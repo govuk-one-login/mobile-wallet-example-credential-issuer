@@ -11,6 +11,8 @@ plugins {
     id 'application'
 }
 
+defaultTasks 'clean', 'build'
+
 
 repositories {
     maven {
@@ -25,13 +27,6 @@ dependencies {
     // This dependency is used by the application.
     implementation libs.guava
     implementation group: 'io.dropwizard', name: 'dropwizard-core', version: '4.0.6'
-}
-
-
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
 }
 
 application {
