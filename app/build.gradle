@@ -9,6 +9,7 @@ buildscript {
 plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
+    id "org.sonarqube" version "4.4.1.3373"
 }
 
 defaultTasks 'clean', 'build'
@@ -58,5 +59,13 @@ subprojects {
         maven {
             url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
         }
+    }
+}
+
+sonar {
+    properties {
+        property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
+        property "sonar.organization", "govuk-one-login"
+        property "sonar.host.url", "https://sonarcloud.io"
     }
 }
