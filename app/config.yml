@@ -1,4 +1,4 @@
 logging:
   level: INFO
   loggers:
-    uk.gov.di.mobile.wallet.cri: DEBUG
+    uk.gov.di.mobile.wallet.cri: INFO
