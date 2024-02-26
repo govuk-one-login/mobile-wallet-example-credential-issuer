@@ -23,10 +23,10 @@ repositories {
 
 dependencies {
     // Use JUnit test framework.
-    testImplementation libs.junit
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
 
     // This dependency is used by the application.
-    implementation libs.guava
+    implementation 'com.google.guava:guava:11.0.2'
     implementation group: 'io.dropwizard', name: 'dropwizard-core', version: '4.0.6'
 }
 
