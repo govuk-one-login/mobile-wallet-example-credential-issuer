@@ -1,0 +1,38 @@
+package uk.gov.di.mobile.wallet.cri;
+
+import io.dropwizard.core.Application;
+import io.dropwizard.core.setup.Bootstrap;
+import io.dropwizard.core.setup.Environment;
+import uk.gov.di.mobile.wallet.cri.resources.CredentialOfferResource;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.CredentialOfferService;
+import uk.gov.di.mobile.wallet.cri.services.KmsService;
+
+public class MockCriApp extends Application<ConfigurationService>{
+    public String getGreeting() {
+        return "Hello World!";
+    }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println(new MockCriApp().getGreeting());
+        new MockCriApp().run(args);
+    }
+
+    @Override
+    public void initialize(final Bootstrap<ConfigurationService> bootstrap) {
+        // TODO: application initialization
+    }
+
+    @Override
+    public void run(final ConfigurationService configurationService,
+                    final Environment environment) {
+
+        KmsService kmsService = new KmsService(configurationService);
+
+        CredentialOfferService credentialOfferService = new CredentialOfferService(configurationService, kmsService);
+
+        // TODO: implement application
+        environment.jersey().register(new CredentialOfferResource(credentialOfferService));
+    }
+    
+}
