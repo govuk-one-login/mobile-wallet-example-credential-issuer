@@ -9,6 +9,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import uk.gov.di.mobile.wallet.cri.helpers.CredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.CredentialOfferService;
+
 import java.util.UUID;
 
 @Singleton
@@ -26,12 +27,15 @@ public class CredentialOfferResource {
             @QueryParam("walletSubjectId") @NotEmpty String walletSubjectId,
             @QueryParam("documentId") @NotEmpty String documentId)
             throws JsonProcessingException {
-        CredentialOffer credentialOffer =
-                credentialOfferService.getCredentialOffer(walletSubjectId);
 
         UUID uuid = UUID.randomUUID();
         String credentialIdentifier = uuid.toString();
 
+        CredentialOffer credentialOffer =
+                credentialOfferService.buildCredentialOffer(credentialIdentifier);
+
+        credentialOfferService.saveCredentialOffer(
+                documentId, credentialIdentifier, walletSubjectId);
 
         ObjectMapper mapper = new ObjectMapper();
 

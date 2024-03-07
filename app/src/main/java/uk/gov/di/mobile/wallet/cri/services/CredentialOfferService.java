@@ -2,24 +2,33 @@ package uk.gov.di.mobile.wallet.cri.services;
 
 import com.nimbusds.jwt.SignedJWT;
 import uk.gov.di.mobile.wallet.cri.helpers.CredentialOffer;
+import uk.gov.di.mobile.wallet.cri.helpers.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.helpers.PreAuthorizedCodeBuilder;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CredentialOfferService {
     private final ConfigurationService configurationService;
     private final KmsService kmsService;
+    private final DynamoDbService<CredentialOfferCacheItem> dynamoDbService;
 
-    public CredentialOfferService(ConfigurationService configurationService, KmsService kmsService) {
+    public CredentialOfferService(
+            ConfigurationService configurationService, KmsService kmsService) {
         this.configurationService = configurationService;
         this.kmsService = kmsService;
+        this.dynamoDbService =
+                new DynamoDbService<>(
+                        DynamoDbService.getClient(configurationService),
+                        CredentialOfferCacheItem.class,
+                        configurationService.getCriCacheTableName());
     }
 
-    public CredentialOffer getCredentialOffer(String walletSubjectId) {
+    public CredentialOffer buildCredentialOffer(String credentialIdentifier) {
         System.out.println("getCredentialOffer");
-        SignedJWT preAuthorizedCode = new PreAuthorizedCodeBuilder(configurationService, kmsService).buildPreAuthorizedCode(walletSubjectId);
+        SignedJWT preAuthorizedCode =
+                new PreAuthorizedCodeBuilder(configurationService, kmsService)
+                        .buildPreAuthorizedCode(credentialIdentifier);
 
         System.out.println("preAuthorizedCode created");
 
@@ -31,16 +40,16 @@ public class CredentialOfferService {
         preAuthorizedCodeMap.put("pre-authorized_code", signedJwtString);
         grantsMap.put("urn:ietf:params:oauth:grant-type:pre-authorized_code", preAuthorizedCodeMap);
 
-
         System.out.println("Trying to build Credential Offer");
         return new CredentialOffer(
                 configurationService.getMockCriUri(),
                 configurationService.getCredentialTypes(),
-                grantsMap
-        );
+                grantsMap);
     }
 
-
+    public void saveCredentialOffer(
+            String documentId, String credentialIdentifier, String walletSubjectId) {
+        dynamoDbService.putItem(
+                new CredentialOfferCacheItem(documentId, credentialIdentifier, walletSubjectId));
+    }
 }
-
-

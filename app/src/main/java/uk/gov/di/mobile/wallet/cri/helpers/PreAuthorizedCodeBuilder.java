@@ -29,22 +29,21 @@ public class PreAuthorizedCodeBuilder {
         this.kmsService = kmsService;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String walletSubjectId) {
+    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) {
         Instant now = Instant.now();
 
         var encodedHeader = getEncodedHeader();
-        
-        var encodedClaims = getEncodedClaims(walletSubjectId, now);
-        
+
+        var encodedClaims = getEncodedClaims(credentialIdentifier, now);
+
         var message = encodedHeader + "." + encodedClaims;
-        
+
         var signRequest =
                 SignRequest.builder()
                         .message(SdkBytes.fromByteArray(message.getBytes()))
                         .keyId(configurationService.getSigningKeyAlias())
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
                         .build();
-
 
         try {
             System.out.println("Signing JWT");
@@ -79,8 +78,8 @@ public class PreAuthorizedCodeBuilder {
                                         now.plus(
                                                 configurationService.getPreAuthorizedCodeTtl(),
                                                 ChronoUnit.SECONDS)))
-                        .claim("client_id", configurationService.getClientId())
-                        .claim("credential_identifiers", walletSubjectId);
+                        .claim("clientId", configurationService.getClientId())
+                        .claim("credential_identifiers", new String[] {walletSubjectId});
 
         var encodedClaims = Base64URL.encode(claimsBuilder.build().toString());
         return encodedClaims;

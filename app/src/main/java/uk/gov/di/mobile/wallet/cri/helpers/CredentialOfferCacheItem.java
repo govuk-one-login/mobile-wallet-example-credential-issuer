@@ -1,23 +1,43 @@
 package uk.gov.di.mobile.wallet.cri.helpers;
 
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
+import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
+
+@DynamoDbBean
 public class CredentialOfferCacheItem {
-    String credential_identifier;
-    String walletSubject;
+    String credentialIdentifier;
+    String walletSubjectId;
     String documentId;
 
+    // Required for DynamoDb BeanTableSchema
+    public CredentialOfferCacheItem() {}
+
     public CredentialOfferCacheItem(
-            String credential_identifier, String walletSubject, String documentId) {
-        this.credential_identifier = credential_identifier;
-        this.walletSubject = walletSubject;
+            String credentialIdentifier, String walletSubject, String documentId) {
+        this.credentialIdentifier = credentialIdentifier;
+        this.walletSubjectId = walletSubject;
         this.documentId = documentId;
     }
 
-    public String getCredential_identifier() {
-        return credential_identifier;
+    @DynamoDbPartitionKey
+    public String getCredentialIdentifier() {
+        return credentialIdentifier;
     }
 
-    public String getWalletSubject() {
-        return walletSubject;
+    public void setCredentialIdentifier(String credentialIdentifier) {
+        this.credentialIdentifier = credentialIdentifier;
+    }
+
+    public void setWalletSubjectId(String walletSubjectId) {
+        this.walletSubjectId = walletSubjectId;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
+    }
+
+    public String getWalletSubjectId() {
+        return walletSubjectId;
     }
 
     public String getDocumentId() {

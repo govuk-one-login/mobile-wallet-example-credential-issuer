@@ -35,7 +35,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getCriCacheTableName() {
-        return System.getenv().getOrDefault("CRI_CACHE_TABLE_NAME", "CRI_CACHE");
+        return System.getenv().getOrDefault("CRI_CACHE_TABLE_NAME", "cri_cache");
     }
 
     public String getIssuer() {
