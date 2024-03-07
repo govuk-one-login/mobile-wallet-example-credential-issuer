@@ -3,13 +3,10 @@ package uk.gov.di.mobile.wallet.cri.services;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kms.KmsClient;
-import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
-import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 
 import java.net.URI;
-import java.util.Objects;
 
 public class KmsService {
     private final KmsClient kmsClient;
@@ -18,8 +15,7 @@ public class KmsService {
         this(
                 configurationService.getLocalstackEndpoint(),
                 configurationService.getAwsRegion(),
-                configurationService.getEnvironment()
-        );
+                configurationService.getEnvironment());
     }
 
     public KmsService(String localstackEndpoint, String awsRegion, String environment) {
@@ -39,11 +35,6 @@ public class KmsService {
                             .credentialsProvider(DefaultCredentialsProvider.create())
                             .build();
         }
-    }
-
-    public GetPublicKeyResponse getPublicKey(GetPublicKeyRequest getPublicKeyRequest) {
-        System.out.println("Getting public key from KMS");
-        return kmsClient.getPublicKey(getPublicKeyRequest);
     }
 
     public SignResponse sign(SignRequest signRequest) {

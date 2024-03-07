@@ -1,9 +1,15 @@
 package uk.gov.di.mobile.wallet.cri.resources;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Singleton;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
+import uk.gov.di.mobile.wallet.cri.helpers.CredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.CredentialOfferService;
+import java.util.UUID;
 
 @Singleton
 @Path("/credential_offer")
@@ -16,8 +22,22 @@ public class CredentialOfferResource {
     }
 
     @GET
-    public Object getCredentialOffer() {
-        return credentialOfferService.getCredentialOffer();
+    public Object getCredentialOffer(
+            @QueryParam("walletSubjectId") @NotEmpty String walletSubjectId,
+            @QueryParam("documentId") @NotEmpty String documentId)
+            throws JsonProcessingException {
+        CredentialOffer credentialOffer =
+                credentialOfferService.getCredentialOffer(walletSubjectId);
+
+        UUID uuid = UUID.randomUUID();
+        String credentialIdentifier = uuid.toString();
+
+
+        ObjectMapper mapper = new ObjectMapper();
+
+        String jsonString = mapper.writeValueAsString(credentialOffer);
+        System.out.println(jsonString);
+
+        return null;
     }
 }
-

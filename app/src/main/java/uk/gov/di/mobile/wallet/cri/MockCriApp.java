@@ -8,7 +8,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.services.KmsService;
 
-public class MockCriApp extends Application<ConfigurationService>{
+public class MockCriApp extends Application<ConfigurationService> {
     public String getGreeting() {
         return "Hello World!";
     }
@@ -24,15 +24,19 @@ public class MockCriApp extends Application<ConfigurationService>{
     }
 
     @Override
-    public void run(final ConfigurationService configurationService,
-                    final Environment environment) {
+    public void run(
+            final ConfigurationService configurationService, final Environment environment) {
+
+        System.out.println("RUN");
 
         KmsService kmsService = new KmsService(configurationService);
+        System.out.println("KmsService");
 
-        CredentialOfferService credentialOfferService = new CredentialOfferService(configurationService, kmsService);
+        CredentialOfferService credentialOfferService =
+                new CredentialOfferService(configurationService, kmsService);
+        System.out.println("CredentialOfferService");
 
         // TODO: implement application
         environment.jersey().register(new CredentialOfferResource(credentialOfferService));
     }
-    
 }
