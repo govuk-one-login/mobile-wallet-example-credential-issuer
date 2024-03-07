@@ -48,8 +48,8 @@ public class CredentialOfferService {
     }
 
     public void saveCredentialOffer(
-            String documentId, String credentialIdentifier, String walletSubjectId) {
+            String credentialIdentifier, String documentId, String walletSubjectId) {
         dynamoDbService.putItem(
-                new CredentialOfferCacheItem(documentId, credentialIdentifier, walletSubjectId));
+                new CredentialOfferCacheItem(credentialIdentifier, documentId, walletSubjectId));
     }
 }

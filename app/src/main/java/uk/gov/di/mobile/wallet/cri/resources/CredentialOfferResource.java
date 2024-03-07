@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import uk.gov.di.mobile.wallet.cri.helpers.CredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.CredentialOfferService;
 
@@ -35,13 +37,15 @@ public class CredentialOfferResource {
                 credentialOfferService.buildCredentialOffer(credentialIdentifier);
 
         credentialOfferService.saveCredentialOffer(
-                documentId, credentialIdentifier, walletSubjectId);
+                credentialIdentifier, documentId, walletSubjectId);
 
         ObjectMapper mapper = new ObjectMapper();
-
         String jsonString = mapper.writeValueAsString(credentialOffer);
         System.out.println(jsonString);
 
-        return null;
+        return Response.status(Response.Status.OK)
+                .entity(jsonString)
+                .type(MediaType.APPLICATION_JSON)
+                .build();
     }
 }

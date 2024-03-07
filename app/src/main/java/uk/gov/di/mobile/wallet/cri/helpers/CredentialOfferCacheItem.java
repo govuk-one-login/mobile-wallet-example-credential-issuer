@@ -13,10 +13,10 @@ public class CredentialOfferCacheItem {
     public CredentialOfferCacheItem() {}
 
     public CredentialOfferCacheItem(
-            String credentialIdentifier, String walletSubject, String documentId) {
+            String credentialIdentifier, String documentId, String walletSubjectId) {
         this.credentialIdentifier = credentialIdentifier;
-        this.walletSubjectId = walletSubject;
         this.documentId = documentId;
+        this.walletSubjectId = walletSubjectId;
     }
 
     @DynamoDbPartitionKey
@@ -24,23 +24,23 @@ public class CredentialOfferCacheItem {
         return credentialIdentifier;
     }
 
-    public void setCredentialIdentifier(String credentialIdentifier) {
-        this.credentialIdentifier = credentialIdentifier;
-    }
-
-    public void setWalletSubjectId(String walletSubjectId) {
-        this.walletSubjectId = walletSubjectId;
-    }
-
-    public void setDocumentId(String documentId) {
-        this.documentId = documentId;
+    public String getDocumentId() {
+        return documentId;
     }
 
     public String getWalletSubjectId() {
         return walletSubjectId;
     }
 
-    public String getDocumentId() {
-        return documentId;
+    public void setCredentialIdentifier(String credentialIdentifier) {
+        this.credentialIdentifier = credentialIdentifier;
+    }
+
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
+    }
+
+    public void setWalletSubjectId(String walletSubjectId) {
+        this.walletSubjectId = walletSubjectId;
     }
 }
