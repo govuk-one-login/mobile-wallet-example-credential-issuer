@@ -59,7 +59,7 @@ public class PreAuthorizedCodeBuilder {
 
         String signature = encodedSignature(signResult);
 
-        var signedJWT = SignedJWT.parse(message + "." + signature);
+        SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
         System.out.println("Returning JWT" + signedJWT.serialize());
         return signedJWT;
     }

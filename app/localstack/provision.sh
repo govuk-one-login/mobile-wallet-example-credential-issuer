@@ -35,4 +35,3 @@ aws --endpoint-url=http://localhost:4566 kms create-alias \
     --region eu-west-2 \
     --alias-name alias/localSigningKeyAlias \
     --target-key-id ff275b92-0def-4dfc-b0f6-87c96b26c6c7
-

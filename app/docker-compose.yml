@@ -9,10 +9,7 @@ services:
       - "4569:4569"
     environment:
       - SERVICES=dynamodb,kms
-      - KMS_PROVIDER=local-kms
-      - HOSTNAME_EXTERNAL=localhost
       - AWS_ACCESS_KEY_ID=na
       - AWS_SECRET_ACCESS_KEY=na
     volumes:
       - ./localstack/provision.sh:/etc/localstack/init/ready.d/init-aws.sh
-      - ./seed.yaml:/init/seed.yaml
