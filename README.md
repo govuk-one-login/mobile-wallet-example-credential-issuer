@@ -1,4 +1,4 @@
-# mobile-wallet-example-credential-issuer
+~~# mobile-wallet-example-credential-issuer
 
 ## Overview
 
@@ -23,9 +23,28 @@ Gradle 8 is used on this project.
 ## Quickstart
 
 ### Build
-Build with `./gradlew`
+Build with `./gradlew clean spotlessApply build`.
+This removes the buildDir folder and format the code before building.
 
 ### Run server locally
-Run with `./gradlew run`
 
-Visit localhost:8080/hello/{name} to check the app is running as expected.
+This app uses LocalStack to run AWS services locally. To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table, run the command:
+```
+docker-compose up
+```
+
+Then run the following command to start the application: `./gradlew run`.
+
+Open [http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def](http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def) in a web browser.
+
+To check that an item was saved to the DynamoDB **cri_cache** table, run the following command in the terminal (replacing the `credentialIdentifier` in the command):
+```
+aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"
+```
+
+You can also run the command below to return all items saved in the table:
+```
+aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb scan --table-name cri_cache"
+```
+
+Your AWS CLI options must be configured before running this command. If they are not, run ```aws configure``` before running the commands above.
