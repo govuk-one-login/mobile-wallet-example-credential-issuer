@@ -1,79 +1,86 @@
 buildscript {
-    repositories {
-        maven {
-            url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
-        }
-    }
+	repositories {
+		maven {
+			url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
+		}
+	}
 }
 
 plugins {
-    id 'application'
-    id "com.diffplug.spotless" version "6.9.0"
-    id "org.sonarqube" version "4.4.1.3373"
+	id 'application'
+	id "com.diffplug.spotless" version "6.23.+"
+	id "org.sonarqube" version "4.4.1.3373"
 }
 
-defaultTasks 'clean', 'build'
+defaultTasks 'clean', 'build', 'spotlessApply'
 
 spotless {
-    java {
-        target '**/*.java'
-        googleJavaFormat('1.11.0').aosp()
-        importOrder '', 'javax', 'java', '\\#'
-    }
+	java {
+		target"**/src/**/*.java"
+		googleJavaFormat("1.13.0").aosp()
+		importOrder "", "javax", "java", "\\#"
+		endWithNewline()
+	}
+	groovyGradle {
+		target '**/*.gradle'
+		greclipse()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
 }
 
+
 repositories {
-    maven {
-        url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
-    }
+	maven {
+		url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
+	}
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    implementation 'com.google.guava:guava:33.0.0-jre',
-            group: 'io.dropwizard', name: 'dropwizard-core', version: '4.0.6',
-            "com.nimbusds:oauth2-oidc-sdk:11.9.1",
-            "software.amazon.awssdk:kms:2.24.13",
-            "software.amazon.awssdk:dynamodb:2.24.13",
-            "software.amazon.awssdk:dynamodb-enhanced:2.24.13",
-            "software.amazon.awssdk:url-connection-client:2.25.1",
-            "com.fasterxml.jackson.core:jackson-databind:2.16.1"
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+	implementation 'com.google.guava:guava:33.0.0-jre',
+	group: 'io.dropwizard', name: 'dropwizard-core', version: '4.0.6',
+	"com.nimbusds:oauth2-oidc-sdk:11.9.1",
+	"software.amazon.awssdk:kms:2.24.13",
+	"software.amazon.awssdk:dynamodb:2.24.13",
+	"software.amazon.awssdk:dynamodb-enhanced:2.24.13",
+	"software.amazon.awssdk:url-connection-client:2.25.1",
+	"com.fasterxml.jackson.core:jackson-databind:2.16.1"
 }
 
 application {
-    mainClass = 'uk.gov.di.mobile.wallet.cri.MockCriApp'
+	mainClass = 'uk.gov.di.mobile.wallet.cri.MockCriApp'
 }
 
 jar {
-    manifest {
-        attributes(
-                'Main-Class': 'uk.gov.di.mobile.wallet.cri.MockCriApp'
-        )
-    }
+	manifest {
+		attributes(
+				'Main-Class': 'uk.gov.di.mobile.wallet.cri.MockCriApp')
+	}
 
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it)}
-    }
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it)}
+	}
 
-    duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
 }
 
 run {
-    args = ['server', 'config.yml']
+	args = ['server', 'config.yml']
 }
 
 subprojects {
-    repositories {
-        maven {
-            url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
-        }
-    }
+	repositories {
+		maven {
+			url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
+		}
+	}
 }
 
 sonar {
-    properties {
-        property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
-        property "sonar.organization", "govuk-one-login"
-        property "sonar.host.url", "https://sonarcloud.io"
-    }
+	properties {
+		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
+		property "sonar.organization", "govuk-one-login"
+		property "sonar.host.url ", "https://sonarcloud.io"
+	}
 }
