@@ -37,6 +37,9 @@ public class MockCriApp extends Application<ConfigurationService> {
         System.out.println("CredentialOfferService");
 
         // TODO: implement application
-        environment.jersey().register(new CredentialOfferResource(credentialOfferService));
+        environment
+                .jersey()
+                .register(
+                        new CredentialOfferResource(credentialOfferService, configurationService));
     }
 }

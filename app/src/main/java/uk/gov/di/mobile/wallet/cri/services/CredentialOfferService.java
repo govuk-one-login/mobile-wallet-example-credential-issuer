@@ -1,10 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.services;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jwt.SignedJWT;
 import uk.gov.di.mobile.wallet.cri.helpers.CredentialOffer;
 import uk.gov.di.mobile.wallet.cri.helpers.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.helpers.PreAuthorizedCodeBuilder;
 
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +26,8 @@ public class CredentialOfferService {
                         configurationService.getCriCacheTableName());
     }
 
-    public CredentialOffer buildCredentialOffer(String credentialIdentifier) {
+    public CredentialOffer buildCredentialOffer(String credentialIdentifier)
+            throws ParseException, JOSEException {
         System.out.println("getCredentialOffer");
         SignedJWT preAuthorizedCode =
                 new PreAuthorizedCodeBuilder(configurationService, kmsService)
@@ -42,7 +45,7 @@ public class CredentialOfferService {
 
         System.out.println("Trying to build Credential Offer");
         return new CredentialOffer(
-                configurationService.getMockCriUri(),
+                configurationService.getMockCriUrl(),
                 configurationService.getCredentialTypes(),
                 grantsMap);
     }

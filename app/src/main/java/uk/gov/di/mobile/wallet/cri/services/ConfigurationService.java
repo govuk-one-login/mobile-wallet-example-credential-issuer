@@ -8,10 +8,6 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("SIGNING_KEY_ALIAS", "alias/localSigningKeyAlias");
     }
 
-    public String getSigningKid() {
-        return System.getenv().getOrDefault("SIGNING_KID", "ff275b92-0def-4dfc-b0f6-87c96b26c6c7");
-    }
-
     public String getAwsRegion() {
         return System.getenv().getOrDefault("AWS_REGION", "eu-west-2");
     }
@@ -20,9 +16,14 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("ENVIRONMENT", "local");
     }
 
-    public String getMockCriUri() {
+    public String getMockCriUrl() {
         return System.getenv()
-                .getOrDefault("MOCK_CRI_URI", "https://credential-issuer.example.com");
+                .getOrDefault("MOCK_CRI_URL", "https://credential-issuer.example.com");
+    }
+
+    public String getWalletUrl() {
+        return System.getenv()
+                .getOrDefault("WALLET_URL", "https://mobile.staging.account.gov.uk/wallet");
     }
 
     public long getPreAuthorizedCodeTtl() {
