@@ -61,6 +61,6 @@ public class CredentialOfferResource {
     }
 
     private Response.ResponseBuilder buildResponse() {
-        return Response.status(Response.Status.OK).type(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
+        return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON_TYPE);
     }
 }
