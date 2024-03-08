@@ -11,4 +11,3 @@ plugins {
 }
 
 rootProject.name = 'mobile-wallet-example-credential-issuer'
-include('app')
