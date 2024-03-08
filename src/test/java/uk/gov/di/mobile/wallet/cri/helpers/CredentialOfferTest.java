@@ -10,7 +10,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CredentialOfferTest {
+class CredentialOfferTest {
 
     CredentialOffer credentialOffer;
     private static final String credentialIssuer = "https://credential-issuer.example.com";
@@ -28,7 +28,7 @@ public class CredentialOfferTest {
 
     @Test
     @DisplayName("Creates a credential offer")
-    public void testCredentialOffer() {
+    void testCredentialOffer() {
         assertEquals("https://credential-issuer.example.com", credentialOffer.credential_issuer);
         assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.credentials);
         assertEquals(grantsMap, credentialOffer.grants);

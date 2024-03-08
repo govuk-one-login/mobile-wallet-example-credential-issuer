@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CredentialOfferCacheItemTest {
+class CredentialOfferCacheItemTest {
 
     CredentialOfferCacheItem credentialOfferCacheItem;
     private static final String credentialIdentifier = "test-credential-identifier";
@@ -21,7 +21,7 @@ public class CredentialOfferCacheItemTest {
 
     @Test
     @DisplayName("Creates a credential offer cache item")
-    public void testCredentialOfferCacheItem() {
+    void testCredentialOfferCacheItem() {
         assertEquals("test-credential-identifier", credentialOfferCacheItem.credentialIdentifier);
         assertEquals("test-document-id", credentialOfferCacheItem.documentId);
         assertEquals("test-wallet-subject-id", credentialOfferCacheItem.walletSubjectId);

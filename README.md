@@ -56,3 +56,6 @@ aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb scan --tabl
 #### AWS CLI
 
 Your AWS CLI options must be configured before running this command. If they are not, run ```aws configure``` before running the commands above.
+
+### Test
+Run unit tests with `./gradlew test`

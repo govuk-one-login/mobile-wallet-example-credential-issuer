@@ -1,21 +1,22 @@
 plugins {
-    id 'application'
-    id 'java'
+    id "application"
+    id "java"
     id "com.diffplug.spotless" version "6.25.0"
     id "org.sonarqube" version "4.4.1.3373"
+    id "jacoco"
 }
 
-defaultTasks 'clean', 'spotlessApply', 'build'
+defaultTasks "clean", "spotlessApply", "build"
 
 repositories {
     maven {
-        url 'https://gds.jfrog.io/artifactory/di-allowed-repos'
+        url "https://gds.jfrog.io/artifactory/di-allowed-repos"
     }
 }
 
 dependencies {
-    implementation 'com.google.guava:guava:33.0.0-jre'
-    implementation group: 'io.dropwizard', name: 'dropwizard-core', version: '4.0.6'
+    implementation "com.google.guava:guava:33.0.0-jre"
+    implementation group: "io.dropwizard", name: "dropwizard-core", version: "4.0.6"
     implementation "com.nimbusds:oauth2-oidc-sdk:11.9.1"
     implementation "software.amazon.awssdk:kms:2.24.13"
     implementation "software.amazon.awssdk:dynamodb:2.24.13"
@@ -23,19 +24,20 @@ dependencies {
     implementation "software.amazon.awssdk:url-connection-client:2.25.1"
     implementation "com.fasterxml.jackson.core:jackson-databind:2.16.1"
 
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.9.0')
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.9.0')
-    testImplementation 'org.junit.platform:junit-platform-console-standalone:1.9.2'
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.9.0"
+    testImplementation "org.mockito:mockito-core:5.10.0"
+    testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.6"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.9.0"
 }
 
 application {
-    mainClass = 'uk.gov.di.mobile.wallet.cri.MockCriApp'
+    mainClass = "uk.gov.di.mobile.wallet.cri.MockCriApp"
 }
 
 jar {
     manifest {
         attributes(
-                'Main-Class': 'uk.gov.di.mobile.wallet.cri.MockCriApp')
+                "Main-Class": "uk.gov.di.mobile.wallet.cri.MockCriApp")
     }
 
     from {
@@ -46,16 +48,12 @@ jar {
 }
 
 run {
-    args = ['server', 'config.yml']
+    args = ["server", "config.yml"]
 }
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-}
-
-test {
-    useJUnitPlatform ()
 }
 
 sonar {
@@ -75,9 +73,29 @@ spotless {
         removeUnusedImports()
     }
     groovyGradle {
-        target '**/*.gradle'
+        target "**/*.gradle"
         greclipse().configFile("tools/spotless-gradle.properties")
         trimTrailingWhitespace()
         endWithNewline()
+    }
+}
+
+test {
+    useJUnitPlatform ()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required.set(true)
+    }
+}
+
+tasks.withType(Test) {
+    testLogging {
+        exceptionFormat "full"
+        events "started", "skipped", "passed", "failed"
+        showStandardStreams true
     }
 }

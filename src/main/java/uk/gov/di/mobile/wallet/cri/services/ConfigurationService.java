@@ -50,10 +50,8 @@ public class ConfigurationService extends Configuration {
     public String getLocalstackEndpoint() {
         return "http://localhost:4566";
     }
-    ;
 
     public String[] getCredentialTypes() {
         return new String[] {"BasicDisclosure"};
     }
-    ;
 }
