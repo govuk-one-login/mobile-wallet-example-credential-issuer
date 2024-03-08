@@ -2,12 +2,14 @@
 //
 // import org.junit.jupiter.api.Test;
 //
+// import java.util.function.Supplier;
+//
 // import static org.junit.jupiter.api.Assertions.assertNotNull;
 //
-// public class AppTest {
+// public class MockCriAppTest {
 //    @Test
 //    public void appHasAGreeting() {
 //        MockCriApp classUnderTest = new MockCriApp();
-//        assertNotNull("app should have a greeting", classUnderTest.getGreeting());
+//        assertNotNull("app should have a greeting", (Supplier<String>) classUnderTest);
 //    }
 // }
