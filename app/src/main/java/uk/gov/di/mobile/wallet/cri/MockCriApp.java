@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri;
 
+import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
+import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
@@ -20,7 +22,10 @@ public class MockCriApp extends Application<ConfigurationService> {
 
     @Override
     public void initialize(final Bootstrap<ConfigurationService> bootstrap) {
-        // TODO: application initialization
+        bootstrap.setConfigurationSourceProvider(
+                new SubstitutingSourceProvider(
+                        bootstrap.getConfigurationSourceProvider(),
+                        new EnvironmentVariableSubstitutor(false)));
     }
 
     @Override

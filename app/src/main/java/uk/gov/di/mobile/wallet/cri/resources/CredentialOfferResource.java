@@ -34,7 +34,7 @@ public class CredentialOfferResource {
     }
 
     @GET
-    public Object getCredentialOffer(
+    public Response getCredentialOffer(
             @QueryParam("walletSubjectId") @NotEmpty String walletSubjectId,
             @QueryParam("documentId") @NotEmpty String documentId)
             throws JsonProcessingException, ParseException, JOSEException {
@@ -57,9 +57,10 @@ public class CredentialOfferResource {
                         + "/add?credential_offer="
                         + URLEncoder.encode(credentialOfferString, StandardCharsets.UTF_8);
 
-        return Response.status(Response.Status.OK)
-                .entity(credentialOfferUrl)
-                .type(MediaType.APPLICATION_JSON)
-                .build();
+        return buildResponse().entity(credentialOfferUrl).build();
+    }
+
+    private Response.ResponseBuilder buildResponse() {
+        return Response.status(Response.Status.OK).type(MediaType.APPLICATION_FORM_URLENCODED_TYPE);
     }
 }
