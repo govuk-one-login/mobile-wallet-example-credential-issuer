@@ -22,29 +22,37 @@ Gradle 8 is used on this project.
 
 ## Quickstart
 
+### Linting
+
+Check with `./gradlew spotlessCheck`.
+
+Apply with `./gradlew spotlessApply`.
+
 ### Build
-Build with `./gradlew clean spotlessApply build`.
-This removes the buildDir folder and format the code before building.
+Build with `./gradlew`
 
-### Run server locally
+By default, this also calls `clean` and `spotlessApply`.
 
+### Run
 This app uses LocalStack to run AWS services locally. To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table, run the command:
 ```
 docker-compose up
 ```
 
-Then run the following command to start the application: `./gradlew run`.
+Then run the application with `./gradlew run`.
 
 Open [http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def](http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def) in a web browser.
 
-To check that an item was saved to the DynamoDB **cri_cache** table, run the following command in the terminal (replacing the `credentialIdentifier` in the command):
+Check that the credential offer was saved to the **cri_cache** by running the following command in the terminal (replacing the `credentialIdentifier` in the command):
 ```
 aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"
 ```
 
-You can also run the command below to return all items saved in the table:
+Return all items from **cri_cache** with the following command:
 ```
 aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb scan --table-name cri_cache"
 ```
+
+#### AWS CLI
 
 Your AWS CLI options must be configured before running this command. If they are not, run ```aws configure``` before running the commands above.
