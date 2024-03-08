@@ -13,22 +13,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CredentialOfferTest {
 
     CredentialOffer credentialOffer;
-    Map<String, Map<String, String>> grantsMap;
+    private static final String credentialIssuer = "https://credential-issuer.example.com";
+    private static final String[] credentials = {"BasicDisclosure"};
+    private static final Map<String, Map<String, String>> grantsMap = new HashMap<>();
 
     @BeforeEach
     void setUp() {
-        grantsMap = new HashMap<>();
         Map<String, String> preAuthorizedCodeMap = new HashMap<>();
-
         preAuthorizedCodeMap.put("pre-authorized_code", "signedJwtString");
         grantsMap.put("urn:ietf:params:oauth:grant-type:pre-authorized_code", preAuthorizedCodeMap);
 
-        credentialOffer =
-                new CredentialOffer(
-                        "https://credential-issuer.example.com",
-                        new String[] {"BasicDisclosure"},
-                        grantsMap);
-        ;
+        credentialOffer = new CredentialOffer(credentialIssuer, credentials, grantsMap);
     }
 
     @Test
