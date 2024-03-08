@@ -3,12 +3,12 @@ package uk.gov.di.mobile.wallet.cri.helpers;
 import java.util.Map;
 
 public class CredentialOffer {
-    String credential_issuer;
+    String credential_issuer; // NOSONAR
     String[] credentials;
     Map<String, Map<String, String>> grants;
 
     public CredentialOffer(
-            String credential_issuer,
+            String credential_issuer, // NOSONAR
             String[] credentials,
             Map<String, Map<String, String>> grants) {
         this.credential_issuer = credential_issuer;
@@ -16,7 +16,7 @@ public class CredentialOffer {
         this.grants = grants;
     }
 
-    public String getCredential_issuer() {
+    public String getCredentialIssuer() {
         return credential_issuer;
     }
 

@@ -88,8 +88,7 @@ public class PreAuthorizedCodeBuilder {
                         .claim("clientId", configurationService.getClientId())
                         .claim("credential_identifiers", new String[] {walletSubjectId});
 
-        var encodedClaims = Base64URL.encode(claimsBuilder.build().toString());
-        return encodedClaims;
+        return Base64URL.encode(claimsBuilder.build().toString());
     }
 
     private Base64URL getEncodedHeader() {
@@ -98,7 +97,6 @@ public class PreAuthorizedCodeBuilder {
                         .keyID(configurationService.getSigningKeyAlias())
                         .type(JWT)
                         .build();
-        var encodedHeader = jwsHeader.toBase64URL();
-        return encodedHeader;
+        return jwsHeader.toBase64URL();
     }
 }
