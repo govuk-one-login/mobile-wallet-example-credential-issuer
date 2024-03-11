@@ -9,6 +9,7 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
@@ -57,8 +58,8 @@ public class PreAuthorizedCodeBuilder {
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             System.out.println("Returning JWT" + signedJWT.serialize());
             return signedJWT;
-        } catch (JOSEException | ParseException exception) {
-            System.out.println("Error when signing SignedJWT: " + exception);
+        } catch (JOSEException | ParseException | SdkClientException exception) {
+            System.out.println("Error when trying to create a JWT" + exception);
             throw new SigningException(exception);
         }
     }

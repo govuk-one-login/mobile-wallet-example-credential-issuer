@@ -48,12 +48,11 @@ public class CredentialOfferResource {
         String credentialIdentifier = uuid.toString();
 
         CredentialOffer credentialOffer;
-
         try {
             credentialOffer = credentialOfferService.buildCredentialOffer(credentialIdentifier);
         } catch (SigningException exception) {
             System.out.println("Error when building credential offer: " + exception);
-            return buildSuccessResponse().build();
+            return buildFailResponse().build();
         }
 
         dataStore.saveCredentialOffer(
