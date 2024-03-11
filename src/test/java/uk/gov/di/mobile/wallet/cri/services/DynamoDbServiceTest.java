@@ -1,6 +1,7 @@
-package uk.gov.di.mobile.wallet.cri;
+package uk.gov.di.mobile.wallet.cri.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -11,7 +12,6 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import uk.gov.di.mobile.wallet.cri.helpers.CredentialOfferCacheItem;
-import uk.gov.di.mobile.wallet.cri.services.DynamoDbService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -32,7 +32,7 @@ class DynamoDbServiceTest {
     @BeforeEach
     void setUp() {
         when(mockDynamoDbEnhancedClient.table(
-                anyString(), ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any()))
+                        anyString(), ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any()))
                 .thenReturn(mockDynamoDbTable);
 
         credentialOfferCacheItem = new CredentialOfferCacheItem();
@@ -45,7 +45,8 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void shouldSaveCredentialOfferItemTooDynamoDbTable() {
+    @DisplayName("Should save credential offer to DynamoDB table")
+    void testItSavesCredentialOfferToTable() {
         dynamoDbService.putItem(credentialOfferCacheItem);
 
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =

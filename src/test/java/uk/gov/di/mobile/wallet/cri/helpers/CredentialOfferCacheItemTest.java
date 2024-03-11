@@ -20,8 +20,8 @@ class CredentialOfferCacheItemTest {
     }
 
     @Test
-    @DisplayName("Creates a credential offer cache item")
-    void testCredentialOfferCacheItem() {
+    @DisplayName("Should create a credential offer cache item")
+    void testItCreatesCredentialOfferCacheItem() {
         assertEquals("test-credential-identifier", credentialOfferCacheItem.credentialIdentifier);
         assertEquals("test-document-id", credentialOfferCacheItem.documentId);
         assertEquals("test-wallet-subject-id", credentialOfferCacheItem.walletSubjectId);

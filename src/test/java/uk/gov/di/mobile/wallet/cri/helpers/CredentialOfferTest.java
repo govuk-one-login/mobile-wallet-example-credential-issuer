@@ -27,8 +27,8 @@ class CredentialOfferTest {
     }
 
     @Test
-    @DisplayName("Creates a credential offer")
-    void testCredentialOffer() {
+    @DisplayName("Should create a credential offer")
+    void testItCreatesCredentialOffer() {
         assertEquals("https://credential-issuer.example.com", credentialOffer.credential_issuer);
         assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.credentials);
         assertEquals(grantsMap, credentialOffer.grants);

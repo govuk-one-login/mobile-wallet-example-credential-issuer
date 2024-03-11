@@ -23,31 +23,38 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void signingKeyAliasShouldEqualDefaultWhenEnvVarUnset() {
+    void testSigningKeyAliasIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("alias/localSigningKeyAlias", configurationService.getSigningKeyAlias());
     }
 
     @Test
-    void awsRegionShouldEqualDefaultWhenEnvVarUnset() {
+    void testSigningKeyIdIsEqualDefaultWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals(
+                "ff275b92-0def-4dfc-b0f6-87c96b26c6c7", configurationService.getSigningKeyId());
+    }
+
+    @Test
+    void testAwsRegionIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("eu-west-2", configurationService.getAwsRegion());
     }
 
     @Test
-    void environmentShouldEqualDefaultWhenEnvVarUnset() {
+    void testEnvironmentIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("local", configurationService.getEnvironment());
     }
 
     @Test
-    void mockCriUrlShouldEqualDefaultWhenEnvVarUnset() {
+    void testMockCriUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("https://credential-issuer.example.com", configurationService.getMockCriUrl());
     }
 
     @Test
-    void wallerUrlShouldEqualDefaultWhenEnvVarUnset() {
+    void testWalletUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
                 "https://mobile.staging.account.gov.uk/wallet",
@@ -55,71 +62,79 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void preAuthorizedCodeTtlShouldEqualDefaultWhenEnvVarUnset() {
+    void testPreAuthorizedCodeTtlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(300, configurationService.getPreAuthorizedCodeTtl());
     }
 
     @Test
-    void clientIdShouldEqualDefaultWhenEnvVarUnset() {
+    void testClientIdIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("abc123", configurationService.getClientId());
     }
 
     @Test
-    void criCacheTableNameShouldEqualDefaultWhenEnvVarUnset() {
+    void testCriCacheTableNameIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("cri_cache", configurationService.getCriCacheTableName());
     }
 
     @Test
-    void issuerShouldEqualDefaultWhenEnvVarUnset() {
+    void testIssuerIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("urn:fdc:gov:uk:<HMRC>", configurationService.getIssuer());
     }
 
     @Test
-    void audienceShouldEqualDefaultWhenEnvVarUnset() {
+    void testAudienceIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("urn:fdc:gov:uk:wallet", configurationService.getAudience());
     }
 
     @Test
-    void localstackEndpointShouldEqualReturnValue() {
+    void testItReturnsLocalstackEndpointValue() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("http://localhost:4566", configurationService.getLocalstackEndpoint());
     }
 
     @Test
-    void credentialTypesShouldEqualReturnValue() {
+    void testItReturnsCredentialTypesValue() {
         ConfigurationService configurationService = new ConfigurationService();
         assertArrayEquals(
                 new String[] {"BasicDisclosure"}, configurationService.getCredentialTypes());
     }
 
     @Test
-    void getSigningKeyAliasEnvironmentVariable() {
+    void testItGetsSigningKeyAliasEnvironmentVariable() {
         environmentVariables.set("SIGNING_KEY_ALIAS", "alias/testSigningKeyAlias");
 
         assertEquals("alias/testSigningKeyAlias", configurationService.getSigningKeyAlias());
     }
 
     @Test
-    void getAwsRegionEnvironmentVariable() {
+    void testItGetsSigningKeyIdEnvironmentVariable() {
+        environmentVariables.set("SIGNING_KEY_ID", "cc275b92-0def-4dfc-b0f6-87c96b26b8b9");
+
+        assertEquals(
+                "cc275b92-0def-4dfc-b0f6-87c96b26b8b9", configurationService.getSigningKeyId());
+    }
+
+    @Test
+    void testItGetsAwsRegionEnvironmentVariable() {
         environmentVariables.set("AWS_REGION", "eu-west-1");
 
         assertEquals("eu-west-1", configurationService.getAwsRegion());
     }
 
     @Test
-    void getEnvironmentEnvironmentVariable() {
+    void testItGetsEnvironmentEnvironmentVariable() {
         environmentVariables.set("ENVIRONMENT", "test");
 
         assertEquals("test", configurationService.getEnvironment());
     }
 
     @Test
-    void getMockCriUrlEnvironmentVariable() {
+    void testItGetsMockCriUrlEnvironmentVariable() {
         environmentVariables.set("MOCK_CRI_URL", "https://credential-issuer.test.example.com");
 
         assertEquals(
@@ -127,7 +142,7 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void getWalletUrlEnvironmentVariable() {
+    void testItGetsWalletUrlEnvironmentVariable() {
         environmentVariables.set("WALLET_URL", "https://mobile.test.account.gov.uk/wallet");
 
         assertEquals(
@@ -135,35 +150,35 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void getPreAuthorizedCodeTtlEnvironmentVariable() {
+    void testItGetsPreAuthorizedCodeTtlEnvironmentVariable() {
         environmentVariables.set("PRE_AUTHORIZED_CODE_TTL_IN_SECS", "600");
 
         assertEquals(600, configurationService.getPreAuthorizedCodeTtl());
     }
 
     @Test
-    void getClientIdEnvironmentVariable() {
+    void testItGetsClientIdEnvironmentVariable() {
         environmentVariables.set("CLIENT_ID", "test-client-id");
 
         assertEquals("test-client-id", configurationService.getClientId());
     }
 
     @Test
-    void getCriCacheTableNameEnvironmentVariable() {
+    void testItGetsCriCacheTableNameEnvironmentVariable() {
         environmentVariables.set("CRI_CACHE_TABLE_NAME", "test-table-name");
 
         assertEquals("test-table-name", configurationService.getCriCacheTableName());
     }
 
     @Test
-    void getIssuerEnvironmentVariable() {
+    void testItGetsIssuerEnvironmentVariable() {
         environmentVariables.set("ISSUER", "urn:fdc:gov:uk:<TEST>");
 
         assertEquals("urn:fdc:gov:uk:<TEST>", configurationService.getIssuer());
     }
 
     @Test
-    void getAudienceEnvironmentVariable() {
+    void testItGetsAudienceEnvironmentVariable() {
         environmentVariables.set("AUDIENCE", "urn:fdc:gov:uk:test-wallet");
 
         assertEquals("urn:fdc:gov:uk:test-wallet", configurationService.getAudience());
