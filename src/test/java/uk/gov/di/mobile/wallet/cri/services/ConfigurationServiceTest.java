@@ -24,7 +24,6 @@ class ConfigurationServiceTest {
 
     @Test
     void testSigningKeyAliasIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals("alias/localSigningKeyAlias", configurationService.getSigningKeyAlias());
     }
 

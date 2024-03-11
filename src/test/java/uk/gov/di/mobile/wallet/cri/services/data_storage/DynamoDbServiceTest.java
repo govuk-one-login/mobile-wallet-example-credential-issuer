@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.services;
+package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,8 +12,6 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
-import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
-import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
