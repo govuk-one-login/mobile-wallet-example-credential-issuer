@@ -94,7 +94,7 @@ public class PreAuthorizedCodeBuilder {
     private Base64URL getEncodedHeader() {
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
-                        .keyID(configurationService.getSigningKeyAlias())
+                        .keyID(configurationService.getSigningKeyId())
                         .type(JWT)
                         .build();
         return jwsHeader.toBase64URL();

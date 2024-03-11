@@ -8,6 +8,11 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("SIGNING_KEY_ALIAS", "alias/localSigningKeyAlias");
     }
 
+    public String getSigningKeyId() {
+        return System.getenv()
+                .getOrDefault("SIGNING_KEY_ID", "ff275b92-0def-4dfc-b0f6-87c96b26c6c7");
+    }
+
     public String getAwsRegion() {
         return System.getenv().getOrDefault("AWS_REGION", "eu-west-2");
     }
