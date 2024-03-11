@@ -9,7 +9,6 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
@@ -18,7 +17,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningService;
 
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -59,7 +57,7 @@ public class PreAuthorizedCodeBuilder {
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             System.out.println("Returning JWT" + signedJWT.serialize());
             return signedJWT;
-        } catch (JOSEException | ParseException | SdkClientException exception) {
+        } catch (Exception exception) {
             throw new SigningException(exception);
         }
     }
