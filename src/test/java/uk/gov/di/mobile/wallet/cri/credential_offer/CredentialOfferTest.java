@@ -22,13 +22,12 @@ class CredentialOfferTest {
         Map<String, String> preAuthorizedCodeMap = new HashMap<>();
         preAuthorizedCodeMap.put("pre-authorized_code", "signedJwtString");
         grantsMap.put("urn:ietf:params:oauth:grant-type:pre-authorized_code", preAuthorizedCodeMap);
-
-        credentialOffer = new CredentialOffer(credentialIssuer, credentials, grantsMap);
     }
 
     @Test
     @DisplayName("Should create a credential offer")
     void testItCreatesCredentialOffer() {
+        credentialOffer = new CredentialOffer(credentialIssuer, credentials, grantsMap);
         assertEquals(
                 "https://credential-issuer.example.com", credentialOffer.getCredentialIssuer());
         assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.getCredentials());

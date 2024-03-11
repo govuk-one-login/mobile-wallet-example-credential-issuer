@@ -55,7 +55,7 @@ public class PreAuthorizedCodeBuilder {
             String signature = encodedSignature(signResult);
 
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
-            System.out.println("Returning JWT" + signedJWT.serialize());
+            System.out.println("Returning JWT " + signedJWT.serialize());
             return signedJWT;
         } catch (Exception exception) {
             throw new SigningException(exception);
