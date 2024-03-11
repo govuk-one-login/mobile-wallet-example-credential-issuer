@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credentialOffer;
+package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import com.nimbusds.jwt.SignedJWT;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;

@@ -5,8 +5,8 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
-import uk.gov.di.mobile.wallet.cri.credentialOffer.CredentialOfferResource;
-import uk.gov.di.mobile.wallet.cri.credentialOffer.CredentialOfferService;
+import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
+import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 

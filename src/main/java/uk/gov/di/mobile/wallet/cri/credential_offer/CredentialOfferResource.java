@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credentialOffer;
+package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -11,8 +11,9 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.dataStorage.DataStore;
-import uk.gov.di.mobile.wallet.cri.services.dataStorage.DynamoDbService;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URLEncoder;
@@ -55,12 +56,19 @@ public class CredentialOfferResource {
             return buildFailResponse().build();
         }
 
-        dataStore.saveCredentialOffer(
-                new CredentialOfferCacheItem(credentialIdentifier, documentId, walletSubjectId));
+        try {
+            dataStore.saveCredentialOffer(
+                    new CredentialOfferCacheItem(
+                            credentialIdentifier, documentId, walletSubjectId));
+        } catch (DataStoreException exception) {
+            System.out.println("Error when saving credential offer: " + exception);
+            return buildFailResponse().build();
+        }
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
-        System.out.println(credentialOfferString);
+
+        System.out.println("Credential offer as string: " + credentialOfferString);
 
         String credentialOfferUrl =
                 configurationService.getWalletUrl()

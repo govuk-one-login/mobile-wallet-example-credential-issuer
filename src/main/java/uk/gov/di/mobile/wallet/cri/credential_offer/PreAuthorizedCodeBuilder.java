@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credentialOffer;
+package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -16,6 +16,7 @@ import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningService;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -27,12 +28,12 @@ public class PreAuthorizedCodeBuilder {
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
     private static final JOSEObjectType JWT = JOSEObjectType.JWT;
     private final ConfigurationService configurationService;
-    private final KmsService kmsService;
+    private final SigningService signingService;
 
     public PreAuthorizedCodeBuilder(
             ConfigurationService configurationService, KmsService kmsService) {
         this.configurationService = configurationService;
-        this.kmsService = kmsService;
+        this.signingService = kmsService;
     }
 
     public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
@@ -50,7 +51,7 @@ public class PreAuthorizedCodeBuilder {
                         .build();
 
         try {
-            SignResponse signResult = kmsService.sign(signRequest);
+            SignResponse signResult = signingService.signPreAuthorizedCode(signRequest);
             System.out.println("JWT has been signed");
 
             String signature = encodedSignature(signResult);
@@ -59,7 +60,6 @@ public class PreAuthorizedCodeBuilder {
             System.out.println("Returning JWT" + signedJWT.serialize());
             return signedJWT;
         } catch (JOSEException | ParseException | SdkClientException exception) {
-            System.out.println("Error when trying to create a JWT" + exception);
             throw new SigningException(exception);
         }
     }

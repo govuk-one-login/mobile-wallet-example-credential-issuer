@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.services.dataStorage;
+package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -43,7 +43,12 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem) {
-        table.putItem(credentialOfferCacheItem);
+    public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
+            throws DataStoreException {
+        try {
+            table.putItem(credentialOfferCacheItem);
+        } catch (Exception exception) {
+            throw new DataStoreException(exception);
+        }
     }
 }

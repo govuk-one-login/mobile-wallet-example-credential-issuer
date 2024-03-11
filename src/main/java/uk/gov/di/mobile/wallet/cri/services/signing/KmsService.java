@@ -9,7 +9,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
 
-public class KmsService {
+public class KmsService implements SigningService {
 
     private final KmsClient kmsClient;
 
@@ -39,8 +39,7 @@ public class KmsService {
         }
     }
 
-    public SignResponse sign(SignRequest signRequest) {
-        System.out.println("Calling KMS to sign token");
+    public SignResponse signPreAuthorizedCode(SignRequest signRequest) {
         return kmsClient.sign(signRequest);
     }
 }

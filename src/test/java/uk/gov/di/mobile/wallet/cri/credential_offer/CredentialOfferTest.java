@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credentialOffer;
+package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

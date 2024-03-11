@@ -12,7 +12,8 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
-import uk.gov.di.mobile.wallet.cri.services.dataStorage.DynamoDbService;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -43,7 +44,7 @@ class DynamoDbServiceTest {
 
     @Test
     @DisplayName("Should save credential offer to DynamoDB table")
-    void testItSavesCredentialOfferToTable() {
+    void testItSavesCredentialOfferToTable() throws DataStoreException {
         dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
 
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
