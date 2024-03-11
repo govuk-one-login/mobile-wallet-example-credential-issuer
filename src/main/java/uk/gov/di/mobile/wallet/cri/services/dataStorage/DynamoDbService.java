@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.services;
+package uk.gov.di.mobile.wallet.cri.services.dataStorage;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -6,18 +6,19 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
 
-public class DynamoDbService<T> {
-    private final DynamoDbTable<T> table;
+public class DynamoDbService implements DataStore {
 
-    public DynamoDbService(
-            DynamoDbEnhancedClient dynamoDbEnhancedClient,
-            Class<T> typeParameterClass,
-            String tableName) {
+    private final DynamoDbTable<CredentialOfferCacheItem> table;
+
+    public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient, String tableName) {
         this.table =
-                dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(typeParameterClass));
+                dynamoDbEnhancedClient.table(
+                        tableName, TableSchema.fromBean(CredentialOfferCacheItem.class));
     }
 
     public static DynamoDbEnhancedClient getClient(ConfigurationService configurationService) {
@@ -41,7 +42,8 @@ public class DynamoDbService<T> {
                 .build();
     }
 
-    public void putItem(T item) {
-        table.putItem(item);
+    @Override
+    public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem) {
+        table.putItem(credentialOfferCacheItem);
     }
 }

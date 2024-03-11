@@ -5,12 +5,13 @@ import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
-import uk.gov.di.mobile.wallet.cri.resources.CredentialOfferResource;
+import uk.gov.di.mobile.wallet.cri.credentialOffer.CredentialOfferResource;
+import uk.gov.di.mobile.wallet.cri.credentialOffer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.CredentialOfferService;
-import uk.gov.di.mobile.wallet.cri.services.KmsService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 public class MockCriApp extends Application<ConfigurationService> {
+
     public static void main(String[] args) throws Exception {
         new MockCriApp().run(args);
     }

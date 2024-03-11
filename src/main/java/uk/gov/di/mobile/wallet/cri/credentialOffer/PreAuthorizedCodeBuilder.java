@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.helpers;
+package uk.gov.di.mobile.wallet.cri.credentialOffer;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -13,7 +13,8 @@ import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.KmsService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -21,6 +22,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 public class PreAuthorizedCodeBuilder {
+
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
     private static final JOSEObjectType JWT = JOSEObjectType.JWT;
     private final ConfigurationService configurationService;
@@ -32,8 +34,7 @@ public class PreAuthorizedCodeBuilder {
         this.kmsService = kmsService;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier)
-            throws ParseException, JOSEException {
+    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
         var encodedHeader = getEncodedHeader();
 
         var encodedClaims = getEncodedClaims(credentialIdentifier);
@@ -47,21 +48,19 @@ public class PreAuthorizedCodeBuilder {
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
                         .build();
 
-        SignResponse signResult;
         try {
-            System.out.println("Signing JWT");
-            signResult = kmsService.sign(signRequest);
+            SignResponse signResult = kmsService.sign(signRequest);
             System.out.println("JWT has been signed");
-        } catch (Exception e) {
-            System.out.println("Error when signing SignedJWT: " + e);
-            throw new RuntimeException(e);
+
+            String signature = encodedSignature(signResult);
+
+            SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
+            System.out.println("Returning JWT" + signedJWT.serialize());
+            return signedJWT;
+        } catch (JOSEException | ParseException exception) {
+            System.out.println("Error when signing SignedJWT: " + exception);
+            throw new SigningException(exception);
         }
-
-        String signature = encodedSignature(signResult);
-
-        SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
-        System.out.println("Returning JWT" + signedJWT.serialize());
-        return signedJWT;
     }
 
     private static String encodedSignature(SignResponse signResult) throws JOSEException {

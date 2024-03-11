@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith({SystemStubsExtension.class})
 class ConfigurationServiceTest {
 
-    ConfigurationService configurationService;
+    private ConfigurationService configurationService;
 
     @SystemStub private EnvironmentVariables environmentVariables;
 

@@ -1,13 +1,14 @@
-package uk.gov.di.mobile.wallet.cri.helpers;
+package uk.gov.di.mobile.wallet.cri.models;
 
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 @DynamoDbBean
 public class CredentialOfferCacheItem {
-    String credentialIdentifier;
-    String walletSubjectId;
-    String documentId;
+
+    private String credentialIdentifier;
+    private String walletSubjectId;
+    private String documentId;
 
     // Required for DynamoDb BeanTableSchema
     public CredentialOfferCacheItem() {}

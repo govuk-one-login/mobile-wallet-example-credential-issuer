@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.helpers;
+package uk.gov.di.mobile.wallet.cri.credentialOffer;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CredentialOfferTest {
 
-    CredentialOffer credentialOffer;
+    private CredentialOffer credentialOffer;
     private static final String credentialIssuer = "https://credential-issuer.example.com";
     private static final String[] credentials = {"BasicDisclosure"};
     private static final Map<String, Map<String, String>> grantsMap = new HashMap<>();
@@ -29,8 +29,9 @@ class CredentialOfferTest {
     @Test
     @DisplayName("Should create a credential offer")
     void testItCreatesCredentialOffer() {
-        assertEquals("https://credential-issuer.example.com", credentialOffer.credential_issuer);
-        assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.credentials);
-        assertEquals(grantsMap, credentialOffer.grants);
+        assertEquals(
+                "https://credential-issuer.example.com", credentialOffer.getCredentialIssuer());
+        assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.getCredentials());
+        assertEquals(grantsMap, credentialOffer.getGrants());
     }
 }

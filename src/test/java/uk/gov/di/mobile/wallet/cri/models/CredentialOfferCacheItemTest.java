@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.helpers;
+package uk.gov.di.mobile.wallet.cri.models;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CredentialOfferCacheItemTest {
 
-    CredentialOfferCacheItem credentialOfferCacheItem;
+    private CredentialOfferCacheItem credentialOfferCacheItem;
     private static final String credentialIdentifier = "test-credential-identifier";
     private static final String documentId = "test-document-id";
     private static final String walletSubjectId = "test-wallet-subject-id";
@@ -22,8 +22,9 @@ class CredentialOfferCacheItemTest {
     @Test
     @DisplayName("Should create a credential offer cache item")
     void testItCreatesCredentialOfferCacheItem() {
-        assertEquals("test-credential-identifier", credentialOfferCacheItem.credentialIdentifier);
-        assertEquals("test-document-id", credentialOfferCacheItem.documentId);
-        assertEquals("test-wallet-subject-id", credentialOfferCacheItem.walletSubjectId);
+        assertEquals(
+                "test-credential-identifier", credentialOfferCacheItem.getCredentialIdentifier());
+        assertEquals("test-document-id", credentialOfferCacheItem.getDocumentId());
+        assertEquals("test-wallet-subject-id", credentialOfferCacheItem.getWalletSubjectId());
     }
 }
