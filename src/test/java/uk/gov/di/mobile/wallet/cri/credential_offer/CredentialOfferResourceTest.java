@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignRequest;
@@ -67,6 +68,7 @@ public class CredentialOfferResourceTest {
     void testItReturns200AndUrlEncodedCredentialOffer() throws JOSEException, DataStoreException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
+        // Mock void method
         doThrow(new RuntimeException("Mock error message"))
                 .when(mockDataStore)
                 .saveCredentialOffer(new CredentialOfferCacheItem());
@@ -78,6 +80,7 @@ public class CredentialOfferResourceTest {
                         .request()
                         .get();
 
+        Mockito.verify(mockDataStore, Mockito.times(1)).saveCredentialOffer(any());
         assertThat(response.getStatus(), is(200));
         assertThat(
                 response.readEntity(String.class),
@@ -101,6 +104,7 @@ public class CredentialOfferResourceTest {
                         .request()
                         .get();
 
+        Mockito.verify(mockDataStore, Mockito.times(1)).saveCredentialOffer(any());
         assertThat(response.getStatus(), is(500));
     }
 
