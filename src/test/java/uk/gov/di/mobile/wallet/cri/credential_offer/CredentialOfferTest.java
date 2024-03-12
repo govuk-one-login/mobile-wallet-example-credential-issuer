@@ -12,7 +12,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CredentialOfferTest {
 
-    private CredentialOffer credentialOffer;
     private static final String credentialIssuer = "https://credential-issuer.example.com";
     private static final String[] credentials = {"BasicDisclosure"};
     private static final Map<String, Map<String, String>> grantsMap = new HashMap<>();
@@ -27,7 +26,8 @@ class CredentialOfferTest {
     @Test
     @DisplayName("Should create a credential offer")
     void testItCreatesCredentialOffer() {
-        credentialOffer = new CredentialOffer(credentialIssuer, credentials, grantsMap);
+        CredentialOffer credentialOffer =
+                new CredentialOffer(credentialIssuer, credentials, grantsMap);
         assertEquals(
                 "https://credential-issuer.example.com", credentialOffer.getCredentialIssuer());
         assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.getCredentials());

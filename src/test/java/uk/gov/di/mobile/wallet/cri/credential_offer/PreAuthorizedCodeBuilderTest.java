@@ -62,13 +62,12 @@ public class PreAuthorizedCodeBuilderTest {
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getAudience(),
                 equalTo(singletonList("urn:fdc:gov:uk:wallet")));
-
         assertThat(preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"), equalTo("abc123"));
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getIssuer(), equalTo("urn:fdc:gov:uk:<HMRC>"));
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getClaim("credential_identifiers"),
-                equalTo(singletonList("e27474f5-6aef-40a4-bed6-5e4e1ec3f885")));
+                equalTo(singletonList(CREDENTIAL_IDENTIFIER)));
         assertThat(preAuthorizedCode.getJWTClaimsSet().getIssueTime(), notNullValue());
         assertThat(preAuthorizedCode.getJWTClaimsSet().getExpirationTime(), notNullValue());
         assertThat(

@@ -13,7 +13,6 @@ import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
-import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URLEncoder;
@@ -30,13 +29,11 @@ public class CredentialOfferResource {
 
     public CredentialOfferResource(
             CredentialOfferService credentialOfferService,
-            ConfigurationService configurationService) {
+            ConfigurationService configurationService,
+            DataStore dataStore) {
         this.credentialOfferService = credentialOfferService;
         this.configurationService = configurationService;
-        this.dataStore =
-                new DynamoDbService(
-                        DynamoDbService.getClient(configurationService),
-                        configurationService.getCriCacheTableName());
+        this.dataStore = dataStore;
     }
 
     @GET
@@ -79,7 +76,7 @@ public class CredentialOfferResource {
     }
 
     private Response.ResponseBuilder buildSuccessResponse() {
-        return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON_TYPE);
+        return Response.status(Response.Status.OK);
     }
 
     private Response.ResponseBuilder buildFailResponse() {

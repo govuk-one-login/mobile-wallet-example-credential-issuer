@@ -8,6 +8,7 @@ import io.dropwizard.core.setup.Environment;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 public class MockCriApp extends Application<ConfigurationService> {
@@ -33,9 +34,15 @@ public class MockCriApp extends Application<ConfigurationService> {
         CredentialOfferService credentialOfferService =
                 new CredentialOfferService(configurationService, kmsService);
 
+        DynamoDbService dynamoDbService =
+                new DynamoDbService(
+                        DynamoDbService.getClient(configurationService),
+                        configurationService.getCriCacheTableName());
+
         environment
                 .jersey()
                 .register(
-                        new CredentialOfferResource(credentialOfferService, configurationService));
+                        new CredentialOfferResource(
+                                credentialOfferService, configurationService, dynamoDbService));
     }
 }

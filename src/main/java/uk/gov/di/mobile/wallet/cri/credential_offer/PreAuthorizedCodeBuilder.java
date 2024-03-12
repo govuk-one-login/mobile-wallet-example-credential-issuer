@@ -50,7 +50,6 @@ public class PreAuthorizedCodeBuilder {
 
         try {
             SignResponse signResult = signingService.signPreAuthorizedCode(signRequest);
-            System.out.println("JWT has been signed");
 
             String signature = encodedSignature(signResult);
 
