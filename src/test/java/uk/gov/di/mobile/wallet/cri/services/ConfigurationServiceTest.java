@@ -93,7 +93,7 @@ class ConfigurationServiceTest {
     @Test
     void testItReturnsLocalstackEndpointValue() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("http://localhost:4566", configurationService.getLocalstackEndpoint());
+        assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
     }
 
     @Test

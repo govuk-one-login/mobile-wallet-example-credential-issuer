@@ -25,8 +25,6 @@ public class DynamoDbService implements DataStore {
         DynamoDbClient client;
 
         if (configurationService.getEnvironment().equals("local")) {
-            System.out.println("Running app in local environment");
-
             client = getLocalClient(configurationService);
         } else {
             client = DynamoDbClient.builder().httpClient(UrlConnectionHttpClient.create()).build();

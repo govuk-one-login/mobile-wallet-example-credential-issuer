@@ -53,7 +53,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getLocalstackEndpoint() {
-        return "http://localhost:4566";
+        return "http://localhost:4560";
     }
 
     public String[] getCredentialTypes() {

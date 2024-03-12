@@ -23,7 +23,6 @@ public class KmsService implements SigningService {
     public KmsService(String localstackEndpoint, String awsRegion, String environment) {
 
         if (environment.equals("local")) {
-            System.out.println("Running app in local environment");
             this.kmsClient =
                     KmsClient.builder()
                             .endpointOverride(URI.create(localstackEndpoint))

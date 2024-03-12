@@ -5,10 +5,9 @@ services:
     container_name: localstack
     image: localstack/localstack:latest
     ports:
-      - "4566:4566"
+      - "4560:4566"
     environment:
       - SERVICES=dynamodb,kms
-      - AWS_ACCESS_KEY_ID=na
-      - AWS_SECRET_ACCESS_KEY=na
+
     volumes:
       - ./localstack/provision.sh:/etc/localstack/init/ready.d/init-aws.sh

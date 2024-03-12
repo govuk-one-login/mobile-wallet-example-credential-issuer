@@ -49,7 +49,6 @@ public class CredentialOfferResource {
         try {
             credentialOffer = credentialOfferService.buildCredentialOffer(credentialIdentifier);
         } catch (SigningException exception) {
-            System.out.println("Error when building credential offer: " + exception);
             return buildFailResponse().build();
         }
 
@@ -58,20 +57,19 @@ public class CredentialOfferResource {
                     new CredentialOfferCacheItem(
                             credentialIdentifier, documentId, walletSubjectId));
         } catch (DataStoreException exception) {
-            System.out.println("Error when saving credential offer: " + exception);
             return buildFailResponse().build();
         }
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
-        String CredentialOfferStringEncoded =
+        String credentialOfferStringEncoded =
                 URLEncoder.encode(credentialOfferString, StandardCharsets.UTF_8);
 
         CredentialOfferUri credentialOfferUri =
                 new CredentialOfferUri(
                         configurationService.getWalletUrl(),
                         "/add?credential_offer=",
-                        CredentialOfferStringEncoded);
+                        credentialOfferStringEncoded);
 
         return buildSuccessResponse().entity(credentialOfferUri).build();
     }

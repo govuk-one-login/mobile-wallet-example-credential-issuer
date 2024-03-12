@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -56,10 +55,6 @@ public class CredentialOfferServiceTest {
         CredentialOffer credentialOffer =
                 credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER);
 
-        ObjectMapper mapper = new ObjectMapper();
-        String credentialOfferString = mapper.writeValueAsString(credentialOffer);
-
-        System.out.println(credentialOfferString);
         assertEquals(
                 "https://credential-issuer.example.com", credentialOffer.getCredentialIssuer());
         assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.getCredentials());

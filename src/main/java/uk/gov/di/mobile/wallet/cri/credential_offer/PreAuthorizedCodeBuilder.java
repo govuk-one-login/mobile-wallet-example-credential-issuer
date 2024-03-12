@@ -36,9 +36,7 @@ public class PreAuthorizedCodeBuilder {
 
     public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
         var encodedHeader = getEncodedHeader();
-
         var encodedClaims = getEncodedClaims(credentialIdentifier);
-
         var message = encodedHeader + "." + encodedClaims;
 
         var signRequest =
@@ -50,11 +48,8 @@ public class PreAuthorizedCodeBuilder {
 
         try {
             SignResponse signResult = signingService.signPreAuthorizedCode(signRequest);
-
             String signature = encodedSignature(signResult);
-
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
-            System.out.println("Returning JWT " + signedJWT.serialize());
             return signedJWT;
         } catch (Exception exception) {
             throw new SigningException(exception);

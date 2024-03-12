@@ -35,17 +35,31 @@ By default, this also calls `clean`,  `spotlessApply` and `test`.
 ### Run
 Run the application with `./gradlew run`
 
-This app uses LocalStack to run AWS services locally. To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table, run `docker-compose up`. You will need to have Docker Desktop or alternative like installed.
+#### Test API Request
+[http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def](http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def)
 
-Open [http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def](http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def).
 
-### Reading the Database
-Check that the credential offer was saved to the **cri_cache** with `aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`, replacing the **credentialIdentifier** with the relevant one.
+#### LocalStack
+This app uses LocalStack to run AWS services locally on port `4560`. 
 
-To return all items from the **cri_cache**, run `aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb scan --table-name cri_cache"`.
+To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table , run `docker-compose up`. 
 
-#### AWS CLI
-Your AWS CLI options must be configured before running this command. If they are not, run ```aws configure``` before running the commands above.
+You will need to have Docker Desktop or alternative like installed.
+
+
+#### Reading from the Database
+You will need to have the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed and configured to interact with the local database. You can configure the CLI with the values below by running `aws configure`:
+```
+AWS Access Key ID [None]: na
+AWS Secret Access Key [None]: na
+Default region name [None]: eu-west-2
+Default output format [None]:
+```
+
+To check that a credential offer was saved to the **cri_cache** table, run `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`, replacing the **credentialIdentifier** with the relevant one.
+
+To return all items from the **cri_cache** table, run `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name cri_cache"`.
+
 
 ### Test
 Run unit tests with `./gradlew test`
