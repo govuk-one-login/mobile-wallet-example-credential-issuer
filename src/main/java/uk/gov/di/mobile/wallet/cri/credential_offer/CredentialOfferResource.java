@@ -76,7 +76,7 @@ public class CredentialOfferResource {
     }
 
     private Response.ResponseBuilder buildSuccessResponse() {
-        return Response.status(Response.Status.OK);
+        return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
     private Response.ResponseBuilder buildFailResponse() {
