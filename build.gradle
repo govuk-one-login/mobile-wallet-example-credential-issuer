@@ -1,0 +1,104 @@
+plugins {
+	id "application"
+	id "java"
+	id "com.diffplug.spotless" version "6.25.0"
+	id "org.sonarqube" version "4.4.1.3373"
+	id "jacoco"
+}
+
+defaultTasks "clean", "spotlessApply", "build"
+
+repositories {
+	maven {
+		url "https://gds.jfrog.io/artifactory/di-allowed-repos"
+	}
+}
+
+dependencies {
+	implementation "com.google.guava:guava:33.0.0-jre"
+	implementation group: "io.dropwizard", name: "dropwizard-core", version: "4.0.6"
+	implementation "com.nimbusds:oauth2-oidc-sdk:11.9.1"
+	implementation "software.amazon.awssdk:kms:2.24.13"
+	implementation "software.amazon.awssdk:dynamodb:2.24.13"
+	implementation "software.amazon.awssdk:dynamodb-enhanced:2.24.13"
+	implementation "software.amazon.awssdk:url-connection-client:2.25.1"
+	implementation "com.fasterxml.jackson.core:jackson-databind:2.16.1"
+	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.2.1'
+
+	testImplementation "org.junit.jupiter:junit-jupiter-api:5.9.0"
+	testImplementation "org.mockito:mockito-junit-jupiter:5.4.0"
+	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.6"
+	testImplementation "org.hamcrest:hamcrest:2.2"
+	testImplementation group: 'io.dropwizard', name: 'dropwizard-testing', version: '4.0.7'
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.9.0"
+}
+
+application {
+	mainClass = "uk.gov.di.mobile.wallet.cri.MockCriApp"
+}
+
+jar {
+	manifest {
+		attributes(
+				"Main-Class": "uk.gov.di.mobile.wallet.cri.MockCriApp")
+	}
+
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+run {
+	args = ["server", "config.yml"]
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+sonar {
+	properties {
+		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
+		property "sonar.organization", "govuk-one-login"
+		property "sonar.host.url", "https://sonarcloud.io"
+	}
+}
+
+spotless {
+	java {
+		target "**/src/**/*.java"
+		googleJavaFormat("1.18.0").aosp()
+		importOrder "", "javax", "java", "\\#"
+		endWithNewline()
+		removeUnusedImports()
+	}
+	groovyGradle {
+		target "**/*.gradle"
+		greclipse()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
+
+test {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required.set(true)
+	}
+}
+
+tasks.withType(Test) {
+	testLogging {
+		exceptionFormat "full"
+		events "started", "skipped", "passed", "failed"
+		showStandardStreams true
+	}
+}

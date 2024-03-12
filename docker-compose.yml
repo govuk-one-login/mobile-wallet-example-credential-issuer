@@ -1,0 +1,13 @@
+version: "3.8"
+
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4560:4566"
+    environment:
+      - SERVICES=dynamodb,kms
+
+    volumes:
+      - ./localstack/provision.sh:/etc/localstack/init/ready.d/init-aws.sh
