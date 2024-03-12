@@ -9,22 +9,6 @@ aws --endpoint-url=http://localhost:4566 dynamodb create-table \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
     --region eu-west-2
 
-aws --endpoint-url=http://localhost:4566 dynamodb put-item \
-    --table-name $TABLE_NAME  \
-    --region eu-west-2 \
-    --item '
-    {
-      "credentialIdentifier": {
-        "S":  "test_credential_identifier"
-      },
-      "walletSubjectId": {
-           "S":  "test_wallet_subject_id"
-      },
-     "documentId": {
-          "S":  "test_document_id"
-      }
-    }'
-
 aws --endpoint-url=http://localhost:4566 kms create-key \
     --region eu-west-2 \
     --key-usage SIGN_VERIFY \

@@ -1,8 +1,7 @@
 # mobile-wallet-example-credential-issuer
 
 ## Overview
-
-A Mock Wallet CRI stub for testing the GOV.UK wallet.
+A credential Issuer following the [OpenID for Verifiable Credential Issuance v1.0; pre-authorized code flow](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-pre-authorized-code-flow) to issue credentials into the GOV.UK wallet.
 
 ## Pre-requisites
 
@@ -36,16 +35,16 @@ By default, this also calls `clean`,  `spotlessApply` and `test`.
 ### Run
 Run the application with `./gradlew run`
 
-This app uses LocalStack to run AWS services locally. To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table, run `docker-compose up`.
+This app uses LocalStack to run AWS services locally. To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table, run `docker-compose up`. You will need to have Docker Desktop or alternative like installed.
 
-Open [http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def](http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def) in a web browser.
+Open [http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def](http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def).
 
+### Reading the Database
 Check that the credential offer was saved to the **cri_cache** with `aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`, replacing the **credentialIdentifier** with the relevant one.
 
 To return all items from the **cri_cache**, run `aws --endpoint-url=http://localhost:4566 --region eu-west-2 dynamodb scan --table-name cri_cache"`.
 
 #### AWS CLI
-
 Your AWS CLI options must be configured before running this command. If they are not, run ```aws configure``` before running the commands above.
 
 ### Test

@@ -64,15 +64,16 @@ public class CredentialOfferResource {
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
+        String CredentialOfferStringEncoded =
+                URLEncoder.encode(credentialOfferString, StandardCharsets.UTF_8);
 
-        System.out.println("Credential offer as string: " + credentialOfferString);
+        CredentialOfferUri credentialOfferUri =
+                new CredentialOfferUri(
+                        configurationService.getWalletUrl(),
+                        "/add?credential_offer=",
+                        CredentialOfferStringEncoded);
 
-        String credentialOfferUrl =
-                configurationService.getWalletUrl()
-                        + "/add?credential_offer="
-                        + URLEncoder.encode(credentialOfferString, StandardCharsets.UTF_8);
-
-        return buildSuccessResponse().entity(credentialOfferUrl).build();
+        return buildSuccessResponse().entity(credentialOfferUri).build();
     }
 
     private Response.ResponseBuilder buildSuccessResponse() {
