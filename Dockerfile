@@ -1,0 +1,1 @@
+FROM amazoncorretto:17.0.9@sha256:0d61d1c858607c6b2bb5981b3da6acd8da10048a39edb5bf45ddfb41a216bfe2
