@@ -56,7 +56,7 @@ class ConfigurationServiceTest {
     void testWalletUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
-                "https://mobile.staging.account.gov.uk/wallet",
+                "https://mobile.staging.account.gov.uk/wallet-test",
                 configurationService.getWalletUrl());
     }
 
