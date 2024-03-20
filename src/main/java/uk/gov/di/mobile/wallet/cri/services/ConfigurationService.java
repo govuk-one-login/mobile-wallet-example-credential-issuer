@@ -27,8 +27,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getWalletUrl() {
-        return System.getenv()
-                .getOrDefault("WALLET_URL", "https://mobile.staging.account.gov.uk/wallet");
+        return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
     }
 
     public long getPreAuthorizedCodeTtl() {
