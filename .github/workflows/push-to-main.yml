@@ -1,0 +1,74 @@
+---
+name: 'Deployment'
+
+'on':
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  upload-s3-artifact-to-build:
+    name: Validate & upload S3 artifact to build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # pin@v3
+        with:
+          fetch-depth: '0'
+
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@c6696d35f45207ec9622ec3235f1997c660e1ab2 # pin@v2
+        with:
+          version: 1.90.0
+          use-installer: true
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # pin@v4
+        with:
+          role-to-assume: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@062b18b96a7aff071d4dc91bc00c4c1a7945b076 # pin@v1
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@main
+        with:
+          cosign-release: 'v1.9.0'
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: "${{ secrets.BUILD_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com"
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          CONTAINER_SIGN_KMS_KEY: ${{ secrets.CONTAINER_SIGN_KMS_KEY }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+
+      - name: Update SAM template
+        env:
+          ECR_REGISTRY: "${{ secrets.BUILD_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com"
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        run: |
+          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA|" template.yaml
+
+      - name: Sam Build & Validate
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          sam validate
+          sam build --cached
+
+      - name: Deploy SAM app
+        uses: govuk-one-login/devplatform-upload-action@1bf704ccba8eaebea0bd43318321d806b29f9fe4 # pin@v3.5
+        with:
+          artifact-bucket-name: ${{ secrets.BUILD_ENV_ARTIFACT_BUCKET_NAME }}
+          signing-profile-name: ${{ secrets.SIGNING_PROFILE_NAME }}
+          working-directory: ./deploy/.aws-sam/build
