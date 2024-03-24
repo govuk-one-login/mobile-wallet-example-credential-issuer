@@ -1,1 +1,11 @@
-FROM amazoncorretto:17.0.9@sha256:0d61d1c858607c6b2bb5981b3da6acd8da10048a39edb5bf45ddfb41a216bfe2
+FROM gradle:8.6.0-jdk17-alpine@sha265:efc3f440f6a8685bedd93e888bbda0ba82afc4b3
+
+WORKDIR /app
+COPY src/ src/
+COPY build.gradle settings.gradle gradlew gradlew.bat config.yaml ./
+COPY gradle/ gradle/
+ARG PORT
+RUN ./gradlew
+
+EXPOSE 8080
+CMD ./gradlew run
