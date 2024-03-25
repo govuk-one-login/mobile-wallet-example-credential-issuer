@@ -4,7 +4,6 @@ WORKDIR /app
 COPY src/ src/
 COPY build.gradle settings.gradle gradlew gradlew.bat config.yaml ./
 COPY gradle/ gradle/
-ARG PORT
 RUN ./gradlew
 
 EXPOSE 8080
