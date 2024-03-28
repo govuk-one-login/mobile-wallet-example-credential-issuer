@@ -23,12 +23,15 @@ public class ConfigurationService extends Configuration {
 
     public String getMockCriUrl() {
         return System.getenv()
-                .getOrDefault("MOCK_CRI_URL", "https://credential-issuer.example.com");
+                .getOrDefault(
+                        "MOCK_CRI_URL", "https://stub-credential-issuer.mobile.dev.account.gov.uk");
     }
 
     public String getStsStubUrl() {
         return System.getenv()
-                .getOrDefault("STS_STUB_URL", "https://document-builder.example.com/sts-stub");
+                .getOrDefault(
+                        "STS_STUB_URL",
+                        "https://document-builder.mobile.dev.account.gov.uk/sts-stub");
     }
 
     public String getWalletUrl() {
@@ -61,6 +64,6 @@ public class ConfigurationService extends Configuration {
     }
 
     public String[] getCredentialTypes() {
-        return new String[] {"BasicDisclosure"};
+        return new String[] {"SocialSecurity"};
     }
 }

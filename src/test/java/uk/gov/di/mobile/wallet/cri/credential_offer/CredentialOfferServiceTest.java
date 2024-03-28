@@ -56,8 +56,9 @@ public class CredentialOfferServiceTest {
                 credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER);
 
         assertEquals(
-                "https://credential-issuer.example.com", credentialOffer.getCredentialIssuer());
-        assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.getCredentials());
+                "https://stub-credential-issuer.mobile.dev.account.gov.uk",
+                credentialOffer.getCredentialIssuer());
+        assertArrayEquals(new String[] {"SocialSecurity"}, credentialOffer.getCredentials());
         assertThat(credentialOffer, hasProperty("grants"));
         assertThat(
                 credentialOffer

@@ -49,7 +49,17 @@ class ConfigurationServiceTest {
     @Test
     void testMockCriUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("https://credential-issuer.example.com", configurationService.getMockCriUrl());
+        assertEquals(
+                "https://stub-credential-issuer.mobile.dev.account.gov.uk",
+                configurationService.getMockCriUrl());
+    }
+
+    @Test
+    void testStsStuUrlIsEqualDefaultWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals(
+                "https://document-builder.mobile.dev.account.gov.uk/sts-stub",
+                configurationService.getStsStubUrl());
     }
 
     @Test
@@ -98,7 +108,7 @@ class ConfigurationServiceTest {
     void testItReturnsCredentialTypesValue() {
         ConfigurationService configurationService = new ConfigurationService();
         assertArrayEquals(
-                new String[] {"BasicDisclosure"}, configurationService.getCredentialTypes());
+                new String[] {"SocialSecurity"}, configurationService.getCredentialTypes());
     }
 
     @Test
@@ -132,10 +142,18 @@ class ConfigurationServiceTest {
 
     @Test
     void testItGetsMockCriUrlEnvironmentVariable() {
-        environmentVariables.set("MOCK_CRI_URL", "https://credential-issuer.test.example.com");
+        environmentVariables.set("MOCK_CRI_URL", "https://credential-issuer.test.com");
+
+        assertEquals("https://credential-issuer.test.com", configurationService.getMockCriUrl());
+    }
+
+    @Test
+    void testItGetsStsStubUrlEnvironmentVariable() {
+        environmentVariables.set("STS_STUB_URL", "https://credential-builder.test.com/sts-stub");
 
         assertEquals(
-                "https://credential-issuer.test.example.com", configurationService.getMockCriUrl());
+                "https://credential-builder.test.com/sts-stub",
+                configurationService.getStsStubUrl());
     }
 
     @Test
