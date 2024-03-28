@@ -26,6 +26,11 @@ public class ConfigurationService extends Configuration {
                 .getOrDefault("MOCK_CRI_URL", "https://credential-issuer.example.com");
     }
 
+    public String getStsStubUrl() {
+        return System.getenv()
+                .getOrDefault("STS_STUB_URL", "https://document-builder.example.com/sts-stub");
+    }
+
     public String getWalletUrl() {
         return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
     }
