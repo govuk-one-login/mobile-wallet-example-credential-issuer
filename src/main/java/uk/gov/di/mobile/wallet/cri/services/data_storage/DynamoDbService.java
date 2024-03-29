@@ -57,7 +57,8 @@ public class DynamoDbService implements DataStore {
         }
     }
 
-    private CredentialOfferCacheItem getItemByKey(String partitionKeyValue) throws DataStoreNulLReturnedException {
+    private CredentialOfferCacheItem getItemByKey(String partitionKeyValue)
+            throws DataStoreNulLReturnedException {
         Key key = Key.builder().partitionValue(partitionKeyValue).build();
         CredentialOfferCacheItem response = table.getItem(key);
         if (response == null) {

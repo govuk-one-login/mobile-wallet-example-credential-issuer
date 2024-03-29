@@ -6,4 +6,3 @@ public class DataStoreException extends Exception {
         super(exception);
     }
 }
-
