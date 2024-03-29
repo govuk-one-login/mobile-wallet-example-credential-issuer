@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.metadata;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.io.Resources;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -9,7 +7,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.io.File;
+import java.io.IOException;
 
 @Singleton
 @Path("/.well-known/openid-credential-issuer")
@@ -17,32 +15,32 @@ public class MetadataResource {
 
     private static final String CREDENTIAL_ENDPOINT = "/credential";
     private static final String CREDENTIALS_SUPPORTED_FILE_NAME = "credentials_supported.json";
-    private final ConfigurationService configurationService;
 
-    public MetadataResource(ConfigurationService configurationService) {
+    private final ConfigurationService configurationService;
+    private final MetadataBuilder metadataBuilder;
+
+    public MetadataResource(
+            ConfigurationService configurationService, MetadataBuilder metadataBuilder) {
         this.configurationService = configurationService;
+        this.metadataBuilder = metadataBuilder;
     }
 
     @GET
     public Response getMetadata() {
         try {
-            File credentialsSupportedFilePath =
-                    new File(Resources.getResource(CREDENTIALS_SUPPORTED_FILE_NAME).getPath());
 
-            ObjectMapper mapper = new ObjectMapper();
-            Object credentialsSupported =
-                    mapper.readValue(credentialsSupportedFilePath, Object.class);
-
-            Metadata metadata = new Metadata();
-
-            metadata.setCredentialsEndpoint(configurationService.getMockCriUrl());
-            metadata.setAuthorizationServer(configurationService.getStsStubUrl());
-            metadata.setCredentialIssuer(
-                    configurationService.getMockCriUrl() + CREDENTIAL_ENDPOINT);
-            metadata.setCredentialsSupported(credentialsSupported);
+            Metadata metadata =
+                    metadataBuilder
+                            .setCredentialIssuer(
+                                    configurationService.getMockCriUrl() + CREDENTIAL_ENDPOINT)
+                            .setCredentialsEndpoint(configurationService.getMockCriUrl())
+                            .setAuthorizationServer(configurationService.getStsStubUrl())
+                            .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
+                            .build();
 
             return buildSuccessResponse().entity(metadata).build();
-        } catch (Exception exception) {
+        } catch (IllegalArgumentException | IOException exception) {
+            System.out.println("An error happened trying to get the metadata: " + exception);
             return buildFailResponse().build();
         }
     }

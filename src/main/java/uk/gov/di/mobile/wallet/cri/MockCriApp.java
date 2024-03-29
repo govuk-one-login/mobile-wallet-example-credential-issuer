@@ -7,6 +7,7 @@ import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
+import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
@@ -40,12 +41,14 @@ public class MockCriApp extends Application<ConfigurationService> {
                         DynamoDbService.getClient(configurationService),
                         configurationService.getCriCacheTableName());
 
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
+
         environment
                 .jersey()
                 .register(
                         new CredentialOfferResource(
                                 credentialOfferService, configurationService, dynamoDbService));
 
-        environment.jersey().register(new MetadataResource(configurationService));
+        environment.jersey().register(new MetadataResource(configurationService, metadataBuilder));
     }
 }
