@@ -2,6 +2,7 @@ package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -44,5 +45,25 @@ public class DynamoDbService implements DataStore {
         } catch (Exception exception) {
             throw new DataStoreException(exception);
         }
+    }
+
+    @Override
+    public CredentialOfferCacheItem getCredentialOffer(String partitionKeyValue)
+            throws DataStoreException {
+        try {
+            return getItemByKey(partitionKeyValue);
+        } catch (Exception exception) {
+            throw new DataStoreException(exception);
+        }
+    }
+
+    private CredentialOfferCacheItem getItemByKey(String partitionKeyValue) throws DataStoreNulLReturnedException {
+        Key key = Key.builder().partitionValue(partitionKeyValue).build();
+        CredentialOfferCacheItem response = table.getItem(key);
+        if (response == null) {
+            System.out.println("Null result retrieved from datastore");
+            throw new DataStoreNulLReturnedException("Null retrieved");
+        }
+        return response;
     }
 }
