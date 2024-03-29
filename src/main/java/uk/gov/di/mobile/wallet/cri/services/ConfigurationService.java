@@ -35,6 +35,13 @@ public class ConfigurationService extends Configuration {
                         "https://stub-credential-issuer.mobile.build.account.gov.uk/sts-stub");
     }
 
+    public String getStsStubUrl() {
+        return System.getenv()
+                .getOrDefault(
+                        "STS_STUB_URL",
+                        "https://document-builder.mobile.dev.account.gov.uk/sts-stub");
+    }
+
     public String getWalletUrl() {
         return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
     }

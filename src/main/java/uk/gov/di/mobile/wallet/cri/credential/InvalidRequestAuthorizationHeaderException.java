@@ -1,11 +1,11 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-public class InvalidRequestException extends Exception {
-    public InvalidRequestException() {
+public class InvalidRequestAuthorizationHeaderException extends Exception {
+    public InvalidRequestAuthorizationHeaderException() {
         super("Invalid access token");
     }
 
-    public InvalidRequestException(Exception exception) {
+    public InvalidRequestAuthorizationHeaderException(Exception exception) {
         super("Invalid access token: " + exception);
     }
 }

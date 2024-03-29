@@ -1,2 +1,3 @@
-package uk.gov.di.mobile.wallet.cri.credential;public class CredentialService {
-}
+package uk.gov.di.mobile.wallet.cri.credential;
+
+public class CredentialService {}
