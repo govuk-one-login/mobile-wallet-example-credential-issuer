@@ -12,7 +12,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -31,28 +30,30 @@ public class AccessTokenService {
         this.client = client;
     }
 
-    public SignedJWT verifyAccessToken(String authorizationHeader)
+    public SignedJWT verifyAccessToken(BearerAccessToken accessToken)
             throws AccessTokenValidationException {
 
-        SignedJWT signedJwt = parseAuthorizationHeader(authorizationHeader);
+        SignedJWT signedJwt = parseAccessToken(accessToken);
 
         verifyTokenHeader(CONFIG_ALGORITHM, signedJwt);
         verifyTokenClaims(signedJwt);
 
         if (!this.verifyJWTSignature(signedJwt)) {
-            throw new AccessTokenValidationException("JWT signature verification failed");
+            throw new AccessTokenValidationException("Access token signature verification failed");
         }
 
         return signedJwt;
     }
 
-    private SignedJWT parseAuthorizationHeader(String authorizationHeader)
+    private SignedJWT parseAccessToken(BearerAccessToken accessToken)
             throws AccessTokenValidationException {
         try {
-            BearerAccessToken accessToken = BearerAccessToken.parse(authorizationHeader);
             return SignedJWT.parse(accessToken.getValue());
-        } catch (ParseException | java.text.ParseException exception) {
-            throw new AccessTokenValidationException(exception.getMessage(), exception);
+        } catch (java.text.ParseException exception) {
+            throw new AccessTokenValidationException(
+                    String.format(
+                            "Could not parse request access token: %s", exception.getMessage()),
+                    exception);
         }
     }
 

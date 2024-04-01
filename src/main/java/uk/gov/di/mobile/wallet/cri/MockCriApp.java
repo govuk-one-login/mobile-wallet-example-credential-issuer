@@ -11,6 +11,7 @@ import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.credential.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialResource;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
+import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
@@ -56,8 +57,15 @@ public class MockCriApp extends Application<ConfigurationService> {
 
         AccessTokenService accessTokenService = new AccessTokenService(client);
 
+        ProofJwtService proofJwtService = new ProofJwtService();
+
         CredentialService credentialService =
-                new CredentialService(configurationService, dynamoDbService, accessTokenService);
+                new CredentialService(
+                        configurationService,
+                        dynamoDbService,
+                        accessTokenService,
+                        proofJwtService,
+                        client);
 
         environment
                 .jersey()
