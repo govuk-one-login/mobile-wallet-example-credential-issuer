@@ -8,10 +8,9 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
+import uk.gov.di.mobile.wallet.cri.credential.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialResource;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
-import uk.gov.di.mobile.wallet.cri.credential.TokenService;
-import uk.gov.di.mobile.wallet.cri.credential.TokenSignatureVerificationService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
@@ -50,16 +49,15 @@ public class MockCriApp extends Application<ConfigurationService> {
 
         MetadataBuilder metadataBuilder = new MetadataBuilder();
 
-        CredentialService credentialService = new CredentialService();
-
         Client client =
                 new JerseyClientBuilder(environment)
                         .using(new JerseyClientConfiguration())
                         .build("test");
 
-        TokenSignatureVerificationService tokenSignatureVerificationService =
-                new TokenSignatureVerificationService(client);
-        TokenService tokenService = new TokenService(tokenSignatureVerificationService);
+        AccessTokenService accessTokenService = new AccessTokenService(client);
+
+        CredentialService credentialService =
+                new CredentialService(configurationService, dynamoDbService, accessTokenService);
 
         environment
                 .jersey()
@@ -72,10 +70,8 @@ public class MockCriApp extends Application<ConfigurationService> {
         environment
                 .jersey()
                 .register(
-                        new CredentialResource(
-                                credentialService,
-                                configurationService,
-                                dynamoDbService,
-                                tokenService));
+                        new CredentialResource(credentialService));
+
+        environment.jersey().register(new CredentialResource(credentialService));
     }
 }
