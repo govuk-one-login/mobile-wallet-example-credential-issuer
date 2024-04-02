@@ -35,20 +35,25 @@ public class ConfigurationService extends Configuration {
                         "https://stub-credential-issuer.mobile.build.account.gov.uk/sts-stub");
     }
 
-    public String getStsStubUrl() {
-        return System.getenv()
-                .getOrDefault(
-                        "STS_STUB_URL",
-                        "https://document-builder.mobile.dev.account.gov.uk/sts-stub");
+    public String getDocumentBuilderUrl() {
+        return System.getenv().getOrDefault("DOCUMENT_BUILDER_URL", "http://localhost:8000");
     }
 
     public String getWalletUrl() {
         return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
     }
 
+    public String getStsStubUrl() {
+        return System.getenv().getOrDefault("STS_STUB_URL", "http://localhost:8000/sts-stub");
+    }
+
     public long getPreAuthorizedCodeTtl() {
         return Long.parseLong(
                 System.getenv().getOrDefault("PRE_AUTHORIZED_CODE_TTL_IN_SECS", "300"));
+    }
+
+    public long getCredentialTtl() {
+        return Long.parseLong(System.getenv().getOrDefault("CREDENTIAL_TTL_IN_DAYS", "14"));
     }
 
     public String getClientId() {

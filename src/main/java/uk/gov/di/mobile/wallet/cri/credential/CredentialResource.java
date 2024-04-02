@@ -8,10 +8,13 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 @Singleton
 @Path("/credential")
 public class CredentialResource {
+
     private final CredentialService credentialService;
 
     public CredentialResource(CredentialService credentialService) {
@@ -22,16 +25,23 @@ public class CredentialResource {
     public Response getCredential(
             @HeaderParam("Authorization") @NotEmpty String authorizationHeader, JsonNode payload) {
 
-        String credential;
-
-        CredentialRequest credentialRequest = CredentialRequest.from(payload);
-        BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
-
+        Credential verifiableCredential;
         try {
-            credential = credentialService.buildCredential(bearerAccessToken, credentialRequest);
+            CredentialRequest credentialRequest = CredentialRequest.from(payload);
+            BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
 
-        } catch (Exception exception) {
-            System.out.println("EXCEPTION: " + exception);
+            verifiableCredential = credentialService.run(bearerAccessToken, credentialRequest);
+
+        } catch (BadRequestException
+                | AccessTokenValidationException
+                | java.text.ParseException
+                | DataStoreException
+                | ProofJwtValidationException
+                | WalletSubjectIdMismatchException
+                | NonceMismatchException
+                | SigningException
+                | java.net.URISyntaxException exception) {
+            System.out.println("An error happened trying to build the credential: " + exception);
             if (exception instanceof BadRequestException) {
                 return buildBadRequestResponse().build();
             }
@@ -39,16 +49,14 @@ public class CredentialResource {
             return buildFailResponse().build();
         }
 
-        return buildSuccessResponse().entity(credential).build();
+        return buildSuccessResponse().entity(verifiableCredential).build();
     }
 
     private BearerAccessToken parseAuthorizationHeader(String authorizationHeader) {
         try {
             return BearerAccessToken.parse(authorizationHeader);
         } catch (ParseException exception) {
-            throw new BadRequestException(
-                    String.format("Invalid authorization header: %s", exception.getMessage()),
-                    exception);
+            throw new BadRequestException("Invalid authorization header");
         }
     }
 

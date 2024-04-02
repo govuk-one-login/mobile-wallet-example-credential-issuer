@@ -16,29 +16,35 @@ import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 public class AccessTokenService {
+
     private static final String CONFIG_ALGORITHM = "RS256";
     private static final String CONFIG_AUDIENCE = "urn:fdc:gov:uk:wallet";
     private static final String CONFIG_ISSUER = "urn:fdc:gov:uk:<HMRC>";
 
-    private final Client client;
+    private final Client httpClient;
+    private final ConfigurationService configurationService;
 
-    public AccessTokenService(Client client) {
-        this.client = client;
+    public AccessTokenService(Client httpClient, ConfigurationService configurationService) {
+        this.httpClient = httpClient;
+        this.configurationService = configurationService;
     }
 
     public SignedJWT verifyAccessToken(BearerAccessToken accessToken)
-            throws AccessTokenValidationException {
+            throws AccessTokenValidationException, URISyntaxException {
 
         SignedJWT signedJwt = parseAccessToken(accessToken);
 
         verifyTokenHeader(CONFIG_ALGORITHM, signedJwt);
         verifyTokenClaims(signedJwt);
 
-        if (!this.verifyJWTSignature(signedJwt)) {
+        if (!this.verifyTokenSignature(signedJwt)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
 
@@ -75,7 +81,6 @@ public class AccessTokenService {
     }
 
     private void verifyTokenClaims(SignedJWT signedJwt) throws AccessTokenValidationException {
-
         Set<String> requiredClaims =
                 new HashSet<>(Arrays.asList("sub", "c_nonce", "credential_identifiers"));
         JWTClaimsSet expectedClaimValues =
@@ -91,7 +96,8 @@ public class AccessTokenService {
         }
     }
 
-    private boolean verifyJWTSignature(SignedJWT signedJwt) throws AccessTokenValidationException {
+    private boolean verifyTokenSignature(SignedJWT signedJwt)
+            throws AccessTokenValidationException, URISyntaxException {
         String keyId = signedJwt.getHeader().getKeyID();
         JWK jwk = getJwk(keyId);
 
@@ -109,7 +115,7 @@ public class AccessTokenService {
         }
     }
 
-    private JWK getJwk(String keyId) throws AccessTokenValidationException {
+    private JWK getJwk(String keyId) throws AccessTokenValidationException, URISyntaxException {
         String didDocumentString = getDidDocument();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -136,17 +142,13 @@ public class AccessTokenService {
         return null;
     }
 
-    private String getDidDocument() {
-        //        try {
-        Response response =
-                client.target("http://localhost:8000/sts-stub/.well-known/did.json")
-                        .request()
-                        .accept(MediaType.APPLICATION_JSON)
-                        .get();
-        return response.readEntity(String.class);
+    private String getDidDocument() throws URISyntaxException {
+        String stsStubUrl = configurationService.getStsStubUrl();
+        String didDocumentPath = "/.well-known/did.json";
+        URI uri = new URI(stsStubUrl + didDocumentPath);
 
-        //        } catch (Exception exception) {
-        //            throw new Exception(exception);
-        //        }
+        Response response =
+                httpClient.target(uri).request().accept(MediaType.APPLICATION_JSON).get();
+        return response.readEntity(String.class);
     }
 }

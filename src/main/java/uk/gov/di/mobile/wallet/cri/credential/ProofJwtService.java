@@ -3,6 +3,8 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
@@ -11,11 +13,13 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
 public class ProofJwtService {
+
     private static final String CONFIG_ALGORITHM = "ES256";
 
     //    private static final String CONFIG_AUDIENCE = "urn:fdc:gov:uk:wallet";
@@ -32,7 +36,7 @@ public class ProofJwtService {
         verifyTokenHeader(CONFIG_ALGORITHM, signedJwt);
         verifyTokenClaims(signedJwt);
 
-        if (!this.verifyJWTSignature(signedJwt)) {
+        if (!this.verifyTokenSignature(signedJwt)) {
             throw new ProofJwtValidationException("Proof JWT signature verification failed");
         }
         return signedJwt;
@@ -84,24 +88,18 @@ public class ProofJwtService {
         }
     }
 
-    private boolean verifyJWTSignature(SignedJWT signedJwt) throws ProofJwtValidationException {
+    private boolean verifyTokenSignature(SignedJWT signedJwt) throws ProofJwtValidationException {
         String keyId = signedJwt.getHeader().getKeyID();
-        System.out.println(keyId);
-
         try {
-            String[] keyIdParts = keyId.split("did:key:");
-            if (keyIdParts.length != 2) {
-                throw new ProofJwtValidationException("JWT did:key is invalid");
-            }
-
-            String publicKeyBase64 = keyIdParts[1];
-
+            String publicKeyBase64 = keyId.replace("did:key:", "");
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
             byte[] decoded = Base64.getDecoder().decode(publicKeyBase64);
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(decoded);
-            KeyFactory kf = KeyFactory.getInstance("EC");
-            ECPublicKey generatePublic = (ECPublicKey) kf.generatePublic(spec);
+            EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
+            ECPublicKey publicKey = (ECPublicKey) keyFactory.generatePublic(keySpec);
 
-            ECDSAVerifier verifier = new ECDSAVerifier(generatePublic);
+            ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();
+
+            ECDSAVerifier verifier = new ECDSAVerifier(ecKey);
             return signedJwt.verify(verifier);
         } catch (JOSEException | InvalidKeySpecException | NoSuchAlgorithmException exception) {
             throw new ProofJwtValidationException(exception.getMessage(), exception);
