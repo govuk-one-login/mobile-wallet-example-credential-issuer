@@ -20,10 +20,9 @@ import java.util.*;
 
 public class ProofJwtService {
 
-    private static final String CONFIG_ALGORITHM = "ES256";
-
-    //    private static final String CONFIG_AUDIENCE = "urn:fdc:gov:uk:wallet";
-    //    private static final String CONFIG_ISSUER = "urn:fdc:gov:uk:<HMRC>";
+    private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
+    private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
+    private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:<HMRC>";
 
     public ProofJwtService() {}
 
@@ -33,7 +32,7 @@ public class ProofJwtService {
         String jwt = credentialRequest.getProof().getJwt();
         SignedJWT signedJwt = parseJwt(jwt);
 
-        verifyTokenHeader(CONFIG_ALGORITHM, signedJwt);
+        verifyTokenHeader(CLIENT_CONFIG_ALGORITHM, signedJwt);
         verifyTokenClaims(signedJwt);
 
         if (!this.verifyTokenSignature(signedJwt)) {
@@ -71,11 +70,11 @@ public class ProofJwtService {
 
     private void verifyTokenClaims(SignedJWT signedJwt) throws ProofJwtValidationException {
 
-        Set<String> requiredClaims = new HashSet<>(Arrays.asList("iss", "aud", "iat", "nonce"));
+        Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
-                        // .issuer(CONFIG_ISSUER)
-                        // .audience(CONFIG_AUDIENCE)
+                        .issuer(CLIENT_CONFIG_ISSUER)
+                        .audience(CLIENT_CONFIG_AUDIENCE)
                         .build();
 
         try {

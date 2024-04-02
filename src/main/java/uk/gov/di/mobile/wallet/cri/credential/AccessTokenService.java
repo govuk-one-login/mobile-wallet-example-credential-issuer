@@ -24,9 +24,10 @@ import java.util.*;
 
 public class AccessTokenService {
 
-    private static final String CONFIG_ALGORITHM = "RS256";
-    private static final String CONFIG_AUDIENCE = "urn:fdc:gov:uk:wallet";
-    private static final String CONFIG_ISSUER = "urn:fdc:gov:uk:<HMRC>";
+    private static final String CLIENT_CONFIG_ALGORITHM = "RS256";
+    private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:sts";
+    private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:<HMRC>";
+    private static final String DID_DOCUMENT_PATH = "/.well-known/did.json";
 
     private final Client httpClient;
     private final ConfigurationService configurationService;
@@ -37,11 +38,11 @@ public class AccessTokenService {
     }
 
     public SignedJWT verifyAccessToken(BearerAccessToken accessToken)
-            throws AccessTokenValidationException, URISyntaxException {
+            throws AccessTokenValidationException {
 
         SignedJWT signedJwt = parseAccessToken(accessToken);
 
-        verifyTokenHeader(CONFIG_ALGORITHM, signedJwt);
+        verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
 
         if (!this.verifyTokenSignature(signedJwt)) {
@@ -57,15 +58,13 @@ public class AccessTokenService {
             return SignedJWT.parse(accessToken.getValue());
         } catch (java.text.ParseException exception) {
             throw new AccessTokenValidationException(
-                    String.format(
-                            "Could not parse request access token: %s", exception.getMessage()),
+                    String.format("Error parsing access token: %s", exception.getMessage()),
                     exception);
         }
     }
 
-    private void verifyTokenHeader(String clientAlgorithmString, SignedJWT signedJwt)
-            throws AccessTokenValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(clientAlgorithmString);
+    private void verifyTokenHeader(SignedJWT signedJwt) throws AccessTokenValidationException {
+        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(CLIENT_CONFIG_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = signedJwt.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new AccessTokenValidationException(
@@ -84,10 +83,14 @@ public class AccessTokenService {
         Set<String> requiredClaims =
                 new HashSet<>(Arrays.asList("sub", "c_nonce", "credential_identifiers"));
         JWTClaimsSet expectedClaimValues =
-                new JWTClaimsSet.Builder().issuer(CONFIG_ISSUER).audience(CONFIG_AUDIENCE).build();
+                new JWTClaimsSet.Builder()
+                        .issuer(CLIENT_CONFIG_ISSUER)
+                        .audience(CLIENT_CONFIG_AUDIENCE)
+                        .build();
 
+        JWTClaimsSet jwtClaimsSet;
         try {
-            JWTClaimsSet jwtClaimsSet = signedJwt.getJWTClaimsSet();
+            jwtClaimsSet = signedJwt.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
@@ -97,13 +100,13 @@ public class AccessTokenService {
     }
 
     private boolean verifyTokenSignature(SignedJWT signedJwt)
-            throws AccessTokenValidationException, URISyntaxException {
+            throws AccessTokenValidationException {
         String keyId = signedJwt.getHeader().getKeyID();
         JWK jwk = getJwk(keyId);
 
         if (jwk == null) {
             throw new AccessTokenValidationException(
-                    "JWT key ID did not match any key in did document");
+                    "JWT key ID did not match any key in DID document");
         }
 
         try {
@@ -115,7 +118,7 @@ public class AccessTokenService {
         }
     }
 
-    private JWK getJwk(String keyId) throws AccessTokenValidationException, URISyntaxException {
+    private JWK getJwk(String keyId) throws AccessTokenValidationException {
         String didDocumentString = getDidDocument();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -136,16 +139,22 @@ public class AccessTokenService {
                 }
             }
         } catch (JsonProcessingException | java.text.ParseException exception) {
-            throw new AccessTokenValidationException(exception.getMessage(), exception);
+            throw new AccessTokenValidationException(
+                    String.format("Error parsing JWK: %s", exception.getMessage()), exception);
         }
 
         return null;
     }
 
-    private String getDidDocument() throws URISyntaxException {
+    private String getDidDocument() {
         String stsStubUrl = configurationService.getStsStubUrl();
-        String didDocumentPath = "/.well-known/did.json";
-        URI uri = new URI(stsStubUrl + didDocumentPath);
+
+        URI uri;
+        try {
+            uri = new URI(stsStubUrl + DID_DOCUMENT_PATH);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Error building STS URI", e);
+        }
 
         Response response =
                 httpClient.target(uri).request().accept(MediaType.APPLICATION_JSON).get();

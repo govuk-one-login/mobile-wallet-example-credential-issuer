@@ -8,8 +8,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 @Singleton
 @Path("/credential")
@@ -32,15 +30,7 @@ public class CredentialResource {
 
             verifiableCredential = credentialService.run(bearerAccessToken, credentialRequest);
 
-        } catch (BadRequestException
-                | AccessTokenValidationException
-                | java.text.ParseException
-                | DataStoreException
-                | ProofJwtValidationException
-                | WalletSubjectIdMismatchException
-                | NonceMismatchException
-                | SigningException
-                | java.net.URISyntaxException exception) {
+        } catch (Exception exception) {
             System.out.println("An error happened trying to build the credential: " + exception);
             if (exception instanceof BadRequestException) {
                 return buildBadRequestResponse().build();

@@ -5,25 +5,16 @@ import jakarta.ws.rs.BadRequestException;
 
 public class CredentialRequest {
 
-    private static final String CREDENTIAL_IDENTIFIER_PATH = "/credential_identifier";
     private static final String PROOF_PATH = "/proof";
     private static final String PROOF_TYPE_PATH = "/proof/proof_type";
     private static final String JWT_PATH = "/proof/jwt";
-
-    private final String credentialIdentifier;
     private final Proof proof;
 
-    public CredentialRequest(String credentialIdentifier, Proof proof) {
-        this.credentialIdentifier = credentialIdentifier;
+    public CredentialRequest(Proof proof) {
         this.proof = proof;
     }
 
     public static CredentialRequest from(JsonNode payload) throws BadRequestException {
-        String credentialIdentifier = payload.at(CREDENTIAL_IDENTIFIER_PATH).asText(null);
-        if (credentialIdentifier == null) {
-            throw new BadRequestException("Missing credential identifier");
-        }
-
         String proof = payload.at(PROOF_PATH).asText(null);
         if (proof == null) {
             throw new BadRequestException("Missing proof");
@@ -41,11 +32,7 @@ public class CredentialRequest {
 
         Proof proofObject = new Proof(proofType, jwt);
 
-        return new CredentialRequest(credentialIdentifier, proofObject);
-    }
-
-    public String getCredentialIdentifier() {
-        return credentialIdentifier;
+        return new CredentialRequest(proofObject);
     }
 
     public Proof getProof() {

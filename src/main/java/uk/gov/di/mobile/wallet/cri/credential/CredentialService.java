@@ -41,14 +41,11 @@ public class CredentialService {
     }
 
     public Credential run(BearerAccessToken bearerAccessToken, CredentialRequest credentialRequest)
-            throws AccessTokenValidationException,
-                    DataStoreException,
+            throws DataStoreException,
                     ProofJwtValidationException,
-                    ParseException,
-                    WalletSubjectIdMismatchException,
-                    NonceMismatchException,
+                    ClaimMismatchException,
                     SigningException,
-                    URISyntaxException {
+                    AccessTokenValidationException {
 
         SignedJWT accessToken = accessTokenService.verifyAccessToken(bearerAccessToken);
 
@@ -57,8 +54,8 @@ public class CredentialService {
         SignedJWT proofJwt = proofJwtService.verifyProofJwt(credentialRequest);
         ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
 
-        if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.c_nonce())) {
-            throw new NonceMismatchException(
+        if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {
+            throw new ClaimMismatchException(
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
@@ -66,7 +63,7 @@ public class CredentialService {
                 dataStore.getCredentialOffer(accessTokenCustomClaims.credentialIdentifier());
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
-            throw new WalletSubjectIdMismatchException(
+            throw new ClaimMismatchException(
                     "Access token sub (walletSubjectId) claim does not match credential offer walletSubjectId");
         }
 
@@ -75,33 +72,45 @@ public class CredentialService {
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }
 
-    private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
-            throws ParseException, AccessTokenValidationException {
-        List<Object> credentialIdentifiers =
-                accessToken.getJWTClaimsSet().getListClaim("credential_identifiers");
-        if (credentialIdentifiers.isEmpty()) {
-            throw new AccessTokenValidationException("Credential identifiers is empty");
+    private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken) {
+        try {
+            List<Object> credentialIdentifiers =
+                    accessToken.getJWTClaimsSet().getListClaim("credential_identifiers");
+
+            String credentialIdentifier = (String) credentialIdentifiers.get(0);
+            String sub = accessToken.getJWTClaimsSet().getStringClaim("sub");
+            String cNonce = accessToken.getJWTClaimsSet().getStringClaim("c_nonce");
+            return new AccessTokenClaims(credentialIdentifier, sub, cNonce);
+
+        } catch (ParseException exception) {
+            throw new RuntimeException("Error parsing access token custom custom");
         }
-        String credentialIdentifier = (String) credentialIdentifiers.get(0);
-        String sub = accessToken.getJWTClaimsSet().getStringClaim("sub");
-        String c_nonce = accessToken.getJWTClaimsSet().getStringClaim("c_nonce");
-        return new AccessTokenClaims(credentialIdentifier, sub, c_nonce);
     }
 
-    private record AccessTokenClaims(String credentialIdentifier, String sub, String c_nonce) {}
+    private record AccessTokenClaims(String credentialIdentifier, String sub, String cNonce) {}
 
-    private static ProofJwtClaims getProofJwtClaims(SignedJWT proofJwt) throws ParseException {
-        String nonce = proofJwt.getJWTClaimsSet().getStringClaim("nonce");
-        String kid = proofJwt.getHeader().getKeyID();
-        return new ProofJwtClaims(nonce, kid);
+    private static ProofJwtClaims getProofJwtClaims(SignedJWT proofJwt) {
+        try {
+            String nonce = proofJwt.getJWTClaimsSet().getStringClaim("nonce");
+            String kid = proofJwt.getHeader().getKeyID();
+            return new ProofJwtClaims(nonce, kid);
+
+        } catch (ParseException exception) {
+            throw new RuntimeException("Error parsing Proof JWT custom custom");
+        }
     }
 
     private record ProofJwtClaims(String nonce, String kid) {}
 
-    private Object getDocumentDetails(String documentId) throws URISyntaxException {
-        String documentBuilderUri = configurationService.getDocumentBuilderUrl();
-        String getDocumentDetailsPath = "/document/" + documentId;
-        URI uri = new URI(documentBuilderUri + getDocumentDetailsPath);
+    private Object getDocumentDetails(String documentId) {
+        URI uri;
+        try {
+            String documentBuilderUri = configurationService.getDocumentBuilderUrl();
+            String getDocumentDetailsPath = "/document/" + documentId;
+            uri = new URI(documentBuilderUri + getDocumentDetailsPath);
+        } catch (URISyntaxException e) {
+            throw new RuntimeException("Error building Document URI", e);
+        }
 
         Response response =
                 httpClient.target(uri).request().accept(MediaType.APPLICATION_JSON).get();
