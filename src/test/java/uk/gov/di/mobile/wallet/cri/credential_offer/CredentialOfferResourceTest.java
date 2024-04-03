@@ -90,7 +90,7 @@ public class CredentialOfferResourceTest {
     void testItReturns500() throws JOSEException, DataStoreException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
-        doThrow(new DataStoreException(new Exception()))
+        doThrow(new DataStoreException("Mock error message", new Exception()))
                 .when(mockDataStore)
                 .saveCredentialOffer(any());
 

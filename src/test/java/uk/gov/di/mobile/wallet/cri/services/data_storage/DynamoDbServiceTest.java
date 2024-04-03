@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 
@@ -62,5 +63,20 @@ class DynamoDbServiceTest {
         assertEquals(
                 credentialOfferCacheItem.getWalletSubjectId(),
                 credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
+    }
+
+    @DisplayName("Should fetch a credential offer by partition key")
+    @Test
+    void testItGetsCredentialOfferFromTableThroughPartitionKey() throws DataStoreException {
+        dynamoDbService.getCredentialOffer("test-partition-key-123");
+
+        ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
+
+        verify(mockDynamoDbEnhancedClient)
+                .table(
+                        eq(TEST_TABLE_NAME),
+                        ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any());
+        verify(mockDynamoDbTable).getItem(keyCaptor.capture());
+        assertEquals("test-partition-key-123", keyCaptor.getValue().partitionKeyValue().s());
     }
 }
