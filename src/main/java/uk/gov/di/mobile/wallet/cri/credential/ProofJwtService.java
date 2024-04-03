@@ -26,10 +26,8 @@ public class ProofJwtService {
 
     public ProofJwtService() {}
 
-    public SignedJWT verifyProofJwt(CredentialRequest credentialRequest)
-            throws ProofJwtValidationException {
+    public SignedJWT verifyProofJwt(String jwt) throws ProofJwtValidationException {
 
-        String jwt = credentialRequest.getProof().getJwt();
         SignedJWT signedJwt = parseJwt(jwt);
 
         verifyTokenHeader(CLIENT_CONFIG_ALGORITHM, signedJwt);
@@ -46,7 +44,7 @@ public class ProofJwtService {
             return SignedJWT.parse(jwt);
         } catch (java.text.ParseException exception) {
             throw new ProofJwtValidationException(
-                    String.format("Could not parse request proof JWT: %s", exception.getMessage()),
+                    String.format("Error parsing proof JWT: %s", exception.getMessage()),
                     exception);
         }
     }
@@ -58,7 +56,7 @@ public class ProofJwtService {
         if (jwtAlgorithm != clientAlgorithm) {
             throw new ProofJwtValidationException(
                     String.format(
-                            "JWT alg header claim %s does not match client config alg %s",
+                            "JWT alg header claim [%s] does not match client config alg [%s]",
                             jwtAlgorithm, clientAlgorithm));
         }
 
@@ -94,14 +92,17 @@ public class ProofJwtService {
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             byte[] decoded = Base64.getDecoder().decode(publicKeyBase64);
             EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
+
             ECPublicKey publicKey = (ECPublicKey) keyFactory.generatePublic(keySpec);
 
             ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();
 
             ECDSAVerifier verifier = new ECDSAVerifier(ecKey);
             return signedJwt.verify(verifier);
-        } catch (JOSEException | InvalidKeySpecException | NoSuchAlgorithmException exception) {
-            throw new ProofJwtValidationException(exception.getMessage(), exception);
+        } catch (JOSEException | NoSuchAlgorithmException | InvalidKeySpecException exception) {
+            throw new ProofJwtValidationException(
+                    String.format("Error verifying signature: %s", exception.getMessage()),
+                    exception);
         }
     }
 }

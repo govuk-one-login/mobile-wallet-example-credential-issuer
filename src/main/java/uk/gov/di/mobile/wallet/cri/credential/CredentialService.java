@@ -51,7 +51,7 @@ public class CredentialService {
 
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
 
-        SignedJWT proofJwt = proofJwtService.verifyProofJwt(credentialRequest);
+        SignedJWT proofJwt = proofJwtService.verifyProofJwt(credentialRequest.getProof().getJwt());
         ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
 
         if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {

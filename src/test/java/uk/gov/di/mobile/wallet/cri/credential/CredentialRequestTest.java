@@ -33,10 +33,11 @@ class CredentialRequestTest {
     void testItThrowsBadRequestExceptionWhenProofIsMissing() throws JsonProcessingException {
         JsonNode requestBody =
                 new ObjectMapper()
-                        .readTree("{\"proof_type\":\"jwt\",\"jwt\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}");
+                        .readTree(
+                                "{\"proof_type\":\"jwt\",\"jwt\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}");
 
-
-        Throwable exception = assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
+        Throwable exception =
+                assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
         assertEquals("Missing proof", exception.getMessage());
     }
 
@@ -45,22 +46,21 @@ class CredentialRequestTest {
     void testItThrowsBadRequestExceptionWhenProofTypeIsMissing() throws JsonProcessingException {
         JsonNode requestBody =
                 new ObjectMapper()
-                        .readTree("{\"proof\":{\"jwt\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+                        .readTree(
+                                "{\"proof\":{\"jwt\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
-
-        Throwable exception = assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
+        Throwable exception =
+                assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
         assertEquals("Missing proof type", exception.getMessage());
     }
 
     @Test
     @DisplayName("Should throw BadRequestException if jwt key is missing from request body")
     void testItThrowsBadRequestExceptionWhenJwtIsMissing() throws JsonProcessingException {
-        JsonNode requestBody =
-                new ObjectMapper()
-                        .readTree("{\"proof\":{\"proof_type\":\"jwt\"}}");
+        JsonNode requestBody = new ObjectMapper().readTree("{\"proof\":{\"proof_type\":\"jwt\"}}");
 
-
-        Throwable exception = assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
+        Throwable exception =
+                assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
         assertEquals("Missing JWT", exception.getMessage());
     }
 }
