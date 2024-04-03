@@ -34,7 +34,7 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWheJwtStringCannotBeParsedAsSignedJwt() {
+    void shouldThrowProofJwtValidationExceptionWhenJwtStringCannotBeParsedAsSignedJwt() {
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,

@@ -19,7 +19,7 @@ class CredentialRequestTest {
                         .readTree(
                                 "{\"proof\":{\"proof_type\":\"jwt\",\"jwt\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
-        CredentialRequest credentialRequest = CredentialRequest.from(requestBody);
+        CredentialRequestBody credentialRequest = CredentialRequestBody.from(requestBody);
 
         assertNotNull(credentialRequest.getProof().getProofType());
         assertEquals(
@@ -37,7 +37,8 @@ class CredentialRequestTest {
                                 "{\"proof_type\":\"jwt\",\"jwt\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}");
 
         Throwable exception =
-                assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
+                assertThrows(
+                        BadRequestException.class, () -> CredentialRequestBody.from(requestBody));
         assertEquals("Missing proof", exception.getMessage());
     }
 
@@ -50,7 +51,8 @@ class CredentialRequestTest {
                                 "{\"proof\":{\"jwt\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
         Throwable exception =
-                assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
+                assertThrows(
+                        BadRequestException.class, () -> CredentialRequestBody.from(requestBody));
         assertEquals("Missing proof type", exception.getMessage());
     }
 
@@ -60,7 +62,8 @@ class CredentialRequestTest {
         JsonNode requestBody = new ObjectMapper().readTree("{\"proof\":{\"proof_type\":\"jwt\"}}");
 
         Throwable exception =
-                assertThrows(BadRequestException.class, () -> CredentialRequest.from(requestBody));
+                assertThrows(
+                        BadRequestException.class, () -> CredentialRequestBody.from(requestBody));
         assertEquals("Missing JWT", exception.getMessage());
     }
 }
