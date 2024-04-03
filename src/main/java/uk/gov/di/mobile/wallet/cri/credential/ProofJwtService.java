@@ -27,7 +27,6 @@ public class ProofJwtService {
     public ProofJwtService() {}
 
     public SignedJWT verifyProofJwt(String jwt) throws ProofJwtValidationException {
-
         SignedJWT signedJwt = parseJwt(jwt);
 
         verifyTokenHeader(CLIENT_CONFIG_ALGORITHM, signedJwt);
@@ -99,7 +98,10 @@ public class ProofJwtService {
 
             ECDSAVerifier verifier = new ECDSAVerifier(ecKey);
             return signedJwt.verify(verifier);
-        } catch (JOSEException | NoSuchAlgorithmException | InvalidKeySpecException exception) {
+        } catch (JOSEException
+                | IllegalArgumentException
+                | NoSuchAlgorithmException
+                | InvalidKeySpecException exception) {
             throw new ProofJwtValidationException(
                     String.format("Error verifying signature: %s", exception.getMessage()),
                     exception);
