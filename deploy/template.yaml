@@ -43,13 +43,13 @@ Conditions:
 Mappings:
   EnvironmentVariables:
     dev:
-      BEURL: "stub-credential-issuer.mobile.dev.account.gov.uk"
+      BEURL: "example-credential-issuer.mobile.dev.account.gov.uk"
     build:
-      BEURL: "stub-credential-issuer.mobile.build.account.gov.uk"
+      BEURL: "example-credential-issuer.mobile.build.account.gov.uk"
     staging:
-      BEURL: "stub-credential-issuer.mobile.stage.account.gov.uk"
+      BEURL: "example-credential-issuer.mobile.stage.account.gov.uk"
     integration:
-      BEURL: "stub-credential-issuer.mobile.integration.account.gov.uk"
+      BEURL: "example-credential-issuer.mobile.integration.account.gov.uk"
   # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
   # PlatformConfiguration:
   #   dev:
@@ -62,11 +62,11 @@ Mappings:
   #     CSLSEGRESS: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython
   ECSConfiguration:
     dev:
-      BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-doc-builder-ecr-containerrepository-lhfhbk5ayzry
+      BackImageRepository: 
     build:
-      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-doc-builder-ecr-containerrepository-zxs2g0lfhfsf
+      BackImageRepository: 
     staging:
-      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-doc-builder-ecr-containerrepository-zxs2g0lfhfsf
+      BackImageRepository: 
     integration:
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-doc-builder-ecr-containerrepository-zxs2g0lfhfsf
   
@@ -397,18 +397,16 @@ Resources:
           Environment:
             - Name: PORT
               Value: !Ref ContainerPort
-            - Name: DOCUMENTS_TABLE_NAME
-              Value: documents
+            # - Name: DOCUMENTS_TABLE_NAME
+            #   Value: documents
             - Name: ENVIRONMENT
               Value: !Sub "${Environment}"
-            - Name: MOCK_CRI_URL
-              Value: placeholderValue
+            # - Name: MOCK_CRI_URL
+            #   Value: placeholderValue
             - Name: STS_SIGNING_KEY_ID
-              Value: !Ref StsStubSigningKey
-            - Name: ACCESS_TOKEN_TTL_IN_SECS
-              Value: 180
-            - Name: DID_CONTROLLER
-              Value: !FindInMap [DidController, !Ref Environment, Controller]
+              Value: !Ref StsBEStubSigningKey
+            # - Name: ACCESS_TOKEN_TTL_IN_SECS
+            #   Value: 180
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
@@ -491,7 +489,7 @@ Resources:
 
   # KMS RESOURCES
 
-  StsStubSigningKey:
+  StsBEStubSigningKey:
     Type: AWS::KMS::Key
     Properties:
       Description: Asymmetric key for signing tokens
@@ -511,8 +509,8 @@ Resources:
       KeyUsage: SIGN_VERIFY
       MultiRegion: false
 
-  StsStubSigningKeyAlias:
+  StsBEStubSigningKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: alias/sts-stub-signing-key
-      TargetKeyId: !Ref StsStubSigningKey
+      AliasName: alias/sts-be-stub-signing-key
+      TargetKeyId: !Ref StsBEStubSigningKey
