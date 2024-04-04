@@ -164,9 +164,15 @@ public class AccessTokenService {
 
         WebTarget webTarget = httpClient.target(uri);
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
-
         Response response = invocationBuilder.get();
-        System.out.println(response);
+
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            System.out.println(response);
+            throw new RuntimeException(
+                    "Request to fetch DID Document failed with status code "
+                            + response.getStatus());
+        }
+
         return response.readEntity(String.class);
     }
 }

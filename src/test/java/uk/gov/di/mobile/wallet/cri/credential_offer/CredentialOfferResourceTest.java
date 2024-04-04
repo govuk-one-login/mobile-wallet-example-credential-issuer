@@ -60,14 +60,7 @@ public class CredentialOfferResourceTest {
             throws JOSEException, DataStoreException, SigningException {
         SignResponse signResponse = getMockedSignResponse();
         CredentialOffer mockCredentialOffer = getMockCredentialOffer();
-
-        // when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
-        // when(credentialOfferService.buildCredentialOffer(anyString(), anyString()))
-        //         .thenReturn(mockCredentialOffer);
-
-// =======
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
-// >>>>>>> 794304b (test(DCMAW-8412): test CredentialBuilder class)
         doThrow(new RuntimeException("Mock error message"))
                 .when(mockDataStore)
                 .saveCredentialOffer(new CredentialOfferCacheItem());

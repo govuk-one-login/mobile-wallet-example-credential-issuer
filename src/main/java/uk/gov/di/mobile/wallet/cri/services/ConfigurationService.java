@@ -49,23 +49,23 @@ public class ConfigurationService extends Configuration {
     }
 
     public long getCredentialTtl() {
-        return Long.parseLong(System.getenv().getOrDefault("CREDENTIAL_TTL_IN_DAYS", "14"));
-    }
-
-    public String getClientId() {
-        return System.getenv().getOrDefault("CLIENT_ID", "abc123");
+        return Long.parseLong(System.getenv().getOrDefault("CREDENTIAL_TTL_IN_DAYS", "365"));
     }
 
     public String getCriCacheTableName() {
         return System.getenv().getOrDefault("CRI_CACHE_TABLE_NAME", "cri_cache");
     }
 
+    public String getClientId() {
+        return "EXAMPLE_CRI";
+    }
+
     public String getIssuer() {
-        return System.getenv().getOrDefault("ISSUER", "urn:fdc:gov:uk:<HMRC>");
+        return "urn:fdc:gov:uk:example-credential-issuer";
     }
 
     public String getAudience() {
-        return System.getenv().getOrDefault("AUDIENCE", "urn:fdc:gov:uk:wallet");
+        return "urn:fdc:gov:uk:wallet";
     }
 
     public String getLocalstackEndpoint() {

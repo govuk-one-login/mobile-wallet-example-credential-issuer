@@ -41,7 +41,7 @@ public class CredentialService {
     }
 
     public Credential run(
-            BearerAccessToken bearerAccessToken, CredentialRequestBody credentialRequest)
+            BearerAccessToken bearerAccessToken, CredentialRequestBody credentialRequestBody)
             throws DataStoreException,
                     ProofJwtValidationException,
                     ClaimMismatchException,
@@ -52,7 +52,8 @@ public class CredentialService {
 
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
 
-        SignedJWT proofJwt = proofJwtService.verifyProofJwt(credentialRequest.getProof().getJwt());
+        SignedJWT proofJwt =
+                proofJwtService.verifyProofJwt(credentialRequestBody.getProof().getJwt());
         ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
 
         if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {
@@ -64,14 +65,12 @@ public class CredentialService {
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(partitionValue);
 
         if (credentialOffer == null) {
-            throw new DataStoreException(
-                    "Null response returned when fetching credential offer with identifier "
-                            + partitionValue);
+            throw new DataStoreException("Null response returned when fetching credential offer");
         }
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
             throw new ClaimMismatchException(
-                    "Access token sub (walletSubjectId) claim does not match credential offer walletSubjectId");
+                    "Access token sub claim does not match cached walletSubjectId");
         }
 
         Object documentDetails = getDocumentDetails(credentialOffer.getDocumentId());
@@ -83,14 +82,15 @@ public class CredentialService {
         try {
             List<Object> credentialIdentifiers =
                     accessToken.getJWTClaimsSet().getListClaim("credential_identifiers");
-
             String credentialIdentifier = (String) credentialIdentifiers.get(0);
             String sub = accessToken.getJWTClaimsSet().getStringClaim("sub");
             String cNonce = accessToken.getJWTClaimsSet().getStringClaim("c_nonce");
             return new AccessTokenClaims(credentialIdentifier, sub, cNonce);
-
-        } catch (ParseException exception) {
-            throw new RuntimeException("Error parsing access token custom custom");
+        } catch (ParseException | NullPointerException exception) {
+            throw new RuntimeException(
+                    String.format(
+                            "Error parsing access token custom claims: %s",
+                            exception.getMessage()));
         }
     }
 
@@ -101,9 +101,10 @@ public class CredentialService {
             String nonce = proofJwt.getJWTClaimsSet().getStringClaim("nonce");
             String kid = proofJwt.getHeader().getKeyID();
             return new ProofJwtClaims(nonce, kid);
-
         } catch (ParseException exception) {
-            throw new RuntimeException("Error parsing Proof JWT custom custom");
+            throw new RuntimeException(
+                    String.format(
+                            "Error parsing Proof JWT custom claims: %s", exception.getMessage()));
         }
     }
 
@@ -119,8 +120,14 @@ public class CredentialService {
             throw new RuntimeException("Error building Document URI", e);
         }
 
-        Response response =
-                httpClient.target(uri).request().accept(MediaType.APPLICATION_JSON).get();
+        Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
+
+        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+            System.out.println(response);
+            throw new RuntimeException(
+                    "Request to fetch DID Document failed with status code: "
+                            + response.getStatus());
+        }
 
         return response.readEntity(Object.class);
     }

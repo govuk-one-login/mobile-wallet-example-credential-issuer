@@ -49,8 +49,7 @@ public class PreAuthorizedCodeBuilder {
         try {
             SignResponse signResult = signingService.sign(signRequest);
             String signature = encodedSignature(signResult);
-            SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
-            return signedJWT;
+            return SignedJWT.parse(message + "." + signature);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing token: %s", exception.getMessage()), exception);
