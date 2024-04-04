@@ -119,7 +119,7 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
         assertEquals(
-                "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:<HMRC>]",
+                "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:example-credential-issuer]",
                 exception.getMessage());
     }
 
@@ -132,7 +132,7 @@ class ProofJwtServiceTest {
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
                                 .issuer("invalid-issuer")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .claim("nonce", "test-nonce")
                                 .build());
 
@@ -159,7 +159,7 @@ class ProofJwtServiceTest {
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
                                 .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .claim("nonce", "test-nonce")
                                 .build());
 
@@ -186,7 +186,7 @@ class ProofJwtServiceTest {
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
                                 .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .claim("nonce", "test-nonce")
                                 .build());
 
@@ -214,7 +214,7 @@ class ProofJwtServiceTest {
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
                                 .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .claim("nonce", "test-nonce")
                                 .build());
 

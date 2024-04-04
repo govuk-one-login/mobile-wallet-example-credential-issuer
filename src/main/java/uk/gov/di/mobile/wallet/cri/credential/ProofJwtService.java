@@ -22,7 +22,7 @@ public class ProofJwtService {
 
     private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
     private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
-    private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:<HMRC>";
+    private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
 
     public ProofJwtService() {}
 

@@ -149,7 +149,7 @@ class AccessTokenServiceTest {
                                 .build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
+                                .issuer("urn:fdc:gov:uk:wallet")
                                 .audience("invalid-audience")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
@@ -167,7 +167,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(bearerAccessToken));
         assertEquals(
-                "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:<HMRC>]",
+                "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:example-credential-issuer]",
                 exception.getMessage());
     }
 
@@ -202,7 +202,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(bearerAccessToken));
         assertEquals(
-                "JWT iss claim has value invalid-issuer, must be urn:fdc:gov:uk:sts",
+                "JWT iss claim has value invalid-issuer, must be urn:fdc:gov:uk:wallet",
                 exception.getMessage());
     }
 
@@ -225,8 +225,8 @@ class AccessTokenServiceTest {
                         new JWSHeader.Builder(JWSAlgorithm.RS256).keyID("test-kid-123").build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .issuer("urn:fdc:gov:uk:wallet")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
                                 .claim(
@@ -266,8 +266,8 @@ class AccessTokenServiceTest {
                                 .build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .issuer("urn:fdc:gov:uk:wallet")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
                                 .claim(
@@ -308,8 +308,8 @@ class AccessTokenServiceTest {
                                 .build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .issuer("urn:fdc:gov:uk:wallet")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
                                 .claim(
@@ -349,8 +349,8 @@ class AccessTokenServiceTest {
                                 .build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .issuer("urn:fdc:gov:uk:wallet")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
                                 .claim(
@@ -390,8 +390,8 @@ class AccessTokenServiceTest {
                                 .build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .issuer("urn:fdc:gov:uk:wallet")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
                                 .claim(
@@ -432,8 +432,8 @@ class AccessTokenServiceTest {
                                 .build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .issuer("urn:fdc:gov:uk:wallet")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
                                 .claim(
@@ -468,8 +468,8 @@ class AccessTokenServiceTest {
                                 .build(),
                         new JWTClaimsSet.Builder()
                                 .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:sts")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .issuer("urn:fdc:gov:uk:wallet")
+                                .audience("urn:fdc:gov:uk:example-credential-issuer")
                                 .subject("test-sub")
                                 .claim("c_nonce", "test-c-nonce")
                                 .claim(
