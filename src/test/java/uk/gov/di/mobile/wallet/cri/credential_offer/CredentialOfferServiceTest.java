@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -31,18 +30,16 @@ import static org.mockito.Mockito.when;
 public class CredentialOfferServiceTest {
     private CredentialOfferService credentialOfferService;
     private final KmsService kmsService = mock(KmsService.class);
-    private ConfigurationService configurationService;
+    private final ConfigurationService configurationService = new ConfigurationService();
 
     @BeforeEach
     void setUp() {
-        configurationService = new ConfigurationService();
         credentialOfferService = new CredentialOfferService(configurationService, kmsService);
     }
 
     @Test
     @DisplayName("Should build and return a credential offer")
-    void testItReturnsCredentialOffer()
-            throws SigningException, JOSEException, JsonProcessingException {
+    void testItReturnsCredentialOffer() throws SigningException, JOSEException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
 

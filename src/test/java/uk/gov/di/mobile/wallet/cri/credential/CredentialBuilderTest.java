@@ -42,7 +42,6 @@ import static org.mockito.Mockito.when;
 public class CredentialBuilderTest {
     private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);
-    private final String DID_KEY = "did:key:test-did-key";
     private JsonNode DOCUMENT_DETAILS;
 
     ConfigurationService configurationService;
@@ -66,7 +65,7 @@ public class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
 
         Credential credentialBuilderReturnValue =
-                credentialBuilder.buildCredential(DID_KEY, DOCUMENT_DETAILS);
+                credentialBuilder.buildCredential("did:key:test-did-key", DOCUMENT_DETAILS);
 
         SignedJWT credential = SignedJWT.parse(credentialBuilderReturnValue.getCredential());
 
@@ -75,14 +74,16 @@ public class CredentialBuilderTest {
         assertThat(credential.getHeader().getType(), equalTo(JOSEObjectType.JWT));
         assertThat(
                 credential.getHeader().getKeyID(), equalTo("ff275b92-0def-4dfc-b0f6-87c96b26c6c7"));
-        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo("urn:fdc:gov:uk:<HMRC>"));
+        assertThat(
+                credential.getJWTClaimsSet().getIssuer(),
+                equalTo("urn:fdc:gov:uk:example-credential-issuer"));
         assertThat(credential.getJWTClaimsSet().getIssueTime(), notNullValue());
         assertThat(credential.getJWTClaimsSet().getNotBeforeTime(), notNullValue());
         assertThat(
                 credential
                         .getJWTClaimsSet()
                         .getExpirationTime()
-                        .before(Date.from(Instant.now().plus(14, ChronoUnit.DAYS))),
+                        .before(Date.from(Instant.now().plus(365, ChronoUnit.DAYS))),
                 equalTo(true));
         assertThat(credential.getJWTClaimsSet().getSubject(), equalTo("did:key:test-did-key"));
         assertNotNull(credential.getJWTClaimsSet().getClaim("vc"));
@@ -99,7 +100,9 @@ public class CredentialBuilderTest {
         SigningException exception =
                 assertThrows(
                         SigningException.class,
-                        () -> credentialBuilder.buildCredential(DID_KEY, DOCUMENT_DETAILS));
+                        () ->
+                                credentialBuilder.buildCredential(
+                                        "did:key:test-did-key", DOCUMENT_DETAILS));
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
 

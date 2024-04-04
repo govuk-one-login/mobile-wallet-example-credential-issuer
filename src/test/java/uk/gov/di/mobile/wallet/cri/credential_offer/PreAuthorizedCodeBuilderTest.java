@@ -38,8 +38,6 @@ import static org.mockito.Mockito.when;
 public class PreAuthorizedCodeBuilderTest {
     private PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
     private final KmsService kmsService = mock(KmsService.class);
-    private final String CREDENTIAL_IDENTIFIER = "e27474f5-6aef-40a4-bed6-5e4e1ec3f885";
-
     ConfigurationService configurationService;
 
     @BeforeEach
@@ -56,17 +54,20 @@ public class PreAuthorizedCodeBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
 
         SignedJWT preAuthorizedCode =
-                preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER);
+                preAuthorizedCodeBuilder.buildPreAuthorizedCode(
+                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885");
 
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getAudience(),
                 equalTo(singletonList("urn:fdc:gov:uk:wallet")));
-        assertThat(preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"), equalTo("abc123"));
         assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getIssuer(), equalTo("urn:fdc:gov:uk:<HMRC>"));
+                preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"), equalTo("EXAMPLE_CRI"));
+        assertThat(
+                preAuthorizedCode.getJWTClaimsSet().getIssuer(),
+                equalTo("urn:fdc:gov:uk:example-credential-issuer"));
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getClaim("credential_identifiers"),
-                equalTo(singletonList(CREDENTIAL_IDENTIFIER)));
+                equalTo(singletonList("e27474f5-6aef-40a4-bed6-5e4e1ec3f885")));
         assertThat(preAuthorizedCode.getJWTClaimsSet().getIssueTime(), notNullValue());
         assertThat(
                 preAuthorizedCode
@@ -91,7 +92,7 @@ public class PreAuthorizedCodeBuilderTest {
                         SigningException.class,
                         () ->
                                 preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                                        CREDENTIAL_IDENTIFIER));
+                                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885"));
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
 

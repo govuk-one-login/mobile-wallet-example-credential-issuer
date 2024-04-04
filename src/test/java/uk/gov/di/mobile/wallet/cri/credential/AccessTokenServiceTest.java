@@ -43,13 +43,9 @@ import static org.mockito.Mockito.*;
 class AccessTokenServiceTest {
 
     @Mock private Client mockHttpClient;
-
     @Mock private WebTarget mockWebTarget;
-
     @Mock private Invocation.Builder mockInvocationBuilder;
-
     @Mock private Response mockResponse;
-
     private AccessTokenService accessTokenService;
     private final ConfigurationService configurationService = new ConfigurationService();
 
@@ -77,7 +73,6 @@ class AccessTokenServiceTest {
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
                         new JWTClaimsSet.Builder().build());
-
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
 
@@ -103,10 +98,8 @@ class AccessTokenServiceTest {
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.RS256).build(),
                         new JWTClaimsSet.Builder().build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -129,10 +122,8 @@ class AccessTokenServiceTest {
                                 .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
                                 .build(),
                         new JWTClaimsSet.Builder().build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -166,10 +157,8 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -203,10 +192,8 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -228,6 +215,7 @@ class AccessTokenServiceTest {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(String.class))
                 .thenReturn(
                         "{\"@context\":[\"https://www.w3.org/ns/did/v1\",\"https://www.w3.org/ns/security/jwk/v1\"],\"id\":\"did:web:wallet-api.mobile.loca.account.gov.uk\"}");
@@ -245,10 +233,8 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -268,6 +254,7 @@ class AccessTokenServiceTest {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(String.class))
                 .thenReturn(
                         "{\"verificationMethod\":{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\"}}");
@@ -287,10 +274,8 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -311,6 +296,7 @@ class AccessTokenServiceTest {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(String.class))
                 .thenReturn(
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\"}]}");
@@ -330,10 +316,8 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -353,6 +337,7 @@ class AccessTokenServiceTest {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(String.class))
                 .thenReturn(
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#a17b0dba-a6a1-4195-9612-76d7c218f30d\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"RSA\",\"e\":\"AQAB\",\"kid\":\"a17b0dba-a6a1-4195-9612-76d7c218f30d\",\"n\":\"t2Q_48EcZQP77-N68fU-qL5XM0J7J7QI4E2w0Uw3LMO02DNUN8MA9zj2LeamioOakymjgfdGrdowT4ofEB_4w130o5VO0ZUnvKe32MWo-93bOFCxgDlmkKpm7vgaaXFFD8yiCNUARfDJNqp_xolVX6gsA8e7jjk_oz69x_1srIvpSPCRWJ-tMI-KGp5m6-oriFShlj-NUk5S7u2i4VTOCcQANk_OQ3aLfZzwjH7VywVvkA2VL627-Akm7S47sbqpCnTehTaUo78f6EmQw8Oo8lsnSyOvAlENPTW5ut6GPyqWOVf6PpvNVL9idDr_qBwhf9ElPPzX-5Fkyvbk10VtNw\"}}]}");
@@ -372,10 +357,8 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -395,6 +378,7 @@ class AccessTokenServiceTest {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(String.class))
                 .thenReturn(
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"RSA\",\"e\":\"AQAB\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"n\":\"v1Dr4NBPaDtvy_XmUbj6Y8HHKQ4zDIwA2_kvL8eBYbj0_f40LNm1JBin4QzR4gE5p7uO1-wPrBMq3YFom1unUg65V9AsUP1GdSP5cYnKsykooYyuFdcdMnvwlUvFeoWy78Xs2ZM0pAaeSnGk3ctXXnlO0HY7i5nASD5SRCJjhCs\"}}]}");
@@ -414,10 +398,8 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
@@ -438,6 +420,7 @@ class AccessTokenServiceTest {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(String.class))
                 .thenReturn(
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"RSA\",\"e\":\"AQAB\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"n\":\"t2Q_48EcZQP77-N68fU-qL5XM0J7J7QI4E2w0Uw3LMO02DNUN8MA9zj2LeamioOakymjgfdGrdowT4ofEB_4w130o5VO0ZUnvKe32MWo-93bOFCxgDlmkKpm7vgaaXFFD8yiCNUARfDJNqp_xolVX6gsA8e7jjk_oz69x_1srIvpSPCRWJ-tMI-KGp5m6-oriFShlj-NUk5S7u2i4VTOCcQANk_OQ3aLfZzwjH7VywVvkA2VL627-Akm7S47sbqpCnTehTaUo78f6EmQw8Oo8lsnSyOvAlENPTW5ut6GPyqWOVf6PpvNVL9idDr_qBwhf9ElPPzX-5Fkyvbk10VtNw\"}}]}");
@@ -457,16 +440,54 @@ class AccessTokenServiceTest {
                                         "credential_identifiers",
                                         new String[] {"test-credential-identifier"})
                                 .build());
-
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
-
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         assertEquals(
                 signedJWT.serialize(),
                 accessTokenService.verifyAccessToken(bearerAccessToken).serialize());
+    }
+
+    @Test
+    void shouldThrowRuntimeExceptionWhenDidDocumentCannotBeFetched()
+            throws JOSEException,
+                    com.nimbusds.oauth2.sdk.ParseException,
+                    InvalidKeySpecException,
+                    NoSuchAlgorithmException {
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(500);
+
+        SignedJWT signedJWT =
+                new SignedJWT(
+                        new JWSHeader.Builder(JWSAlgorithm.RS256)
+                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
+                                .build(),
+                        new JWTClaimsSet.Builder()
+                                .issueTime(Date.from(Instant.now()))
+                                .issuer("urn:fdc:gov:uk:sts")
+                                .audience("urn:fdc:gov:uk:<HMRC>")
+                                .subject("test-sub")
+                                .claim("c_nonce", "test-c-nonce")
+                                .claim(
+                                        "credential_identifiers",
+                                        new String[] {"test-credential-identifier"})
+                                .build());
+        RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
+        signedJWT.sign(rsaSigner);
+        BearerAccessToken bearerAccessToken =
+                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class,
+                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+        assertEquals(
+                "Request to fetch DID Document failed with status code 500",
+                exception.getMessage());
     }
 
     private RSAPrivateKey getRsaPrivateKey()
