@@ -25,7 +25,7 @@ public class CredentialResource {
 
         Credential verifiableCredential;
         try {
-            CredentialRequest credentialRequest = CredentialRequest.from(payload);
+            CredentialRequestBody credentialRequest = CredentialRequestBody.from(payload);
             BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
 
             verifiableCredential = credentialService.run(bearerAccessToken, credentialRequest);

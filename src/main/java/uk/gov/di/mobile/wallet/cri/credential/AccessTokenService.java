@@ -14,6 +14,8 @@ import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -69,7 +71,7 @@ public class AccessTokenService {
         if (jwtAlgorithm != clientAlgorithm) {
             throw new AccessTokenValidationException(
                     String.format(
-                            "JWT alg header claim %s does not match client config alg %s",
+                            "JWT alg header claim [%s] does not match client config alg [%s]",
                             jwtAlgorithm, clientAlgorithm));
         }
 
@@ -104,11 +106,6 @@ public class AccessTokenService {
         String keyId = signedJwt.getHeader().getKeyID();
         JWK jwk = getJwk(keyId);
 
-        if (jwk == null) {
-            throw new AccessTokenValidationException(
-                    "JWT key ID did not match any key in DID document");
-        }
-
         try {
             final RSAKey publicKey = new RSAKey.Builder(jwk.toRSAKey()).build();
             RSASSAVerifier verifier = new RSASSAVerifier(publicKey);
@@ -127,15 +124,23 @@ public class AccessTokenService {
             JsonNode verificationMethod =
                     objectMapper.readTree(didDocumentString).get("verificationMethod");
 
-            if (verificationMethod.isArray()) {
-                for (JsonNode verificationMethodItem : verificationMethod) {
-                    String publicKeyJwk = verificationMethodItem.path("publicKeyJwk").toString();
+            if (verificationMethod == null) {
+                throw new AccessTokenValidationException(
+                        "Invalid DID document: verificationMethod is null");
+            }
 
-                    JWK jwk = JWK.parse(publicKeyJwk);
+            if (!verificationMethod.isArray()) {
+                throw new AccessTokenValidationException(
+                        "Invalid DID document: verificationMethod is not an array");
+            }
 
-                    if (jwk.getKeyID().equals(keyId)) {
-                        return jwk;
-                    }
+            for (JsonNode verificationMethodItem : verificationMethod) {
+                String publicKeyJwk = verificationMethodItem.path("publicKeyJwk").toString();
+
+                JWK jwk = JWK.parse(publicKeyJwk);
+
+                if (jwk.getKeyID().equals(keyId)) {
+                    return jwk;
                 }
             }
         } catch (JsonProcessingException | java.text.ParseException exception) {
@@ -143,7 +148,8 @@ public class AccessTokenService {
                     String.format("Error parsing JWK: %s", exception.getMessage()), exception);
         }
 
-        return null;
+        throw new AccessTokenValidationException(
+                "JWT key ID did not match any key in DID document");
     }
 
     private String getDidDocument() {
@@ -156,8 +162,11 @@ public class AccessTokenService {
             throw new RuntimeException("Error building STS URI", e);
         }
 
-        Response response =
-                httpClient.target(uri).request().accept(MediaType.APPLICATION_JSON).get();
+        WebTarget webTarget = httpClient.target(uri);
+        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+
+        Response response = invocationBuilder.get();
+        System.out.println(response);
         return response.readEntity(String.class);
     }
 }

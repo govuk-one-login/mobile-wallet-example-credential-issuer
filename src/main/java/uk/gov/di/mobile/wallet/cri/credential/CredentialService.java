@@ -40,7 +40,8 @@ public class CredentialService {
         this.credentialBuilder = credentialBuilder;
     }
 
-    public Credential run(BearerAccessToken bearerAccessToken, CredentialRequest credentialRequest)
+    public Credential run(
+            BearerAccessToken bearerAccessToken, CredentialRequestBody credentialRequest)
             throws DataStoreException,
                     ProofJwtValidationException,
                     ClaimMismatchException,
