@@ -35,7 +35,7 @@ public class KmsService implements SigningService {
         // }
     }
 
-    public SignResponse signPreAuthorizedCode(SignRequest signRequest) {
+    public SignResponse sign(SignRequest signRequest) {
         return kmsClient.sign(signRequest);
     }
 }

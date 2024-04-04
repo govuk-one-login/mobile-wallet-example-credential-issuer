@@ -47,12 +47,13 @@ public class PreAuthorizedCodeBuilder {
                         .build();
 
         try {
-            SignResponse signResult = signingService.signPreAuthorizedCode(signRequest);
+            SignResponse signResult = signingService.sign(signRequest);
             String signature = encodedSignature(signResult);
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             return signedJWT;
         } catch (Exception exception) {
-            throw new SigningException(exception);
+            throw new SigningException(
+                    String.format("Error signing token: %s", exception.getMessage()), exception);
         }
     }
 

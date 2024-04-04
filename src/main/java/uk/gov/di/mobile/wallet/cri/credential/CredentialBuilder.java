@@ -49,12 +49,13 @@ public class CredentialBuilder {
                         .build();
 
         try {
-            SignResponse signResult = signingService.signPreAuthorizedCode(signRequest);
+            SignResponse signResult = signingService.sign(signRequest);
             String signature = encodedSignature(signResult);
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             return new Credential(signedJWT);
         } catch (Exception exception) {
-            throw new SigningException(exception);
+            throw new SigningException(
+                    String.format("Error signing token: %s", exception.getMessage()), exception);
         }
     }
 
@@ -79,7 +80,7 @@ public class CredentialBuilder {
                                         now.plus(
                                                 configurationService.getCredentialTtl(),
                                                 ChronoUnit.DAYS)))
-                        .claim("sub", new String[] {proofJwtDidKey})
+                        .subject(proofJwtDidKey)
                         .claim("vc", documentDetails)
                         .claim("context", new String[] {CONTEXT});
         return Base64URL.encode(claimsBuilder.build().toString());
