@@ -43,10 +43,6 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
     }
 
-    public String getStsStubUrl() {
-        return System.getenv().getOrDefault("STS_STUB_URL", "http://localhost:8000/sts-stub");
-    }
-
     public long getPreAuthorizedCodeTtl() {
         return Long.parseLong(
                 System.getenv().getOrDefault("PRE_AUTHORIZED_CODE_TTL_IN_SECS", "300"));

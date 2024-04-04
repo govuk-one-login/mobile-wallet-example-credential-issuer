@@ -1,5 +1,8 @@
-package uk.gov.di.mobile.wallet.cri.credential_offer;
+package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -30,55 +33,62 @@ import java.util.Date;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.beans.HasProperty.hasProperty;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class PreAuthorizedCodeBuilderTest {
-    private PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
+public class CredentialBuilderTest {
+    private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);
-    private final String CREDENTIAL_IDENTIFIER = "e27474f5-6aef-40a4-bed6-5e4e1ec3f885";
+    private final String DID_KEY = "did:key:test-did-key";
+    private JsonNode DOCUMENT_DETAILS;
 
     ConfigurationService configurationService;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws JsonProcessingException {
         configurationService = new ConfigurationService();
-        preAuthorizedCodeBuilder = new PreAuthorizedCodeBuilder(configurationService, kmsService);
+        credentialBuilder = new CredentialBuilder(configurationService, kmsService);
+
+        DOCUMENT_DETAILS =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"credentialSubject\":{\"name\":[{\"nameParts\":[{\"type\": \"Title\",\"value\": \"Ms\"},{\"type\":\"GivenName\",\"value\":\"Irene\"},{\"type\":\"FamilyName\",\"value\":\"Adler\"}]}],\"socialSecurityRecord\": [{ \"personalNumber\": \"QQ123456A\" }]},\"type\": [\"VerifiableCredential\", \"SocialSecurityCredential\"]}");
     }
 
     @Test
     @DisplayName(
-            "Should build the pre-authorized code with the correct claims and sign it with KMS")
-    void testItReturnsSignedJwt() throws SigningException, ParseException, JOSEException {
+            "Should build the verifiable credential with the correct claims and sign it with KMS")
+    void testItReturnsCredential() throws SigningException, ParseException, JOSEException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
 
-        SignedJWT preAuthorizedCode =
-                preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER);
+        Credential credentialBuilderReturnValue =
+                credentialBuilder.buildCredential(DID_KEY, DOCUMENT_DETAILS);
 
+        SignedJWT credential = SignedJWT.parse(credentialBuilderReturnValue.getCredential());
+
+        assertThat(credentialBuilderReturnValue, hasProperty("credential"));
+        assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(credential.getHeader().getType(), equalTo(JOSEObjectType.JWT));
         assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getAudience(),
-                equalTo(singletonList("urn:fdc:gov:uk:wallet")));
-        assertThat(preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"), equalTo("abc123"));
+                credential.getHeader().getKeyID(), equalTo("ff275b92-0def-4dfc-b0f6-87c96b26c6c7"));
+        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo("urn:fdc:gov:uk:<HMRC>"));
+        assertThat(credential.getJWTClaimsSet().getIssueTime(), notNullValue());
+        assertThat(credential.getJWTClaimsSet().getNotBeforeTime(), notNullValue());
         assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getIssuer(), equalTo("urn:fdc:gov:uk:<HMRC>"));
-        assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getClaim("credential_identifiers"),
-                equalTo(singletonList(CREDENTIAL_IDENTIFIER)));
-        assertThat(preAuthorizedCode.getJWTClaimsSet().getIssueTime(), notNullValue());
-        assertThat(
-                preAuthorizedCode
+                credential
                         .getJWTClaimsSet()
                         .getExpirationTime()
-                        .before(Date.from(Instant.now().plus(300, ChronoUnit.SECONDS))),
+                        .before(Date.from(Instant.now().plus(14, ChronoUnit.DAYS))),
                 equalTo(true));
+        assertThat(credential.getJWTClaimsSet().getSubject(), equalTo("did:key:test-did-key"));
+        assertNotNull(credential.getJWTClaimsSet().getClaim("vc"));
         assertThat(
-                preAuthorizedCode.getHeader().getKeyID(),
-                equalTo("ff275b92-0def-4dfc-b0f6-87c96b26c6c7"));
-        assertThat(preAuthorizedCode.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(preAuthorizedCode.getHeader().getType(), equalTo(JOSEObjectType.JWT));
+                credential.getJWTClaimsSet().getClaim("context"),
+                equalTo(singletonList("https://www.w3.org/2018/credentials/v1")));
     }
 
     @Test
@@ -89,9 +99,7 @@ public class PreAuthorizedCodeBuilderTest {
         SigningException exception =
                 assertThrows(
                         SigningException.class,
-                        () ->
-                                preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                                        CREDENTIAL_IDENTIFIER));
+                        () -> credentialBuilder.buildCredential(DID_KEY, DOCUMENT_DETAILS));
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
 

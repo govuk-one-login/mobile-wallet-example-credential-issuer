@@ -44,7 +44,7 @@ public class CredentialOfferServiceTest {
     void testItReturnsCredentialOffer()
             throws SigningException, JOSEException, JsonProcessingException {
         SignResponse signResponse = getMockedSignResponse();
-        when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
 
         CredentialOffer credentialOffer =
                 credentialOfferService.buildCredentialOffer(
