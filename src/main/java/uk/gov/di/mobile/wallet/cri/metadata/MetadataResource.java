@@ -34,7 +34,7 @@ public class MetadataResource {
                             .setCredentialIssuer(
                                     configurationService.getMockCriUrl() + CREDENTIAL_ENDPOINT)
                             .setCredentialsEndpoint(configurationService.getMockCriUrl())
-                            .setAuthorizationServer(configurationService.getStsStubUrl())
+                            .setAuthorizationServers(configurationService.getStsStubUrl())
                             .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
                             .build();
 

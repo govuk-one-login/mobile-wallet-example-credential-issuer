@@ -10,9 +10,9 @@ import java.io.IOException;
 public class MetadataBuilder {
 
     String credential_issuer; // NOSONAR
-    String authorization_server; // NOSONAR
+    String authorization_servers; // NOSONAR
     String credentials_endpoint; // NOSONAR
-    Object credentials_supported; // NOSONAR
+    Object credential_configurations_supported; // NOSONAR
 
     public MetadataBuilder() {}
 
@@ -26,13 +26,13 @@ public class MetadataBuilder {
         return this;
     }
 
-    @JsonProperty("authorization_server")
-    public MetadataBuilder setAuthorizationServer(String authorization_server)
+    @JsonProperty("authorization_servers")
+    public MetadataBuilder setAuthorizationServers(String authorization_servers)
             throws IllegalArgumentException {
-        if (authorization_server == null) {
-            throw new IllegalArgumentException("authorization_server must not be null");
+        if (authorization_servers == null) {
+            throw new IllegalArgumentException("authorization_servers must not be null");
         }
-        this.authorization_server = authorization_server;
+        this.authorization_servers = authorization_servers;
         return this;
     }
 
@@ -46,7 +46,7 @@ public class MetadataBuilder {
         return this;
     }
 
-    @JsonProperty("credentials_supported")
+    @JsonProperty("credential_configurations_supported")
     public MetadataBuilder setCredentialsSupported(String fileName)
             throws IOException, IllegalArgumentException {
         if (fileName == null) {
@@ -54,15 +54,16 @@ public class MetadataBuilder {
         }
         File credentialsSupportedFilePath = new File(Resources.getResource(fileName).getPath());
         ObjectMapper mapper = new ObjectMapper();
-        this.credentials_supported = mapper.readValue(credentialsSupportedFilePath, Object.class);
+        this.credential_configurations_supported =
+                mapper.readValue(credentialsSupportedFilePath, Object.class);
         return this;
     }
 
     public Metadata build() {
         return new Metadata(
                 credential_issuer,
-                authorization_server,
+                authorization_servers,
                 credentials_endpoint,
-                credentials_supported);
+                credential_configurations_supported);
     }
 }
