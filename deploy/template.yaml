@@ -32,7 +32,7 @@ Parameters:
     Default: 8080
 
 Conditions:
-  StackNameIsWalletDocBuilderBE: !Equals [ !Ref "AWS::StackName", wallet-cred-issuer-be ]
+  StackNameIsWalletCredIssuerBE: !Equals [ !Ref "AWS::StackName", wallet-cred-issuer-be ]
 
   UsePermissionsBoundary:
     Fn::Not:
@@ -294,7 +294,7 @@ Resources:
     Type: AWS::ApiGatewayV2::DomainName
     Properties:
       DomainName: !If 
-        - StackNameIsWalletDocBuilderBE
+        - StackNameIsWalletCredIssuerBE
         - !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
         - !Sub
           - "${AWS::StackName}-${BEURL}"
