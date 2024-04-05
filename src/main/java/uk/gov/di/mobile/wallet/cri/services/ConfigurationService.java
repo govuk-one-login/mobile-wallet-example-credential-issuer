@@ -28,10 +28,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getStsStubUrl() {
-        return System.getenv()
-                .getOrDefault(
-                        "STS_STUB_URL",
-                        "https://document-builder.mobile.dev.account.gov.uk/sts-stub");
+        return System.getenv().getOrDefault("STS_STUB_URL", "http://localhost:8000/sts-stub");
     }
 
     public String getWalletUrl() {

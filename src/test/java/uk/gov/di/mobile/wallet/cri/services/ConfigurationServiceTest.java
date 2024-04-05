@@ -57,9 +57,7 @@ class ConfigurationServiceTest {
     @Test
     void testStsStuUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(
-                "https://document-builder.mobile.dev.account.gov.uk/sts-stub",
-                configurationService.getStsStubUrl());
+        assertEquals("http://localhost:8000/sts-stub", configurationService.getStsStubUrl());
     }
 
     @Test
