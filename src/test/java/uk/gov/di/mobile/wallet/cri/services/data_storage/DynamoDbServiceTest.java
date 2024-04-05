@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -22,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DynamoDbServiceTest {
+
     private static final String TEST_TABLE_NAME = "test-cache-cri-table";
 
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
@@ -42,8 +42,7 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    @DisplayName("Should save credential offer to DynamoDB table")
-    void testItSavesCredentialOfferToTable() throws DataStoreException {
+    void shouldSaveCredentialOfferToCache() throws DataStoreException {
         dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
 
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
@@ -65,9 +64,8 @@ class DynamoDbServiceTest {
                 credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
     }
 
-    @DisplayName("Should fetch a credential offer by partition key")
     @Test
-    void testItGetsCredentialOfferFromTableThroughPartitionKey() throws DataStoreException {
+    void shouldGetCredentialOfferFromCacheThroughPartitionKey() throws DataStoreException {
         dynamoDbService.getCredentialOffer("test-partition-key-123");
 
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
