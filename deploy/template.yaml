@@ -32,7 +32,7 @@ Parameters:
     Default: 8080
 
 Conditions:
-  StackNameIsWalletDocBuilderBE: !Equals [ !Ref "AWS::StackName", wallet-doc-builder-be ]
+  StackNameIsWalletDocBuilderBE: !Equals [ !Ref "AWS::StackName", wallet-cred-issuer-be ]
 
   UsePermissionsBoundary:
     Fn::Not:
