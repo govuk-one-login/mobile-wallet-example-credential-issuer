@@ -116,8 +116,8 @@ public class CredentialService {
             String documentBuilderUri = configurationService.getDocumentBuilderUrl();
             String getDocumentDetailsPath = "/document/" + documentId;
             uri = new URI(documentBuilderUri + getDocumentDetailsPath);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Error building Document URI", e);
+        } catch (URISyntaxException exception) {
+            throw new RuntimeException("Error building Document URI: ", exception);
         }
 
         Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();

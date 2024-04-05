@@ -158,8 +158,8 @@ public class AccessTokenService {
         URI uri;
         try {
             uri = new URI(stsStubUrl + DID_DOCUMENT_PATH);
-        } catch (URISyntaxException e) {
-            throw new RuntimeException("Error building STS URI", e);
+        } catch (URISyntaxException exception) {
+            throw new RuntimeException("Error building STS URI: ", exception);
         }
 
         WebTarget webTarget = httpClient.target(uri);

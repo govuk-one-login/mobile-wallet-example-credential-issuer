@@ -50,7 +50,7 @@ public class MockCriApp extends Application<ConfigurationService> {
         Client httpClient =
                 new JerseyClientBuilder(environment)
                         .using(new JerseyClientConfiguration())
-                        .build("test");
+                        .build("example-cri");
 
         AccessTokenService accessTokenService =
                 new AccessTokenService(httpClient, configurationService);

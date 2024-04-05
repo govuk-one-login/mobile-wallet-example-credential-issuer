@@ -46,7 +46,7 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void tesExampleCriUrlIsEqualDefaultWhenEnvVarUnset() {
+    void testExampleCriUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
                 "https://example-credential-issuer.mobile.build.account.gov.uk",
@@ -80,27 +80,6 @@ class ConfigurationServiceTest {
     }
 
     @Test
-<<<<<<< HEAD
-    void testIssuerIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("urn:fdc:gov:uk:<HMRC>", configurationService.getIssuer());
-    }
-
-    @Test
-    void testAudienceIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("urn:fdc:gov:uk:wallet", configurationService.getAudience());
-    }
-
-    @Test
-    void testItReturnsLocalstackEndpointValue() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
-    }
-
-    @Test
-=======
->>>>>>> c133064 (test(DCMAW-8412): improve unit tests)
     void testItGetsSigningKeyAliasEnvironmentVariable() {
         environmentVariables.set("SIGNING_KEY_ALIAS", "alias/testSigningKeyAlias");
         assertEquals("alias/testSigningKeyAlias", configurationService.getSigningKeyAlias());
@@ -126,15 +105,9 @@ class ConfigurationServiceTest {
     }
 
     @Test
-<<<<<<< HEAD
     void testItGetsExampleCriUrlEnvironmentVariable() {
         environmentVariables.set(
                 "EXAMPLE_CRI_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
-
-=======
-    void testItGetsMockCriUrlEnvironmentVariable() {
-        environmentVariables.set("MOCK_CRI_URL", "https://credential-issuer.test.example.com");
->>>>>>> c133064 (test(DCMAW-8412): improve unit tests)
         assertEquals(
                 "https://example-credential-issuer.mobile.test.account.gov.uk",
                 configurationService.getExampleCriUrl());
@@ -186,11 +159,5 @@ class ConfigurationServiceTest {
     @Test
     void testItGetsLocalstackEndpointValue() {
         assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
-    }
-
-    @Test
-    void testItGetsCredentialTypesValue() {
-        assertArrayEquals(
-                new String[] {"SocialSecurity"}, configurationService.getCredentialTypes());
     }
 }
