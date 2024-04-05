@@ -7,7 +7,6 @@ import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({SystemStubsExtension.class})
@@ -92,13 +91,6 @@ class ConfigurationServiceTest {
     void testItReturnsLocalstackEndpointValue() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
-    }
-
-    @Test
-    void testItReturnsCredentialTypesValue() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertArrayEquals(
-                new String[] {"BasicDisclosure"}, configurationService.getCredentialTypes());
     }
 
     @Test

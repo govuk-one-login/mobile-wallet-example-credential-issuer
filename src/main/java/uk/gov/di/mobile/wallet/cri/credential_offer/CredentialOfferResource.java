@@ -39,7 +39,8 @@ public class CredentialOfferResource {
     @GET
     public Response getCredentialOffer(
             @QueryParam("walletSubjectId") @NotEmpty String walletSubjectId,
-            @QueryParam("documentId") @NotEmpty String documentId)
+            @QueryParam("documentId") @NotEmpty String documentId,
+            @QueryParam("credentialType") @NotEmpty String credentialType)
             throws JsonProcessingException {
 
         UUID uuid = UUID.randomUUID();
@@ -47,7 +48,9 @@ public class CredentialOfferResource {
 
         CredentialOffer credentialOffer;
         try {
-            credentialOffer = credentialOfferService.buildCredentialOffer(credentialIdentifier);
+            credentialOffer =
+                    credentialOfferService.buildCredentialOffer(
+                            credentialIdentifier, credentialType);
         } catch (SigningException exception) {
             return buildFailResponse().build();
         }

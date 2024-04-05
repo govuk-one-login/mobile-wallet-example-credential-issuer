@@ -9,11 +9,11 @@ public class CredentialOffer {
     private final Map<String, Map<String, String>> grants;
 
     public CredentialOffer(
-            String credential_issuer, // NOSONAR
-            String[] credentials,
+            String credentialIssuer,
+            String credentialType,
             Map<String, Map<String, String>> grants) {
-        this.credential_issuer = credential_issuer;
-        this.credentials = credentials;
+        this.credential_issuer = credentialIssuer;
+        this.credentials = new String[] {credentialType};
         this.grants = grants;
     }
 

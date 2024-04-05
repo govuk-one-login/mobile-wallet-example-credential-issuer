@@ -21,9 +21,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,9 +32,6 @@ public class CredentialOfferServiceTest {
     private CredentialOfferService credentialOfferService;
     private final KmsService kmsService = mock(KmsService.class);
     private ConfigurationService configurationService;
-    private final String CREDENTIAL_IDENTIFIER = "e27474f5-6aef-40a4-bed6-5e4e1ec3f885";
-
-    private static final Map<String, Map<String, String>> grantsMap = new HashMap<>();
 
     @BeforeEach
     void setUp() {
@@ -53,11 +47,12 @@ public class CredentialOfferServiceTest {
         when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
 
         CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER);
+                credentialOfferService.buildCredentialOffer(
+                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "TestCredentialType");
 
         assertEquals(
                 "https://credential-issuer.example.com", credentialOffer.getCredentialIssuer());
-        assertArrayEquals(new String[] {"BasicDisclosure"}, credentialOffer.getCredentials());
+        assertArrayEquals(new String[] {"TestCredentialType"}, credentialOffer.getCredentials());
         assertThat(credentialOffer, hasProperty("grants"));
         assertThat(
                 credentialOffer
