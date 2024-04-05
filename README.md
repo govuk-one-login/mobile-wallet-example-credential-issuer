@@ -54,7 +54,10 @@ You will need to have Docker Desktop or alternative like installed.
 Run the application with `./gradlew run`
 
 #### Test API Request
-[http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def](http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def)
+To get a credential offer:
+```
+curl -X GET http://localhost:8080/credential_offer?walletSubjectId=walletSubjectIdPlaceholder&documentId=testDocumentId&credentialType=BasicCheckCredential | jq
+```
 
 #### Reading from the Database
 To check that a credential offer was saved to the **cri_cache** table, run `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`, replacing the **credentialIdentifier** with the relevant one.
