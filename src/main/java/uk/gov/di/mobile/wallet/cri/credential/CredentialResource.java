@@ -23,23 +23,22 @@ public class CredentialResource {
     public Response getCredential(
             @HeaderParam("Authorization") @NotEmpty String authorizationHeader, JsonNode payload) {
 
-        Credential verifiableCredential;
+        Credential credential;
         try {
             CredentialRequestBody credentialRequest = CredentialRequestBody.from(payload);
             BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
 
-            verifiableCredential = credentialService.run(bearerAccessToken, credentialRequest);
-
+            credential = credentialService.run(bearerAccessToken, credentialRequest);
         } catch (Exception exception) {
             System.out.println("An error happened trying to build the credential: " + exception);
             if (exception instanceof BadRequestException) {
-                return buildBadRequestResponse().build();
+                return buildBadRequestResponse().entity(exception.getMessage()).build();
             }
 
             return buildFailResponse().build();
         }
 
-        return buildSuccessResponse().entity(verifiableCredential).build();
+        return buildSuccessResponse().entity(credential).build();
     }
 
     private BearerAccessToken parseAuthorizationHeader(String authorizationHeader) {

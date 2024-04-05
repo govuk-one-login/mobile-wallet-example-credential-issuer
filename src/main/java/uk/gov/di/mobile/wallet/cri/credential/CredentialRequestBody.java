@@ -17,17 +17,17 @@ public class CredentialRequestBody {
     public static CredentialRequestBody from(JsonNode payload) throws BadRequestException {
         String proof = payload.at(PROOF_PATH).asText(null);
         if (proof == null) {
-            throw new BadRequestException("Missing proof");
+            throw new BadRequestException("Missing proof in request body");
         }
 
         String proofType = payload.at(PROOF_TYPE_PATH).asText(null);
         if (proofType == null) {
-            throw new BadRequestException("Missing proof type");
+            throw new BadRequestException("Missing proof type in request body");
         }
 
         String jwt = payload.at(JWT_PATH).asText(null);
         if (jwt == null) {
-            throw new BadRequestException("Missing JWT");
+            throw new BadRequestException("Missing jwt in request body");
         }
 
         Proof proofObject = new Proof(proofType, jwt);

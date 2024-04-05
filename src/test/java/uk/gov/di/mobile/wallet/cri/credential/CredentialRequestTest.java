@@ -39,7 +39,7 @@ class CredentialRequestTest {
         Throwable exception =
                 assertThrows(
                         BadRequestException.class, () -> CredentialRequestBody.from(requestBody));
-        assertEquals("Missing proof", exception.getMessage());
+        assertEquals("Missing proof in request body", exception.getMessage());
     }
 
     @Test
@@ -53,7 +53,7 @@ class CredentialRequestTest {
         Throwable exception =
                 assertThrows(
                         BadRequestException.class, () -> CredentialRequestBody.from(requestBody));
-        assertEquals("Missing proof type", exception.getMessage());
+        assertEquals("Missing proof type in request body", exception.getMessage());
     }
 
     @Test
@@ -64,6 +64,6 @@ class CredentialRequestTest {
         Throwable exception =
                 assertThrows(
                         BadRequestException.class, () -> CredentialRequestBody.from(requestBody));
-        assertEquals("Missing JWT", exception.getMessage());
+        assertEquals("Missing jwt in request body", exception.getMessage());
     }
 }
