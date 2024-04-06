@@ -48,7 +48,9 @@ class ConfigurationServiceTest {
     @Test
     void testMockCriUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("https://credential-issuer.example.com", configurationService.getMockCriUrl());
+        assertEquals(
+                "https://example-credential-issuer.mobile.build.account.gov.uk",
+                configurationService.getExampleCriUrl());
     }
 
     @Test
@@ -124,10 +126,12 @@ class ConfigurationServiceTest {
 
     @Test
     void testItGetsMockCriUrlEnvironmentVariable() {
-        environmentVariables.set("MOCK_CRI_URL", "https://credential-issuer.test.example.com");
+        environmentVariables.set(
+                "EXAMPLE_CRI_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
 
         assertEquals(
-                "https://credential-issuer.test.example.com", configurationService.getMockCriUrl());
+                "https://example-credential-issuer.mobile.test.account.gov.uk",
+                configurationService.getExampleCriUrl());
     }
 
     @Test
