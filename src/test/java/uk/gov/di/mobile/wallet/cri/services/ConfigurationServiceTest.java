@@ -47,15 +47,15 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void testMockCriUrlIsEqualDefaultWhenEnvVarUnset() {
+    void tesExampleCriUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
-                "https://stub-credential-issuer.mobile.dev.account.gov.uk",
-                configurationService.getMockCriUrl());
+                "https://example-credential-issuer.mobile.build.account.gov.uk",
+                configurationService.getExampleCriUrl());
     }
 
     @Test
-    void testStsStuUrlIsEqualDefaultWhenEnvVarUnset() {
+    void testStsStubUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("http://localhost:8000/sts-stub", configurationService.getStsStubUrl());
     }
@@ -139,10 +139,13 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void testItGetsMockCriUrlEnvironmentVariable() {
-        environmentVariables.set("MOCK_CRI_URL", "https://credential-issuer.test.com");
+    void testItGetsExampleCriUrlEnvironmentVariable() {
+        environmentVariables.set(
+                "EXAMPLE_CRI_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
 
-        assertEquals("https://credential-issuer.test.com", configurationService.getMockCriUrl());
+        assertEquals(
+                "https://example-credential-issuer.mobile.test.account.gov.uk",
+                configurationService.getExampleCriUrl());
     }
 
     @Test

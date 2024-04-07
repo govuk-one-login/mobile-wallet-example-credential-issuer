@@ -21,10 +21,11 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("ENVIRONMENT", "local");
     }
 
-    public String getMockCriUrl() {
+    public String getExampleCriUrl() {
         return System.getenv()
                 .getOrDefault(
-                        "MOCK_CRI_URL", "https://stub-credential-issuer.mobile.dev.account.gov.uk");
+                        "EXAMPLE_CRI_URL",
+                        "https://example-credential-issuer.mobile.build.account.gov.uk");
     }
 
     public String getStsStubUrl() {
