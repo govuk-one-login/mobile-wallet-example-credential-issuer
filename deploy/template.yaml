@@ -14,7 +14,6 @@ Parameters:
       - "dev"
       - "build"
       - "staging"
-      # - "integration"
   VpcStackName:
     Description: >
       The name of the stack that defines the VPC in which this container will
@@ -387,7 +386,7 @@ Resources:
 
 #  The ECR container for overriding in development, if you want to target a specific version/tag
 #  for development use, change the value of the 'Image' property value to:
-#  "671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-doc-builder-ecr-containerrepository-lhfhbk5ayzry:<image_tag>"
+#  "671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:<image_tag>"
 #  To deploy the latest version of the image, use the git sha from the most recent commit, as the <image tag>, found using ‘git log’
 
   WalletBEECSServiceTaskDefinition:
@@ -395,7 +394,7 @@ Resources:
     Properties:
       ContainerDefinitions:
         - Essential: true
-          Image: CONTAINER-IMAGE-PLACEHOLDER
+          Image: 671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:chris_test_image
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
