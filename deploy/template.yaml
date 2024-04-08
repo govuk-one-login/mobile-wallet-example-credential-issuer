@@ -394,18 +394,28 @@ Resources:
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
-            - Name: PORT
-              Value: !Ref ContainerPort
-            # - Name: DOCUMENTS_TABLE_NAME
-            #   Value: documents
-            - Name: ENVIRONMENT
+            - Name: SIGNING_KEY_ALIAS
+              Value: placeholderValue
+            - Name: SIGNING_KEY_ID
+              Value: placeholderValue
+            - Name: AWS_REGION
+              Value: placeholderValue
+            - Name: ENVIROMENT
               Value: !Sub "${Environment}"
-            # - Name: MOCK_CRI_URL
-            #   Value: placeholderValue
-            - Name: STS_SIGNING_KEY_ID
-              Value: !Ref StsBEStubSigningKey
-            # - Name: ACCESS_TOKEN_TTL_IN_SECS
-            #   Value: 180
+            - Name: MOCK_CRI_URL
+              Value: placeholderValue
+            - Name: DOCUMENT_BUILDER_URL
+              Value: placeholderValue
+            - Name: WALLET_URL
+              Value: placeholderValue
+            - Name: PRE_AUTHORIZED_CODE_TTL_IN_SECS
+              Value: 300
+            - Name: CREDENTIAL_TTL_IN_DAYS
+              Value: 365
+            - Name: CRI_CACHE_TABLE_NAME
+              Value: placeholderValue
+            - Name: STS_URL
+              Value: placeholderValue
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
