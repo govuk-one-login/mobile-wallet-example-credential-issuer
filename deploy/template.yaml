@@ -44,12 +44,16 @@ Mappings:
   EnvironmentVariables:
     dev:
       BEURL: "example-credential-issuer.mobile.dev.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.dev.account.gov.uk"
     build:
       BEURL: "example-credential-issuer.mobile.build.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.build.account.gov.uk"
     staging:
       BEURL: "example-credential-issuer.mobile.stage.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.stage.account.gov.uk"
     integration:
       BEURL: "example-credential-issuer.mobile.integration.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.integration.account.gov.uk"
   # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
   # PlatformConfiguration:
   #   dev:
@@ -395,19 +399,19 @@ Resources:
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
-              Value: placeholderValue
+              Value: !Ref StsBEStubSigningKeyAlias
             - Name: SIGNING_KEY_ID
-              Value: placeholderValue
+              Value: !Ref StsBEStubSigningKey
             - Name: AWS_REGION
-              Value: placeholderValue
+              Value: eu-west-2
             - Name: ENVIROMENT
               Value: !Sub "${Environment}"
             - Name: MOCK_CRI_URL
-              Value: placeholderValue
+              Value: !Ref WalletBECustomDomain
             - Name: DOCUMENT_BUILDER_URL
-              Value: placeholderValue
+              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
             - Name: WALLET_URL
-              Value: placeholderValue
+              Value: "https://mobile.account.gov.uk/wallet"
             - Name: PRE_AUTHORIZED_CODE_TTL_IN_SECS
               Value: 300
             - Name: CREDENTIAL_TTL_IN_DAYS
@@ -415,7 +419,7 @@ Resources:
             - Name: CRI_CACHE_TABLE_NAME
               Value: placeholderValue
             - Name: STS_URL
-              Value: placeholderValue
+              Value: !Ref WalletBECustomDomain
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
