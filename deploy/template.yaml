@@ -402,9 +402,9 @@ Resources:
   WalletBEECSServiceTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
-      ContainerDefinitions:
+      ContainerDefinitions: CONTAINER-IMAGE-PLACEHOLDER
         - Essential: true
-          Image: 671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:chris_test_image
+          Image: CONTAINER
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
