@@ -534,5 +534,5 @@ Resources:
   StsBEStubSigningKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: alias/sts-be-stub-signing-key
+      AliasName: !Sub "alias/sts-be-stub-signing-key-${AWS::StackName}"
       TargetKeyId: !Ref StsBEStubSigningKey
