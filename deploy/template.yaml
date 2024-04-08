@@ -179,6 +179,16 @@ Resources:
               - s3:PutObject
             Resource:
               - !Sub arn:aws:s3:::${WalletBEAccessLogsBucket}/wallet-stub-back-${Environment}/AWSLogs/${AWS::AccountId}/*
+          - Effect: Deny
+            Principal:
+              AWS: "*"
+            Action: "*"
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref WalletBEAccessLogsBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": false    
 
 # LOADBALANCER RESOURCES
 
