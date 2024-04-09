@@ -1,0 +1,538 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Transform:
+  - AWS::Serverless-2016-10-31
+Description: >-
+  Wallet Stub BE
+
+Parameters:
+  Environment:
+    Description: "The environment type"
+    Type: "String"
+    Default: dev
+    AllowedValues:
+      - "dev"
+      - "build"
+      - "staging"
+  VpcStackName:
+    Description: >
+      The name of the stack that defines the VPC in which this container will
+      run.
+    Type: String
+    Default: platform-vpc
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+  ContainerPort:
+    Description: >
+      The port on which the container is running
+    Type: Number
+    Default: 8080
+
+Conditions:
+  StackNameIsWalletCredIssuerBE: !Equals [ !Ref "AWS::StackName", wallet-cred-issuer-be ]
+
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      BEURL: "example-credential-issuer.mobile.dev.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.dev.account.gov.uk"
+    build:
+      BEURL: "example-credential-issuer.mobile.build.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.build.account.gov.uk"
+    staging:
+      BEURL: "example-credential-issuer.mobile.stage.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.stage.account.gov.uk"
+    integration:
+      BEURL: "example-credential-issuer.mobile.integration.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.integration.account.gov.uk"
+  # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
+  # PlatformConfiguration:
+  #   dev:
+  #     CSLSEGRESS: "This should not ever be set; the dev account is not configured to egress logs."
+  #   build:
+  #     CSLSEGRESS: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython
+  #   staging:
+  #     CSLSEGRESS: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython
+  #   integration:
+  #     CSLSEGRESS: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython
+  ECSConfiguration:
+    dev:
+      BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
+    build:
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+    staging:
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+    integration:
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+  ElasticLoadBalancerAccountIds:
+    eu-west-2:
+      AccountId: 652711504416
+
+
+Resources:
+
+# SECURITY GROUPS
+
+  WalletBELoadBalancerSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub BE LoadBalancer Security Group
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 80
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${VpcStackName}-VpcId"
+
+  WalletBELoadBalancerSGEgressToECSSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !GetAtt WalletBELoadBalancerSG.GroupId
+      IpProtocol: tcp
+      Description: >-
+        Egress between the Wallet Stub BE load balancer and
+        the Wallet Stub BE ECS security group
+      DestinationSecurityGroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+
+  WalletBEECSSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub BE ECS Security Group permitting outbound
+        to anywhere.
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: '-1'
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${VpcStackName}-VpcId"
+
+  WalletBEECSSecurityGroupIngressFromLoadBalancer:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      IpProtocol: tcp
+      Description: >-
+        Wallet Stub BE ECS permits inbound from the Wallet Stub 
+        BE load balancer.
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
+      SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSG.GroupId
+
+# ACCESS LOGS
+
+  WalletBEAPIGWAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-WalletBE-API-GW-AccessLogs
+
+  WalletBEECSAccessLogsGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Back-ECS
+      RetentionInDays: 14
+
+  WalletBEAccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub wallet-stub-back-${Environment}-access-logs
+      VersioningConfiguration:
+        Status: "Enabled"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  WalletBEAccessLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WalletBEAccessLogsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub
+                - "arn:aws:iam::${ElbAccountId}:root"
+                - ElbAccountId: !FindInMap [ ElasticLoadBalancerAccountIds, !Ref AWS::Region, AccountId ]
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub arn:aws:s3:::${WalletBEAccessLogsBucket}/wallet-stub-back-${Environment}/AWSLogs/${AWS::AccountId}/*
+          - Effect: Deny
+            Principal:
+              AWS: "*"
+            Action: "*"
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref WalletBEAccessLogsBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": false    
+
+# LOADBALANCER RESOURCES
+
+  WalletBELoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt WalletBELoadBalancerSG.GroupId
+      Subnets:
+        - Fn::ImportValue:
+            !Sub "${VpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue:
+            !Sub "${VpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue:
+            !Sub "${VpcStackName}-PrivateSubnetIdC"
+      Type: application
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: true
+        - Key: access_logs.s3.bucket
+          Value: !Ref WalletBEAccessLogsBucket
+        - Key: access_logs.s3.prefix
+          Value: !Sub wallet-stub-back-${Environment}
+        - Key: idle_timeout.timeout_seconds
+          Value: 60 # N.B, this is 1 second less than the nodeJS app is configured in server.ts
+
+  WalletBELoadBalancerListenerTargetGroupECS:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckEnabled: TRUE
+      HealthCheckProtocol: HTTP
+      Matcher:
+        HttpCode: 200-499
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue:
+          !Sub "${VpcStackName}-VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+
+  WalletBELoadBalancerListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
+          Type: forward
+      LoadBalancerArn: !Ref WalletBELoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+# APIGW RESOURCES
+
+  WalletBEApiGwHttpEndpoint:
+      Type: 'AWS::ApiGatewayV2::Api'
+      Properties:
+        Name: !Sub wallet-stub-Back-${Environment}-${AWS::StackName}
+        Description: !Sub "Wallet Stub Backend API. ${AWS::StackName}"
+        ProtocolType: HTTP
+
+  WalletBEApiGwHttpEndpointIntegration:
+      Type: 'AWS::ApiGatewayV2::Integration'
+      Properties:
+        ApiId: !Ref WalletBEApiGwHttpEndpoint
+        IntegrationType: HTTP_PROXY
+        ConnectionId:
+          Fn::ImportValue:
+            !Sub "${VpcStackName}-VpcLinkId"
+        ConnectionType: VPC_LINK
+        IntegrationMethod: ANY
+        IntegrationUri: !Ref WalletBELoadBalancerListener
+        PayloadFormatVersion: '1.0'
+        RequestParameters:
+          overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+
+  WalletBEAPIGWRoute:
+    Type: 'AWS::ApiGatewayV2::Route'
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      RouteKey: 'ANY /{proxy+}'
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref WalletBEApiGwHttpEndpointIntegration
+
+  WalletBEAPIStageDefault:
+    Type: 'AWS::ApiGatewayV2::Stage'
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      StageName: $default
+      AutoDeploy: true
+      DefaultRouteSettings:
+        DataTraceEnabled: false
+        DetailedMetricsEnabled: true
+        ThrottlingBurstLimit: 400
+        ThrottlingRateLimit: 1200
+      AccessLogSettings:
+        DestinationArn: !GetAtt WalletBEAPIGWAccessLogsGroup.Arn
+        Format: >-
+          {
+          "requestId":"$context.requestId",
+          "ip": "$context.identity.sourceIp",
+          "requestTime":"$context.requestTime",
+          "httpMethod":"$context.httpMethod",
+          "path": "$context.path",
+          "routeKey":"$context.routeKey",
+          "status":"$context.status",
+          "protocol":"$context.protocol",
+          "responseLength":"$context.responseLength"
+          }
+
+  WalletBECustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !If 
+        - StackNameIsWalletCredIssuerBE
+        - !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
+        - !Sub
+          - "${AWS::StackName}-${BEURL}"
+          - BEURL:
+              !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
+      DomainNameConfigurations:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  WalletBEApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref WalletBECustomDomain
+      Type: A
+      HostedZoneId: !Sub "{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}"
+      AliasTarget:
+        DNSName: !GetAtt WalletBECustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt WalletBECustomDomain.RegionalHostedZoneId
+        EvaluateTargetHealth: false
+
+  WalletBEApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Ref WalletBECustomDomain
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      Stage: !Ref WalletBEAPIStageDefault
+
+# ECS RESOURCES
+
+  WalletBECluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletECSCluster"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet Stub BE"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+  WalletBEECSService:
+    DependsOn:
+      - WalletBELoadBalancerListener
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref WalletBECluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt WalletBEECSSecurityGroup.GroupId
+          Subnets:
+            - Fn::ImportValue:
+                !Sub "${VpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue:
+                !Sub "${VpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue:
+                !Sub "${VpcStackName}-ProtectedSubnetIdC"
+      TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletECS"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet BE Stub"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+#  The ECR container for overriding in development, if you want to target a specific version/tag
+#  for development use, change the value of the 'Image' property value to:
+#  "671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:<image_tag>"
+#  To deploy the latest version of the image, use the git sha from the most recent commit, as the <image tag>, found using ‘git log’
+
+  WalletBEECSServiceTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      ContainerDefinitions: CONTAINER-IMAGE-PLACEHOLDER
+        - Essential: true
+          Image: CONTAINER
+          Name: app
+          Environment:
+            - Name: SIGNING_KEY_ALIAS
+              Value: !Ref StsBEStubSigningKeyAlias
+            - Name: SIGNING_KEY_ID
+              Value: !Ref StsBEStubSigningKey
+            - Name: AWS_REGION
+              Value: eu-west-2
+            - Name: ENVIROMENT
+              Value: !Sub "${Environment}"
+            - Name: MOCK_CRI_URL
+              Value: !Ref WalletBECustomDomain
+            - Name: DOCUMENT_BUILDER_URL
+              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
+            - Name: WALLET_URL
+              Value: "https://mobile.account.gov.uk/wallet"
+            - Name: PRE_AUTHORIZED_CODE_TTL_IN_SECS
+              Value: 300
+            - Name: CREDENTIAL_TTL_IN_DAYS
+              Value: 365
+            - Name: CRI_CACHE_TABLE_NAME
+              Value: placeholderValue
+            - Name: STS_URL
+              Value: !Ref WalletBECustomDomain
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group : !Ref WalletBEECSAccessLogsGroup
+              awslogs-region : !Sub ${AWS::Region}
+              awslogs-stream-prefix : !Sub wallet-stub-back-${Environment}
+      Cpu: '1024' # Increased to use 1 CPU unit
+      ExecutionRoleArn: !GetAtt WalletBEECSTaskExecutionRole.Arn
+      Memory: '2048' # Upgraded memory value to match with increased CPU
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt WalletBEECSTaskRole.Arn
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletTaskDefinition"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet Stub BE"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+  WalletBEECSTaskExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      Policies:
+        - PolicyName: PullWalletBackImage
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecr:BatchGetImage"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchCheckLayerAvailability"
+                Resource:
+                  - !FindInMap [ ECSConfiguration, !Ref Environment, BackImageRepository ]
+              - Effect: Allow
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !GetAtt "WalletBEECSAccessLogsGroup.Arn"
+                  - !Sub "${WalletBEECSAccessLogsGroup.Arn}:*"
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  WalletBEECSTaskRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  # KMS RESOURCES
+
+  StsBEStubSigningKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Asymmetric key for signing tokens
+      Enabled: true
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action:
+              - "kms:*"
+            Resource:
+              - "*"
+      KeySpec: RSA_4096
+      KeyUsage: SIGN_VERIFY
+      MultiRegion: false
+
+  StsBEStubSigningKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/sts-be-stub-signing-key-${AWS::StackName}"
+      TargetKeyId: !Ref StsBEStubSigningKey
