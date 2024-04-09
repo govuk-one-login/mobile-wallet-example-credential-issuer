@@ -34,7 +34,7 @@ public class CredentialOfferService {
         grantsMap.put("urn:ietf:params:oauth:grant-type:pre-authorized_code", preAuthorizedCodeMap);
 
         return new CredentialOffer(
-                configurationService.getMockCriUrl(),
+                configurationService.getExampleCriUrl(),
                 configurationService.getCredentialTypes(),
                 grantsMap);
     }
