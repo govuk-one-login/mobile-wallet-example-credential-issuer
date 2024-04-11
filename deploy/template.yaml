@@ -536,3 +536,56 @@ Resources:
     Properties:
       AliasName: !Sub "alias/sts-be-stub-signing-key-${AWS::StackName}"
       TargetKeyId: !Ref StsBEStubSigningKey
+
+  CRICacheDatabaseKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action:
+              - kms:*
+            Resource:
+              - "*"
+
+  CRICacheDatabaseKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/DatabaseKmsKey"
+      TargetKeyId: !Ref CRICacheDatabaseKmsKey
+
+  # DYNAMODB RESOURCES
+
+   CRICacheDatabase:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: credentialIdentifier
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TableName: cri_cache
+      KeySchema:
+        - AttributeName: credentialIdentifier
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt CRICacheDatabaseKmsKey.Arn
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Mobile Wallet
+        - Key: Owner
+          Value: Mobile Wallet Team
+        - Key: Environment
+          Value: !Ref "Environment"
+
