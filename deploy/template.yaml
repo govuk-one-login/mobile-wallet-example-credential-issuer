@@ -402,9 +402,9 @@ Resources:
   WalletBEECSServiceTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
-      ContainerDefinitions: CONTAINER-IMAGE-PLACEHOLDER
+      ContainerDefinitions: 
         - Essential: true
-          Image: CONTAINER
+          Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
