@@ -555,12 +555,12 @@ Resources:
   CRICacheDatabaseKmsKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/DatabaseKmsKey"
+      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/CRICacheDatabaseKmsKey"
       TargetKeyId: !Ref CRICacheDatabaseKmsKey
 
   # DYNAMODB RESOURCES
 
-   CRICacheDatabase:
+  CRICacheDatabase:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
