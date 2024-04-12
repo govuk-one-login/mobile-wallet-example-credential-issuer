@@ -489,9 +489,6 @@ Resources:
                 Resource:
                   - !GetAtt "WalletBEECSAccessLogsGroup.Arn"
                   - !Sub "${WalletBEECSAccessLogsGroup.Arn}:*"
-              - Effect: Allow
-                Action: 'dynamodb:PutItem'
-                Resource: !GetAtt CRICacheDatabase.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
@@ -507,6 +504,14 @@ Resources:
             Principal:
               Service: ecs-tasks.amazonaws.com
         Version: 2012-10-17
+      Policies:
+        - PolicyName: AccessDynamoDb
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 'dynamodb:PutItem'
+                Resource: !GetAtt CRICacheDatabase.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
