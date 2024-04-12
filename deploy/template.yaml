@@ -489,6 +489,9 @@ Resources:
                 Resource:
                   - !GetAtt "WalletBEECSAccessLogsGroup.Arn"
                   - !Sub "${WalletBEECSAccessLogsGroup.Arn}:*"
+              - Effect: Allow
+                Action: 'dynamodb:PutItem'
+                Resource: !GetAtt CRICacheDatabase.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
