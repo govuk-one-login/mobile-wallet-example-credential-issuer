@@ -512,6 +512,9 @@ Resources:
               - Effect: Allow
                 Action: 'dynamodb:PutItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
+              - Effect: Allow
+                Action: 'kms:Decrypt'
+                Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
