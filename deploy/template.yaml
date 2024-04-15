@@ -409,7 +409,7 @@ Resources:
             - Name: AWS_REGION
               Value: eu-west-2
             - Name: ENVIROMENT
-              Value: !Sub "${Environment}"
+              Value: dev
             - Name: MOCK_CRI_URL
               Value: www.example-credential-issuer.mobile.dev.account.gov.uk
             - Name: DOCUMENT_BUILDER_URL
