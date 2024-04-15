@@ -24,21 +24,21 @@ public class DynamoDbService implements DataStore {
     public static DynamoDbEnhancedClient getClient(ConfigurationService configurationService) {
         DynamoDbClient client;
 
-        if (configurationService.getEnvironment().equals("local")) {
-            client = getLocalClient(configurationService);
-        } else {
+        // if (configurationService.getEnvironment().equals("local")) {
+        //     client = getLocalClient(configurationService);
+        // } else {
             client = DynamoDbClient.builder().httpClient(UrlConnectionHttpClient.create()).build();
-        }
+        // }
         return DynamoDbEnhancedClient.builder().dynamoDbClient(client).build();
     }
 
-    private static DynamoDbClient getLocalClient(ConfigurationService configurationService) {
-        return DynamoDbClient.builder()
-                .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
-                .httpClient(UrlConnectionHttpClient.create())
-                .region(Region.of(configurationService.getAwsRegion()))
-                .build();
-    }
+    // private static DynamoDbClient getLocalClient(ConfigurationService configurationService) {
+    //     return DynamoDbClient.builder()
+    //             .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
+    //             .httpClient(UrlConnectionHttpClient.create())
+    //             .region(Region.of(configurationService.getAwsRegion()))
+    //             .build();
+    // }
 
     @Override
     public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
