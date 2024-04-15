@@ -403,9 +403,9 @@ Resources:
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
-              Value: !Ref StsBEStubSigningKeyAlias
+              Value: !Ref CredentialIssuerSigningKeyAlias
             - Name: SIGNING_KEY_ID
-              Value: !Ref StsBEStubSigningKey
+              Value: !Ref CredentialIssuerSigningKey
             - Name: AWS_REGION
               Value: eu-west-2
             - Name: ENVIROMENT
@@ -517,7 +517,7 @@ Resources:
 
   # KMS RESOURCES
 
-  StsBEStubSigningKey:
+  CredentialIssuerSigningKey:
     Type: AWS::KMS::Key
     Properties:
       Description: Asymmetric key for signing tokens
@@ -543,11 +543,11 @@ Resources:
       KeyUsage: SIGN_VERIFY
       MultiRegion: false
 
-  StsBEStubSigningKeyAlias:
+  CredentialIssuerSigningKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
       AliasName: !Sub "alias/sts-be-stub-signing-key-${AWS::StackName}"
-      TargetKeyId: !Ref StsBEStubSigningKey
+      TargetKeyId: !Ref CredentialIssuerSigningKey
 
   CRICacheDatabaseKmsKey:
     Type: AWS::KMS::Key
