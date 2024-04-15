@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services.signing;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kms.KmsClient;
@@ -13,6 +15,8 @@ public class KmsService implements SigningService {
 
     private final KmsClient kmsClient;
 
+    private static Logger logger = LoggerFactory.getLogger(KmsService.class);
+
     public KmsService(ConfigurationService configurationService) {
         this(
                 configurationService.getLocalstackEndpoint(),
@@ -21,7 +25,7 @@ public class KmsService implements SigningService {
     }
 
     public KmsService(String localstackEndpoint, String awsRegion, String environment) {
-
+        logger.info(" DEBUG environment = {}", environment);
         if (environment.equals("local")) {
             this.kmsClient =
                     KmsClient.builder()

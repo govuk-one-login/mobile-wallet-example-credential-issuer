@@ -22,3 +22,5 @@ build
 dist
 .idea
 *.toml
+.vscode/
+bin/

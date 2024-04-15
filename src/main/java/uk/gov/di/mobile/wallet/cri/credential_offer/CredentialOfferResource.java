@@ -9,6 +9,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -18,9 +20,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 @Path("/credential_offer")
@@ -77,7 +76,7 @@ public class CredentialOfferResource {
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
         String credentialOfferStringEncoded =
                 URLEncoder.encode(credentialOfferString, StandardCharsets.UTF_8);
-        
+
         CredentialOfferUri credentialOfferUri =
                 new CredentialOfferUri(
                         configurationService.getWalletUrl(),
