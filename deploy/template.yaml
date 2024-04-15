@@ -42,14 +42,14 @@ Conditions:
 Mappings:
   EnvironmentVariables:
     dev:
-      BEURL: "example-credential-issuer.mobile.dev.account.gov.uk"
-      FEURL: "stub-credential-issuer.mobile.dev.account.gov.uk"
+      BEURL: "https://example-credential-issuer.mobile.dev.account.gov.uk"
+      FEURL: "https://stub-credential-issuer.mobile.dev.account.gov.uk"
     build:
-      BEURL: "example-credential-issuer.mobile.build.account.gov.uk"
-      FEURL: "stub-credential-issuer.mobile.build.account.gov.uk"
+      BEURL: "https://example-credential-issuer.mobile.build.account.gov.uk"
+      FEURL: "https://stub-credential-issuer.mobile.build.account.gov.uk"
     staging:
-      BEURL: "example-credential-issuer.mobile.staging.account.gov.uk"
-      FEURL: "stub-credential-issuer.mobile.staging.account.gov.uk"
+      BEURL: "https://example-credential-issuer.mobile.staging.account.gov.uk"
+      FEURL: "https://stub-credential-issuer.mobile.staging.account.gov.uk"
   # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
   # PlatformConfiguration:
   #   dev:
@@ -411,9 +411,9 @@ Resources:
             - Name: ENVIROMENT
               Value: dev
             - Name: MOCK_CRI_URL
-              Value: https://example-credential-issuer.mobile.dev.account.gov.uk
+              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
             - Name: DOCUMENT_BUILDER_URL
-              Value: https://stub-credential-issuer.mobile.dev.account.gov.uk
+              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
             - Name: WALLET_URL
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: PRE_AUTHORIZED_CODE_TTL_IN_SECS
@@ -423,7 +423,7 @@ Resources:
             - Name: CRI_CACHE_TABLE_NAME
               Value: cri-cache
             - Name: STS_URL
-              Value: https://stub-credential-issuer.mobile.dev.account.gov.uk
+              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
