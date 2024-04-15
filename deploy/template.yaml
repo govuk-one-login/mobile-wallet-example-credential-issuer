@@ -539,7 +539,7 @@ Resources:
             Action: kms:Sign
             Resource:
               - "*"
-      KeySpec: RSA_4096
+      KeySpec: ECC_NIST_P256
       KeyUsage: SIGN_VERIFY
       MultiRegion: false
 
