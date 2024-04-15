@@ -411,9 +411,9 @@ Resources:
             - Name: ENVIROMENT
               Value: dev
             - Name: MOCK_CRI_URL
-              Value: www.example-credential-issuer.mobile.dev.account.gov.uk
+              Value: https://example-credential-issuer.mobile.dev.account.gov.uk
             - Name: DOCUMENT_BUILDER_URL
-              Value: www.stub-credential-issuer.mobile.dev.account.gov.uk
+              Value: https://stub-credential-issuer.mobile.dev.account.gov.uk
             - Name: WALLET_URL
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: PRE_AUTHORIZED_CODE_TTL_IN_SECS
@@ -423,7 +423,7 @@ Resources:
             - Name: CRI_CACHE_TABLE_NAME
               Value: cri-cache
             - Name: STS_URL
-              Value: www.stub-credential-issuer.mobile.dev.account.gov.uk
+              Value: https://stub-credential-issuer.mobile.dev.account.gov.uk
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
