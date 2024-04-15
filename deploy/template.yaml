@@ -421,7 +421,7 @@ Resources:
             - Name: CREDENTIAL_TTL_IN_DAYS
               Value: 365
             - Name: CRI_CACHE_TABLE_NAME
-              Value: placeholderValue
+              Value: cri-cache
             - Name: STS_URL
               Value: !Ref WalletBECustomDomain
           PortMappings:
