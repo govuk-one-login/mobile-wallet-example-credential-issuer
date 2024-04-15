@@ -68,6 +68,7 @@ public class CredentialOfferResource {
                             credentialIdentifier, documentId, walletSubjectId));
             logger.info("Saved into DB wsID: {} and docID: {}", walletSubjectId, documentId);
         } catch (DataStoreException exception) {
+            logger.error("failed to save", exception);
             return buildFailResponse().build();
         }
 
@@ -75,7 +76,7 @@ public class CredentialOfferResource {
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
         String credentialOfferStringEncoded =
                 URLEncoder.encode(credentialOfferString, StandardCharsets.UTF_8);
-
+        
         CredentialOfferUri credentialOfferUri =
                 new CredentialOfferUri(
                         configurationService.getWalletUrl(),
