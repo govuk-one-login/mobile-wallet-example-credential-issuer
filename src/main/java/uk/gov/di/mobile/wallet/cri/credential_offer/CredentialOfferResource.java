@@ -19,6 +19,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 @Path("/credential_offer")
 public class CredentialOfferResource {
@@ -26,6 +29,8 @@ public class CredentialOfferResource {
     private final CredentialOfferService credentialOfferService;
     private final ConfigurationService configurationService;
     private final DataStore dataStore;
+
+    private static Logger logger = LoggerFactory.getLogger(CredentialOfferResource.class);
 
     public CredentialOfferResource(
             CredentialOfferService credentialOfferService,
@@ -41,13 +46,18 @@ public class CredentialOfferResource {
             @QueryParam("walletSubjectId") @NotEmpty String walletSubjectId,
             @QueryParam("documentId") @NotEmpty String documentId)
             throws JsonProcessingException {
-
+        logger.info(
+                "Credential Offer request recieved with wsID: {} and docID: {}",
+                walletSubjectId,
+                documentId);
         UUID uuid = UUID.randomUUID();
         String credentialIdentifier = uuid.toString();
 
         CredentialOffer credentialOffer;
         try {
             credentialOffer = credentialOfferService.buildCredentialOffer(credentialIdentifier);
+            logger.info(
+                    "Credential Offer built wsID: {} and docID: {}", walletSubjectId, documentId);
         } catch (SigningException exception) {
             return buildFailResponse().build();
         }
@@ -56,6 +66,7 @@ public class CredentialOfferResource {
             dataStore.saveCredentialOffer(
                     new CredentialOfferCacheItem(
                             credentialIdentifier, documentId, walletSubjectId));
+            logger.info("Saved into DB wsID: {} and docID: {}", walletSubjectId, documentId);
         } catch (DataStoreException exception) {
             return buildFailResponse().build();
         }
