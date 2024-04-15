@@ -411,9 +411,9 @@ Resources:
             - Name: ENVIROMENT
               Value: !Sub "${Environment}"
             - Name: MOCK_CRI_URL
-              Value: !Ref WalletBECustomDomain
+              Value: www.example-credential-issuer.mobile.dev.account.gov.uk
             - Name: DOCUMENT_BUILDER_URL
-              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
+              Value: www.stub-credential-issuer.mobile.dev.account.gov.uk
             - Name: WALLET_URL
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: PRE_AUTHORIZED_CODE_TTL_IN_SECS
@@ -423,7 +423,7 @@ Resources:
             - Name: CRI_CACHE_TABLE_NAME
               Value: cri-cache
             - Name: STS_URL
-              Value: !Ref WalletBECustomDomain
+              Value: www.example-credential-issuer.mobile.dev.account.gov.uk
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
