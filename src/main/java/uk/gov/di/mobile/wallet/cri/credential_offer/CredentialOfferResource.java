@@ -59,6 +59,7 @@ public class CredentialOfferResource {
             logger.info(
                     "Credential Offer built wsID: {} and docID: {}", walletSubjectId, documentId);
         } catch (SigningException exception) {
+            logger.error("failed to sign", exception);
             return buildFailResponse().build();
         }
 
