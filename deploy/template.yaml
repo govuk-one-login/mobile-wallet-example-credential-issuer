@@ -418,7 +418,7 @@ Resources:
             - Name: DOCUMENT_BUILDER_URL
               Value: !Sub 
                       - "https://-${FEURL}"
-                      - BEURL:
+                      - FEURL:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
             - Name: WALLET_URL
               Value: "https://mobile.account.gov.uk/wallet"
@@ -431,7 +431,7 @@ Resources:
             - Name: STS_URL
               Value: !Sub 
                       - "https://-${FEURL}"
-                      - BEURL:
+                      - FEURL:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
           PortMappings:
             - ContainerPort: !Ref ContainerPort
