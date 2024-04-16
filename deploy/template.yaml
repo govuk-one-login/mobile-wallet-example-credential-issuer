@@ -42,14 +42,14 @@ Conditions:
 Mappings:
   EnvironmentVariables:
     dev:
-      BEURL: "https://example-credential-issuer.mobile.dev.account.gov.uk"
-      FEURL: "https://stub-credential-issuer.mobile.dev.account.gov.uk"
+      BEURL: "example-credential-issuer.mobile.dev.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.dev.account.gov.uk"
     build:
-      BEURL: "https://example-credential-issuer.mobile.build.account.gov.uk"
-      FEURL: "https://stub-credential-issuer.mobile.build.account.gov.uk"
+      BEURL: "example-credential-issuer.mobile.build.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.build.account.gov.uk"
     staging:
-      BEURL: "https://example-credential-issuer.mobile.staging.account.gov.uk"
-      FEURL: "https://stub-credential-issuer.mobile.staging.account.gov.uk"
+      BEURL: "example-credential-issuer.mobile.staging.account.gov.uk"
+      FEURL: "stub-credential-issuer.mobile.staging.account.gov.uk"
   # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
   # PlatformConfiguration:
   #   dev:
@@ -403,17 +403,23 @@ Resources:
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
-              Value: !Ref StsBEStubSigningKeyAlias
+              Value: !Ref CredentialIssuerSigningKeyAlias
             - Name: SIGNING_KEY_ID
-              Value: !Ref StsBEStubSigningKey
+              Value: !Ref CredentialIssuerSigningKey
             - Name: AWS_REGION
-              Value: eu-west-2
+              Value: !Sub "${AWS::Region}"
             - Name: ENVIROMENT
-              Value: dev
+              Value: !Sub "${Environment}"
             - Name: MOCK_CRI_URL
-              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
+              Value: !Sub 
+                      - "https://${BEURL}"
+                      - BEURL:
+                          !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
             - Name: DOCUMENT_BUILDER_URL
-              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
+              Value: !Sub 
+                      - "https://${FEURL}"
+                      - FEURL:
+                          !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
             - Name: WALLET_URL
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: PRE_AUTHORIZED_CODE_TTL_IN_SECS
@@ -421,9 +427,12 @@ Resources:
             - Name: CREDENTIAL_TTL_IN_DAYS
               Value: 365
             - Name: CRI_CACHE_TABLE_NAME
-              Value: cri-cache
+              Value: !Ref CRICacheDatabase
             - Name: STS_URL
-              Value: !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
+              Value: !Sub 
+                      - "https://${FEURL}"
+                      - FEURL:
+                          !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
@@ -508,7 +517,10 @@ Resources:
                 Action: 'dynamodb:PutItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
               - Effect: Allow
-                Action: 'kms:Decrypt'
+                Action: 
+                  - 'kms:Decrypt'
+                  - 'kms:Encrypt'
+                  - 'kms:GenerateDataKey'
                 Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
@@ -517,7 +529,7 @@ Resources:
 
   # KMS RESOURCES
 
-  StsBEStubSigningKey:
+  CredentialIssuerSigningKey:
     Type: AWS::KMS::Key
     Properties:
       Description: Asymmetric key for signing tokens
@@ -533,15 +545,21 @@ Resources:
               - "kms:*"
             Resource:
               - "*"
-      KeySpec: RSA_4096
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt WalletBEECSTaskRole.Arn
+            Action: kms:Sign
+            Resource:
+              - "*"
+      KeySpec: ECC_NIST_P256
       KeyUsage: SIGN_VERIFY
       MultiRegion: false
 
-  StsBEStubSigningKeyAlias:
+  CredentialIssuerSigningKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
       AliasName: !Sub "alias/sts-be-stub-signing-key-${AWS::StackName}"
-      TargetKeyId: !Ref StsBEStubSigningKey
+      TargetKeyId: !Ref CredentialIssuerSigningKey
 
   CRICacheDatabaseKmsKey:
     Type: AWS::KMS::Key
@@ -594,4 +612,3 @@ Resources:
           Value: Mobile Wallet Team
         - Key: Environment
           Value: !Ref "Environment"
-
