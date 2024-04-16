@@ -407,7 +407,7 @@ Resources:
             - Name: SIGNING_KEY_ID
               Value: !Ref CredentialIssuerSigningKey
             - Name: AWS_REGION
-              Value: !Ref "${AWS::Region}"
+              Value: !Sub "${AWS::Region}"
             - Name: ENVIROMENT
               Value: !Sub "${Environment}"
             - Name: MOCK_CRI_URL
