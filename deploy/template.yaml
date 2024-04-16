@@ -412,12 +412,12 @@ Resources:
               Value: dev
             - Name: MOCK_CRI_URL
               Value: !Sub 
-                      - "https://-${BEURL}"
+                      - "https://${BEURL}"
                       - BEURL:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
             - Name: DOCUMENT_BUILDER_URL
               Value: !Sub 
-                      - "https://-${FEURL}"
+                      - "https://${FEURL}"
                       - FEURL:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
             - Name: WALLET_URL
@@ -430,7 +430,7 @@ Resources:
               Value: cri-cache
             - Name: STS_URL
               Value: !Sub 
-                      - "https://-${FEURL}"
+                      - "https://${FEURL}"
                       - FEURL:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
           PortMappings:
