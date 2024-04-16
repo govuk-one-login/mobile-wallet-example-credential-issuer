@@ -7,8 +7,6 @@ import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.net.URI;
-
 public class KmsService implements SigningService {
 
     private final KmsClient kmsClient;
@@ -21,21 +19,20 @@ public class KmsService implements SigningService {
     }
 
     public KmsService(String localstackEndpoint, String awsRegion, String environment) {
-
-        if (environment.equals("local")) {
-            this.kmsClient =
-                    KmsClient.builder()
-                            .endpointOverride(URI.create(localstackEndpoint))
-                            .credentialsProvider(DefaultCredentialsProvider.create())
-                            .region(Region.of(awsRegion))
-                            .build();
-        } else {
-            this.kmsClient =
-                    KmsClient.builder()
-                            .region(Region.of(awsRegion))
-                            .credentialsProvider(DefaultCredentialsProvider.create())
-                            .build();
-        }
+        // if (environment.equals("local")) {
+        //     this.kmsClient =
+        //             KmsClient.builder()
+        //                     .endpointOverride(URI.create(localstackEndpoint))
+        //                     .credentialsProvider(DefaultCredentialsProvider.create())
+        //                     .region(Region.of(awsRegion))
+        //                     .build();
+        // } else {
+        this.kmsClient =
+                KmsClient.builder()
+                        .region(Region.of(awsRegion))
+                        .credentialsProvider(DefaultCredentialsProvider.create())
+                        .build();
+        // }
     }
 
     public SignResponse signPreAuthorizedCode(SignRequest signRequest) {
