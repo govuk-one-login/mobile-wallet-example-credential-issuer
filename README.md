@@ -57,6 +57,10 @@ Run the application with `./gradlew run`
 To get a credential offer:
 ```
 curl -X GET http://localhost:8080/credential_offer?walletSubjectId=walletSubjectIdPlaceholder&documentId=testDocumentId&credentialType=BasicCheckCredential | jq
+
+To get the credential metadata:
+```
+curl -X GET http://localhost:8080/.well-known/openid-credential-issuer | jq
 ```
 
 #### Reading from the Database
