@@ -505,11 +505,11 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action: 'dynamodb:*'
+                Action: 'dynamodb:PutItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
               - Effect: Allow
                 Action: 'kms:Decrypt'
-                Resource: "arn:aws:dynamodb:*"
+                Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
