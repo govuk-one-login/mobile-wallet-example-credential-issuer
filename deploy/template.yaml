@@ -407,9 +407,9 @@ Resources:
             - Name: SIGNING_KEY_ID
               Value: !Ref CredentialIssuerSigningKey
             - Name: AWS_REGION
-              Value: eu-west-2
+              Value: !Ref "${AWS::Region}"
             - Name: ENVIROMENT
-              Value: dev
+              Value: !Sub "${Environment}"
             - Name: MOCK_CRI_URL
               Value: !Sub 
                       - "https://${BEURL}"
@@ -427,7 +427,7 @@ Resources:
             - Name: CREDENTIAL_TTL_IN_DAYS
               Value: 365
             - Name: CRI_CACHE_TABLE_NAME
-              Value: cri_cache
+              Value: !Ref CRICacheDatabase
             - Name: STS_URL
               Value: !Sub 
                       - "https://${FEURL}"
