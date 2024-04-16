@@ -558,7 +558,7 @@ Resources:
   CredentialIssuerSigningKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub "alias/sts-be-stub-signing-key-${AWS::StackName}"
+      AliasName: !Sub "alias/credential-signing-key-${AWS::StackName}"
       TargetKeyId: !Ref CredentialIssuerSigningKey
 
   CRICacheDatabaseKmsKey:
