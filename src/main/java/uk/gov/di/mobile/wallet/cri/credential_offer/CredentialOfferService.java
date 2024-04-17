@@ -19,7 +19,7 @@ public class CredentialOfferService {
         this.kmsService = kmsService;
     }
 
-    public CredentialOffer buildCredentialOffer(String credentialIdentifier)
+    public CredentialOffer buildCredentialOffer(String credentialIdentifier, String credentialType)
             throws SigningException {
         SignedJWT preAuthorizedCode =
                 new PreAuthorizedCodeBuilder(configurationService, kmsService)
@@ -34,8 +34,6 @@ public class CredentialOfferService {
         grantsMap.put("urn:ietf:params:oauth:grant-type:pre-authorized_code", preAuthorizedCodeMap);
 
         return new CredentialOffer(
-                configurationService.getExampleCriUrl(),
-                configurationService.getCredentialTypes(),
-                grantsMap);
+                configurationService.getExampleCriUrl(), credentialType, grantsMap);
     }
 }

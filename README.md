@@ -53,11 +53,10 @@ You will need to have Docker Desktop or alternative like installed.
 #### Running the Application
 Run the application with `./gradlew run`
 
-#### Test API Requests
+#### Test API Request
 To get a credential offer:
 ```
-curl -X GET http://localhost:8080/credential_offer?walletSubjectId=123abc&documentId=456def | jq
-```
+curl -X GET http://localhost:8080/credential_offer?walletSubjectId=walletSubjectIdPlaceholder&documentId=testDocumentId&credentialType=BasicCheckCredential | jq
 
 To get the credential metadata:
 ```

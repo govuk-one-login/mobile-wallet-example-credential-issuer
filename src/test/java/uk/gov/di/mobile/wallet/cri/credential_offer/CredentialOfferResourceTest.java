@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -13,7 +12,6 @@ import com.nimbusds.jwt.SignedJWT;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,16 +39,14 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class CredentialOfferResourceTest {
 
-    private static final String CREDENTIAL_ISSUER = "mock-credential-issuer";
-    private static final String[] CREDENTIALS = new String[] {"mock-credential"};
     private static final String WALLET_SUBJECT_ID = "mock-wallet-subject-id";
     private static final String DOCUMENT_ID = "mock-document-id";
+    private static final String CREDENTIAL_TYPE = "TestCredentialType";
     private static final KmsService kmsService = mock(KmsService.class);
     private static final ConfigurationService configurationService = new ConfigurationService();
     private static final CredentialOfferService credentialOfferService =
             mock(CredentialOfferService.class);
     private final DynamoDbService mockDataStore = mock(DynamoDbService.class);
-
     private final ResourceExtension EXT =
             ResourceExtension.builder()
                     .addResource(
@@ -58,36 +54,35 @@ public class CredentialOfferResourceTest {
                                     credentialOfferService, configurationService, mockDataStore))
                     .build();
 
-    @BeforeEach
-    void setUp() throws SigningException {
-        CredentialOffer credentialOffer = getMockCredentialOffer();
-
-        when(credentialOfferService.buildCredentialOffer(anyString())).thenReturn(credentialOffer);
-    }
-
     @Test
     @DisplayName("Should return 200 and the URL encoded credential offer")
     void testItReturns200AndUrlEncodedCredentialOffer()
-            throws JOSEException, DataStoreException, JsonProcessingException {
+            throws JOSEException, DataStoreException, SigningException {
         SignResponse signResponse = getMockedSignResponse();
+        CredentialOffer mockCredentialOffer = getMockCredentialOffer();
+
         when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
+        when(credentialOfferService.buildCredentialOffer(anyString(), anyString()))
+                .thenReturn(mockCredentialOffer);
+
         doThrow(new RuntimeException("Mock error message"))
                 .when(mockDataStore)
                 .saveCredentialOffer(new CredentialOfferCacheItem());
-
-        String credentialOfferString =
-                "{\"credential_offer_uri\":\"https://mobile.account.gov.uk/wallet/add?credential_offer=%7B%22credentials%22%3A%5B%22mock-credential%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJraWQiOiJmZjI3NWI5Mi0wZGVmLTRkZmMtYjBmNi04N2M5NmIyNmM2YzciLCJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJ1cm46ZmRjOmdvdjp1azp3YWxsZXQiLCJjbGllbnRJZCI6ImFiYzEyMyIsImlzcyI6InVybjpmZGM6Z292OnVrOjxITVJDPiIsImNyZWRlbnRpYWxfaWRlbnRpZmllcnMiOlsiOWVlNzQxNjctYzYxZC00ZWE3LWFiZTEtZTI3OGYxMThlYTU1Il0sImV4cCI6MTcxMDIzNjM0NSwiaWF0IjoxNzEwMjM2MDQ1fQ.X89-rmLzo9UhzPe1t857N-0YBLRwQLu2jNYnxjSgAcU87d8wyWbbzML2wM_-rrdG5PyOWcup4-mpuFEI4VsSVA%22%7D%7D%2C%22credentialIssuer%22%3A%22mock-credential-issuer%22%7D\"}";
 
         final Response response =
                 EXT.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
                         .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("credentialType", CREDENTIAL_TYPE)
                         .request()
                         .get();
 
+        String expectedCredentialOfferString =
+                "{\"credential_offer_uri\":\"https://mobile.account.gov.uk/wallet/add?credential_offer=%7B%22credentials%22%3A%5B%22TestCredentialType%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJraWQiOiJmZjI3NWI5Mi0wZGVmLTRkZmMtYjBmNi04N2M5NmIyNmM2YzciLCJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJ1cm46ZmRjOmdvdjp1azp3YWxsZXQiLCJjbGllbnRJZCI6ImFiYzEyMyIsImlzcyI6InVybjpmZGM6Z292OnVrOjxITVJDPiIsImNyZWRlbnRpYWxfaWRlbnRpZmllcnMiOlsiOWVlNzQxNjctYzYxZC00ZWE3LWFiZTEtZTI3OGYxMThlYTU1Il0sImV4cCI6MTcxMDIzNjM0NSwiaWF0IjoxNzEwMjM2MDQ1fQ.X89-rmLzo9UhzPe1t857N-0YBLRwQLu2jNYnxjSgAcU87d8wyWbbzML2wM_-rrdG5PyOWcup4-mpuFEI4VsSVA%22%7D%7D%2C%22credentialIssuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%7D\"}";
+
         Mockito.verify(mockDataStore, Mockito.times(1)).saveCredentialOffer(any());
         assertThat(response.getStatus(), is(200));
-        assertThat(response.readEntity(String.class), is(credentialOfferString));
+        assertThat(response.readEntity(String.class), is(expectedCredentialOfferString));
     }
 
     @Test
@@ -103,6 +98,7 @@ public class CredentialOfferResourceTest {
                 EXT.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
                         .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("credentialType", CREDENTIAL_TYPE)
                         .request()
                         .get();
 
@@ -113,15 +109,14 @@ public class CredentialOfferResourceTest {
     private CredentialOffer getMockCredentialOffer() {
         String mockSignedJwt =
                 "eyJraWQiOiJmZjI3NWI5Mi0wZGVmLTRkZmMtYjBmNi04N2M5NmIyNmM2YzciLCJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJ1cm46ZmRjOmdvdjp1azp3YWxsZXQiLCJjbGllbnRJZCI6ImFiYzEyMyIsImlzcyI6InVybjpmZGM6Z292OnVrOjxITVJDPiIsImNyZWRlbnRpYWxfaWRlbnRpZmllcnMiOlsiOWVlNzQxNjctYzYxZC00ZWE3LWFiZTEtZTI3OGYxMThlYTU1Il0sImV4cCI6MTcxMDIzNjM0NSwiaWF0IjoxNzEwMjM2MDQ1fQ.X89-rmLzo9UhzPe1t857N-0YBLRwQLu2jNYnxjSgAcU87d8wyWbbzML2wM_-rrdG5PyOWcup4-mpuFEI4VsSVA";
-
         Map<String, Map<String, String>> mockGrantsMap = new HashMap<>();
         Map<String, String> mockPreAuthorizedCodeMap = new HashMap<>();
-
         mockPreAuthorizedCodeMap.put("pre-authorized_code", mockSignedJwt);
         mockGrantsMap.put(
                 "urn:ietf:params:oauth:grant-type:pre-authorized_code", mockPreAuthorizedCodeMap);
 
-        return new CredentialOffer(CREDENTIAL_ISSUER, CREDENTIALS, mockGrantsMap);
+        return new CredentialOffer(
+                "https://credential-issuer.example.com", "TestCredentialType", mockGrantsMap);
     }
 
     private SignResponse getMockedSignResponse() throws JOSEException {

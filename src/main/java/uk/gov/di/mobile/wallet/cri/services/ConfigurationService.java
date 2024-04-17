@@ -63,8 +63,4 @@ public class ConfigurationService extends Configuration {
     public String getLocalstackEndpoint() {
         return "http://localhost:4560";
     }
-
-    public String[] getCredentialTypes() {
-        return new String[] {"SocialSecurity"};
-    }
 }
