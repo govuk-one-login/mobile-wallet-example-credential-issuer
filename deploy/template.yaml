@@ -612,3 +612,11 @@ Resources:
           Value: Mobile Wallet Team
         - Key: Environment
           Value: !Ref "Environment"
+
+# WAF ASSOCIATION
+
+  ExampleCredIssuerWebAclAssociation:
+      Type: AWS::WAFv2::WebACLAssociation
+      Properties:
+        ResourceArn: !Ref WalletBELoadBalancer
+        WebACLArn: !Sub "{{resolve:ssm:/${Environment}/Platform/Security/WafArn}}"
