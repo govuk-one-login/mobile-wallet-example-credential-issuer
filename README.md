@@ -57,16 +57,28 @@ Run the application with `./gradlew run`
 To get a credential offer:
 ```
 curl -X GET http://localhost:8080/credential_offer?walletSubjectId=walletSubjectIdPlaceholder&documentId=testDocumentId&credentialType=BasicCheckCredential | jq
+```
 
 To get the credential metadata:
 ```
 curl -X GET http://localhost:8080/.well-known/openid-credential-issuer | jq
 ```
 
-#### Reading from the Database
-To check that a credential offer was saved to the **cri_cache** table, run `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`, replacing the **credentialIdentifier** with the relevant one.
+To get a credential (replace the proof JWT and bearer access token values before testing):
+ ```
+curl -d '{"proof":{"proof_type":"jwt", "jwt": "<<insert proof jwt>>" }}' -H "Content-Type: application/json" -H "Authorization: Bearer <<insert bearer token jwt>>" -X POST http://localhost:8080/credential | jq
+ ```
 
-To return all items from the **cri_cache** table, run `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name cri_cache"`.
+#### Reading from the Database
+To check that a credential offer was saved to the **cri_cache** table, run:
+
+`aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`
+
+replacing the **credentialIdentifier** with the relevant one.
+
+To return all items from the **cri_cache** table, run:
+
+ `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name cri_cache"`.
 
 ### Test
 Run unit tests with `./gradlew test`

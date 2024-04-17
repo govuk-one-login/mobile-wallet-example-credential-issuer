@@ -61,7 +61,8 @@ public class CredentialOfferResourceTest {
         SignResponse signResponse = getMockedSignResponse();
         CredentialOffer mockCredentialOffer = getMockCredentialOffer();
 
-        when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
+
         when(credentialOfferService.buildCredentialOffer(anyString(), anyString()))
                 .thenReturn(mockCredentialOffer);
 
@@ -89,8 +90,8 @@ public class CredentialOfferResourceTest {
     @DisplayName("Should return 500 when a DataStoreException is caught")
     void testItReturns500() throws JOSEException, DataStoreException {
         SignResponse signResponse = getMockedSignResponse();
-        when(kmsService.signPreAuthorizedCode(any(SignRequest.class))).thenReturn(signResponse);
-        doThrow(new DataStoreException(new Exception()))
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
+        doThrow(new DataStoreException("Mock error message", new Exception()))
                 .when(mockDataStore)
                 .saveCredentialOffer(any());
 

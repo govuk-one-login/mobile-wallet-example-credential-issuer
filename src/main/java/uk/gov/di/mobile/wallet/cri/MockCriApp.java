@@ -1,10 +1,14 @@
 package uk.gov.di.mobile.wallet.cri;
 
+import io.dropwizard.client.JerseyClientBuilder;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
+import jakarta.ws.rs.client.Client;
+import uk.gov.di.mobile.wallet.cri.credential.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
@@ -42,6 +46,25 @@ public class MockCriApp extends Application<ConfigurationService> {
                         configurationService.getCriCacheTableName());
 
         MetadataBuilder metadataBuilder = new MetadataBuilder();
+        Client httpClient =
+                new JerseyClientBuilder(environment)
+                        .using(new JerseyClientConfiguration())
+                        .build("example-cri");
+
+        AccessTokenService accessTokenService =
+                new AccessTokenService(httpClient, configurationService);
+        ProofJwtService proofJwtService = new ProofJwtService();
+        CredentialBuilder credentialBuilder =
+                new CredentialBuilder(configurationService, kmsService);
+
+        CredentialService credentialService =
+                new CredentialService(
+                        configurationService,
+                        dynamoDbService,
+                        accessTokenService,
+                        proofJwtService,
+                        httpClient,
+                        credentialBuilder);
 
         environment
                 .jersey()
@@ -50,5 +73,9 @@ public class MockCriApp extends Application<ConfigurationService> {
                                 credentialOfferService, configurationService, dynamoDbService));
 
         environment.jersey().register(new MetadataResource(configurationService, metadataBuilder));
+
+        environment.jersey().register(new CredentialResource(credentialService));
+
+        environment.jersey().register(new CredentialResource(credentialService));
     }
 }

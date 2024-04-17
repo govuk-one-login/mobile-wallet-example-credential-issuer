@@ -35,6 +35,10 @@ public class ConfigurationService extends Configuration {
                         "https://stub-credential-issuer.mobile.build.account.gov.uk/sts-stub");
     }
 
+    public String getDocumentBuilderUrl() {
+        return System.getenv().getOrDefault("DOCUMENT_BUILDER_URL", "http://localhost:8000");
+    }
+
     public String getWalletUrl() {
         return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
     }
@@ -44,20 +48,24 @@ public class ConfigurationService extends Configuration {
                 System.getenv().getOrDefault("PRE_AUTHORIZED_CODE_TTL_IN_SECS", "300"));
     }
 
-    public String getClientId() {
-        return System.getenv().getOrDefault("CLIENT_ID", "abc123");
+    public long getCredentialTtl() {
+        return Long.parseLong(System.getenv().getOrDefault("CREDENTIAL_TTL_IN_DAYS", "365"));
     }
 
     public String getCriCacheTableName() {
         return System.getenv().getOrDefault("CRI_CACHE_TABLE_NAME", "cri_cache");
     }
 
+    public String getClientId() {
+        return "EXAMPLE_CRI";
+    }
+
     public String getIssuer() {
-        return System.getenv().getOrDefault("ISSUER", "urn:fdc:gov:uk:<HMRC>");
+        return "urn:fdc:gov:uk:example-credential-issuer";
     }
 
     public String getAudience() {
-        return System.getenv().getOrDefault("AUDIENCE", "urn:fdc:gov:uk:wallet");
+        return "urn:fdc:gov:uk:wallet";
     }
 
     public String getLocalstackEndpoint() {

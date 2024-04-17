@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -10,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 
@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DynamoDbServiceTest {
+
     private static final String TEST_TABLE_NAME = "test-cache-cri-table";
 
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
@@ -41,8 +42,7 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    @DisplayName("Should save credential offer to DynamoDB table")
-    void testItSavesCredentialOfferToTable() throws DataStoreException {
+    void shouldSaveCredentialOfferToCache() throws DataStoreException {
         dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
 
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
@@ -62,5 +62,19 @@ class DynamoDbServiceTest {
         assertEquals(
                 credentialOfferCacheItem.getWalletSubjectId(),
                 credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
+    }
+
+    @Test
+    void shouldGetCredentialOfferFromCacheThroughPartitionKey() throws DataStoreException {
+        dynamoDbService.getCredentialOffer("test-partition-key-123");
+
+        ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
+
+        verify(mockDynamoDbEnhancedClient)
+                .table(
+                        eq(TEST_TABLE_NAME),
+                        ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any());
+        verify(mockDynamoDbTable).getItem(keyCaptor.capture());
+        assertEquals("test-partition-key-123", keyCaptor.getValue().partitionKeyValue().s());
     }
 }

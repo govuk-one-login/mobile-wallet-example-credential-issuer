@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential_offer;
+package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -21,22 +21,24 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-public class PreAuthorizedCodeBuilder {
+public class CredentialBuilder {
 
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
     private static final JOSEObjectType JWT = JOSEObjectType.JWT;
+    private static final String CONTEXT = "https://www.w3.org/2018/credentials/v1";
+
     private final ConfigurationService configurationService;
     private final SigningService signingService;
 
-    public PreAuthorizedCodeBuilder(
-            ConfigurationService configurationService, KmsService kmsService) {
+    public CredentialBuilder(ConfigurationService configurationService, KmsService kmsService) {
         this.configurationService = configurationService;
         this.signingService = kmsService;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
+    public Credential buildCredential(String proofJwtDidKey, Object documentDetails)
+            throws SigningException {
         var encodedHeader = getEncodedHeader();
-        var encodedClaims = getEncodedClaims(credentialIdentifier);
+        var encodedClaims = getEncodedClaims(proofJwtDidKey, documentDetails);
         var message = encodedHeader + "." + encodedClaims;
 
         var signRequest =
@@ -49,7 +51,8 @@ public class PreAuthorizedCodeBuilder {
         try {
             SignResponse signResult = signingService.sign(signRequest);
             String signature = encodedSignature(signResult);
-            return SignedJWT.parse(message + "." + signature);
+            SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
+            return new Credential(signedJWT);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing token: %s", exception.getMessage()), exception);
@@ -64,22 +67,22 @@ public class PreAuthorizedCodeBuilder {
                 .toString();
     }
 
-    private Base64URL getEncodedClaims(String walletSubjectId) {
+    private Base64URL getEncodedClaims(String proofJwtDidKey, Object documentDetails) {
         Instant now = Instant.now();
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
-                        .audience(configurationService.getAudience())
                         .issuer(configurationService.getIssuer())
                         .issueTime(Date.from(now))
+                        .notBeforeTime(Date.from(now))
                         .expirationTime(
                                 Date.from(
                                         now.plus(
-                                                configurationService.getPreAuthorizedCodeTtl(),
-                                                ChronoUnit.SECONDS)))
-                        .claim("clientId", configurationService.getClientId())
-                        .claim("credential_identifiers", new String[] {walletSubjectId});
-
+                                                configurationService.getCredentialTtl(),
+                                                ChronoUnit.DAYS)))
+                        .subject(proofJwtDidKey)
+                        .claim("vc", documentDetails)
+                        .claim("context", new String[] {CONTEXT});
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 

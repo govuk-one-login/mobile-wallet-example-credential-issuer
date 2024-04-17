@@ -5,5 +5,5 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 
 public interface SigningService {
 
-    public SignResponse signPreAuthorizedCode(SignRequest signRequest);
+    public SignResponse sign(SignRequest signRequest);
 }

@@ -6,4 +6,6 @@ public interface DataStore {
 
     public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
             throws DataStoreException;
+
+    CredentialOfferCacheItem getCredentialOffer(String partitionValue) throws DataStoreException;
 }
