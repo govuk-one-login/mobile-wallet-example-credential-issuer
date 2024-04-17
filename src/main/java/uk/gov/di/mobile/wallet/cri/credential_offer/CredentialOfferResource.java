@@ -9,6 +9,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -26,6 +28,8 @@ public class CredentialOfferResource {
     private final CredentialOfferService credentialOfferService;
     private final ConfigurationService configurationService;
     private final DataStore dataStore;
+
+    private static Logger logger = LoggerFactory.getLogger(CredentialOfferResource.class);
 
     public CredentialOfferResource(
             CredentialOfferService credentialOfferService,
@@ -52,6 +56,9 @@ public class CredentialOfferResource {
                     credentialOfferService.buildCredentialOffer(
                             credentialIdentifier, credentialType);
         } catch (SigningException exception) {
+            logger.error(
+                    "failed to sign credential offer for walletSubjectID: {} , documentID: {}",
+                    exception);
             return buildFailResponse().build();
         }
 
@@ -60,6 +67,9 @@ public class CredentialOfferResource {
                     new CredentialOfferCacheItem(
                             credentialIdentifier, documentId, walletSubjectId));
         } catch (DataStoreException exception) {
+            logger.error(
+                    "failed to save credential offer for walletSubjectID: {} , documentID: {}",
+                    exception);
             return buildFailResponse().build();
         }
 
