@@ -45,7 +45,6 @@ public class MockCriApp extends Application<ConfigurationService> {
                         DynamoDbService.getClient(configurationService),
                         configurationService.getCriCacheTableName());
 
-
         MetadataBuilder metadataBuilder = new MetadataBuilder();
         Client httpClient =
                 new JerseyClientBuilder(environment)
@@ -75,10 +74,7 @@ public class MockCriApp extends Application<ConfigurationService> {
 
         environment.jersey().register(new MetadataResource(configurationService, metadataBuilder));
 
-        environment
-                .jersey()
-                .register(
-                        new CredentialResource(credentialService));
+        environment.jersey().register(new CredentialResource(credentialService));
 
         environment.jersey().register(new CredentialResource(credentialService));
     }

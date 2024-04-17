@@ -60,12 +60,11 @@ public class CredentialOfferResourceTest {
             throws JOSEException, DataStoreException, SigningException {
         SignResponse signResponse = getMockedSignResponse();
         CredentialOffer mockCredentialOffer = getMockCredentialOffer();
-        
+
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
 
         when(credentialOfferService.buildCredentialOffer(anyString(), anyString()))
                 .thenReturn(mockCredentialOffer);
-
 
         doThrow(new RuntimeException("Mock error message"))
                 .when(mockDataStore)
