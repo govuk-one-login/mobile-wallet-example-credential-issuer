@@ -31,9 +31,9 @@ public class MetadataResource {
 
             Metadata metadata =
                     metadataBuilder
-                            .setCredentialIssuer(
+                            .setCredentialIssuer(configurationService.getExampleCriUrl())
+                            .setCredentialsEndpoint(
                                     configurationService.getExampleCriUrl() + CREDENTIAL_ENDPOINT)
-                            .setCredentialsEndpoint(configurationService.getExampleCriUrl())
                             .setAuthorizationServers(configurationService.getStsStubUrl())
                             .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
                             .build();
