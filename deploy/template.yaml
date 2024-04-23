@@ -410,7 +410,7 @@ Resources:
               Value: !Sub "${AWS::Region}"
             - Name: ENVIRONMENT
               Value: !Sub "${Environment}"
-            - Name: MOCK_CRI_URL
+            - Name: EXAMPLE_CRI_URL
               Value: !Sub 
                       - "https://${BEURL}"
                       - BEURL:
@@ -428,9 +428,9 @@ Resources:
               Value: 365
             - Name: CRI_CACHE_TABLE_NAME
               Value: !Ref CRICacheDatabase
-            - Name: STS_URL
+            - Name: STS_STUB_URL
               Value: !Sub 
-                      - "https://${FEURL}"
+                      - "https://${FEURL}/sts-stub"
                       - FEURL:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
           PortMappings:
@@ -514,7 +514,9 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action: 'dynamodb:PutItem'
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:GetItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
               - Effect: Allow
                 Action: 

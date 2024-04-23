@@ -48,13 +48,12 @@ public class CredentialOfferResource {
             throws JsonProcessingException {
 
         UUID uuid = UUID.randomUUID();
-        String credentialIdentifier = uuid.toString();
+        String credentialOfferId = uuid.toString();
 
         CredentialOffer credentialOffer;
         try {
             credentialOffer =
-                    credentialOfferService.buildCredentialOffer(
-                            credentialIdentifier, credentialType);
+                    credentialOfferService.buildCredentialOffer(credentialOfferId, credentialType);
         } catch (SigningException exception) {
             logger.error(
                     "failed to sign credential offer for walletSubjectID: {} , documentID: {}",
@@ -64,14 +63,18 @@ public class CredentialOfferResource {
 
         try {
             dataStore.saveCredentialOffer(
-                    new CredentialOfferCacheItem(
-                            credentialIdentifier, documentId, walletSubjectId));
+                    new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId));
         } catch (DataStoreException exception) {
             logger.error(
                     "failed to save credential offer for walletSubjectID: {} , documentID: {}",
                     exception);
             return buildFailResponse().build();
         }
+
+        logger.info(
+                "Credential offer saved for walletSubjectId: {} and credentialOfferId: {}",
+                walletSubjectId,
+                credentialOfferId);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);

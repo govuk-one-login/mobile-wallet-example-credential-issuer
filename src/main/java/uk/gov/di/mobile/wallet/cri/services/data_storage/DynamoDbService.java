@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
@@ -16,6 +18,7 @@ public class DynamoDbService implements DataStore {
 
     private final String tableName;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private static final Logger logger = LoggerFactory.getLogger(DynamoDbService.class);
 
     public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient, String tableName) {
         this.tableName = tableName;

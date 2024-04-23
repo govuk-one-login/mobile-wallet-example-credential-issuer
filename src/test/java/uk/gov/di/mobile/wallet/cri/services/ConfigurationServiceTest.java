@@ -48,17 +48,13 @@ class ConfigurationServiceTest {
     @Test
     void testExampleCriUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(
-                "https://example-credential-issuer.mobile.build.account.gov.uk",
-                configurationService.getExampleCriUrl());
+        assertEquals("https://localhost:8080", configurationService.getExampleCriUrl());
     }
 
     @Test
     void testStsStubUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(
-                "https://stub-credential-issuer.mobile.build.account.gov.uk/sts-stub",
-                configurationService.getStsStubUrl());
+        assertEquals("https://localhost:8000/sts-stub", configurationService.getStsStubUrl());
     }
 
     @Test
