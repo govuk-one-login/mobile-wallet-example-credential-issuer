@@ -626,7 +626,7 @@ Resources:
 # ALARMS
 
   ExampleCredIssuerLowContainerTaskCountAlarm:
-    Condition: IsBuild
+    # Condition: IsBuild
     DependsOn:
        - WalletBECluster
        - WalletBEECSService
