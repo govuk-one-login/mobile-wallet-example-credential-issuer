@@ -73,7 +73,7 @@ public class CredentialOfferResource {
             return buildFailResponse().build();
         }
 
-        logger.info("Credential offer saved");
+        logger.info("Credential offer saved, credentialIdentifier = {}", credentialIdentifier);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
