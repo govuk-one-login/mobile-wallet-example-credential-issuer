@@ -30,8 +30,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getDocumentBuilderUrl() {
-        return System.getenv()
-                .getOrDefault("DOCUMENT_BUILDER_URL", "https://https://localhost:8000");
+        return System.getenv().getOrDefault("DOCUMENT_BUILDER_URL", "https://localhost:8000");
     }
 
     public String getWalletUrl() {
