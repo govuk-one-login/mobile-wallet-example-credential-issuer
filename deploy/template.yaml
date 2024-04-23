@@ -514,7 +514,9 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action: 'dynamodb:PutItem'
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:GetItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
               - Effect: Allow
                 Action: 
