@@ -662,11 +662,11 @@ Resources:
             Stat: Minimum
 
   FE4XXErrorAlarm:
-    # Condition: IsBuild
+    Condition: IsBuild
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub "${AWS::StackName}-FE4XXErrorAlarm"
-      AlarmDescription: Trigger the alarm if errorThreshold exceeds 50git add% with a minimum of 5 invocations in the last 30 minutes
+      AlarmDescription: Trigger the alarm if errorThreshold exceeds 50% with a minimum of 5 invocations in the last 30 minutes
       ActionsEnabled: false
       # OKActions:
       #   - !ImportValue platform-alarm-topic-slack-warning-alert
