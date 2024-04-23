@@ -662,7 +662,7 @@ Resources:
             Stat: Minimum
 
   FE4XXErrorAlarm:
-    Condition: IsBuild
+    # Condition: IsBuild
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub "${AWS::StackName}-FE4XXErrorAlarm"
