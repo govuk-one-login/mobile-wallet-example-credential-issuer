@@ -47,9 +47,7 @@ public class CredentialOfferServiceTest {
                 credentialOfferService.buildCredentialOffer(
                         "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "TestCredentialType");
 
-        assertEquals(
-                "https://example-credential-issuer.mobile.dev.account.gov.uk",
-                credentialOffer.getCredentialIssuer());
+        assertEquals("https://localhost:8080", credentialOffer.getCredentialIssuer());
         assertArrayEquals(new String[] {"TestCredentialType"}, credentialOffer.getCredentials());
         assertThat(credentialOffer, hasProperty("grants"));
         assertThat(
