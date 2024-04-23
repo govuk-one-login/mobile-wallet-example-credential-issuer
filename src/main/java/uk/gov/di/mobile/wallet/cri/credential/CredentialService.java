@@ -64,10 +64,10 @@ public class CredentialService {
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
-        String credentialOfferID = accessTokenCustomClaims.credentialIdentifier();
-        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferID);
+        String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
+        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
-        logger.info("Credential offer retrieved, credentialOfferID = {}", credentialOfferID);
+        logger.info("Credential offer retrieved for credentialOfferId: {}", credentialOfferId);
 
         if (credentialOffer == null) {
             throw new DataStoreException("Null response returned when fetching credential offer");
