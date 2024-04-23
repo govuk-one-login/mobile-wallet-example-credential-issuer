@@ -49,7 +49,6 @@ public class DynamoDbService implements DataStore {
         try {
             getTable().putItem(credentialOfferCacheItem);
         } catch (Exception exception) {
-            logger.error("Failed to save credential offer", exception);
             throw new DataStoreException("Error saving credential offer", exception);
         }
     }
@@ -60,7 +59,6 @@ public class DynamoDbService implements DataStore {
         try {
             return getItemByKey(Key.builder().partitionValue(partitionValue).build());
         } catch (Exception exception) {
-            logger.error("Failed to get credential offer", exception);
             throw new DataStoreException("Error fetching credential offer", exception);
         }
     }
