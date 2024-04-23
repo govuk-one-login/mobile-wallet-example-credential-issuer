@@ -36,7 +36,10 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getDocumentBuilderUrl() {
-        return System.getenv().getOrDefault("DOCUMENT_BUILDER_URL", "https://stub-credential-issuer.mobile.build.account.gov.uk");
+        return System.getenv()
+                .getOrDefault(
+                        "DOCUMENT_BUILDER_URL",
+                        "https://stub-credential-issuer.mobile.dev.account.gov.uk");
     }
 
     public String getWalletUrl() {
