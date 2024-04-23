@@ -25,18 +25,18 @@ public class ConfigurationService extends Configuration {
         return System.getenv()
                 .getOrDefault(
                         "EXAMPLE_CRI_URL",
-                        "https://example-credential-issuer.mobile.build.account.gov.uk");
+                        "https://example-credential-issuer.mobile.dev.account.gov.uk");
     }
 
     public String getStsStubUrl() {
         return System.getenv()
                 .getOrDefault(
                         "STS_STUB_URL",
-                        "https://stub-credential-issuer.mobile.build.account.gov.uk/sts-stub");
+                        "https://stub-credential-issuer.mobile.dev.account.gov.uk/sts-stub");
     }
 
     public String getDocumentBuilderUrl() {
-        return System.getenv().getOrDefault("DOCUMENT_BUILDER_URL", "http://localhost:8000");
+        return System.getenv().getOrDefault("DOCUMENT_BUILDER_URL", "https://stub-credential-issuer.mobile.build.account.gov.uk");
     }
 
     public String getWalletUrl() {
