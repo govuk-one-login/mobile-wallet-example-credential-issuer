@@ -25,6 +25,10 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("EXAMPLE_CRI_URL", "https://localhost:8080");
     }
 
+    public String getDidController() {
+        return System.getenv().getOrDefault("DID_CONTROLLER", "localhost:8080");
+    }
+
     public String getStsStubUrl() {
         return System.getenv().getOrDefault("STS_STUB_URL", "https://localhost:8000/sts-stub");
     }
