@@ -555,7 +555,10 @@ Resources:
           - Effect: Allow
             Principal:
               AWS: !GetAtt WalletBEECSTaskRole.Arn
-            Action: kms:Sign
+            Action:
+            - "kms:Sign"
+            - "kms:GetPublicKey"
+            - "kms:DescribeKey"
             Resource:
               - "*"
       KeySpec: ECC_NIST_P256
