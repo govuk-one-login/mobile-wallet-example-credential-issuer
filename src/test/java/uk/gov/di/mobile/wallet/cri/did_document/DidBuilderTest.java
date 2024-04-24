@@ -12,26 +12,29 @@ import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class DidBuilderTest {
 
     @Test
-    void shouldReturnDidDocument()
+    void shouldReturnDid()
             throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         ECKey testJwk = getTestJwk();
 
         Did response =
                 new DidBuilder()
-                        .setType("TEST_DID_TYPE")
-                        .setController("TEST_DID_CONTROLLER")
-                        .setId("TEST_DID_ID")
+                        .setType("test_did_type")
+                        .setController("test_controller")
+                        .setId("test_did_id")
                         .setPublicKeyJwk(testJwk)
                         .build();
 
-        assertEquals("TEST_DID_TYPE", response.type);
-        assertEquals("TEST_DID_CONTROLLER", response.controller);
-        assertEquals("TEST_DID_ID", response.id);
+        assertEquals("test_did_type", response.type);
+        assertEquals("test_controller", response.controller);
+        assertEquals("test_did_id", response.id);
+        assertThat(response.publicKeyJwk, instanceOf(PublicKeyJwk.class));
         assertEquals(testJwk.getKeyID(), response.publicKeyJwk.kid);
         assertEquals(testJwk.getX().toString(), response.publicKeyJwk.x);
         assertEquals(testJwk.getY().toString(), response.publicKeyJwk.y);
