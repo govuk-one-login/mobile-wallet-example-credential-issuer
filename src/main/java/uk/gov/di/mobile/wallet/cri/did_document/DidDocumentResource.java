@@ -16,7 +16,7 @@ import java.security.NoSuchAlgorithmException;
 public class DidDocumentResource {
 
     private final DidDocumentService didDocumentService;
-    private static Logger logger = LoggerFactory.getLogger(DidDocumentResource.class);
+    private static final Logger logger = LoggerFactory.getLogger(DidDocumentResource.class);
 
     public DidDocumentResource(DidDocumentService didDocumentService) {
         this.didDocumentService = didDocumentService;
@@ -25,10 +25,10 @@ public class DidDocumentResource {
     @GET
     public Response getDidDocument() {
         try {
-            DidDocument didDocument = didDocumentService.generateDIDDocument();
+            DidDocument didDocument = didDocumentService.generateDidDocument();
             return buildSuccessResponse().entity(didDocument).build();
         } catch (IllegalArgumentException | PEMException | NoSuchAlgorithmException exception) {
-            logger.error("An error happened trying to get the DID Web document: %s", exception);
+            logger.error("An error happened trying to get the DID document: %s", exception);
             return buildFailResponse().build();
         }
     }

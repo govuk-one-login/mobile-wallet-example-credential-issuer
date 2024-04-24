@@ -8,8 +8,6 @@ public class PublicKeyJwkBuilder {
     String x;
     String y;
 
-    public PublicKeyJwkBuilder() {}
-
     public PublicKeyJwkBuilder setKty(String kty) throws IllegalArgumentException {
         if (kty == null) {
             throw new IllegalArgumentException("kty must not be null");

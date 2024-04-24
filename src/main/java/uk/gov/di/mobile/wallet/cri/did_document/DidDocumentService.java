@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.did_document;
 
 import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.JWK;
 import org.apache.hc.client5.http.utils.Hex;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMException;
@@ -29,10 +28,11 @@ import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static com.nimbusds.jose.jwk.Curve.P_256;
 
 public class DidDocumentService {
-    private static final String DID_DIGEST_ALGORITHM = "SHA-256";
-    private static final String JSON_WEB_KEY = "JsonWebKey2020";
+
+    private static final String DID_HASHING_ALGORITHM = "SHA-256";
+    private static final String VERIFICATION_METHOD_TYPE = "JsonWebKey2020";
     private static final String CONTROLLER_PREFIX = "did:web:";
-    public static final List<String> CONTEXT =
+    private static final List<String> CONTEXT =
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
     private static final Logger logger = LoggerFactory.getLogger(DidDocumentService.class);
     private final ConfigurationService configurationService;
@@ -43,51 +43,52 @@ public class DidDocumentService {
         this.kmsService = kmsService;
     }
 
-    public DidDocument generateDIDDocument()
-            throws DidDocumentException, PEMException, NoSuchAlgorithmException {
-        String signingKeyAlias = configurationService.getSigningKeyAlias();
+    public DidDocument generateDidDocument() throws PEMException, NoSuchAlgorithmException {
 
+        String keyAlias = configurationService.getSigningKeyAlias();
         String controller = CONTROLLER_PREFIX + configurationService.getDidController();
-        Did did = generateDid(signingKeyAlias, controller);
+        Did did = generateDid(keyAlias, controller);
+        List<Did> verificationMethod = Collections.singletonList(did);
+        List<String> assertionMethod = Collections.singletonList(did.getId());
 
         return new DidDocumentBuilder()
                 .setContext(CONTEXT)
                 .setId(controller)
-                .setVerificationMethod(Collections.singletonList(did))
-                .setAssertionMethod(Collections.singletonList(did.getId()))
+                .setVerificationMethod(verificationMethod)
+                .setAssertionMethod(assertionMethod)
                 .build();
     }
 
-    private Did generateDid(String signingKeyAlias, String controller)
+    private Did generateDid(String keyAlias, String controller)
             throws PEMException, NoSuchAlgorithmException {
-        if (!isKeyActive(signingKeyAlias)) {
-            throw new DidDocumentException("Public key is not active");
+
+        if (!isKeyActive(keyAlias)) {
+            throw new RuntimeException("Public key is not active");
         }
 
-        var publicKeyResponse =
-                kmsService.getPublicKey(
-                        GetPublicKeyRequest.builder().keyId(signingKeyAlias).build());
+        GetPublicKeyResponse getPublicKeyResponse =
+                kmsService.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
 
-        String keyId = Arn.fromString(publicKeyResponse.keyId()).resource().resource();
-        MessageDigest digest = MessageDigest.getInstance(DID_DIGEST_ALGORITHM);
+        String keyId = Arn.fromString(getPublicKeyResponse.keyId()).resource().resource();
+        MessageDigest messageDigest = MessageDigest.getInstance(DID_HASHING_ALGORITHM);
+        String keyIdHashed =
+                Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
 
-        String keyIdEncoded =
-                Hex.encodeHexString(digest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
-
-        JWK jwk = createJwk(publicKeyResponse, keyIdEncoded);
-        String didId = controller + "#" + keyIdEncoded;
+        ECKey jwk = createJwk(getPublicKeyResponse, keyIdHashed);
+        String id = controller + "#" + keyIdHashed;
 
         return new DidBuilder()
-                .setId(didId)
+                .setId(id)
                 .setController(controller)
-                .setType(JSON_WEB_KEY)
+                .setType(VERIFICATION_METHOD_TYPE)
                 .setPublicKeyJwk(jwk)
                 .build();
     }
 
-    private JWK createJwk(GetPublicKeyResponse publicKeyResponse, String keyId)
+    private ECKey createJwk(GetPublicKeyResponse publicKeyResponse, String keyId)
             throws PEMException {
-        var publicKey = createPublicKey(publicKeyResponse);
+        PublicKey publicKey = createPublicKey(publicKeyResponse);
+
         return new ECKey.Builder(P_256, (ECPublicKey) publicKey)
                 .keyID(keyId)
                 .algorithm(ES256)
@@ -95,14 +96,15 @@ public class DidDocumentService {
     }
 
     private PublicKey createPublicKey(GetPublicKeyResponse publicKeyResponse) throws PEMException {
-        var subjectKeyInfo =
+        SubjectPublicKeyInfo subjectKeyInfo =
                 SubjectPublicKeyInfo.getInstance(publicKeyResponse.publicKey().asByteArray());
 
         return new JcaPEMKeyConverter().getPublicKey(subjectKeyInfo);
     }
 
     private boolean isKeyActive(String keyAlias) {
-        var describeKeyRequest = DescribeKeyRequest.builder().keyId(keyAlias).build();
+        DescribeKeyRequest describeKeyRequest =
+                DescribeKeyRequest.builder().keyId(keyAlias).build();
         DescribeKeyResponse describeKeyResponse;
 
         try {
@@ -113,12 +115,12 @@ public class DidDocumentService {
         }
 
         if (Boolean.FALSE.equals(describeKeyResponse.keyMetadata().enabled())) {
-            logger.info("Key with alias {} was is disabled", keyAlias);
+            logger.info("Key with alias {} is disabled", keyAlias);
             return false;
         }
 
         if (describeKeyResponse.keyMetadata().deletionDate() != null) {
-            logger.info("Key with alias {} was is due for deletion", keyAlias);
+            logger.info("Key with alias {} is due for deletion", keyAlias);
             return false;
         }
 

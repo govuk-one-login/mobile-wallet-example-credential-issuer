@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.did_document;
 
 import com.nimbusds.jose.jwk.ECKey;
-import com.nimbusds.jose.jwk.JWK;
 
 public class DidBuilder {
 
@@ -9,8 +8,6 @@ public class DidBuilder {
     String type;
     String controller;
     PublicKeyJwk jwk;
-
-    public DidBuilder() {}
 
     public DidBuilder setId(String id) throws IllegalArgumentException {
         if (id == null) {
@@ -36,23 +33,19 @@ public class DidBuilder {
         return this;
     }
 
-    public DidBuilder setPublicKeyJwk(JWK jwk) throws IllegalArgumentException {
+    public DidBuilder setPublicKeyJwk(ECKey jwk) throws IllegalArgumentException {
         if (jwk == null) {
-            throw new IllegalArgumentException("publicKeyJwk must not be null");
+            throw new IllegalArgumentException("jwk must not be null");
         }
-
-        if (jwk instanceof ECKey ecKey) {
-            this.jwk =
-                    new PublicKeyJwkBuilder()
-                            .setKid(jwk.getKeyID())
-                            .setKty(jwk.getKeyType().getValue())
-                            .setCrv(ecKey.getCurve().toString())
-                            .setX(ecKey.getX().toString())
-                            .setY(ecKey.getY().toString())
-                            .build();
-            return this;
-        }
-        return null;
+        this.jwk =
+                new PublicKeyJwkBuilder()
+                        .setKid(jwk.getKeyID())
+                        .setKty(jwk.getKeyType().getValue())
+                        .setCrv(jwk.getCurve().toString())
+                        .setX(jwk.getX().toString())
+                        .setY(jwk.getY().toString())
+                        .build();
+        return this;
     }
 
     public Did build() {
