@@ -11,6 +11,8 @@ import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.credential.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
+import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
+import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -66,6 +68,9 @@ public class MockCriApp extends Application<ConfigurationService> {
                         httpClient,
                         credentialBuilder);
 
+        DidDocumentService didDocumentService =
+                new DidDocumentService(configurationService, kmsService);
+
         environment
                 .jersey()
                 .register(
@@ -76,6 +81,6 @@ public class MockCriApp extends Application<ConfigurationService> {
 
         environment.jersey().register(new CredentialResource(credentialService));
 
-        environment.jersey().register(new CredentialResource(credentialService));
+        environment.jersey().register(new DidDocumentResource(didDocumentService));
     }
 }
