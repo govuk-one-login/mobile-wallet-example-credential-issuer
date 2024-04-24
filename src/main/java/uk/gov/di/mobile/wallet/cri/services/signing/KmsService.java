@@ -3,8 +3,7 @@ package uk.gov.di.mobile.wallet.cri.services.signing;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kms.KmsClient;
-import software.amazon.awssdk.services.kms.model.SignRequest;
-import software.amazon.awssdk.services.kms.model.SignResponse;
+import software.amazon.awssdk.services.kms.model.*;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
@@ -39,5 +38,13 @@ public class KmsService implements SigningService {
 
     public SignResponse sign(SignRequest signRequest) {
         return kmsClient.sign(signRequest);
+    }
+
+    public GetPublicKeyResponse getPublicKey(GetPublicKeyRequest getPublicKeyRequest) {
+        return kmsClient.getPublicKey(getPublicKeyRequest);
+    }
+
+    public DescribeKeyResponse describeKey(DescribeKeyRequest describeKeyRequest) {
+        return kmsClient.describeKey(describeKeyRequest);
     }
 }
