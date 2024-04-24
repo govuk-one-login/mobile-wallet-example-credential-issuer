@@ -22,7 +22,6 @@ public class DidDocumentBuilder {
         return this;
     }
 
-    @JsonProperty("id")
     public DidDocumentBuilder setId(String id) throws IllegalArgumentException {
         if (id == null) {
             throw new IllegalArgumentException("id must not be null");
@@ -31,7 +30,6 @@ public class DidDocumentBuilder {
         return this;
     }
 
-    @JsonProperty("verificationMethod")
     public DidDocumentBuilder setVerificationMethod(List<Did> verificationMethod)
             throws IllegalArgumentException {
         if (verificationMethod == null) {
@@ -41,7 +39,6 @@ public class DidDocumentBuilder {
         return this;
     }
 
-    @JsonProperty("assertionMethod")
     public DidDocumentBuilder setAssertionMethod(List<String> assertionMethod)
             throws IllegalArgumentException {
         if (assertionMethod == null) {

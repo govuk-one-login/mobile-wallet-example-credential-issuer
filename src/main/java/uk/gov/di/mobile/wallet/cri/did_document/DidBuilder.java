@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.did_document;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 
@@ -13,7 +12,6 @@ public class DidBuilder {
 
     public DidBuilder() {}
 
-    @JsonProperty("id")
     public DidBuilder setId(String id) throws IllegalArgumentException {
         if (id == null) {
             throw new IllegalArgumentException("id must not be null");
@@ -22,7 +20,6 @@ public class DidBuilder {
         return this;
     }
 
-    @JsonProperty("type")
     public DidBuilder setType(String type) throws IllegalArgumentException {
         if (type == null) {
             throw new IllegalArgumentException("type must not be null");
@@ -31,7 +28,6 @@ public class DidBuilder {
         return this;
     }
 
-    @JsonProperty("controller")
     public DidBuilder setController(String controller) throws IllegalArgumentException {
         if (controller == null) {
             throw new IllegalArgumentException("controller must not be null");
@@ -40,7 +36,6 @@ public class DidBuilder {
         return this;
     }
 
-    @JsonProperty("publicKeyJwk")
     public DidBuilder setPublicKeyJwk(JWK jwk) throws IllegalArgumentException {
         if (jwk == null) {
             throw new IllegalArgumentException("publicKeyJwk must not be null");

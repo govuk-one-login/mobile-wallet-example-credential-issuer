@@ -9,5 +9,4 @@ public interface SigningService {
     public GetPublicKeyResponse getPublicKey(GetPublicKeyRequest getPublicKeyRequest);
 
     public DescribeKeyResponse describeKey(DescribeKeyRequest describeKeyRequest);
-
 }

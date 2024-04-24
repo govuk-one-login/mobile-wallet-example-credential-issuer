@@ -26,7 +26,6 @@ public class DidDocumentResource {
     public Response getDidDocument() {
         try {
             DidDocument didDocument = didDocumentService.generateDIDDocument();
-
             return buildSuccessResponse().entity(didDocument).build();
         } catch (IllegalArgumentException | PEMException | NoSuchAlgorithmException exception) {
             logger.error("An error happened trying to get the DID Web document: %s", exception);
