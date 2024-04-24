@@ -10,7 +10,7 @@ public class PublicKeyJwkBuilder {
 
     public PublicKeyJwkBuilder setKty(String kty) throws IllegalArgumentException {
         if (kty == null) {
-            throw new IllegalArgumentException("kty must not be null");
+            throw new IllegalArgumentException("kty attribute must not be null");
         }
         this.kty = kty;
         return this;
@@ -18,7 +18,7 @@ public class PublicKeyJwkBuilder {
 
     public PublicKeyJwkBuilder setKid(String kid) throws IllegalArgumentException {
         if (kid == null) {
-            throw new IllegalArgumentException("kid must not be null");
+            throw new IllegalArgumentException("kid attribute must not be null");
         }
         this.kid = kid;
         return this;
@@ -26,7 +26,7 @@ public class PublicKeyJwkBuilder {
 
     public PublicKeyJwkBuilder setCrv(String crv) throws IllegalArgumentException {
         if (crv == null) {
-            throw new IllegalArgumentException("crv must not be null");
+            throw new IllegalArgumentException("crv attribute must not be null");
         }
         this.crv = crv;
         return this;
@@ -34,7 +34,7 @@ public class PublicKeyJwkBuilder {
 
     public PublicKeyJwkBuilder setX(String x) throws IllegalArgumentException {
         if (x == null) {
-            throw new IllegalArgumentException("x must not be null");
+            throw new IllegalArgumentException("x attribute must not be null");
         }
         this.x = x;
         return this;
@@ -42,7 +42,7 @@ public class PublicKeyJwkBuilder {
 
     public PublicKeyJwkBuilder setY(String y) throws IllegalArgumentException {
         if (y == null) {
-            throw new IllegalArgumentException("y must not be null");
+            throw new IllegalArgumentException("y attribute must not be null");
         }
         this.y = y;
         return this;

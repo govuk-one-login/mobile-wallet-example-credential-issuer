@@ -81,7 +81,7 @@ public class DidBuilderTest {
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID("TEST_KEY_ID")
+                .keyID("test_key_id")
                 .algorithm(ES256)
                 .build();
     }
