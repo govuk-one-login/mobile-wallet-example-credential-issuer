@@ -19,8 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class DidBuilderTest {
 
     @Test
-    void shouldReturnDid()
-            throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    void shouldReturnDid() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         ECKey testJwk = getTestJwk();
 
         Did response =

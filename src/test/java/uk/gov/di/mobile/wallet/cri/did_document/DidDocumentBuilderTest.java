@@ -23,19 +23,29 @@ public class DidDocumentBuilderTest {
     @Test
     void shouldReturnDidDocument()
             throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-    List<String> testContext =
-                List.of("https://www.w3.org/ns/did/v1/test", "https://www.w3.org/ns/security/jwk/v1/test");
+        List<String> testContext =
+                List.of(
+                        "https://www.w3.org/ns/did/v1/test",
+                        "https://www.w3.org/ns/security/jwk/v1/test");
         String testController = "test_controller";
         List<String> testAssertionMethod = Collections.singletonList("test_assertion_method");
         ECKey testJwk = getTestJwk();
-        List<Did> testVerificationMethod = Collections.singletonList(new DidBuilder()
-                .setType("test_did_type")
-                .setController("test_controller")
-                .setId("test_did_id")
-                .setPublicKeyJwk(testJwk)
-                .build());
+        List<Did> testVerificationMethod =
+                Collections.singletonList(
+                        new DidBuilder()
+                                .setType("test_did_type")
+                                .setController("test_controller")
+                                .setId("test_did_id")
+                                .setPublicKeyJwk(testJwk)
+                                .build());
 
-        DidDocument response = new DidDocumentBuilder().setContext(testContext).setId(testController).setVerificationMethod(testVerificationMethod).setAssertionMethod(testAssertionMethod).build();
+        DidDocument response =
+                new DidDocumentBuilder()
+                        .setContext(testContext)
+                        .setId(testController)
+                        .setVerificationMethod(testVerificationMethod)
+                        .setAssertionMethod(testAssertionMethod)
+                        .build();
 
         assertEquals(testContext, response.context);
         assertEquals(testController, response.id);
@@ -48,7 +58,8 @@ public class DidDocumentBuilderTest {
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
-                        IllegalArgumentException.class, () -> didDocumentBuilder.setVerificationMethod(null));
+                        IllegalArgumentException.class,
+                        () -> didDocumentBuilder.setVerificationMethod(null));
         Assertions.assertEquals("verificationMethod must not be null", thrown.getMessage());
     }
 
@@ -64,7 +75,9 @@ public class DidDocumentBuilderTest {
     void shouldThrowIllegalArgumentExceptionOnNullAssertionMethod() {
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         IllegalArgumentException thrown =
-                assertThrows(IllegalArgumentException.class, () -> didDocumentBuilder.setAssertionMethod(null));
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> didDocumentBuilder.setAssertionMethod(null));
         Assertions.assertEquals("assertionMethod must not be null", thrown.getMessage());
     }
 
@@ -72,7 +85,8 @@ public class DidDocumentBuilderTest {
     void shouldThrowIllegalArgumentExceptionOnNullContext() {
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         IllegalArgumentException thrown =
-                assertThrows(IllegalArgumentException.class, () -> didDocumentBuilder.setContext(null));
+                assertThrows(
+                        IllegalArgumentException.class, () -> didDocumentBuilder.setContext(null));
         Assertions.assertEquals("context must not be null", thrown.getMessage());
     }
 

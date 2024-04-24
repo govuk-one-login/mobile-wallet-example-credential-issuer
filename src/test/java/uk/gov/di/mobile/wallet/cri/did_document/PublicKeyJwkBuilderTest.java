@@ -21,7 +21,14 @@ public class PublicKeyJwkBuilderTest {
             throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         ECKey testJwk = getTestJwk();
 
-        PublicKeyJwk response = new PublicKeyJwkBuilder().setKid(testJwk.getKeyID()).setKty(testJwk.getKeyType().toString()).setCrv(testJwk.getCurve().toString()).setX(testJwk.getX().toString()).setY(testJwk.getY().toString()).build();
+        PublicKeyJwk response =
+                new PublicKeyJwkBuilder()
+                        .setKid(testJwk.getKeyID())
+                        .setKty(testJwk.getKeyType().toString())
+                        .setCrv(testJwk.getCurve().toString())
+                        .setX(testJwk.getX().toString())
+                        .setY(testJwk.getY().toString())
+                        .build();
 
         assertEquals(testJwk.getKeyID(), response.kid);
         assertEquals(testJwk.getKeyType().toString(), response.kty);
@@ -61,8 +68,7 @@ public class PublicKeyJwkBuilderTest {
     void shouldThrowIllegalArgumentExceptionOnNullX() {
         PublicKeyJwkBuilder publicKeyJwkBuilder = new PublicKeyJwkBuilder();
         IllegalArgumentException thrown =
-                assertThrows(
-                        IllegalArgumentException.class, () -> publicKeyJwkBuilder.setX(null));
+                assertThrows(IllegalArgumentException.class, () -> publicKeyJwkBuilder.setX(null));
         Assertions.assertEquals("x attribute must not be null", thrown.getMessage());
     }
 
@@ -70,8 +76,7 @@ public class PublicKeyJwkBuilderTest {
     void shouldThrowIllegalArgumentExceptionOnNullY() {
         PublicKeyJwkBuilder publicKeyJwkBuilder = new PublicKeyJwkBuilder();
         IllegalArgumentException thrown =
-                assertThrows(
-                        IllegalArgumentException.class, () -> publicKeyJwkBuilder.setY(null));
+                assertThrows(IllegalArgumentException.class, () -> publicKeyJwkBuilder.setY(null));
         Assertions.assertEquals("y attribute must not be null", thrown.getMessage());
     }
 
