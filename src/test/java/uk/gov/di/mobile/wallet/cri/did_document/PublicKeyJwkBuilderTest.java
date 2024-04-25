@@ -16,6 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PublicKeyJwkBuilderTest {
+    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
+    private static final String TEST_PUBLIC_KEY_TYPE = "EC";
+
     @Test
     void shouldReturnPublicKeyJwk()
             throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
@@ -81,12 +84,12 @@ public class PublicKeyJwkBuilderTest {
     }
 
     private ECKey getTestJwk() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
+        KeyPairGenerator gen = KeyPairGenerator.getInstance(TEST_PUBLIC_KEY_TYPE);
         gen.initialize(Curve.P_256.toECParameterSpec());
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID("test_key_id")
+                .keyID(TEST_KEY_ID)
                 .algorithm(ES256)
                 .build();
     }

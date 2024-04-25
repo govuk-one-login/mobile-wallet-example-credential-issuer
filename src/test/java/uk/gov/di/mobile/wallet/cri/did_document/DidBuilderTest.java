@@ -18,21 +18,29 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class DidBuilderTest {
 
+    private static final String TEST_PUBLIC_KEY_TYPE = "EC";
+    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
+    private static final String TEST_DID_TYPE = "JsonWebKey2020";
+    private static final String TEST_CONTROLLER = "did:web:localhost:8080";
+    private static final String TEST_HASHED_KEY_ID =
+            "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
+    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_HASHED_KEY_ID;
+
     @Test
     void shouldReturnDid() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         ECKey testJwk = getTestJwk();
 
         Did response =
                 new DidBuilder()
-                        .setType("test_did_type")
-                        .setController("test_controller")
-                        .setId("test_did_id")
+                        .setType(TEST_DID_TYPE)
+                        .setController(TEST_CONTROLLER)
+                        .setId(TEST_DID_ID)
                         .setPublicKeyJwk(testJwk)
                         .build();
 
-        assertEquals("test_did_type", response.type);
-        assertEquals("test_controller", response.controller);
-        assertEquals("test_did_id", response.id);
+        assertEquals(TEST_DID_TYPE, response.type);
+        assertEquals(TEST_CONTROLLER, response.controller);
+        assertEquals(TEST_DID_ID, response.id);
         assertThat(response.publicKeyJwk, instanceOf(PublicKeyJwk.class));
         assertEquals(testJwk.getKeyID(), response.publicKeyJwk.kid);
         assertEquals(testJwk.getX().toString(), response.publicKeyJwk.x);
@@ -75,12 +83,12 @@ public class DidBuilderTest {
     }
 
     private ECKey getTestJwk() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
+        KeyPairGenerator gen = KeyPairGenerator.getInstance(TEST_PUBLIC_KEY_TYPE);
         gen.initialize(Curve.P_256.toECParameterSpec());
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID("test_key_id")
+                .keyID(TEST_KEY_ID)
                 .algorithm(ES256)
                 .build();
     }

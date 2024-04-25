@@ -31,6 +31,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class DidDocumentResourceTest {
 
+    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
+    private static final String TEST_HASHED_KEY_ID =
+            "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
+    private static final String TEST_CONTROLLER = "did:web:localhost:8080";
+    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_HASHED_KEY_ID;
+    private static final List<String> TEST_ASSERTION_METHOD = List.of(TEST_DID_ID);
+    private static final List<String> TEST_CONTEXT =
+            List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
+    private static final String TEST_DID_TYPE = "JsonWebKey2020";
+    private static final String TEST_PUBLIC_KEY_TYPE = "EC";
     private static final DidDocumentService didDocumentService = mock(DidDocumentService.class);
     private final ResourceExtension EXT =
             ResourceExtension.builder()
@@ -78,37 +88,31 @@ public class DidDocumentResourceTest {
 
     private DidDocument getMockDidDocument()
             throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        List<String> testContext =
-                List.of(
-                        "https://www.w3.org/ns/did/v1/test",
-                        "https://www.w3.org/ns/security/jwk/v1/test");
-        String testController = "test_controller";
-        List<String> testAssertionMethod = Collections.singletonList("test_assertion_method");
         ECKey testJwk = getTestJwk();
-        List<Did> testVerificationMethod =
+        List<Did> testDid =
                 Collections.singletonList(
                         new DidBuilder()
-                                .setType("test_did_type")
-                                .setController("test_controller")
-                                .setId("test_did_id")
+                                .setType(TEST_DID_TYPE)
+                                .setController(TEST_CONTROLLER)
+                                .setId(TEST_DID_ID)
                                 .setPublicKeyJwk(testJwk)
                                 .build());
 
         return new DidDocumentBuilder()
-                .setContext(testContext)
-                .setId(testController)
-                .setVerificationMethod(testVerificationMethod)
-                .setAssertionMethod(testAssertionMethod)
+                .setContext(TEST_CONTEXT)
+                .setId(TEST_CONTROLLER)
+                .setVerificationMethod(testDid)
+                .setAssertionMethod(TEST_ASSERTION_METHOD)
                 .build();
     }
 
     private ECKey getTestJwk() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
-        KeyPairGenerator gen = KeyPairGenerator.getInstance("EC");
+        KeyPairGenerator gen = KeyPairGenerator.getInstance(TEST_PUBLIC_KEY_TYPE);
         gen.initialize(Curve.P_256.toECParameterSpec());
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID("test_key_id")
+                .keyID(TEST_KEY_ID)
                 .algorithm(ES256)
                 .build();
     }

@@ -15,7 +15,10 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -25,10 +28,21 @@ public class DidDocumentServiceTest {
     private DidDocumentService didDocumentService;
     private final KmsService kmsService = mock(KmsService.class);
     private final ConfigurationService configurationService = new ConfigurationService();
-    private static final String KEY_ID =
+    private static final String TEST_ARN =
             "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String PUBLIC_KEY =
+    private static final String TEST_PUBLIC_KEY =
             "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZS4QGXEhtywj9ivxlgx1dIJkFS7l2TInfT9r3Onmpvq64gfgiSQcFQ6eBIJDb9udSzWgi9+Z4Ls+wRkRqzghgQ==";
+    private static final String TEST_HASHED_KEY_ID =
+            "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
+    private static final String TEST_CONTROLLER = "did:web:localhost:8080";
+    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_HASHED_KEY_ID;
+    private static final List<String> TEST_CONTEXT =
+            List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
+    private static final String TEST_DID_TYPE = "JsonWebKey2020";
+    private static final String TEST_PUBLIC_KEY_TYPE = "EC";
+    private static final String TEST_PUBLIC_KEY_CURVE = "P-256";
+    private static final String TEST_PUBLIC_KEY_X = "ZS4QGXEhtywj9ivxlgx1dIJkFS7l2TInfT9r3Onmpvo";
+    private static final String TEST_PUBLIC_KEY_Y = "uuIH4IkkHBUOngSCQ2_bnUs1oIvfmeC7PsEZEas4IYE";
 
     @BeforeEach
     void setUp() {
@@ -38,35 +52,62 @@ public class DidDocumentServiceTest {
     @Test
     void shouldReturnDidDocument() throws PEMException, NoSuchAlgorithmException {
         when(kmsService.getPublicKey(any(GetPublicKeyRequest.class)))
-                .thenReturn(getMockPublicKeyResponse(KEY_ID, PUBLIC_KEY));
+                .thenReturn(getMockPublicKeyResponse(TEST_ARN, TEST_PUBLIC_KEY));
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(getMockDescribeKeyResponse(KEY_ID, true, null));
+                .thenReturn(getMockDescribeKeyResponse(TEST_ARN, true, null));
 
         DidDocument didDocument = didDocumentService.generateDidDocument();
-        assertEquals("did:web:localhost:8080", didDocument.getId());
-        assertEquals(
-                List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1"),
-                didDocument.getContext());
+        assertEquals(TEST_CONTROLLER, didDocument.getId());
+        assertEquals(TEST_CONTEXT, didDocument.getContext());
         assertEquals(1, didDocument.getVerificationMethod().size());
         assertEquals(1, didDocument.getAssertionMethod().size());
-        assertEquals(
-                "did:web:localhost:8080#0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2",
-                didDocument.getAssertionMethod().get(0));
+        assertEquals(TEST_DID_ID, didDocument.getAssertionMethod().get(0));
 
         Did did = didDocument.getVerificationMethod().get(0);
-        assertEquals(
-                "did:web:localhost:8080#0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2",
-                did.getId());
-        assertEquals("did:web:localhost:8080", did.getController());
-        assertEquals("JsonWebKey2020", did.getType());
+        assertEquals(TEST_DID_ID, did.getId());
+        assertEquals(TEST_CONTROLLER, did.getController());
+        assertEquals(TEST_DID_TYPE, did.getType());
 
         PublicKeyJwk jwk = did.getPublicKeyJwk();
-        assertEquals(
-                "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2", jwk.getKid());
-        assertEquals("EC", jwk.getKty());
-        assertEquals("P-256", jwk.getCrv());
-        assertEquals("ZS4QGXEhtywj9ivxlgx1dIJkFS7l2TInfT9r3Onmpvo", jwk.getX());
-        assertEquals("uuIH4IkkHBUOngSCQ2_bnUs1oIvfmeC7PsEZEas4IYE", jwk.getY());
+        assertEquals(TEST_HASHED_KEY_ID, jwk.getKid());
+        assertEquals(TEST_PUBLIC_KEY_TYPE, jwk.getKty());
+        assertEquals(TEST_PUBLIC_KEY_CURVE, jwk.getCrv());
+        assertEquals(TEST_PUBLIC_KEY_X, jwk.getX());
+        assertEquals(TEST_PUBLIC_KEY_Y, jwk.getY());
+    }
+
+    @Test
+    void shouldThrowRuntimeErrorIfKeyIsInactive() {
+        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
+                .thenThrow(NotFoundException.class);
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class, () -> didDocumentService.generateDidDocument());
+        assertThat(exception.getMessage(), containsString("Public key is not active"));
+    }
+
+    @Test
+    void shouldThrowRuntimeErrorIfKeyIsNotEnabled() {
+        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
+                .thenReturn(getMockDescribeKeyResponse(TEST_ARN, false, null));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class, () -> didDocumentService.generateDidDocument());
+        assertThat(exception.getMessage(), containsString("Public key is not active"));
+    }
+
+    @Test
+    void shouldThrowRuntimeErrorIfKeyIsDueForDeletion() {
+        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
+                .thenReturn(
+                        getMockDescribeKeyResponse(TEST_ARN, true, Instant.now().plusSeconds(60)));
+
+        RuntimeException exception =
+                assertThrows(
+                        RuntimeException.class, () -> didDocumentService.generateDidDocument());
+        assertThat(exception.getMessage(), containsString("Public key is not active"));
     }
 
     public static GetPublicKeyResponse getMockPublicKeyResponse(String keyId, String keyString) {
