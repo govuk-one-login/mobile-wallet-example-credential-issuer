@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.NotFoundException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningService;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -36,11 +36,12 @@ public class DidDocumentService {
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
     private static final Logger logger = LoggerFactory.getLogger(DidDocumentService.class);
     private final ConfigurationService configurationService;
-    private final KmsService kmsService;
+    private final SigningService signingService;
 
-    public DidDocumentService(ConfigurationService configurationService, KmsService kmsService) {
+    public DidDocumentService(
+            ConfigurationService configurationService, SigningService signingService) {
         this.configurationService = configurationService;
-        this.kmsService = kmsService;
+        this.signingService = signingService;
     }
 
     public DidDocument generateDidDocument() throws PEMException, NoSuchAlgorithmException {
@@ -67,7 +68,7 @@ public class DidDocumentService {
         }
 
         GetPublicKeyResponse getPublicKeyResponse =
-                kmsService.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
+                signingService.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
 
         String keyId = Arn.fromString(getPublicKeyResponse.keyId()).resource().resource();
         MessageDigest messageDigest = MessageDigest.getInstance(DID_HASHING_ALGORITHM);
@@ -108,7 +109,7 @@ public class DidDocumentService {
         DescribeKeyResponse describeKeyResponse;
 
         try {
-            describeKeyResponse = kmsService.describeKey(describeKeyRequest);
+            describeKeyResponse = signingService.describeKey(describeKeyRequest);
         } catch (NotFoundException e) {
             logger.info("Key with alias {} was not found", keyAlias);
             return false;
