@@ -48,13 +48,13 @@ class ConfigurationServiceTest {
     @Test
     void testExampleCriUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("https://localhost:8080", configurationService.getExampleCriUrl());
+        assertEquals("http://localhost:8080", configurationService.getExampleCriUrl());
     }
 
     @Test
     void testStsStubUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("https://localhost:8000/sts-stub", configurationService.getStsStubUrl());
+        assertEquals("http://localhost:8000/sts-stub", configurationService.getStsStubUrl());
     }
 
     @Test
