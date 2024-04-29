@@ -5,16 +5,11 @@ import org.apache.hc.client5.http.utils.Hex;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.arns.Arn;
-import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
-import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
-import software.amazon.awssdk.services.kms.model.NotFoundException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -34,14 +29,12 @@ public class DidDocumentService {
     private static final String CONTROLLER_PREFIX = "did:web:";
     private static final List<String> CONTEXT =
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
-    private static final Logger logger = LoggerFactory.getLogger(DidDocumentService.class);
     private final ConfigurationService configurationService;
-    private final SigningService signingService;
+    private final KeyService keyService;
 
-    public DidDocumentService(
-            ConfigurationService configurationService, SigningService signingService) {
+    public DidDocumentService(ConfigurationService configurationService, KeyService keyService) {
         this.configurationService = configurationService;
-        this.signingService = signingService;
+        this.keyService = keyService;
     }
 
     public DidDocument generateDidDocument() throws PEMException, NoSuchAlgorithmException {
@@ -63,12 +56,12 @@ public class DidDocumentService {
     private Did generateDid(String keyAlias, String controller)
             throws PEMException, NoSuchAlgorithmException {
 
-        if (!isKeyActive(keyAlias)) {
+        if (!keyService.isKeyActive(keyAlias)) {
             throw new RuntimeException("Public key is not active");
         }
 
         GetPublicKeyResponse getPublicKeyResponse =
-                signingService.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
+                keyService.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
 
         String keyId = Arn.fromString(getPublicKeyResponse.keyId()).resource().resource();
         MessageDigest messageDigest = MessageDigest.getInstance(DID_HASHING_ALGORITHM);
@@ -101,30 +94,5 @@ public class DidDocumentService {
                 SubjectPublicKeyInfo.getInstance(publicKeyResponse.publicKey().asByteArray());
 
         return new JcaPEMKeyConverter().getPublicKey(subjectKeyInfo);
-    }
-
-    private boolean isKeyActive(String keyAlias) {
-        DescribeKeyRequest describeKeyRequest =
-                DescribeKeyRequest.builder().keyId(keyAlias).build();
-        DescribeKeyResponse describeKeyResponse;
-
-        try {
-            describeKeyResponse = signingService.describeKey(describeKeyRequest);
-        } catch (NotFoundException e) {
-            logger.info("Key with alias {} was not found", keyAlias);
-            return false;
-        }
-
-        if (Boolean.FALSE.equals(describeKeyResponse.keyMetadata().enabled())) {
-            logger.info("Key with alias {} is disabled", keyAlias);
-            return false;
-        }
-
-        if (describeKeyResponse.keyMetadata().deletionDate() != null) {
-            logger.info("Key with alias {} is due for deletion", keyAlias);
-            return false;
-        }
-
-        return true;
     }
 }

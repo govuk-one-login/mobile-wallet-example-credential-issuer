@@ -13,9 +13,8 @@ import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningService;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -26,12 +25,12 @@ public class PreAuthorizedCodeBuilder {
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
     private static final JOSEObjectType JWT = JOSEObjectType.JWT;
     private final ConfigurationService configurationService;
-    private final SigningService signingService;
+    private final KeyService keyService;
 
     public PreAuthorizedCodeBuilder(
-            ConfigurationService configurationService, KmsService kmsService) {
+            ConfigurationService configurationService, KeyService keyService) {
         this.configurationService = configurationService;
-        this.signingService = kmsService;
+        this.keyService = keyService;
     }
 
     public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
@@ -47,7 +46,7 @@ public class PreAuthorizedCodeBuilder {
                         .build();
 
         try {
-            SignResponse signResult = signingService.sign(signRequest);
+            SignResponse signResult = keyService.sign(signRequest);
             String signature = encodedSignature(signResult);
             return SignedJWT.parse(message + "." + signature);
         } catch (Exception exception) {

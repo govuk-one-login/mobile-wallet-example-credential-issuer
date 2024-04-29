@@ -55,6 +55,7 @@ public class DidDocumentServiceTest {
                 .thenReturn(getMockPublicKeyResponse(TEST_ARN, TEST_PUBLIC_KEY));
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(getMockDescribeKeyResponse(TEST_ARN, true, null));
+        when(kmsService.isKeyActive(any(String.class))).thenReturn(true);
 
         DidDocument didDocument = didDocumentService.generateDidDocument();
         assertEquals(TEST_CONTROLLER, didDocument.getId());
