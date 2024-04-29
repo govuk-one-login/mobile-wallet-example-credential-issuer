@@ -22,7 +22,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getExampleCriUrl() {
-        return System.getenv().getOrDefault("EXAMPLE_CRI_URL", "http://localhost:8080");
+        return System.getenv().getOrDefault("EXAMPLE_CRI_URL", "https://localhost:8080");
     }
 
     public String getDidController() {
