@@ -128,12 +128,11 @@ public class CredentialService {
         Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
 
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            System.out.println(response);
             throw new RuntimeException(
-                    "Request to fetch DID Document failed with status code: "
-                            + response.getStatus());
+                    String.format(
+                            "Request to fetch document details for documentId %s failed with status code %s",
+                            documentId, response.getStatus()));
         }
-
         return response.readEntity(Object.class);
     }
 }

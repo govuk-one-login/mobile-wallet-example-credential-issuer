@@ -57,6 +57,8 @@ public class CredentialOfferResource {
         } catch (SigningException exception) {
             logger.error(
                     "failed to sign credential offer for walletSubjectID: {} , documentID: {}",
+                    walletSubjectId,
+                    documentId,
                     exception);
             return buildFailResponse().build();
         }
@@ -67,6 +69,8 @@ public class CredentialOfferResource {
         } catch (DataStoreException exception) {
             logger.error(
                     "failed to save credential offer for walletSubjectID: {} , documentID: {}",
+                    walletSubjectId,
+                    documentId,
                     exception);
             return buildFailResponse().build();
         }

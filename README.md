@@ -65,9 +65,14 @@ curl -X GET http://localhost:8080/.well-known/openid-credential-issuer | jq
 ```
 
 To get a credential (replace the proof JWT and bearer access token values before testing):
- ```
+```
 curl -d '{"proof":{"proof_type":"jwt", "jwt": "<<insert proof jwt>>" }}' -H "Content-Type: application/json" -H "Authorization: Bearer <<insert bearer token jwt>>" -X POST http://localhost:8080/credential | jq
- ```
+```
+
+To get the DID document:
+```
+curl -X GET http://localhost:8080/.well-known/did.json | jq
+```
 
 #### Reading from the Database
 To check that a credential offer was saved to the **cri_cache** table, run:

@@ -6,21 +6,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(MockitoExtension.class)
 public class MetadataBuilderTest {
 
-    private MetadataBuilder metadataBuilder;
-
     @Test
-    @DisplayName("Should return the credential metadata")
-    void testItReturns200AndCredentialMetadata() throws IOException {
+    void shouldReturnCredentialMetadata() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
 
         Metadata response =
@@ -51,8 +45,8 @@ public class MetadataBuilderTest {
 
     @Test
     @DisplayName("Should throw JsonParseException when credentials_supported is invalid JSON")
-    void testItThrowsJsonParseExceptionOnInvalidJson() {
-        metadataBuilder = new MetadataBuilder();
+    void shouldThrowJsonParseExceptionOnInvalidJson() {
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
         assertThrows(
                 JsonParseException.class,
                 () ->
@@ -63,8 +57,8 @@ public class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw error when setCredentialsSupported is called with a file name that does not exist")
-    void testItThrowsIllegalArgumentExceptionOnInvalidFileName() {
-        metadataBuilder = new MetadataBuilder();
+    void shouldThrowIllegalArgumentExceptionOnInvalidFileName() {
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -75,8 +69,8 @@ public class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialsSupported is called with null value")
-    void testItThrowsIllegalArgumentExceptionOnNullCredentialsSupported() {
-        metadataBuilder = new MetadataBuilder();
+    void shouldThrowIllegalArgumentExceptionOnNullCredentialsSupported() {
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -87,8 +81,8 @@ public class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialsEndpoint is called with null value")
-    void testItThrowsIllegalArgumentExceptionOnNullCredentialsEndpoint() {
-        metadataBuilder = new MetadataBuilder();
+    void shouldThrowIllegalArgumentExceptionOnNullCredentialsEndpoint() {
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -99,8 +93,8 @@ public class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setAuthorizationServer is called with null value")
-    void testItThrowsIllegalArgumentExceptionOnNullAuthorizationServer() {
-        metadataBuilder = new MetadataBuilder();
+    void shouldThrowIllegalArgumentExceptionOnNullAuthorizationServer() {
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -111,8 +105,8 @@ public class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialIssuer is called with null value")
-    void testItThrowsIllegalArgumentExceptionOnNullCredentialIssuer() {
-        metadataBuilder = new MetadataBuilder();
+    void shouldThrowIllegalArgumentExceptionOnNullCredentialIssuer() {
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
                         IllegalArgumentException.class,

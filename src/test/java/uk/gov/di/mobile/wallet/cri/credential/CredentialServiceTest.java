@@ -220,7 +220,8 @@ public class CredentialServiceTest {
                         () -> credentialService.run(bearerAccessToken, credentialRequestBody));
         assertThat(
                 exception.getMessage(),
-                containsString("Request to fetch DID Document failed with status code: 500"));
+                containsString(
+                        "Request to fetch document details for documentId test-document-id failed with status code 500"));
     }
 
     @Test

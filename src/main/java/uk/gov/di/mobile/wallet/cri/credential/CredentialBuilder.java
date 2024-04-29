@@ -13,9 +13,8 @@ import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningService;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -28,11 +27,11 @@ public class CredentialBuilder {
     private static final String CONTEXT = "https://www.w3.org/2018/credentials/v1";
 
     private final ConfigurationService configurationService;
-    private final SigningService signingService;
+    private final KeyService keyService;
 
-    public CredentialBuilder(ConfigurationService configurationService, KmsService kmsService) {
+    public CredentialBuilder(ConfigurationService configurationService, KeyService keyService) {
         this.configurationService = configurationService;
-        this.signingService = kmsService;
+        this.keyService = keyService;
     }
 
     public Credential buildCredential(String proofJwtDidKey, Object documentDetails)
@@ -49,7 +48,7 @@ public class CredentialBuilder {
                         .build();
 
         try {
-            SignResponse signResult = signingService.sign(signRequest);
+            SignResponse signResult = keyService.sign(signRequest);
             String signature = encodedSignature(signResult);
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             return new Credential(signedJWT);
