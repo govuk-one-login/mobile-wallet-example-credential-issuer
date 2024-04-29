@@ -62,7 +62,10 @@ public class DidDocumentServiceTest {
 
     @Test
     void shouldReturnDidDocument()
-            throws PEMException, NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+            throws PEMException,
+                    NoSuchAlgorithmException,
+                    InvalidAlgorithmParameterException,
+                    KeyNotActiveException {
         ECKey mockJwk = getMockJwk();
         when(kmsService.getPublicKey(any(GetPublicKeyRequest.class)))
                 .thenReturn(getMockPublicKeyResponse(TEST_ARN, TEST_PUBLIC_KEY));
@@ -92,36 +95,39 @@ public class DidDocumentServiceTest {
     }
 
     @Test
-    void shouldThrowRuntimeErrorIfKeyIsInactive() {
+    void shouldThrowKeyNotActiveExceptionIfKeyIsInactive() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenThrow(NotFoundException.class);
 
-        RuntimeException exception =
+        KeyNotActiveException exception =
                 assertThrows(
-                        RuntimeException.class, () -> didDocumentService.generateDidDocument());
+                        KeyNotActiveException.class,
+                        () -> didDocumentService.generateDidDocument());
         assertThat(exception.getMessage(), containsString("Public key is not active"));
     }
 
     @Test
-    void shouldThrowRuntimeErrorIfKeyIsNotEnabled() {
+    void shouldThrowKeyNotActiveExceptionIfKeyIsNotEnabled() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(getMockDescribeKeyResponse(TEST_ARN, false, null));
 
-        RuntimeException exception =
+        KeyNotActiveException exception =
                 assertThrows(
-                        RuntimeException.class, () -> didDocumentService.generateDidDocument());
+                        KeyNotActiveException.class,
+                        () -> didDocumentService.generateDidDocument());
         assertThat(exception.getMessage(), containsString("Public key is not active"));
     }
 
     @Test
-    void shouldThrowRuntimeErrorIfKeyIsDueForDeletion() {
+    void shouldThrowKeyNotActiveExceptionIfKeyIsDueForDeletion() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(
                         getMockDescribeKeyResponse(TEST_ARN, true, Instant.now().plusSeconds(60)));
 
-        RuntimeException exception =
+        KeyNotActiveException exception =
                 assertThrows(
-                        RuntimeException.class, () -> didDocumentService.generateDidDocument());
+                        KeyNotActiveException.class,
+                        () -> didDocumentService.generateDidDocument());
         assertThat(exception.getMessage(), containsString("Public key is not active"));
     }
 

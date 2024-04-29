@@ -54,7 +54,7 @@ public class DidDocumentResourceTest {
 
     @Test
     void shouldReturn500WhenDidDocumentServiceThrowsAnException()
-            throws PEMException, NoSuchAlgorithmException {
+            throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
 
         doThrow(new NoSuchAlgorithmException("Mock error message", new Exception()))
                 .when(didDocumentService)
@@ -72,7 +72,8 @@ public class DidDocumentResourceTest {
             throws JsonProcessingException,
                     InvalidAlgorithmParameterException,
                     NoSuchAlgorithmException,
-                    PEMException {
+                    PEMException,
+                    KeyNotActiveException {
 
         DidDocument didDocument = getMockDidDocument();
         when(didDocumentService.generateDidDocument()).thenReturn(didDocument);

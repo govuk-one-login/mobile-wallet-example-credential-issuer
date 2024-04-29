@@ -27,7 +27,8 @@ public class DidDocumentService {
         this.keyService = keyService;
     }
 
-    public DidDocument generateDidDocument() throws PEMException, NoSuchAlgorithmException {
+    public DidDocument generateDidDocument()
+            throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
 
         String keyAlias = configurationService.getSigningKeyAlias();
         String controller = CONTROLLER_PREFIX + configurationService.getDidController();
@@ -44,10 +45,10 @@ public class DidDocumentService {
     }
 
     private Did generateDid(String keyAlias, String controller)
-            throws PEMException, NoSuchAlgorithmException {
+            throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
 
         if (!keyService.isKeyActive(keyAlias)) {
-            throw new RuntimeException("Public key is not active");
+            throw new KeyNotActiveException("Public key is not active");
         }
 
         ECKey jwk = keyService.getPublicKeyJwk(keyAlias);
