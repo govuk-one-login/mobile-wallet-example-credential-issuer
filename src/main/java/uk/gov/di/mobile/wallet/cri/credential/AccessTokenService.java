@@ -5,9 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
-import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
@@ -26,7 +26,7 @@ import java.util.*;
 
 public class AccessTokenService {
 
-    private static final String CLIENT_CONFIG_ALGORITHM = "RS256";
+    private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
     private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
     private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
     private static final String DID_DOCUMENT_PATH = "/.well-known/did.json";
@@ -107,8 +107,8 @@ public class AccessTokenService {
         JWK jwk = getJwk(keyId);
 
         try {
-            final RSAKey publicKey = new RSAKey.Builder(jwk.toRSAKey()).build();
-            RSASSAVerifier verifier = new RSASSAVerifier(publicKey);
+            final ECKey publicKey = new ECKey.Builder(jwk.toECKey()).build();
+            ECDSAVerifier verifier = new ECDSAVerifier(publicKey);
             return signedJwt.verify(verifier);
         } catch (JOSEException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
