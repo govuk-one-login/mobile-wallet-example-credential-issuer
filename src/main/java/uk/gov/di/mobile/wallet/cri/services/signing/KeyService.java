@@ -4,8 +4,6 @@ import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
-import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
-import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 
@@ -13,11 +11,9 @@ public interface KeyService {
 
     public SignResponse sign(SignRequest signRequest);
 
-    public GetPublicKeyResponse getPublicKey(GetPublicKeyRequest getPublicKeyRequest);
-
     public DescribeKeyResponse describeKey(DescribeKeyRequest describeKeyRequest);
 
     public boolean isKeyActive(String keyAlias);
 
-    public ECKey getPublicKeyJwk(String keyAlias) throws PEMException;
+    public ECKey getPublicKey(String keyAlias) throws PEMException;
 }

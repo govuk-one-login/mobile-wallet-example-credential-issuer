@@ -60,10 +60,6 @@ public class KmsService implements KeyService {
         return kmsClient.sign(signRequest);
     }
 
-    public GetPublicKeyResponse getPublicKey(GetPublicKeyRequest getPublicKeyRequest) {
-        return kmsClient.getPublicKey(getPublicKeyRequest);
-    }
-
     public DescribeKeyResponse describeKey(DescribeKeyRequest describeKeyRequest) {
         return kmsClient.describeKey(describeKeyRequest);
     }
@@ -93,9 +89,9 @@ public class KmsService implements KeyService {
         return true;
     }
 
-    public ECKey getPublicKeyJwk(String keyAlias) throws PEMException {
+    public ECKey getPublicKey(String keyAlias) throws PEMException {
         GetPublicKeyResponse getPublicKeyResponse =
-                getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
+                kmsClient.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
 
         return createJwk(getPublicKeyResponse);
     }

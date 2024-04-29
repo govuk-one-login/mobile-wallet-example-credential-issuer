@@ -10,7 +10,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
-import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
 import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
 import software.amazon.awssdk.services.kms.model.NotFoundException;
@@ -67,12 +66,10 @@ public class DidDocumentServiceTest {
                     InvalidAlgorithmParameterException,
                     KeyNotActiveException {
         ECKey mockJwk = getMockJwk();
-        when(kmsService.getPublicKey(any(GetPublicKeyRequest.class)))
-                .thenReturn(getMockPublicKeyResponse(TEST_ARN, TEST_PUBLIC_KEY));
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(getMockDescribeKeyResponse(TEST_ARN, true, null));
         when(kmsService.isKeyActive(any(String.class))).thenReturn(true);
-        when(kmsService.getPublicKeyJwk(any(String.class))).thenReturn(mockJwk);
+        when(kmsService.getPublicKey(any(String.class))).thenReturn(mockJwk);
 
         DidDocument didDocument = didDocumentService.generateDidDocument();
         assertEquals(TEST_CONTROLLER, didDocument.getId());
