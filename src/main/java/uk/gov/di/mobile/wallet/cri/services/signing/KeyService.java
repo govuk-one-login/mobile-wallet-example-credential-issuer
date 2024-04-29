@@ -2,7 +2,12 @@ package uk.gov.di.mobile.wallet.cri.services.signing;
 
 import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
-import software.amazon.awssdk.services.kms.model.*;
+import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
+import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
+import software.amazon.awssdk.services.kms.model.GetPublicKeyRequest;
+import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
+import software.amazon.awssdk.services.kms.model.SignRequest;
+import software.amazon.awssdk.services.kms.model.SignResponse;
 
 public interface KeyService {
 
