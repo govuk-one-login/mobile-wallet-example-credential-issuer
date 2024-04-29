@@ -35,14 +35,14 @@ public class DidBuilderTest {
                         .setType(TEST_DID_TYPE)
                         .setController(TEST_CONTROLLER)
                         .setId(TEST_DID_ID)
-                        .setPublicKeyJwk(testJwk)
+                        .setPublicKeyJwk(testJwk, TEST_HASHED_KEY_ID)
                         .build();
 
         assertEquals(TEST_DID_TYPE, response.type);
         assertEquals(TEST_CONTROLLER, response.controller);
         assertEquals(TEST_DID_ID, response.id);
         assertThat(response.publicKeyJwk, instanceOf(PublicKeyJwk.class));
-        assertEquals(testJwk.getKeyID(), response.publicKeyJwk.kid);
+        assertEquals(TEST_HASHED_KEY_ID, response.publicKeyJwk.kid);
         assertEquals(testJwk.getX().toString(), response.publicKeyJwk.x);
         assertEquals(testJwk.getY().toString(), response.publicKeyJwk.y);
         assertEquals(testJwk.getKeyType().getValue(), response.publicKeyJwk.kty);
@@ -54,7 +54,8 @@ public class DidBuilderTest {
         DidBuilder didBuilder = new DidBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
-                        IllegalArgumentException.class, () -> didBuilder.setPublicKeyJwk(null));
+                        IllegalArgumentException.class,
+                        () -> didBuilder.setPublicKeyJwk(null, null));
         Assertions.assertEquals("jwk must not be null", thrown.getMessage());
     }
 

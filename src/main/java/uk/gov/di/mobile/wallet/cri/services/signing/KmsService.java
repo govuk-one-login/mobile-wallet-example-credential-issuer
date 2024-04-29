@@ -1,7 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.services.signing;
 
+import com.nimbusds.jose.jwk.ECKey;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.openssl.PEMException;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.arns.Arn;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kms.KmsClient;
@@ -10,6 +15,11 @@ import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
+import java.security.PublicKey;
+import java.security.interfaces.ECPublicKey;
+
+import static com.nimbusds.jose.JWSAlgorithm.ES256;
+import static com.nimbusds.jose.jwk.Curve.P_256;
 
 public class KmsService implements KeyService {
 
@@ -75,5 +85,29 @@ public class KmsService implements KeyService {
         }
 
         return true;
+    }
+
+    public ECKey getPublicKeyJwk(String keyAlias) throws PEMException {
+        GetPublicKeyResponse getPublicKeyResponse =
+                getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
+
+        return createJwk(getPublicKeyResponse);
+    }
+
+    private ECKey createJwk(GetPublicKeyResponse publicKeyResponse) throws PEMException {
+        PublicKey publicKey = createPublicKey(publicKeyResponse);
+
+        String keyId = Arn.fromString(publicKeyResponse.keyId()).resource().resource();
+        return new ECKey.Builder(P_256, (ECPublicKey) publicKey)
+                .keyID(keyId)
+                .algorithm(ES256)
+                .build();
+    }
+
+    private PublicKey createPublicKey(GetPublicKeyResponse publicKeyResponse) throws PEMException {
+        SubjectPublicKeyInfo subjectKeyInfo =
+                SubjectPublicKeyInfo.getInstance(publicKeyResponse.publicKey().asByteArray());
+
+        return new JcaPEMKeyConverter().getPublicKey(subjectKeyInfo);
     }
 }

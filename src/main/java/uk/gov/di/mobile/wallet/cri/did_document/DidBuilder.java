@@ -33,13 +33,18 @@ public class DidBuilder {
         return this;
     }
 
-    public DidBuilder setPublicKeyJwk(ECKey jwk) throws IllegalArgumentException {
+    public DidBuilder setPublicKeyJwk(ECKey jwk, String keyId) throws IllegalArgumentException {
         if (jwk == null) {
             throw new IllegalArgumentException("jwk must not be null");
         }
+
+        if (keyId == null) {
+            throw new IllegalArgumentException("keyId must not be null");
+        }
+
         this.jwk =
                 new PublicKeyJwkBuilder()
-                        .setKid(jwk.getKeyID())
+                        .setKid(keyId)
                         .setKty(jwk.getKeyType().getValue())
                         .setCrv(jwk.getCurve().toString())
                         .setX(jwk.getX().toString())

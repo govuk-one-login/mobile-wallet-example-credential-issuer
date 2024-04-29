@@ -95,7 +95,7 @@ public class DidDocumentResourceTest {
                                 .setType(TEST_DID_TYPE)
                                 .setController(TEST_CONTROLLER)
                                 .setId(TEST_DID_ID)
-                                .setPublicKeyJwk(testJwk)
+                                .setPublicKeyJwk(testJwk, TEST_HASHED_KEY_ID)
                                 .build());
 
         return new DidDocumentBuilder()
