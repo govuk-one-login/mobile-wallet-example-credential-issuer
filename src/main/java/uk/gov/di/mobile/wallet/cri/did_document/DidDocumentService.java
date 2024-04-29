@@ -55,16 +55,16 @@ public class DidDocumentService {
 
         String keyId = jwk.getKeyID();
         MessageDigest messageDigest = MessageDigest.getInstance(DID_HASHING_ALGORITHM);
-        String keyIdHashed =
+        String hashedKeyId =
                 Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
 
-        String id = controller + "#" + keyIdHashed;
+        String id = controller + "#" + hashedKeyId;
 
         return new DidBuilder()
                 .setId(id)
                 .setController(controller)
                 .setType(VERIFICATION_METHOD_TYPE)
-                .setPublicKeyJwk(jwk, keyIdHashed)
+                .setPublicKeyJwk(jwk, hashedKeyId)
                 .build();
     }
 }

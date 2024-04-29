@@ -33,18 +33,19 @@ public class DidBuilder {
         return this;
     }
 
-    public DidBuilder setPublicKeyJwk(ECKey jwk, String keyId) throws IllegalArgumentException {
+    public DidBuilder setPublicKeyJwk(ECKey jwk, String hashedKeyId)
+            throws IllegalArgumentException {
         if (jwk == null) {
             throw new IllegalArgumentException("jwk must not be null");
         }
 
-        if (keyId == null) {
-            throw new IllegalArgumentException("keyId must not be null");
+        if (hashedKeyId == null) {
+            throw new IllegalArgumentException("hashedKeyId must not be null");
         }
 
         this.jwk =
                 new PublicKeyJwkBuilder()
-                        .setKid(keyId)
+                        .setKid(hashedKeyId)
                         .setKty(jwk.getKeyType().getValue())
                         .setCrv(jwk.getCurve().toString())
                         .setX(jwk.getX().toString())
