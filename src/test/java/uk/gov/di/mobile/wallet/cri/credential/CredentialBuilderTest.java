@@ -25,6 +25,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -42,6 +43,8 @@ import static org.mockito.Mockito.when;
 public class CredentialBuilderTest {
     private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);
+    private final String HASHED_KEY_ID =
+            "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
     private JsonNode DOCUMENT_DETAILS;
 
     ConfigurationService configurationService;
@@ -60,7 +63,8 @@ public class CredentialBuilderTest {
     @Test
     @DisplayName(
             "Should build the verifiable credential with the correct claims and sign it with KMS")
-    void testItReturnsCredential() throws SigningException, ParseException, JOSEException {
+    void testItReturnsCredential()
+            throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
 
@@ -72,8 +76,7 @@ public class CredentialBuilderTest {
         assertThat(credentialBuilderReturnValue, hasProperty("credential"));
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getType(), equalTo(JOSEObjectType.JWT));
-        assertThat(
-                credential.getHeader().getKeyID(), equalTo("ff275b92-0def-4dfc-b0f6-87c96b26c6c7"));
+        assertThat(credential.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
         assertThat(
                 credential.getJWTClaimsSet().getIssuer(),
                 equalTo("urn:fdc:gov:uk:example-credential-issuer"));
