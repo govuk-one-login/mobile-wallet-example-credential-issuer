@@ -1,13 +1,11 @@
 package uk.gov.di.mobile.wallet.cri.did_document;
 
 import com.nimbusds.jose.jwk.ECKey;
-import org.apache.hc.client5.http.utils.Hex;
 import org.bouncycastle.openssl.PEMException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
 import java.util.List;
@@ -51,12 +49,9 @@ public class DidDocumentService {
         }
 
         ECKey jwk = keyService.getPublicKey(keyAlias);
-
         String keyId = jwk.getKeyID();
-        String kidHashingAlgorithm = configurationService.getKeyIdHashingAlgorithm();
-        MessageDigest messageDigest = MessageDigest.getInstance(kidHashingAlgorithm);
         String hashedKeyId =
-                Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
+                new KeyHelper().hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
 
         String id = controller + "#" + hashedKeyId;
 
