@@ -14,7 +14,6 @@ import java.util.List;
 
 public class DidDocumentService {
 
-    private static final String DID_KEY_ID_HASHING_ALGORITHM = "SHA-256";
     private static final String VERIFICATION_METHOD_TYPE = "JsonWebKey2020";
     private static final String CONTROLLER_PREFIX = "did:web:";
     private static final List<String> CONTEXT =
@@ -54,7 +53,8 @@ public class DidDocumentService {
         ECKey jwk = keyService.getPublicKey(keyAlias);
 
         String keyId = jwk.getKeyID();
-        MessageDigest messageDigest = MessageDigest.getInstance(DID_KEY_ID_HASHING_ALGORITHM);
+        String kidHashingAlgorithm = configurationService.getKeyIdHashingAlgorithm();
+        MessageDigest messageDigest = MessageDigest.getInstance(kidHashingAlgorithm);
         String hashedKeyId =
                 Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
 

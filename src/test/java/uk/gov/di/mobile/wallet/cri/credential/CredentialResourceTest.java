@@ -18,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,7 +48,8 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     ClaimMismatchException,
                     SigningException,
-                    ProofJwtValidationException {
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException {
         JsonNode requestBody = new ObjectMapper().readTree("{\"proof\":{\"proof_type\":\"jwt\"}}");
 
         final Response response =
@@ -70,7 +72,8 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     ClaimMismatchException,
                     SigningException,
-                    ProofJwtValidationException {
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -96,7 +99,8 @@ public class CredentialResourceTest {
                     ClaimMismatchException,
                     SigningException,
                     ProofJwtValidationException,
-                    JsonProcessingException {
+                    JsonProcessingException,
+                    NoSuchAlgorithmException {
 
         String authorizationHeader =
                 "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
@@ -127,7 +131,8 @@ public class CredentialResourceTest {
                     SigningException,
                     ProofJwtValidationException,
                     JsonProcessingException,
-                    ParseException {
+                    ParseException,
+                    NoSuchAlgorithmException {
 
         String authorizationHeader =
                 "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";

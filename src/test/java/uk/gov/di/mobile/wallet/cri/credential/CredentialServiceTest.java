@@ -23,6 +23,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -185,7 +186,8 @@ public class CredentialServiceTest {
                     java.text.ParseException,
                     ProofJwtValidationException,
                     DataStoreException,
-                    SigningException {
+                    SigningException,
+                    NoSuchAlgorithmException {
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse(
                         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjpbImNyZWRlbnRpYWxfaWRlbnRpZmllciJdLCJzdWIiOiJ0ZXN0LXdhbGxldC1zdWJqZWN0LWlkIiwiY19ub25jZSI6IjEyMzQ1In0.gXgeBUJ2d7gT2gzv-lkKXIcWcBmwxfwdivNT0p5J_Xc");
@@ -233,7 +235,8 @@ public class CredentialServiceTest {
                     ProofJwtValidationException,
                     DataStoreException,
                     SigningException,
-                    ClaimMismatchException {
+                    ClaimMismatchException,
+                    NoSuchAlgorithmException {
         BearerAccessToken bearerAccessToken =
                 BearerAccessToken.parse(
                         "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjpbImNyZWRlbnRpYWxfaWRlbnRpZmllciJdLCJzdWIiOiJ0ZXN0LXdhbGxldC1zdWJqZWN0LWlkIiwiY19ub25jZSI6IjEyMzQ1In0.gXgeBUJ2d7gT2gzv-lkKXIcWcBmwxfwdivNT0p5J_Xc");

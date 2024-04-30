@@ -15,6 +15,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.util.List;
 
@@ -49,7 +50,8 @@ public class CredentialService {
                     ProofJwtValidationException,
                     ClaimMismatchException,
                     SigningException,
-                    AccessTokenValidationException {
+                    AccessTokenValidationException,
+                    NoSuchAlgorithmException {
 
         SignedJWT accessToken = accessTokenService.verifyAccessToken(bearerAccessToken);
 

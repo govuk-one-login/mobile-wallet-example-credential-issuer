@@ -8,6 +8,7 @@ import com.nimbusds.jose.crypto.impl.ECDSA;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import org.apache.hc.client5.http.utils.Hex;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
@@ -16,6 +17,9 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -35,7 +39,7 @@ public class CredentialBuilder {
     }
 
     public Credential buildCredential(String proofJwtDidKey, Object documentDetails)
-            throws SigningException {
+            throws SigningException, NoSuchAlgorithmException {
         var encodedHeader = getEncodedHeader();
         var encodedClaims = getEncodedClaims(proofJwtDidKey, documentDetails);
         var message = encodedHeader + "." + encodedClaims;
@@ -85,12 +89,15 @@ public class CredentialBuilder {
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
-    private Base64URL getEncodedHeader() {
+    private Base64URL getEncodedHeader() throws NoSuchAlgorithmException {
+        String keyId = configurationService.getSigningKeyId();
+        String kidHashingAlgorithm = configurationService.getKeyIdHashingAlgorithm();
+        MessageDigest messageDigest = MessageDigest.getInstance(kidHashingAlgorithm);
+        String hashedKeyId =
+                Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
+
         var jwsHeader =
-                new JWSHeader.Builder(SIGNING_ALGORITHM)
-                        .keyID(configurationService.getSigningKeyId())
-                        .type(JWT)
-                        .build();
+                new JWSHeader.Builder(SIGNING_ALGORITHM).keyID(hashedKeyId).type(JWT).build();
         return jwsHeader.toBase64URL();
     }
 }
