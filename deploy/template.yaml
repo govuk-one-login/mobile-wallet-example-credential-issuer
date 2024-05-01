@@ -33,6 +33,8 @@ Parameters:
 Conditions:
   StackNameIsWalletCredIssuerBE: !Equals [ !Ref "AWS::StackName", wallet-cred-issuer-be ]
 
+  IsBuild: !Equals [ !Ref Environment, build ]
+
   UsePermissionsBoundary:
     Fn::Not:
       - Fn::Equals:
@@ -145,7 +147,7 @@ Resources:
   WalletBEAccessLogsBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub wallet-stub-back-${Environment}-access-logs
+      BucketName: !Sub wallet-stub-back-${AWS::StackName}-${Environment}-access-logs
       VersioningConfiguration:
         Status: "Enabled"
       PublicAccessBlockConfiguration:
@@ -630,3 +632,91 @@ Resources:
       Properties:
         ResourceArn: !Ref WalletBELoadBalancer
         WebACLArn: !Sub "{{resolve:ssm:/${Environment}/Platform/Security/WafArn}}"
+
+# ALARMS
+
+  ExampleCredIssuerLowContainerTaskCountAlarm:
+    Condition: IsBuild
+    DependsOn:
+       - WalletBECluster
+       - WalletBEECSService
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${AWS::StackName}-EgCredIssuerLowContainerTaskCountAlarm"
+      AlarmDescription: Trigger a warning if the running container task count drops below 1
+      ActionsEnabled: false
+      # OKActions: - commented until we create sns topics for wallet alarms
+      #   - !ImportValue platform-alarm-topic-critical-alert
+      # AlarmActions:
+      #   - !ImportValue platform-alarm-topic-critical-alert
+      InsufficientDataActions: []
+      Dimensions: []
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: breaching
+      Metrics:
+        - Id: containerTaskCount
+          ReturnData: true
+          MetricStat:
+            Metric:
+              Namespace: ECS/ContainerInsights
+              MetricName: RunningTaskCount
+              Dimensions:
+                - Name: ClusterName
+                  Value: !Ref WalletBECluster
+                - Name: ServiceName
+                  Value: !GetAtt WalletBEECSService.Name
+            Period: 60
+            Stat: Minimum
+
+  FE4XXErrorAlarm:
+    Condition: IsBuild
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${AWS::StackName}-FE4XXErrorAlarm"
+      AlarmDescription: Trigger the alarm if errorThreshold exceeds 50% with a minimum of 5 invocations in the last 30 minutes
+      ActionsEnabled: false
+      # OKActions:
+      #   - !ImportValue platform-alarm-topic-slack-warning-alert
+      # AlarmActions:
+      #   - !ImportValue platform-alarm-topic-slack-warning-alert
+      InsufficientDataActions: [ ]
+      Dimensions: [ ]
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 50
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: notBreaching
+      Metrics:
+        - Id: errorThreshold
+          Label: errorThreshold
+          ReturnData: true
+          Expression: IF(invocations<5,0,errorPercentage)
+        - Id: invocations
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/ApiGateway
+              MetricName: Count
+              Dimensions:
+                - Name: ApiId
+                  Value: !Ref WalletBEApiGwHttpEndpoint
+            Period: 1800
+            Stat: Sum
+        - Id: error
+          ReturnData: false
+          MetricStat:
+            Metric:
+              Namespace: AWS/ApiGateway
+              MetricName: 4xx
+              Dimensions:
+                - Name: ApiId
+                  Value: !Ref WalletBEApiGwHttpEndpoint
+            Period: 1800
+            Stat: Sum
+        - Id: errorPercentage
+          Label: errorPercentage
+          ReturnData: false
+          Expression: (error/invocations) * 100
