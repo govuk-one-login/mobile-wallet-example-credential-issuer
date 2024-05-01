@@ -39,6 +39,7 @@ public class PreAuthorizedCodeBuilderTest {
     private PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
     private final KmsService kmsService = mock(KmsService.class);
     ConfigurationService configurationService;
+    private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
 
     @BeforeEach
     void setUp() {
@@ -52,6 +53,7 @@ public class PreAuthorizedCodeBuilderTest {
     void testItReturnsSignedJwt() throws SigningException, ParseException, JOSEException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
+        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
 
         SignedJWT preAuthorizedCode =
                 preAuthorizedCodeBuilder.buildPreAuthorizedCode(
@@ -99,7 +101,7 @@ public class PreAuthorizedCodeBuilderTest {
     private SignResponse getMockedSignResponse() throws JOSEException {
         var signingKey =
                 new ECKeyGenerator(Curve.P_256)
-                        .keyID(configurationService.getSigningKeyId())
+                        .keyID(KEY_ID)
                         .algorithm(JWSAlgorithm.ES256)
                         .generate();
         var ecdsaSigner = new ECDSASigner(signingKey);
@@ -112,7 +114,7 @@ public class PreAuthorizedCodeBuilderTest {
         return SignResponse.builder()
                 .signature(SdkBytes.fromByteArray(derSignature))
                 .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
-                .keyId(configurationService.getSigningKeyId())
+                .keyId(KEY_ID)
                 .build();
     }
 }

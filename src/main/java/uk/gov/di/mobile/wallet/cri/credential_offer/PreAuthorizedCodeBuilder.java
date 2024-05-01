@@ -34,14 +34,14 @@ public class PreAuthorizedCodeBuilder {
     }
 
     public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
-        var encodedHeader = getEncodedHeader();
+        String keyId = keyService.getKeyId(configurationService.getSigningKeyAlias());
+        var encodedHeader = getEncodedHeader(keyId);
         var encodedClaims = getEncodedClaims(credentialIdentifier);
         var message = encodedHeader + "." + encodedClaims;
-
         var signRequest =
                 SignRequest.builder()
                         .message(SdkBytes.fromByteArray(message.getBytes()))
-                        .keyId(configurationService.getSigningKeyAlias())
+                        .keyId(keyId)
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
                         .build();
 
@@ -82,12 +82,8 @@ public class PreAuthorizedCodeBuilder {
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
-    private Base64URL getEncodedHeader() {
-        var jwsHeader =
-                new JWSHeader.Builder(SIGNING_ALGORITHM)
-                        .keyID(configurationService.getSigningKeyId())
-                        .type(JWT)
-                        .build();
+    private Base64URL getEncodedHeader(String keyId) {
+        var jwsHeader = new JWSHeader.Builder(SIGNING_ALGORITHM).keyID(keyId).type(JWT).build();
         return jwsHeader.toBase64URL();
     }
 }

@@ -64,6 +64,12 @@ public class KmsService implements KeyService {
         return kmsClient.describeKey(describeKeyRequest);
     }
 
+    public String getKeyId(String keyAlias) {
+        DescribeKeyRequest describeKeyRequest =
+                DescribeKeyRequest.builder().keyId(keyAlias).build();
+        return Arn.fromString(describeKeyRequest.keyId()).resource().resource();
+    }
+
     public boolean isKeyActive(String keyAlias) {
         DescribeKeyRequest describeKeyRequest =
                 DescribeKeyRequest.builder().keyId(keyAlias).build();

@@ -40,14 +40,14 @@ public class CredentialBuilder {
 
     public Credential buildCredential(String proofJwtDidKey, Object documentDetails)
             throws SigningException, NoSuchAlgorithmException {
-        var encodedHeader = getEncodedHeader();
+        String keyId = keyService.getKeyId(configurationService.getSigningKeyAlias());
+        var encodedHeader = getEncodedHeader(keyId);
         var encodedClaims = getEncodedClaims(proofJwtDidKey, documentDetails);
         var message = encodedHeader + "." + encodedClaims;
-
         var signRequest =
                 SignRequest.builder()
                         .message(SdkBytes.fromByteArray(message.getBytes()))
-                        .keyId(configurationService.getSigningKeyAlias())
+                        .keyId(keyId)
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
                         .build();
 
@@ -89,8 +89,7 @@ public class CredentialBuilder {
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
-    private Base64URL getEncodedHeader() throws NoSuchAlgorithmException {
-        String keyId = configurationService.getSigningKeyId();
+    private Base64URL getEncodedHeader(String keyId) throws NoSuchAlgorithmException {
         String kidHashingAlgorithm = configurationService.getKeyIdHashingAlgorithm();
         MessageDigest messageDigest = MessageDigest.getInstance(kidHashingAlgorithm);
         String hashedKeyId =

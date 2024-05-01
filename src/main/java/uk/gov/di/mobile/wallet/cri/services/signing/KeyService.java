@@ -16,4 +16,6 @@ public interface KeyService {
     public boolean isKeyActive(String keyAlias);
 
     public ECKey getPublicKey(String keyAlias) throws PEMException;
+
+    public String getKeyId(String keyAlias);
 }
