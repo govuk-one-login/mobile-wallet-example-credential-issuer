@@ -15,6 +15,7 @@ import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
+import uk.gov.di.mobile.wallet.cri.proof_jwt.ProofResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
@@ -78,9 +79,8 @@ public class MockCriApp extends Application<ConfigurationService> {
                                 credentialOfferService, configurationService, dynamoDbService));
 
         environment.jersey().register(new MetadataResource(configurationService, metadataBuilder));
-
         environment.jersey().register(new CredentialResource(credentialService));
-
         environment.jersey().register(new DidDocumentResource(didDocumentService));
+        environment.jersey().register(new ProofResource());
     }
 }

@@ -1,0 +1,20 @@
+package uk.gov.di.mobile.wallet.cri.did_key;
+
+public enum Multicodec {
+    P256_PUB("1200", 33);
+
+    /** The codec code value. */
+    public final String code;
+
+    // -1 represents unknown length
+    public final int expectedKeyLength;
+
+    /** The unsigned varint encoding of the code. */
+    public final String uvarintcode;
+
+    Multicodec(String code, int expectedKeyLength) {
+        this.code = code;
+        this.expectedKeyLength = expectedKeyLength;
+        this.uvarintcode = HexUtils.hexToVarintHex(this.code);
+    }
+}
