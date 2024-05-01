@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential_spike;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -9,14 +9,18 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import uk.gov.di.mobile.wallet.cri.credential.ProofJwtValidationException;
+import uk.gov.di.mobile.wallet.cri.did_key.DidKeyResolver;
+import uk.gov.di.mobile.wallet.cri.did_key.InvalidDidKeyException;
 
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
+import static com.nimbusds.jose.JWSAlgorithm.ES256;
 
 public class ProofJwtService {
 
@@ -26,7 +30,8 @@ public class ProofJwtService {
 
     public ProofJwtService() {}
 
-    public SignedJWT verifyProofJwt(String jwt) throws ProofJwtValidationException {
+    public SignedJWT verifyProofJwt(String jwt)
+            throws ProofJwtValidationException, InvalidDidKeyException {
         SignedJWT signedJwt = parseJwt(jwt);
 
         verifyTokenHeader(CLIENT_CONFIG_ALGORITHM, signedJwt);
@@ -84,15 +89,22 @@ public class ProofJwtService {
         }
     }
 
-    private boolean verifyTokenSignature(SignedJWT signedJwt) throws ProofJwtValidationException {
-        String keyId = signedJwt.getHeader().getKeyID();
+    private boolean verifyTokenSignature(SignedJWT signedJwt)
+            throws ProofJwtValidationException, InvalidDidKeyException {
+        String didKey = signedJwt.getHeader().getKeyID();
         try {
-            String publicKeyBase64 = keyId.replace("did:key:", "");
-            KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            byte[] decoded = Base64.getDecoder().decode(publicKeyBase64);
-            EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
 
-            ECPublicKey publicKey = (ECPublicKey) keyFactory.generatePublic(keySpec);
+            DidKeyResolver didKeyResolver = new DidKeyResolver();
+            DidKeyResolver.DecodedData resolvedDidKey = didKeyResolver.decodeDIDKey(didKey);
+
+            byte[] rawPublicKeyBytes = resolvedDidKey.rawPublicKeyBytes();
+
+            ECPublicKey publicKey = didKeyResolver.generatePublicKeyFromBytes(rawPublicKeyBytes);
+            System.out.println("Public key AFTER: " + publicKey);
+
+            System.out.println(
+                    "Public key AFTER JWK: "
+                            + new ECKey.Builder(Curve.P_256, publicKey).algorithm(ES256).build());
 
             ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();
 

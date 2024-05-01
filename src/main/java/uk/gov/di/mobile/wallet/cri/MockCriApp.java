@@ -79,8 +79,29 @@ public class MockCriApp extends Application<ConfigurationService> {
                                 credentialOfferService, configurationService, dynamoDbService));
 
         environment.jersey().register(new MetadataResource(configurationService, metadataBuilder));
+
         environment.jersey().register(new CredentialResource(credentialService));
+
         environment.jersey().register(new DidDocumentResource(didDocumentService));
+
+        // Spike resources
+        uk.gov.di.mobile.wallet.cri.credential_spike.ProofJwtService proofJwtServiceSpike =
+                new uk.gov.di.mobile.wallet.cri.credential_spike.ProofJwtService();
+        uk.gov.di.mobile.wallet.cri.credential_spike.CredentialService credentialServiceSpike =
+                new uk.gov.di.mobile.wallet.cri.credential_spike.CredentialService(
+                        configurationService,
+                        dynamoDbService,
+                        accessTokenService,
+                        proofJwtServiceSpike,
+                        httpClient,
+                        credentialBuilder);
+
         environment.jersey().register(new ProofResource());
+
+        environment
+                .jersey()
+                .register(
+                        new uk.gov.di.mobile.wallet.cri.credential_spike.CredentialResource(
+                                credentialServiceSpike));
     }
 }

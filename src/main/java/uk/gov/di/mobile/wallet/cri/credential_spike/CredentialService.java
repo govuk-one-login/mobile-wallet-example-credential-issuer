@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential_spike;
 
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
@@ -7,6 +7,8 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.*;
+import uk.gov.di.mobile.wallet.cri.did_key.InvalidDidKeyException;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -47,11 +49,12 @@ public class CredentialService {
     public Credential run(
             BearerAccessToken bearerAccessToken, CredentialRequestBody credentialRequestBody)
             throws DataStoreException,
-                    ProofJwtValidationException,
                     ClaimMismatchException,
                     SigningException,
                     AccessTokenValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    InvalidDidKeyException,
+                    ProofJwtValidationException {
 
         SignedJWT accessToken = accessTokenService.verifyAccessToken(bearerAccessToken);
 
