@@ -7,13 +7,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
-import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
 import software.amazon.awssdk.services.kms.model.NotFoundException;
-import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
@@ -23,7 +20,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
-import java.util.Base64;
 import java.util.List;
 
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
@@ -42,8 +38,6 @@ public class DidDocumentServiceTest {
     private final ConfigurationService configurationService = new ConfigurationService();
     private static final String TEST_ARN =
             "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String TEST_PUBLIC_KEY =
-            "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZS4QGXEhtywj9ivxlgx1dIJkFS7l2TInfT9r3Onmpvq64gfgiSQcFQ6eBIJDb9udSzWgi9+Z4Ls+wRkRqzghgQ==";
     private static final String TEST_HASHED_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
     private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
@@ -126,15 +120,6 @@ public class DidDocumentServiceTest {
                         KeyNotActiveException.class,
                         () -> didDocumentService.generateDidDocument());
         assertThat(exception.getMessage(), containsString("Public key is not active"));
-    }
-
-    public static GetPublicKeyResponse getMockPublicKeyResponse(String keyId, String keyString) {
-        byte[] publicKey = Base64.getDecoder().decode(keyString);
-        return GetPublicKeyResponse.builder()
-                .keyId(keyId)
-                .publicKey(SdkBytes.fromByteArray(publicKey))
-                .signingAlgorithms(SigningAlgorithmSpec.ECDSA_SHA_256)
-                .build();
     }
 
     public static DescribeKeyResponse getMockDescribeKeyResponse(

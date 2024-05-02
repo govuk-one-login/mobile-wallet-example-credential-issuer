@@ -67,7 +67,9 @@ public class KmsService implements KeyService {
     public String getKeyId(String keyAlias) {
         DescribeKeyRequest describeKeyRequest =
                 DescribeKeyRequest.builder().keyId(keyAlias).build();
-        return Arn.fromString(describeKeyRequest.keyId()).resource().resource();
+        DescribeKeyResponse describeKeyResponse = describeKey(describeKeyRequest);
+        String keyId = describeKeyResponse.keyMetadata().keyId();
+        return Arn.fromString(keyId).resource().resource();
     }
 
     public boolean isKeyActive(String keyAlias) {
@@ -96,15 +98,16 @@ public class KmsService implements KeyService {
     }
 
     public ECKey getPublicKey(String keyAlias) throws PEMException {
-        GetPublicKeyResponse getPublicKeyResponse =
-                kmsClient.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
+        GetPublicKeyResponse publicKeyResponse = getKmsPublicKey(keyAlias);
+        return createJwk(publicKeyResponse);
+    }
 
-        return createJwk(getPublicKeyResponse);
+    public GetPublicKeyResponse getKmsPublicKey(String keyAlias) {
+        return kmsClient.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
     }
 
     private ECKey createJwk(GetPublicKeyResponse publicKeyResponse) throws PEMException {
         PublicKey publicKey = createPublicKey(publicKeyResponse);
-
         String keyId = Arn.fromString(publicKeyResponse.keyId()).resource().resource();
         return new ECKey.Builder(P_256, (ECPublicKey) publicKey)
                 .keyID(keyId)
@@ -115,7 +118,6 @@ public class KmsService implements KeyService {
     private PublicKey createPublicKey(GetPublicKeyResponse publicKeyResponse) throws PEMException {
         SubjectPublicKeyInfo subjectKeyInfo =
                 SubjectPublicKeyInfo.getInstance(publicKeyResponse.publicKey().asByteArray());
-
         return new JcaPEMKeyConverter().getPublicKey(subjectKeyInfo);
     }
 }
