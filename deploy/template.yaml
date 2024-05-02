@@ -406,8 +406,6 @@ Resources:
           Environment:
             - Name: SIGNING_KEY_ALIAS
               Value: !Ref CredentialIssuerSigningKeyAlias
-            - Name: SIGNING_KEY_ID
-              Value: !Ref CredentialIssuerSigningKey
             - Name: AWS_REGION
               Value: !Sub "${AWS::Region}"
             - Name: ENVIRONMENT
