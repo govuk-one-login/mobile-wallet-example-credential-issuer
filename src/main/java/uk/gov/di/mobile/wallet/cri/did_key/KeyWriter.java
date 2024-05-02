@@ -5,6 +5,8 @@ import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.math.ec.ECCurve;
+import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 import java.security.*;
@@ -21,17 +23,25 @@ public class KeyWriter {
      */
     public byte[] getCompressedPublicKey(PublicKey publicKey) {
         System.out.println("Public key BEFORE: " + publicKey);
-
         System.out.println(
                 "Public key BEFORE JWK: "
                         + new ECKey.Builder(Curve.P_256, (ECPublicKey) publicKey)
                                 .algorithm(ES256)
                                 .build());
 
-        BigInteger xCoordinate = ((ECPublicKey) publicKey).getW().getAffineX();
-        BigInteger yCoordinate = ((ECPublicKey) publicKey).getW().getAffineY();
+        ECPublicKey ecPublicKey = ((ECPublicKey) publicKey);
 
-        return CURVE.getCurve().createPoint(xCoordinate, yCoordinate).getEncoded(true);
+        byte[] x = ecPublicKey.getW().getAffineX().toByteArray();
+        byte[] y = ecPublicKey.getW().getAffineY().toByteArray();
+
+        BigInteger xbi = new BigInteger(1, x);
+        BigInteger ybi = new BigInteger(1, y);
+
+        ECCurve curve = CURVE.getCurve();
+        ECPoint point = curve.createPoint(xbi, ybi);
+
+        byte[] publicKeyCompressed = point.getEncoded(true);
+        return publicKeyCompressed;
     }
 
     /**
