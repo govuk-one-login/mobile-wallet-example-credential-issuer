@@ -159,7 +159,7 @@ public class AccessTokenService {
         try {
             uri = new URI(stsStubUrl + DID_DOCUMENT_PATH);
         } catch (URISyntaxException exception) {
-            throw new RuntimeException("Error building STS URI: ", exception);
+            throw new RuntimeException("Error building authorization server URI: ", exception);
         }
 
         WebTarget webTarget = httpClient.target(uri);
@@ -167,7 +167,6 @@ public class AccessTokenService {
         Response response = invocationBuilder.get();
 
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            System.out.println(response);
             throw new RuntimeException(
                     "Request to fetch DID Document failed with status code "
                             + response.getStatus());

@@ -44,7 +44,7 @@ public class CredentialService {
         this.credentialBuilder = credentialBuilder;
     }
 
-    public Credential run(
+    public Credential getCredential(
             BearerAccessToken bearerAccessToken, CredentialRequestBody credentialRequestBody)
             throws DataStoreException,
                     ProofJwtValidationException,
@@ -54,12 +54,14 @@ public class CredentialService {
                     NoSuchAlgorithmException {
 
         SignedJWT accessToken = accessTokenService.verifyAccessToken(bearerAccessToken);
+        logger.info("Access token verified");
 
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
 
         SignedJWT proofJwt =
                 proofJwtService.verifyProofJwt(credentialRequestBody.getProof().getJwt());
         ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
+        logger.info("Proof JWT verified");
 
         if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {
             throw new ClaimMismatchException(
@@ -68,7 +70,6 @@ public class CredentialService {
 
         String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-
         logger.info("Credential offer retrieved for credentialOfferId: {}", credentialOfferId);
 
         if (credentialOffer == null) {
@@ -80,7 +81,9 @@ public class CredentialService {
                     "Access token sub claim does not match cached walletSubjectId");
         }
 
-        Object documentDetails = getDocumentDetails(credentialOffer.getDocumentId());
+        String documentId = credentialOffer.getDocumentId();
+        Object documentDetails = getDocumentDetails(documentId);
+        logger.info("Document retrieved for documentId {}", documentId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }

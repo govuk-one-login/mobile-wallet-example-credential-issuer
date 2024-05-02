@@ -5,9 +5,9 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-
-import java.io.IOException;
 
 @Singleton
 @Path("/.well-known/openid-credential-issuer")
@@ -15,9 +15,9 @@ public class MetadataResource {
 
     private static final String CREDENTIAL_ENDPOINT = "/credential";
     private static final String CREDENTIALS_SUPPORTED_FILE_NAME = "credentials_supported.json";
-
     private final ConfigurationService configurationService;
     private final MetadataBuilder metadataBuilder;
+    private static Logger logger = LoggerFactory.getLogger(MetadataResource.class);
 
     public MetadataResource(
             ConfigurationService configurationService, MetadataBuilder metadataBuilder) {
@@ -38,9 +38,11 @@ public class MetadataResource {
                             .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
                             .build();
 
+            logger.info("Metadata created");
+
             return buildSuccessResponse().entity(metadata).build();
-        } catch (IllegalArgumentException | IOException exception) {
-            System.out.println("An error happened trying to get the metadata: " + exception);
+        } catch (Exception exception) {
+            logger.error("An error happened trying to get the metadata: ", exception);
             return buildFailResponse().build();
         }
     }

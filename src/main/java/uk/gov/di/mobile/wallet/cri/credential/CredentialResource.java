@@ -8,12 +8,15 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 @Path("/credential")
 public class CredentialResource {
 
     private final CredentialService credentialService;
+    private static Logger logger = LoggerFactory.getLogger(CredentialResource.class);
 
     public CredentialResource(CredentialService credentialService) {
         this.credentialService = credentialService;
@@ -26,11 +29,14 @@ public class CredentialResource {
         Credential credential;
         try {
             CredentialRequestBody credentialRequest = CredentialRequestBody.from(payload);
-            BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
+            logger.info("Valid request body");
 
-            credential = credentialService.run(bearerAccessToken, credentialRequest);
+            BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
+            logger.info("Valid authorization header");
+
+            credential = credentialService.getCredential(bearerAccessToken, credentialRequest);
         } catch (Exception exception) {
-            System.out.println("An error happened trying to build the credential: " + exception);
+            logger.error("An error happened trying to get the credential: ", exception);
             if (exception instanceof BadRequestException) {
                 return buildBadRequestResponse().entity(exception.getMessage()).build();
             }
