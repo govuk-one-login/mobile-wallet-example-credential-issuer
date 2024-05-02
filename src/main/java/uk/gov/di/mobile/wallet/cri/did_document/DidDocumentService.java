@@ -4,7 +4,7 @@ import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
-import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 
 import java.security.NoSuchAlgorithmException;
 import java.util.Collections;
@@ -17,11 +17,11 @@ public class DidDocumentService {
     private static final List<String> CONTEXT =
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
     private final ConfigurationService configurationService;
-    private final KeyService keyService;
+    private final KeyProvider keyProvider;
 
-    public DidDocumentService(ConfigurationService configurationService, KeyService keyService) {
+    public DidDocumentService(ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
-        this.keyService = keyService;
+        this.keyProvider = keyProvider;
     }
 
     public DidDocument generateDidDocument()
@@ -44,14 +44,14 @@ public class DidDocumentService {
     private Did generateDid(String keyAlias, String controller)
             throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
 
-        if (!keyService.isKeyActive(keyAlias)) {
+        if (!keyProvider.isKeyActive(keyAlias)) {
             throw new KeyNotActiveException("Public key is not active");
         }
 
-        ECKey jwk = keyService.getPublicKey(keyAlias);
+        ECKey jwk = keyProvider.getPublicKey(keyAlias);
         String keyId = jwk.getKeyID();
         String hashedKeyId =
-                new KeyHelper().hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
+                KeyHelper.hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
 
         String id = controller + "#" + hashedKeyId;
 

@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
-import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
@@ -29,11 +29,11 @@ public class CredentialBuilder {
     private static final String CONTEXT = "https://www.w3.org/2018/credentials/v1";
 
     private final ConfigurationService configurationService;
-    private final KeyService keyService;
+    private final KeyProvider keyProvider;
 
-    public CredentialBuilder(ConfigurationService configurationService, KeyService keyService) {
+    public CredentialBuilder(ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
-        this.keyService = keyService;
+        this.keyProvider = keyProvider;
     }
 
     public Credential buildCredential(String proofJwtDidKey, Object documentDetails)
@@ -50,7 +50,7 @@ public class CredentialBuilder {
                         .build();
 
         try {
-            SignResponse signResult = keyService.sign(signRequest);
+            SignResponse signResult = keyProvider.sign(signRequest);
             String signature = encodedSignature(signResult);
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             return new Credential(signedJWT);
@@ -89,10 +89,9 @@ public class CredentialBuilder {
 
     private Base64URL getEncodedHeader() throws NoSuchAlgorithmException {
         String hashedKeyId =
-                new KeyHelper()
-                        .hashKeyId(
-                                configurationService.getSigningKeyId(),
-                                configurationService.getKeyIdHashingAlgorithm());
+                KeyHelper.hashKeyId(
+                        configurationService.getSigningKeyId(),
+                        configurationService.getKeyIdHashingAlgorithm());
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM).keyID(hashedKeyId).type(JWT).build();
         return jwsHeader.toBase64URL();

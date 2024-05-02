@@ -8,7 +8,8 @@ import java.security.NoSuchAlgorithmException;
 
 public class KeyHelper {
 
-    public String hashKeyId(String keyId, String hashingAlgorithm) throws NoSuchAlgorithmException {
+    public static String hashKeyId(String keyId, String hashingAlgorithm)
+            throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
         return Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
     }
