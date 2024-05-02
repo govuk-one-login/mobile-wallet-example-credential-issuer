@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 class KmsServiceTest {
 
     private final KmsService kmsService = mock(KmsService.class);
+    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_ARN =
             "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_KEY_ALIAS = "test-signing-key";
@@ -34,7 +35,7 @@ class KmsServiceTest {
     @Test
     void shouldReturnKeyId() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(getMockDescribeKeyResponse(TEST_ARN, true, null));
+                .thenReturn(getMockDescribeKeyResponse(TEST_KEY_ID, true, null));
         when(kmsService.getKeyId(TEST_KEY_ALIAS)).thenCallRealMethod();
 
         String keyId = kmsService.getKeyId(TEST_KEY_ALIAS);
@@ -46,7 +47,7 @@ class KmsServiceTest {
         String mockPublicKey =
                 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZS4QGXEhtywj9ivxlgx1dIJkFS7l2TInfT9r3Onmpvq64gfgiSQcFQ6eBIJDb9udSzWgi9+Z4Ls+wRkRqzghgQ==";
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(getMockDescribeKeyResponse(TEST_ARN, true, null));
+                .thenReturn(getMockDescribeKeyResponse(TEST_KEY_ID, true, null));
         when(kmsService.getKmsPublicKey(TEST_KEY_ALIAS))
                 .thenReturn(getMockPublicKeyResponse(TEST_ARN, mockPublicKey));
 
@@ -72,10 +73,10 @@ class KmsServiceTest {
                 .build();
     }
 
-    public static GetPublicKeyResponse getMockPublicKeyResponse(String keyId, String keyString) {
+    public static GetPublicKeyResponse getMockPublicKeyResponse(String keyArn, String keyString) {
         byte[] publicKey = Base64.getDecoder().decode(keyString);
         return GetPublicKeyResponse.builder()
-                .keyId(keyId)
+                .keyId(keyArn)
                 .publicKey(SdkBytes.fromByteArray(publicKey))
                 .signingAlgorithms(SigningAlgorithmSpec.ECDSA_SHA_256)
                 .build();

@@ -68,8 +68,7 @@ public class KmsService implements KeyService {
         DescribeKeyRequest describeKeyRequest =
                 DescribeKeyRequest.builder().keyId(keyAlias).build();
         DescribeKeyResponse describeKeyResponse = describeKey(describeKeyRequest);
-        String keyId = describeKeyResponse.keyMetadata().keyId();
-        return Arn.fromString(keyId).resource().resource();
+        return describeKeyResponse.keyMetadata().keyId();
     }
 
     public boolean isKeyActive(String keyAlias) {
