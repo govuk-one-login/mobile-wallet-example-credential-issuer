@@ -17,14 +17,20 @@ import static org.bitcoinj.core.ECKey.CURVE;
 
 public class KeyWriter {
     /**
-     * Compresses a public key of type PublicKey into an array of bytes
+     * Compresses a public key of type PublicKey and returns it as an array of bytes.
+     * <p>
+     * The public key is an EC point, that is a pair of integer coordinates {x, y}, laying on the curve. It can be
+     * compressed to just one of the coordinates {x} + 1 bit (parity). In other words, the compressed public key
+     * stores whether the y-coordinate is even or odd and the x-coordinate:
+     * - 1 byte: the indicator of the y coordinate value (equal to 02 if the y coordinate of the public point is even, or 03 if it is odd)
+     * - 32 bytes: the x coordinate of the public point
      *
-     * @return Compressed public key in byte array format
+     * @return Compressed public key (257-bit integer) in byte array format (33 bytes)
      */
-    public byte[] getCompressedPublicKey(PublicKey publicKey) {
-        System.out.println("Public key BEFORE: " + publicKey);
+    public static byte[] getCompressedPublicKey(PublicKey publicKey) {
+        System.out.println("Public key BEFORE COMPRESSION: " + publicKey);
         System.out.println(
-                "Public key BEFORE JWK: "
+                "JWK: "
                         + new ECKey.Builder(Curve.P_256, (ECPublicKey) publicKey)
                                 .algorithm(ES256)
                                 .build());
@@ -45,15 +51,16 @@ public class KeyWriter {
     }
 
     /**
-     * Creates an asymmetric key-pair
+     * Generates an ECDSA key-pair (256-bit elliptic curve aka secp256r1).
+     * - Private key: an 256-bit integer (32 bytes) - generated at random
+     * - Public key: a (EC) point on the elliptic curve, calculated by multiplying the private key by the generator
+     * point G
      *
-     * @return A key-pair
-     * @throws NoSuchAlgorithmException On error creating a key-pair generator with an invalid
-     *     algorithm
-     * @throws InvalidAlgorithmParameterException On error initializing a key-pair generator with an
-     *     invalid algorithm
+     * @return An ECDSA key-pair
+     * @throws NoSuchAlgorithmException On error creating a key-pair generator with an invalid algorithm
+     * @throws InvalidAlgorithmParameterException On error initializing a key-pair generator with an invalid algorithm
      */
-    public KeyPair generateKeyPair()
+    public static KeyPair generateKeyPair()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256r1");
 

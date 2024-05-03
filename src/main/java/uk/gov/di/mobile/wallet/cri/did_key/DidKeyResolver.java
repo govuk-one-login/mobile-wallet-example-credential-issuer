@@ -47,36 +47,38 @@ public class DidKeyResolver {
      * @throws InvalidDidKeyException On error decoding the did:key
      */
     public DecodedData decodeDIDKey(@NotNull String didKey) throws InvalidDidKeyException {
-        String multibaseValue = extractMultibaseFromDidKey(didKey);
-        byte[] multicodec = Base58.decode(multibaseValue);
+        // get fingerprint/multibase
+        String multibase = extractMultibaseFromDidKey(didKey);
+        // base58 decode the public key
+        byte[] multicodec = Base58.decode(multibase);
 
         return extractMulticodecValue(multicodec);
     }
 
     private static @NotNull String extractMultibaseFromDidKey(@NotNull String didKey)
             throws InvalidDidKeyException {
-        // Validate the did key starts with did:key:
+        // validate the did key starts with did:key:
         if (!didKey.startsWith("did:key:")) {
             throw new InvalidDidKeyException("Expected key to start with prefix did:key:");
         }
 
-        // Validate multibase type is 'z'
+        // DID keys only support base58 encoding, which is informed by z character as first character:
+        // validate that key is base58 encoded by checking it starts with 'z'
         String[] segments = didKey.split(":");
         String multibase = segments[segments.length - 1];
         char multibaseType = multibase.charAt(0);
         if (multibaseType != 'z') {
-            // DID keys only support base58-btc encoding, which is informed by z character as first
-            // character
             throw new InvalidDidKeyException(
                     "DID Keys need to be encoded in base58-btc encoding, "
                             + "but found multibase type "
                             + multibaseType);
         }
 
-        // Remove z character from multibase and return
+        // Skip/remove leading "z" from the base58 encoding
         return multibase.substring(1);
     }
 
+    // this method can be simplified as we are only dealing with one multicodec value so no need to iterate over many
     private static DecodedData extractMulticodecValue(byte[] keyBytes)
             throws InvalidDidKeyException {
         String hex = HexUtils.bytesToHex(keyBytes);
@@ -110,7 +112,7 @@ public class DidKeyResolver {
     }
 
     /**
-     * Creates an EC public key from a compressed key
+     * Creates a public key from a compressed key.
      *
      * @param compressedPublicKey Compressed public key in byte array format
      * @return The public key as ECPublicKey object
@@ -119,13 +121,14 @@ public class DidKeyResolver {
      */
     public ECPublicKey generatePublicKeyFromBytes(byte[] compressedPublicKey)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
+        // Check if key is compressed by checking that its length is 33 bytes and the first byte is either 0x02 or 0x03
         if (compressedPublicKey.length != 33
                 || compressedPublicKey[0] != 2 && compressedPublicKey[0] != 3) {
             throw new IllegalArgumentException();
         }
 
         ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256r1");
-        byte[] publicKeyUncompressed = uncompressKey(compressedPublicKey, spec);
+        byte[] publicKeyUncompressed = decompressKey(compressedPublicKey, spec);
 
         ECNamedCurveSpec params =
                 new ECNamedCurveSpec("secp256r1", spec.getCurve(), spec.getG(), spec.getN());
@@ -137,12 +140,12 @@ public class DidKeyResolver {
     }
 
     /**
-     * Uncompresses a compressed public key
+     * Decompresses a compressed public key.
      *
      * @param compressedPublicKey Compressed public key in byte array format
      * @return Uncompressed public key in byte array format
      */
-    private static byte[] uncompressKey(
+    private static byte[] decompressKey(
             byte[] compressedPublicKey, ECNamedCurveParameterSpec spec) {
         return spec.getCurve().decodePoint(compressedPublicKey).getEncoded(false);
     }

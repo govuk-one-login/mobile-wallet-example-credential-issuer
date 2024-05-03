@@ -28,20 +28,22 @@ import java.util.Date;
 @Path("/proof")
 public class ProofResource {
 
-    public ProofResource() {}
-
     @GET
     public Response getProof(@QueryParam("nonce") @NotEmpty String nonce) {
         try {
-            KeyWriter keyWriter = new KeyWriter();
-            KeyPair keyPair = keyWriter.generateKeyPair();
+            // get an ECDSA key-pair
+            KeyPair keyPair = KeyWriter.generateKeyPair();
+            // get the public key from the key-air
             PublicKey publicKey = keyPair.getPublic();
-            byte[] compressedPublicKey = keyWriter.getCompressedPublicKey(publicKey);
+            // compress the public key
+            byte[] compressedPublicKey = KeyWriter.getCompressedPublicKey(publicKey);
+            // generate a did:key from the compressed public key
             String didKey = DidKeyGenerator.encodeDIDKey(Multicodec.P256_PUB, compressedPublicKey);
 
             JWSHeader header =
                     new JWSHeader.Builder(JWSAlgorithm.ES256)
                             .type(JOSEObjectType.JWT)
+                            // Make kid header claim equal to did:key
                             .keyID(didKey)
                             .build();
             JWTClaimsSet payload =
@@ -53,6 +55,7 @@ public class ProofResource {
                             .build();
 
             SignedJWT signedJWT = new SignedJWT(header, payload);
+            // sign token with the private key from the key-pair
             signedJWT.sign(new ECDSASigner((ECPrivateKey) keyPair.getPrivate()));
             System.out.println("Signed JWT: " + signedJWT.serialize());
 
