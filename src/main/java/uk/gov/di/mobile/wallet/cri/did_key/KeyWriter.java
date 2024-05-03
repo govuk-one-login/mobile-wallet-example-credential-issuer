@@ -2,18 +2,18 @@ package uk.gov.di.mobile.wallet.cri.did_key;
 
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
-import org.bouncycastle.jce.ECNamedCurveTable;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
+import org.bouncycastle.asn1.x9.ECNamedCurveTable;
+import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
+import org.bouncycastle.util.encoders.Hex;
 
 import java.math.BigInteger;
 import java.security.*;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECGenParameterSpec;
 
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
-import static org.bitcoinj.core.ECKey.CURVE;
 
 public class KeyWriter {
     /**
@@ -31,20 +31,26 @@ public class KeyWriter {
     public static byte[] getCompressedPublicKey(PublicKey publicKey) {
         System.out.println("Public key BEFORE COMPRESSION: " + publicKey);
         System.out.println(
-                "JWK: "
+                "Public key JWK: "
                         + new ECKey.Builder(Curve.P_256, (ECPublicKey) publicKey)
                                 .algorithm(ES256)
                                 .build());
 
+        // parse public key as public key of type EC
         ECPublicKey ecPublicKey = ((ECPublicKey) publicKey);
 
+        // get x-coordinate
         byte[] x = ecPublicKey.getW().getAffineX().toByteArray();
+        // get y-coordinate
         byte[] y = ecPublicKey.getW().getAffineY().toByteArray();
 
+        // convert x-coordinate to big integer
         BigInteger xbi = new BigInteger(1, x);
+        // convert y-coordinate to big integer
         BigInteger ybi = new BigInteger(1, y);
 
-        ECCurve curve = CURVE.getCurve();
+        X9ECParameters x9 = ECNamedCurveTable.getByName("secp256r1");
+        ECCurve curve = x9.getCurve();
         ECPoint point = curve.createPoint(xbi, ybi);
 
         byte[] publicKeyCompressed = point.getEncoded(true);
@@ -64,11 +70,9 @@ public class KeyWriter {
      */
     public static KeyPair generateKeyPair()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
-        ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256r1");
 
-        KeyPairGenerator keyPairGenerator =
-                KeyPairGenerator.getInstance("EC", new BouncyCastleProvider());
-        keyPairGenerator.initialize(spec);
+        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("EC");
+        keyPairGenerator.initialize(new ECGenParameterSpec("secp256r1"), new SecureRandom());
         return keyPairGenerator.generateKeyPair();
     }
 }
