@@ -19,8 +19,8 @@ import uk.gov.di.mobile.wallet.cri.did_key.KeyWriter;
 import uk.gov.di.mobile.wallet.cri.did_key.Multicodec;
 
 import java.security.KeyPair;
-import java.security.PublicKey;
 import java.security.interfaces.ECPrivateKey;
+import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.Date;
 
@@ -33,9 +33,9 @@ public class ProofResource {
         try {
             // get an ECDSA key-pair
             KeyPair keyPair = KeyWriter.generateKeyPair();
-            // get the public key from the key-air
-            PublicKey publicKey = keyPair.getPublic();
-            // compress the public key
+            // get the public key from the key-pair and parse it as ECPublicKey
+            ECPublicKey publicKey = (ECPublicKey) keyPair.getPublic();
+            // compress the public key - you can also try using getCompressedPublicKeyManually()
             byte[] compressedPublicKey = KeyWriter.getCompressedPublicKey(publicKey);
             // generate a did:key from the compressed public key
             String didKey = DidKeyGenerator.encodeDIDKey(Multicodec.P256_PUB, compressedPublicKey);
