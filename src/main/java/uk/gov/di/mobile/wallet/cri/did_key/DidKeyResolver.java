@@ -62,7 +62,8 @@ public class DidKeyResolver {
             throw new InvalidDidKeyException("Expected key to start with prefix did:key:");
         }
 
-        // DID keys only support base58 encoding, which is informed by z character as first character:
+        // DID keys only support base58 encoding, which is informed by z character as first
+        // character:
         // validate that key is base58 encoded by checking it starts with 'z'
         String[] segments = didKey.split(":");
         String multibase = segments[segments.length - 1];
@@ -78,7 +79,8 @@ public class DidKeyResolver {
         return multibase.substring(1);
     }
 
-    // this method can be simplified as we are only dealing with one multicodec value so no need to iterate over many
+    // this method can be simplified as we are only dealing with one multicodec value so no need to
+    // iterate over many
     private static DecodedData extractMulticodecValue(byte[] keyBytes)
             throws InvalidDidKeyException {
         String hex = HexUtils.bytesToHex(keyBytes);
@@ -121,7 +123,8 @@ public class DidKeyResolver {
      */
     public ECPublicKey generatePublicKeyFromBytes(byte[] compressedPublicKey)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // Check if key is compressed by checking that its length is 33 bytes and the first byte is either 0x02 or 0x03
+        // Check if key is compressed by checking that its length is 33 bytes and the first byte is
+        // either 0x02 or 0x03
         if (compressedPublicKey.length != 33
                 || compressedPublicKey[0] != 2 && compressedPublicKey[0] != 3) {
             throw new IllegalArgumentException();
