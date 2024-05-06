@@ -22,87 +22,62 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void testSigningKeyAliasIsEqualDefaultWhenEnvVarUnset() {
+    void shouldGetSigningKeyAliasDefaultValueWhenEnvVarUnset() {
         assertEquals("alias/localSigningKeyAlias", configurationService.getSigningKeyAlias());
     }
 
     @Test
-    void testSigningKeyIdIsEqualDefaultWhenEnvVarUnset() {
+    void shouldGetSigningKeyAliasEnvVarValue() {
+        environmentVariables.set("SIGNING_KEY_ALIAS", "alias/testSigningKeyAlias-1");
+        assertEquals("alias/testSigningKeyAlias-1", configurationService.getSigningKeyAlias());
+    }
+
+    @Test
+    void shouldGetSigningKeyIdDefaultValueWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
                 "ff275b92-0def-4dfc-b0f6-87c96b26c6c7", configurationService.getSigningKeyId());
     }
 
     @Test
-    void testAwsRegionIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("eu-west-2", configurationService.getAwsRegion());
-    }
-
-    @Test
-    void testEnvironmentIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("local", configurationService.getEnvironment());
-    }
-
-    @Test
-    void testExampleCriUrlIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("http://localhost:8080", configurationService.getExampleCriUrl());
-    }
-
-    @Test
-    void testOneLoginAuthServerUrlIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(
-                "http://localhost:8000/sts-stub", configurationService.getOneLoginAuthServerUrl());
-    }
-
-    @Test
-    void testWalletUrlIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("https://mobile.account.gov.uk/wallet", configurationService.getWalletUrl());
-    }
-
-    @Test
-    void testPreAuthorizedCodeTtlIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(300, configurationService.getPreAuthorizedCodeTtl());
-    }
-
-    @Test
-    void testCriCacheTableNameIsEqualDefaultWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("cri_cache", configurationService.getCriCacheTableName());
-    }
-
-    @Test
-    void testItGetsSigningKeyAliasEnvironmentVariable() {
-        environmentVariables.set("SIGNING_KEY_ALIAS", "alias/testSigningKeyAlias");
-        assertEquals("alias/testSigningKeyAlias", configurationService.getSigningKeyAlias());
-    }
-
-    @Test
-    void testItGetsSigningKeyIdEnvironmentVariable() {
+    void shouldGetSigningKeyIdEnvVarValue() {
         environmentVariables.set("SIGNING_KEY_ID", "cc275b92-0def-4dfc-b0f6-87c96b26b8b9");
         assertEquals(
                 "cc275b92-0def-4dfc-b0f6-87c96b26b8b9", configurationService.getSigningKeyId());
     }
 
     @Test
-    void testItGetsAwsRegionEnvironmentVariable() {
+    void shouldGetAwsRegionDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals("eu-west-2", configurationService.getAwsRegion());
+    }
+
+    @Test
+    void shouldGetAwsRegionEnvVarValue() {
         environmentVariables.set("AWS_REGION", "eu-west-1");
         assertEquals("eu-west-1", configurationService.getAwsRegion());
     }
 
     @Test
-    void testItGetsEnvironmentEnvironmentVariable() {
+    void shouldGetEnvironmentDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals("local", configurationService.getEnvironment());
+    }
+
+    @Test
+    void shouldGetEnvironmentEnvVarValue() {
         environmentVariables.set("ENVIRONMENT", "test");
         assertEquals("test", configurationService.getEnvironment());
     }
 
     @Test
-    void testItGetsExampleCriUrlEnvironmentVariable() {
+    void shouldGetExampleCriUrlDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals("http://localhost:8080", configurationService.getExampleCriUrl());
+    }
+
+    @Test
+    void shouldGetExampleCriUrlEnvVarValue() {
         environmentVariables.set(
                 "EXAMPLE_CRI_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
         assertEquals(
@@ -111,56 +86,130 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void testItGetsOneLoginAuthServerUrlEnvironmentVariable() {
-        environmentVariables.set(
-                "ONE_LOGIN_AUTH_SERVER_URL", "https://credential-builder.test.com/auth-server");
+    void shouldGetDidControllerDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals("localhost:8080", configurationService.getDidController());
+    }
 
+    @Test
+    void shouldGetDidControllerEnvVarValue() {
+        environmentVariables.set("DID_CONTROLLER", "https://example-credential-issuer.gov.uk");
         assertEquals(
-                "https://credential-builder.test.com/auth-server",
+                "https://example-credential-issuer.gov.uk",
+                configurationService.getDidController());
+    }
+
+    @Test
+    void shouldGetOneLoginAuthServerUrlDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals(
+                "http://localhost:8000/sts-stub", configurationService.getOneLoginAuthServerUrl());
+    }
+
+    @Test
+    void shouldGetOneLoginAuthServerUrlEnvVarValue() {
+        environmentVariables.set(
+                "ONE_LOGIN_AUTH_SERVER_URL", "https://credential-store.com/auth-server");
+        assertEquals(
+                "https://credential-store.com/auth-server",
                 configurationService.getOneLoginAuthServerUrl());
     }
 
     @Test
-    void testItGetsWalletUrlEnvironmentVariable() {
+    void shouldGetCredentialStoreUrlDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals("http://localhost:8000", configurationService.getCredentialStoreUrl());
+    }
+
+    @Test
+    void shouldGetCredentialStoreUrlEnvVarValue() {
+        environmentVariables.set("CREDENTIAL_STORE_URL", "https://credential-store.test.com");
+        assertEquals(
+                "https://credential-store.test.com", configurationService.getCredentialStoreUrl());
+    }
+
+    @Test
+    void shouldGetWalletUrlDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals("https://mobile.account.gov.uk/wallet", configurationService.getWalletUrl());
+    }
+
+    @Test
+    void shouldGetWalletUrlEnvVarValue() {
         environmentVariables.set("WALLET_URL", "https://mobile.test.account.gov.uk/wallet");
         assertEquals(
                 "https://mobile.test.account.gov.uk/wallet", configurationService.getWalletUrl());
     }
 
     @Test
-    void testItGetsPreAuthorizedCodeTtlEnvironmentVariable() {
+    void shouldGetPreAuthCodeTtlDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals(300, configurationService.getPreAuthorizedCodeTtl());
+    }
+
+    @Test
+    void shouldGetPreAuthCodeTtlEnvVarValue() {
         environmentVariables.set("PRE_AUTHORIZED_CODE_TTL_IN_SECS", "600");
         assertEquals(600, configurationService.getPreAuthorizedCodeTtl());
     }
 
     @Test
-    void testItGetsClientIdValue() {
+    void shouldGetCredentialTtlDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals(365, configurationService.getCredentialTtl());
+    }
+
+    @Test
+    void shouldGetCredentialTtlEnvVarValue() {
+        environmentVariables.set("CREDENTIAL_TTL_IN_DAYS", "400");
+        assertEquals(400, configurationService.getCredentialTtl());
+    }
+
+    @Test
+    void shouldGetCredentialOfferCacheTableNameDefaultValueWhenEnvVarUnset() {
+        ConfigurationService configurationService = new ConfigurationService();
+        assertEquals(
+                "credential_offer_cache", configurationService.getCredentialOfferCacheTableName());
+    }
+
+    @Test
+    void shouldGetGetCredentialOfferCacheTableNameEnvVarValue() {
+        environmentVariables.set("CREDENTIAL_OFFER_CACHE", "test-table-name");
+        assertEquals("test-table-name", configurationService.getCredentialOfferCacheTableName());
+    }
+
+    @Test
+    void shouldGetClientIdValue() {
         assertEquals("EXAMPLE_CRI", configurationService.getClientId());
     }
 
     @Test
-    void testItGetsCriCacheTableNameEnvironmentVariable() {
-        environmentVariables.set("CRI_CACHE_TABLE_NAME", "test-table-name");
-        assertEquals("test-table-name", configurationService.getCriCacheTableName());
-    }
-
-    @Test
-    void testItGetsIssuerValue() {
+    void shouldGetIssuerValue() {
         assertEquals("urn:fdc:gov:uk:example-credential-issuer", configurationService.getIssuer());
     }
 
     @Test
-    void testItGetsAudienceValue() {
+    void shouldGetAudienceValue() {
         assertEquals("urn:fdc:gov:uk:wallet", configurationService.getAudience());
     }
 
     @Test
-    void testItGetsLocalstackEndpointValue() {
+    void shouldGetLocalstackEndpointValue() {
         assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
     }
 
     @Test
-    void testItGetsDidDocumentPathValue() {
-        assertEquals("/.well-known/did.json", configurationService.getDidDocumentPath());
+    void shouldGetKeyIdHashingAlgorithmValue() {
+        assertEquals("SHA-256", configurationService.getKeyIdHashingAlgorithm());
+    }
+
+    @Test
+    void shouldGetAuthServerDidDocumentPathValue() {
+        assertEquals("/.well-known/did.json", configurationService.getAuthServerDidDocumentPath());
+    }
+
+    @Test
+    void shouldGetCredentialStoreDocumentPathValue() {
+        assertEquals("/document/", configurationService.getCredentialStoreDocumentPath());
     }
 }

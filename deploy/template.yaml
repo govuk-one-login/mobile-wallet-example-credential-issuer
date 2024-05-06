@@ -422,7 +422,7 @@ Resources:
                 - ${BEURL}
                 - BEURL:
                     !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
-            - Name: DOCUMENT_BUILDER_URL
+            - Name: CREDENTIAL_STORE_URL
               Value: !Sub 
                       - "https://${FEURL}"
                       - FEURL:
@@ -433,7 +433,7 @@ Resources:
               Value: 300
             - Name: CREDENTIAL_TTL_IN_DAYS
               Value: 365
-            - Name: CRI_CACHE_TABLE_NAME
+            - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub 
@@ -605,7 +605,7 @@ Resources:
         - AttributeName: credentialIdentifier
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
-      TableName: cri_cache
+      TableName: credential_offer_cache
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH

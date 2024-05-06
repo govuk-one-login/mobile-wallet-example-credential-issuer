@@ -152,7 +152,7 @@ public class AccessTokenService {
 
     private String getDidDocument() {
         String authServerUrl = configurationService.getOneLoginAuthServerUrl();
-        String didDocumentPath = configurationService.getDidDocumentPath();
+        String didDocumentPath = configurationService.getAuthServerDidDocumentPath();
 
         URI uri;
         try {

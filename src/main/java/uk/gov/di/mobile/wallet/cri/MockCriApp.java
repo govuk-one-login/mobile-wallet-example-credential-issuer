@@ -45,7 +45,7 @@ public class MockCriApp extends Application<ConfigurationService> {
         DynamoDbService dynamoDbService =
                 new DynamoDbService(
                         DynamoDbService.getClient(configurationService),
-                        configurationService.getCriCacheTableName());
+                        configurationService.getCredentialOfferCacheTableName());
 
         MetadataBuilder metadataBuilder = new MetadataBuilder();
         Client httpClient =
