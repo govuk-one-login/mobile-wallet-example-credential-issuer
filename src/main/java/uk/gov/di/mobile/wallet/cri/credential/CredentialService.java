@@ -54,23 +54,24 @@ public class CredentialService {
                     NoSuchAlgorithmException {
 
         SignedJWT accessToken = accessTokenService.verifyAccessToken(bearerAccessToken);
-        logger.info("Access token verified");
 
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
+        String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
+
+        logger.info("Access token for credentialOfferId {} verified", credentialOfferId);
 
         SignedJWT proofJwt =
                 proofJwtService.verifyProofJwt(credentialRequestBody.getProof().getJwt());
         ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
-        logger.info("Proof JWT verified");
+        logger.info("Proof JWT for credentialOfferId {} verified", credentialOfferId);
 
         if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {
             throw new ClaimMismatchException(
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
-        String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-        logger.info("Credential offer retrieved for credentialOfferId: {}", credentialOfferId);
+        logger.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (credentialOffer == null) {
             throw new DataStoreException("Null response returned when fetching credential offer");
@@ -83,7 +84,10 @@ public class CredentialService {
 
         String documentId = credentialOffer.getDocumentId();
         Object documentDetails = getDocumentDetails(documentId);
-        logger.info("Document retrieved for documentId {}", documentId);
+        logger.info(
+                "Document details retrieved for credentialOfferId {} and documentId {}",
+                credentialOfferId,
+                documentId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }

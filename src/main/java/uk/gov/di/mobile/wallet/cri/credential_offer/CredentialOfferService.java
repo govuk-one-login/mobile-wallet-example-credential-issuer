@@ -28,7 +28,10 @@ public class CredentialOfferService {
                 new PreAuthorizedCodeBuilder(configurationService, kmsService)
                         .buildPreAuthorizedCode(credentialIdentifier);
 
-        logger.info("Pre-authorized code created for credentialOfferId {}", credentialIdentifier);
+        logger.info(
+                "Pre-authorized code created for credentialOfferId {} and credentialType {}",
+                credentialIdentifier,
+                credentialType);
 
         String signedJwtString = preAuthorizedCode.serialize();
 

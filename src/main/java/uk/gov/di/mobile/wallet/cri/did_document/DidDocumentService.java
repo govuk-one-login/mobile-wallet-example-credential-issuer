@@ -35,9 +35,6 @@ public class DidDocumentService {
         String keyAlias = configurationService.getSigningKeyAlias();
         String controller = CONTROLLER_PREFIX + configurationService.getDidController();
         Did did = generateDid(keyAlias, controller);
-
-        logger.info("DID created");
-
         List<Did> verificationMethod = Collections.singletonList(did);
         List<String> assertionMethod = Collections.singletonList(did.getId());
 

@@ -29,10 +29,8 @@ public class CredentialResource {
         Credential credential;
         try {
             CredentialRequestBody credentialRequest = CredentialRequestBody.from(payload);
-            logger.info("Valid request body");
 
             BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
-            logger.info("Valid authorization header");
 
             credential = credentialService.getCredential(bearerAccessToken, credentialRequest);
         } catch (Exception exception) {

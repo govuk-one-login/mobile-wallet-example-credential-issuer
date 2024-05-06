@@ -26,8 +26,6 @@ public class DidDocumentResource {
     public Response getDidDocument() {
         try {
             DidDocument didDocument = didDocumentService.generateDidDocument();
-            logger.info("DID document created");
-
             return buildSuccessResponse().entity(didDocument).build();
         } catch (IllegalArgumentException
                 | PEMException

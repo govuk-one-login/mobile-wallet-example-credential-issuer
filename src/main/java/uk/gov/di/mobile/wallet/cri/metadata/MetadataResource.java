@@ -38,8 +38,6 @@ public class MetadataResource {
                             .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
                             .build();
 
-            logger.info("Metadata created");
-
             return buildSuccessResponse().entity(metadata).build();
         } catch (Exception exception) {
             logger.error("An error happened trying to get the metadata: ", exception);
