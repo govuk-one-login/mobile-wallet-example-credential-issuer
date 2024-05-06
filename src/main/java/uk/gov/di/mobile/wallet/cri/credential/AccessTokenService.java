@@ -22,7 +22,9 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AccessTokenService {
 
