@@ -435,7 +435,7 @@ Resources:
               Value: 365
             - Name: CRI_CACHE_TABLE_NAME
               Value: !Ref CRICacheDatabase
-            - Name: STS_STUB_URL
+            - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub 
                       - "https://${FEURL}/sts-stub"
                       - FEURL:

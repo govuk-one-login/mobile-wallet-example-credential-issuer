@@ -68,7 +68,7 @@ public class MetadataResourceTest {
                 objectMapper.readValue(testCredentialsSupportedString, Object.class);
         return new Metadata(
                 "https://test-credential-issuer.gov.uk/credential",
-                "https://test-auhtorization-server.gov.uk/sts-stub",
+                "https://test-auhtorization-server.gov.uk/auth-server",
                 "https://test-credential-issuer.gov.uk",
                 testCredentialsSupported);
     }

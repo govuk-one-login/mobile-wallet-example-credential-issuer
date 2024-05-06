@@ -29,8 +29,9 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("DID_CONTROLLER", "localhost:8080");
     }
 
-    public String getStsStubUrl() {
-        return System.getenv().getOrDefault("STS_STUB_URL", "http://localhost:8000/sts-stub");
+    public String getOneLoginAuthServerUrl() {
+        return System.getenv()
+                .getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8000/sts-stub");
     }
 
     public String getDocumentBuilderUrl() {
@@ -72,5 +73,9 @@ public class ConfigurationService extends Configuration {
 
     public String getKeyIdHashingAlgorithm() {
         return "SHA-256";
+    }
+
+    public String getDidDocumentPath() {
+        return "/.well-known/did.json";
     }
 }

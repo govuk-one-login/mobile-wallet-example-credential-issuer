@@ -52,9 +52,10 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void testStsStubUrlIsEqualDefaultWhenEnvVarUnset() {
+    void testOneLoginAuthServerUrlIsEqualDefaultWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("http://localhost:8000/sts-stub", configurationService.getStsStubUrl());
+        assertEquals(
+                "http://localhost:8000/sts-stub", configurationService.getOneLoginAuthServerUrl());
     }
 
     @Test
@@ -110,12 +111,13 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void testItGetsStsStubUrlEnvironmentVariable() {
-        environmentVariables.set("STS_STUB_URL", "https://credential-builder.test.com/sts-stub");
+    void testItGetsOneLoginAuthServerUrlEnvironmentVariable() {
+        environmentVariables.set(
+                "ONE_LOGIN_AUTH_SERVER_URL", "https://credential-builder.test.com/auth-server");
 
         assertEquals(
-                "https://credential-builder.test.com/sts-stub",
-                configurationService.getStsStubUrl());
+                "https://credential-builder.test.com/auth-server",
+                configurationService.getOneLoginAuthServerUrl());
     }
 
     @Test
@@ -155,5 +157,10 @@ class ConfigurationServiceTest {
     @Test
     void testItGetsLocalstackEndpointValue() {
         assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
+    }
+
+    @Test
+    void testItGetsDidDocumentPathValue() {
+        assertEquals("/.well-known/did.json", configurationService.getDidDocumentPath());
     }
 }
