@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class CredentialResource {
 
     private final CredentialService credentialService;
-    private static Logger logger = LoggerFactory.getLogger(CredentialResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialResource.class);
 
     public CredentialResource(CredentialService credentialService) {
         this.credentialService = credentialService;
@@ -34,7 +34,7 @@ public class CredentialResource {
 
             credential = credentialService.getCredential(bearerAccessToken, credentialRequest);
         } catch (Exception exception) {
-            logger.error("An error happened trying to get the credential: ", exception);
+            LOGGER.error("An error happened trying to get the credential: ", exception);
             if (exception instanceof BadRequestException) {
                 return buildBadRequestResponse().entity(exception.getMessage()).build();
             }

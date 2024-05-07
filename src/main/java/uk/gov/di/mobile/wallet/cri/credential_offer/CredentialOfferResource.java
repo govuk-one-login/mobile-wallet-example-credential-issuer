@@ -28,7 +28,7 @@ public class CredentialOfferResource {
     private final CredentialOfferService credentialOfferService;
     private final ConfigurationService configurationService;
     private final DataStore dataStore;
-    private static Logger logger = LoggerFactory.getLogger(CredentialOfferResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
 
     public CredentialOfferResource(
             CredentialOfferService credentialOfferService,
@@ -54,7 +54,7 @@ public class CredentialOfferResource {
             credentialOffer =
                     credentialOfferService.buildCredentialOffer(credentialOfferId, credentialType);
         } catch (SigningException exception) {
-            logger.error(
+            LOGGER.error(
                     "Failed to create credential offer for walletSubjectId {} and documentId {}",
                     walletSubjectId,
                     documentId,
@@ -62,7 +62,7 @@ public class CredentialOfferResource {
             return buildFailResponse().build();
         }
 
-        logger.info(
+        LOGGER.info(
                 "Credential offer created for walletSubjectId {} and credentialOfferId {}",
                 walletSubjectId,
                 credentialOfferId);
@@ -71,7 +71,7 @@ public class CredentialOfferResource {
             dataStore.saveCredentialOffer(
                     new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId));
         } catch (DataStoreException exception) {
-            logger.error(
+            LOGGER.error(
                     "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",
                     walletSubjectId,
                     documentId,
@@ -79,7 +79,7 @@ public class CredentialOfferResource {
             return buildFailResponse().build();
         }
 
-        logger.info(
+        LOGGER.info(
                 "Credential offer saved for walletSubjectId {} and credentialOfferId {}",
                 walletSubjectId,
                 credentialOfferId);

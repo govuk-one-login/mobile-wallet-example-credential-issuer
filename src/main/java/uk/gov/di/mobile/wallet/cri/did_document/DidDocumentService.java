@@ -3,8 +3,6 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.ECKey;
 import org.apache.hc.client5.http.utils.Hex;
 import org.bouncycastle.openssl.PEMException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
 
@@ -22,7 +20,6 @@ public class DidDocumentService {
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
     private final ConfigurationService configurationService;
     private final KeyService keyService;
-    private static final Logger logger = LoggerFactory.getLogger(DidDocumentService.class);
 
     public DidDocumentService(ConfigurationService configurationService, KeyService keyService) {
         this.configurationService = configurationService;

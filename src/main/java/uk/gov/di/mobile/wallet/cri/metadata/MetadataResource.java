@@ -17,7 +17,7 @@ public class MetadataResource {
     private static final String CREDENTIALS_SUPPORTED_FILE_NAME = "credentials_supported.json";
     private final ConfigurationService configurationService;
     private final MetadataBuilder metadataBuilder;
-    private static Logger logger = LoggerFactory.getLogger(MetadataResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataResource.class);
 
     public MetadataResource(
             ConfigurationService configurationService, MetadataBuilder metadataBuilder) {
@@ -40,7 +40,7 @@ public class MetadataResource {
 
             return buildSuccessResponse().entity(metadata).build();
         } catch (Exception exception) {
-            logger.error("An error happened trying to get the metadata: ", exception);
+            LOGGER.error("An error happened trying to get the metadata: ", exception);
             return buildFailResponse().build();
         }
     }

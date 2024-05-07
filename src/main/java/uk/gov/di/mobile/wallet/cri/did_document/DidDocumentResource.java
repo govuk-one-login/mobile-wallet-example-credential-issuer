@@ -16,7 +16,7 @@ import java.security.NoSuchAlgorithmException;
 public class DidDocumentResource {
 
     private final DidDocumentService didDocumentService;
-    private static final Logger logger = LoggerFactory.getLogger(DidDocumentResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DidDocumentResource.class);
 
     public DidDocumentResource(DidDocumentService didDocumentService) {
         this.didDocumentService = didDocumentService;
@@ -31,7 +31,7 @@ public class DidDocumentResource {
                 | PEMException
                 | NoSuchAlgorithmException
                 | KeyNotActiveException exception) {
-            logger.error("An error happened trying to get the DID document: ", exception);
+            LOGGER.error("An error happened trying to get the DID document: ", exception);
             return buildFailResponse().build();
         }
     }

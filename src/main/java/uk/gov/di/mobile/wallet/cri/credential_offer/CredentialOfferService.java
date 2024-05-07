@@ -14,7 +14,7 @@ public class CredentialOfferService {
 
     private final ConfigurationService configurationService;
     private final KmsService kmsService;
-    private static Logger logger = LoggerFactory.getLogger(CredentialOfferService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferService.class);
 
     public CredentialOfferService(
             ConfigurationService configurationService, KmsService kmsService) {
@@ -28,7 +28,7 @@ public class CredentialOfferService {
                 new PreAuthorizedCodeBuilder(configurationService, kmsService)
                         .buildPreAuthorizedCode(credentialIdentifier);
 
-        logger.info(
+        LOGGER.info(
                 "Pre-authorized code created for credentialOfferId {} and credentialType {}",
                 credentialIdentifier,
                 credentialType);
