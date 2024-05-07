@@ -27,10 +27,10 @@ import java.security.interfaces.ECPublicKey;
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static com.nimbusds.jose.jwk.Curve.P_256;
 
-public class KmsService implements KeyService {
+public class KmsService implements KeyProvider {
 
     private final KmsClient kmsClient;
-    private static final Logger logger = LoggerFactory.getLogger(DidDocumentService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DidDocumentService.class);
 
     public KmsService(ConfigurationService configurationService) {
         this(
@@ -72,17 +72,17 @@ public class KmsService implements KeyService {
         try {
             describeKeyResponse = describeKey(describeKeyRequest);
         } catch (NotFoundException exception) {
-            logger.info("Key with alias {} was not found", keyAlias);
+            LOGGER.info("Key with alias {} was not found", keyAlias);
             return false;
         }
 
         if (Boolean.FALSE.equals(describeKeyResponse.keyMetadata().enabled())) {
-            logger.info("Key with alias {} is disabled", keyAlias);
+            LOGGER.info("Key with alias {} is disabled", keyAlias);
             return false;
         }
 
         if (describeKeyResponse.keyMetadata().deletionDate() != null) {
-            logger.info("Key with alias {} is due for deletion", keyAlias);
+            LOGGER.info("Key with alias {} is due for deletion", keyAlias);
             return false;
         }
 

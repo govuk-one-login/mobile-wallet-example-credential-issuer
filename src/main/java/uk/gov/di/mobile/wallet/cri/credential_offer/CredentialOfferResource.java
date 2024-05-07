@@ -28,8 +28,7 @@ public class CredentialOfferResource {
     private final CredentialOfferService credentialOfferService;
     private final ConfigurationService configurationService;
     private final DataStore dataStore;
-
-    private static Logger logger = LoggerFactory.getLogger(CredentialOfferResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
 
     public CredentialOfferResource(
             CredentialOfferService credentialOfferService,
@@ -55,28 +54,33 @@ public class CredentialOfferResource {
             credentialOffer =
                     credentialOfferService.buildCredentialOffer(credentialOfferId, credentialType);
         } catch (SigningException exception) {
-            logger.error(
-                    "failed to sign credential offer for walletSubjectID: {} , documentID: {}",
+            LOGGER.error(
+                    "Failed to create credential offer for walletSubjectId {} and documentId {}",
                     walletSubjectId,
                     documentId,
                     exception);
             return buildFailResponse().build();
         }
+
+        LOGGER.info(
+                "Credential offer created for walletSubjectId {} and credentialOfferId {}",
+                walletSubjectId,
+                credentialOfferId);
 
         try {
             dataStore.saveCredentialOffer(
                     new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId));
         } catch (DataStoreException exception) {
-            logger.error(
-                    "failed to save credential offer for walletSubjectID: {} , documentID: {}",
+            LOGGER.error(
+                    "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",
                     walletSubjectId,
                     documentId,
                     exception);
             return buildFailResponse().build();
         }
 
-        logger.info(
-                "Credential offer saved for walletSubjectId: {} and credentialOfferId: {}",
+        LOGGER.info(
+                "Credential offer saved for walletSubjectId {} and credentialOfferId {}",
                 walletSubjectId,
                 credentialOfferId);
 

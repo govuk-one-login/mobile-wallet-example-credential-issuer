@@ -160,7 +160,7 @@ public class AccessTokenService {
         try {
             uri = new URI(authServerUrl + didDocumentPath);
         } catch (URISyntaxException exception) {
-            throw new RuntimeException("Error building One Login auth server URI: ", exception);
+            throw new RuntimeException("Error building authorization server URI: ", exception);
         }
 
         WebTarget webTarget = httpClient.target(uri);
@@ -168,7 +168,6 @@ public class AccessTokenService {
         Response response = invocationBuilder.get();
 
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            System.out.println(response);
             throw new RuntimeException(
                     "Request to fetch DID Document failed with status code "
                             + response.getStatus());

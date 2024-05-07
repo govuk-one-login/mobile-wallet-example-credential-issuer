@@ -32,7 +32,7 @@ public class ProofJwtService {
     public SignedJWT verifyProofJwt(String jwt) throws ProofJwtValidationException {
         SignedJWT signedJwt = parseJwt(jwt);
 
-        verifyTokenHeader(CLIENT_CONFIG_ALGORITHM, signedJwt);
+        verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
 
         if (!this.verifyTokenSignature(signedJwt)) {
@@ -51,9 +51,8 @@ public class ProofJwtService {
         }
     }
 
-    private void verifyTokenHeader(String clientAlgorithmString, SignedJWT signedJwt)
-            throws ProofJwtValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(clientAlgorithmString);
+    private void verifyTokenHeader(SignedJWT signedJwt) throws ProofJwtValidationException {
+        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.CLIENT_CONFIG_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = signedJwt.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new ProofJwtValidationException(
