@@ -27,7 +27,7 @@ import java.security.interfaces.ECPublicKey;
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static com.nimbusds.jose.jwk.Curve.P_256;
 
-public class KmsService implements KeyService {
+public class KmsService implements KeyProvider {
 
     private final KmsClient kmsClient;
     private static final Logger logger = LoggerFactory.getLogger(DidDocumentService.class);
