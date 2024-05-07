@@ -27,7 +27,7 @@ public class CredentialService {
     private final ProofJwtService proofJwtService;
     private final Client httpClient;
     private final CredentialBuilder credentialBuilder;
-    private static final Logger logger = LoggerFactory.getLogger(CredentialService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService(
             ConfigurationService configurationService,
@@ -44,7 +44,7 @@ public class CredentialService {
         this.credentialBuilder = credentialBuilder;
     }
 
-    public Credential run(
+    public Credential getCredential(
             BearerAccessToken bearerAccessToken, CredentialRequestBody credentialRequestBody)
             throws DataStoreException,
                     ProofJwtValidationException,
@@ -56,20 +56,22 @@ public class CredentialService {
         SignedJWT accessToken = accessTokenService.verifyAccessToken(bearerAccessToken);
 
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
+        String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
+
+        LOGGER.info("Access token for credentialOfferId {} verified", credentialOfferId);
 
         SignedJWT proofJwt =
                 proofJwtService.verifyProofJwt(credentialRequestBody.getProof().getJwt());
         ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
+        LOGGER.info("Proof JWT for credentialOfferId {} verified", credentialOfferId);
 
         if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {
             throw new ClaimMismatchException(
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
-        String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-
-        logger.info("Credential offer retrieved for credentialOfferId: {}", credentialOfferId);
+        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (credentialOffer == null) {
             throw new DataStoreException("Null response returned when fetching credential offer");
@@ -80,7 +82,12 @@ public class CredentialService {
                     "Access token sub claim does not match cached walletSubjectId");
         }
 
-        Object documentDetails = getDocumentDetails(credentialOffer.getDocumentId());
+        String documentId = credentialOffer.getDocumentId();
+        Object documentDetails = getDocumentDetails(documentId);
+        LOGGER.info(
+                "Document details retrieved for credentialOfferId {} and documentId {}",
+                credentialOfferId,
+                documentId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }

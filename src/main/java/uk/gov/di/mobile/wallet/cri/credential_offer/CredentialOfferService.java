@@ -1,6 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import com.nimbusds.jwt.SignedJWT;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -12,6 +14,7 @@ public class CredentialOfferService {
 
     private final ConfigurationService configurationService;
     private final KmsService kmsService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferService.class);
 
     public CredentialOfferService(
             ConfigurationService configurationService, KmsService kmsService) {
@@ -24,6 +27,11 @@ public class CredentialOfferService {
         SignedJWT preAuthorizedCode =
                 new PreAuthorizedCodeBuilder(configurationService, kmsService)
                         .buildPreAuthorizedCode(credentialIdentifier);
+
+        LOGGER.info(
+                "Pre-authorized code created for credentialOfferId {} and credentialType {}",
+                credentialIdentifier,
+                credentialType);
 
         String signedJwtString = preAuthorizedCode.serialize();
 
