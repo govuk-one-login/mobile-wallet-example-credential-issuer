@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 
-public interface KeyService {
+public interface KeyProvider {
 
     public SignResponse sign(SignRequest signRequest);
 

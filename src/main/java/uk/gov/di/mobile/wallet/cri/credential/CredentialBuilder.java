@@ -8,17 +8,15 @@ import com.nimbusds.jose.crypto.impl.ECDSA;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import org.apache.hc.client5.http.utils.Hex;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KeyService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -31,16 +29,16 @@ public class CredentialBuilder {
     private static final String CONTEXT = "https://www.w3.org/2018/credentials/v1";
 
     private final ConfigurationService configurationService;
-    private final KeyService keyService;
+    private final KeyProvider keyProvider;
 
-    public CredentialBuilder(ConfigurationService configurationService, KeyService keyService) {
+    public CredentialBuilder(ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
-        this.keyService = keyService;
+        this.keyProvider = keyProvider;
     }
 
     public Credential buildCredential(String proofJwtDidKey, Object documentDetails)
             throws SigningException, NoSuchAlgorithmException {
-        String keyId = keyService.getKeyId(configurationService.getSigningKeyAlias());
+        String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId);
         var encodedClaims = getEncodedClaims(proofJwtDidKey, documentDetails);
         var message = encodedHeader + "." + encodedClaims;
@@ -52,7 +50,7 @@ public class CredentialBuilder {
                         .build();
 
         try {
-            SignResponse signResult = keyService.sign(signRequest);
+            SignResponse signResult = keyProvider.sign(signRequest);
             String signature = encodedSignature(signResult);
             SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             return new Credential(signedJWT);
@@ -90,11 +88,8 @@ public class CredentialBuilder {
     }
 
     private Base64URL getEncodedHeader(String keyId) throws NoSuchAlgorithmException {
-        String kidHashingAlgorithm = configurationService.getKeyIdHashingAlgorithm();
-        MessageDigest messageDigest = MessageDigest.getInstance(kidHashingAlgorithm);
         String hashedKeyId =
-                Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
-
+                KeyHelper.hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM).keyID(hashedKeyId).type(JWT).build();
         return jwsHeader.toBase64URL();
