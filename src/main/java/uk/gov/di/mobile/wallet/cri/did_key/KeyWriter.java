@@ -7,6 +7,9 @@ import org.bouncycastle.asn1.x9.X9ECParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECPoint;
 import org.bouncycastle.util.encoders.Hex;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential_spike.CredentialService;
 
 import javax.management.openmbean.InvalidKeyException;
 
@@ -18,6 +21,9 @@ import java.security.spec.ECGenParameterSpec;
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
 
 public class KeyWriter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+
     /**
      * Compresses a public key of type PublicKey and returns it as an array of bytes.
      *
@@ -32,10 +38,10 @@ public class KeyWriter {
      * @return Compressed public key (257-bit integer) in byte array format (33 bytes)
      */
     public static byte[] getCompressedPublicKey(ECPublicKey publicKey) {
-        System.out.println("Public key BEFORE COMPRESSION: " + publicKey);
-        System.out.println(
-                "Public key JWK: "
-                        + new ECKey.Builder(Curve.P_256, publicKey).algorithm(ES256).build());
+        LOGGER.debug("Public key BEFORE compression: {}", publicKey);
+        LOGGER.debug(
+                "Public key JWK BEFORE compression: {}",
+                new ECKey.Builder(Curve.P_256, publicKey).algorithm(ES256).build());
 
         // get x-coordinate
         byte[] x = publicKey.getW().getAffineX().toByteArray();
@@ -52,9 +58,9 @@ public class KeyWriter {
         ECPoint point = curve.createPoint(xbi, ybi);
 
         byte[] publicKeyCompressed = point.getEncoded(true);
-        System.out.println(
-                "getCompressedPublicKey public key hex encoded: "
-                        + Hex.toHexString(publicKeyCompressed));
+        LOGGER.debug(
+                "getCompressedPublicKey public key hex encoded: {}",
+                Hex.toHexString(publicKeyCompressed));
         return publicKeyCompressed;
     }
 
@@ -92,9 +98,9 @@ public class KeyWriter {
         System.arraycopy(prefixBytes, 0, publicKeyCompressed, 0, 1);
         System.arraycopy(xTrimmed, 0, publicKeyCompressed, prefixBytes.length, xTrimmed.length);
 
-        System.out.println(
-                "getCompressedPublicKeyManually public key hex encoded: "
-                        + Hex.toHexString(publicKeyCompressed));
+        LOGGER.debug(
+                "getCompressedPublicKeyManually public key hex encoded: {}",
+                Hex.toHexString(publicKeyCompressed));
         return publicKeyCompressed;
     }
 

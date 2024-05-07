@@ -14,6 +14,9 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import net.minidev.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential_spike.CredentialResource;
 import uk.gov.di.mobile.wallet.cri.did_key.DidKeyGenerator;
 import uk.gov.di.mobile.wallet.cri.did_key.KeyWriter;
 import uk.gov.di.mobile.wallet.cri.did_key.Multicodec;
@@ -27,6 +30,8 @@ import java.util.Date;
 @Singleton
 @Path("/proof")
 public class ProofResource {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialResource.class);
 
     @GET
     public Response getProof(@QueryParam("nonce") @NotEmpty String nonce) {
@@ -57,14 +62,14 @@ public class ProofResource {
             SignedJWT signedJWT = new SignedJWT(header, payload);
             // sign token with the private key from the key-pair
             signedJWT.sign(new ECDSASigner((ECPrivateKey) keyPair.getPrivate()));
-            System.out.println("Signed JWT: " + signedJWT.serialize());
+            LOGGER.debug("Signed JWT: {}", signedJWT.serialize());
 
             JSONObject jsonResponse = new JSONObject();
             jsonResponse.put("proof", signedJWT.serialize());
 
             return buildSuccessResponse().entity(jsonResponse).build();
         } catch (Exception exception) {
-            System.out.println("An error happened trying to get proof JWT: " + exception);
+            LOGGER.error("An error happened trying to get proof JWT: ", exception);
             return buildFailResponse().build();
         }
     }

@@ -11,6 +11,8 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.Credential;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialRequestBody;
 
@@ -19,6 +21,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialRequestBody;
 public class CredentialResource {
 
     private final CredentialService credentialService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialResource.class);
 
     public CredentialResource(CredentialService credentialService) {
         this.credentialService = credentialService;
@@ -35,7 +38,7 @@ public class CredentialResource {
 
             credential = credentialService.run(bearerAccessToken, credentialRequest);
         } catch (Exception exception) {
-            System.out.println("An error happened trying to build the credential: " + exception);
+            LOGGER.error("An error happened trying to build the credential: ", exception);
             if (exception instanceof BadRequestException) {
                 return buildBadRequestResponse().entity(exception.getMessage()).build();
             }

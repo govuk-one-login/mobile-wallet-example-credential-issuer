@@ -9,6 +9,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.did_key.DidKeyResolver;
 import uk.gov.di.mobile.wallet.cri.did_key.InvalidDidKeyException;
@@ -27,6 +29,7 @@ public class ProofJwtService {
     private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
     private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
     private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialResource.class);
 
     public ProofJwtService() {}
 
@@ -100,11 +103,10 @@ public class ProofJwtService {
             byte[] rawPublicKeyBytes = resolvedDidKey.rawPublicKeyBytes();
 
             ECPublicKey publicKey = didKeyResolver.generatePublicKeyFromBytes(rawPublicKeyBytes);
-            System.out.println("Public key AFTER: " + publicKey);
-
-            System.out.println(
-                    "Public key AFTER JWK: "
-                            + new ECKey.Builder(Curve.P_256, publicKey).algorithm(ES256).build());
+            LOGGER.debug("Public key AFTER resolving: {}", publicKey);
+            LOGGER.debug(
+                    "Public key AFTER JWK resolving: {}",
+                    new ECKey.Builder(Curve.P_256, publicKey).algorithm(ES256).build());
 
             ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();
 

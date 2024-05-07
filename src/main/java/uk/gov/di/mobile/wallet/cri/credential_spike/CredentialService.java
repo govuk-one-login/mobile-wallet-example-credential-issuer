@@ -29,7 +29,7 @@ public class CredentialService {
     private final ProofJwtService proofJwtService;
     private final Client httpClient;
     private final CredentialBuilder credentialBuilder;
-    private static final Logger logger = LoggerFactory.getLogger(CredentialService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService(
             ConfigurationService configurationService,
@@ -72,7 +72,7 @@ public class CredentialService {
         String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
-        logger.info("Credential offer retrieved for credentialOfferId: {}", credentialOfferId);
+        LOGGER.info("Credential offer retrieved for credentialOfferId: {}", credentialOfferId);
 
         if (credentialOffer == null) {
             throw new DataStoreException("Null response returned when fetching credential offer");
