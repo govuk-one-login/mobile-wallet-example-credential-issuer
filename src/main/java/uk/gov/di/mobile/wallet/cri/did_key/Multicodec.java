@@ -6,7 +6,7 @@ public enum Multicodec {
     /** The codec code value. */
     public final String code;
 
-    // -1 represents unknown length
+    /** The compressed public key length in bytes. */
     public final int expectedKeyLength;
 
     /** The unsigned varint encoding of the code. */

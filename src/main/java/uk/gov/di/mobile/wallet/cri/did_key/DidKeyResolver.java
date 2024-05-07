@@ -63,8 +63,7 @@ public class DidKeyResolver {
         }
 
         // DID keys only support base58 encoding, which is informed by z character as first
-        // character:
-        // validate that key is base58 encoded by checking it starts with 'z'
+        // character: validate that key is base58 encoded by checking it starts with 'z'
         String[] segments = didKey.split(":");
         String multibase = segments[segments.length - 1];
         char multibaseType = multibase.charAt(0);
@@ -75,39 +74,39 @@ public class DidKeyResolver {
                             + multibaseType);
         }
 
-        // Skip/remove leading "z" from the base58 encoding
+        // skip leading "z" from the base58 encoding
         return multibase.substring(1);
     }
 
-    // this method can be simplified as we are only dealing with one multicodec value so no need to
-    // iterate over many
     private static DecodedData extractMulticodecValue(byte[] keyBytes)
             throws InvalidDidKeyException {
         String hex = HexUtils.bytesToHex(keyBytes);
-        // Have to iterate through every potential multicodec this could be
-        for (Multicodec c : Multicodec.values()) {
-            // We need to match the unigned varint value of the multicodec header, not the actual
-            // value!
-            if (hex.startsWith(c.uvarintcode)) {
-                // Extract the actual public key by removing the multicodec header
-                String keyHex = hex.substring(c.uvarintcode.length());
-                byte[] keyHexBytes = HexFormat.of().parseHex(keyHex);
-                assertPublicKeyLengthIsExpected(c, keyHexBytes);
+        Multicodec multicodec = Multicodec.P256_PUB;
 
-                return new DecodedData(
-                        c, keyHexBytes, Base64.getUrlEncoder().encodeToString(keyHexBytes));
-            }
+        // check if hex encoded public key starts with the unsigned varint of the multicodec value
+        // supported
+        if (!hex.startsWith(multicodec.uvarintcode)) {
+            throw new InvalidDidKeyException("DID key multicodec value is not supported");
         }
+        // extract the actual public key by removing the multicodec
+        String keyHex = hex.substring(multicodec.uvarintcode.length());
 
-        throw new InvalidDidKeyException("DID key multicodec value is not supported");
+        byte[] keyHexBytes = HexFormat.of().parseHex(keyHex);
+
+        // check if key length is correct
+        assertPublicKeyLengthIsExpected(multicodec, keyHexBytes);
+
+        return new DecodedData(
+                multicodec, keyHexBytes, Base64.getUrlEncoder().encodeToString(keyHexBytes));
     }
 
-    private static void assertPublicKeyLengthIsExpected(Multicodec c, byte[] keyHexBytes)
+    private static void assertPublicKeyLengthIsExpected(Multicodec multicodec, byte[] keyHexBytes)
             throws InvalidDidKeyException {
-        if (c.expectedKeyLength != -1 && keyHexBytes.length != c.expectedKeyLength) {
+        if (multicodec.expectedKeyLength != -1
+                && keyHexBytes.length != multicodec.expectedKeyLength) {
             throw new InvalidDidKeyException(
                     "Expected key length of: "
-                            + c.expectedKeyLength
+                            + multicodec.expectedKeyLength
                             + ", but found: "
                             + keyHexBytes.length);
         }
@@ -123,7 +122,7 @@ public class DidKeyResolver {
      */
     public ECPublicKey generatePublicKeyFromBytes(byte[] compressedPublicKey)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // Check if key is compressed by checking that its length is 33 bytes and the first byte is
+        // check if key is compressed by checking that its length is 33 bytes and the first byte is
         // either 0x02 or 0x03
         if (compressedPublicKey.length != 33
                 || compressedPublicKey[0] != 2 && compressedPublicKey[0] != 3) {
