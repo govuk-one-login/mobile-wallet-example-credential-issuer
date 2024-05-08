@@ -33,20 +33,6 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void shouldGetSigningKeyIdDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(
-                "ff275b92-0def-4dfc-b0f6-87c96b26c6c7", configurationService.getSigningKeyId());
-    }
-
-    @Test
-    void shouldGetSigningKeyIdEnvVarValue() {
-        environmentVariables.set("SIGNING_KEY_ID", "cc275b92-0def-4dfc-b0f6-87c96b26b8b9");
-        assertEquals(
-                "cc275b92-0def-4dfc-b0f6-87c96b26b8b9", configurationService.getSigningKeyId());
-    }
-
-    @Test
     void shouldGetAwsRegionDefaultValueWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals("eu-west-2", configurationService.getAwsRegion());

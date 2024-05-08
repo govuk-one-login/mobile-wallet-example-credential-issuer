@@ -46,6 +46,8 @@ public class CredentialOfferResourceTest {
     private static final String WALLET_SUBJECT_ID = "mock-wallet-subject-id";
     private static final String DOCUMENT_ID = "mock-document-id";
     private static final String CREDENTIAL_TYPE = "TestCredentialType";
+    private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
+
     private static final KmsService kmsService = mock(KmsService.class);
     private static final ConfigurationService configurationService = new ConfigurationService();
     private static final CredentialOfferService credentialOfferService =
@@ -127,7 +129,7 @@ public class CredentialOfferResourceTest {
     private SignResponse getMockedSignResponse() throws JOSEException {
         var signingKey =
                 new ECKeyGenerator(Curve.P_256)
-                        .keyID(configurationService.getSigningKeyId())
+                        .keyID(KEY_ID)
                         .algorithm(JWSAlgorithm.ES256)
                         .generate();
         var ecdsaSigner = new ECDSASigner(signingKey);
@@ -140,7 +142,7 @@ public class CredentialOfferResourceTest {
         return SignResponse.builder()
                 .signature(SdkBytes.fromByteArray(derSignature))
                 .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
-                .keyId(configurationService.getSigningKeyId())
+                .keyId(KEY_ID)
                 .build();
     }
 }

@@ -47,8 +47,10 @@ public class CredentialBuilderTest {
 
     private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);
-    private final String HASHED_KEY_ID =
+    private static final String HASHED_KEY_ID =
             "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
+    private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
+
     private JsonNode DOCUMENT_DETAILS;
 
     ConfigurationService configurationService;
@@ -71,6 +73,7 @@ public class CredentialBuilderTest {
             throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
+        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
 
         Credential credentialBuilderReturnValue =
                 credentialBuilder.buildCredential("did:key:test-did-key", DOCUMENT_DETAILS);
@@ -102,6 +105,7 @@ public class CredentialBuilderTest {
     @Test
     @DisplayName("Should throw a SigningException when KMS throws an exception")
     void testItThrowsSigningException() {
+        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
         when(kmsService.sign(any(SignRequest.class))).thenThrow(DisabledException.class);
 
         SigningException exception =
@@ -116,7 +120,7 @@ public class CredentialBuilderTest {
     private SignResponse getMockedSignResponse() throws JOSEException {
         var signingKey =
                 new ECKeyGenerator(Curve.P_256)
-                        .keyID(configurationService.getSigningKeyId())
+                        .keyID(KEY_ID)
                         .algorithm(JWSAlgorithm.ES256)
                         .generate();
         var ecdsaSigner = new ECDSASigner(signingKey);
@@ -129,7 +133,7 @@ public class CredentialBuilderTest {
         return SignResponse.builder()
                 .signature(SdkBytes.fromByteArray(derSignature))
                 .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
-                .keyId(configurationService.getSigningKeyId())
+                .keyId(KEY_ID)
                 .build();
     }
 }
