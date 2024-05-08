@@ -14,7 +14,8 @@ import java.security.interfaces.ECPublicKey;
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DidBuilderTest {
 

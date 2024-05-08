@@ -24,7 +24,11 @@ import java.text.ParseException;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
@@ -60,7 +64,7 @@ public class CredentialResourceTest {
                                 "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(credentialService, Mockito.times(0)).run(any(), any());
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
         assertThat(response.readEntity(String.class), is("Missing jwt in request body"));
     }
@@ -87,7 +91,7 @@ public class CredentialResourceTest {
                                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(credentialService, Mockito.times(0)).run(any(), any());
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
         assertThat(response.readEntity(String.class), is("Invalid authorization header"));
     }
@@ -110,7 +114,7 @@ public class CredentialResourceTest {
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
         doThrow(new SigningException("Mock error message", new Exception()))
                 .when(credentialService)
-                .run(any(), any());
+                .getCredential(any(), any());
 
         final Response response =
                 EXT.target("/credential")
@@ -118,7 +122,7 @@ public class CredentialResourceTest {
                         .header("Authorization", authorizationHeader)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(credentialService, Mockito.times(1)).run(any(), any());
+        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(500));
         reset(credentialService);
     }
@@ -143,7 +147,8 @@ public class CredentialResourceTest {
 
         Credential credential = getMockCredential();
 
-        when(credentialService.run(any(BearerAccessToken.class), any(CredentialRequestBody.class)))
+        when(credentialService.getCredential(
+                        any(BearerAccessToken.class), any(CredentialRequestBody.class)))
                 .thenReturn(credential);
 
         final Response response =
@@ -152,7 +157,7 @@ public class CredentialResourceTest {
                         .header("Authorization", authorizationHeader)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(credentialService, Mockito.times(1)).run(any(), any());
+        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(200));
         assertThat(
                 response.readEntity(String.class),

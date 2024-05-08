@@ -1,6 +1,6 @@
 #!/bin/sh
 
-export TABLE_NAME=cri_cache
+export TABLE_NAME=credential_offer_cache
 
 aws --endpoint-url=http://localhost:4566 dynamodb create-table \
     --table-name $TABLE_NAME \

@@ -5,15 +5,21 @@ import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.inject.Singleton;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
 @Path("/credential")
 public class CredentialResource {
 
     private final CredentialService credentialService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialResource.class);
 
     public CredentialResource(CredentialService credentialService) {
         this.credentialService = credentialService;
@@ -26,11 +32,12 @@ public class CredentialResource {
         Credential credential;
         try {
             CredentialRequestBody credentialRequest = CredentialRequestBody.from(payload);
+
             BearerAccessToken bearerAccessToken = parseAuthorizationHeader(authorizationHeader);
 
-            credential = credentialService.run(bearerAccessToken, credentialRequest);
+            credential = credentialService.getCredential(bearerAccessToken, credentialRequest);
         } catch (Exception exception) {
-            System.out.println("An error happened trying to build the credential: " + exception);
+            LOGGER.error("An error happened trying to get the credential: ", exception);
             if (exception instanceof BadRequestException) {
                 return buildBadRequestResponse().entity(exception.getMessage()).build();
             }

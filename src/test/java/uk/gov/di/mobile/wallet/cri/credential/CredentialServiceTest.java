@@ -26,14 +26,18 @@ import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class CredentialServiceTest {
+
     @Mock private Client mockHttpClient;
     @Mock private WebTarget mockWebTarget;
     @Mock private Invocation.Builder mockInvocationBuilder;
@@ -77,7 +81,9 @@ public class CredentialServiceTest {
         RuntimeException exception =
                 assertThrows(
                         RuntimeException.class,
-                        () -> credentialService.run(bearerAccessToken, credentialRequestBody));
+                        () ->
+                                credentialService.getCredential(
+                                        bearerAccessToken, credentialRequestBody));
         assertThat(
                 exception.getMessage(), containsString("Error parsing access token custom claims"));
     }
@@ -106,7 +112,9 @@ public class CredentialServiceTest {
         ClaimMismatchException exception =
                 assertThrows(
                         ClaimMismatchException.class,
-                        () -> credentialService.run(bearerAccessToken, credentialRequestBody));
+                        () ->
+                                credentialService.getCredential(
+                                        bearerAccessToken, credentialRequestBody));
         assertEquals(
                 "Access token c_nonce claim does not match Proof JWT nonce claim",
                 exception.getMessage());
@@ -138,7 +146,9 @@ public class CredentialServiceTest {
         DataStoreException exception =
                 assertThrows(
                         DataStoreException.class,
-                        () -> credentialService.run(bearerAccessToken, credentialRequestBody));
+                        () ->
+                                credentialService.getCredential(
+                                        bearerAccessToken, credentialRequestBody));
         assertEquals(
                 "Null response returned when fetching credential offer", exception.getMessage());
     }
@@ -172,7 +182,9 @@ public class CredentialServiceTest {
         ClaimMismatchException exception =
                 assertThrows(
                         ClaimMismatchException.class,
-                        () -> credentialService.run(bearerAccessToken, credentialRequestBody));
+                        () ->
+                                credentialService.getCredential(
+                                        bearerAccessToken, credentialRequestBody));
         assertThat(
                 exception.getMessage(),
                 containsString("Access token sub claim does not match cached walletSubjectId"));
@@ -219,7 +231,9 @@ public class CredentialServiceTest {
         RuntimeException exception =
                 assertThrows(
                         RuntimeException.class,
-                        () -> credentialService.run(bearerAccessToken, credentialRequestBody));
+                        () ->
+                                credentialService.getCredential(
+                                        bearerAccessToken, credentialRequestBody));
         assertThat(
                 exception.getMessage(),
                 containsString(
@@ -267,7 +281,7 @@ public class CredentialServiceTest {
         when(credentialBuilder.buildCredential(any(), any())).thenReturn(testCredentialObject);
 
         Credential credentialServiceReturnValue =
-                credentialService.run(bearerAccessToken, credentialRequestBody);
+                credentialService.getCredential(bearerAccessToken, credentialRequestBody);
 
         assertEquals(
                 testCredentialObject.getCredential(), credentialServiceReturnValue.getCredential());

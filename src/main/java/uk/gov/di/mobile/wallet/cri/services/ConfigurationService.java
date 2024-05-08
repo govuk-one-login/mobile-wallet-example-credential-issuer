@@ -24,12 +24,13 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("DID_CONTROLLER", "localhost:8080");
     }
 
-    public String getStsStubUrl() {
-        return System.getenv().getOrDefault("STS_STUB_URL", "http://localhost:8000/sts-stub");
+    public String getOneLoginAuthServerUrl() {
+        return System.getenv()
+                .getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8000/sts-stub");
     }
 
-    public String getDocumentBuilderUrl() {
-        return System.getenv().getOrDefault("DOCUMENT_BUILDER_URL", "http://localhost:8000");
+    public String getCredentialStoreUrl() {
+        return System.getenv().getOrDefault("CREDENTIAL_STORE_URL", "http://localhost:8000");
     }
 
     public String getWalletUrl() {
@@ -45,8 +46,8 @@ public class ConfigurationService extends Configuration {
         return Long.parseLong(System.getenv().getOrDefault("CREDENTIAL_TTL_IN_DAYS", "365"));
     }
 
-    public String getCriCacheTableName() {
-        return System.getenv().getOrDefault("CRI_CACHE_TABLE_NAME", "cri_cache");
+    public String getCredentialOfferCacheTableName() {
+        return System.getenv().getOrDefault("CREDENTIAL_OFFER_CACHE", "credential_offer_cache");
     }
 
     public String getClientId() {
@@ -67,5 +68,13 @@ public class ConfigurationService extends Configuration {
 
     public String getKeyIdHashingAlgorithm() {
         return "SHA-256";
+    }
+
+    public String getAuthServerDidDocumentPath() {
+        return "/.well-known/did.json";
+    }
+
+    public String getCredentialStoreDocumentPath() {
+        return "/document/";
     }
 }
