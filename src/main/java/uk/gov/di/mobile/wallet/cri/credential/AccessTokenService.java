@@ -22,15 +22,15 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class AccessTokenService {
 
     private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
     private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
     private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
-    private static final String DID_DOCUMENT_PATH = "/.well-known/did.json";
-
     private final Client httpClient;
     private final ConfigurationService configurationService;
 
@@ -153,11 +153,12 @@ public class AccessTokenService {
     }
 
     private String getDidDocument() {
-        String stsStubUrl = configurationService.getStsStubUrl();
+        String authServerUrl = configurationService.getOneLoginAuthServerUrl();
+        String didDocumentPath = configurationService.getAuthServerDidDocumentPath();
 
         URI uri;
         try {
-            uri = new URI(stsStubUrl + DID_DOCUMENT_PATH);
+            uri = new URI(authServerUrl + didDocumentPath);
         } catch (URISyntaxException exception) {
             throw new RuntimeException("Error building authorization server URI: ", exception);
         }

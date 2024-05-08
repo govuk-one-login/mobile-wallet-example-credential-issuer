@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class MetadataBuilderTest {
 
@@ -22,7 +24,7 @@ public class MetadataBuilderTest {
                         .setCredentialIssuer("https://test-credential-issuer.gov.uk")
                         .setCredentialsEndpoint("https://test-credential-issuer.gov.uk/credential")
                         .setAuthorizationServers(
-                                "https://test-auhtorization-server.gov.uk/sts-stub")
+                                "https://test-authorization-server.gov.uk/auth-server")
                         .setCredentialsSupported("test_valid_credentials_supported.json")
                         .build();
 
@@ -36,7 +38,7 @@ public class MetadataBuilderTest {
 
         assertEquals("https://test-credential-issuer.gov.uk", response.credential_issuer);
         assertArrayEquals(
-                new String[] {"https://test-auhtorization-server.gov.uk/sts-stub"},
+                new String[] {"https://test-authorization-server.gov.uk/auth-server"},
                 response.authorization_servers);
         assertEquals(
                 "https://test-credential-issuer.gov.uk/credential", response.credentials_endpoint);

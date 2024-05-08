@@ -127,9 +127,10 @@ public class CredentialService {
     private Object getDocumentDetails(String documentId) {
         URI uri;
         try {
-            String documentBuilderUri = configurationService.getDocumentBuilderUrl();
-            String getDocumentDetailsPath = "/document/" + documentId;
-            uri = new URI(documentBuilderUri + getDocumentDetailsPath);
+            String credentialStoreUrl = configurationService.getCredentialStoreUrl();
+            String credentialStoreDocumentPath =
+                    configurationService.getCredentialStoreDocumentPath();
+            uri = new URI(credentialStoreUrl + credentialStoreDocumentPath + documentId);
         } catch (URISyntaxException exception) {
             throw new RuntimeException("Error building Document URI: ", exception);
         }

@@ -34,7 +34,8 @@ public class MetadataResource {
                             .setCredentialIssuer(configurationService.getExampleCriUrl())
                             .setCredentialsEndpoint(
                                     configurationService.getExampleCriUrl() + CREDENTIAL_ENDPOINT)
-                            .setAuthorizationServers(configurationService.getStsStubUrl())
+                            .setAuthorizationServers(
+                                    configurationService.getOneLoginAuthServerUrl())
                             .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
                             .build();
 
