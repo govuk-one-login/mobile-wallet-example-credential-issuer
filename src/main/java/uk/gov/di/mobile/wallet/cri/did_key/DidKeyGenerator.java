@@ -20,6 +20,9 @@ public class DidKeyGenerator {
 
         // base58 encode the buffer
         String base58Encoded = Base58.encode(buffer);
+        String base58Encoded2 = Base58Utils.encode(buffer);
+        System.out.println(base58Encoded);
+        System.out.println(base58Encoded2);
 
         // prefix with `z` to indicate multi-base base58btc encoding
         return "did:key:z" + base58Encoded;
