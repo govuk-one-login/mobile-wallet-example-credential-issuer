@@ -52,8 +52,7 @@ public class CredentialBuilder {
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
             String signature = encodedSignature(signResult);
-            String brokenSignature = signature + "break";
-            SignedJWT signedJWT = SignedJWT.parse(message + "." + brokenSignature);
+            SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
             return new Credential(signedJWT);
         } catch (Exception exception) {
             throw new SigningException(
