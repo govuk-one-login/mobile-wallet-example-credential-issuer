@@ -67,7 +67,7 @@ jobs:
           sam build --cached
 
       - name: Deploy SAM app
-        uses: govuk-one-login/devplatform-upload-action@2281463e2a4ea137fa3ff96b4620e5e39b01d7b7 # pin@v3.8.1
+        uses: govuk-one-login/devplatform-upload-action@f906dab69fb3b4847aa10cd910317bfe564ebcf9 # pin@v3.9
         with:
           artifact-bucket-name: ${{ secrets.BUILD_ENV_ARTIFACT_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.SIGNING_PROFILE_NAME }}
