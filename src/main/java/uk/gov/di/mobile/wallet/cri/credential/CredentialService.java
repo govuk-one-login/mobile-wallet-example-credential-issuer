@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -44,29 +43,25 @@ public class CredentialService {
         this.credentialBuilder = credentialBuilder;
     }
 
-    public Credential getCredential(
-            BearerAccessToken bearerAccessToken, CredentialRequestBody credentialRequestBody)
+    public Credential getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
                     ProofJwtValidationException,
-                    ClaimMismatchException,
                     SigningException,
                     AccessTokenValidationException,
                     NoSuchAlgorithmException {
 
-        SignedJWT accessToken = accessTokenService.verifyAccessToken(bearerAccessToken);
+        accessTokenService.verifyAccessToken(accessToken);
 
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
         String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
-
         LOGGER.info("Access token for credentialOfferId {} verified", credentialOfferId);
 
-        SignedJWT proofJwt =
-                proofJwtService.verifyProofJwt(credentialRequestBody.getProof().getJwt());
+        proofJwtService.verifyProofJwt(proofJwt);
         ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
         LOGGER.info("Proof JWT for credentialOfferId {} verified", credentialOfferId);
 
         if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {
-            throw new ClaimMismatchException(
+            throw new ProofJwtValidationException(
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
@@ -74,11 +69,12 @@ public class CredentialService {
         LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (credentialOffer == null) {
-            throw new DataStoreException("Null response returned when fetching credential offer");
+            throw new AccessTokenValidationException(
+                    "Null response returned when fetching credential offer");
         }
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
-            throw new ClaimMismatchException(
+            throw new AccessTokenValidationException(
                     "Access token sub claim does not match cached walletSubjectId");
         }
 
@@ -92,7 +88,8 @@ public class CredentialService {
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }
 
-    private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken) {
+    private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
+            throws AccessTokenValidationException {
         try {
             List<Object> credentialIdentifiers =
                     accessToken.getJWTClaimsSet().getListClaim("credential_identifiers");
@@ -101,7 +98,7 @@ public class CredentialService {
             String cNonce = accessToken.getJWTClaimsSet().getStringClaim("c_nonce");
             return new AccessTokenClaims(credentialIdentifier, sub, cNonce);
         } catch (ParseException | NullPointerException exception) {
-            throw new RuntimeException(
+            throw new AccessTokenValidationException(
                     String.format(
                             "Error parsing access token custom claims: %s",
                             exception.getMessage()));
@@ -118,7 +115,8 @@ public class CredentialService {
         } catch (ParseException exception) {
             throw new RuntimeException(
                     String.format(
-                            "Error parsing Proof JWT custom claims: %s", exception.getMessage()));
+                            "Error parsing RequestBody JWT custom claims: %s",
+                            exception.getMessage()));
         }
     }
 
