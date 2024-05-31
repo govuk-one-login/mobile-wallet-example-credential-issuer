@@ -1,11 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.crypto.ECDSASigner;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.ParseException;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -24,6 +25,10 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -62,129 +67,80 @@ public class CredentialServiceTest {
     }
 
     @Test
-    void shouldThrowRuntimeExceptionWhenAccessTokenCredentialIdentifiersIsNotAnArray()
-            throws ParseException,
-                    JsonProcessingException,
-                    AccessTokenValidationException,
-                    java.text.ParseException {
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse(
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjoiY3JlZGVudGlhbF9pZGVudGlmaWVyIiwic3ViIjoiMTIzNDU2Nzg5MCIsImNfbm9uY2UiOiJjX25vbmNlIn0.pXLW_iQ7GuCW0bCQB-V1kysFpvTB0AyvmHF8riTVfMk");
-        JsonNode payload =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\",\"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2lkIn0.eyJub25jZSI6Im5vbmNlIn0.K5FhFCgxYEpRkga4tCRSbFaCiLfm-RQozcTHLRMYwbg\"}}");
-        CredentialRequestBody credentialRequestBody = CredentialRequestBody.from(payload);
-        when(accessTokenService.verifyAccessToken(bearerAccessToken))
-                .thenReturn(SignedJWT.parse(bearerAccessToken.getValue()));
+    void shouldThrowAccessTokenValidationExceptionWhenAccessTokenCredentialIdentifiersIsEmpty()
+            throws java.text.ParseException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken = getTestAccessToken("test-nonce");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
 
-        RuntimeException exception =
+        AccessTokenValidationException exception =
                 assertThrows(
-                        RuntimeException.class,
-                        () ->
-                                credentialService.getCredential(
-                                        bearerAccessToken, credentialRequestBody));
+                        AccessTokenValidationException.class,
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertThat(
-                exception.getMessage(), containsString("Error parsing access token custom claims"));
+                exception.getMessage(),
+                containsString(
+                        "Error parsing access token custom claims: credential_identifiers is invalid"));
     }
 
     @Test
-    void shouldThrowClaimMismatchExceptionWhenNoncesDoNotMatch()
-            throws ParseException,
-                    JsonProcessingException,
-                    AccessTokenValidationException,
-                    java.text.ParseException,
-                    ProofJwtValidationException {
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse(
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjpbImNyZWRlbnRpYWxfaWRlbnRpZmllciJdLCJzdWIiOiIxMjM0NTY3ODkwIiwiY19ub25jZSI6ImNfbm9uY2UifQ.zjj4jBfXidXAI_cUGb4srf5Hk1M1XceSGck4aH-iXKc");
-        JsonNode payload =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\",\"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2lkIn0.eyJub25jZSI6Im5vbmNlIn0.K5FhFCgxYEpRkga4tCRSbFaCiLfm-RQozcTHLRMYwbg\"}}");
-        CredentialRequestBody credentialRequestBody = CredentialRequestBody.from(payload);
-        when(accessTokenService.verifyAccessToken(bearerAccessToken))
-                .thenReturn(SignedJWT.parse(bearerAccessToken.getValue()));
-        String proofJwtString = credentialRequestBody.getProof().getJwt();
-        when(proofJwtService.verifyProofJwt(proofJwtString))
-                .thenReturn(SignedJWT.parse(proofJwtString));
+    void shouldThrowProofJwtValidationExceptionWhenNoncesDoNotMatch()
+            throws java.text.ParseException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce-1", "test-credential-identifier", "test-wallet-sub");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce-2");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
 
-        ClaimMismatchException exception =
+        ProofJwtValidationException exception =
                 assertThrows(
-                        ClaimMismatchException.class,
-                        () ->
-                                credentialService.getCredential(
-                                        bearerAccessToken, credentialRequestBody));
+                        ProofJwtValidationException.class,
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals(
                 "Access token c_nonce claim does not match Proof JWT nonce claim",
                 exception.getMessage());
     }
 
     @Test
-    void shouldThrowDataStoreExceptionWhenCredentialOfferNotInDataStore()
-            throws ParseException,
-                    JsonProcessingException,
-                    AccessTokenValidationException,
-                    java.text.ParseException,
-                    ProofJwtValidationException,
-                    DataStoreException {
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse(
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjpbImNyZWRlbnRpYWxfaWRlbnRpZmllciJdLCJzdWIiOiIxMjM0NTY3ODkwIiwiY19ub25jZSI6IjEyMzQ1In0.bFS0x1PwS4LwpA_14W7sBrAjEz4F9ChPh82bkYl_zkM");
-        JsonNode payload =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\",\"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2lkIn0.eyJub25jZSI6IjEyMzQ1In0.jatpaC088-drgyiqshU3BsRSp38i_5xDczT1_GyVOdI\"}}");
-        CredentialRequestBody credentialRequestBody = CredentialRequestBody.from(payload);
-        when(accessTokenService.verifyAccessToken(bearerAccessToken))
-                .thenReturn(SignedJWT.parse(bearerAccessToken.getValue()));
-        String proofJwtString = credentialRequestBody.getProof().getJwt();
-        when(proofJwtService.verifyProofJwt(proofJwtString))
-                .thenReturn(SignedJWT.parse(proofJwtString));
+    void shouldThrowAccessTokenValidationExceptionWhenCredentialOfferNotInDataStore()
+            throws java.text.ParseException, DataStoreException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
-        DataStoreException exception =
+        AccessTokenValidationException exception =
                 assertThrows(
-                        DataStoreException.class,
-                        () ->
-                                credentialService.getCredential(
-                                        bearerAccessToken, credentialRequestBody));
+                        AccessTokenValidationException.class,
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals(
                 "Null response returned when fetching credential offer", exception.getMessage());
     }
 
     @Test
-    void shouldThrowDataStoreExceptionWhenWalletSubjectIdsDoNotMatch()
-            throws ParseException,
-                    JsonProcessingException,
-                    AccessTokenValidationException,
-                    java.text.ParseException,
-                    ProofJwtValidationException,
-                    DataStoreException {
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse(
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjpbImNyZWRlbnRpYWxfaWRlbnRpZmllciJdLCJzdWIiOiIxMjM0NTY3ODkwIiwiY19ub25jZSI6IjEyMzQ1In0.bFS0x1PwS4LwpA_14W7sBrAjEz4F9ChPh82bkYl_zkM");
-        JsonNode payload =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\",\"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2lkIn0.eyJub25jZSI6IjEyMzQ1In0.jatpaC088-drgyiqshU3BsRSp38i_5xDczT1_GyVOdI\"}}");
-        CredentialRequestBody credentialRequestBody = CredentialRequestBody.from(payload);
-        when(accessTokenService.verifyAccessToken(bearerAccessToken))
-                .thenReturn(SignedJWT.parse(bearerAccessToken.getValue()));
-        String proofJwtString = credentialRequestBody.getProof().getJwt();
-        when(proofJwtService.verifyProofJwt(proofJwtString))
-                .thenReturn(SignedJWT.parse(proofJwtString));
+    void shouldThrowAccessTokenValidationExceptionWhenWalletSubjectIdsDoNotMatch()
+            throws java.text.ParseException, DataStoreException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub-1");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
         CredentialOfferCacheItem credentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-subject-id");
+                        "test-credential-identifier", "test-document-id", "test-wallet-sub-2");
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(credentialOfferCacheItem);
 
-        ClaimMismatchException exception =
+        AccessTokenValidationException exception =
                 assertThrows(
-                        ClaimMismatchException.class,
-                        () ->
-                                credentialService.getCredential(
-                                        bearerAccessToken, credentialRequestBody));
+                        AccessTokenValidationException.class,
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertThat(
                 exception.getMessage(),
                 containsString("Access token sub claim does not match cached walletSubjectId"));
@@ -192,30 +148,20 @@ public class CredentialServiceTest {
 
     @Test
     void shouldThrowRuntimeExceptionWhenDocumentDetailsCannotBeFetched()
-            throws ParseException,
-                    JsonProcessingException,
-                    AccessTokenValidationException,
-                    java.text.ParseException,
-                    ProofJwtValidationException,
+            throws java.text.ParseException,
                     DataStoreException,
                     SigningException,
-                    NoSuchAlgorithmException {
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse(
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjpbImNyZWRlbnRpYWxfaWRlbnRpZmllciJdLCJzdWIiOiJ0ZXN0LXdhbGxldC1zdWJqZWN0LWlkIiwiY19ub25jZSI6IjEyMzQ1In0.gXgeBUJ2d7gT2gzv-lkKXIcWcBmwxfwdivNT0p5J_Xc");
-        JsonNode payload =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\",\"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2lkIn0.eyJub25jZSI6IjEyMzQ1In0.jatpaC088-drgyiqshU3BsRSp38i_5xDczT1_GyVOdI\"}}");
-        CredentialRequestBody credentialRequestBody = CredentialRequestBody.from(payload);
-        when(accessTokenService.verifyAccessToken(bearerAccessToken))
-                .thenReturn(SignedJWT.parse(bearerAccessToken.getValue()));
-        String proofJwtString = credentialRequestBody.getProof().getJwt();
-        when(proofJwtService.verifyProofJwt(proofJwtString))
-                .thenReturn(SignedJWT.parse(proofJwtString));
+                    NoSuchAlgorithmException,
+                    JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
         CredentialOfferCacheItem credentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-subject-id");
+                        "test-credential-identifier", "test-document-id", "test-wallet-sub");
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(credentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
@@ -231,9 +177,7 @@ public class CredentialServiceTest {
         RuntimeException exception =
                 assertThrows(
                         RuntimeException.class,
-                        () ->
-                                credentialService.getCredential(
-                                        bearerAccessToken, credentialRequestBody));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertThat(
                 exception.getMessage(),
                 containsString(
@@ -242,31 +186,22 @@ public class CredentialServiceTest {
 
     @Test
     void shouldReturnCredential()
-            throws ParseException,
-                    JsonProcessingException,
-                    AccessTokenValidationException,
+            throws AccessTokenValidationException,
                     java.text.ParseException,
                     ProofJwtValidationException,
                     DataStoreException,
                     SigningException,
-                    ClaimMismatchException,
-                    NoSuchAlgorithmException {
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse(
-                        "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjcmVkZW50aWFsX2lkZW50aWZpZXJzIjpbImNyZWRlbnRpYWxfaWRlbnRpZmllciJdLCJzdWIiOiJ0ZXN0LXdhbGxldC1zdWJqZWN0LWlkIiwiY19ub25jZSI6IjEyMzQ1In0.gXgeBUJ2d7gT2gzv-lkKXIcWcBmwxfwdivNT0p5J_Xc");
-        JsonNode payload =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\",\"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InRlc3Qta2lkIn0.eyJub25jZSI6IjEyMzQ1In0.jatpaC088-drgyiqshU3BsRSp38i_5xDczT1_GyVOdI\"}}");
-        CredentialRequestBody credentialRequestBody = CredentialRequestBody.from(payload);
-        when(accessTokenService.verifyAccessToken(bearerAccessToken))
-                .thenReturn(SignedJWT.parse(bearerAccessToken.getValue()));
-        String proofJwtString = credentialRequestBody.getProof().getJwt();
-        when(proofJwtService.verifyProofJwt(proofJwtString))
-                .thenReturn(SignedJWT.parse(proofJwtString));
+                    NoSuchAlgorithmException,
+                    JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
         CredentialOfferCacheItem credentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-subject-id");
+                        "test-credential-identifier", "test-document-id", "test-wallet-sub");
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(credentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
@@ -279,12 +214,65 @@ public class CredentialServiceTest {
                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
         Credential testCredentialObject = new Credential(testCredentialJwt);
         when(credentialBuilder.buildCredential(any(), any())).thenReturn(testCredentialObject);
-
         Credential credentialServiceReturnValue =
-                credentialService.getCredential(bearerAccessToken, credentialRequestBody);
+                credentialService.getCredential(accessToken, proofJwt);
 
         assertEquals(
                 testCredentialObject.getCredential(), credentialServiceReturnValue.getCredential());
-        verify(credentialBuilder).buildCredential("test-kid", testDocumentDetails);
+        verify(credentialBuilder)
+                .buildCredential(
+                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
+                        testDocumentDetails);
+    }
+
+    private static SignedJWT getTestProofJwt(String nonce) {
+        return new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                        .keyID(
+                                "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==")
+                        .build(),
+                new JWTClaimsSet.Builder()
+                        .issueTime(Date.from(Instant.now()))
+                        .issuer("urn:fdc:gov:uk:wallet")
+                        .audience("urn:fdc:gov:uk:example-credential-issuer")
+                        .claim("nonce", nonce)
+                        .build());
+    }
+
+    private static SignedJWT getTestAccessToken(
+            String nonce, String credentialIdentifier, String subject) {
+        return new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                        .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
+                        .build(),
+                new JWTClaimsSet.Builder()
+                        .issueTime(Date.from(Instant.now()))
+                        .issuer("urn:fdc:gov:uk:wallet")
+                        .audience("urn:fdc:gov:uk:example-credential-issuer")
+                        .subject(subject)
+                        .claim("c_nonce", nonce)
+                        .claim("credential_identifiers", Arrays.asList(credentialIdentifier))
+                        .build());
+    }
+
+    private static SignedJWT getTestAccessToken(String nonce) {
+        return new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                        .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
+                        .build(),
+                new JWTClaimsSet.Builder()
+                        .issueTime(Date.from(Instant.now()))
+                        .issuer("urn:fdc:gov:uk:wallet")
+                        .audience("urn:fdc:gov:uk:example-credential-issuer")
+                        .subject("test-sub")
+                        .claim("c_nonce", nonce)
+                        .claim("credential_identifiers", Arrays.asList())
+                        .build());
+    }
+
+    private static ECKey getEsPrivateKey() throws java.text.ParseException {
+        String privateKeyJwkBase64 =
+                "eyJrdHkiOiJFQyIsImQiOiI4SGJYN0xib1E1OEpJOGo3eHdfQXp0SlRVSDVpZTFtNktIQlVmX3JnakVrIiwidXNlIjoic2lnIiwiY3J2IjoiUC0yNTYiLCJraWQiOiJmMDYxMWY3Zi04YTI5LTQ3ZTEtYmVhYy1mNWVlNWJhNzQ3MmUiLCJ4IjoiSlpKeE83b2JSOElzdjU4NUVzaWcwYlAwQUdfb1N6MDhSMS11VXBiYl9JRSIsInkiOiJtNjBRMmtMMExiaEhTbHRjS1lyTG8wczE1M1hveF9tVDV2UlV6Z3g4TWtFIiwiaWF0IjoxNzEyMTQ2MTc5fQ==";
+        return ECKey.parse(new String(Base64.getDecoder().decode(privateKeyJwkBase64)));
     }
 }
