@@ -8,7 +8,6 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -32,10 +31,7 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -55,23 +51,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowPAccessTokenValidationExceptionWhenJwtStringCannotBeParsedAsSignedJwt()
-            throws com.nimbusds.oauth2.sdk.ParseException {
-        BearerAccessToken bearerAccessToken = BearerAccessToken.parse("Bearer invalid.jwt.string");
-
-        AccessTokenValidationException exception =
-                assertThrows(
-                        AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
-        assertThat(exception.getMessage(), containsString("Error parsing access token"));
-    }
-
-    @Test
     void shouldThrowAccessTokenValidationExceptionWhenJwtHeaderAlgDoesNotMatchConfig()
-            throws JOSEException,
-                    com.nimbusds.oauth2.sdk.ParseException,
-                    InvalidKeySpecException,
-                    NoSuchAlgorithmException {
+            throws JOSEException, InvalidKeySpecException, NoSuchAlgorithmException {
         SignedJWT signedJWT =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.RS256).build(),
@@ -79,13 +60,10 @@ class AccessTokenServiceTest {
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
         signedJWT.sign(rsaSigner);
 
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
-
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals(
                 "JWT alg header claim [RS256] does not match client config alg [ES256]",
                 exception.getMessage());
@@ -93,26 +71,24 @@ class AccessTokenServiceTest {
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenJwtHeaderKidIsNull()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         SignedJWT signedJWT =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
                         new JWTClaimsSet.Builder().build());
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals("JWT kid header claim is null", exception.getMessage());
     }
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenRequiredClaimAreNull()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         SignedJWT signedJWT =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
@@ -121,13 +97,11 @@ class AccessTokenServiceTest {
                         new JWTClaimsSet.Builder().build());
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals(
                 "JWT missing required claims: [aud, c_nonce, credential_identifiers, iss, sub]",
                 exception.getMessage());
@@ -135,31 +109,15 @@ class AccessTokenServiceTest {
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenAudienceClaimDoesNotMatchConfig()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
-        SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("invalid-audience")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+            throws JOSEException, ParseException {
+        SignedJWT signedJWT = getTestSignedJwt("urn:fdc:gov:uk:wallet", "invalid-audience");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals(
                 "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:example-credential-issuer]",
                 exception.getMessage());
@@ -167,31 +125,16 @@ class AccessTokenServiceTest {
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenIssuerClaimDoesNotMatchConfig()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("invalid-issuer")
-                                .audience("urn:fdc:gov:uk:<HMRC>")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt("invalid-issuer", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals(
                 "JWT iss claim has value invalid-issuer, must be urn:fdc:gov:uk:wallet",
                 exception.getMessage());
@@ -199,7 +142,7 @@ class AccessTokenServiceTest {
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenDidDocumentVerificationMethodFieldIsMissing()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -209,33 +152,21 @@ class AccessTokenServiceTest {
                         "{\"@context\":[\"https://www.w3.org/ns/did/v1\",\"https://www.w3.org/ns/security/jwk/v1\"],\"id\":\"did:web:wallet-api.mobile.loca.account.gov.uk\"}");
 
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256).keyID("test-kid-123").build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals("Invalid DID document: verificationMethod is null", exception.getMessage());
     }
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenDidDocumentVerificationMethodIsNotArray()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -245,36 +176,22 @@ class AccessTokenServiceTest {
                         "{\"verificationMethod\":{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\"}}");
 
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals(
                 "Invalid DID document: verificationMethod is not an array", exception.getMessage());
     }
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenDidDocumentPublicKeyJwkFieldIsMissing()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -284,35 +201,21 @@ class AccessTokenServiceTest {
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\"}]}");
 
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals("Error parsing JWK: Invalid JSON object", exception.getMessage());
     }
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenDidDocumentKeyIdDoesNotMatchJwtKeyId()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -322,35 +225,21 @@ class AccessTokenServiceTest {
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"po5a1a8b-809a-4f32-944d-baae1a57ed22\",\"x\":\"JZJxO7obR8Isv585Esig0bP0AG_oSz08R1-uUpbb_IE\",\"y\":\"m60Q2kL0LbhHSltcKYrLo0s153Xox_mT5vRUzgx8MkE\"}}]}");
 
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals("JWT key ID did not match any key in DID document", exception.getMessage());
     }
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenSignatureVerificationFails()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+            throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -360,38 +249,20 @@ class AccessTokenServiceTest {
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"AhVL0Z0RY3h5TYs1GaWUGXzu_dnaqKfxr-LQp0c6gWk\",\"y\":\"wTM8HUE0_knPihDtWRYbIrpSe4RkxRClqXuU3eumji8\"}}]}");
 
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals("Access token signature verification failed", exception.getMessage());
     }
 
     @Test
-    void shouldReturnAccessTokenParsedAsSignedJwtWhenVerificationSucceeds()
-            throws JOSEException,
-                    com.nimbusds.oauth2.sdk.ParseException,
-                    AccessTokenValidationException,
-                    ParseException {
+    void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -401,65 +272,52 @@ class AccessTokenServiceTest {
                         "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"JZJxO7obR8Isv585Esig0bP0AG_oSz08R1-uUpbb_IE\",\"y\":\"m60Q2kL0LbhHSltcKYrLo0s153Xox_mT5vRUzgx8MkE\"}}]}");
 
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
-        assertEquals(
-                signedJWT.serialize(),
-                accessTokenService.verifyAccessToken(bearerAccessToken).serialize());
+        assertDoesNotThrow(() -> accessTokenService.verifyAccessToken(signedJWT));
     }
 
     @Test
-    void shouldThrowRuntimeExceptionWhenDidDocumentCannotBeFetched()
-            throws JOSEException, com.nimbusds.oauth2.sdk.ParseException, ParseException {
+    void shouldThrowAccessTokenValidationExceptionWhenDidDocumentCannotBeFetched()
+            throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(500);
 
         SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .subject("test-sub")
-                                .claim("c_nonce", "test-c-nonce")
-                                .claim(
-                                        "credential_identifiers",
-                                        new String[] {"test-credential-identifier"})
-                                .build());
+                getTestSignedJwt(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJWT.sign(ecSigner);
-        BearerAccessToken bearerAccessToken =
-                BearerAccessToken.parse("Bearer " + signedJWT.serialize());
 
-        RuntimeException exception =
+        AccessTokenValidationException exception =
                 assertThrows(
-                        RuntimeException.class,
-                        () -> accessTokenService.verifyAccessToken(bearerAccessToken));
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(signedJWT));
         assertEquals(
                 "Request to fetch DID Document failed with status code 500",
                 exception.getMessage());
+    }
+
+    private static SignedJWT getTestSignedJwt(String issuer, String audience) {
+        return new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.ES256)
+                        .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
+                        .build(),
+                new JWTClaimsSet.Builder()
+                        .issueTime(Date.from(Instant.now()))
+                        .issuer(issuer)
+                        .audience(audience)
+                        .subject("test-sub")
+                        .claim("c_nonce", "test-c-nonce")
+                        .claim(
+                                "credential_identifiers",
+                                new String[] {"test-credential-identifier"})
+                        .build());
     }
 
     private RSAPrivateKey getRsaPrivateKey()
