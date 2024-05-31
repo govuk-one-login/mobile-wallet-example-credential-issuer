@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.client.Entity;
@@ -46,11 +45,32 @@ public class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn400WhenProofJwtInRequestBodyIsInvalid()
+    void shouldReturn400AndInvalidProofWhenProofJwtIsNull()
+            throws DataStoreException,
+                    AccessTokenValidationException,
+                    SigningException,
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException {
+        JsonNode requestBody = null;
+
+        final Response response =
+                EXT.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(400));
+        assertThat(response.readEntity(String.class), is("invalid_proof"));
+    }
+
+    @Test
+    void shouldReturn400AndInvalidProofWhenProofJwtIsMissingJwt()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
-                    ClaimMismatchException,
                     SigningException,
                     ProofJwtValidationException,
                     NoSuchAlgorithmException {
@@ -66,18 +86,142 @@ public class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
-        assertThat(response.readEntity(String.class), is("Missing jwt in request body"));
+        assertThat(response.readEntity(String.class), is("invalid_proof"));
     }
 
     @Test
-    void shouldReturn400WhenAuthorizationHeaderIsNotValidBearerAccessToken()
+    void shouldReturn400AndInvalidProofWhenProofJwtIsMissingProof()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
-                    ClaimMismatchException,
                     SigningException,
                     ProofJwtValidationException,
                     NoSuchAlgorithmException {
+        JsonNode requestBody =
+                new ObjectMapper().readTree("{\"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}");
+
+        final Response response =
+                EXT.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(400));
+        assertThat(response.readEntity(String.class), is("invalid_proof"));
+    }
+
+    @Test
+    void shouldReturn400AndInvalidProofWhenProofJwtContainsAdditionalFields()
+            throws JsonProcessingException,
+                    DataStoreException,
+                    AccessTokenValidationException,
+                    SigningException,
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException {
+        JsonNode requestBody =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"invalidParam\": \"test\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
+
+        final Response response =
+                EXT.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(400));
+        assertThat(response.readEntity(String.class), is("invalid_proof"));
+    }
+
+    @Test
+    void shouldReturn400AndInvalidProofWhenProofTypeIsNotJwt()
+            throws JsonProcessingException,
+                    DataStoreException,
+                    AccessTokenValidationException,
+                    SigningException,
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException {
+        JsonNode requestBody =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}");
+
+        final Response response =
+                EXT.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(400));
+        assertThat(response.readEntity(String.class), is("invalid_proof"));
+    }
+
+    @Test
+    void shouldReturn400AndInvalidProofWhenJwtCannotBeParsedAsSignedJwt()
+            throws JsonProcessingException,
+                    DataStoreException,
+                    AccessTokenValidationException,
+                    SigningException,
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException {
+        JsonNode requestBody =
+                new ObjectMapper()
+                        .readTree("{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
+
+        final Response response =
+                EXT.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(400));
+        assertThat(response.readEntity(String.class), is("invalid_proof"));
+    }
+
+    @Test
+    void shouldReturn400AndInvalidCredentialRequestWhenAuthorizationHeaderIsMissing()
+            throws JsonProcessingException,
+                    DataStoreException,
+                    AccessTokenValidationException,
+                    SigningException,
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException {
+        JsonNode requestBody =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+
+        final Response response =
+                EXT.target("/credential")
+                        .request()
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(0)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(400));
+        assertThat(response.readEntity(String.class), is("invalid_credential_request"));
+    }
+
+    @Test
+    void
+            shouldReturn400AndInvalidCredentialRequestWhenAuthorizationHeaderIsNotValidBearerAccessToken()
+                    throws JsonProcessingException,
+                            DataStoreException,
+                            AccessTokenValidationException,
+                            SigningException,
+                            ProofJwtValidationException,
+                            NoSuchAlgorithmException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -93,21 +237,17 @@ public class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
-        assertThat(response.readEntity(String.class), is("Invalid authorization header"));
+        assertThat(response.readEntity(String.class), is("invalid_credential_request"));
     }
 
     @Test
     void shouldReturn500WhenCredentialServiceThrowsAnException()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    ClaimMismatchException,
                     SigningException,
                     ProofJwtValidationException,
-                    JsonProcessingException,
-                    NoSuchAlgorithmException {
-
-        String authorizationHeader =
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+                    NoSuchAlgorithmException,
+                    JsonProcessingException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -119,11 +259,14 @@ public class CredentialResourceTest {
         final Response response =
                 EXT.target("/credential")
                         .request()
-                        .header("Authorization", authorizationHeader)
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(500));
+        assertThat(response.readEntity(String.class), is("server_error"));
         reset(credentialService);
     }
 
@@ -131,30 +274,25 @@ public class CredentialResourceTest {
     void shouldReturn200AndTheCredential()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    ClaimMismatchException,
                     SigningException,
                     ProofJwtValidationException,
                     JsonProcessingException,
                     ParseException,
                     NoSuchAlgorithmException {
-
-        String authorizationHeader =
-                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-
         Credential credential = getMockCredential();
-
-        when(credentialService.getCredential(
-                        any(BearerAccessToken.class), any(CredentialRequestBody.class)))
+        when(credentialService.getCredential(any(SignedJWT.class), any(SignedJWT.class)))
                 .thenReturn(credential);
 
         final Response response =
                 EXT.target("/credential")
                         .request()
-                        .header("Authorization", authorizationHeader)
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
@@ -168,7 +306,6 @@ public class CredentialResourceTest {
         SignedJWT credential =
                 SignedJWT.parse(
                         "eyJraWQiOiJmZjI3NWI5Mi0wZGVmLTRkZmMtYjBmNi04N2M5NmIyNmM2YzciLCJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJzdWIiOiJkaWQ6a2V5Ok1Ga3dFd1lIS29aSXpqMENBUVlJS29aSXpqMERBUWNEUWdBRVRjbTNMTUpqelZUeEEyTGQ3VEYybHZqRm5oQXV6amZNQm1rbE01QnMxNjFWNERzQyt6N2ZjUUdCRzJvNGZ3QXRKc1ltZ0w2MTQ4Qzl1UkVZUTd5MEdRPT0iLCJuYmYiOjE3MTIyNTM1OTEsImlzcyI6InVybjpmZGM6Z292OnVrOmV4YW1wbGUtY3JlZGVudGlhbC1pc3N1ZXIiLCJjb250ZXh0IjpbImh0dHBzOi8vd3d3LnczLm9yZy8yMDE4L2NyZWRlbnRpYWxzL3YxIl0sImV4cCI6MTc0Mzc4OTU5MSwiaWF0IjoxNzEyMjUzNTkxLCJ2YyI6eyJ0eXBlIjpbIlZlcmlmaWFibGVDcmVkZW50aWFsIiwiU29jaWFsU2VjdXJpdHlDcmVkZW50aWFsIl0sImNyZWRlbnRpYWxTdWJqZWN0Ijp7Im5hbWUiOlt7Im5hbWVQYXJ0cyI6W3sidmFsdWUiOiJNciIsInR5cGUiOiJUaXRsZSJ9LHsidmFsdWUiOiJTYXJhaCIsInR5cGUiOiJHaXZlbk5hbWUifSx7InZhbHVlIjoiRWxpemFiZXRoIiwidHlwZSI6IkdpdmVuTmFtZSJ9LHsidmFsdWUiOiJFZHdhcmRzIiwidHlwZSI6IkZhbWlseU5hbWUifV19XSwic29jaWFsU2VjdXJpdHlSZWNvcmQiOlt7InBlcnNvbmFsTnVtYmVyIjoiUVExMjM0NTZDIn1dfX19.F49yZ0Y5cBYMMrIwroYJffUoidgOQBXJRa-MzU77Qa875G5VOIYHv9ZmtqjAb7pvHseVquBQEhLGtcULUlSfSA");
-
         return new Credential(credential);
     }
 }

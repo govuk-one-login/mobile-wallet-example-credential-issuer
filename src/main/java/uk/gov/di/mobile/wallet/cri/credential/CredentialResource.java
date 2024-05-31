@@ -7,7 +7,11 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
 import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
 import jakarta.inject.Singleton;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.HeaderParam;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -61,7 +65,7 @@ public class CredentialResource {
             return SignedJWT.parse(bearerAccessToken.getValue());
         } catch (ParseException | java.text.ParseException exception) {
             throw new AccessTokenValidationException(
-                    "Failed to parse authorization header as JWT: ", exception);
+                    "Failed to parse authorization header as Signed JWT: ", exception);
         }
     }
 
@@ -85,7 +89,8 @@ public class CredentialResource {
         try {
             return SignedJWT.parse(requestBody.getProof().getJwt());
         } catch (java.text.ParseException exception) {
-            throw new ProofJwtValidationException("Failed to parse proof as JWT: ", exception);
+            throw new ProofJwtValidationException(
+                    "Failed to parse proof JWT as Signed JWT: ", exception);
         }
     }
 
