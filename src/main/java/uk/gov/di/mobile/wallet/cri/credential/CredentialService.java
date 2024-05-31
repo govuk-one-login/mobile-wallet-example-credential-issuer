@@ -12,6 +12,8 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import javax.management.InvalidAttributeValueException;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -93,11 +95,14 @@ public class CredentialService {
         try {
             List<Object> credentialIdentifiers =
                     accessToken.getJWTClaimsSet().getListClaim("credential_identifiers");
+            if (credentialIdentifiers.isEmpty()) {
+                throw new InvalidAttributeValueException("credential_identifiers is invalid");
+            }
             String credentialIdentifier = (String) credentialIdentifiers.get(0);
             String sub = accessToken.getJWTClaimsSet().getStringClaim("sub");
             String cNonce = accessToken.getJWTClaimsSet().getStringClaim("c_nonce");
             return new AccessTokenClaims(credentialIdentifier, sub, cNonce);
-        } catch (ParseException | NullPointerException exception) {
+        } catch (ParseException | NullPointerException | InvalidAttributeValueException exception) {
             throw new AccessTokenValidationException(
                     String.format(
                             "Error parsing access token custom claims: %s",
