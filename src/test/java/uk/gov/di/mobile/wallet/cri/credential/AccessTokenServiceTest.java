@@ -8,6 +8,7 @@ import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -282,8 +283,9 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenDidDocumentCannotBeFetched()
-            throws JOSEException, ParseException {
+    void
+            shouldThrowAccessTokenValidationExceptionWhenDidDocumentEndpointReturnsUnsuccessfulResponse()
+                    throws JOSEException, ParseException {
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -302,6 +304,28 @@ class AccessTokenServiceTest {
         assertEquals(
                 "Request to fetch DID Document failed with status code 500",
                 exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowAccessTokenValidationExceptionWhenCallToFetchDidDocumentThrowsAnError()
+            throws JOSEException, ParseException {
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenThrow(new ProcessingException("Some error happened"));
+
+        SignedJWT signedJwt =
+                getTestAccessToken(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        signedJwt.sign(ecSigner);
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(signedJwt));
+        assertEquals("Could not fetch DID Document: ", exception.getMessage());
+        assertEquals(ProcessingException.class, exception.getCause().getClass());
+        assertEquals("Some error happened", exception.getCause().getMessage());
     }
 
     private static SignedJWT getTestAccessToken(String issuer, String audience) {

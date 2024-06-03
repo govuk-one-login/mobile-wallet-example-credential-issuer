@@ -12,6 +12,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -144,16 +145,20 @@ public class AccessTokenService {
             throw new RuntimeException("Error building authorization server URI: ", exception);
         }
 
-        WebTarget webTarget = httpClient.target(uri);
-        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
-        Response response = invocationBuilder.get();
+        Response response;
+        try {
+            WebTarget webTarget = httpClient.target(uri);
+            Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+            response = invocationBuilder.get();
+        } catch (ProcessingException exception) {
+            throw new AccessTokenValidationException("Could not fetch DID Document: ", exception);
+        }
 
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
             throw new AccessTokenValidationException(
                     "Request to fetch DID Document failed with status code "
                             + response.getStatus());
         }
-
         return response.readEntity(String.class);
     }
 }
