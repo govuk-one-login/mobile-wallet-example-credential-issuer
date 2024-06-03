@@ -50,7 +50,9 @@ public class CredentialService {
                     ProofJwtValidationException,
                     SigningException,
                     AccessTokenValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
 
         accessTokenService.verifyAccessToken(accessToken);
 
@@ -112,13 +114,14 @@ public class CredentialService {
 
     private record AccessTokenClaims(String credentialIdentifier, String sub, String cNonce) {}
 
-    private static ProofJwtClaims getProofJwtClaims(SignedJWT proofJwt) {
+    private static ProofJwtClaims getProofJwtClaims(SignedJWT proofJwt)
+            throws CredentialServiceException {
         try {
             String nonce = proofJwt.getJWTClaimsSet().getStringClaim("nonce");
             String kid = proofJwt.getHeader().getKeyID();
             return new ProofJwtClaims(nonce, kid);
         } catch (ParseException exception) {
-            throw new RuntimeException(
+            throw new CredentialServiceException(
                     String.format(
                             "Error parsing RequestBody JWT custom claims: %s",
                             exception.getMessage()));
@@ -127,21 +130,16 @@ public class CredentialService {
 
     private record ProofJwtClaims(String nonce, String kid) {}
 
-    private Object getDocumentDetails(String documentId) {
-        URI uri;
-        try {
-            String credentialStoreUrl = configurationService.getCredentialStoreUrl();
-            String credentialStoreDocumentPath =
-                    configurationService.getCredentialStoreDocumentPath();
-            uri = new URI(credentialStoreUrl + credentialStoreDocumentPath + documentId);
-        } catch (URISyntaxException exception) {
-            throw new RuntimeException("Error building Document URI: ", exception);
-        }
+    private Object getDocumentDetails(String documentId)
+            throws URISyntaxException, CredentialServiceException {
+        String credentialStoreUrl = configurationService.getCredentialStoreUrl();
+        String credentialStoreDocumentPath = configurationService.getCredentialStoreDocumentPath();
+        URI uri = new URI(credentialStoreUrl + credentialStoreDocumentPath + documentId);
 
         Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
 
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new RuntimeException(
+            throw new CredentialServiceException(
                     String.format(
                             "Request to fetch document details for documentId %s failed with status code %s",
                             documentId, response.getStatus()));

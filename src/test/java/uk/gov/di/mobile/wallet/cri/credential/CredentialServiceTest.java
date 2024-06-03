@@ -24,6 +24,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Arrays;
@@ -124,6 +125,25 @@ public class CredentialServiceTest {
     }
 
     @Test
+    void shouldThrowDataStoreExceptionWhenCallToDatabaseThrowsAnError()
+            throws java.text.ParseException, DataStoreException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
+        when(dynamoDbService.getCredentialOffer(anyString()))
+                .thenThrow(new DataStoreException("Some database error"));
+
+        DataStoreException exception =
+                assertThrows(
+                        DataStoreException.class,
+                        () -> credentialService.getCredential(accessToken, proofJwt));
+        assertEquals("Some database error", exception.getMessage());
+    }
+
+    @Test
     void shouldThrowAccessTokenValidationExceptionWhenWalletSubjectIdsDoNotMatch()
             throws java.text.ParseException, DataStoreException, JOSEException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
@@ -174,9 +194,9 @@ public class CredentialServiceTest {
         when(credentialBuilder.buildCredential("test-did-key", new Object()))
                 .thenReturn(testCredentialObject);
 
-        RuntimeException exception =
+        CredentialServiceException exception =
                 assertThrows(
-                        RuntimeException.class,
+                        CredentialServiceException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
         assertThat(
                 exception.getMessage(),
@@ -192,7 +212,9 @@ public class CredentialServiceTest {
                     DataStoreException,
                     SigningException,
                     NoSuchAlgorithmException,
-                    JOSEException {
+                    JOSEException,
+                    URISyntaxException,
+                    CredentialServiceException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
                 getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");

@@ -9,6 +9,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.hc.core5.http.HttpException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 
@@ -50,7 +52,9 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody = null;
 
         final Response response =
@@ -73,7 +77,10 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    HttpException,
+                    CredentialServiceException {
         JsonNode requestBody = new ObjectMapper().readTree("{\"proof\":{\"proof_type\":\"jwt\"}}");
 
         final Response response =
@@ -96,7 +103,9 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper().readTree("{\"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}");
 
@@ -120,7 +129,9 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -146,7 +157,9 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -172,7 +185,9 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree("{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
@@ -197,7 +212,9 @@ public class CredentialResourceTest {
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -221,7 +238,9 @@ public class CredentialResourceTest {
                             AccessTokenValidationException,
                             SigningException,
                             ProofJwtValidationException,
-                            NoSuchAlgorithmException {
+                            NoSuchAlgorithmException,
+                            URISyntaxException,
+                            CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -241,18 +260,52 @@ public class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn500WhenCredentialServiceThrowsAnException()
+    void shouldReturn500WhenCredentialServiceThrowsASigningException()
             throws DataStoreException,
                     AccessTokenValidationException,
                     SigningException,
                     ProofJwtValidationException,
                     NoSuchAlgorithmException,
-                    JsonProcessingException {
+                    JsonProcessingException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-        doThrow(new SigningException("Mock error message", new Exception()))
+        doThrow(new SigningException("Some signing error", new Exception()))
+                .when(credentialService)
+                .getCredential(any(), any());
+
+        final Response response =
+                EXT.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(500));
+        assertThat(response.readEntity(String.class), is("server_error"));
+        reset(credentialService);
+    }
+
+    @Test
+    void shouldReturn500WhenCredentialServiceThrowsADataStoreException()
+            throws DataStoreException,
+                    AccessTokenValidationException,
+                    SigningException,
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException,
+                    JsonProcessingException,
+                    URISyntaxException,
+                    CredentialServiceException {
+        JsonNode requestBody =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+        doThrow(new DataStoreException("Some database error", new Exception()))
                 .when(credentialService)
                 .getCredential(any(), any());
 
@@ -278,7 +331,9 @@ public class CredentialResourceTest {
                     ProofJwtValidationException,
                     JsonProcessingException,
                     ParseException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(

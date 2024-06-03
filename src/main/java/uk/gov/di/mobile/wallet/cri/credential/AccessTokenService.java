@@ -39,7 +39,8 @@ public class AccessTokenService {
         this.configurationService = configurationService;
     }
 
-    public void verifyAccessToken(SignedJWT signedJwt) throws AccessTokenValidationException {
+    public void verifyAccessToken(SignedJWT signedJwt)
+            throws AccessTokenValidationException, URISyntaxException {
         verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
         if (!this.verifyTokenSignature(signedJwt)) {
@@ -84,7 +85,7 @@ public class AccessTokenService {
     }
 
     private boolean verifyTokenSignature(SignedJWT signedJwt)
-            throws AccessTokenValidationException {
+            throws AccessTokenValidationException, URISyntaxException {
         String keyId = signedJwt.getHeader().getKeyID();
         JWK jwk = getJwk(keyId);
 
@@ -97,7 +98,7 @@ public class AccessTokenService {
         }
     }
 
-    private JWK getJwk(String keyId) throws AccessTokenValidationException {
+    private JWK getJwk(String keyId) throws AccessTokenValidationException, URISyntaxException {
         String didDocumentString = getDidDocument();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -134,16 +135,10 @@ public class AccessTokenService {
                 "JWT key ID did not match any key in DID document");
     }
 
-    private String getDidDocument() throws AccessTokenValidationException {
+    private String getDidDocument() throws AccessTokenValidationException, URISyntaxException {
         String authServerUrl = configurationService.getOneLoginAuthServerUrl();
         String didDocumentPath = configurationService.getAuthServerDidDocumentPath();
-
-        URI uri;
-        try {
-            uri = new URI(authServerUrl + didDocumentPath);
-        } catch (URISyntaxException exception) {
-            throw new RuntimeException("Error building authorization server URI: ", exception);
-        }
+        URI uri = new URI(authServerUrl + didDocumentPath);
 
         Response response;
         try {
