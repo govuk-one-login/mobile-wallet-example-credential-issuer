@@ -25,26 +25,12 @@ public class ProofJwtServiceDid {
 
     public ProofJwtServiceDid() {}
 
-    public SignedJWT verifyProofJwt(String jwt)
+    public void verifyProofJwt(SignedJWT signedJwt)
             throws ProofJwtValidationException, InvalidDidKeyException {
-        SignedJWT signedJwt = parseJwt(jwt);
-
         verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
-
         if (!this.verifyTokenSignature(signedJwt)) {
             throw new ProofJwtValidationException("Proof JWT signature verification failed");
-        }
-        return signedJwt;
-    }
-
-    private SignedJWT parseJwt(String jwt) throws ProofJwtValidationException {
-        try {
-            return SignedJWT.parse(jwt);
-        } catch (java.text.ParseException exception) {
-            throw new ProofJwtValidationException(
-                    String.format("Error parsing proof JWT: %s", exception.getMessage()),
-                    exception);
         }
     }
 
