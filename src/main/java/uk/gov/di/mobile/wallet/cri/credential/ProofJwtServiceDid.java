@@ -69,8 +69,7 @@ public class ProofJwtServiceDid {
         }
     }
 
-    private boolean verifyTokenSignature(SignedJWT signedJwt)
-            throws ProofJwtValidationException, InvalidDidKeyException {
+    private boolean verifyTokenSignature(SignedJWT signedJwt) throws ProofJwtValidationException {
         String didKey = signedJwt.getHeader().getKeyID();
         try {
             DidKeyResolver didKeyResolver = new DidKeyResolver();
@@ -84,7 +83,8 @@ public class ProofJwtServiceDid {
                 | IllegalArgumentException
                 | NoSuchAlgorithmException
                 | InvalidKeySpecException
-                | AddressFormatException exception) {
+                | AddressFormatException
+                | InvalidDidKeyException exception) {
             throw new ProofJwtValidationException(
                     String.format("Error verifying signature: %s", exception.getMessage()),
                     exception);
