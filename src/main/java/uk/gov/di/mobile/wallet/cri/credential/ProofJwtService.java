@@ -29,25 +29,11 @@ public class ProofJwtService {
 
     public ProofJwtService() {}
 
-    public SignedJWT verifyProofJwt(String jwt) throws ProofJwtValidationException {
-        SignedJWT signedJwt = parseJwt(jwt);
-
+    public void verifyProofJwt(SignedJWT signedJwt) throws ProofJwtValidationException {
         verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
-
         if (!this.verifyTokenSignature(signedJwt)) {
             throw new ProofJwtValidationException("Proof JWT signature verification failed");
-        }
-        return signedJwt;
-    }
-
-    private SignedJWT parseJwt(String jwt) throws ProofJwtValidationException {
-        try {
-            return SignedJWT.parse(jwt);
-        } catch (java.text.ParseException exception) {
-            throw new ProofJwtValidationException(
-                    String.format("Error parsing proof JWT: %s", exception.getMessage()),
-                    exception);
         }
     }
 
@@ -68,7 +54,6 @@ public class ProofJwtService {
     }
 
     private void verifyTokenClaims(SignedJWT signedJwt) throws ProofJwtValidationException {
-
         Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()

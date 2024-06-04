@@ -12,7 +12,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import com.nimbusds.oauth2.sdk.token.BearerAccessToken;
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -39,29 +39,12 @@ public class AccessTokenService {
         this.configurationService = configurationService;
     }
 
-    public SignedJWT verifyAccessToken(BearerAccessToken accessToken)
-            throws AccessTokenValidationException {
-
-        SignedJWT signedJwt = parseAccessToken(accessToken);
-
+    public void verifyAccessToken(SignedJWT signedJwt)
+            throws AccessTokenValidationException, URISyntaxException {
         verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
-
         if (!this.verifyTokenSignature(signedJwt)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
-        }
-
-        return signedJwt;
-    }
-
-    private SignedJWT parseAccessToken(BearerAccessToken accessToken)
-            throws AccessTokenValidationException {
-        try {
-            return SignedJWT.parse(accessToken.getValue());
-        } catch (java.text.ParseException exception) {
-            throw new AccessTokenValidationException(
-                    String.format("Error parsing access token: %s", exception.getMessage()),
-                    exception);
         }
     }
 
@@ -102,7 +85,7 @@ public class AccessTokenService {
     }
 
     private boolean verifyTokenSignature(SignedJWT signedJwt)
-            throws AccessTokenValidationException {
+            throws AccessTokenValidationException, URISyntaxException {
         String keyId = signedJwt.getHeader().getKeyID();
         JWK jwk = getJwk(keyId);
 
@@ -115,7 +98,7 @@ public class AccessTokenService {
         }
     }
 
-    private JWK getJwk(String keyId) throws AccessTokenValidationException {
+    private JWK getJwk(String keyId) throws AccessTokenValidationException, URISyntaxException {
         String didDocumentString = getDidDocument();
 
         ObjectMapper objectMapper = new ObjectMapper();
@@ -152,27 +135,25 @@ public class AccessTokenService {
                 "JWT key ID did not match any key in DID document");
     }
 
-    private String getDidDocument() {
+    private String getDidDocument() throws AccessTokenValidationException, URISyntaxException {
         String authServerUrl = configurationService.getOneLoginAuthServerUrl();
         String didDocumentPath = configurationService.getAuthServerDidDocumentPath();
+        URI uri = new URI(authServerUrl + didDocumentPath);
 
-        URI uri;
+        Response response;
         try {
-            uri = new URI(authServerUrl + didDocumentPath);
-        } catch (URISyntaxException exception) {
-            throw new RuntimeException("Error building authorization server URI: ", exception);
+            WebTarget webTarget = httpClient.target(uri);
+            Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
+            response = invocationBuilder.get();
+        } catch (ProcessingException exception) {
+            throw new AccessTokenValidationException("Could not fetch DID Document: ", exception);
         }
 
-        WebTarget webTarget = httpClient.target(uri);
-        Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON);
-        Response response = invocationBuilder.get();
-
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new RuntimeException(
+            throw new AccessTokenValidationException(
                     "Request to fetch DID Document failed with status code "
                             + response.getStatus());
         }
-
         return response.readEntity(String.class);
     }
 }
