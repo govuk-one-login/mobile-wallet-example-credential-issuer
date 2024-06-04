@@ -23,8 +23,7 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class ProofJwtServiceTest {
 
@@ -36,29 +35,20 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenJwtStringCannotBeParsedAsSignedJwt() {
-        ProofJwtValidationException exception =
-                assertThrows(
-                        ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt("invalid.jwt.string"));
-        assertThat(exception.getMessage(), containsString("Error parsing proof JWT"));
-    }
-
-    @Test
     void shouldThrowProofJwtValidationExceptionWhenJwtHeaderAlgDoesNotMatchConfig()
             throws JOSEException, InvalidKeySpecException, NoSuchAlgorithmException {
-        SignedJWT signedJWT =
+        SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.RS256).build(),
                         new JWTClaimsSet.Builder().build());
 
         RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
-        signedJWT.sign(rsaSigner);
+        signedJwt.sign(rsaSigner);
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
+                        () -> proofJwtService.verifyProofJwt(signedJwt));
         assertEquals(
                 "JWT alg header claim [RS256] does not match client config alg [ES256]",
                 exception.getMessage());
@@ -67,59 +57,58 @@ class ProofJwtServiceTest {
     @Test
     void shouldThrowProofJwtValidationExceptionWhenJwtHeaderKidIsNull()
             throws JOSEException, ParseException {
-        SignedJWT signedJWT =
+        SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
                         new JWTClaimsSet.Builder().build());
 
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJWT.sign(ecSigner);
+        signedJwt.sign(ecSigner);
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
+                        () -> proofJwtService.verifyProofJwt(signedJwt));
         assertEquals("JWT kid header claim is null", exception.getMessage());
     }
 
     @Test
     void shouldThrowProofJwtValidationExceptionWhenRequiredClaimAreNull()
             throws JOSEException, ParseException {
-        SignedJWT signedJWT =
+        SignedJWT signedJwt =
                 new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256).keyID("test-kid-123").build(),
+                        new JWSHeader.Builder(JWSAlgorithm.ES256)
+                                .keyID(
+                                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==")
+                                .build(),
                         new JWTClaimsSet.Builder().build());
 
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJWT.sign(ecSigner);
+        signedJwt.sign(ecSigner);
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
+                        () -> proofJwtService.verifyProofJwt(signedJwt));
         assertEquals("JWT missing required claims: [aud, iat, iss, nonce]", exception.getMessage());
     }
 
     @Test
     void shouldThrowProofJwtValidationExceptionWhenAudienceClaimDoesNotMatchConfig()
             throws JOSEException, ParseException {
-        SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256).keyID("test-kid-123").build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("invalid-audience")
-                                .claim("nonce", "test-nonce")
-                                .build());
+        SignedJWT signedJwt =
+                getTestProofJwt(
+                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
+                        "urn:fdc:gov:uk:wallet",
+                        "invalid-audience");
 
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJWT.sign(ecSigner);
+        signedJwt.sign(ecSigner);
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
+                        () -> proofJwtService.verifyProofJwt(signedJwt));
         assertEquals(
                 "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:example-credential-issuer]",
                 exception.getMessage());
@@ -128,23 +117,18 @@ class ProofJwtServiceTest {
     @Test
     void shouldThrowProofJwtValidationExceptionWhenAIssuerClaimDoesNotMatchConfig()
             throws JOSEException, ParseException {
-        SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256).keyID("test-kid-123").build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("invalid-issuer")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .claim("nonce", "test-nonce")
-                                .build());
-
+        SignedJWT signedJwt =
+                getTestProofJwt(
+                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
+                        "invalid-issuer",
+                        "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJWT.sign(ecSigner);
+        signedJwt.sign(ecSigner);
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
+                        () -> proofJwtService.verifyProofJwt(signedJwt));
         assertEquals(
                 "JWT iss claim has value invalid-issuer, must be urn:fdc:gov:uk:wallet",
                 exception.getMessage());
@@ -153,25 +137,18 @@ class ProofJwtServiceTest {
     @Test
     void shouldThrowProofJwtValidationExceptionWhenDidKeyIsInvalid()
             throws JOSEException, ParseException {
-        SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID("did:key:notAValidKey")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .claim("nonce", "test-nonce")
-                                .build());
-
+        SignedJWT signedJwt =
+                getTestProofJwt(
+                        "did:key:notAValidKey",
+                        "urn:fdc:gov:uk:wallet",
+                        "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJWT.sign(ecSigner);
+        signedJwt.sign(ecSigner);
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
+                        () -> proofJwtService.verifyProofJwt(signedJwt));
 
         assertThat(exception.getMessage(), containsString("Error verifying signature"));
     }
@@ -179,53 +156,46 @@ class ProofJwtServiceTest {
     @Test
     void shouldThrowProofJwtValidationExceptionWhenSignatureVerificationFailed()
             throws JOSEException, ParseException {
-        SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID(
-                                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .claim("nonce", "test-nonce")
-                                .build());
+        SignedJWT signedJwt =
+                getTestProofJwt(
+                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
+                        "urn:fdc:gov:uk:wallet",
+                        "urn:fdc:gov:uk:example-credential-issuer");
 
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJWT.sign(ecSigner);
+        signedJwt.sign(ecSigner);
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> proofJwtService.verifyProofJwt(signedJWT.serialize()));
+                        () -> proofJwtService.verifyProofJwt(signedJwt));
 
         assertThat(
                 exception.getMessage(), containsString("Proof JWT signature verification failed"));
     }
 
     @Test
-    void shouldReturnProofJwtParsedAsSignedJwtWhenVerificationSucceeds()
-            throws JOSEException, ParseException, ProofJwtValidationException {
-        SignedJWT signedJWT =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID(
-                                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJZJxO7obR8Isv585Esig0bP0AG/oSz08R1+uUpbb/IGbrRDaQvQtuEdKW1wpisujSzXndejH+ZPm9FTODHwyQQ==")
-                                .build(),
-                        new JWTClaimsSet.Builder()
-                                .issueTime(Date.from(Instant.now()))
-                                .issuer("urn:fdc:gov:uk:wallet")
-                                .audience("urn:fdc:gov:uk:example-credential-issuer")
-                                .claim("nonce", "test-nonce")
-                                .build());
-
+    void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
+        SignedJWT signedJwt =
+                getTestProofJwt(
+                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJZJxO7obR8Isv585Esig0bP0AG/oSz08R1+uUpbb/IGbrRDaQvQtuEdKW1wpisujSzXndejH+ZPm9FTODHwyQQ==",
+                        "urn:fdc:gov:uk:wallet",
+                        "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJWT.sign(ecSigner);
+        signedJwt.sign(ecSigner);
 
-        assertEquals(
-                signedJWT.serialize(),
-                proofJwtService.verifyProofJwt(signedJWT.serialize()).serialize());
+        assertDoesNotThrow(() -> proofJwtService.verifyProofJwt(signedJwt));
+    }
+
+    private static SignedJWT getTestProofJwt(String kid, String issuer, String audience) {
+        return new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.ES256).keyID(kid).build(),
+                new JWTClaimsSet.Builder()
+                        .issueTime(Date.from(Instant.now()))
+                        .issuer(issuer)
+                        .audience(audience)
+                        .claim("nonce", "test-nonce")
+                        .build());
     }
 
     private RSAPrivateKey getRsaPrivateKey()
