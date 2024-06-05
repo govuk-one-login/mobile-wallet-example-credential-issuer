@@ -101,7 +101,7 @@ public class DidKeyResolver {
         byte[] keyHexBytes = HexFormat.of().parseHex(keyHex);
 
         // check if key is compressed by checking that its length is 33 bytes and the first byte is
-        // either 0x02 or 0x03
+        // either 0x02 (2) or 0x03 (3)
         assertPublicKeyIsCompressed(multicodec, keyHexBytes);
 
         return new DecodedData(
@@ -113,14 +113,14 @@ public class DidKeyResolver {
         if (keyHexBytes.length != multicodec.expectedKeyLength) {
             throw new InvalidDidKeyException(
                     String.format(
-                            "Expected key length of %s, but found %s instead",
+                            "Expected key length equal to %s, but found %s instead",
                             multicodec.expectedKeyLength, keyHexBytes.length));
         }
 
         if (keyHexBytes[0] != 2 && keyHexBytes[0] != 3) {
             throw new InvalidDidKeyException(
                     String.format(
-                            "Expected key prefix of 0x02 or 0x03, but found %s instead",
+                            "Expected key prefix equal to 2 or 3, but found %s instead",
                             keyHexBytes[0]));
         }
     }

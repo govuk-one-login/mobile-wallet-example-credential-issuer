@@ -79,6 +79,18 @@ public class DidKeyResolverTest {
                         () ->
                                 didKeyResolver.decodeDIDKey(
                                         "did:key:z3u1stSg9rUT8ZygCoovJN9GSV7CQzETPPuPMG3D7b6RqsFK"));
-        assertEquals("Expected key length of 33, but found 32 instead", thrown.getMessage());
+        assertEquals("Expected key length equal to 33, but found 32 instead", thrown.getMessage());
+    }
+
+    @Test
+    void shouldThrowInvalidDidKeyExceptionWhenPublicKeyPrefixIsNot2Or3() {
+        InvalidDidKeyException thrown =
+                assertThrows(
+                        InvalidDidKeyException.class,
+                        () ->
+                                didKeyResolver.decodeDIDKey(
+                                        "did:key:zDnag8UdU6WNW8dXEXVMR8G2B8DoMSTbNt9ZYajQGE4v1dckd"));
+        assertEquals(
+                "Expected key prefix equal to 2 or 3, but found 7 instead", thrown.getMessage());
     }
 }
