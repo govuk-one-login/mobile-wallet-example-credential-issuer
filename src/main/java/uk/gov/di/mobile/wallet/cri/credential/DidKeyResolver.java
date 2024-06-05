@@ -16,7 +16,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 
 public class DidKeyResolver {
-    public record DecodedData(
+    public record DecodedKeyData(
             Multicodec multicodecValue, byte[] rawPublicKeyBytes, String publicKeyBase64) {}
 
     /**
@@ -45,7 +45,7 @@ public class DidKeyResolver {
      * @return A response containing the public key algorithm, and the did key itself
      * @throws InvalidDidKeyException On error decoding the did:key
      */
-    public DecodedData decodeDIDKey(@NotNull String didKey)
+    public DecodedKeyData decodeDIDKey(@NotNull String didKey)
             throws InvalidDidKeyException, AddressFormatException {
         // get fingerprint/multibase
         String multibase = removePrefixAndMultibaseCode(didKey);
@@ -85,7 +85,7 @@ public class DidKeyResolver {
         return multibase.substring(1);
     }
 
-    private static DecodedData extractPublicKey(byte[] keyBytes) throws InvalidDidKeyException {
+    private static DecodedKeyData extractPublicKey(byte[] keyBytes) throws InvalidDidKeyException {
         String hex = HexUtils.bytesToHex(keyBytes);
         Multicodec multicodec = Multicodec.P256_PUB;
 
@@ -95,7 +95,7 @@ public class DidKeyResolver {
         // either 0x02 (2) or 0x03 (3)
         assertPublicKeyIsCompressed(multicodec, keyHexBytes);
 
-        return new DecodedData(
+        return new DecodedKeyData(
                 multicodec, keyHexBytes, Base64.getUrlEncoder().encodeToString(keyHexBytes));
     }
 

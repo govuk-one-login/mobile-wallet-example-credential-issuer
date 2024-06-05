@@ -73,7 +73,7 @@ public class ProofJwtServiceDid {
         String didKey = signedJwt.getHeader().getKeyID();
         try {
             DidKeyResolver didKeyResolver = new DidKeyResolver();
-            DidKeyResolver.DecodedData resolvedDidKey = didKeyResolver.decodeDIDKey(didKey);
+            DidKeyResolver.DecodedKeyData resolvedDidKey = didKeyResolver.decodeDIDKey(didKey);
             byte[] rawPublicKeyBytes = resolvedDidKey.rawPublicKeyBytes();
             ECPublicKey publicKey = didKeyResolver.generatePublicKeyFromBytes(rawPublicKeyBytes);
             ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();

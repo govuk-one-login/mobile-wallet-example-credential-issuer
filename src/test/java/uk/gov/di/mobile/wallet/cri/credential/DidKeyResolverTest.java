@@ -17,12 +17,13 @@ public class DidKeyResolverTest {
 
     @Test
     void shouldDecodeDidKeyIntoAPublicKey() throws AddressFormatException, InvalidDidKeyException {
-        DidKeyResolver.DecodedData decodedData =
+        DidKeyResolver.DecodedKeyData decodedKeyData =
                 didKeyResolver.decodeDIDKey(
                         "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX");
-        assertEquals("A85_TEO57jfsASQWD-4bhUvr7Yn0qE8XS4GA_ydRFx3O", decodedData.publicKeyBase64());
-        assertEquals(Multicodec.P256_PUB, decodedData.multicodecValue());
-        assertEquals(33, decodedData.rawPublicKeyBytes().length);
+        assertEquals(
+                "A85_TEO57jfsASQWD-4bhUvr7Yn0qE8XS4GA_ydRFx3O", decodedKeyData.publicKeyBase64());
+        assertEquals(Multicodec.P256_PUB, decodedKeyData.multicodecValue());
+        assertEquals(33, decodedKeyData.rawPublicKeyBytes().length);
     }
 
     @Test
