@@ -153,8 +153,7 @@ class ProofJwtServiceDidTest {
 
         assertThat(
                 exception.getMessage(),
-                containsString(
-                        "Error verifying signature: DID Keys need to be encoded in base58-btc encoding"));
+                containsString("Error verifying signature: did:key must be base58 encoded"));
     }
 
     @Test

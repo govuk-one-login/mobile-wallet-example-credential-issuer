@@ -8,7 +8,7 @@ public class HexUtilsTest {
 
     @Test
     void shouldHexEncodeABytesArray() {
-        assertEquals("5465737420537472696E67", HexUtils.bytesToHex("Test String".getBytes()));
+        assertEquals("54657374537472696E67", HexUtils.bytesToHex("TestString".getBytes()));
     }
 
     @Test

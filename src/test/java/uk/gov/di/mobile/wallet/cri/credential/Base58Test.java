@@ -25,7 +25,7 @@ public class Base58Test {
         AddressFormatException thrown =
                 assertThrows(
                         AddressFormatException.class,
-                        () -> Base58.decode("Not a valid base58 encoded string"));
-        assertEquals("Illegal character   at 3", thrown.getMessage());
+                        () -> Base58.decode("NotAValidBase58EncodedString"));
+        assertEquals("Illegal character l at 6", thrown.getMessage());
     }
 }
