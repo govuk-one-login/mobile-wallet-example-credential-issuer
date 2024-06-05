@@ -65,7 +65,7 @@ public class Base58 {
 
             temp[--j] = mod;
         }
-        // Do no add extra leading zeroes, move j to first non-null byte.
+        // Do not add extra leading zeroes, move j to first non-null byte.
         while (j < temp.length && temp[j] == 0) {
             ++j;
         }

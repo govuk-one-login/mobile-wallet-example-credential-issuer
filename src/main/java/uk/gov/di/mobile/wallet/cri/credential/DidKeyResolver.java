@@ -48,30 +48,37 @@ public class DidKeyResolver {
     public DecodedData decodeDIDKey(@NotNull String didKey)
             throws InvalidDidKeyException, AddressFormatException {
         // get fingerprint/multibase
-        String multibase = extractMultibaseFromDidKey(didKey);
-        // base58 decode the public key
+        String multibase = removePrefixAndMultibaseCode(didKey);
+        // base58 decode the key
         byte[] multicodec = Base58.decode(multibase);
 
         return extractMulticodecValue(multicodec);
     }
 
-    private static @NotNull String extractMultibaseFromDidKey(@NotNull String didKey)
+    /**
+     * Checks key has prefix "did:key:" followed by the letter "z" from the base58 encoding. Then
+     * removes prefix "did:key:" and multibase code "z" from key before returning it.
+     *
+     * @param didKey The did key
+     * @return The base58 encoded key without the prefix "did:key:z"
+     * @throws InvalidDidKeyException On error validating the did:key
+     */
+    private static @NotNull String removePrefixAndMultibaseCode(@NotNull String didKey)
             throws InvalidDidKeyException {
-        // validate the did key starts with did:key:
+        // validate did:key prefix
         if (!didKey.startsWith("did:key:")) {
-            throw new InvalidDidKeyException("Expected key to start with prefix did:key:");
+            throw new InvalidDidKeyException("Expected did:key to start with prefix did:key:");
         }
 
-        // DID keys only support base58 encoding, which is informed by z character as first
-        // character: validate that key is base58 encoded by checking it starts with 'z'
+        // did:key must be base58 encoded, which is informed by the z character as first character
         String[] segments = didKey.split(":");
         String multibase = segments[segments.length - 1];
         char multibaseType = multibase.charAt(0);
         if (multibaseType != 'z') {
             throw new InvalidDidKeyException(
-                    "DID Keys need to be encoded in base58-btc encoding, "
-                            + "but found multibase type "
-                            + multibaseType);
+                    String.format(
+                            "did:key must be base58 encoded but found multibase code %s instead",
+                            multibaseType));
         }
 
         // skip leading "z" from the base58 encoding
@@ -86,29 +93,35 @@ public class DidKeyResolver {
         // check if hex encoded public key starts with the unsigned varint of the multicodec value
         // supported
         if (!hex.startsWith(multicodec.uvarintcode)) {
-            throw new InvalidDidKeyException("DID key multicodec value is not supported");
+            throw new InvalidDidKeyException("did:key multicodec value is not supported");
         }
         // extract the actual public key by removing the multicodec
         String keyHex = hex.substring(multicodec.uvarintcode.length());
 
         byte[] keyHexBytes = HexFormat.of().parseHex(keyHex);
 
-        // check if key length is correct
-        assertPublicKeyLengthIsExpected(multicodec, keyHexBytes);
+        // check if key is compressed by checking that its length is 33 bytes and the first byte is
+        // either 0x02 or 0x03
+        assertPublicKeyIsCompressed(multicodec, keyHexBytes);
 
         return new DecodedData(
                 multicodec, keyHexBytes, Base64.getUrlEncoder().encodeToString(keyHexBytes));
     }
 
-    private static void assertPublicKeyLengthIsExpected(Multicodec multicodec, byte[] keyHexBytes)
+    private static void assertPublicKeyIsCompressed(Multicodec multicodec, byte[] keyHexBytes)
             throws InvalidDidKeyException {
-        if (multicodec.expectedKeyLength != -1
-                && keyHexBytes.length != multicodec.expectedKeyLength) {
+        if (keyHexBytes.length != multicodec.expectedKeyLength) {
             throw new InvalidDidKeyException(
-                    "Expected key length of: "
-                            + multicodec.expectedKeyLength
-                            + ", but found: "
-                            + keyHexBytes.length);
+                    String.format(
+                            "Expected key length of %s, but found %s instead",
+                            multicodec.expectedKeyLength, keyHexBytes.length));
+        }
+
+        if (keyHexBytes[0] != 2 && keyHexBytes[0] != 3) {
+            throw new InvalidDidKeyException(
+                    String.format(
+                            "Expected key prefix of 0x02 or 0x03, but found %s instead",
+                            keyHexBytes[0]));
         }
     }
 
@@ -122,13 +135,6 @@ public class DidKeyResolver {
      */
     public ECPublicKey generatePublicKeyFromBytes(byte[] compressedPublicKey)
             throws NoSuchAlgorithmException, InvalidKeySpecException {
-        // check if key is compressed by checking that its length is 33 bytes and the first byte is
-        // either 0x02 or 0x03
-        if (compressedPublicKey.length != 33
-                || compressedPublicKey[0] != 2 && compressedPublicKey[0] != 3) {
-            throw new IllegalArgumentException();
-        }
-
         ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256r1");
         byte[] publicKeyUncompressed = decompressKey(compressedPublicKey, spec);
 
