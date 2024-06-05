@@ -52,7 +52,7 @@ public class DidKeyResolver {
         // base58 decode the key
         byte[] multicodec = Base58.decode(multibase);
 
-        return extractMulticodecValue(multicodec);
+        return extractPublicKey(multicodec);
     }
 
     /**
@@ -85,11 +85,22 @@ public class DidKeyResolver {
         return multibase.substring(1);
     }
 
-    private static DecodedData extractMulticodecValue(byte[] keyBytes)
-            throws InvalidDidKeyException {
+    private static DecodedData extractPublicKey(byte[] keyBytes) throws InvalidDidKeyException {
         String hex = HexUtils.bytesToHex(keyBytes);
         Multicodec multicodec = Multicodec.P256_PUB;
 
+        byte[] keyHexBytes = removeMulticodec(hex, multicodec);
+
+        // check if key is compressed by checking that its length is 33 bytes and the first byte is
+        // either 0x02 (2) or 0x03 (3)
+        assertPublicKeyIsCompressed(multicodec, keyHexBytes);
+
+        return new DecodedData(
+                multicodec, keyHexBytes, Base64.getUrlEncoder().encodeToString(keyHexBytes));
+    }
+
+    private static byte[] removeMulticodec(String hex, Multicodec multicodec)
+            throws InvalidDidKeyException {
         // check if hex encoded public key starts with the unsigned varint of the multicodec value
         // supported
         if (!hex.startsWith(multicodec.uvarintcode)) {
@@ -98,14 +109,7 @@ public class DidKeyResolver {
         // extract the actual public key by removing the multicodec
         String keyHex = hex.substring(multicodec.uvarintcode.length());
 
-        byte[] keyHexBytes = HexFormat.of().parseHex(keyHex);
-
-        // check if key is compressed by checking that its length is 33 bytes and the first byte is
-        // either 0x02 (2) or 0x03 (3)
-        assertPublicKeyIsCompressed(multicodec, keyHexBytes);
-
-        return new DecodedData(
-                multicodec, keyHexBytes, Base64.getUrlEncoder().encodeToString(keyHexBytes));
+        return HexFormat.of().parseHex(keyHex);
     }
 
     private static void assertPublicKeyIsCompressed(Multicodec multicodec, byte[] keyHexBytes)
