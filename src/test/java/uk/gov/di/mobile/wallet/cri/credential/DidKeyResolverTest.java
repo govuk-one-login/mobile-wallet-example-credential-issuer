@@ -18,7 +18,7 @@ public class DidKeyResolverTest {
     @Test
     void shouldDecodeDidKeyIntoAPublicKey() throws AddressFormatException, InvalidDidKeyException {
         DidKeyResolver.DecodedKeyData decodedKeyData =
-                didKeyResolver.decodeDIDKey(
+                didKeyResolver.decodeDidKey(
                         "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX");
         assertEquals(
                 "A85_TEO57jfsASQWD-4bhUvr7Yn0qE8XS4GA_ydRFx3O", decodedKeyData.publicKeyBase64());
@@ -32,7 +32,7 @@ public class DidKeyResolverTest {
                 assertThrows(
                         InvalidDidKeyException.class,
                         () ->
-                                didKeyResolver.decodeDIDKey(
+                                didKeyResolver.decodeDidKey(
                                         "did:keyzDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX"));
         assertEquals("Expected did:key to start with prefix did:key:", thrown.getMessage());
     }
@@ -43,7 +43,7 @@ public class DidKeyResolverTest {
                 assertThrows(
                         InvalidDidKeyException.class,
                         () ->
-                                didKeyResolver.decodeDIDKey(
+                                didKeyResolver.decodeDidKey(
                                         "did:key:DnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX"));
         assertEquals(
                 "did:key must be base58 encoded but found multibase code D instead",
@@ -56,7 +56,7 @@ public class DidKeyResolverTest {
                 assertThrows(
                         AddressFormatException.class,
                         () ->
-                                didKeyResolver.decodeDIDKey(
+                                didKeyResolver.decodeDidKey(
                                         "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX="));
         assertEquals("Illegal character = at 48", thrown.getMessage());
     }
@@ -67,7 +67,7 @@ public class DidKeyResolverTest {
                 assertThrows(
                         InvalidDidKeyException.class,
                         () ->
-                                didKeyResolver.decodeDIDKey(
+                                didKeyResolver.decodeDidKey(
                                         "did:key:z82Lm1MpAkeJcix9K8TMiLd5NMAhnwkjjCBeWHXyu3U4oT2MVJJKXkcVBgjGhnLBn2Kaau9"));
         assertEquals("did:key multicodec value is not supported", thrown.getMessage());
     }
@@ -78,7 +78,7 @@ public class DidKeyResolverTest {
                 assertThrows(
                         InvalidDidKeyException.class,
                         () ->
-                                didKeyResolver.decodeDIDKey(
+                                didKeyResolver.decodeDidKey(
                                         "did:key:z3u1stSg9rUT8ZygCoovJN9GSV7CQzETPPuPMG3D7b6RqsFK"));
         assertEquals("Expected key length equal to 33, but found 32 instead", thrown.getMessage());
     }
@@ -89,7 +89,7 @@ public class DidKeyResolverTest {
                 assertThrows(
                         InvalidDidKeyException.class,
                         () ->
-                                didKeyResolver.decodeDIDKey(
+                                didKeyResolver.decodeDidKey(
                                         "did:key:zDnag8UdU6WNW8dXEXVMR8G2B8DoMSTbNt9ZYajQGE4v1dckd"));
         assertEquals(
                 "Expected key prefix equal to 2 or 3, but found 7 instead", thrown.getMessage());

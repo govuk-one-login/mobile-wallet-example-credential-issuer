@@ -45,7 +45,7 @@ public class DidKeyResolver {
      * @return A response containing the public key algorithm, and the did key itself
      * @throws InvalidDidKeyException On error decoding the did:key
      */
-    public DecodedKeyData decodeDIDKey(@NotNull String didKey)
+    public DecodedKeyData decodeDidKey(@NotNull String didKey)
             throws InvalidDidKeyException, AddressFormatException {
         // get fingerprint/multibase
         String multibase = removePrefixAndMultibaseCode(didKey);
