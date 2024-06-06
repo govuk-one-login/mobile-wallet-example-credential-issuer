@@ -20,10 +20,10 @@ public class DidKeyResolver {
             Multicodec multicodecValue, byte[] rawPublicKeyBytes, String publicKeyBase64) {}
 
     /**
-     * Decodes the given DID key into a response stating the public key algorithm, and the actual
+     * Decodes the given did:key into a response object containing the public key algorithm, and the
      * contents of the public key.
      *
-     * <p>DID keys are structured such that:
+     * <p>A did:key is structured such that:
      *
      * <ul>
      *   <li>The prefix <i>must be</i> <code>did:key</code>
@@ -41,9 +41,9 @@ public class DidKeyResolver {
      * decoded are actually represented as <code>0x8024</code>. In this code, we have to compare the
      * base58-btc decoded multicodec to the <b>unsigned varint</b> value of the multicodec header.
      *
-     * @param didKey The did key to decode
-     * @return A response containing the public key algorithm, and the did key itself
-     * @throws InvalidDidKeyException On error decoding the did:key
+     * @param didKey The did:key to resolve
+     * @return A response containing the public key algorithm, and the public key material
+     * @throws InvalidDidKeyException On error resolving the did:key
      */
     public DecodedKeyData decodeDidKey(@NotNull String didKey)
             throws InvalidDidKeyException, AddressFormatException {
@@ -56,8 +56,9 @@ public class DidKeyResolver {
     }
 
     /**
-     * Checks key has prefix "did:key:" followed by the letter "z" from the base58 encoding. Then
-     * removes prefix "did:key:" and multibase code "z" from key before returning it.
+     * Checks that key has prefix "did:key:" followed by the letter "z" from the base58 encoding.
+     * Then removes both the prefix "did:key:" and the multibase code "z" from the key and returns
+     * it.
      *
      * @param didKey The did key
      * @return The base58 encoded key without the prefix "did:key:z"
@@ -85,6 +86,13 @@ public class DidKeyResolver {
         return multibase.substring(1);
     }
 
+    /**
+     * Extracts the public key material from the function input.
+     *
+     * @param keyBytes The multicodec identifier for the public key type and the public key material
+     * @return DecodedKeyData
+     * @throws InvalidDidKeyException On error validating the did:key
+     */
     private static DecodedKeyData extractPublicKey(byte[] keyBytes) throws InvalidDidKeyException {
         String hex = HexUtils.bytesToHex(keyBytes);
         Multicodec multicodec = Multicodec.P256_PUB;
@@ -99,19 +107,37 @@ public class DidKeyResolver {
                 multicodec, keyHexBytes, Base64.getUrlEncoder().encodeToString(keyHexBytes));
     }
 
-    private static byte[] removeMulticodec(String hex, Multicodec multicodec)
+    /**
+     * Validates that key starts with the expected unsigned varint of the multicodec and then
+     * removes it, returning only the public key material.
+     *
+     * @param multicodec The key's multicodec value
+     * @param hexKey The multicodec identifier for the public key type and the public key material
+     *     hex encoded
+     * @return The public key material in byte array format
+     * @throws InvalidDidKeyException On an invalid multicodec
+     */
+    private static byte[] removeMulticodec(String hexKey, Multicodec multicodec)
             throws InvalidDidKeyException {
         // check if hex encoded public key starts with the unsigned varint of the multicodec value
         // supported
-        if (!hex.startsWith(multicodec.uvarintcode)) {
+        if (!hexKey.startsWith(multicodec.uvarintcode)) {
             throw new InvalidDidKeyException("did:key multicodec value is not supported");
         }
         // extract the actual public key by removing the multicodec
-        String keyHex = hex.substring(multicodec.uvarintcode.length());
+        String keyHex = hexKey.substring(multicodec.uvarintcode.length());
 
         return HexFormat.of().parseHex(keyHex);
     }
 
+    /**
+     * Checks that the public key is compressed. A compressed key must be 33 bytes long and have
+     * prefix 2 or 3.
+     *
+     * @param multicodec The key's multicodec value
+     * @param keyHexBytes The public key material
+     * @throws InvalidDidKeyException On a public key that is not compressed
+     */
     private static void assertPublicKeyIsCompressed(Multicodec multicodec, byte[] keyHexBytes)
             throws InvalidDidKeyException {
         if (keyHexBytes.length != multicodec.expectedKeyLength) {

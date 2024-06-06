@@ -5,6 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HexUtils {
+
+    /**
+     * Converts a byte array to a hexadecimal value.
+     *
+     * @param bytes The bytes to convert
+     * @return The bytes hexadecimal value in the form of a string
+     */
     public static String bytesToHex(byte[] bytes) {
         StringBuilder result = new StringBuilder();
         for (byte aByte : bytes) {

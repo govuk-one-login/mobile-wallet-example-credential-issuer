@@ -28,6 +28,12 @@ public class Base58 {
         }
     }
 
+    /**
+     * Decodes the input base58 string into bytes.
+     *
+     * @param input the base58-encoded string to decode
+     * @return the decoded data in byte array format
+     */
     public static byte[] decode(String input) throws AddressFormatException {
         if (input.length() == 0) {
             return new byte[0];

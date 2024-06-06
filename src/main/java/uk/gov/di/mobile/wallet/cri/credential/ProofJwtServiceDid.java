@@ -25,8 +25,7 @@ public class ProofJwtServiceDid {
 
     public ProofJwtServiceDid() {}
 
-    public void verifyProofJwt(SignedJWT signedJwt)
-            throws ProofJwtValidationException, InvalidDidKeyException {
+    public void verifyProofJwt(SignedJWT signedJwt) throws ProofJwtValidationException {
         verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
         if (!this.verifyTokenSignature(signedJwt)) {
