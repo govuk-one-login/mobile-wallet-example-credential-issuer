@@ -25,6 +25,12 @@ public class ProofJwtServiceDid {
 
     public ProofJwtServiceDid() {}
 
+    /**
+     * Verifies the Proof JWT's header and payload claims and its signature.
+     *
+     * @param signedJwt The Proof JWT to verify
+     * @throws ProofJwtValidationException On any error verifying the token claims and signature
+     */
     public void verifyProofJwt(SignedJWT signedJwt) throws ProofJwtValidationException {
         verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
@@ -33,6 +39,12 @@ public class ProofJwtServiceDid {
         }
     }
 
+    /**
+     * Verifies that the required header claims are present and/or match an expected value.
+     *
+     * @param signedJwt The Proof JWT to validate
+     * @throws ProofJwtValidationException On invalid header claims
+     */
     private void verifyTokenHeader(SignedJWT signedJwt) throws ProofJwtValidationException {
         JWSAlgorithm clientAlgorithm =
                 JWSAlgorithm.parse(ProofJwtServiceDid.CLIENT_CONFIG_ALGORITHM);
@@ -50,6 +62,12 @@ public class ProofJwtServiceDid {
         }
     }
 
+    /**
+     * Verifies that the required payload claims are present and/or match an expected value.
+     *
+     * @param signedJwt The Proof JWT to validate
+     * @throws ProofJwtValidationException On invalid payload claims
+     */
     private void verifyTokenClaims(SignedJWT signedJwt) throws ProofJwtValidationException {
         Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
         JWTClaimsSet expectedClaimValues =
@@ -68,6 +86,13 @@ public class ProofJwtServiceDid {
         }
     }
 
+    /**
+     * Verifies the Proof JWT signature with the public key extracted from the did:key included in
+     * the token's "kid" header claim.
+     *
+     * @param signedJwt The Proof JWT to verify
+     * @throws ProofJwtValidationException On error verifying the token signature
+     */
     private boolean verifyTokenSignature(SignedJWT signedJwt) throws ProofJwtValidationException {
         String didKey = signedJwt.getHeader().getKeyID();
         try {
