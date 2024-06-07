@@ -1,105 +1,100 @@
-package uk.gov.di.mobile.wallet.cri.credential;
-
-/**
+/*
  * Copyright 2011 Google Inc.
+ * Copyright 2018 Andreas Schildbach
  *
- * <p>Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
- * <p>Unless required by applicable law or agreed to in writing, software distributed under the
- * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
- * express or implied. See the License for the specific language governing permissions and
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-public class Base58 {
-    private static final char[] ALPHABET =
-            "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
 
+package uk.gov.di.mobile.wallet.cri.credential;
+
+import java.util.Arrays;
+
+public class Base58 {
+    public static final char[] ALPHABET =
+            "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
     private static final int[] INDEXES = new int[128];
 
     static {
-        for (int i = 0; i < INDEXES.length; i++) {
-            INDEXES[i] = -1;
-        }
+        Arrays.fill(INDEXES, -1);
         for (int i = 0; i < ALPHABET.length; i++) {
             INDEXES[ALPHABET[i]] = i;
         }
     }
 
     /**
-     * Decodes the input base58 string into bytes.
+     * Decodes the given base58 string into the original data bytes.
      *
      * @param input the base58-encoded string to decode
-     * @return the decoded data in byte array format
+     * @return the decoded data bytes
+     * @throws ≈ if the given string is not a valid base58 string
      */
     public static byte[] decode(String input) throws AddressFormatException {
         if (input.length() == 0) {
             return new byte[0];
         }
+        // Convert the base58-encoded ASCII chars to a base58 byte sequence (base58 digits).
         byte[] input58 = new byte[input.length()];
-        // Transform the String to a base58 byte sequence
         for (int i = 0; i < input.length(); ++i) {
             char c = input.charAt(i);
-
-            int digit58 = -1;
-            if (c >= 0 && c < 128) {
-                digit58 = INDEXES[c];
+            int digit = c < 128 ? INDEXES[c] : -1;
+            if (digit < 0) {
+                throw new AddressFormatException.InvalidCharacter(c, i);
             }
-            if (digit58 < 0) {
-                throw new AddressFormatException("Illegal character " + c + " at " + i);
+            input58[i] = (byte) digit;
+        }
+        // Count leading zeros.
+        int zeros = 0;
+        while (zeros < input58.length && input58[zeros] == 0) {
+            ++zeros;
+        }
+        // Convert base-58 digits to base-256 digits.
+        byte[] decoded = new byte[input.length()];
+        int outputStart = decoded.length;
+        for (int inputStart = zeros; inputStart < input58.length; ) {
+            decoded[--outputStart] = divmod(input58, inputStart, 58, 256);
+            if (input58[inputStart] == 0) {
+                ++inputStart; // optimization - skip leading zeros
             }
-
-            input58[i] = (byte) digit58;
         }
-        // Count leading zeroes
-        int zeroCount = 0;
-        while (zeroCount < input58.length && input58[zeroCount] == 0) {
-            ++zeroCount;
+        // Ignore extra leading zeroes that were added during the calculation.
+        while (outputStart < decoded.length && decoded[outputStart] == 0) {
+            ++outputStart;
         }
-        // The encoding
-        byte[] temp = new byte[input.length()];
-        int j = temp.length;
-
-        int startAt = zeroCount;
-        while (startAt < input58.length) {
-            byte mod = divmod256(input58, startAt);
-            if (input58[startAt] == 0) {
-                ++startAt;
-            }
-
-            temp[--j] = mod;
-        }
-        // Do not add extra leading zeroes, move j to first non-null byte.
-        while (j < temp.length && temp[j] == 0) {
-            ++j;
-        }
-
-        return copyOfRange(temp, j - zeroCount, temp.length);
+        // Return decoded data (including original number of leading zeros).
+        return Arrays.copyOfRange(decoded, outputStart - zeros, decoded.length);
     }
 
-    //
-    // number -> number / 256, returns number % 256
-    //
-    private static byte divmod256(byte[] number58, int startAt) {
+    /**
+     * Divides a number, represented as an array of bytes each containing a single digit in the
+     * specified base, by the given divisor. The given number is modified in-place to contain the
+     * quotient, and the return value is the remainder.
+     *
+     * @param number the number to divide
+     * @param firstDigit the index within the array of the first non-zero digit (this is used for
+     *     optimization by skipping the leading zeros)
+     * @param base the base in which the number's digits are represented (up to 256)
+     * @param divisor the number to divide by (up to 256)
+     * @return the remainder of the division operation
+     */
+    private static byte divmod(byte[] number, int firstDigit, int base, int divisor) {
+        // this is just long division which accounts for the base of the input digits
         int remainder = 0;
-        for (int i = startAt; i < number58.length; i++) {
-            int digit58 = (int) number58[i] & 0xFF;
-            int temp = remainder * 58 + digit58;
-
-            number58[i] = (byte) (temp / 256);
-
-            remainder = temp % 256;
+        for (int i = firstDigit; i < number.length; i++) {
+            int digit = (int) number[i] & 0xFF;
+            int temp = remainder * base + digit;
+            number[i] = (byte) (temp / divisor);
+            remainder = temp % divisor;
         }
-
         return (byte) remainder;
-    }
-
-    private static byte[] copyOfRange(byte[] source, int from, int to) {
-        byte[] range = new byte[to - from];
-        System.arraycopy(source, from, range, 0, range.length);
-
-        return range;
     }
 }

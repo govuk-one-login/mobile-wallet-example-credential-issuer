@@ -26,6 +26,6 @@ public class Base58Test {
                 assertThrows(
                         AddressFormatException.class,
                         () -> Base58.decode("NotAValidBase58EncodedString"));
-        assertEquals("Illegal character l at 6", thrown.getMessage());
+        assertEquals("Invalid character 'l' at position 6", thrown.getMessage());
     }
 }

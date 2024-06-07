@@ -107,7 +107,6 @@ public class ProofJwtServiceDid {
                 | IllegalArgumentException
                 | NoSuchAlgorithmException
                 | InvalidKeySpecException
-                | AddressFormatException
                 | InvalidDidKeyException exception) {
             throw new ProofJwtValidationException(
                     String.format("Error verifying signature: %s", exception.getMessage()),

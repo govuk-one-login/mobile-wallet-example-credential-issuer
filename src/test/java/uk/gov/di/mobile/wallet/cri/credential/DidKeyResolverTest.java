@@ -58,7 +58,7 @@ public class DidKeyResolverTest {
                         () ->
                                 didKeyResolver.decodeDidKey(
                                         "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX="));
-        assertEquals("Illegal character = at 48", thrown.getMessage());
+        assertEquals("Invalid character '=' at position 48", thrown.getMessage());
     }
 
     @Test
