@@ -32,11 +32,11 @@ public class HexUtils {
      * As an example:
      *
      * <ol>
-     *   <li>Convert 0x1200 to binary: 0001 0010 0000 0000
-     *   <li>Group into 7-bit groups: 0000100, 1000000
-     *   <li>Add MSB for each group (except the last one): 10000100, 11000000
-     *   <li>Convert to hexadecimal: 0x84, 0xC0
-     *   <li>Concatenate: 0x84C0
+     *   <li>Convert 0x1200 to binary: 1001000000000
+     *   <li>Group into 7-bit groups: 0100100, 0000000
+     *   <li>Add MSB for each group: 10000000, 00100100
+     *   <li>Convert to hexadecimal: 0x80, 0x24
+     *   <li>Concatenate: 0x8024
      * </ol>
      *
      * @param hex The hex value to convert

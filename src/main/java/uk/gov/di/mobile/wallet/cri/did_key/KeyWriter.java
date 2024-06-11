@@ -89,7 +89,7 @@ public class KeyWriter {
         }
 
         // calculate compressed key prefix
-        int prefix = 2 + (y[y.length - 1] & 1);
+        int prefix = 2 + (y[y.length - 1] & 1); // "(y[y.length - 1] & 1" returns 1 or 0
         byte[] prefixBytes = new byte[1];
         prefixBytes[0] = (byte) prefix;
 

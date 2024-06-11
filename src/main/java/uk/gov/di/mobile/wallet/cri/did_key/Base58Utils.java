@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.did_key;
 
-import org.bouncycastle.util.encoders.Hex;
-
 import java.math.BigInteger;
 import java.util.Arrays;
 
@@ -25,9 +23,6 @@ public class Base58Utils {
      * @return the base58-encoded string
      */
     public static String encode(byte[] input) {
-        System.out.println(Hex.toHexString(input));
-        System.out.println(input.length);
-
         if (input.length == 0) {
             return "";
         }
@@ -46,14 +41,10 @@ public class Base58Utils {
         int index = encoded.length;
 
         while (startEncodingAt < input.length) {
-            System.out.println("startEncodingAt " + startEncodingAt);
-            System.out.println("index " + index);
             encoded[--index] = BASE58_ALPHABET[divmod(input, startEncodingAt, 256, 58)];
             if (input[startEncodingAt] == 0) {
-                System.out.println("it is 0");
                 ++startEncodingAt; // optimization - skip leading zeros
             }
-            System.out.println(encoded);
         }
         // Preserve exactly as many leading encoded zeros in output as there were leading zeros in
         // input.
