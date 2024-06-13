@@ -8,11 +8,7 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
-import uk.gov.di.mobile.wallet.cri.credential.AccessTokenService;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialResource;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
-import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
@@ -75,6 +71,18 @@ public class MockCriApp extends Application<ConfigurationService> {
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
 
+        ProofJwtServiceDid proofJwtServiceDid =
+                new uk.gov.di.mobile.wallet.cri.credential.ProofJwtServiceDid();
+
+        CredentialServiceDid credentialServiceDid =
+                new uk.gov.di.mobile.wallet.cri.credential.CredentialServiceDid(
+                        configurationService,
+                        dynamoDbService,
+                        accessTokenService,
+                        proofJwtServiceDid,
+                        httpClient,
+                        credentialBuilder);
+
         environment
                 .jersey()
                 .register(
@@ -86,5 +94,11 @@ public class MockCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new CredentialResource(credentialService));
 
         environment.jersey().register(new DidDocumentResource(didDocumentService));
+
+        environment
+                .jersey()
+                .register(
+                        new uk.gov.di.mobile.wallet.cri.credential.CredentialResourceDid(
+                                credentialServiceDid));
     }
 }
