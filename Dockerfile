@@ -1,4 +1,4 @@
-FROM gradle:8.8.0-jdk17-alpine
+FROM gradle:8.6.0-jdk17-alpine@sha256:87f40d50d0015236f5aa95d13399508d70e44bc3d97f3bb80efe9a942957825b
 
 WORKDIR /app
 COPY src/ src/
