@@ -14,7 +14,7 @@ public class RequestBody {
     @JsonCreator
     public RequestBody(
             @JsonProperty(value = "proof", required = true) Proof proof,
-            @JsonProperty(value = "credential_identifier", required = true)
+            @JsonProperty(value = "credential_identifier", required = false)
                     String credentialIdentifier) {
         this.proof = proof;
         this.credential_identifier = credentialIdentifier;
