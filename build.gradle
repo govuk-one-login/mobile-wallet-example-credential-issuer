@@ -86,7 +86,7 @@ spotless {
 	}
 	groovyGradle {
 		target "**/*.gradle"
-		// greclipse()
+		greclipse()
 		trimTrailingWhitespace()
 		endWithNewline()
 	}
