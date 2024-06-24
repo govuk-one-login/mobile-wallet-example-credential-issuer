@@ -128,30 +128,6 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void shouldGetPreAuthCodeTtlDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(300, configurationService.getPreAuthorizedCodeTtl());
-    }
-
-    @Test
-    void shouldGetPreAuthCodeTtlEnvVarValue() {
-        environmentVariables.set("PRE_AUTHORIZED_CODE_TTL_IN_SECS", "600");
-        assertEquals(600, configurationService.getPreAuthorizedCodeTtl());
-    }
-
-    @Test
-    void shouldGetCredentialTtlDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
-        assertEquals(365, configurationService.getCredentialTtl());
-    }
-
-    @Test
-    void shouldGetCredentialTtlEnvVarValue() {
-        environmentVariables.set("CREDENTIAL_TTL_IN_DAYS", "400");
-        assertEquals(400, configurationService.getCredentialTtl());
-    }
-
-    @Test
     void shouldGetCredentialOfferCacheTableNameDefaultValueWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
@@ -197,5 +173,15 @@ class ConfigurationServiceTest {
     @Test
     void shouldGetCredentialStoreDocumentPathValue() {
         assertEquals("/document/", configurationService.getCredentialStoreDocumentPath());
+    }
+
+    @Test
+    void shouldGetPreAuthCodeTtlValue() {
+        assertEquals(300, configurationService.getPreAuthorizedCodeTtl());
+    }
+
+    @Test
+    void shouldGetCredentialTtlValue() {
+        assertEquals(365, configurationService.getCredentialTtl());
     }
 }
