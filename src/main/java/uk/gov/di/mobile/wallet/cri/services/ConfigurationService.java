@@ -26,11 +26,11 @@ public class ConfigurationService extends Configuration {
 
     public String getOneLoginAuthServerUrl() {
         return System.getenv()
-                .getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8000/sts-stub");
+                .getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8888/sts-stub");
     }
 
     public String getCredentialStoreUrl() {
-        return System.getenv().getOrDefault("CREDENTIAL_STORE_URL", "http://localhost:8000");
+        return System.getenv().getOrDefault("CREDENTIAL_STORE_URL", "http://localhost:8888");
     }
 
     public String getWalletUrl() {
