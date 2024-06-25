@@ -23,7 +23,9 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class ProofJwtServiceTest {
 
@@ -78,8 +80,7 @@ class ProofJwtServiceTest {
         SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
-                                .keyID(
-                                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==")
+                                .keyID("did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf")
                                 .build(),
                         new JWTClaimsSet.Builder().build());
 
@@ -98,7 +99,7 @@ class ProofJwtServiceTest {
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
-                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
+                        "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf",
                         "urn:fdc:gov:uk:wallet",
                         "invalid-audience");
 
@@ -119,7 +120,7 @@ class ProofJwtServiceTest {
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
-                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
+                        "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf",
                         "invalid-issuer",
                         "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
@@ -139,7 +140,7 @@ class ProofJwtServiceTest {
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
-                        "did:key:notAValidKey",
+                        "did:key:notAValidDidKey",
                         "urn:fdc:gov:uk:wallet",
                         "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
@@ -150,7 +151,9 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(signedJwt));
 
-        assertThat(exception.getMessage(), containsString("Error verifying signature"));
+        assertThat(
+                exception.getMessage(),
+                containsString("Error verifying signature: did:key must be base58 encoded"));
     }
 
     @Test
@@ -158,7 +161,7 @@ class ProofJwtServiceTest {
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
-                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
+                        "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX",
                         "urn:fdc:gov:uk:wallet",
                         "urn:fdc:gov:uk:example-credential-issuer");
 
@@ -178,7 +181,7 @@ class ProofJwtServiceTest {
     void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
-                        "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEJZJxO7obR8Isv585Esig0bP0AG/oSz08R1+uUpbb/IGbrRDaQvQtuEdKW1wpisujSzXndejH+ZPm9FTODHwyQQ==",
+                        "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf",
                         "urn:fdc:gov:uk:wallet",
                         "urn:fdc:gov:uk:example-credential-issuer");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
@@ -209,8 +212,8 @@ class ProofJwtServiceTest {
     }
 
     private ECKey getEsPrivateKey() throws ParseException {
-        String privateKeyJwkBase64 =
-                "eyJrdHkiOiJFQyIsImQiOiI4SGJYN0xib1E1OEpJOGo3eHdfQXp0SlRVSDVpZTFtNktIQlVmX3JnakVrIiwidXNlIjoic2lnIiwiY3J2IjoiUC0yNTYiLCJraWQiOiJmMDYxMWY3Zi04YTI5LTQ3ZTEtYmVhYy1mNWVlNWJhNzQ3MmUiLCJ4IjoiSlpKeE83b2JSOElzdjU4NUVzaWcwYlAwQUdfb1N6MDhSMS11VXBiYl9JRSIsInkiOiJtNjBRMmtMMExiaEhTbHRjS1lyTG8wczE1M1hveF9tVDV2UlV6Z3g4TWtFIiwiaWF0IjoxNzEyMTQ2MTc5fQ==";
-        return ECKey.parse(new String(Base64.getDecoder().decode(privateKeyJwkBase64)));
+        String privateKeyJwk =
+                "{\"kty\":\"EC\",\"d\":\"aWs8vn4m77PZ_SFMqpGgDlmgBCvtccsV1sE8UCmWPm0\",\"crv\":\"P-256\",\"x\":\"QW9GkrKtsARqx2stUsf1EwBmFaORYzheMbCq28oAIsg\",\"y\":\"DM7AJ0OmO9EduJoQEzGVT0pNKuzwGr1KI1r3fuU85oQ\"}";
+        return ECKey.parse(privateKeyJwk);
     }
 }

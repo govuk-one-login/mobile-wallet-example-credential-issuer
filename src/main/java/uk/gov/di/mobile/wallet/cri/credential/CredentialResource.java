@@ -78,8 +78,7 @@ public class CredentialResource {
         try {
             requestBody = mapper.readValue(payload, RequestBody.class);
         } catch (JsonProcessingException exception) {
-            throw new ProofJwtValidationException(
-                    "Failed to parse request body as Proof: ", exception);
+            throw new ProofJwtValidationException("Failed to parse request body: ", exception);
         }
 
         if (!Objects.equals(requestBody.getProof().getProofType(), "jwt")) {
