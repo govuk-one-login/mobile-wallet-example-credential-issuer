@@ -1,5 +1,7 @@
 FROM gradle:8-jdk17-alpine
 
+RUN apk update && apk upgrade busybox
+
 WORKDIR /app
 COPY src/ src/
 COPY build.gradle settings.gradle gradlew gradlew.bat config.yml ./
