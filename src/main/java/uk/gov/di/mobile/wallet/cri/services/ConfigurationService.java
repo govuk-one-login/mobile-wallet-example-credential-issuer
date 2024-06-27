@@ -37,15 +37,6 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
     }
 
-    public long getPreAuthorizedCodeTtl() {
-        return Long.parseLong(
-                System.getenv().getOrDefault("PRE_AUTHORIZED_CODE_TTL_IN_SECS", "300"));
-    }
-
-    public long getCredentialTtl() {
-        return Long.parseLong(System.getenv().getOrDefault("CREDENTIAL_TTL_IN_DAYS", "365"));
-    }
-
     public String getCredentialOfferCacheTableName() {
         return System.getenv().getOrDefault("CREDENTIAL_OFFER_CACHE", "credential_offer_cache");
     }
@@ -76,5 +67,13 @@ public class ConfigurationService extends Configuration {
 
     public String getCredentialStoreDocumentPath() {
         return "/document/";
+    }
+
+    public long getPreAuthorizedCodeTtl() {
+        return 300;
+    }
+
+    public long getCredentialTtl() {
+        return 365;
     }
 }
