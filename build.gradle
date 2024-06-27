@@ -3,7 +3,8 @@ plugins {
 	id "java"
 	id "com.diffplug.spotless" version "6.25.0"
 	id "org.sonarqube" version "4.4.1.3373"
-	id "jacoco"
+	//	id "jacoco"
+	id "jacoco-report-aggregation"
 }
 
 defaultTasks "clean", "spotlessApply", "build"
@@ -64,11 +65,15 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
+String jacocoBuildReportPath = "reports/jacoco/test/jacocoTestReport.xml"
+
 sonar {
 	properties {
 		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
 		property "sonar.organization", "govuk-one-login"
 		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.exclusions", "**/src/test/**"
+		property "sonar.coverage.jacoco.xmlReportPaths", "$project.buildDir/$jacocoBuildReportPath"
 	}
 }
 

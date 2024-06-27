@@ -38,6 +38,8 @@ public class CredentialResource {
 
         Credential credential;
         try {
+            LOGGER.info("Test log message");
+
             SignedJWT accessToken = parseAuthorizationHeader(authorizationHeader);
             SignedJWT proofJwt = parseRequestBody(payload);
 
