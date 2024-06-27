@@ -79,10 +79,7 @@ public class CredentialResourceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException,
                     CredentialServiceException {
-        JsonNode requestBody =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"jwt\"}}");
+        JsonNode requestBody = new ObjectMapper().readTree("{\"proof\":{\"proof_type\":\"jwt\"}}");
 
         final Response response =
                 EXT.target("/credential")
@@ -108,9 +105,7 @@ public class CredentialResourceTest {
                     URISyntaxException,
                     CredentialServiceException {
         JsonNode requestBody =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}");
+                new ObjectMapper().readTree("{\"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}");
 
         final Response response =
                 EXT.target("/credential")
@@ -138,7 +133,7 @@ public class CredentialResourceTest {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"invalidParam\": \"test\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
+                                "{\"invalidParam\": \"test\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
 
         final Response response =
                 EXT.target("/credential")
@@ -166,7 +161,7 @@ public class CredentialResourceTest {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}");
+                                "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}");
 
         final Response response =
                 EXT.target("/credential")
@@ -193,8 +188,7 @@ public class CredentialResourceTest {
                     CredentialServiceException {
         JsonNode requestBody =
                 new ObjectMapper()
-                        .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
+                        .readTree("{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
 
         final Response response =
                 EXT.target("/credential")
@@ -222,7 +216,7 @@ public class CredentialResourceTest {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
         final Response response =
                 EXT.target("/credential")
@@ -248,7 +242,7 @@ public class CredentialResourceTest {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
         final Response response =
                 EXT.target("/credential")
@@ -276,7 +270,7 @@ public class CredentialResourceTest {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
         doThrow(new SigningException("Some signing error", new Exception()))
                 .when(credentialService)
                 .getCredential(any(), any());
@@ -308,7 +302,7 @@ public class CredentialResourceTest {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
         doThrow(new DataStoreException("Some database error", new Exception()))
                 .when(credentialService)
                 .getCredential(any(), any());
@@ -341,7 +335,7 @@ public class CredentialResourceTest {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
-                                "{\"credential_identifier\":\"7fb54d49-985b-4a52-be20-6d820cc8fc40\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
         Credential credential = getMockCredential();
         when(credentialService.getCredential(any(SignedJWT.class), any(SignedJWT.class)))
                 .thenReturn(credential);
