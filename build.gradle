@@ -64,35 +64,17 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 String jacocoBuildReportPath = "reports/jacoco/test/jacocoTestReport.xml"
 
-=======
->>>>>>> 92cf653 (adding back sonar)
 sonar {
 	properties {
 		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
 		property "sonar.organization", "govuk-one-login"
 		property "sonar.host.url", "https://sonarcloud.io"
-<<<<<<< HEAD
 		property "sonar.coverage.exclusions", "**/src/test/**"
 		property "sonar.coverage.jacoco.xmlReportPaths", "$project.buildDir/$jacocoBuildReportPath"
 	}
 }
-=======
-// sonar {
-// 	properties {
-// 		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
-// 		property "sonar.organization", "govuk-one-login"
-// 		property "sonar.host.url", "https://sonarcloud.io"
-// 	}
-// }
->>>>>>> 6c8ee6a (test removing sonar)
-=======
-	}
-}
->>>>>>> 92cf653 (adding back sonar)
 
 spotless {
 	java {
