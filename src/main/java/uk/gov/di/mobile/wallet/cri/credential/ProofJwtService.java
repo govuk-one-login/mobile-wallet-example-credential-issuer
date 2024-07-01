@@ -10,14 +10,10 @@ import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 
-import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.EncodedKeySpec;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +25,12 @@ public class ProofJwtService {
 
     public ProofJwtService() {}
 
+    /**
+     * Verifies the Proof JWT's header and payload claims and its signature.
+     *
+     * @param signedJwt The Proof JWT to verify
+     * @throws ProofJwtValidationException On any error verifying the token claims and signature
+     */
     public void verifyProofJwt(SignedJWT signedJwt) throws ProofJwtValidationException {
         verifyTokenHeader(signedJwt);
         verifyTokenClaims(signedJwt);
@@ -37,6 +39,12 @@ public class ProofJwtService {
         }
     }
 
+    /**
+     * Verifies that the required header claims are present and/or match an expected value.
+     *
+     * @param signedJwt The Proof JWT to validate
+     * @throws ProofJwtValidationException On invalid header claims
+     */
     private void verifyTokenHeader(SignedJWT signedJwt) throws ProofJwtValidationException {
         JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.CLIENT_CONFIG_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = signedJwt.getHeader().getAlgorithm();
@@ -53,6 +61,12 @@ public class ProofJwtService {
         }
     }
 
+    /**
+     * Verifies that the required payload claims are present and/or match an expected value.
+     *
+     * @param signedJwt The Proof JWT to validate
+     * @throws ProofJwtValidationException On invalid payload claims
+     */
     private void verifyTokenClaims(SignedJWT signedJwt) throws ProofJwtValidationException {
         Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
         JWTClaimsSet expectedClaimValues =
@@ -71,24 +85,28 @@ public class ProofJwtService {
         }
     }
 
+    /**
+     * Verifies the Proof JWT signature with the public key extracted from the did:key included in
+     * the token's "kid" header claim.
+     *
+     * @param signedJwt The Proof JWT to verify
+     * @throws ProofJwtValidationException On error verifying the token signature
+     */
     private boolean verifyTokenSignature(SignedJWT signedJwt) throws ProofJwtValidationException {
-        String keyId = signedJwt.getHeader().getKeyID();
+        String didKey = signedJwt.getHeader().getKeyID();
         try {
-            String publicKeyBase64 = keyId.replace("did:key:", "");
-            KeyFactory keyFactory = KeyFactory.getInstance("EC");
-            byte[] decoded = Base64.getDecoder().decode(publicKeyBase64);
-            EncodedKeySpec keySpec = new X509EncodedKeySpec(decoded);
-
-            ECPublicKey publicKey = (ECPublicKey) keyFactory.generatePublic(keySpec);
-
+            DidKeyResolver didKeyResolver = new DidKeyResolver();
+            DidKeyResolver.DecodedKeyData resolvedDidKey = didKeyResolver.decodeDidKey(didKey);
+            byte[] rawPublicKeyBytes = resolvedDidKey.rawPublicKeyBytes();
+            ECPublicKey publicKey = didKeyResolver.generatePublicKeyFromBytes(rawPublicKeyBytes);
             ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();
-
             ECDSAVerifier verifier = new ECDSAVerifier(ecKey);
             return signedJwt.verify(verifier);
         } catch (JOSEException
                 | IllegalArgumentException
                 | NoSuchAlgorithmException
-                | InvalidKeySpecException exception) {
+                | InvalidKeySpecException
+                | InvalidDidKeyException exception) {
             throw new ProofJwtValidationException(
                     String.format("Error verifying signature: %s", exception.getMessage()),
                     exception);

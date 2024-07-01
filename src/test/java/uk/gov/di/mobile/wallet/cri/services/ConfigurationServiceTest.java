@@ -89,7 +89,7 @@ class ConfigurationServiceTest {
     void shouldGetOneLoginAuthServerUrlDefaultValueWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
-                "http://localhost:8000/sts-stub", configurationService.getOneLoginAuthServerUrl());
+                "http://localhost:8888/sts-stub", configurationService.getOneLoginAuthServerUrl());
     }
 
     @Test
@@ -104,7 +104,7 @@ class ConfigurationServiceTest {
     @Test
     void shouldGetCredentialStoreUrlDefaultValueWhenEnvVarUnset() {
         ConfigurationService configurationService = new ConfigurationService();
-        assertEquals("http://localhost:8000", configurationService.getCredentialStoreUrl());
+        assertEquals("http://localhost:8888", configurationService.getCredentialStoreUrl());
     }
 
     @Test

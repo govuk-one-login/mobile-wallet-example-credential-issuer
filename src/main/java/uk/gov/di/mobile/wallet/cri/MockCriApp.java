@@ -71,18 +71,6 @@ public class MockCriApp extends Application<ConfigurationService> {
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
 
-        ProofJwtServiceDid proofJwtServiceDid =
-                new uk.gov.di.mobile.wallet.cri.credential.ProofJwtServiceDid();
-
-        CredentialServiceDid credentialServiceDid =
-                new uk.gov.di.mobile.wallet.cri.credential.CredentialServiceDid(
-                        configurationService,
-                        dynamoDbService,
-                        accessTokenService,
-                        proofJwtServiceDid,
-                        httpClient,
-                        credentialBuilder);
-
         environment
                 .jersey()
                 .register(
@@ -99,6 +87,6 @@ public class MockCriApp extends Application<ConfigurationService> {
                 .jersey()
                 .register(
                         new uk.gov.di.mobile.wallet.cri.credential.CredentialResourceDid(
-                                credentialServiceDid));
+                                credentialService));
     }
 }

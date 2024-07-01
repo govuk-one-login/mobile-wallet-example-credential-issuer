@@ -25,10 +25,10 @@ import java.util.Objects;
 @Path("/credentialdid")
 public class CredentialResourceDid {
 
-    private final CredentialServiceDid credentialService;
+    private final CredentialService credentialService;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialResourceDid.class);
 
-    public CredentialResourceDid(CredentialServiceDid credentialService) {
+    public CredentialResourceDid(CredentialService credentialService) {
         this.credentialService = credentialService;
     }
 
