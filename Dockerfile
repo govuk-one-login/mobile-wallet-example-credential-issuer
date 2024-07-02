@@ -1,4 +1,6 @@
-FROM gradle:8.6.0-jdk17-alpine@sha256:87f40d50d0015236f5aa95d13399508d70e44bc3d97f3bb80efe9a942957825b
+FROM gradle:8.8.0-jdk17-alpine@sha256:bbb264cb9b7aca0213f849f9b2f4989edea4b32fe85f026f3852f2f956d08fd4
+
+RUN apk update && apk upgrade busybox
 
 WORKDIR /app
 COPY src/ src/
