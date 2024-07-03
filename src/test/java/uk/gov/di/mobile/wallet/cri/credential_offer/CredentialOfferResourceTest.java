@@ -43,7 +43,8 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class CredentialOfferResourceTest {
 
-    private static final String WALLET_SUBJECT_ID = "mock-wallet-subject-id";
+    private static final String WALLET_SUBJECT_ID =
+            "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String DOCUMENT_ID = "mock-document-id";
     private static final String CREDENTIAL_TYPE = "TestCredentialType";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
@@ -111,6 +112,45 @@ public class CredentialOfferResourceTest {
 
         Mockito.verify(mockDataStore, Mockito.times(1)).saveCredentialOffer(any());
         assertThat(response.getStatus(), is(500));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when a walletSubjectID is not a valid value")
+    void testItValidatesInputParam_walletSubjectID() {
+        final Response response =
+                EXT.target("/credential_offer")
+                        .queryParam("walletSubjectId", "123")
+                        .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("credentialType", CREDENTIAL_TYPE)
+                        .request()
+                        .get();
+        assertThat(response.getStatus(), is(400));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when a documentId is not a valid value")
+    void testItValidatesInputParam_documentId() {
+        final Response response =
+                EXT.target("/credential_offer")
+                        .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
+                        .queryParam("documentId", "&&^")
+                        .queryParam("credentialType", CREDENTIAL_TYPE)
+                        .request()
+                        .get();
+        assertThat(response.getStatus(), is(400));
+    }
+
+    @Test
+    @DisplayName("Should return 400 when a credentialType is not a valid value")
+    void testItValidatesInputParam_credentialType() {
+        final Response response =
+                EXT.target("/credential_offer")
+                        .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
+                        .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("credentialType", "???")
+                        .request()
+                        .get();
+        assertThat(response.getStatus(), is(400));
     }
 
     private CredentialOffer getMockCredentialOffer() {

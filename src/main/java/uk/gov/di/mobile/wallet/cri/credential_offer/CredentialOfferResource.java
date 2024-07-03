@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Singleton;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -30,6 +32,11 @@ public class CredentialOfferResource {
     private final DataStore dataStore;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
 
+    private static final String WALLET_SUBJECT_ID_PATTERN =
+            "^urn:fdc:wallet\\.account\\.gov\\.uk:2024:[a-zA-Z0-9_-]{43}$";
+    private static final String DOCUMENT_ID_PATTERN = "^[a-zA-Z0-9_-]{10,50}$";
+    private static final String CREDENTIAL_TYPE_PATTERN = "^[a-zA-Z]{10,100}$";
+
     public CredentialOfferResource(
             CredentialOfferService credentialOfferService,
             ConfigurationService configurationService,
@@ -40,10 +47,14 @@ public class CredentialOfferResource {
     }
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
     public Response getCredentialOffer(
-            @QueryParam("walletSubjectId") @NotEmpty String walletSubjectId,
-            @QueryParam("documentId") @NotEmpty String documentId,
-            @QueryParam("credentialType") @NotEmpty String credentialType)
+            @QueryParam("walletSubjectId") @NotEmpty @Pattern(regexp = WALLET_SUBJECT_ID_PATTERN)
+                    String walletSubjectId,
+            @QueryParam("documentId") @NotEmpty @Pattern(regexp = DOCUMENT_ID_PATTERN)
+                    String documentId,
+            @QueryParam("credentialType") @NotEmpty @Pattern(regexp = CREDENTIAL_TYPE_PATTERN)
+                    String credentialType)
             throws JsonProcessingException {
 
         UUID uuid = UUID.randomUUID();
