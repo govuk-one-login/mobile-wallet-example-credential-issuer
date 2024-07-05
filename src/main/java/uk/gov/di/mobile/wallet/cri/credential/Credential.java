@@ -5,7 +5,7 @@ import com.nimbusds.jwt.SignedJWT;
 
 public class Credential {
 
-    private final String credential;  // NOSONAR
+    private final String credential; // NOSONAR
 
     public Credential(SignedJWT verifiableCredential) {
 
