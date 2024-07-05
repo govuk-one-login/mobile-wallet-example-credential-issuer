@@ -59,7 +59,7 @@ public class MetadataResourceTest {
         final Response response =
                 EXT.target("/.well-known/openid-credential-issuer").request().get();
 
-        assertEquals(response.getStatus(), 500);
+        assertEquals(500, response.getStatus());
     }
 
     private static Metadata getTestCredentialMetadata(ObjectMapper objectMapper)
