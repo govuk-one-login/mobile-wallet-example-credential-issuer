@@ -25,7 +25,7 @@ public class Base58 {
         // Do nothing
     }
 
-    public static final char[] ALPHABET =
+    private static final char[] ALPHABET =
             "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
     private static final int[] INDEXES = new int[128];
 
@@ -95,7 +95,7 @@ public class Base58 {
         // this is just long division which accounts for the base of the input digits
         int remainder = 0;
         for (int i = firstDigit; i < number.length; i++) {
-            int digit = (int) number[i] & 0xFF;
+            int digit = number[i] & 0xFF;
             int temp = remainder * base + digit;
             number[i] = (byte) (temp / divisor);
             remainder = temp % divisor;

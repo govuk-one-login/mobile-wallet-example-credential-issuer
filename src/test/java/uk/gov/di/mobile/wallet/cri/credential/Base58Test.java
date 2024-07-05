@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class Base58Test {
+class Base58Test {
 
     @Test
     void shouldDecodeBase58EncodedInput() throws AddressFormatException {

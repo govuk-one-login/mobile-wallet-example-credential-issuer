@@ -32,7 +32,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
-public class CredentialResourceTest {
+class CredentialResourceTest {
 
     private static final CredentialService credentialService = mock(CredentialService.class);
     private final ResourceExtension EXT =

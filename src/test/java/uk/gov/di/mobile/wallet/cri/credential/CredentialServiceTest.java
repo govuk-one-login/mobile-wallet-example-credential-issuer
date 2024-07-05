@@ -42,7 +42,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class CredentialServiceTest {
+class CredentialServiceTest {
 
     @Mock private Client mockHttpClient;
     @Mock private WebTarget mockWebTarget;

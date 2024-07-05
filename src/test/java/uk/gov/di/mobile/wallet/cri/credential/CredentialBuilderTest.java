@@ -43,7 +43,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class CredentialBuilderTest {
+class CredentialBuilderTest {
 
     private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);

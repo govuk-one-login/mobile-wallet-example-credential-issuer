@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
-public class DidDocumentResourceTest {
+class DidDocumentResourceTest {
 
     private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_HASHED_KEY_ID =

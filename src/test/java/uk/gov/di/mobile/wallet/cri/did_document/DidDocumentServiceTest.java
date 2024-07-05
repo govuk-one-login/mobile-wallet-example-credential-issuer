@@ -32,7 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
-public class DidDocumentServiceTest {
+class DidDocumentServiceTest {
     private DidDocumentService didDocumentService;
     private final KmsService kmsService = mock(KmsService.class);
     private final ConfigurationService configurationService = new ConfigurationService();

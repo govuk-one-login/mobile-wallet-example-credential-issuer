@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
-public class MetadataResourceTest {
+class MetadataResourceTest {
 
     private static final ConfigurationService configurationService = new ConfigurationService();
     private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
