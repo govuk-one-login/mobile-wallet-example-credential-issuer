@@ -20,6 +20,11 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import java.util.Arrays;
 
 public class Base58 {
+
+    private Base58() {
+        // Do nothing
+    }
+
     public static final char[] ALPHABET =
             "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
     private static final int[] INDEXES = new int[128];
