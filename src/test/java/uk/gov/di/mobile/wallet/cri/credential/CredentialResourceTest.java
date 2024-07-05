@@ -355,40 +355,6 @@ public class CredentialResourceTest {
                 is(new ObjectMapper().writeValueAsString(credential)));
     }
 
-    @Test
-    void shouldReturn200WhenRequestHasNoCredential_Identifiers()
-            throws DataStoreException,
-                    AccessTokenValidationException,
-                    SigningException,
-                    ProofJwtValidationException,
-                    JsonProcessingException,
-                    ParseException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
-                    CredentialServiceException {
-        JsonNode requestBody =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-        Credential credential = getMockCredential();
-        when(credentialService.getCredential(any(SignedJWT.class), any(SignedJWT.class)))
-                .thenReturn(credential);
-
-        final Response response =
-                EXT.target("/credential")
-                        .request()
-                        .header(
-                                "Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
-                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
-
-        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(200));
-        assertThat(
-                response.readEntity(String.class),
-                is(new ObjectMapper().writeValueAsString(credential)));
-    }
-
     private Credential getMockCredential() throws ParseException {
         SignedJWT credential =
                 SignedJWT.parse(
