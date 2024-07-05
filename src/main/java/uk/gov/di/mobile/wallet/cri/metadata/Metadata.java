@@ -5,14 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class Metadata {
 
     public Metadata(
-            String credential_issuer,
-            String authorization_servers,
-            String credentials_endpoint,
-            Object credential_configurations_supported) {
-        this.credential_issuer = credential_issuer;
-        this.authorization_servers = new String[] {authorization_servers};
-        this.credentials_endpoint = credentials_endpoint;
-        this.credential_configurations_supported = credential_configurations_supported;
+            String credentialIssuer,
+            String authorizationServers,
+            String credentialsEndpoint,
+            Object credentialConfigurationsSupported) {
+        this.credential_issuer = credentialIssuer;
+        this.authorization_servers = new String[] {authorizationServers};
+        this.credentials_endpoint = credentialsEndpoint;
+        this.credential_configurations_supported = credentialConfigurationsSupported;
     }
 
     String credential_issuer; // NOSONAR

@@ -19,32 +19,32 @@ public class MetadataBuilder {
     }
 
     @JsonProperty("credential_issuer")
-    public MetadataBuilder setCredentialIssuer(String credential_issuer)
+    public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {
-        if (credential_issuer == null) {
+        if (credentialIssuer == null) {
             throw new IllegalArgumentException("credential_issuer must not be null");
         }
-        this.credential_issuer = credential_issuer;
+        this.credential_issuer = credentialIssuer;
         return this;
     }
 
     @JsonProperty("authorization_servers")
-    public MetadataBuilder setAuthorizationServers(String authorization_servers)
+    public MetadataBuilder setAuthorizationServers(String authorizationServers)
             throws IllegalArgumentException {
-        if (authorization_servers == null) {
+        if (authorizationServers == null) {
             throw new IllegalArgumentException("authorization_servers must not be null");
         }
-        this.authorization_servers = authorization_servers;
+        this.authorization_servers = authorizationServers;
         return this;
     }
 
     @JsonProperty("credentials_endpoint")
-    public MetadataBuilder setCredentialsEndpoint(String credentials_endpoint)
+    public MetadataBuilder setCredentialsEndpoint(String credentialsEndpoint)
             throws IllegalArgumentException {
-        if (credentials_endpoint == null) {
+        if (credentialsEndpoint == null) {
             throw new IllegalArgumentException("credentials_endpoint must not be null");
         }
-        this.credentials_endpoint = credentials_endpoint;
+        this.credentials_endpoint = credentialsEndpoint;
         return this;
     }
 
