@@ -8,6 +8,9 @@ import java.security.NoSuchAlgorithmException;
 
 public class KeyHelper {
 
+    private KeyHelper() {
+        // Do nothing
+    }
     public static String hashKeyId(String keyId, String hashingAlgorithm)
             throws NoSuchAlgorithmException {
         MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);

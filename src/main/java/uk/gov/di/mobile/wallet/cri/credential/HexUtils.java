@@ -6,6 +6,10 @@ import java.util.List;
 
 public class HexUtils {
 
+    private HexUtils() {
+        // Do nothing
+    }
+
     /**
      * Converts a byte array to a hexadecimal value.
      *
