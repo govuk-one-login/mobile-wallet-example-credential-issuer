@@ -33,7 +33,9 @@ Parameters:
 Conditions:
   StackNameIsWalletCredIssuerBE: !Equals [ !Ref "AWS::StackName", wallet-cred-issuer-be ]
 
-  IsBuild: !Equals [ !Ref Environment, build ]
+  IsBuildOrStaging: !Or
+    - !Equals [ !Ref Environment, build ]
+    - !Equals [ !Ref Environment, staging ]
 
   UsePermissionsBoundary:
     Fn::Not:
@@ -624,7 +626,7 @@ Resources:
 # ALARMS
 
   ExampleCredIssuerLowContainerTaskCountAlarm:
-    Condition: IsBuild
+    Condition: IsBuildOrStaging
     DependsOn:
        - WalletBECluster
        - WalletBEECSService
@@ -660,7 +662,7 @@ Resources:
             Stat: Minimum
 
   FE4XXErrorAlarm:
-    Condition: IsBuild
+    Condition: IsBuildOrStaging
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub "${AWS::StackName}-FE4XXErrorAlarm"
