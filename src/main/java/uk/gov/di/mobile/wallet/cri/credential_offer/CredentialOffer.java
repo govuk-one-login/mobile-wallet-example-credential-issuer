@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 public class CredentialOffer {
@@ -17,6 +19,7 @@ public class CredentialOffer {
         this.grants = grants;
     }
 
+    @JsonProperty("credential_issuer")
     public String getCredentialIssuer() {
         return credential_issuer;
     }
