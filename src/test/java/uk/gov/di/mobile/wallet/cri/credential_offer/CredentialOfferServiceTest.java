@@ -53,6 +53,7 @@ public class CredentialOfferServiceTest {
                         "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "TestCredentialType");
 
         assertEquals("http://localhost:8080", credentialOffer.getCredentialIssuer());
+        assertEquals("http://localhost:8080", credentialOffer.getCredentialIssuerTemporary());
         assertArrayEquals(new String[] {"TestCredentialType"}, credentialOffer.getCredentials());
         assertThat(credentialOffer, hasProperty("grants"));
         assertThat(
