@@ -1,6 +1,6 @@
 FROM gradle:8.8.0-jdk17-focal
 
-RUN apk update && apk upgrade busybox
+# RUN apk update && apk upgrade busybox
 
 WORKDIR /app
 COPY src/ src/
