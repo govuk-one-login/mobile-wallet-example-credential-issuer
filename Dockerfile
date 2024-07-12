@@ -1,4 +1,4 @@
-FROM gradle:8.8.0-jdk17-alpine
+FROM gradle:8.8.0-jdk17-focal
 
 RUN apk update && apk upgrade busybox
 
