@@ -13,6 +13,7 @@ Parameters:
     AllowedValues:
       - "dev"
       - "build"
+      - "staging"
   VpcStackName:
     Description: >
       The name of the stack that defines the VPC in which this container will
@@ -43,12 +44,16 @@ Conditions:
 Mappings:
   EnvironmentVariables:
     dev:
-      BEURL: "example-credential-issuer.mobile.dev.account.gov.uk"
-      FEURL: "stub-credential-issuer.mobile.dev.account.gov.uk"
+      SelfUrl: "example-credential-issuer.mobile.dev.account.gov.uk"
+      CredentialStoreUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
       BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
     build:
-      BEURL: "example-credential-issuer.mobile.build.account.gov.uk"
-      FEURL: "stub-credential-issuer.mobile.build.account.gov.uk"
+      SelfUrl: "example-credential-issuer.mobile.build.account.gov.uk"
+      CredentialStoreUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+    staging:
+      SelfUrl: "example-credential-issuer.mobile.staging.account.gov.uk"
+      CredentialStoreUrl: "stub-credential-issuer.mobile.staging.account.gov.uk"
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
   # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
   # PlatformConfiguration:
@@ -291,11 +296,11 @@ Resources:
     Properties:
       DomainName: !If 
         - StackNameIsWalletCredIssuerBE
-        - !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
+        - !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
         - !Sub
-          - "${AWS::StackName}-${BEURL}"
-          - BEURL:
-              !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
+          - "${AWS::StackName}-${SelfUrl}"
+          - SelfUrl:
+              !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
       DomainNameConfigurations:
         - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
           EndpointType: REGIONAL
@@ -398,28 +403,28 @@ Resources:
               Value: !Sub "${Environment}"
             - Name: EXAMPLE_CRI_URL
               Value: !Sub 
-                      - "https://${BEURL}"
-                      - BEURL:
-                          !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
+                      - "https://${SelfUrl}"
+                      - SelfUrl:
+                          !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
             - Name: DID_CONTROLLER
               Value: !Sub
-                - ${BEURL}
-                - BEURL:
-                    !FindInMap [ EnvironmentVariables, !Ref Environment, BEURL ]
-            - Name: CREDENTIAL_STORE_URL
+                - ${SelfUrl}
+                - SelfUrl:
+                    !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+            - Name: CredentialStoreUrl
               Value: !Sub 
-                      - "https://${FEURL}"
-                      - FEURL:
-                          !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
+                      - "https://${CredentialStoreUrl}"
+                      - CredentialStoreUrl:
+                          !FindInMap [ EnvironmentVariables, !Ref Environment, CredentialStoreUrl ]
             - Name: WALLET_URL
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub 
-                      - "https://${FEURL}/sts-stub"
-                      - FEURL:
-                          !FindInMap [ EnvironmentVariables, !Ref Environment, FEURL ]
+                      - "https://${CredentialStoreUrl}/sts-stub"
+                      - CredentialStoreUrl:
+                          !FindInMap [ EnvironmentVariables, !Ref Environment, CredentialStoreUrl ]
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
