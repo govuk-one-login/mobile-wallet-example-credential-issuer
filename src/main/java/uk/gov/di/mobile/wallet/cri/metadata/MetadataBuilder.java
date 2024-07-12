@@ -14,10 +14,6 @@ public class MetadataBuilder {
     String credentials_endpoint; // NOSONAR
     Object credential_configurations_supported; // NOSONAR
 
-    public MetadataBuilder() {
-        // Do nothing
-    }
-
     @JsonProperty("credential_issuer")
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {

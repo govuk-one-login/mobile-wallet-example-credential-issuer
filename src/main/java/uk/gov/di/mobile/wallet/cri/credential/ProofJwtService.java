@@ -23,10 +23,6 @@ public class ProofJwtService {
     private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
     private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
 
-    public ProofJwtService() {
-        // Do nothing
-    }
-
     /**
      * Verifies the Proof JWT's header and payload claims and its signature.
      *
