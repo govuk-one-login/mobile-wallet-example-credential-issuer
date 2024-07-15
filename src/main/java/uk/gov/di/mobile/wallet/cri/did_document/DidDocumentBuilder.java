@@ -11,8 +11,6 @@ public class DidDocumentBuilder {
     List<Did> verificationMethod;
     List<String> assertionMethod;
 
-    public DidDocumentBuilder() {}
-
     @JsonProperty("@context")
     public DidDocumentBuilder setContext(List<String> context) throws IllegalArgumentException {
         if (context == null) {

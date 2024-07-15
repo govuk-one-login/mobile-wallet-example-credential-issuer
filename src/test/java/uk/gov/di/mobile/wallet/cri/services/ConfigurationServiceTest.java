@@ -34,7 +34,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetAwsRegionDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals("eu-west-2", configurationService.getAwsRegion());
     }
 
@@ -46,7 +45,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetEnvironmentDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals("local", configurationService.getEnvironment());
     }
 
@@ -58,7 +56,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetExampleCriUrlDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals("http://localhost:8080", configurationService.getExampleCriUrl());
     }
 
@@ -73,7 +70,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetDidControllerDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals("localhost:8080", configurationService.getDidController());
     }
 
@@ -87,7 +83,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetOneLoginAuthServerUrlDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
                 "http://localhost:8888/sts-stub", configurationService.getOneLoginAuthServerUrl());
     }
@@ -103,7 +98,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetCredentialStoreUrlDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals("http://localhost:8888", configurationService.getCredentialStoreUrl());
     }
 
@@ -116,7 +110,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetWalletUrlDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals("https://mobile.account.gov.uk/wallet", configurationService.getWalletUrl());
     }
 
@@ -129,7 +122,6 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetCredentialOfferCacheTableNameDefaultValueWhenEnvVarUnset() {
-        ConfigurationService configurationService = new ConfigurationService();
         assertEquals(
                 "credential_offer_cache", configurationService.getCredentialOfferCacheTableName());
     }

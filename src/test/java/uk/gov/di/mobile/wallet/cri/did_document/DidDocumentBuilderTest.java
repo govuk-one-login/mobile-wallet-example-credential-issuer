@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DidDocumentBuilderTest {
+class DidDocumentBuilderTest {
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
     private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_HASHED_KEY_ID =

@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
-public class MetadataResourceTest {
+class MetadataResourceTest {
 
     private static final ConfigurationService configurationService = new ConfigurationService();
     private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
@@ -59,7 +59,7 @@ public class MetadataResourceTest {
         final Response response =
                 EXT.target("/.well-known/openid-credential-issuer").request().get();
 
-        assertEquals(response.getStatus(), 500);
+        assertEquals(500, response.getStatus());
     }
 
     private static Metadata getTestCredentialMetadata(ObjectMapper objectMapper)
