@@ -82,11 +82,5 @@ public class MockCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new CredentialResource(credentialService));
 
         environment.jersey().register(new DidDocumentResource(didDocumentService));
-
-        environment
-                .jersey()
-                .register(
-                        new uk.gov.di.mobile.wallet.cri.credential.CredentialResourceDid(
-                                credentialService));
     }
 }
