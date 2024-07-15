@@ -416,7 +416,7 @@ Resources:
                 - ${SelfUrl}
                 - SelfUrl:
                     !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
-            - Name: CredentialStoreUrl
+            - Name: CREDENTIAL_STORE_URL
               Value: !Sub 
                       - "https://${CredentialStoreUrl}"
                       - CredentialStoreUrl:
