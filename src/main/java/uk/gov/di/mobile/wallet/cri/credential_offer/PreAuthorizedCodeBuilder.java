@@ -13,9 +13,11 @@ import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -33,9 +35,12 @@ public class PreAuthorizedCodeBuilder {
         this.keyProvider = keyProvider;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
+    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier)
+            throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        var encodedHeader = getEncodedHeader(keyId);
+        String hashedKeyId =
+                KeyHelper.hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
+        var encodedHeader = getEncodedHeader(hashedKeyId);
         var encodedClaims = getEncodedClaims(credentialIdentifier);
         var message = encodedHeader + "." + encodedClaims;
         var signRequest =
