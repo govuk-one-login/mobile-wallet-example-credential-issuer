@@ -36,7 +36,6 @@ public class PreAuthorizedCodeBuilder {
     public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId);
-        
         var encodedClaims = getEncodedClaims(credentialIdentifier);
         var message = encodedHeader + "." + encodedClaims;
         var signRequest =
@@ -73,7 +72,6 @@ public class PreAuthorizedCodeBuilder {
                         .issuer(configurationService.getIssuer())
                         .issueTime(Date.from(now))
                         .expirationTime(
-
                                 Date.from(
                                         now.plus(
                                                 configurationService.getPreAuthorizedCodeTtl(),
@@ -81,12 +79,10 @@ public class PreAuthorizedCodeBuilder {
                         .claim("clientId", configurationService.getClientId())
                         .claim("credential_identifiers", new String[] {walletSubjectId});
 
-
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
     private Base64URL getEncodedHeader(String keyId) {
-
         var jwsHeader = new JWSHeader.Builder(SIGNING_ALGORITHM).keyID(keyId).type(JWT).build();
         return jwsHeader.toBase64URL();
     }
