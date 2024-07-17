@@ -82,6 +82,53 @@ public class PreAuthorizedCodeBuilder {
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
+    private static String encodedSignat(SignResponse signResult) throws JOSEException {
+        return Base64URL.encode(
+                        ECDSA.transcodeSignatureToConcat(
+                                signResult.signature().asByteArray(),
+                                ECDSA.getSignatureByteArrayLength(SIGNING_ALGORITHM)))
+                .toString();
+    }
+
+    private Base64URL getEncodedClms(String walletSubjectId) {
+        Instant now = Instant.now();
+
+        var claimsBuilder =
+                new JWTClaimsSet.Builder()
+                        .audience(configurationService.getAudience())
+                        .issuer(configurationService.getIssuer())
+                        .issueTime(Date.from(now))
+                        .expirationTime(
+                                Date.from(
+                                        now.plus(
+                                                configurationService.getPreAuthorizedCodeTtl(),
+                                                ChronoUnit.SECONDS)))
+                        .claim("clientId", configurationService.getClientId())
+                        .claim("credential_identifiers", new String[] {walletSubjectId});
+
+        return Base64URL.encode(claimsBuilder.build().toString());
+    }
+
+
+    private Base64URL getEncodesddClms(String walletSubjectId) {
+        Instant now = Instant.now();
+
+        var claimsBuilder =
+                new JWTClaimsSet.Builder()
+                        .audience(configurationService.getAudience())
+                        .issuer(configurationService.getIssuer())
+                        .issueTime(Date.from(now))
+                        .expirationTime(
+                                Date.from(
+                                        now.plus(
+                                                configurationService.getPreAuthorizedCodeTtl(),
+                                                ChronoUnit.SECONDS)))
+                        .claim("clientId", configurationService.getClientId())
+                        .claim("credential_identifiers", new String[] {walletSubjectId});
+
+        return Base64URL.encode(claimsBuilder.build().toString());
+    }
+
     private Base64URL getEncodedHeader(String keyId) {
         var jwsHeader = new JWSHeader.Builder(SIGNING_ALGORITHM).keyID(keyId).type(JWT).build();
         return jwsHeader.toBase64URL();
