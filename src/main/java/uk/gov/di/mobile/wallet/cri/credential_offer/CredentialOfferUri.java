@@ -13,6 +13,7 @@ public class CredentialOfferUri {
 
     @JsonProperty("credential_offer_uri")
     public String getCredential() {
+        
         return credential_offer_uri;
     }
 }

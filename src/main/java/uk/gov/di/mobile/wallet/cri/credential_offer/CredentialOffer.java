@@ -13,6 +13,7 @@ public class CredentialOffer {
     private final Map<String, Map<String, String>> grants;
 
     public CredentialOffer(
+
             String credentialIssuer,
             String credentialType,
             Map<String, Map<String, String>> grants) {
@@ -24,19 +25,23 @@ public class CredentialOffer {
 
     @JsonProperty("credential_issuer")
     public String getCredentialIssuer() {
+
         return credential_issuer;
     }
 
     @JsonProperty("credentialIssuer")
     public String getCredentialIssuerTemporary() {
+
         return credentialIssuer;
     }
 
     public String[] getCredentials() {
+
         return credentials;
     }
 
     public Map<String, Map<String, String>> getGrants() {
+        
         return grants;
     }
 }

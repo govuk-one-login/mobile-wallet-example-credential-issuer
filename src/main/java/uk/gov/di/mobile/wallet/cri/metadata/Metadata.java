@@ -18,25 +18,30 @@ public class Metadata {
     String credential_issuer; // NOSONAR
     String[] authorization_servers; // NOSONAR
     String credentials_endpoint; // NOSONAR
+
     Object credential_configurations_supported; // NOSONAR
 
     @JsonProperty("credentials_endpoint")
     public String getCredentialsEndpoint() {
+
         return credentials_endpoint;
     }
 
     @JsonProperty("authorization_servers")
     public String[] getAuthorizationServers() {
+
         return authorization_servers;
     }
 
     @JsonProperty("credential_issuer")
     public String getCredentialIssuer() {
+
         return credential_issuer;
     }
 
     @JsonProperty("credential_configurations_supported")
     public Object getCredentialsSupported() {
+        
         return credential_configurations_supported;
     }
 }
