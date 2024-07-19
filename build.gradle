@@ -95,6 +95,7 @@ spotless {
 test {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
+	exclude 'uk/gov/di/mobile/wallet/cri/src/MockCriApp'
 }
 
 jacocoTestReport {
