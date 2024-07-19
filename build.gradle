@@ -39,13 +39,13 @@ dependencies {
 }
 
 application {
-	mainClass = "uk.gov.di.mobile.wallet.cri.MockCriApp"
+	mainClass = "uk.gov.di.mobile.wallet.cri.ExampleCriApp"
 }
 
 jar {
 	manifest {
 		attributes(
-				"Main-Class": "uk.gov.di.mobile.wallet.cri.MockCriApp")
+				"Main-Class": "uk.gov.di.mobile.wallet.cri.ExampleCriApp")
 	}
 
 	from {
@@ -95,7 +95,7 @@ spotless {
 test {
 	useJUnitPlatform()
 	finalizedBy jacocoTestReport
-	exclude 'uk/gov/di/mobile/wallet/cri/src/MockCriApp'
+	exclude 'uk/gov/di/mobile/wallet/cri/src/ExampleCriApp'
 }
 
 jacocoTestReport {

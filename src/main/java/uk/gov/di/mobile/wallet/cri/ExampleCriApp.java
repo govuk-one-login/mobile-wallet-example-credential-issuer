@@ -19,10 +19,10 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
-public class MockCriApp extends Application<ConfigurationService> {
+public class ExampleCriApp extends Application<ConfigurationService> {
 
     public static void main(String[] args) throws Exception {
-        new MockCriApp().run(args);
+        new ExampleCriApp().run(args);
     }
 
     @Override
