@@ -71,7 +71,7 @@ sonar {
 		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
 		property "sonar.organization", "govuk-one-login"
 		property "sonar.host.url", "https://sonarcloud.io"
-		property "sonar.coverage.exclusions", "**/src/test/**"
+		property 'sonar.coverage.exclusions', "**/uk/gov/di/mobile/wallet/cri/credential/**"
 		property "sonar.coverage.jacoco.xmlReportPaths", "$project.buildDir/$jacocoBuildReportPath"
 	}
 }
