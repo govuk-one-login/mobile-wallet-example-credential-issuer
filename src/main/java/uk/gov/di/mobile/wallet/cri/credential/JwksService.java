@@ -7,14 +7,20 @@ import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.SecurityContext;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 
 public class JwksService {
 
     private final JWKSource<SecurityContext> jwkSource;
 
-    public JwksService(URL url) {
+    public JwksService(ConfigurationService configurationService) throws MalformedURLException {
+        URL url =
+                new URL(
+                        configurationService.getOneLoginAuthServerUrl()
+                                + configurationService.getAuthServerJwksPath());
         this.jwkSource =
                 JWKSourceBuilder.create(url)
                         .retrying(true)

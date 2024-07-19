@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -31,9 +32,7 @@ class JwksServiceTest {
 
     @Test
     void shouldReturnJwksIsFound()
-            throws AddressFormatException,
-                    KeySourceException,
-                    ParseException {
+            throws AddressFormatException, KeySourceException, ParseException {
         JWK publicKey =
                 JWK.parse(
                         "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");

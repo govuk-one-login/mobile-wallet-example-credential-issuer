@@ -55,7 +55,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                         .using(new JerseyClientConfiguration())
                         .build("example-cri");
 
-        AccessTokenService accessTokenService = new AccessTokenService(configurationService);
+        JwksService jwksService = new JwksService(configurationService);
+        AccessTokenService accessTokenService = new AccessTokenService(jwksService);
         ProofJwtService proofJwtService = new ProofJwtService();
         CredentialBuilder credentialBuilder =
                 new CredentialBuilder(configurationService, kmsService);

@@ -61,6 +61,10 @@ public class ConfigurationService extends Configuration {
         return "SHA-256";
     }
 
+    public String getAuthServerJwksPath() {
+        return "/.well-known/jwks.json";
+    }
+
     public String getCredentialStoreDocumentPath() {
         return "/document/";
     }

@@ -9,10 +9,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,13 +22,6 @@ public class AccessTokenService {
     private static final String JWKS_PATH = "/.well-known/jwks.json"; // NOSONAR
 
     private final JwksService jwksService;
-
-    public AccessTokenService(ConfigurationService configurationService)
-            throws MalformedURLException {
-        this.jwksService =
-                new JwksService(
-                        new URL(configurationService.getOneLoginAuthServerUrl() + JWKS_PATH));
-    }
 
     public AccessTokenService(JwksService jwksService) {
         this.jwksService = jwksService;
