@@ -8,12 +8,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
+import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -31,7 +36,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldReturnJwksIsFound()
+    void shouldReturnJwk()
             throws AddressFormatException, KeySourceException, ParseException {
         JWK publicKey =
                 JWK.parse(
@@ -46,7 +51,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldThrowKeySourceExceptionWhenJwksNotFound()
+    void shouldThrowKeySourceExceptionWhenJwkNotFound()
             throws AddressFormatException, KeySourceException {
         final List<JWK> jwkList = Collections.emptyList();
         when(jwkSource.get(any(JWKSelector.class), isNull())).thenReturn(jwkList);
@@ -61,5 +66,14 @@ class JwksServiceTest {
         assertEquals(
                 "No key found with key ID: cb5a1a8b-809a-4f32-944d-caae1a57ed91",
                 exception.getMessage());
+    }
+
+    @Test
+    void shouldTestAdditionalConstructor()
+            throws AddressFormatException, MalformedURLException {
+        ConfigurationService configurationService = new ConfigurationService();
+        JwksService jwksService = new JwksService(configurationService);
+
+        assertThat(jwksService, instanceOf(JwksService.class));
     }
 }
