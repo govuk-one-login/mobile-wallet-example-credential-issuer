@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class AccessTokenServiceTest {
@@ -158,7 +159,7 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenSignatureVe()
+    void shouldThrowAccessTokenValidationExceptionWhenJwksServiceThrowsKeySourceException()
             throws JOSEException, ParseException {
         when(jwksService.retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class)))
                 .thenThrow(new KeySourceException("Some error fetching JWKs"));
@@ -190,6 +191,9 @@ class AccessTokenServiceTest {
         signedJwt.sign(ecSigner);
 
         assertDoesNotThrow(() -> accessTokenService.verifyAccessToken(signedJwt));
+        verify(jwksService)
+                .retrieveJwkFromURLWithKeyId(
+                        any(URL.class), any(String.class));
     }
 
     private static SignedJWT getTestAccessToken(String issuer, String audience) {
