@@ -27,9 +27,12 @@ public class AccessTokenService {
     private final ConfigurationService configurationService;
     private final JwksService jwksService;
 
-    public AccessTokenService(ConfigurationService configurationService) throws MalformedURLException {
+    public AccessTokenService(ConfigurationService configurationService)
+            throws MalformedURLException {
         this.configurationService = configurationService;
-        this.jwksService = new JwksService(new URL(configurationService.getOneLoginAuthServerUrl() + JWKS_PATH));
+        this.jwksService =
+                new JwksService(
+                        new URL(configurationService.getOneLoginAuthServerUrl() + JWKS_PATH));
     }
 
     public AccessTokenService(ConfigurationService configurationService, JwksService jwksService) {

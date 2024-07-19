@@ -36,8 +36,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
     }
 
     @Override
-    public void run(
-            final ConfigurationService configurationService, final Environment environment) throws MalformedURLException {
+    public void run(final ConfigurationService configurationService, final Environment environment)
+            throws MalformedURLException {
 
         KmsService kmsService = new KmsService(configurationService);
 

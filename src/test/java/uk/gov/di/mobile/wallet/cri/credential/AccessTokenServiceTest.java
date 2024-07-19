@@ -31,8 +31,8 @@ import java.util.Date;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AccessTokenServiceTest {
@@ -191,9 +191,7 @@ class AccessTokenServiceTest {
         signedJwt.sign(ecSigner);
 
         assertDoesNotThrow(() -> accessTokenService.verifyAccessToken(signedJwt));
-        verify(jwksService)
-                .retrieveJwkFromURLWithKeyId(
-                        any(URL.class), any(String.class));
+        verify(jwksService).retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class));
     }
 
     private static SignedJWT getTestAccessToken(String issuer, String audience) {
