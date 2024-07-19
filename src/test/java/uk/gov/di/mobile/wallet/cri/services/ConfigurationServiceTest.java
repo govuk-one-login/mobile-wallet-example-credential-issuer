@@ -158,11 +158,6 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void shouldGetAuthServerDidDocumentPathValue() {
-        assertEquals("/.well-known/did.json", configurationService.getAuthServerDidDocumentPath());
-    }
-
-    @Test
     void shouldGetCredentialStoreDocumentPathValue() {
         assertEquals("/document/", configurationService.getCredentialStoreDocumentPath());
     }

@@ -53,8 +53,7 @@ public class MockCriApp extends Application<ConfigurationService> {
                         .using(new JerseyClientConfiguration())
                         .build("example-cri");
 
-        AccessTokenService accessTokenService =
-                new AccessTokenService(httpClient, configurationService);
+        AccessTokenService accessTokenService = new AccessTokenService(configurationService);
         ProofJwtService proofJwtService = new ProofJwtService();
         CredentialBuilder credentialBuilder =
                 new CredentialBuilder(configurationService, kmsService);

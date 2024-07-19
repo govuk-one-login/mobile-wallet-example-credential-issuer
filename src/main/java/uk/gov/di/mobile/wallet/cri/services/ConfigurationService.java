@@ -61,10 +61,6 @@ public class ConfigurationService extends Configuration {
         return "SHA-256";
     }
 
-    public String getAuthServerDidDocumentPath() {
-        return "/.well-known/did.json";
-    }
-
     public String getCredentialStoreDocumentPath() {
         return "/document/";
     }

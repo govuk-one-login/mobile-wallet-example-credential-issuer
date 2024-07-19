@@ -3,25 +3,20 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import jakarta.ws.rs.ProcessingException;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.net.URI;
+import java.net.URL;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
@@ -35,21 +30,19 @@ import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AccessTokenServiceTest {
 
-    @Mock private Client mockHttpClient;
-    @Mock private WebTarget mockWebTarget;
-    @Mock private Invocation.Builder mockInvocationBuilder;
-    @Mock private Response mockResponse;
     private AccessTokenService accessTokenService;
     private final ConfigurationService configurationService = new ConfigurationService();
+    private final JwksService jwksService = mock(JwksService.class);
 
     @BeforeEach
     void setup() {
-        accessTokenService = new AccessTokenService(mockHttpClient, configurationService);
+        accessTokenService = new AccessTokenService(configurationService, jwksService);
     }
 
     @Test
@@ -59,7 +52,7 @@ class AccessTokenServiceTest {
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.RS256).build(),
                         new JWTClaimsSet.Builder().build());
-        RSASSASigner rsaSigner = new RSASSASigner(getRsaPrivateKey());
+        RSASSASigner rsaSigner = new RSASSASigner(getRsaKey());
         signedJwt.sign(rsaSigner);
 
         AccessTokenValidationException exception =
@@ -78,7 +71,7 @@ class AccessTokenServiceTest {
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
                         new JWTClaimsSet.Builder().build());
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
         AccessTokenValidationException exception =
@@ -97,7 +90,7 @@ class AccessTokenServiceTest {
                                 .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
                                 .build(),
                         new JWTClaimsSet.Builder().build());
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
         AccessTokenValidationException exception =
@@ -113,7 +106,7 @@ class AccessTokenServiceTest {
     void shouldThrowAccessTokenValidationExceptionWhenAudienceClaimDoesNotMatchConfig()
             throws JOSEException, ParseException {
         SignedJWT signedJwt = getTestAccessToken("urn:fdc:gov:uk:wallet", "invalid-audience");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
         AccessTokenValidationException exception =
@@ -130,7 +123,7 @@ class AccessTokenServiceTest {
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestAccessToken("invalid-issuer", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
         AccessTokenValidationException exception =
@@ -143,117 +136,18 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenDidDocumentVerificationMethodFieldIsMissing()
-            throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(String.class))
-                .thenReturn(
-                        "{\"@context\":[\"https://www.w3.org/ns/did/v1\",\"https://www.w3.org/ns/security/jwk/v1\"],\"id\":\"did:web:wallet-api.mobile.loca.account.gov.uk\"}");
-
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJwt.sign(ecSigner);
-
-        AccessTokenValidationException exception =
-                assertThrows(
-                        AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
-        assertEquals("Invalid DID document: verificationMethod is null", exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowAccessTokenValidationExceptionWhenDidDocumentVerificationMethodIsNotArray()
-            throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(String.class))
-                .thenReturn(
-                        "{\"verificationMethod\":{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\"}}");
-
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJwt.sign(ecSigner);
-
-        AccessTokenValidationException exception =
-                assertThrows(
-                        AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
-        assertEquals(
-                "Invalid DID document: verificationMethod is not an array", exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowAccessTokenValidationExceptionWhenDidDocumentPublicKeyJwkFieldIsMissing()
-            throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(String.class))
-                .thenReturn(
-                        "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\"}]}");
-
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJwt.sign(ecSigner);
-
-        AccessTokenValidationException exception =
-                assertThrows(
-                        AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
-        assertEquals("Error parsing JWK: Invalid JSON object", exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowAccessTokenValidationExceptionWhenDidDocumentKeyIdDoesNotMatchJwtKeyId()
-            throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(String.class))
-                .thenReturn(
-                        "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"po5a1a8b-809a-4f32-944d-baae1a57ed22\",\"x\":\"JZJxO7obR8Isv585Esig0bP0AG_oSz08R1-uUpbb_IE\",\"y\":\"m60Q2kL0LbhHSltcKYrLo0s153Xox_mT5vRUzgx8MkE\"}}]}");
-
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJwt.sign(ecSigner);
-
-        AccessTokenValidationException exception =
-                assertThrows(
-                        AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
-        assertEquals("JWT key ID did not match any key in DID document", exception.getMessage());
-    }
-
-    @Test
     void shouldThrowAccessTokenValidationExceptionWhenSignatureVerificationFails()
             throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(String.class))
-                .thenReturn(
-                        "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"AhVL0Z0RY3h5TYs1GaWUGXzu_dnaqKfxr-LQp0c6gWk\",\"y\":\"wTM8HUE0_knPihDtWRYbIrpSe4RkxRClqXuU3eumji8\"}}]}");
+        JWK publicKey =
+                JWK.parse(
+                        "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class)))
+                .thenReturn(publicKey);
 
         SignedJWT signedJwt =
                 getTestAccessToken(
                         "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
         AccessTokenValidationException exception =
@@ -264,68 +158,38 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(String.class))
-                .thenReturn(
-                        "{\"verificationMethod\":[{\"id\": \"did:web:wallet-api.mobile.local.account.gov.uk#cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"type\":\"JsonWebKey\",\"controller\":\"did:web:wallet-api.mobile.local.account.gov.uk\",\"publicKeyJwk\": {\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"JZJxO7obR8Isv585Esig0bP0AG_oSz08R1-uUpbb_IE\",\"y\":\"m60Q2kL0LbhHSltcKYrLo0s153Xox_mT5vRUzgx8MkE\"}}]}");
+    void shouldThrowAccessTokenValidationExceptionWhenSignatureVe()
+            throws JOSEException, ParseException {
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class)))
+                .thenThrow(new KeySourceException("Some error fetching JWKs"));
 
         SignedJWT signedJwt =
                 getTestAccessToken(
                         "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
+        signedJwt.sign(ecSigner);
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(signedJwt));
+        assertEquals("Some error fetching JWKs", exception.getMessage());
+    }
+
+    @Test
+    void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
+        ECKey key = getEsKey();
+        JWK publicKey = key.toPublicJWK();
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class)))
+                .thenReturn(publicKey);
+
+        SignedJWT signedJwt =
+                getTestAccessToken(
+                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
+        ECDSASigner ecSigner = new ECDSASigner(key);
         signedJwt.sign(ecSigner);
 
         assertDoesNotThrow(() -> accessTokenService.verifyAccessToken(signedJwt));
-    }
-
-    @Test
-    void
-            shouldThrowAccessTokenValidationExceptionWhenDidDocumentEndpointReturnsUnsuccessfulResponse()
-                    throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(500);
-
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJwt.sign(ecSigner);
-
-        AccessTokenValidationException exception =
-                assertThrows(
-                        AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
-        assertEquals(
-                "Request to fetch DID Document failed with status code 500",
-                exception.getMessage());
-    }
-
-    @Test
-    void shouldThrowAccessTokenValidationExceptionWhenCallToFetchDidDocumentThrowsAnError()
-            throws JOSEException, ParseException {
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenThrow(new ProcessingException("Some error happened"));
-
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
-        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
-        signedJwt.sign(ecSigner);
-
-        AccessTokenValidationException exception =
-                assertThrows(
-                        AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
-        assertEquals("Could not fetch DID Document: ", exception.getMessage());
-        assertEquals(ProcessingException.class, exception.getCause().getClass());
-        assertEquals("Some error happened", exception.getCause().getMessage());
     }
 
     private static SignedJWT getTestAccessToken(String issuer, String audience) {
@@ -345,8 +209,7 @@ class AccessTokenServiceTest {
                         .build());
     }
 
-    private RSAPrivateKey getRsaPrivateKey()
-            throws InvalidKeySpecException, NoSuchAlgorithmException {
+    private RSAPrivateKey getRsaKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
         String privateKey =
                 "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC3ZD/jwRxlA/vv43rx9T6ovlczQnsntAjgTbDRTDcsw7TYM1Q3wwD3OPYt5qaKg5qTKaOB90at2jBPih8QH/jDXfSjlU7RlSe8p7fYxaj73ds4ULGAOWaQqmbu+BppcUUPzKII1QBF8Mk2qn/GiVVfqCwDx7uOOT+jPr3H/Wysi+lI8JFYn60wj4oanmbr6iuIVKGWP41STlLu7aLhVM4JxAA2T85Ddot9nPCMftXLBW+QDZUvrbv4CSbtLjuxuqkKdN6FNpSjvx/oSZDDw6jyWydLI68CUQ09Nbm63oY/KpY5V/o+m81Uv2J0Ov+oHCF/0SU8/Nf7kWTK9uTXRW03AgMBAAECggEAE5rV8aUNQgdBAY4R8JfFEQj4DXTH8aCfaksj4dwB8fkh9hLWp/divQsL1jBYEWqsNZs37YbfuWofzAD5/SFN2KTMqEgn2uPVEafkUXof7Hz1GHoX35tDSafNxTIksKz5Mw0vLT6H/vIUsJFdg33e8JDr06Ogez3Hfc4RP7XpzjAgdUoVcEhF4VKFo6r7ImETUWQ4E5mCmWnqKPiqrGrVcwP0xVtz09yeE45eAVX89Sgn4Brxv48TDnKtKYxU2NhEKRJyL2EU0QLjW80tyGl/zzEzhn/QpjJqfKPB5REP41oPBfER/HVHoXDinelcNXYUkBUqbtcKexNI8wPHA5/TcQKBgQDb9UsmJiDHvlaTZS/Ge7+6wcn2zDT/o0S3ZRLzJeWcNLBonohiOt0FBvj/NvttqDGK53yjZZFRfWqJaG2pFJqhY/PLiX4hlt6nAQkzUDxpI08sU0Q4IgEomJUvXmicEJNHR1L4YYyPyv5nDB3fmGsyUTdbeWOFJRIxr25lOS1MNQKBgQDVcRPjsXJSDuRNOo/GnAGZiYlfAvxeXfkIsB45vbfEp+9HcvA7BZZP3b2JbMDIj2JcpYo5+W/Z3uU5nBVU0WjtXZ79uSvV/14oH95z5uAIm6JtIWgVGC31fGyPl8RLgn00fYa6MGXWUo82WnLYDBmC3wa7Xfar/dKVUQBZWGsJOwKBgC3+dOBdSK17146qsfrHFahvrVO2D78E3PGcaQH/AqxPODQoMkyYEm9ird5wGNMtQG7TSPTB4Ekx+H0TIRsh+9OTmv8MmRtc+OHjDZF1TayOfZe/MZyrP6LFhSyKiUVZEfLtryPRAhtvTxMtLXH75S54XSL7lxvYTJ2nGWaBNj+hAoGAf67ujAZp8ibQcla3DcPjvRqm3/ykRjuHL6hT3IzeszkXDjH2/gfgnJR0vxIc3Z3Q5MVuxDGwtK//hpAVvrCrSVv5MaUlURY8GFrAM6uIl/2qlAgpAH1/eNxfASN0HQvJpK32+8jaEvU+kPBYxV+vnzeWCl4yoz7rS8GyKMCY/2MCgYEAtDBPMVHPbjauWjzIjXlaJTMlAoWOmnTB36rkNC9U0SRCxvP6hcLTgvDv1TR2+mKM5tQS2/C1XC3zajUFhIqR0funEEWqUoKfZEWqagOILxpIaeida2MwWXNYLQIAimoMQ6CbqdHsPOrQ/ZtxqlwDUnPYumRawSyxsGIThDnN4oc=";
         return (RSAPrivateKey)
@@ -355,7 +218,7 @@ class AccessTokenServiceTest {
                                 new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));
     }
 
-    private ECKey getEsPrivateKey() throws ParseException {
+    private ECKey getEsKey() throws ParseException {
         String privateKeyJwkBase64 =
                 "eyJrdHkiOiJFQyIsImQiOiI4SGJYN0xib1E1OEpJOGo3eHdfQXp0SlRVSDVpZTFtNktIQlVmX3JnakVrIiwidXNlIjoic2lnIiwiY3J2IjoiUC0yNTYiLCJraWQiOiJmMDYxMWY3Zi04YTI5LTQ3ZTEtYmVhYy1mNWVlNWJhNzQ3MmUiLCJ4IjoiSlpKeE83b2JSOElzdjU4NUVzaWcwYlAwQUdfb1N6MDhSMS11VXBiYl9JRSIsInkiOiJtNjBRMmtMMExiaEhTbHRjS1lyTG8wczE1M1hveF9tVDV2UlV6Z3g4TWtFIiwiaWF0IjoxNzEyMTQ2MTc5fQ==";
         return ECKey.parse(new String(Base64.getDecoder().decode(privateKeyJwkBase64)));

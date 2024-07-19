@@ -58,7 +58,7 @@ Mappings:
     staging:
       SelfUrl: "example-credential-issuer.mobile.staging.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.mobile.staging.account.gov.uk"
-      AuthServerUrl: "token.staging.account.gov.uk/token"
+      AuthServerUrl: "token.staging.account.gov.uk"
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
   # see https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-access-logs.html
   # PlatformConfiguration:
