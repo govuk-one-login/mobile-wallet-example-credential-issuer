@@ -30,7 +30,7 @@ public class JwksService {
                         .build();
     }
 
-    public JwksService(JWKSource jwkSource) {
+    public JwksService(JWKSource<SecurityContext> jwkSource) {
         this.jwkSource = jwkSource;
     }
 

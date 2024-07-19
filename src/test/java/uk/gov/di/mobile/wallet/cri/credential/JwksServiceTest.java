@@ -4,7 +4,6 @@ import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.source.JWKSource;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,8 +16,8 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
@@ -30,14 +29,10 @@ class JwksServiceTest {
     private JwksService jwksService;
     private final JWKSource jwkSource = mock(JWKSource.class);
 
-    @BeforeEach
-    void setup() {
-        jwksService = new JwksService(jwkSource);
-    }
-
     @Test
     void shouldReturnJwkWhenFound()
             throws AddressFormatException, KeySourceException, ParseException {
+        jwksService = new JwksService(jwkSource);
         JWK publicKey =
                 JWK.parse(
                         "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
@@ -53,6 +48,7 @@ class JwksServiceTest {
     @Test
     void shouldThrowKeySourceExceptionWhenJwkNotFound()
             throws AddressFormatException, KeySourceException {
+        jwksService = new JwksService(jwkSource);
         final List<JWK> jwkList = Collections.emptyList();
         when(jwkSource.get(any(JWKSelector.class), isNull())).thenReturn(jwkList);
 
@@ -72,7 +68,7 @@ class JwksServiceTest {
     void shouldTestAdditionalClassConstructor()
             throws AddressFormatException, MalformedURLException {
         ConfigurationService configurationService = new ConfigurationService();
-        JwksService jwksService = new JwksService(configurationService);
+        jwksService = new JwksService(configurationService);
 
         assertThat(jwksService, instanceOf(JwksService.class));
     }
