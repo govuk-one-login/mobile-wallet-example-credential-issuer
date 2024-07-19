@@ -36,7 +36,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldReturnJwk()
+    void shouldReturnJwkWhenFound()
             throws AddressFormatException, KeySourceException, ParseException {
         JWK publicKey =
                 JWK.parse(
@@ -69,7 +69,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldTestAdditionalConstructor()
+    void shouldTestAdditionalClassConstructor()
             throws AddressFormatException, MalformedURLException {
         ConfigurationService configurationService = new ConfigurationService();
         JwksService jwksService = new JwksService(configurationService);
