@@ -19,6 +19,8 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
+import java.net.MalformedURLException;
+
 public class ExampleCriApp extends Application<ConfigurationService> {
 
     public static void main(String[] args) throws Exception {
@@ -35,7 +37,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
 
     @Override
     public void run(
-            final ConfigurationService configurationService, final Environment environment) {
+            final ConfigurationService configurationService, final Environment environment) throws MalformedURLException {
 
         KmsService kmsService = new KmsService(configurationService);
 
