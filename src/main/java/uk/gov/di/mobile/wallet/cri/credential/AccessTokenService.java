@@ -19,8 +19,6 @@ public class AccessTokenService {
     private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
     private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
     private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
-    private static final String JWKS_PATH = "/.well-known/jwks.json"; // NOSONAR
-
     private final JwksService jwksService;
 
     public AccessTokenService(JwksService jwksService) {
