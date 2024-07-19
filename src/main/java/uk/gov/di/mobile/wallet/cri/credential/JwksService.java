@@ -22,14 +22,13 @@ public class JwksService {
                         .cache(false)
                         .rateLimited(false)
                         .build();
-        ;
     }
 
     public JwksService(JWKSource jwkSource) {
         this.jwkSource = jwkSource;
     }
 
-    public JWK retrieveJwkFromURLWithKeyId(URL url, String keyId) throws KeySourceException {
+    public JWK retrieveJwkFromURLWithKeyId(String keyId) throws KeySourceException {
         JWKSelector selector = new JWKSelector(new JWKMatcher.Builder().keyID(keyId).build());
         return jwkSource.get(selector, null).stream()
                 .findFirst()

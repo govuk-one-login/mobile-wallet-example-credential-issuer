@@ -8,9 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.List;
@@ -25,7 +22,6 @@ import static org.mockito.Mockito.when;
 class JwksServiceTest {
 
     private JwksService jwksService;
-
     private final JWKSource jwkSource = mock(JWKSource.class);
 
     @BeforeEach
@@ -37,7 +33,6 @@ class JwksServiceTest {
     void shouldReturnJwksIsFound()
             throws AddressFormatException,
                     KeySourceException,
-                    MalformedURLException,
                     ParseException {
         JWK publicKey =
                 JWK.parse(
@@ -46,8 +41,7 @@ class JwksServiceTest {
         when(jwkSource.get(any(JWKSelector.class), isNull())).thenReturn(jwkList);
 
         JWK response =
-                jwksService.retrieveJwkFromURLWithKeyId(
-                        new URL("https://localhost:8080"), "cb5a1a8b-809a-4f32-944d-caae1a57ed91");
+                jwksService.retrieveJwkFromURLWithKeyId("cb5a1a8b-809a-4f32-944d-caae1a57ed91");
 
         assertEquals(publicKey, response);
     }
@@ -63,7 +57,6 @@ class JwksServiceTest {
                         KeySourceException.class,
                         () ->
                                 jwksService.retrieveJwkFromURLWithKeyId(
-                                        new URL("https://localhost:8080"),
                                         "cb5a1a8b-809a-4f32-944d-caae1a57ed91"));
 
         assertEquals(

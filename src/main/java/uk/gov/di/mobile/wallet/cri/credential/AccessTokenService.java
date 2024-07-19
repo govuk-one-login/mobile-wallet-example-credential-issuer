@@ -24,19 +24,16 @@ public class AccessTokenService {
     private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
     private static final String JWKS_PATH = "/.well-known/jwks.json"; // NOSONAR
 
-    private final ConfigurationService configurationService;
     private final JwksService jwksService;
 
     public AccessTokenService(ConfigurationService configurationService)
             throws MalformedURLException {
-        this.configurationService = configurationService;
         this.jwksService =
                 new JwksService(
                         new URL(configurationService.getOneLoginAuthServerUrl() + JWKS_PATH));
     }
 
-    public AccessTokenService(ConfigurationService configurationService, JwksService jwksService) {
-        this.configurationService = configurationService;
+    public AccessTokenService(JwksService jwksService) {
         this.jwksService = jwksService;
     }
 
@@ -87,15 +84,12 @@ public class AccessTokenService {
     private boolean verifyTokenSignature(SignedJWT signedJwt)
             throws AccessTokenValidationException {
         String keyId = signedJwt.getHeader().getKeyID();
-        String authServerUrl = configurationService.getOneLoginAuthServerUrl();
-
         try {
-            URL url = new URL(authServerUrl + JWKS_PATH);
-            JWK jwk = jwksService.retrieveJwkFromURLWithKeyId(url, keyId);
+            JWK jwk = jwksService.retrieveJwkFromURLWithKeyId(keyId);
             final ECKey publicKey = new ECKey.Builder(jwk.toECKey()).build();
             ECDSAVerifier verifier = new ECDSAVerifier(publicKey);
             return signedJwt.verify(verifier);
-        } catch (JOSEException | MalformedURLException exception) {
+        } catch (JOSEException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
     }

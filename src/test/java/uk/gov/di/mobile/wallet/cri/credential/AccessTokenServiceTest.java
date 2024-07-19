@@ -14,9 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.net.URL;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
@@ -38,12 +36,11 @@ import static org.mockito.Mockito.when;
 class AccessTokenServiceTest {
 
     private AccessTokenService accessTokenService;
-    private final ConfigurationService configurationService = new ConfigurationService();
     private final JwksService jwksService = mock(JwksService.class);
 
     @BeforeEach
     void setup() {
-        accessTokenService = new AccessTokenService(configurationService, jwksService);
+        accessTokenService = new AccessTokenService(jwksService);
     }
 
     @Test
@@ -142,8 +139,7 @@ class AccessTokenServiceTest {
         JWK publicKey =
                 JWK.parse(
                         "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
-        when(jwksService.retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class)))
-                .thenReturn(publicKey);
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
 
         SignedJWT signedJwt =
                 getTestAccessToken(
@@ -161,7 +157,7 @@ class AccessTokenServiceTest {
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenJwksServiceThrowsKeySourceException()
             throws JOSEException, ParseException {
-        when(jwksService.retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class)))
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class)))
                 .thenThrow(new KeySourceException("Some error fetching JWKs"));
 
         SignedJWT signedJwt =
@@ -181,8 +177,7 @@ class AccessTokenServiceTest {
     void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
         ECKey key = getEsKey();
         JWK publicKey = key.toPublicJWK();
-        when(jwksService.retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class)))
-                .thenReturn(publicKey);
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
 
         SignedJWT signedJwt =
                 getTestAccessToken(
@@ -191,7 +186,7 @@ class AccessTokenServiceTest {
         signedJwt.sign(ecSigner);
 
         assertDoesNotThrow(() -> accessTokenService.verifyAccessToken(signedJwt));
-        verify(jwksService).retrieveJwkFromURLWithKeyId(any(URL.class), any(String.class));
+        verify(jwksService).retrieveJwkFromURLWithKeyId(any(String.class));
     }
 
     private static SignedJWT getTestAccessToken(String issuer, String audience) {
