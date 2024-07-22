@@ -21,6 +21,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 @Singleton
@@ -64,7 +65,7 @@ public class CredentialOfferResource {
         try {
             credentialOffer =
                     credentialOfferService.buildCredentialOffer(credentialOfferId, credentialType);
-        } catch (SigningException exception) {
+        } catch (SigningException | NoSuchAlgorithmException exception) {
             LOGGER.error(
                     "Failed to create credential offer for walletSubjectId {} and documentId {}",
                     walletSubjectId,

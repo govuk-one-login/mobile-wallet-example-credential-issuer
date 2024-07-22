@@ -20,6 +20,8 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.startsWith;
@@ -43,7 +45,8 @@ class CredentialOfferServiceTest {
 
     @Test
     @DisplayName("Should build and return a credential offer")
-    void testItReturnsCredentialOffer() throws SigningException, JOSEException {
+    void testItReturnsCredentialOffer()
+            throws SigningException, JOSEException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
@@ -61,7 +64,8 @@ class CredentialOfferServiceTest {
                         .getGrants()
                         .get("urn:ietf:params:oauth:grant-type:pre-authorized_code")
                         .get("pre-authorized_code"),
-                startsWith("eyJraWQiOiJmZjI3NWI5Mi0wZGVm"));
+                startsWith(
+                        "eyJraWQiOiI3OGZhMTMxZDY3N2MxYWMwZjE3MmM1M2I0N2FjMTY5YTk1YWQwZDkyYzM4YmQ3OTRhNzBkYTU5MDMyMDU4Mjc0IiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ."));
     }
 
     private SignResponse getMockedSignResponse() throws JOSEException {

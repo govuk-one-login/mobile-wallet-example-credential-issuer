@@ -7,6 +7,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,7 @@ public class CredentialOfferService {
     }
 
     public CredentialOffer buildCredentialOffer(String credentialIdentifier, String credentialType)
-            throws SigningException {
+            throws SigningException, NoSuchAlgorithmException {
         SignedJWT preAuthorizedCode =
                 new PreAuthorizedCodeBuilder(configurationService, kmsService)
                         .buildPreAuthorizedCode(credentialIdentifier);
