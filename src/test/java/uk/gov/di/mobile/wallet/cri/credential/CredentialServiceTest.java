@@ -245,6 +245,8 @@ class CredentialServiceTest {
                 .buildCredential(
                         "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==",
                         testDocumentDetails);
+        verify(accessTokenService).verifyAccessToken(accessToken);
+        verify(proofJwtService).verifyProofJwt(proofJwt);
     }
 
     private static SignedJWT getTestProofJwt(String nonce) {
