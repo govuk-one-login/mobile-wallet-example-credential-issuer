@@ -25,8 +25,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getOneLoginAuthServerUrl() {
-        return System.getenv()
-                .getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8888/sts-stub");
+        return System.getenv().getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8888");
     }
 
     public String getCredentialStoreUrl() {
