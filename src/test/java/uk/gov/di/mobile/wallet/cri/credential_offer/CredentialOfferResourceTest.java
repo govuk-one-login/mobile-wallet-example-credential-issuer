@@ -28,6 +28,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ class CredentialOfferResourceTest {
     @Test
     @DisplayName("Should return 200 and the URL encoded credential offer")
     void testItReturns200AndUrlEncodedCredentialOffer()
-            throws JOSEException, DataStoreException, SigningException {
+            throws JOSEException, DataStoreException, SigningException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         CredentialOffer mockCredentialOffer = getMockCredentialOffer();
 

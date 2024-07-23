@@ -22,6 +22,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -53,7 +54,8 @@ class PreAuthorizedCodeBuilderTest {
     @Test
     @DisplayName(
             "Should build the pre-authorized code with the correct claims and sign it with KMS")
-    void testItReturnsSignedJwt() throws SigningException, ParseException, JOSEException {
+    void testItReturnsSignedJwt()
+            throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
@@ -82,7 +84,7 @@ class PreAuthorizedCodeBuilderTest {
                 equalTo(true));
         assertThat(
                 preAuthorizedCode.getHeader().getKeyID(),
-                equalTo("ff275b92-0def-4dfc-b0f6-87c96b26c6c7"));
+                equalTo("78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274"));
         assertThat(preAuthorizedCode.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(preAuthorizedCode.getHeader().getType(), equalTo(JOSEObjectType.JWT));
     }
@@ -90,6 +92,7 @@ class PreAuthorizedCodeBuilderTest {
     @Test
     @DisplayName("Should throw a SigningException when KMS throws an exception")
     void testItThrowsSigningException() {
+        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
         when(kmsService.sign(any(SignRequest.class))).thenThrow(DisabledException.class);
 
         SigningException exception =
