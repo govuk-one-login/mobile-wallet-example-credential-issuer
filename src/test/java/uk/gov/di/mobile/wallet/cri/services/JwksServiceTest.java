@@ -109,7 +109,6 @@ class JwksServiceTest {
 
         JWKSet result = new JwksService(configurationService, kmsService).generateJwks();
         JWK key = result.getKeyByKeyId(TEST_KEY_ID);
-        ;
         assertEquals(mockJwk.toString(), key.toJSONString());
     }
 

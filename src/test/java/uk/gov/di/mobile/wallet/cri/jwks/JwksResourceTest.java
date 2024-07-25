@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.did_document.*;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 
@@ -32,7 +31,7 @@ import static org.mockito.Mockito.when;
 class JwksResourceTest {
 
     private static final JwksService jwksService = mock(JwksService.class);
-    private final ResourceExtension EXT =
+    private final ResourceExtension resource =
             ResourceExtension.builder().addResource(new JwksResource(jwksService)).build();
 
     @BeforeEach
@@ -45,7 +44,7 @@ class JwksResourceTest {
             throws KeyNotActiveException, PEMException, NoSuchAlgorithmException {
         doThrow(new PEMException("Mock error message")).when(jwksService).generateJwks();
 
-        final Response response = EXT.target("/.well-known/jwks.json").request().get();
+        final Response response = resource.target("/.well-known/jwks.json").request().get();
 
         verify(jwksService, Mockito.times(1)).generateJwks();
         assertThat(response.getStatus(), is(500));
@@ -61,7 +60,7 @@ class JwksResourceTest {
         var expectedJWKSet = new JWKSet(List.of(publicKey));
         when(jwksService.generateJwks()).thenReturn(expectedJWKSet);
 
-        final Response response = EXT.target("/.well-known/jwks.json").request().get();
+        final Response response = resource.target("/.well-known/jwks.json").request().get();
 
         verify(jwksService, Mockito.times(1)).generateJwks();
         assertThat(response.getStatus(), is(200));
