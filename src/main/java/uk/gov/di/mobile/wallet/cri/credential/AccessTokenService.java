@@ -25,17 +25,17 @@ public class AccessTokenService {
         this.jwksService = jwksService;
     }
 
-    public void verifyAccessToken(SignedJWT signedJwt) throws AccessTokenValidationException {
-        verifyTokenHeader(signedJwt);
-        verifyTokenClaims(signedJwt);
-        if (!this.verifyTokenSignature(signedJwt)) {
+    public void verifyAccessToken(SignedJWT accessToken) throws AccessTokenValidationException {
+        verifyTokenHeader(accessToken);
+        verifyTokenClaims(accessToken);
+        if (!this.verifyTokenSignature(accessToken)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
     }
 
-    private void verifyTokenHeader(SignedJWT signedJwt) throws AccessTokenValidationException {
+    private void verifyTokenHeader(SignedJWT accessToken) throws AccessTokenValidationException {
         JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(CLIENT_CONFIG_ALGORITHM);
-        JWSAlgorithm jwtAlgorithm = signedJwt.getHeader().getAlgorithm();
+        JWSAlgorithm jwtAlgorithm = accessToken.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new AccessTokenValidationException(
                     String.format(
@@ -43,13 +43,13 @@ public class AccessTokenService {
                             jwtAlgorithm, clientAlgorithm));
         }
 
-        String keyId = signedJwt.getHeader().getKeyID();
+        String keyId = accessToken.getHeader().getKeyID();
         if (keyId == null) {
             throw new AccessTokenValidationException("JWT kid header claim is null");
         }
     }
 
-    private void verifyTokenClaims(SignedJWT signedJwt) throws AccessTokenValidationException {
+    private void verifyTokenClaims(SignedJWT accessToken) throws AccessTokenValidationException {
         Set<String> requiredClaims =
                 new HashSet<>(Arrays.asList("sub", "c_nonce", "credential_identifiers"));
         JWTClaimsSet expectedClaimValues =
@@ -60,7 +60,7 @@ public class AccessTokenService {
 
         JWTClaimsSet jwtClaimsSet;
         try {
-            jwtClaimsSet = signedJwt.getJWTClaimsSet();
+            jwtClaimsSet = accessToken.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
@@ -69,14 +69,14 @@ public class AccessTokenService {
         }
     }
 
-    private boolean verifyTokenSignature(SignedJWT signedJwt)
+    private boolean verifyTokenSignature(SignedJWT accessToken)
             throws AccessTokenValidationException {
-        String keyId = signedJwt.getHeader().getKeyID();
+        String keyId = accessToken.getHeader().getKeyID();
         try {
             JWK jwk = jwksService.retrieveJwkFromURLWithKeyId(keyId);
             final ECKey publicKey = new ECKey.Builder(jwk.toECKey()).build();
             ECDSAVerifier verifier = new ECDSAVerifier(publicKey);
-            return signedJwt.verify(verifier);
+            return accessToken.verify(verifier);
         } catch (JOSEException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
