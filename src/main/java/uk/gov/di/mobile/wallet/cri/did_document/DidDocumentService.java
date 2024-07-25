@@ -3,15 +3,16 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class DidDocumentService {
 
+    private static final List<Did> VERIFICATION_METHOD = new ArrayList<>();
+    private static final List<String> ASSERTION_METHOD = new ArrayList<>();
     private static final String VERIFICATION_METHOD_TYPE = "JsonWebKey2020";
     private static final String CONTROLLER_PREFIX = "did:web:";
     private static final List<String> CONTEXT =
@@ -30,14 +31,14 @@ public class DidDocumentService {
         String keyAlias = configurationService.getSigningKeyAlias();
         String controller = CONTROLLER_PREFIX + configurationService.getDidController();
         Did did = generateDid(keyAlias, controller);
-        List<Did> verificationMethod = Collections.singletonList(did);
-        List<String> assertionMethod = Collections.singletonList(did.getId());
+        VERIFICATION_METHOD.add(did);
+        ASSERTION_METHOD.add(did.getId());
 
         return new DidDocumentBuilder()
                 .setContext(CONTEXT)
                 .setId(controller)
-                .setVerificationMethod(verificationMethod)
-                .setAssertionMethod(assertionMethod)
+                .setVerificationMethod(VERIFICATION_METHOD)
+                .setAssertionMethod(ASSERTION_METHOD)
                 .build();
     }
 
@@ -50,16 +51,13 @@ public class DidDocumentService {
 
         ECKey jwk = keyProvider.getPublicKey(keyAlias);
         String keyId = jwk.getKeyID();
-        String hashedKeyId =
-                KeyHelper.hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
-
-        String id = controller + "#" + hashedKeyId;
+        String id = controller + "#" + keyId;
 
         return new DidBuilder()
                 .setId(id)
                 .setController(controller)
                 .setType(VERIFICATION_METHOD_TYPE)
-                .setPublicKeyJwk(jwk, hashedKeyId)
+                .setPublicKeyJwk(jwk)
                 .build();
     }
 }

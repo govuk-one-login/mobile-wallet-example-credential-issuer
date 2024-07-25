@@ -20,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class DidBuilderTest {
 
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
-    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_DID_TYPE = "JsonWebKey2020";
     private static final String TEST_CONTROLLER = "did:web:localhost:8080";
     private static final String TEST_HASHED_KEY_ID =
@@ -36,7 +35,7 @@ class DidBuilderTest {
                         .setType(TEST_DID_TYPE)
                         .setController(TEST_CONTROLLER)
                         .setId(TEST_DID_ID)
-                        .setPublicKeyJwk(testJwk, TEST_HASHED_KEY_ID)
+                        .setPublicKeyJwk(testJwk)
                         .build();
 
         assertEquals(TEST_DID_TYPE, response.type);
@@ -55,8 +54,7 @@ class DidBuilderTest {
         DidBuilder didBuilder = new DidBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
-                        IllegalArgumentException.class,
-                        () -> didBuilder.setPublicKeyJwk(null, null));
+                        IllegalArgumentException.class, () -> didBuilder.setPublicKeyJwk(null));
         Assertions.assertEquals("jwk must not be null", thrown.getMessage());
     }
 
@@ -90,7 +88,7 @@ class DidBuilderTest {
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID(TEST_KEY_ID)
+                .keyID(TEST_HASHED_KEY_ID)
                 .algorithm(ES256)
                 .build();
     }

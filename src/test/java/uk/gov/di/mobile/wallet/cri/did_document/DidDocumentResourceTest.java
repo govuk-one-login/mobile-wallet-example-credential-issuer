@@ -35,7 +35,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DidDocumentResourceTest {
 
-    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_HASHED_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
     private static final String TEST_CONTROLLER = "did:web:localhost:8080";
@@ -100,7 +99,7 @@ class DidDocumentResourceTest {
                                 .setType(TEST_DID_TYPE)
                                 .setController(TEST_CONTROLLER)
                                 .setId(TEST_DID_ID)
-                                .setPublicKeyJwk(testJwk, TEST_HASHED_KEY_ID)
+                                .setPublicKeyJwk(testJwk)
                                 .build());
 
         return new DidDocumentBuilder()
@@ -117,7 +116,7 @@ class DidDocumentResourceTest {
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID(TEST_KEY_ID)
+                .keyID(TEST_HASHED_KEY_ID)
                 .algorithm(ES256)
                 .build();
     }

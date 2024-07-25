@@ -41,7 +41,7 @@ class DidDocumentBuilderTest {
                                 .setType(TEST_DID_TYPE)
                                 .setController(TEST_CONTROLLER)
                                 .setId(TEST_DID_ID)
-                                .setPublicKeyJwk(testJwk, TEST_HASHED_KEY_ID)
+                                .setPublicKeyJwk(testJwk)
                                 .build());
 
         DidDocument response =
