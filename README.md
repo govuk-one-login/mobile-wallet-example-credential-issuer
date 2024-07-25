@@ -74,6 +74,11 @@ To get the DID document:
 curl -X GET http://localhost:8080/.well-known/did.json | jq
 ```
 
+To get the JWKS:
+```
+curl -X GET http://localhost:8080/.well-known/jwks.json | jq
+```
+
 #### Reading from the Database
 To check that a credential offer was saved to the **cri_cache** table, run:
 
