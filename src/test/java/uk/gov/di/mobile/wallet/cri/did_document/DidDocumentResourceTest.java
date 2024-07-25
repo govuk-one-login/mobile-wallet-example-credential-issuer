@@ -35,10 +35,10 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DidDocumentResourceTest {
 
-    private static final String TEST_HASHED_KEY_ID =
+    private static final String TEST_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
     private static final String TEST_CONTROLLER = "did:web:localhost:8080";
-    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_HASHED_KEY_ID;
+    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_KEY_ID;
     private static final List<String> TEST_ASSERTION_METHOD = List.of(TEST_DID_ID);
     private static final List<String> TEST_CONTEXT =
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
@@ -116,7 +116,7 @@ class DidDocumentResourceTest {
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID(TEST_HASHED_KEY_ID)
+                .keyID(TEST_KEY_ID)
                 .algorithm(ES256)
                 .build();
     }

@@ -7,6 +7,7 @@ public class PublicKeyJwkBuilder {
     String crv;
     String x;
     String y;
+    String alg;
 
     public PublicKeyJwkBuilder setKty(String kty) throws IllegalArgumentException {
         if (kty == null) {
@@ -48,7 +49,15 @@ public class PublicKeyJwkBuilder {
         return this;
     }
 
+    public PublicKeyJwkBuilder setAlg(String alg) throws IllegalArgumentException {
+        if (alg == null) {
+            throw new IllegalArgumentException("alg attribute must not be null");
+        }
+        this.alg = alg;
+        return this;
+    }
+
     public PublicKeyJwk build() {
-        return new PublicKeyJwk(kty, kid, crv, x, y);
+        return new PublicKeyJwk(kty, kid, crv, x, y, alg);
     }
 }

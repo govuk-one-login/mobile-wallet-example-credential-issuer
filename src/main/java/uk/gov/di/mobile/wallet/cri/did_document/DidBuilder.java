@@ -45,6 +45,7 @@ public class DidBuilder {
                         .setCrv(jwk.getCurve().toString())
                         .setX(jwk.getX().toString())
                         .setY(jwk.getY().toString())
+                        .setAlg(jwk.getAlgorithm().toString())
                         .build();
         return this;
     }

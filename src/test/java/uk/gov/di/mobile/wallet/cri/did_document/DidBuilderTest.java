@@ -22,9 +22,9 @@ class DidBuilderTest {
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
     private static final String TEST_DID_TYPE = "JsonWebKey2020";
     private static final String TEST_CONTROLLER = "did:web:localhost:8080";
-    private static final String TEST_HASHED_KEY_ID =
+    private static final String TEST_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
-    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_HASHED_KEY_ID;
+    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_KEY_ID;
 
     @Test
     void shouldReturnDid() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
@@ -42,11 +42,12 @@ class DidBuilderTest {
         assertEquals(TEST_CONTROLLER, response.controller);
         assertEquals(TEST_DID_ID, response.id);
         assertThat(response.publicKeyJwk, instanceOf(PublicKeyJwk.class));
-        assertEquals(TEST_HASHED_KEY_ID, response.publicKeyJwk.kid);
+        assertEquals(TEST_KEY_ID, response.publicKeyJwk.kid);
         assertEquals(testJwk.getX().toString(), response.publicKeyJwk.x);
         assertEquals(testJwk.getY().toString(), response.publicKeyJwk.y);
         assertEquals(testJwk.getKeyType().getValue(), response.publicKeyJwk.kty);
         assertEquals(testJwk.getCurve().toString(), response.publicKeyJwk.crv);
+        assertEquals(testJwk.getAlgorithm().toString(), response.publicKeyJwk.alg);
     }
 
     @Test
@@ -88,7 +89,7 @@ class DidBuilderTest {
         KeyPair keyPair = gen.generateKeyPair();
 
         return new ECKey.Builder(Curve.P_256, (ECPublicKey) keyPair.getPublic())
-                .keyID(TEST_HASHED_KEY_ID)
+                .keyID(TEST_KEY_ID)
                 .algorithm(ES256)
                 .build();
     }
