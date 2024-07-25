@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
 import software.amazon.awssdk.services.kms.model.NotFoundException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.security.InvalidAlgorithmParameterException;

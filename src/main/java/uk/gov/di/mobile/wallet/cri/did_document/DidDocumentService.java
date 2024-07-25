@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 
 import java.security.NoSuchAlgorithmException;

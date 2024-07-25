@@ -9,7 +9,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
-import uk.gov.di.mobile.wallet.cri.did_document.KeyNotActiveException;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 
 import java.net.MalformedURLException;

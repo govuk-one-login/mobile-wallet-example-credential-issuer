@@ -9,8 +9,8 @@ import jakarta.ws.rs.core.Response;
 import org.bouncycastle.openssl.PEMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.did_document.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -28,17 +28,13 @@ public class JwksResource {
     @GET
     public Response getJwks() {
         try {
-            JWKSet jwkSet = jwksService.generateJwks();
-            System.out.println(jwkSet);
-            String jwkSetString = jwkSet.toPublicJWKSet().toString();
-            System.out.println(jwkSetString);
-
-            return buildSuccessResponse().entity(jwkSetString).build();
+            JWKSet jwkSet = jwksService.generateJwks().toPublicJWKSet();
+            return buildSuccessResponse().entity(jwkSet.toString()).build();
         } catch (IllegalArgumentException
                 | PEMException
                 | NoSuchAlgorithmException
                 | KeyNotActiveException exception) {
-            LOGGER.error("An error happened trying to get the DID document: ", exception);
+            LOGGER.error("An error happened trying to get the JWKS: ", exception);
             return buildFailResponse().build();
         }
     }

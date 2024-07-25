@@ -1,0 +1,70 @@
+package uk.gov.di.mobile.wallet.cri.jwks;
+
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.jwk.JWKSet;
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import io.dropwizard.testing.junit5.ResourceExtension;
+import jakarta.ws.rs.core.Response;
+import org.bouncycastle.openssl.PEMException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.did_document.*;
+import uk.gov.di.mobile.wallet.cri.services.JwksService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
+
+import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(DropwizardExtensionsSupport.class)
+@ExtendWith(MockitoExtension.class)
+class JwksResourceTest {
+
+    private static final JwksService jwksService = mock(JwksService.class);
+    private final ResourceExtension EXT =
+            ResourceExtension.builder().addResource(new JwksResource(jwksService)).build();
+
+    @BeforeEach
+    void setUp() {
+        Mockito.reset(jwksService);
+    }
+
+    @Test
+    void shouldReturn500WhenJwksServiceThrowsAnException()
+            throws KeyNotActiveException, PEMException, NoSuchAlgorithmException {
+        doThrow(new PEMException("Mock error message")).when(jwksService).generateJwks();
+
+        final Response response = EXT.target("/.well-known/jwks.json").request().get();
+
+        verify(jwksService, Mockito.times(1)).generateJwks();
+        assertThat(response.getStatus(), is(500));
+        reset(jwksService);
+    }
+
+    @Test
+    void shouldReturn200AndJwksJson()
+            throws ParseException, KeyNotActiveException, PEMException, NoSuchAlgorithmException {
+        JWK publicKey =
+                JWK.parse(
+                        "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"d7cb2ed24d8f70433e293ebc270bf1de77fcfab02a7f631da396b70e9b3aa8d7\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
+        var expectedJWKSet = new JWKSet(List.of(publicKey));
+        when(jwksService.generateJwks()).thenReturn(expectedJWKSet);
+
+        final Response response = EXT.target("/.well-known/jwks.json").request().get();
+
+        verify(jwksService, Mockito.times(1)).generateJwks();
+        assertThat(response.getStatus(), is(200));
+        assertThat(response.readEntity(String.class), is(expectedJWKSet.toString()));
+    }
+}
