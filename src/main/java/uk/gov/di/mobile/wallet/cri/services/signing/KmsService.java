@@ -20,6 +20,7 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
+import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
 
@@ -95,7 +96,7 @@ public class KmsService implements KeyProvider {
         return true;
     }
 
-    public ECKey getPublicKey(String keyAlias) throws PEMException {
+    public ECKey getPublicKey(String keyAlias) throws PEMException, NoSuchAlgorithmException {
         GetPublicKeyResponse publicKeyResponse = getKmsPublicKey(keyAlias);
         return createJwk(publicKeyResponse);
     }
@@ -104,11 +105,13 @@ public class KmsService implements KeyProvider {
         return kmsClient.getPublicKey(GetPublicKeyRequest.builder().keyId(keyAlias).build());
     }
 
-    private ECKey createJwk(GetPublicKeyResponse publicKeyResponse) throws PEMException {
+    private ECKey createJwk(GetPublicKeyResponse publicKeyResponse)
+            throws PEMException, NoSuchAlgorithmException {
         PublicKey publicKey = createPublicKey(publicKeyResponse);
         String keyId = Arn.fromString(publicKeyResponse.keyId()).resource().resource();
+        String hashedKeyId = KeyHelper.hashKeyId(keyId);
         return new ECKey.Builder(P_256, (ECPublicKey) publicKey)
-                .keyID(keyId)
+                .keyID(hashedKeyId)
                 .algorithm(ES256)
                 .build();
     }

@@ -56,10 +56,6 @@ public class ConfigurationService extends Configuration {
         return "http://localhost:4560";
     }
 
-    public String getKeyIdHashingAlgorithm() {
-        return "SHA-256";
-    }
-
     public String getAuthServerJwksPath() {
         return "/.well-known/jwks.json";
     }

@@ -7,6 +7,8 @@ import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 
+import java.security.NoSuchAlgorithmException;
+
 public interface KeyProvider {
 
     public SignResponse sign(SignRequest signRequest);
@@ -15,7 +17,7 @@ public interface KeyProvider {
 
     public boolean isKeyActive(String keyAlias);
 
-    public ECKey getPublicKey(String keyAlias) throws PEMException;
+    public ECKey getPublicKey(String keyAlias) throws PEMException, NoSuchAlgorithmException;
 
     public String getKeyId(String keyAlias);
 }
