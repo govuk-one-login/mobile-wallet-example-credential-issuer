@@ -19,10 +19,12 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
-public class MockCriApp extends Application<ConfigurationService> {
+import java.net.MalformedURLException;
+
+public class ExampleCriApp extends Application<ConfigurationService> {
 
     public static void main(String[] args) throws Exception {
-        new MockCriApp().run(args);
+        new ExampleCriApp().run(args);
     }
 
     @Override
@@ -34,8 +36,8 @@ public class MockCriApp extends Application<ConfigurationService> {
     }
 
     @Override
-    public void run(
-            final ConfigurationService configurationService, final Environment environment) {
+    public void run(final ConfigurationService configurationService, final Environment environment)
+            throws MalformedURLException {
 
         KmsService kmsService = new KmsService(configurationService);
 
@@ -53,8 +55,8 @@ public class MockCriApp extends Application<ConfigurationService> {
                         .using(new JerseyClientConfiguration())
                         .build("example-cri");
 
-        AccessTokenService accessTokenService =
-                new AccessTokenService(httpClient, configurationService);
+        JwksService jwksService = new JwksService(configurationService);
+        AccessTokenService accessTokenService = new AccessTokenService(jwksService);
         ProofJwtService proofJwtService = new ProofJwtService();
         CredentialBuilder credentialBuilder =
                 new CredentialBuilder(configurationService, kmsService);

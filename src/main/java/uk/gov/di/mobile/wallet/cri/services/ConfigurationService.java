@@ -25,8 +25,7 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getOneLoginAuthServerUrl() {
-        return System.getenv()
-                .getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8888/sts-stub");
+        return System.getenv().getOrDefault("ONE_LOGIN_AUTH_SERVER_URL", "http://localhost:8888");
     }
 
     public String getCredentialStoreUrl() {
@@ -61,8 +60,8 @@ public class ConfigurationService extends Configuration {
         return "SHA-256";
     }
 
-    public String getAuthServerDidDocumentPath() {
-        return "/.well-known/did.json";
+    public String getAuthServerJwksPath() {
+        return "/.well-known/jwks.json";
     }
 
     public String getCredentialStoreDocumentPath() {

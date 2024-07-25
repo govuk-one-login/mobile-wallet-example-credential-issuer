@@ -39,13 +39,13 @@ dependencies {
 }
 
 application {
-	mainClass = "uk.gov.di.mobile.wallet.cri.MockCriApp"
+	mainClass = "uk.gov.di.mobile.wallet.cri.ExampleCriApp"
 }
 
 jar {
 	manifest {
 		attributes(
-				"Main-Class": "uk.gov.di.mobile.wallet.cri.MockCriApp")
+				"Main-Class": "uk.gov.di.mobile.wallet.cri.ExampleCriApp")
 	}
 
 	from {
@@ -72,6 +72,7 @@ sonar {
 		property "sonar.organization", "govuk-one-login"
 		property "sonar.host.url", "https://sonarcloud.io"
 		property "sonar.coverage.exclusions", "**/src/test/**"
+		property 'sonar.coverage.exclusions', "**/src/main/java/uk/gov/di/mobile/wallet/cri/ExampleCriApp.java"
 		property "sonar.coverage.jacoco.xmlReportPaths", "$project.buildDir/$jacocoBuildReportPath"
 	}
 }

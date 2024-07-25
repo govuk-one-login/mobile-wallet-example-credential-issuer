@@ -83,8 +83,7 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetOneLoginAuthServerUrlDefaultValueWhenEnvVarUnset() {
-        assertEquals(
-                "http://localhost:8888/sts-stub", configurationService.getOneLoginAuthServerUrl());
+        assertEquals("http://localhost:8888", configurationService.getOneLoginAuthServerUrl());
     }
 
     @Test
@@ -158,8 +157,8 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void shouldGetAuthServerDidDocumentPathValue() {
-        assertEquals("/.well-known/did.json", configurationService.getAuthServerDidDocumentPath());
+    void shouldGetAuthServerJwksPathValue() {
+        assertEquals("/.well-known/jwks.json", configurationService.getAuthServerJwksPath());
     }
 
     @Test
