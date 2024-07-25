@@ -42,7 +42,7 @@ public class JwksService {
     public JwksService(
             ConfigurationService configurationService,
             KeyProvider keyProvider,
-            JWKSource jwkSource) {
+            JWKSource<SecurityContext> jwkSource) {
         this.configurationService = configurationService;
         this.keyProvider = keyProvider;
         this.jwkSource = jwkSource;
