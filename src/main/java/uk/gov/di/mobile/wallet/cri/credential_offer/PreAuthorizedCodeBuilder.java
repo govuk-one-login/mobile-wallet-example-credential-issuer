@@ -38,8 +38,7 @@ public class PreAuthorizedCodeBuilder {
     public SignedJWT buildPreAuthorizedCode(String credentialIdentifier)
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        String hashedKeyId =
-                KeyHelper.hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
+        String hashedKeyId = KeyHelper.hashKeyId(keyId);
         var encodedHeader = getEncodedHeader(hashedKeyId);
         var encodedClaims = getEncodedClaims(credentialIdentifier);
         var message = encodedHeader + "." + encodedClaims;
