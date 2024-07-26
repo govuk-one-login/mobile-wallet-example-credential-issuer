@@ -33,7 +33,7 @@ public class DidDocumentResource {
                 | NoSuchAlgorithmException
                 | KeyNotActiveException exception) {
             LOGGER.error("An error happened trying to get the DID document: ", exception);
-            return buildFailResponse().build();
+            return buildInternalErrorResponse().build();
         }
     }
 
@@ -41,7 +41,7 @@ public class DidDocumentResource {
         return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
-    private Response.ResponseBuilder buildFailResponse() {
+    private Response.ResponseBuilder buildInternalErrorResponse() {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .type(MediaType.APPLICATION_JSON_TYPE);
     }
