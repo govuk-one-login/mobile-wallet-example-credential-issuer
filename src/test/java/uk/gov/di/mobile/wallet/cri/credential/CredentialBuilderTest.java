@@ -47,10 +47,9 @@ class CredentialBuilderTest {
 
     private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);
-    private static final String HASHED_KEY_ID =
-            "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
-
+    private static final String TEST_HASHED_KEY_ID =
+            "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
     private JsonNode DOCUMENT_DETAILS;
 
     ConfigurationService configurationService;
@@ -83,7 +82,7 @@ class CredentialBuilderTest {
         assertThat(credentialBuilderReturnValue, hasProperty("credential"));
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getType(), equalTo(JOSEObjectType.JWT));
-        assertThat(credential.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(credential.getHeader().getKeyID(), equalTo(TEST_HASHED_KEY_ID));
         assertThat(
                 credential.getJWTClaimsSet().getIssuer(),
                 equalTo("urn:fdc:gov:uk:example-credential-issuer"));

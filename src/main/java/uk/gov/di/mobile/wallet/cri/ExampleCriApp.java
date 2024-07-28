@@ -13,9 +13,11 @@ import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
+import uk.gov.di.mobile.wallet.cri.jwks.JwksResource;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
@@ -55,7 +57,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                         .using(new JerseyClientConfiguration())
                         .build("example-cri");
 
-        JwksService jwksService = new JwksService(configurationService);
+        JwksService jwksService = new JwksService(configurationService, kmsService);
         AccessTokenService accessTokenService = new AccessTokenService(jwksService);
         ProofJwtService proofJwtService = new ProofJwtService();
         CredentialBuilder credentialBuilder =
@@ -84,5 +86,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new CredentialResource(credentialService));
 
         environment.jersey().register(new DidDocumentResource(didDocumentService));
+
+        environment.jersey().register(new JwksResource(jwksService));
     }
 }

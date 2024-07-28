@@ -26,13 +26,13 @@ public class ProofJwtService {
     /**
      * Verifies the Proof JWT's header and payload claims and its signature.
      *
-     * @param signedJwt The Proof JWT to verify
+     * @param proofJwt The Proof JWT to verify
      * @throws ProofJwtValidationException On any error verifying the token claims and signature
      */
-    public void verifyProofJwt(SignedJWT signedJwt) throws ProofJwtValidationException {
-        verifyTokenHeader(signedJwt);
-        verifyTokenClaims(signedJwt);
-        if (!this.verifyTokenSignature(signedJwt)) {
+    public void verifyProofJwt(SignedJWT proofJwt) throws ProofJwtValidationException {
+        verifyTokenHeader(proofJwt);
+        verifyTokenClaims(proofJwt);
+        if (!this.verifyTokenSignature(proofJwt)) {
             throw new ProofJwtValidationException("Proof JWT signature verification failed");
         }
     }
@@ -40,12 +40,12 @@ public class ProofJwtService {
     /**
      * Verifies that the required header claims are present and/or match an expected value.
      *
-     * @param signedJwt The Proof JWT to validate
+     * @param proofJwt The Proof JWT to validate
      * @throws ProofJwtValidationException On invalid header claims
      */
-    private void verifyTokenHeader(SignedJWT signedJwt) throws ProofJwtValidationException {
+    private void verifyTokenHeader(SignedJWT proofJwt) throws ProofJwtValidationException {
         JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.CLIENT_CONFIG_ALGORITHM);
-        JWSAlgorithm jwtAlgorithm = signedJwt.getHeader().getAlgorithm();
+        JWSAlgorithm jwtAlgorithm = proofJwt.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new ProofJwtValidationException(
                     String.format(
@@ -53,7 +53,7 @@ public class ProofJwtService {
                             jwtAlgorithm, clientAlgorithm));
         }
 
-        String keyId = signedJwt.getHeader().getKeyID();
+        String keyId = proofJwt.getHeader().getKeyID();
         if (keyId == null) {
             throw new ProofJwtValidationException("JWT kid header claim is null");
         }
@@ -62,10 +62,10 @@ public class ProofJwtService {
     /**
      * Verifies that the required payload claims are present and/or match an expected value.
      *
-     * @param signedJwt The Proof JWT to validate
+     * @param proofJwt The Proof JWT to validate
      * @throws ProofJwtValidationException On invalid payload claims
      */
-    private void verifyTokenClaims(SignedJWT signedJwt) throws ProofJwtValidationException {
+    private void verifyTokenClaims(SignedJWT proofJwt) throws ProofJwtValidationException {
         Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
@@ -74,7 +74,7 @@ public class ProofJwtService {
                         .build();
 
         try {
-            JWTClaimsSet jwtClaimsSet = signedJwt.getJWTClaimsSet();
+            JWTClaimsSet jwtClaimsSet = proofJwt.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
@@ -87,11 +87,11 @@ public class ProofJwtService {
      * Verifies the Proof JWT signature with the public key extracted from the did:key included in
      * the token's "kid" header claim.
      *
-     * @param signedJwt The Proof JWT to verify
+     * @param proofJwt The Proof JWT to verify
      * @throws ProofJwtValidationException On error verifying the token signature
      */
-    private boolean verifyTokenSignature(SignedJWT signedJwt) throws ProofJwtValidationException {
-        String didKey = signedJwt.getHeader().getKeyID();
+    private boolean verifyTokenSignature(SignedJWT proofJwt) throws ProofJwtValidationException {
+        String didKey = proofJwt.getHeader().getKeyID();
         try {
             DidKeyResolver didKeyResolver = new DidKeyResolver();
             DidKeyResolver.DecodedKeyData resolvedDidKey = didKeyResolver.decodeDidKey(didKey);
@@ -99,7 +99,7 @@ public class ProofJwtService {
             ECPublicKey publicKey = didKeyResolver.generatePublicKeyFromBytes(rawPublicKeyBytes);
             ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();
             ECDSAVerifier verifier = new ECDSAVerifier(ecKey);
-            return signedJwt.verify(verifier);
+            return proofJwt.verify(verifier);
         } catch (JOSEException
                 | IllegalArgumentException
                 | NoSuchAlgorithmException

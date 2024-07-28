@@ -8,9 +8,10 @@ import java.security.NoSuchAlgorithmException;
 
 public class KeyHelper {
 
-    public static String hashKeyId(String keyId, String hashingAlgorithm)
-            throws NoSuchAlgorithmException {
-        MessageDigest messageDigest = MessageDigest.getInstance(hashingAlgorithm);
+    private static final String HASHING_ALGORITHM = "SHA-256";
+
+    public static String hashKeyId(String keyId) throws NoSuchAlgorithmException {
+        MessageDigest messageDigest = MessageDigest.getInstance(HASHING_ALGORITHM);
         return Hex.encodeHexString(messageDigest.digest(keyId.getBytes(StandardCharsets.UTF_8)));
     }
 }

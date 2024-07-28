@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 
 import java.security.NoSuchAlgorithmException;
@@ -50,16 +50,13 @@ public class DidDocumentService {
 
         ECKey jwk = keyProvider.getPublicKey(keyAlias);
         String keyId = jwk.getKeyID();
-        String hashedKeyId =
-                KeyHelper.hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
-
-        String id = controller + "#" + hashedKeyId;
+        String id = controller + "#" + keyId;
 
         return new DidBuilder()
                 .setId(id)
                 .setController(controller)
                 .setType(VERIFICATION_METHOD_TYPE)
-                .setPublicKeyJwk(jwk, hashedKeyId)
+                .setPublicKeyJwk(jwk)
                 .build();
     }
 }

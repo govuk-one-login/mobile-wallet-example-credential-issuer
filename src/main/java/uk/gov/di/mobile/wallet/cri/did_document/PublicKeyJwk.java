@@ -4,12 +4,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class PublicKeyJwk {
 
-    public PublicKeyJwk(String kty, String kid, String crv, String x, String y) {
+    public PublicKeyJwk(String kty, String kid, String crv, String x, String y, String alg) {
         this.kty = kty;
         this.kid = kid;
         this.crv = crv;
         this.x = x;
         this.y = y;
+        this.alg = alg;
     }
 
     String kty;
@@ -17,6 +18,7 @@ public class PublicKeyJwk {
     String crv;
     String x;
     String y;
+    String alg;
 
     @JsonProperty("kty")
     public String getKty() {
@@ -41,5 +43,10 @@ public class PublicKeyJwk {
     @JsonProperty("y")
     public String getY() {
         return y;
+    }
+
+    @JsonProperty("alg")
+    public String getAlg() {
+        return alg;
     }
 }

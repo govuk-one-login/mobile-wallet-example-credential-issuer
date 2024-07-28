@@ -52,7 +52,7 @@ public class CredentialResource {
                 return buildBadRequestResponse().entity("invalid_proof").build();
             }
 
-            return buildFailResponse().entity("server_error").build();
+            return buildInternalErrorResponse().entity("server_error").build();
         }
 
         return buildSuccessResponse().entity(credential).build();
@@ -102,7 +102,7 @@ public class CredentialResource {
         return Response.status(Response.Status.BAD_REQUEST);
     }
 
-    private Response.ResponseBuilder buildFailResponse() {
+    private Response.ResponseBuilder buildInternalErrorResponse() {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR);
     }
 }

@@ -1,22 +1,31 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.services;
 
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKMatcher;
 import com.nimbusds.jose.jwk.JWKSelector;
+import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.jwk.source.JWKSourceBuilder;
 import com.nimbusds.jose.proc.SecurityContext;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import org.bouncycastle.openssl.PEMException;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.security.NoSuchAlgorithmException;
 
 public class JwksService {
 
     private final JWKSource<SecurityContext> jwkSource;
+    private final ConfigurationService configurationService;
+    private final KeyProvider keyProvider;
 
-    public JwksService(ConfigurationService configurationService) throws MalformedURLException {
+    public JwksService(ConfigurationService configurationService, KeyProvider keyProvider)
+            throws MalformedURLException {
+        this.configurationService = configurationService;
+        this.keyProvider = keyProvider;
         URL url =
                 new URL(
                         configurationService.getOneLoginAuthServerUrl()
@@ -30,7 +39,12 @@ public class JwksService {
                         .build();
     }
 
-    public JwksService(JWKSource<SecurityContext> jwkSource) {
+    public JwksService(
+            ConfigurationService configurationService,
+            KeyProvider keyProvider,
+            JWKSource<SecurityContext> jwkSource) {
+        this.configurationService = configurationService;
+        this.keyProvider = keyProvider;
         this.jwkSource = jwkSource;
     }
 
@@ -39,5 +53,16 @@ public class JwksService {
         return jwkSource.get(selector, null).stream()
                 .findFirst()
                 .orElseThrow(() -> new KeySourceException("No key found with key ID: " + keyId));
+    }
+
+    public JWKSet generateJwks()
+            throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
+
+        String keyAlias = configurationService.getSigningKeyAlias();
+        if (!keyProvider.isKeyActive(keyAlias)) {
+            throw new KeyNotActiveException("Public key is not active");
+        }
+
+        return new JWKSet(keyProvider.getPublicKey(keyAlias));
     }
 }

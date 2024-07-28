@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
 import software.amazon.awssdk.services.kms.model.NotFoundException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -38,11 +39,10 @@ class DidDocumentServiceTest {
     private final ConfigurationService configurationService = new ConfigurationService();
     private static final String TEST_ARN =
             "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String TEST_HASHED_KEY_ID =
+    private static final String TEST_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
-    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_CONTROLLER = "did:web:localhost:8080";
-    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_HASHED_KEY_ID;
+    private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_KEY_ID;
     private static final List<String> TEST_CONTEXT =
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
     private static final String TEST_DID_TYPE = "JsonWebKey2020";
@@ -78,11 +78,12 @@ class DidDocumentServiceTest {
         assertEquals(TEST_DID_TYPE, did.getType());
 
         PublicKeyJwk jwk = did.getPublicKeyJwk();
-        assertEquals(TEST_HASHED_KEY_ID, jwk.getKid());
+        assertEquals(TEST_KEY_ID, jwk.getKid());
         assertEquals(mockJwk.getKeyType().toString(), jwk.getKty());
         assertEquals(mockJwk.getCurve().toString(), jwk.getCrv());
         assertEquals(mockJwk.getX().toString(), jwk.getX());
         assertEquals(mockJwk.getY().toString(), jwk.getY());
+        assertEquals(mockJwk.getAlgorithm().toString(), jwk.getAlg());
     }
 
     @Test

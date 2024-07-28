@@ -1,5 +1,6 @@
-package uk.gov.di.mobile.wallet.cri.did_document;
+package uk.gov.di.mobile.wallet.cri.jwks;
 
+import com.nimbusds.jose.jwk.JWKSet;
 import jakarta.inject.Singleton;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -8,31 +9,32 @@ import jakarta.ws.rs.core.Response;
 import org.bouncycastle.openssl.PEMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 
 import java.security.NoSuchAlgorithmException;
 
 @Singleton
-@Path("/.well-known/did.json")
-public class DidDocumentResource {
+@Path("/.well-known/jwks.json")
+public class JwksResource {
 
-    private final DidDocumentService didDocumentService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(DidDocumentResource.class);
+    private final JwksService jwksService;
+    private static final Logger LOGGER = LoggerFactory.getLogger(JwksResource.class);
 
-    public DidDocumentResource(DidDocumentService didDocumentService) {
-        this.didDocumentService = didDocumentService;
+    public JwksResource(JwksService jwksService) {
+        this.jwksService = jwksService;
     }
 
     @GET
-    public Response getDidDocument() {
+    public Response getJwks() {
         try {
-            DidDocument didDocument = didDocumentService.generateDidDocument();
-            return buildSuccessResponse().entity(didDocument).build();
+            JWKSet jwkSet = jwksService.generateJwks().toPublicJWKSet();
+            return buildSuccessResponse().entity(jwkSet.toString()).build();
         } catch (IllegalArgumentException
                 | PEMException
                 | NoSuchAlgorithmException
                 | KeyNotActiveException exception) {
-            LOGGER.error("An error happened trying to get the DID document: ", exception);
+            LOGGER.error("An error happened trying to get the JWKS: ", exception);
             return buildInternalErrorResponse().build();
         }
     }

@@ -88,8 +88,7 @@ public class CredentialBuilder {
     }
 
     private Base64URL getEncodedHeader(String keyId) throws NoSuchAlgorithmException {
-        String hashedKeyId =
-                KeyHelper.hashKeyId(keyId, configurationService.getKeyIdHashingAlgorithm());
+        String hashedKeyId = KeyHelper.hashKeyId(keyId);
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM).keyID(hashedKeyId).type(JWT).build();
         return jwsHeader.toBase64URL();

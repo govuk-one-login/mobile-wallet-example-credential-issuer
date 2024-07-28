@@ -152,11 +152,6 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void shouldGetKeyIdHashingAlgorithmValue() {
-        assertEquals("SHA-256", configurationService.getKeyIdHashingAlgorithm());
-    }
-
-    @Test
     void shouldGetAuthServerJwksPathValue() {
         assertEquals("/.well-known/jwks.json", configurationService.getAuthServerJwksPath());
     }

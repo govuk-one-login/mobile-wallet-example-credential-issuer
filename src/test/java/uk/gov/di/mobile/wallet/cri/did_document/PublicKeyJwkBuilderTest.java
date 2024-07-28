@@ -16,7 +16,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PublicKeyJwkBuilderTest {
-    private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
+
+    private static final String TEST_KEY_ID =
+            "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
 
     @Test
@@ -31,6 +33,7 @@ class PublicKeyJwkBuilderTest {
                         .setCrv(testJwk.getCurve().toString())
                         .setX(testJwk.getX().toString())
                         .setY(testJwk.getY().toString())
+                        .setAlg(testJwk.getAlgorithm().toString())
                         .build();
 
         assertEquals(testJwk.getKeyID(), response.kid);
@@ -38,6 +41,7 @@ class PublicKeyJwkBuilderTest {
         assertEquals(testJwk.getCurve().toString(), response.crv);
         assertEquals(testJwk.getX().toString(), response.x);
         assertEquals(testJwk.getY().toString(), response.y);
+        assertEquals(testJwk.getAlgorithm().toString(), response.alg);
     }
 
     @Test

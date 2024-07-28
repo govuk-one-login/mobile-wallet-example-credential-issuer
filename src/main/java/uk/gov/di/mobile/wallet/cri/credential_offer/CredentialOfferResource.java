@@ -71,7 +71,7 @@ public class CredentialOfferResource {
                     walletSubjectId,
                     documentId,
                     exception);
-            return buildFailResponse().build();
+            return buildInternalErrorResponse().build();
         }
 
         LOGGER.info(
@@ -88,7 +88,7 @@ public class CredentialOfferResource {
                     walletSubjectId,
                     documentId,
                     exception);
-            return buildFailResponse().build();
+            return buildInternalErrorResponse().build();
         }
 
         LOGGER.info(
@@ -114,7 +114,7 @@ public class CredentialOfferResource {
         return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON_TYPE);
     }
 
-    private Response.ResponseBuilder buildFailResponse() {
+    private Response.ResponseBuilder buildInternalErrorResponse() {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
                 .type(MediaType.APPLICATION_JSON_TYPE);
     }
