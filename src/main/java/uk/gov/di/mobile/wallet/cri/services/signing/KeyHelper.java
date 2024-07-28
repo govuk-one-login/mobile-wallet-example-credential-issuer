@@ -8,6 +8,11 @@ import java.security.NoSuchAlgorithmException;
 
 public class KeyHelper {
 
+    private KeyHelper() {
+        throw new UnsupportedOperationException(
+                "This is a utility class and cannot be instantiated");
+    }
+
     private static final String HASHING_ALGORITHM = "SHA-256";
 
     public static String hashKeyId(String keyId) throws NoSuchAlgorithmException {

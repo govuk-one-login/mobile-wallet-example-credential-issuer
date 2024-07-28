@@ -16,6 +16,7 @@ import java.util.Base64;
 import java.util.HexFormat;
 
 public class DidKeyResolver {
+
     public record DecodedKeyData(
             Multicodec multicodecValue, byte[] rawPublicKeyBytes, String publicKeyBase64) {}
 

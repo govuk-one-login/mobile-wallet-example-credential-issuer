@@ -25,8 +25,7 @@ class MetadataResourceTest {
 
     private static final ConfigurationService configurationService = new ConfigurationService();
     private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
-
-    private ResourceExtension EXT =
+    private ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(new MetadataResource(configurationService, metadataBuilder))
                     .build();
@@ -40,7 +39,7 @@ class MetadataResourceTest {
         when(metadataBuilder.build()).thenReturn(testCredentialMetadata);
 
         final Response response =
-                EXT.target("/.well-known/openid-credential-issuer").request().get();
+                resource.target("/.well-known/openid-credential-issuer").request().get();
 
         JsonNode expectedResponseBodyAsString =
                 objectMapper.readTree(objectMapper.writeValueAsString(testCredentialMetadata));
@@ -57,7 +56,7 @@ class MetadataResourceTest {
         when(metadataBuilder.build()).thenThrow(IllegalArgumentException.class);
 
         final Response response =
-                EXT.target("/.well-known/openid-credential-issuer").request().get();
+                resource.target("/.well-known/openid-credential-issuer").request().get();
 
         assertEquals(500, response.getStatus());
     }

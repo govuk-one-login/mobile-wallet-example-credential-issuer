@@ -35,7 +35,7 @@ import static org.mockito.Mockito.when;
 class CredentialResourceTest {
 
     private static final CredentialService credentialService = mock(CredentialService.class);
-    private final ResourceExtension EXT =
+    private final ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(new CredentialResource(credentialService))
                     .build();
@@ -57,7 +57,7 @@ class CredentialResourceTest {
         JsonNode requestBody = null;
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -82,7 +82,7 @@ class CredentialResourceTest {
         JsonNode requestBody = new ObjectMapper().readTree("{\"proof\":{\"proof_type\":\"jwt\"}}");
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -108,7 +108,7 @@ class CredentialResourceTest {
                 new ObjectMapper().readTree("{\"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}");
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -136,7 +136,7 @@ class CredentialResourceTest {
                                 "{\"invalidParam\": \"test\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -164,7 +164,7 @@ class CredentialResourceTest {
                                 "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}");
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -191,7 +191,7 @@ class CredentialResourceTest {
                         .readTree("{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}");
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -219,7 +219,7 @@ class CredentialResourceTest {
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
@@ -245,7 +245,7 @@ class CredentialResourceTest {
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -276,7 +276,7 @@ class CredentialResourceTest {
                 .getCredential(any(), any());
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -308,7 +308,7 @@ class CredentialResourceTest {
                 .getCredential(any(), any());
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",
@@ -341,7 +341,7 @@ class CredentialResourceTest {
                 .thenReturn(credential);
 
         final Response response =
-                EXT.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header(
                                 "Authorization",

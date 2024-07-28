@@ -50,8 +50,7 @@ class CredentialBuilderTest {
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String TEST_HASHED_KEY_ID =
             "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
-    private JsonNode DOCUMENT_DETAILS;
-
+    private JsonNode documentDetails;
     ConfigurationService configurationService;
 
     @BeforeEach
@@ -59,7 +58,7 @@ class CredentialBuilderTest {
         configurationService = new ConfigurationService();
         credentialBuilder = new CredentialBuilder(configurationService, kmsService);
 
-        DOCUMENT_DETAILS =
+        documentDetails =
                 new ObjectMapper()
                         .readTree(
                                 "{\"credentialSubject\":{\"name\":[{\"nameParts\":[{\"type\": \"Title\",\"value\": \"Ms\"},{\"type\":\"GivenName\",\"value\":\"Irene\"},{\"type\":\"FamilyName\",\"value\":\"Adler\"}]}],\"socialSecurityRecord\": [{ \"personalNumber\": \"QQ123456A\" }]},\"type\": [\"VerifiableCredential\", \"SocialSecurityCredential\"]}");
@@ -75,7 +74,7 @@ class CredentialBuilderTest {
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
 
         Credential credentialBuilderReturnValue =
-                credentialBuilder.buildCredential("did:key:test-did-key", DOCUMENT_DETAILS);
+                credentialBuilder.buildCredential("did:key:test-did-key", documentDetails);
 
         SignedJWT credential = SignedJWT.parse(credentialBuilderReturnValue.getCredential());
 
@@ -112,7 +111,7 @@ class CredentialBuilderTest {
                         SigningException.class,
                         () ->
                                 credentialBuilder.buildCredential(
-                                        "did:key:test-did-key", DOCUMENT_DETAILS));
+                                        "did:key:test-did-key", documentDetails));
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
 
