@@ -7,8 +7,8 @@ import java.util.Map;
 public class CredentialOffer {
 
     private final String credential_issuer; // NOSONAR
+    //TODO: remove credentialIssuer once SDK has been updated: https://govukverify.atlassian.net/browse/DCMAW-9756
     private final String credentialIssuer;
-
     private final String[] credentials;
     private final Map<String, Map<String, String>> grants;
 
