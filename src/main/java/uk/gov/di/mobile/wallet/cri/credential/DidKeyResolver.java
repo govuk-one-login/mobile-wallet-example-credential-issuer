@@ -17,8 +17,12 @@ import java.util.HexFormat;
 
 public class DidKeyResolver {
 
-    public record DecodedKeyData( // NOSONAR - overriding methods is not required as byte[]
-            // rawPublicKeyBytes is created within this class
+    public record DecodedKeyData( // NOSONAR
+            /*
+            "Equals method should be overridden in records containing array fields java:S6218"
+            Overriding the equals method is not required as byte[] rawPublicKeyBytes is created within this class
+            and can only contain bytes
+            */
             Multicodec multicodecValue, byte[] rawPublicKeyBytes, String publicKeyBase64) {}
 
     /**
