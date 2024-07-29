@@ -17,11 +17,8 @@
 
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import lombok.experimental.UtilityClass;
-
 import java.util.Arrays;
 
-@UtilityClass
 public class Base58 {
 
     private static final char[] ALPHABET =
