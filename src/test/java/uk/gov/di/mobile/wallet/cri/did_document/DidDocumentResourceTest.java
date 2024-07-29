@@ -46,7 +46,7 @@ class DidDocumentResourceTest {
     private static final String TEST_DID_TYPE = "JsonWebKey2020";
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
     private static final DidDocumentService didDocumentService = mock(DidDocumentService.class);
-    private final ResourceExtension EXT =
+    private final ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(new DidDocumentResource(didDocumentService))
                     .build();
@@ -64,7 +64,7 @@ class DidDocumentResourceTest {
                 .when(didDocumentService)
                 .generateDidDocument();
 
-        final Response response = EXT.target("/.well-known/did.json").request().get();
+        final Response response = resource.target("/.well-known/did.json").request().get();
 
         verify(didDocumentService, Mockito.times(1)).generateDidDocument();
         assertThat(response.getStatus(), is(500));
@@ -82,7 +82,7 @@ class DidDocumentResourceTest {
         DidDocument didDocument = getMockDidDocument();
         when(didDocumentService.generateDidDocument()).thenReturn(didDocument);
 
-        final Response response = EXT.target("/.well-known/did.json").request().get();
+        final Response response = resource.target("/.well-known/did.json").request().get();
 
         verify(didDocumentService, Mockito.times(1)).generateDidDocument();
         assertThat(response.getStatus(), is(200));

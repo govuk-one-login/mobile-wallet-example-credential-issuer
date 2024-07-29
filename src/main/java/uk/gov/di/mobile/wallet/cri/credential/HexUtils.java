@@ -6,6 +6,10 @@ import java.util.List;
 
 public class HexUtils {
 
+    private HexUtils() {
+        // Should never be instantiated
+    }
+
     /**
      * Converts a byte array to a hexadecimal value.
      *
