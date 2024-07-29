@@ -1,17 +1,14 @@
 package uk.gov.di.mobile.wallet.cri.services.signing;
 
+import lombok.experimental.UtilityClass;
 import org.apache.hc.client5.http.utils.Hex;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+@UtilityClass
 public class KeyHelper {
-
-    private KeyHelper() {
-        throw new UnsupportedOperationException(
-                "This is a utility class and cannot be instantiated");
-    }
 
     private static final String HASHING_ALGORITHM = "SHA-256";
 

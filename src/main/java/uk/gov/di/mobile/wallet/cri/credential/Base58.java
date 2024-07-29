@@ -17,14 +17,12 @@
 
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import lombok.experimental.UtilityClass;
+
 import java.util.Arrays;
 
+@UtilityClass
 public class Base58 {
-
-    private Base58() {
-        throw new UnsupportedOperationException(
-                "This is a utility class and cannot be instantiated");
-    }
 
     private static final char[] ALPHABET =
             "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();

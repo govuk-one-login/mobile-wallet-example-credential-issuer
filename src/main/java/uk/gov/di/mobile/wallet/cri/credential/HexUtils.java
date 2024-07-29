@@ -1,15 +1,13 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import lombok.experimental.UtilityClass;
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
+@UtilityClass
 public class HexUtils {
-
-    private HexUtils() {
-        throw new UnsupportedOperationException(
-                "This is a utility class and cannot be instantiated");
-    }
 
     /**
      * Converts a byte array to a hexadecimal value.

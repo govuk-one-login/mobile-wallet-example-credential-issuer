@@ -17,7 +17,8 @@ import java.util.HexFormat;
 
 public class DidKeyResolver {
 
-    public record DecodedKeyData( // NOSONAR - overriding methods is not required as byte[] rawPublicKeyBytes is created within this class
+    public record DecodedKeyData( // NOSONAR - overriding methods is not required as byte[]
+            // rawPublicKeyBytes is created within this class
             Multicodec multicodecValue, byte[] rawPublicKeyBytes, String publicKeyBase64) {}
 
     /**
