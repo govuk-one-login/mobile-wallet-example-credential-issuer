@@ -55,10 +55,8 @@ class CredentialResourceTest {
                 "{\"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}", // when 'proof' param is missing
                 "{\"invalidParam\": \"test\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}", // when it contains additional param 'invalidParam'"
                 "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}", // "when
-                // 'proof_type' param value is not 'jwt'"
+                // 'proof_type' param is not 'jwt'"
                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}" // when JWT is invalid
-                // and can't be parsed
-                // as SignedJWT
             })
     void shouldReturn400AndInvalidProofWhenProofJwtIsInvalid(String arg)
             throws DataStoreException,

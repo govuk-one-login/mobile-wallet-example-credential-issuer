@@ -6,6 +6,11 @@ import java.util.List;
 
 public class HexUtils {
 
+    private HexUtils() {
+        throw new UnsupportedOperationException(
+                "This is a utility class and cannot be instantiated");
+    }
+
     /**
      * Converts a byte array to a hexadecimal value.
      *
