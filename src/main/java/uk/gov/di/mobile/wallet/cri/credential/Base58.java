@@ -22,8 +22,7 @@ import java.util.Arrays;
 public class Base58 {
 
     private Base58() {
-        throw new UnsupportedOperationException(
-                "This is a utility class and cannot be instantiated");
+        // Should never be instantiated
     }
 
     private static final char[] ALPHABET =
