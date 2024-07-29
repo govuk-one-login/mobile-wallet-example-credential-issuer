@@ -82,13 +82,13 @@ curl -X GET http://localhost:8080/.well-known/jwks.json | jq
 #### Reading from the Database
 To check that a credential offer was saved to the **cri_cache** table, run:
 
-`aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name cri_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`
+`aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name credential_offer_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`
 
 replacing the **credentialIdentifier** with the relevant one.
 
 To return all items from the **cri_cache** table, run:
 
- `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name cri_cache"`.
+ `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name credential_offer_cache`.
 
 ### Test
 Run unit tests with `./gradlew test`

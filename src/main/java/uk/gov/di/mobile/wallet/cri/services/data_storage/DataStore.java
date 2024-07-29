@@ -4,8 +4,10 @@ import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 
 public interface DataStore {
 
-    public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
+    void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
             throws DataStoreException;
 
     CredentialOfferCacheItem getCredentialOffer(String partitionValue) throws DataStoreException;
+
+    void deleteCredentialOffer(String partitionValue) throws DataStoreException;
 }
