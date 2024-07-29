@@ -261,7 +261,8 @@ class CredentialServiceTest {
         verify(accessTokenService).verifyAccessToken(accessToken);
         verify(proofJwtService).verifyProofJwt(proofJwt);
         verify(dynamoDbService, Mockito.times(1)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(1)).deleteCredentialOffer(any());}
+        verify(dynamoDbService, Mockito.times(1)).deleteCredentialOffer(any());
+    }
 
     private static SignedJWT getTestProofJwt(String nonce) {
         return new SignedJWT(
