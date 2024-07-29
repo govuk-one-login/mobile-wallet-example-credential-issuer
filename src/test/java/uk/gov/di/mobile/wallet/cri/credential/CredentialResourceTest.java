@@ -51,12 +51,11 @@ class CredentialResourceTest {
     @ValueSource(
             strings = {
                 "", // when request body is falsy
-                "{\"proof\":{\"proof_type\":\"jwt\"}}", // when 'jwt' param is missing
-                "{\"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}", // when 'proof' param is missing
-                "{\"invalidParam\": \"test\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}", // when it contains additional param 'invalidParam'"
-                "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}", // "when
-                // 'proof_type' param is not 'jwt'"
-                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}" // when JWT is invalid
+                "{\"proof\":{\"proof_type\":\"jwt\"}}", // 'jwt' param is missing
+                "{\"proof_type\":\"jwt\", \"jwt\":\"testJwt\"}", // 'proof' param is missing
+                "{\"invalidParam\": \"test\", \"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}", // request contains additional param 'invalidParam'"
+                "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}", // "'proof_type' param is not 'jwt'"
+                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}" // JWT is invalid
             })
     void shouldReturn400AndInvalidProofWhenProofJwtIsInvalid(String arg)
             throws DataStoreException,
