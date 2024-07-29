@@ -23,10 +23,8 @@ import static org.mockito.Mockito.when;
 class DynamoDbServiceTest {
 
     private static final String TEST_TABLE_NAME = "test-cache-cri-table";
-
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
     @Mock private DynamoDbTable<CredentialOfferCacheItem> mockDynamoDbTable;
-
     private CredentialOfferCacheItem credentialOfferCacheItem;
     private DynamoDbService dynamoDbService;
 
@@ -75,6 +73,20 @@ class DynamoDbServiceTest {
                         eq(TEST_TABLE_NAME),
                         ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any());
         verify(mockDynamoDbTable).getItem(keyCaptor.capture());
+        assertEquals("test-partition-key-123", keyCaptor.getValue().partitionKeyValue().s());
+    }
+
+    @Test
+    void shouldDeleteCredentialOfferFromCacheThroughPartitionKey() throws DataStoreException {
+        dynamoDbService.deleteCredentialOffer("test-partition-key-123");
+
+        ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
+
+        verify(mockDynamoDbEnhancedClient)
+                .table(
+                        eq(TEST_TABLE_NAME),
+                        ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any());
+        verify(mockDynamoDbTable).deleteItem(keyCaptor.capture());
         assertEquals("test-partition-key-123", keyCaptor.getValue().partitionKeyValue().s());
     }
 }
