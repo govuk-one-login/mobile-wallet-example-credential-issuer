@@ -82,8 +82,7 @@ public class CredentialOfferResource {
 
         Long credentialOfferTtl =
                 Instant.now()
-                        .plusSeconds(
-                                Long.parseLong(configurationService.getCredentialOfferTtlInSecs()))
+                        .plusSeconds(configurationService.getCredentialOfferTtlInSecs())
                         .getEpochSecond();
 
         try {

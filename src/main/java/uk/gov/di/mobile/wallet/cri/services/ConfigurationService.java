@@ -40,10 +40,6 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("CREDENTIAL_OFFER_CACHE", "credential_offer_cache");
     }
 
-    public String getCredentialOfferTtlInSecs() {
-        return System.getenv().getOrDefault("CREDENTIAL_OFFER_TTL", "900");
-    }
-
     public String getClientId() {
         return "EXAMPLE_CRI";
     }
@@ -74,5 +70,13 @@ public class ConfigurationService extends Configuration {
 
     public long getCredentialTtlInSecs() {
         return 365;
+    }
+
+    /*
+    credential offer should last for a limited time to prevent miss-use.
+    15 minutes (900 seconds) has been chosen for now but this needs user testing and security sign off.
+    */
+    public int getCredentialOfferTtlInSecs() {
+        return 900;
     }
 }
