@@ -46,7 +46,7 @@ Default output format [None]:
 ####  Setting up LocalStack
 This app uses LocalStack to run AWS services locally on port `4560`.
 
-To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table , run `docker-compose up`.
+To start the LocalStack container and provision a local version of KMS and the **cri_cache** DynamoDB table , run `docker compose up`.
 
 You will need to have Docker Desktop or alternative like installed.
 
@@ -80,7 +80,7 @@ curl -X GET http://localhost:8080/.well-known/jwks.json | jq
 ```
 
 #### Reading from the Database
-To check that a credential offer was saved to the **cri_cache** table, run:
+To check that a credential offer was saved to the **credential_offer_cache** table, run:
 
 `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name credential_offer_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`
 
@@ -91,4 +91,11 @@ To return all items from the **cri_cache** table, run:
  `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name credential_offer_cache`.
 
 ### Test
+#### Unit Tests
 Run unit tests with `./gradlew test`
+
+#### Testing with the Example CRI Test Harness
+When testing with the [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-harness) locally, you must point the authorization server to the right address:
+```
+ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run  
+```
