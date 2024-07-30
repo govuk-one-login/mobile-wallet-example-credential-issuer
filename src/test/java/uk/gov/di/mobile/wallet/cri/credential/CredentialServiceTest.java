@@ -68,7 +68,10 @@ class CredentialServiceTest {
                         credentialBuilder);
         credentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-sub", 900L);
+                        "test-credential-identifier",
+                        "test-document-id",
+                        "test-wallet-sub",
+                        Instant.now().plusSeconds(Long.parseLong("900")).getEpochSecond());
     }
 
     @Test
@@ -166,6 +169,31 @@ class CredentialServiceTest {
         assertThat(
                 exception.getMessage(),
                 containsString("Access token sub claim does not match cached walletSubjectId"));
+    }
+
+    @Test
+    void shouldThrowAccessTokenValidationExceptionWhenCredentialOfferIsExpired()
+            throws java.text.ParseException, DataStoreException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
+        CredentialOfferCacheItem expiredCredentialOfferCacheItem =
+                new CredentialOfferCacheItem(
+                        "test-credential-identifier",
+                        "test-document-id",
+                        "test-wallet-sub",
+                        Instant.now().minusSeconds(Long.parseLong("1")).getEpochSecond());
+        when(dynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(expiredCredentialOfferCacheItem);
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> credentialService.getCredential(accessToken, proofJwt));
+        assertThat(exception.getMessage(), containsString("Credential offer is expired"));
     }
 
     @Test

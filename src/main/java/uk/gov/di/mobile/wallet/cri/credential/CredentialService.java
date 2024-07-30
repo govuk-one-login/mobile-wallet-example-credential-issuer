@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.List;
 
 public class CredentialService {
@@ -75,6 +76,11 @@ public class CredentialService {
         if (credentialOffer == null) {
             throw new AccessTokenValidationException(
                     "Null response returned when fetching credential offer");
+        }
+
+        long now = Instant.now().getEpochSecond();
+        if (now > credentialOffer.getTimeToLive()) {
+            throw new AccessTokenValidationException("Credential offer is expired");
         }
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
