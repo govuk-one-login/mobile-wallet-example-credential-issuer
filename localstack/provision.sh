@@ -9,6 +9,9 @@ aws --endpoint-url=http://localhost:4566 dynamodb create-table \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
     --region eu-west-2
 
+aws dynamodb update-time-to-live --table-name $TABLE_NAME \
+                      --time-to-live-specification Enabled=true,AttributeName=timeToLive
+
 aws --endpoint-url=http://localhost:4566 kms create-key \
     --region eu-west-2 \
     --key-usage SIGN_VERIFY \
