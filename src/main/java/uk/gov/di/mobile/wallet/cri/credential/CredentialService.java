@@ -89,6 +89,7 @@ public class CredentialService {
                 credentialOfferId,
                 documentId);
 
+        // credential offer is deleted to prevent replay
         dataStore.deleteCredentialOffer(credentialOfferId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);

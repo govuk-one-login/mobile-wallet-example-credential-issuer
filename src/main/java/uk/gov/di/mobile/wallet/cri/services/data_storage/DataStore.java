@@ -7,7 +7,7 @@ public interface DataStore {
     void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
             throws DataStoreException;
 
-    CredentialOfferCacheItem getCredentialOffer(String partitionValue) throws DataStoreException;
+    CredentialOfferCacheItem getCredentialOffer(String credentialOfferId) throws DataStoreException;
 
-    void deleteCredentialOffer(String partitionValue) throws DataStoreException;
+    void deleteCredentialOffer(String credentialOfferId) throws DataStoreException;
 }
