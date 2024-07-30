@@ -80,7 +80,7 @@ public class CredentialOfferResource {
                 walletSubjectId,
                 credentialOfferId);
 
-        Long credentialOfferTtl =
+        Long credentialOfferExpiryTimestamp =
                 Instant.now()
                         .plusSeconds(configurationService.getCredentialOfferTtlInSecs())
                         .getEpochSecond();
@@ -88,7 +88,10 @@ public class CredentialOfferResource {
         try {
             dataStore.saveCredentialOffer(
                     new CredentialOfferCacheItem(
-                            credentialOfferId, documentId, walletSubjectId, credentialOfferTtl));
+                            credentialOfferId,
+                            documentId,
+                            walletSubjectId,
+                            credentialOfferExpiryTimestamp));
         } catch (DataStoreException exception) {
             LOGGER.error(
                     "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",

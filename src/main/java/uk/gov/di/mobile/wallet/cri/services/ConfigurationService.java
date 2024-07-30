@@ -73,7 +73,7 @@ public class ConfigurationService extends Configuration {
     }
 
     /*
-    credential offer should last for a limited time to prevent miss-use.
+    Credential offer should last for a limited time to prevent miss-use.
     15 minutes (900 seconds) has been chosen for now but this needs user testing and security sign off.
     */
     public int getCredentialOfferTtlInSecs() {
