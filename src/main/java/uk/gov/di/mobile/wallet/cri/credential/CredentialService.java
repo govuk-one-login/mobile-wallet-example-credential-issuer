@@ -71,12 +71,13 @@ public class CredentialService {
         }
 
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (credentialOffer == null) {
+            LOGGER.info("Credential offer not found for credentialOfferId {}", credentialOfferId);
             throw new CredentialOfferNotFoundException(
                     "Null response returned from database when fetching credential offer");
         }
+        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
             throw new AccessTokenValidationException(
