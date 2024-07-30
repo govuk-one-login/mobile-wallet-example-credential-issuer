@@ -14,8 +14,9 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,10 +24,9 @@ import static org.mockito.Mockito.when;
 class DynamoDbServiceTest {
 
     private static final String TEST_TABLE_NAME = "test-cache-cri-table";
-
+    private static final String TEST_PARTITION_KEY = "test-credential_id";
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
     @Mock private DynamoDbTable<CredentialOfferCacheItem> mockDynamoDbTable;
-
     private CredentialOfferCacheItem credentialOfferCacheItem;
     private DynamoDbService dynamoDbService;
 
@@ -35,24 +35,20 @@ class DynamoDbServiceTest {
         when(mockDynamoDbEnhancedClient.table(
                         anyString(), ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any()))
                 .thenReturn(mockDynamoDbTable);
-
-        credentialOfferCacheItem = new CredentialOfferCacheItem();
-
+        credentialOfferCacheItem =
+                new CredentialOfferCacheItem(
+                        TEST_PARTITION_KEY, "test-document-id", "test-wallet-subject-id");
         dynamoDbService = new DynamoDbService(mockDynamoDbEnhancedClient, TEST_TABLE_NAME);
     }
 
     @Test
     void shouldSaveCredentialOfferToCache() throws DataStoreException {
         dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
-
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
                 ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
 
-        verify(mockDynamoDbEnhancedClient)
-                .table(
-                        eq(TEST_TABLE_NAME),
-                        ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any());
         verify(mockDynamoDbTable).putItem(credentialOfferCacheItemArgumentCaptor.capture());
+
         assertEquals(
                 credentialOfferCacheItem.getCredentialIdentifier(),
                 credentialOfferCacheItemArgumentCaptor.getValue().getCredentialIdentifier());
@@ -65,16 +61,69 @@ class DynamoDbServiceTest {
     }
 
     @Test
+    void shouldThrowDataStoreExceptionWhenErrorHappensWhileTryingToSaveItem()
+            throws DataStoreException {
+        dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
+        ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
+                ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
+        doThrow(new UnsupportedOperationException())
+                .when(mockDynamoDbTable)
+                .putItem(credentialOfferCacheItemArgumentCaptor.capture());
+
+        DataStoreException exception =
+                assertThrows(
+                        DataStoreException.class,
+                        () -> dynamoDbService.saveCredentialOffer(credentialOfferCacheItem));
+        assertEquals("Error saving credential offer", exception.getMessage());
+    }
+
+    @Test
     void shouldGetCredentialOfferFromCacheThroughPartitionKey() throws DataStoreException {
-        dynamoDbService.getCredentialOffer("test-partition-key-123");
-
+        dynamoDbService.getCredentialOffer(TEST_PARTITION_KEY);
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
-
-        verify(mockDynamoDbEnhancedClient)
-                .table(
-                        eq(TEST_TABLE_NAME),
-                        ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any());
         verify(mockDynamoDbTable).getItem(keyCaptor.capture());
-        assertEquals("test-partition-key-123", keyCaptor.getValue().partitionKeyValue().s());
+
+        assertEquals(TEST_PARTITION_KEY, keyCaptor.getValue().partitionKeyValue().s());
+    }
+
+    @Test
+    void shouldThrowDataStoreExceptionWhenErrorHappensWhileTryingToGetItem()
+            throws DataStoreException {
+        dynamoDbService.getCredentialOffer(TEST_PARTITION_KEY);
+        ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
+        doThrow(new UnsupportedOperationException())
+                .when(mockDynamoDbTable)
+                .getItem(keyCaptor.capture());
+
+        DataStoreException exception =
+                assertThrows(
+                        DataStoreException.class,
+                        () -> dynamoDbService.getCredentialOffer(TEST_PARTITION_KEY));
+        assertEquals("Error fetching credential offer", exception.getMessage());
+    }
+
+    @Test
+    void shouldDeleteCredentialOfferFromCacheThroughPartitionKey() throws DataStoreException {
+        dynamoDbService.deleteCredentialOffer(TEST_PARTITION_KEY);
+        ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
+        verify(mockDynamoDbTable).deleteItem(keyCaptor.capture());
+
+        assertEquals(TEST_PARTITION_KEY, keyCaptor.getValue().partitionKeyValue().s());
+    }
+
+    @Test
+    void shouldThrowDataStoreExceptionWhenErrorHappensWhileTryingToDeleteItem()
+            throws DataStoreException {
+        dynamoDbService.deleteCredentialOffer(TEST_PARTITION_KEY);
+        ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
+        doThrow(new UnsupportedOperationException())
+                .when(mockDynamoDbTable)
+                .deleteItem(keyCaptor.capture());
+
+        DataStoreException exception =
+                assertThrows(
+                        DataStoreException.class,
+                        () -> dynamoDbService.deleteCredentialOffer(TEST_PARTITION_KEY));
+        assertEquals("Error deleting credential offer", exception.getMessage());
     }
 }

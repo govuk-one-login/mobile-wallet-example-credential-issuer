@@ -38,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -69,7 +70,7 @@ class CredentialServiceTest {
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenAccessTokenCredentialIdentifiersIsEmpty()
-            throws java.text.ParseException, JOSEException {
+            throws java.text.ParseException, JOSEException, DataStoreException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken = getTestAccessToken("test-nonce");
         SignedJWT proofJwt = getTestProofJwt("test-nonce");
@@ -84,11 +85,13 @@ class CredentialServiceTest {
                 exception.getMessage(),
                 containsString(
                         "Error parsing access token custom claims: credential_identifiers is invalid"));
+        verify(dynamoDbService, times(0)).getCredentialOffer(any());
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
     void shouldThrowProofJwtValidationExceptionWhenNoncesDoNotMatch()
-            throws java.text.ParseException, JOSEException {
+            throws java.text.ParseException, JOSEException, DataStoreException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
                 getTestAccessToken("test-nonce-1", "test-credential-identifier", "test-wallet-sub");
@@ -103,10 +106,12 @@ class CredentialServiceTest {
         assertEquals(
                 "Access token c_nonce claim does not match Proof JWT nonce claim",
                 exception.getMessage());
+        verify(dynamoDbService, times(0)).getCredentialOffer(any());
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenCredentialOfferNotInDataStore()
+    void shouldThrowCredentialOfferNotFoundExceptionWhenCredentialOfferNotInDataStore()
             throws java.text.ParseException, DataStoreException, JOSEException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
@@ -116,12 +121,15 @@ class CredentialServiceTest {
         proofJwt.sign(ecSigner);
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
-        AccessTokenValidationException exception =
+        CredentialOfferNotFoundException exception =
                 assertThrows(
-                        AccessTokenValidationException.class,
+                        CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals(
-                "Null response returned when fetching credential offer", exception.getMessage());
+                "Null response returned from database when fetching credential offer",
+                exception.getMessage());
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -141,6 +149,8 @@ class CredentialServiceTest {
                         DataStoreException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Some database error", exception.getMessage());
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -164,6 +174,8 @@ class CredentialServiceTest {
         assertThat(
                 exception.getMessage(),
                 containsString("Access token sub claim does not match cached walletSubjectId"));
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -202,6 +214,8 @@ class CredentialServiceTest {
                 exception.getMessage(),
                 containsString(
                         "Request to fetch document details for documentId test-document-id failed with status code 500"));
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -214,7 +228,8 @@ class CredentialServiceTest {
                     NoSuchAlgorithmException,
                     JOSEException,
                     URISyntaxException,
-                    CredentialServiceException {
+                    CredentialServiceException,
+                    CredentialOfferNotFoundException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
                 getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");
@@ -247,6 +262,8 @@ class CredentialServiceTest {
                         testDocumentDetails);
         verify(accessTokenService).verifyAccessToken(accessToken);
         verify(proofJwtService).verifyProofJwt(proofJwt);
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(1)).deleteCredentialOffer("test-credential-identifier");
     }
 
     private static SignedJWT getTestProofJwt(String nonce) {

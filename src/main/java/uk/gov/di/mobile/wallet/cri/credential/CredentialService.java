@@ -52,7 +52,8 @@ public class CredentialService {
                     AccessTokenValidationException,
                     NoSuchAlgorithmException,
                     URISyntaxException,
-                    CredentialServiceException {
+                    CredentialServiceException,
+                    CredentialOfferNotFoundException {
 
         accessTokenService.verifyAccessToken(accessToken);
 
@@ -70,12 +71,13 @@ public class CredentialService {
         }
 
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (credentialOffer == null) {
-            throw new AccessTokenValidationException(
-                    "Null response returned when fetching credential offer");
+            LOGGER.info("Credential offer not found for credentialOfferId {}", credentialOfferId);
+            throw new CredentialOfferNotFoundException(
+                    "Null response returned from database when fetching credential offer");
         }
+        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
             throw new AccessTokenValidationException(
@@ -88,6 +90,9 @@ public class CredentialService {
                 "Document details retrieved for credentialOfferId {} and documentId {}",
                 credentialOfferId,
                 documentId);
+
+        // credential offer is deleted to prevent replay
+        dataStore.deleteCredentialOffer(credentialOfferId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }
