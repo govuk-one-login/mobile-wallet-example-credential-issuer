@@ -29,6 +29,10 @@ Parameters:
       The port on which the container is running
     Type: Number
     Default: 8080
+  DocumentBuilderStackName:
+    Description: The cloudformation stack name of the document builder
+    Type: String
+    Default: "wallet-doc-builder-fe"
 
 Conditions:
   StackNameIsWalletCredIssuerBE: !Equals [ !Ref "AWS::StackName", wallet-cred-issuer-be ]
@@ -417,6 +421,8 @@ Resources:
                 - ${SelfUrl}
                 - SelfUrl:
                     !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+            - Name: OIDC_CLIENT_ID
+              Value: !Sub "{{resolve:ssm:/${DocumentBuilderStackName}/Config/OIDC/Client/Id}}"
             - Name: CREDENTIAL_STORE_URL
               Value: !Sub 
                       - "https://${CredentialStoreUrl}"
