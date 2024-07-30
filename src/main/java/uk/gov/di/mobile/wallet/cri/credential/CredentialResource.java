@@ -52,6 +52,10 @@ public class CredentialResource {
                 return buildBadRequestResponse().entity("invalid_proof").build();
             }
 
+            if (exception instanceof CredentialOfferNotFoundException) {
+                return buildNotFoundResponse().entity("invalid_credential_request").build();
+            }
+
             return buildInternalErrorResponse().entity("server_error").build();
         }
 
@@ -100,6 +104,10 @@ public class CredentialResource {
 
     private Response.ResponseBuilder buildBadRequestResponse() {
         return Response.status(Response.Status.BAD_REQUEST);
+    }
+
+    private Response.ResponseBuilder buildNotFoundResponse() {
+        return Response.status(Response.Status.NOT_FOUND);
     }
 
     private Response.ResponseBuilder buildInternalErrorResponse() {

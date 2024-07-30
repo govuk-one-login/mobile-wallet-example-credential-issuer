@@ -111,7 +111,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenCredentialOfferNotInDataStore()
+    void shouldThrowCredentialOfferNotFoundExceptionWhenCredentialOfferNotInDataStore()
             throws java.text.ParseException, DataStoreException, JOSEException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
@@ -121,12 +121,13 @@ class CredentialServiceTest {
         proofJwt.sign(ecSigner);
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
-        AccessTokenValidationException exception =
+        CredentialOfferNotFoundException exception =
                 assertThrows(
-                        AccessTokenValidationException.class,
+                        CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals(
-                "Null response returned when fetching credential offer", exception.getMessage());
+                "Null response returned from database when fetching credential offer",
+                exception.getMessage());
         verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
         verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
@@ -227,7 +228,8 @@ class CredentialServiceTest {
                     NoSuchAlgorithmException,
                     JOSEException,
                     URISyntaxException,
-                    CredentialServiceException {
+                    CredentialServiceException,
+                    CredentialOfferNotFoundException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
                 getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");

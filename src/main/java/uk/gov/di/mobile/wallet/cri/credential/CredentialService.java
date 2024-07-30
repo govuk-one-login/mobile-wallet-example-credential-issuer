@@ -52,7 +52,8 @@ public class CredentialService {
                     AccessTokenValidationException,
                     NoSuchAlgorithmException,
                     URISyntaxException,
-                    CredentialServiceException {
+                    CredentialServiceException,
+                    CredentialOfferNotFoundException {
 
         accessTokenService.verifyAccessToken(accessToken);
 
@@ -73,8 +74,8 @@ public class CredentialService {
         LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (credentialOffer == null) {
-            throw new AccessTokenValidationException(
-                    "Null response returned when fetching credential offer");
+            throw new CredentialOfferNotFoundException(
+                    "Null response returned from database when fetching credential offer");
         }
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
