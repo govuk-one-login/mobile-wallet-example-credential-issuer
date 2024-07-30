@@ -132,9 +132,7 @@ class CredentialServiceTest {
                 assertThrows(
                         CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
-        assertEquals(
-                "Null response returned from database when fetching credential offer",
-                exception.getMessage());
+        assertEquals("Credential offer expired or not found", exception.getMessage());
         verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
         verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
@@ -184,7 +182,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenCredentialOfferIsExpired()
+    void shouldThrowCredentialOfferNotFoundExceptionWhenCredentialOfferIsExpired()
             throws java.text.ParseException, DataStoreException, JOSEException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
@@ -201,11 +199,11 @@ class CredentialServiceTest {
         when(dynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(expiredCredentialOfferCacheItem);
 
-        AccessTokenValidationException exception =
+        CredentialOfferNotFoundException exception =
                 assertThrows(
-                        AccessTokenValidationException.class,
+                        CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
-        assertThat(exception.getMessage(), containsString("Credential offer is expired"));
+        assertThat(exception.getMessage(), containsString("Credential offer expired or not found"));
     }
 
     @Test

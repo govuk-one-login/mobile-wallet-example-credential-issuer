@@ -73,16 +73,8 @@ public class CredentialService {
 
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
-        if (credentialOffer == null) {
-            LOGGER.info("Credential offer not found for credentialOfferId {}", credentialOfferId);
-            throw new CredentialOfferNotFoundException(
-                    "Null response returned from database when fetching credential offer");
-        }
-        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
-
-        long now = Instant.now().getEpochSecond();
-        if (now > credentialOffer.getTimeToLive()) {
-            throw new AccessTokenValidationException("Credential offer is expired");
+        if (!isValidDatabaseResponse(credentialOffer, credentialOfferId)) {
+            throw new CredentialOfferNotFoundException("Credential offer expired or not found");
         }
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
@@ -101,6 +93,27 @@ public class CredentialService {
         dataStore.deleteCredentialOffer(credentialOfferId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
+    }
+
+    private static boolean isValidDatabaseResponse(
+            CredentialOfferCacheItem credentialOffer, String credentialOfferId) {
+        if (credentialOffer == null) {
+            LOGGER.info("Credential offer not found for credentialOfferId {}", credentialOfferId);
+            return false;
+        }
+
+        long now = Instant.now().getEpochSecond();
+        long credentialOfferExpiry = credentialOffer.getTimeToLive();
+        if (now > credentialOfferExpiry) {
+            LOGGER.info(
+                    "Credential offer for credentialOfferId {} expired at {}",
+                    credentialOfferId,
+                    credentialOfferExpiry);
+            return false;
+        }
+
+        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
+        return true;
     }
 
     private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
