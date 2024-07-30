@@ -40,6 +40,10 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("CREDENTIAL_OFFER_CACHE", "credential_offer_cache");
     }
 
+    public String getCredentialOfferTtlInSecs() {
+        return System.getenv().getOrDefault("CREDENTIAL_OFFER_TTL", "900");
+    }
+
     public String getClientId() {
         return "EXAMPLE_CRI";
     }
@@ -64,11 +68,11 @@ public class ConfigurationService extends Configuration {
         return "/document/";
     }
 
-    public long getPreAuthorizedCodeTtl() {
+    public long getPreAuthorizedCodeTtlInSecs() {
         return 300;
     }
 
-    public long getCredentialTtl() {
+    public long getCredentialTtlInSecs() {
         return 365;
     }
 }

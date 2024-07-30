@@ -79,7 +79,7 @@ public class CredentialBuilder {
                         .expirationTime(
                                 Date.from(
                                         now.plus(
-                                                configurationService.getCredentialTtl(),
+                                                configurationService.getCredentialTtlInSecs(),
                                                 ChronoUnit.DAYS)))
                         .subject(proofJwtDidKey)
                         .claim("vc", documentDetails)

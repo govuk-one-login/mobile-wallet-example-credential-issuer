@@ -13,7 +13,10 @@ class CredentialOfferCacheItemTest {
     void setUp() {
         credentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-subject-id");
+                        "test-credential-identifier",
+                        "test-document-id",
+                        "test-wallet-subject-id",
+                        900L);
     }
 
     @Test
@@ -22,5 +25,6 @@ class CredentialOfferCacheItemTest {
                 "test-credential-identifier", credentialOfferCacheItem.getCredentialIdentifier());
         assertEquals("test-document-id", credentialOfferCacheItem.getDocumentId());
         assertEquals("test-wallet-subject-id", credentialOfferCacheItem.getWalletSubjectId());
+        assertEquals(900, credentialOfferCacheItem.getTimeToLive());
     }
 }

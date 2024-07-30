@@ -22,6 +22,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.UUID;
 
 @Singleton
@@ -79,9 +80,16 @@ public class CredentialOfferResource {
                 walletSubjectId,
                 credentialOfferId);
 
+        Long credentialOfferTtl =
+                Instant.now()
+                        .plusSeconds(
+                                Long.parseLong(configurationService.getCredentialOfferTtlInSecs()))
+                        .getEpochSecond();
+
         try {
             dataStore.saveCredentialOffer(
-                    new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId));
+                    new CredentialOfferCacheItem(
+                            credentialOfferId, documentId, walletSubjectId, credentialOfferTtl));
         } catch (DataStoreException exception) {
             LOGGER.error(
                     "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",

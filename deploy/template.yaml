@@ -426,6 +426,8 @@ Resources:
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
+            - Name: CREDENTIAL_OFFER_TTL
+              Value: "900"
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub
                       - "https://${AuthServerUrl}"
@@ -600,6 +602,9 @@ Resources:
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: timeToLive
+        Enabled: true
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       SSESpecification:
