@@ -132,6 +132,17 @@ class ConfigurationServiceTest {
     }
 
     @Test
+    void shouldGetCredentialOfferTtlDefaultValueWhenEnvVarUnset() {
+        assertEquals("900", configurationService.getCredentialOfferTtlInSecs());
+    }
+
+    @Test
+    void shouldGetGetCredentialOfferTttlEnvVarValue() {
+        environmentVariables.set("CREDENTIAL_OFFER_TTL", "300");
+        assertEquals("300", configurationService.getCredentialOfferTtlInSecs());
+    }
+
+    @Test
     void shouldGetClientIdValue() {
         assertEquals("EXAMPLE_CRI", configurationService.getClientId());
     }
