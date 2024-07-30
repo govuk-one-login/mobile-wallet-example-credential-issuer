@@ -133,17 +133,12 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetClientIdValue() {
-        assertEquals("EXAMPLE_CRI", configurationService.getClientId());
+        assertEquals("TEST_CLIENT_ID", configurationService.getClientId());
     }
 
     @Test
     void shouldGetIssuerValue() {
         assertEquals("urn:fdc:gov:uk:example-credential-issuer", configurationService.getIssuer());
-    }
-
-    @Test
-    void shouldGetAudienceValue() {
-        assertEquals("urn:fdc:gov:uk:wallet", configurationService.getAudience());
     }
 
     @Test

@@ -41,15 +41,11 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getClientId() {
-        return "EXAMPLE_CRI";
+        return System.getenv().getOrDefault("OIDC_CLIENT_ID", "TEST_CLIENT_ID");
     }
 
     public String getIssuer() {
         return "urn:fdc:gov:uk:example-credential-issuer";
-    }
-
-    public String getAudience() {
-        return "urn:fdc:gov:uk:wallet";
     }
 
     public String getLocalstackEndpoint() {
