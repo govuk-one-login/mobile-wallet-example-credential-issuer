@@ -66,9 +66,10 @@ class PreAuthorizedCodeBuilderTest {
 
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getAudience(),
-                equalTo(singletonList("urn:fdc:gov:uk:wallet")));
+                equalTo(singletonList("http://localhost:8888")));
         assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"), equalTo("EXAMPLE_CRI"));
+                preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"),
+                equalTo("TEST_CLIENT_ID"));
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getIssuer(),
                 equalTo("urn:fdc:gov:uk:example-credential-issuer"));
