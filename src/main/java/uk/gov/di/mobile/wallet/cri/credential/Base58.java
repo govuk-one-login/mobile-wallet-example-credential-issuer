@@ -21,6 +21,10 @@ import java.util.Arrays;
 
 public class Base58 {
 
+    private Base58() {
+        // Should never be instantiated
+    }
+
     private static final char[] ALPHABET =
             "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz".toCharArray();
     private static final int[] INDEXES = new int[128];

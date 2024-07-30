@@ -17,6 +17,9 @@
 # Ignore Gradle build output directory
 build
 
+# Intellij
+*.iml
+
 # Mac
 .DS_Store
 dist

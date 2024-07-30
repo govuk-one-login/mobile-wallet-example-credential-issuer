@@ -49,13 +49,12 @@ class CredentialOfferResourceTest {
     private static final String DOCUMENT_ID = "mock-document-id";
     private static final String CREDENTIAL_TYPE = "TestCredentialType";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
-
     private static final KmsService kmsService = mock(KmsService.class);
     private static final ConfigurationService configurationService = new ConfigurationService();
     private static final CredentialOfferService credentialOfferService =
             mock(CredentialOfferService.class);
     private final DynamoDbService mockDataStore = mock(DynamoDbService.class);
-    private final ResourceExtension EXT =
+    private final ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(
                             new CredentialOfferResource(
@@ -79,7 +78,7 @@ class CredentialOfferResourceTest {
                 .saveCredentialOffer(new CredentialOfferCacheItem());
 
         final Response response =
-                EXT.target("/credential_offer")
+                resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
                         .queryParam("documentId", DOCUMENT_ID)
                         .queryParam("credentialType", CREDENTIAL_TYPE)
@@ -104,7 +103,7 @@ class CredentialOfferResourceTest {
                 .saveCredentialOffer(any());
 
         final Response response =
-                EXT.target("/credential_offer")
+                resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
                         .queryParam("documentId", DOCUMENT_ID)
                         .queryParam("credentialType", CREDENTIAL_TYPE)
@@ -119,7 +118,7 @@ class CredentialOfferResourceTest {
     @DisplayName("Should return 400 when a walletSubjectID is not a valid value")
     void testItValidatesInputParam_walletSubjectID() {
         final Response response =
-                EXT.target("/credential_offer")
+                resource.target("/credential_offer")
                         .queryParam("walletSubjectId", "123")
                         .queryParam("documentId", DOCUMENT_ID)
                         .queryParam("credentialType", CREDENTIAL_TYPE)
@@ -132,7 +131,7 @@ class CredentialOfferResourceTest {
     @DisplayName("Should return 400 when a documentId is not a valid value")
     void testItValidatesInputParam_documentId() {
         final Response response =
-                EXT.target("/credential_offer")
+                resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
                         .queryParam("documentId", "&&^")
                         .queryParam("credentialType", CREDENTIAL_TYPE)
@@ -145,7 +144,7 @@ class CredentialOfferResourceTest {
     @DisplayName("Should return 400 when a credentialType is not a valid value")
     void testItValidatesInputParam_credentialType() {
         final Response response =
-                EXT.target("/credential_offer")
+                resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
                         .queryParam("documentId", DOCUMENT_ID)
                         .queryParam("credentialType", "???")

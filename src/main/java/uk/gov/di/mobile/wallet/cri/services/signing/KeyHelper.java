@@ -8,6 +8,10 @@ import java.security.NoSuchAlgorithmException;
 
 public class KeyHelper {
 
+    private KeyHelper() {
+        // Should never be instantiated
+    }
+
     private static final String HASHING_ALGORITHM = "SHA-256";
 
     public static String hashKeyId(String keyId) throws NoSuchAlgorithmException {
