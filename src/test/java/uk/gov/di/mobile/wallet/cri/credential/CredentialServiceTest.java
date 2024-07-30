@@ -214,7 +214,7 @@ class CredentialServiceTest {
                 containsString(
                         "Request to fetch document details for documentId test-document-id failed with status code 500"));
         verify(dynamoDbService, Mockito.times(1)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(1)).deleteCredentialOffer(any());
+        verify(dynamoDbService, Mockito.times(0)).deleteCredentialOffer(any());
     }
 
     @Test

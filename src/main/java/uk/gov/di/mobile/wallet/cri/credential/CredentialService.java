@@ -82,14 +82,14 @@ public class CredentialService {
                     "Access token sub claim does not match cached walletSubjectId");
         }
 
-        dataStore.deleteCredentialOffer(credentialOfferId);
-
         String documentId = credentialOffer.getDocumentId();
         Object documentDetails = getDocumentDetails(documentId);
         LOGGER.info(
                 "Document details retrieved for credentialOfferId {} and documentId {}",
                 credentialOfferId,
                 documentId);
+
+        dataStore.deleteCredentialOffer(credentialOfferId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }
