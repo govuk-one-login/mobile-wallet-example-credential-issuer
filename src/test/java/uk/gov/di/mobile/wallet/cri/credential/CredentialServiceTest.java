@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -39,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -85,8 +85,8 @@ class CredentialServiceTest {
                 exception.getMessage(),
                 containsString(
                         "Error parsing access token custom claims: credential_identifiers is invalid"));
-        verify(dynamoDbService, Mockito.times(0)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(0)).deleteCredentialOffer(any());
+        verify(dynamoDbService, times(0)).getCredentialOffer(any());
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -106,8 +106,8 @@ class CredentialServiceTest {
         assertEquals(
                 "Access token c_nonce claim does not match Proof JWT nonce claim",
                 exception.getMessage());
-        verify(dynamoDbService, Mockito.times(0)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(0)).deleteCredentialOffer(any());
+        verify(dynamoDbService, times(0)).getCredentialOffer(any());
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -127,8 +127,8 @@ class CredentialServiceTest {
                         () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals(
                 "Null response returned when fetching credential offer", exception.getMessage());
-        verify(dynamoDbService, Mockito.times(1)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(0)).deleteCredentialOffer(any());
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -148,8 +148,8 @@ class CredentialServiceTest {
                         DataStoreException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Some database error", exception.getMessage());
-        verify(dynamoDbService, Mockito.times(1)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(0)).deleteCredentialOffer(any());
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -173,8 +173,8 @@ class CredentialServiceTest {
         assertThat(
                 exception.getMessage(),
                 containsString("Access token sub claim does not match cached walletSubjectId"));
-        verify(dynamoDbService, Mockito.times(1)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(0)).deleteCredentialOffer(any());
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -213,8 +213,8 @@ class CredentialServiceTest {
                 exception.getMessage(),
                 containsString(
                         "Request to fetch document details for documentId test-document-id failed with status code 500"));
-        verify(dynamoDbService, Mockito.times(1)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(0)).deleteCredentialOffer(any());
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
 
     @Test
@@ -260,8 +260,8 @@ class CredentialServiceTest {
                         testDocumentDetails);
         verify(accessTokenService).verifyAccessToken(accessToken);
         verify(proofJwtService).verifyProofJwt(proofJwt);
-        verify(dynamoDbService, Mockito.times(1)).getCredentialOffer(any());
-        verify(dynamoDbService, Mockito.times(1)).deleteCredentialOffer(any());
+        verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
+        verify(dynamoDbService, times(1)).deleteCredentialOffer("test-credential-identifier");
     }
 
     private static SignedJWT getTestProofJwt(String nonce) {
