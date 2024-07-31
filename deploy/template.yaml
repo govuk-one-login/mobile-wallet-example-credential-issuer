@@ -433,9 +433,9 @@ Resources:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, CredentialStoreUrl ]
             - Name: WALLET_APP_DEEP_LINK_URL
               Value: !Sub
-                - "https://${WalletAppDeepLinkUrl}"
-                - AuthServerUrl:
-                    !FindInMap [ EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl ]
+                      - "https://${WalletAppDeepLinkUrl}"
+                      - WalletAppDeepLinkUrl:
+                          !FindInMap [ EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl ]
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
             - Name: ONE_LOGIN_AUTH_SERVER_URL
@@ -527,6 +527,7 @@ Resources:
                 Action:
                   - 'dynamodb:PutItem'
                   - 'dynamodb:GetItem'
+                  - 'dynamodb:DeleteItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
               - Effect: Allow
                 Action: 
