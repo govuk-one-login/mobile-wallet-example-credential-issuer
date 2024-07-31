@@ -56,16 +56,16 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetExampleCriUrlDefaultValueWhenEnvVarUnset() {
-        assertEquals("http://localhost:8080", configurationService.getExampleCriUrl());
+        assertEquals("http://localhost:8080", configurationService.getSelfUrl());
     }
 
     @Test
-    void shouldGetExampleCriUrlEnvVarValue() {
+    void shouldGetSelfUrlEnvVarValue() {
         environmentVariables.set(
-                "EXAMPLE_CRI_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
+                "SELF_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
         assertEquals(
                 "https://example-credential-issuer.mobile.test.account.gov.uk",
-                configurationService.getExampleCriUrl());
+                configurationService.getSelfUrl());
     }
 
     @Test

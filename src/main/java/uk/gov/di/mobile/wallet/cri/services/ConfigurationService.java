@@ -16,8 +16,8 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("ENVIRONMENT", "local");
     }
 
-    public String getExampleCriUrl() {
-        return System.getenv().getOrDefault("EXAMPLE_CRI_URL", "http://localhost:8080");
+    public String getSelfUrl() {
+        return System.getenv().getOrDefault("SELF_URL", "http://localhost:8080");
     }
 
     public String getDidController() {

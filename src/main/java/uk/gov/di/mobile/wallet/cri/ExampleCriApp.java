@@ -58,7 +58,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                         .build("example-cri");
 
         JwksService jwksService = new JwksService(configurationService, kmsService);
-        AccessTokenService accessTokenService = new AccessTokenService(jwksService);
+        AccessTokenService accessTokenService = new AccessTokenService(jwksService, configurationService);
         ProofJwtService proofJwtService = new ProofJwtService();
         CredentialBuilder credentialBuilder =
                 new CredentialBuilder(configurationService, kmsService);
