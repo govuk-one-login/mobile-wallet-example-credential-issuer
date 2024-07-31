@@ -15,6 +15,14 @@ public class CredentialOfferCacheItem {
     public CredentialOfferCacheItem() {}
 
     public CredentialOfferCacheItem(
+            String credentialIdentifier, String documentId, String walletSubjectId) {
+        this.credentialIdentifier = credentialIdentifier;
+        this.documentId = documentId;
+        this.walletSubjectId = walletSubjectId;
+    }
+
+    // Required for unit testing
+    public CredentialOfferCacheItem(
             String credentialIdentifier,
             String documentId,
             String walletSubjectId,

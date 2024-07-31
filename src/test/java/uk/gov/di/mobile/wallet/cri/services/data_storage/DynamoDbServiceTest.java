@@ -24,6 +24,7 @@ import static org.mockito.Mockito.when;
 class DynamoDbServiceTest {
 
     private static final String TEST_TABLE_NAME = "test-cache-cri-table";
+    private static final int TEST_TTL = 300;
     private static final String TEST_PARTITION_KEY = "test-credential_id";
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
     @Mock private DynamoDbTable<CredentialOfferCacheItem> mockDynamoDbTable;
@@ -37,8 +38,9 @@ class DynamoDbServiceTest {
                 .thenReturn(mockDynamoDbTable);
         credentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        TEST_PARTITION_KEY, "test-document-id", "test-wallet-subject-id", 100L);
-        dynamoDbService = new DynamoDbService(mockDynamoDbEnhancedClient, TEST_TABLE_NAME);
+                        TEST_PARTITION_KEY, "test-document-id", "test-wallet-subject-id");
+        dynamoDbService =
+                new DynamoDbService(mockDynamoDbEnhancedClient, TEST_TABLE_NAME, TEST_TTL);
     }
 
     @Test
@@ -58,6 +60,9 @@ class DynamoDbServiceTest {
         assertEquals(
                 credentialOfferCacheItem.getWalletSubjectId(),
                 credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
+        assertEquals(
+                credentialOfferCacheItem.getTimeToLive(),
+                credentialOfferCacheItemArgumentCaptor.getValue().getTimeToLive());
     }
 
     @Test
