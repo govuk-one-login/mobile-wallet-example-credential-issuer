@@ -219,6 +219,7 @@ Resources:
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
+      HealthCheckPath: "/healthcheck"
       Matcher:
         HttpCode: 200-499
       Port: 80
