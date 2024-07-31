@@ -9,6 +9,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
 import java.util.Arrays;
@@ -17,13 +18,14 @@ import java.util.Set;
 
 public class AccessTokenService {
 
-    private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
-    private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
-    private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
-    private final JwksService jwksService;
+    private static final String ACCESS_TOKEN_ALGORITHM = "ES256";
 
-    public AccessTokenService(JwksService jwksService) {
+    private final JwksService jwksService;
+    private final ConfigurationService configurationService;
+
+    public AccessTokenService(JwksService jwksService, ConfigurationService configurationService) {
         this.jwksService = jwksService;
+        this.configurationService = configurationService;
     }
 
     public void verifyAccessToken(SignedJWT accessToken) throws AccessTokenValidationException {
@@ -35,7 +37,7 @@ public class AccessTokenService {
     }
 
     private void verifyTokenHeader(SignedJWT accessToken) throws AccessTokenValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(CLIENT_CONFIG_ALGORITHM);
+        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ACCESS_TOKEN_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = accessToken.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new AccessTokenValidationException(
@@ -55,8 +57,8 @@ public class AccessTokenService {
                 new HashSet<>(Arrays.asList("sub", "c_nonce", "credential_identifiers"));
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
-                        .issuer(CLIENT_CONFIG_ISSUER)
-                        .audience(CLIENT_CONFIG_AUDIENCE)
+                        .issuer(configurationService.getOneLoginAuthServerUrl())
+                        .audience(configurationService.getSelfUrl())
                         .build();
 
         JWTClaimsSet jwtClaimsSet;

@@ -9,6 +9,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
@@ -19,9 +20,13 @@ import java.util.Set;
 
 public class ProofJwtService {
 
-    private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
-    private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
-    private static final String CLIENT_CONFIG_AUDIENCE = "urn:fdc:gov:uk:example-credential-issuer";
+    private static final String PROOF_JWT_ALGORITHM = "ES256";
+    private static final String PROOF_JWT_ISSUER = "urn:fdc:gov:uk:wallet";
+    private ConfigurationService configurationService;
+
+    public ProofJwtService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
 
     /**
      * Verifies the Proof JWT's header and payload claims and its signature.
@@ -44,7 +49,7 @@ public class ProofJwtService {
      * @throws ProofJwtValidationException On invalid header claims
      */
     private void verifyTokenHeader(SignedJWT proofJwt) throws ProofJwtValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.CLIENT_CONFIG_ALGORITHM);
+        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.PROOF_JWT_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = proofJwt.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new ProofJwtValidationException(
@@ -69,8 +74,8 @@ public class ProofJwtService {
         Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
-                        .issuer(CLIENT_CONFIG_ISSUER)
-                        .audience(CLIENT_CONFIG_AUDIENCE)
+                        .issuer(PROOF_JWT_ISSUER)
+                        .audience(configurationService.getSelfUrl())
                         .build();
 
         try {

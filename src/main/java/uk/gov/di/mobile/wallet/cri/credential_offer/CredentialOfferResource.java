@@ -103,7 +103,7 @@ public class CredentialOfferResource {
 
         CredentialOfferUri credentialOfferUri =
                 new CredentialOfferUri(
-                        configurationService.getWalletUrl(),
+                        configurationService.getWalletDeepLinkUrl(),
                         "/add?credential_offer=",
                         credentialOfferStringEncoded);
 

@@ -16,8 +16,8 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("ENVIRONMENT", "local");
     }
 
-    public String getExampleCriUrl() {
-        return System.getenv().getOrDefault("EXAMPLE_CRI_URL", "http://localhost:8080");
+    public String getSelfUrl() {
+        return System.getenv().getOrDefault("SELF_URL", "http://localhost:8080");
     }
 
     public String getDidController() {
@@ -32,8 +32,9 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("CREDENTIAL_STORE_URL", "http://localhost:8888");
     }
 
-    public String getWalletUrl() {
-        return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
+    public String getWalletDeepLinkUrl() {
+        return System.getenv()
+                .getOrDefault("WALLET_APP_DEEP_LINK_URL", "https://mobile.account.gov.uk/wallet");
     }
 
     public String getCredentialOfferCacheTableName() {
@@ -42,10 +43,6 @@ public class ConfigurationService extends Configuration {
 
     public String getClientId() {
         return System.getenv().getOrDefault("OIDC_CLIENT_ID", "TEST_CLIENT_ID");
-    }
-
-    public String getIssuer() {
-        return "urn:fdc:gov:uk:example-credential-issuer";
     }
 
     public String getLocalstackEndpoint() {

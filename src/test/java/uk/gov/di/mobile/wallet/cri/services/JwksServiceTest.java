@@ -7,6 +7,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jose.jwk.JWKSelector;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
+import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +45,7 @@ import static org.mockito.Mockito.when;
 class JwksServiceTest {
 
     private JwksService jwksService;
-    private final JWKSource jwkSource = mock(JWKSource.class);
+    private final JWKSource<SecurityContext> jwkSource = mock(JWKSource.class);
     private final KeyProvider kmsService = mock(KmsService.class);
     private final ConfigurationService configurationService = new ConfigurationService();
     private static final String TEST_ARN =

@@ -411,7 +411,7 @@ Resources:
               Value: !Sub "${AWS::Region}"
             - Name: ENVIRONMENT
               Value: !Sub "${Environment}"
-            - Name: EXAMPLE_CRI_URL
+            - Name: SELF_URL
               Value: !Sub 
                       - "https://${SelfUrl}"
                       - SelfUrl:
@@ -428,7 +428,7 @@ Resources:
                       - "https://${CredentialStoreUrl}"
                       - CredentialStoreUrl:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, CredentialStoreUrl ]
-            - Name: WALLET_URL
+            - Name: WALLET_APP_DEEP_LINK_URL
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase

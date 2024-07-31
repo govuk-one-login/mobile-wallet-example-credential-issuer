@@ -56,16 +56,16 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetExampleCriUrlDefaultValueWhenEnvVarUnset() {
-        assertEquals("http://localhost:8080", configurationService.getExampleCriUrl());
+        assertEquals("http://localhost:8080", configurationService.getSelfUrl());
     }
 
     @Test
-    void shouldGetExampleCriUrlEnvVarValue() {
+    void shouldGetSelfUrlEnvVarValue() {
         environmentVariables.set(
-                "EXAMPLE_CRI_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
+                "SELF_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
         assertEquals(
                 "https://example-credential-issuer.mobile.test.account.gov.uk",
-                configurationService.getExampleCriUrl());
+                configurationService.getSelfUrl());
     }
 
     @Test
@@ -109,14 +109,18 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetWalletUrlDefaultValueWhenEnvVarUnset() {
-        assertEquals("https://mobile.account.gov.uk/wallet", configurationService.getWalletUrl());
+        assertEquals(
+                "https://mobile.account.gov.uk/wallet",
+                configurationService.getWalletDeepLinkUrl());
     }
 
     @Test
     void shouldGetWalletUrlEnvVarValue() {
-        environmentVariables.set("WALLET_URL", "https://mobile.test.account.gov.uk/wallet");
+        environmentVariables.set(
+                "WALLET_APP_DEEP_LINK_URL", "https://mobile.test.account.gov.uk/wallet");
         assertEquals(
-                "https://mobile.test.account.gov.uk/wallet", configurationService.getWalletUrl());
+                "https://mobile.test.account.gov.uk/wallet",
+                configurationService.getWalletDeepLinkUrl());
     }
 
     @Test
@@ -134,11 +138,6 @@ class ConfigurationServiceTest {
     @Test
     void shouldGetClientIdValue() {
         assertEquals("TEST_CLIENT_ID", configurationService.getClientId());
-    }
-
-    @Test
-    void shouldGetIssuerValue() {
-        assertEquals("urn:fdc:gov:uk:example-credential-issuer", configurationService.getIssuer());
     }
 
     @Test
