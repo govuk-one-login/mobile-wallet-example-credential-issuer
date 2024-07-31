@@ -56,7 +56,7 @@ class JwksResourceTest {
             throws ParseException, KeyNotActiveException, PEMException, NoSuchAlgorithmException {
         JWK publicKey =
                 JWK.parse(
-                        "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"d7cb2ed24d8f70433e293ebc270bf1de77fcfab02a7f631da396b70e9b3aa8d7\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
+                        "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"d7cb2ed24d8f70433e293ebc270bf1de77fcfab02a7f631da396b70e9b3aa8d7\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\",\"use\":\"sig\"}");
         var expectedJWKSet = new JWKSet(List.of(publicKey));
         when(jwksService.generateJwks()).thenReturn(expectedJWKSet);
 

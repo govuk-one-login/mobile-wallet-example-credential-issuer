@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services.signing;
 
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.KeyUse;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
@@ -113,6 +114,7 @@ public class KmsService implements KeyProvider {
         return new ECKey.Builder(P_256, (ECPublicKey) publicKey)
                 .keyID(hashedKeyId)
                 .algorithm(ES256)
+                .keyUse(KeyUse.SIGNATURE)
                 .build();
     }
 
