@@ -217,9 +217,8 @@ Resources:
   WalletBELoadBalancerListenerTargetGroupECS:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
     Properties:
-      HealthCheckEnabled: TRUE
+      HealthCheckEnabled: FALSE
       HealthCheckProtocol: HTTP
-      HealthCheckPath: "/healthcheck"
       Matcher:
         HttpCode: 200-499
       Port: 80
