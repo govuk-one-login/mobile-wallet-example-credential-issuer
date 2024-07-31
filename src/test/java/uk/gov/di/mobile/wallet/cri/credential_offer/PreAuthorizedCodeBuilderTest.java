@@ -76,11 +76,8 @@ class PreAuthorizedCodeBuilderTest {
                 preAuthorizedCode.getJWTClaimsSet().getAudience(),
                 equalTo(singletonList(AUTH_URL)));
         assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"),
-                equalTo(AUTH_CLIENT_ID));
-        assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getIssuer(),
-                equalTo(SELF_URL));
+                preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"), equalTo(AUTH_CLIENT_ID));
+        assertThat(preAuthorizedCode.getJWTClaimsSet().getIssuer(), equalTo(SELF_URL));
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getClaim("credential_identifiers"),
                 equalTo(singletonList("e27474f5-6aef-40a4-bed6-5e4e1ec3f885")));
