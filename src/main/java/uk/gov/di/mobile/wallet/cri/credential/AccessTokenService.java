@@ -19,7 +19,7 @@ import java.util.Set;
 public class AccessTokenService {
 
     private static final String ACCESS_TOKEN_ALGORITHM = "ES256";
-    
+
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
 

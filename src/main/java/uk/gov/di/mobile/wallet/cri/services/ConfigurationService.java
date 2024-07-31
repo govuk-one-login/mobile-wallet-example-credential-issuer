@@ -32,8 +32,9 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("CREDENTIAL_STORE_URL", "http://localhost:8888");
     }
 
-    public String getWalletUrl() {
-        return System.getenv().getOrDefault("WALLET_URL", "https://mobile.account.gov.uk/wallet");
+    public String getWalletDeepLinkUrl() {
+        return System.getenv()
+                .getOrDefault("WALLET_APP_DEEP_LINK_URL", "https://mobile.account.gov.uk/wallet");
     }
 
     public String getCredentialOfferCacheTableName() {

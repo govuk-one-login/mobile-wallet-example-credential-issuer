@@ -9,6 +9,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
@@ -21,7 +22,11 @@ public class ProofJwtService {
 
     private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
     private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
-    private static final String CLIENT_CONFIG_AUDIENCE = "selfurl"
+    private ConfigurationService configurationService;
+
+    public ProofJwtService(ConfigurationService configurationService) {
+        this.configurationService = configurationService;
+    }
 
     /**
      * Verifies the Proof JWT's header and payload claims and its signature.
@@ -70,7 +75,7 @@ public class ProofJwtService {
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
                         .issuer(CLIENT_CONFIG_ISSUER)
-                        .audience(CLIENT_CONFIG_AUDIENCE)
+                        .audience(configurationService.getSelfUrl())
                         .build();
 
         try {

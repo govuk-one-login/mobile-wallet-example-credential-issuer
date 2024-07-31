@@ -10,6 +10,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -33,7 +34,7 @@ class ProofJwtServiceTest {
 
     @BeforeEach
     void setup() {
-        proofJwtService = new ProofJwtService();
+        proofJwtService = new ProofJwtService(new ConfigurationService());
     }
 
     @Test
@@ -111,7 +112,7 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(signedJwt));
         assertEquals(
-                "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:example-credential-issuer]",
+                "JWT aud claim has value [invalid-audience], must be [http://localhost:8080]",
                 exception.getMessage());
     }
 
@@ -122,7 +123,7 @@ class ProofJwtServiceTest {
                 getTestProofJwt(
                         "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf",
                         "invalid-issuer",
-                        "urn:fdc:gov:uk:example-credential-issuer");
+                        "http://localhost:8080");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJwt.sign(ecSigner);
 
@@ -142,7 +143,7 @@ class ProofJwtServiceTest {
                 getTestProofJwt(
                         "did:key:notAValidDidKey",
                         "urn:fdc:gov:uk:wallet",
-                        "urn:fdc:gov:uk:example-credential-issuer");
+                        "http://localhost:8080");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJwt.sign(ecSigner);
 
@@ -163,7 +164,7 @@ class ProofJwtServiceTest {
                 getTestProofJwt(
                         "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX",
                         "urn:fdc:gov:uk:wallet",
-                        "urn:fdc:gov:uk:example-credential-issuer");
+                        "http://localhost:8080");
 
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJwt.sign(ecSigner);
@@ -183,7 +184,7 @@ class ProofJwtServiceTest {
                 getTestProofJwt(
                         "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf",
                         "urn:fdc:gov:uk:wallet",
-                        "urn:fdc:gov:uk:example-credential-issuer");
+                        "http://localhost:8080");
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         signedJwt.sign(ecSigner);
 

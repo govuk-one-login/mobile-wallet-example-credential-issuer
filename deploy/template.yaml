@@ -428,7 +428,7 @@ Resources:
                       - "https://${CredentialStoreUrl}"
                       - CredentialStoreUrl:
                           !FindInMap [ EnvironmentVariables, !Ref Environment, CredentialStoreUrl ]
-            - Name: WALLET_URL
+            - Name: WALLET_APP_DEEP_LINK_URL
               Value: "https://mobile.account.gov.uk/wallet"
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
