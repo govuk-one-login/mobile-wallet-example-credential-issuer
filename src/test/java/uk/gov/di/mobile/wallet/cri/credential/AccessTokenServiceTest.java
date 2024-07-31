@@ -14,6 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
 import java.security.KeyFactory;
@@ -37,11 +38,17 @@ import static org.mockito.Mockito.when;
 class AccessTokenServiceTest {
 
     private AccessTokenService accessTokenService;
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final JwksService jwksService = mock(JwksService.class);
+
+    private static final String AUDIENCE = "self-url.gov.uk";
+    private static final String ISSUER = "auth-url.gov.uk";
 
     @BeforeEach
     void setup() {
-        accessTokenService = new AccessTokenService(jwksService);
+        accessTokenService = new AccessTokenService(jwksService, configurationService);
+        when(configurationService.getSelfUrl()).thenReturn(AUDIENCE);
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(ISSUER);
     }
 
     @Test
@@ -104,7 +111,7 @@ class AccessTokenServiceTest {
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenAudienceClaimDoesNotMatchConfig()
             throws JOSEException, ParseException {
-        SignedJWT signedJwt = getTestAccessToken("urn:fdc:gov:uk:wallet", "invalid-audience");
+        SignedJWT signedJwt = getTestAccessToken(ISSUER, "invalid-audience");
         ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
@@ -113,15 +120,15 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(signedJwt));
         assertEquals(
-                "JWT aud claim has value [invalid-audience], must be [urn:fdc:gov:uk:example-credential-issuer]",
+                "JWT aud claim has value [invalid-audience], must be [self-url.gov.uk]",
                 exception.getMessage());
     }
 
     @Test
     void shouldThrowAccessTokenValidationExceptionWhenIssuerClaimDoesNotMatchConfig()
             throws JOSEException, ParseException {
-        SignedJWT signedJwt =
-                getTestAccessToken("invalid-issuer", "urn:fdc:gov:uk:example-credential-issuer");
+
+        SignedJWT signedJwt = getTestAccessToken("invalid-issuer", AUDIENCE);
         ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
@@ -130,7 +137,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(signedJwt));
         assertEquals(
-                "JWT iss claim has value invalid-issuer, must be urn:fdc:gov:uk:wallet",
+                "JWT iss claim has value invalid-issuer, must be auth-url.gov.uk",
                 exception.getMessage());
     }
 
@@ -142,9 +149,7 @@ class AccessTokenServiceTest {
                         "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
 
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
+        SignedJWT signedJwt = getTestAccessToken(ISSUER, AUDIENCE);
         ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
@@ -161,9 +166,7 @@ class AccessTokenServiceTest {
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class)))
                 .thenThrow(new KeySourceException("Some error fetching JWKs"));
 
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
+        SignedJWT signedJwt = getTestAccessToken(ISSUER, AUDIENCE);
         ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         signedJwt.sign(ecSigner);
 
@@ -180,9 +183,7 @@ class AccessTokenServiceTest {
         JWK publicKey = key.toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
 
-        SignedJWT signedJwt =
-                getTestAccessToken(
-                        "urn:fdc:gov:uk:wallet", "urn:fdc:gov:uk:example-credential-issuer");
+        SignedJWT signedJwt = getTestAccessToken(ISSUER, AUDIENCE);
         ECDSASigner ecSigner = new ECDSASigner(key);
         signedJwt.sign(ecSigner);
 

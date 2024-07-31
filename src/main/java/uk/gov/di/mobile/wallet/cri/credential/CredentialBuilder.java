@@ -73,7 +73,7 @@ public class CredentialBuilder {
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
-                        .issuer(configurationService.getIssuer())
+                        .issuer(configurationService.getSelfUrl())
                         .issueTime(Date.from(now))
                         .notBeforeTime(Date.from(now))
                         .expirationTime(

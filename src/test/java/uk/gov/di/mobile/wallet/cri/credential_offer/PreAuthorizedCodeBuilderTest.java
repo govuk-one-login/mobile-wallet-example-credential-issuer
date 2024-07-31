@@ -42,13 +42,21 @@ class PreAuthorizedCodeBuilderTest {
 
     private PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
     private final KmsService kmsService = mock(KmsService.class);
-    ConfigurationService configurationService;
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
+
+    private static final String KEY_ALIAS = "signing-key";
+    private static final String AUTH_CLIENT_ID = "auth-client-id";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
+    private static final String SELF_URL = "self-url.gov.uk";
+    private static final String AUTH_URL = "auth-url.gov.uk";
 
     @BeforeEach
     void setUp() {
-        configurationService = new ConfigurationService();
         preAuthorizedCodeBuilder = new PreAuthorizedCodeBuilder(configurationService, kmsService);
+        when(configurationService.getSelfUrl()).thenReturn(SELF_URL);
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_URL);
+        when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
+        when(configurationService.getClientId()).thenReturn(AUTH_CLIENT_ID);
     }
 
     @Test
@@ -66,13 +74,10 @@ class PreAuthorizedCodeBuilderTest {
 
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getAudience(),
-                equalTo(singletonList("http://localhost:8888")));
+                equalTo(singletonList(AUTH_URL)));
         assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"),
-                equalTo("TEST_CLIENT_ID"));
-        assertThat(
-                preAuthorizedCode.getJWTClaimsSet().getIssuer(),
-                equalTo("urn:fdc:gov:uk:example-credential-issuer"));
+                preAuthorizedCode.getJWTClaimsSet().getClaim("clientId"), equalTo(AUTH_CLIENT_ID));
+        assertThat(preAuthorizedCode.getJWTClaimsSet().getIssuer(), equalTo(SELF_URL));
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getClaim("credential_identifiers"),
                 equalTo(singletonList("e27474f5-6aef-40a4-bed6-5e4e1ec3f885")));

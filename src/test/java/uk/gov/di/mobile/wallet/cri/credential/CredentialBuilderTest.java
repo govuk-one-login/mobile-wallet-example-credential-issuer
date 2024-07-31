@@ -82,9 +82,7 @@ class CredentialBuilderTest {
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getType(), equalTo(JOSEObjectType.JWT));
         assertThat(credential.getHeader().getKeyID(), equalTo(TEST_HASHED_KEY_ID));
-        assertThat(
-                credential.getJWTClaimsSet().getIssuer(),
-                equalTo("urn:fdc:gov:uk:example-credential-issuer"));
+        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo("http://localhost:8080"));
         assertThat(credential.getJWTClaimsSet().getIssueTime(), notNullValue());
         assertThat(credential.getJWTClaimsSet().getNotBeforeTime(), notNullValue());
         assertThat(
