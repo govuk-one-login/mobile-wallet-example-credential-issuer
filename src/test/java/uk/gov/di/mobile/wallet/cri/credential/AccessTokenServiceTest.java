@@ -41,8 +41,8 @@ class AccessTokenServiceTest {
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final JwksService jwksService = mock(JwksService.class);
 
-    private final static String AUDIENCE = "self-url.gov.uk";
-    private final static String ISSUER = "auth-url.gov.uk";
+    private static final String AUDIENCE = "self-url.gov.uk";
+    private static final String ISSUER = "auth-url.gov.uk";
 
     @BeforeEach
     void setup() {

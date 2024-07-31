@@ -20,8 +20,8 @@ import java.util.Set;
 
 public class ProofJwtService {
 
-    private static final String CLIENT_CONFIG_ALGORITHM = "ES256";
-    private static final String CLIENT_CONFIG_ISSUER = "urn:fdc:gov:uk:wallet";
+    private static final String PROOF_JWT_ALGORITHM = "ES256";
+    private static final String PROOF_JWT_ISSUER = "urn:fdc:gov:uk:wallet";
     private ConfigurationService configurationService;
 
     public ProofJwtService(ConfigurationService configurationService) {
@@ -49,7 +49,7 @@ public class ProofJwtService {
      * @throws ProofJwtValidationException On invalid header claims
      */
     private void verifyTokenHeader(SignedJWT proofJwt) throws ProofJwtValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.CLIENT_CONFIG_ALGORITHM);
+        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.PROOF_JWT_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = proofJwt.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new ProofJwtValidationException(
@@ -74,7 +74,7 @@ public class ProofJwtService {
         Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
-                        .issuer(CLIENT_CONFIG_ISSUER)
+                        .issuer(PROOF_JWT_ISSUER)
                         .audience(configurationService.getSelfUrl())
                         .build();
 
