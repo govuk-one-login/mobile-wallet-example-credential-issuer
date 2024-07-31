@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Path("/")
-public class HealthCheckResource {
+public class HealthCheckResource extends HealthCheck {
 
     private final Environment environment;
 
@@ -45,5 +45,10 @@ public class HealthCheckResource {
         Response.ResponseBuilder res = allHealthy ? Response.ok() : Response.status(503);
 
         return res.entity(response).build();
+    }
+
+    @Override
+    protected Result check() throws Exception {
+        return null;
     }
 }
