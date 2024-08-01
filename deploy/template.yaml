@@ -221,6 +221,8 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckPath: "/healthcheck"
       HealthCheckPort: "8081"
+      HealthCheckIntervalSeconds: 5
+      HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-499
       Port: 80
