@@ -108,11 +108,7 @@ public class CredentialService {
 
     private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
         long now = Instant.now().getEpochSecond();
-        long credentialOfferExpiry = credentialOffer.getTimeToLive();
-        if (now > credentialOfferExpiry) {
-            return true;
-        }
-        return false;
+        return now > credentialOffer.getTimeToLive();
     }
 
     private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
