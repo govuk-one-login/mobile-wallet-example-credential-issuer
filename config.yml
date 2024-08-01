@@ -4,7 +4,7 @@ logging:
     uk.gov.di.mobile.wallet.cri: INFO
 admin:
   healthChecks:
-    servletEnabled: true
+    servletEnabled: false
     minThreads: 1
     maxThreads: 4
     workQueueSize: 1
