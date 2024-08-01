@@ -132,7 +132,9 @@ class CredentialServiceTest {
                 assertThrows(
                         CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
-        assertEquals("Credential offer expired or not found", exception.getMessage());
+        assertEquals(
+                "Credential offer not found for credentialOfferId test-credential-identifier",
+                exception.getMessage());
         verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
         verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
     }
@@ -203,7 +205,10 @@ class CredentialServiceTest {
                 assertThrows(
                         CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
-        assertThat(exception.getMessage(), containsString("Credential offer expired or not found"));
+        assertThat(
+                exception.getMessage(),
+                containsString(
+                        "Credential offer for credentialOfferId test-credential-identifier expired at"));
     }
 
     @Test

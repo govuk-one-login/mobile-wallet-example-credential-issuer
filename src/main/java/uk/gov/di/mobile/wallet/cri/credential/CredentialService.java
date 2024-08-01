@@ -73,9 +73,20 @@ public class CredentialService {
 
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
-        if (!isValidDatabaseResponse(credentialOffer, credentialOfferId)) {
-            throw new CredentialOfferNotFoundException("Credential offer expired or not found");
+        if (credentialOffer == null) {
+            throw new CredentialOfferNotFoundException(
+                    String.format(
+                            "Credential offer not found for credentialOfferId %s",
+                            credentialOfferId));
         }
+
+        if (isExpired(credentialOffer)) {
+            throw new CredentialOfferNotFoundException(
+                    String.format(
+                            "Credential offer for credentialOfferId %s expired at %s",
+                            credentialOfferId, credentialOffer.getTimeToLive()));
+        }
+        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
             throw new AccessTokenValidationException(
@@ -95,25 +106,13 @@ public class CredentialService {
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
     }
 
-    private static boolean isValidDatabaseResponse(
-            CredentialOfferCacheItem credentialOffer, String credentialOfferId) {
-        if (credentialOffer == null) {
-            LOGGER.info("Credential offer not found for credentialOfferId {}", credentialOfferId);
-            return false;
-        }
-
+    private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
         long now = Instant.now().getEpochSecond();
         long credentialOfferExpiry = credentialOffer.getTimeToLive();
         if (now > credentialOfferExpiry) {
-            LOGGER.info(
-                    "Credential offer for credentialOfferId {} expired at {}",
-                    credentialOfferId,
-                    credentialOfferExpiry);
-            return false;
+            return true;
         }
-
-        LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
-        return true;
+        return false;
     }
 
     private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
