@@ -1,23 +1,26 @@
 package uk.gov.di.mobile.wallet.cri.healthcheck;
 
 import com.codahale.metrics.health.HealthCheck;
-import com.google.common.collect.ImmutableMap;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
+import static jakarta.ws.rs.core.Response.Status.OK;
+import static jakarta.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Path("/")
 public class HealthCheckResource {
 
-    private final Environment environment;
+    private Environment environment;
 
     public HealthCheckResource(Environment environment) {
         this.environment = environment;
@@ -30,20 +33,30 @@ public class HealthCheckResource {
         SortedMap<String, HealthCheck.Result> results =
                 environment.healthChecks().runHealthChecks();
 
-        Map<String, Map<String, Boolean>> response =
+        Map<String, Map<String, Object>> response =
                 results.entrySet().stream()
                         .collect(
                                 Collectors.toMap(
                                         Map.Entry::getKey,
-                                        healthCheck ->
-                                                ImmutableMap.of(
+                                        healthCheckResult ->
+                                                java.util.Map.of(
                                                         "healthy",
-                                                        healthCheck.getValue().isHealthy())));
+                                                                healthCheckResult
+                                                                        .getValue()
+                                                                        .isHealthy(),
+                                                        "message",
+                                                                defaultString(
+                                                                        healthCheckResult
+                                                                                .getValue()
+                                                                                .getMessage(),
+                                                                        "Healthy"))));
 
-        boolean allHealthy = results.values().stream().allMatch(HealthCheck.Result::isHealthy);
+        Response.Status status = allHealthy(results.values()) ? OK : SERVICE_UNAVAILABLE;
 
-        Response.ResponseBuilder res = allHealthy ? Response.ok() : Response.status(503);
+        return Response.status(status).entity(response).build();
+    }
 
-        return res.entity(response).build();
+    private boolean allHealthy(Collection<HealthCheck.Result> results) {
+        return results.stream().allMatch(HealthCheck.Result::isHealthy);
     }
 }
