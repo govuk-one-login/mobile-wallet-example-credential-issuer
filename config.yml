@@ -3,9 +3,14 @@ logging:
   loggers:
     uk.gov.di.mobile.wallet.cri: INFO
 health:
-  delayedShutdownHandlerEnabled: true
-  shutdownWaitPeriod: 10s
   healthCheckUrlPaths: [ "/healthcheck" ]
+  delayedShutdownHandlerEnabled: true
+  shutdownWaitPeriod: 1s
   healthChecks:
-    - name: application
+    - name: "application"
       critical: true
+      schedule:
+        checkInterval: "300s" ## The interval for performing healthChecks while in a healthy state.
+        downtimeInterval: "10s" ## The healthCheck interval while the app is unhealthy
+        failureAttempts: 2
+        successAttempts: 1

@@ -77,8 +77,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
 
-        HealthCheckResource healthCheck = new HealthCheckResource();
-        environment.healthChecks().register("application", healthCheck);
+        environment.healthChecks().register("application", new HealthCheckResource());
 
         environment
                 .jersey()
