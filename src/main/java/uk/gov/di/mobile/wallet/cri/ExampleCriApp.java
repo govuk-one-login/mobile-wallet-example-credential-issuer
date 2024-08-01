@@ -13,7 +13,6 @@ import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
-import uk.gov.di.mobile.wallet.cri.healthcheck.ApplicationHealthCheck;
 import uk.gov.di.mobile.wallet.cri.jwks.JwksResource;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
