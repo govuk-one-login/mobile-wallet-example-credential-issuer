@@ -613,6 +613,9 @@ Resources:
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: timeToLive
+        Enabled: true
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       SSESpecification:

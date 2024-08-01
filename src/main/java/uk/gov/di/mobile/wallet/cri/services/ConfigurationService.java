@@ -57,11 +57,19 @@ public class ConfigurationService extends Configuration {
         return "/document/";
     }
 
-    public long getPreAuthorizedCodeTtl() {
+    public long getPreAuthorizedCodeTtlInSecs() {
         return 300;
     }
 
-    public long getCredentialTtl() {
+    public long getCredentialTtlInSecs() {
         return 365;
+    }
+
+    /*
+    Credential offer should last for a limited time to prevent miss-use.
+    15 minutes (900 seconds) has been chosen for now but this needs user testing and security sign off.
+    */
+    public int getCredentialOfferTtlInSecs() {
+        return 900;
     }
 }

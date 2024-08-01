@@ -18,6 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.List;
 
 public class CredentialService {
@@ -73,9 +74,17 @@ public class CredentialService {
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
         if (credentialOffer == null) {
-            LOGGER.info("Credential offer not found for credentialOfferId {}", credentialOfferId);
             throw new CredentialOfferNotFoundException(
-                    "Null response returned from database when fetching credential offer");
+                    String.format(
+                            "Credential offer not found for credentialOfferId %s",
+                            credentialOfferId));
+        }
+
+        if (isExpired(credentialOffer)) {
+            throw new CredentialOfferNotFoundException(
+                    String.format(
+                            "Credential offer for credentialOfferId %s expired at %s",
+                            credentialOfferId, credentialOffer.getTimeToLive()));
         }
         LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
@@ -95,6 +104,11 @@ public class CredentialService {
         dataStore.deleteCredentialOffer(credentialOfferId);
 
         return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
+    }
+
+    private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
+        long now = Instant.now().getEpochSecond();
+        return now > credentialOffer.getTimeToLive();
     }
 
     private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
