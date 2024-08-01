@@ -2,9 +2,3 @@ logging:
   level: INFO
   loggers:
     uk.gov.di.mobile.wallet.cri: INFO
-admin:
-  healthChecks:
-    servletEnabled: false
-    minThreads: 1
-    maxThreads: 4
-    workQueueSize: 1
