@@ -2,3 +2,10 @@ logging:
   level: INFO
   loggers:
     uk.gov.di.mobile.wallet.cri: INFO
+health:
+  delayedShutdownHandlerEnabled: true
+  shutdownWaitPeriod: 10s
+  healthCheckUrlPaths: [ "/healthcheck" ]
+  healthChecks:
+    - name: application
+      critical: true
