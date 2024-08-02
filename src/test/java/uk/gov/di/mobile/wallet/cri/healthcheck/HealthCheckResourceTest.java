@@ -76,7 +76,7 @@ class HealthCheckResourceTest {
     }
 
     @Test
-    public void shouldBeUnhealthyResponseWhenServiceIsOnlyPartiallyHealthy()
+    void shouldBeUnhealthyResponseWhenServiceIsOnlyPartiallyHealthy()
             throws JsonProcessingException {
         SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
         map.put("ping", HealthCheck.Result.healthy());
