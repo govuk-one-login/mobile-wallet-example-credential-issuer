@@ -52,10 +52,10 @@ class DidDocumentServiceTest {
     @BeforeEach
     void setUp() {
         didDocumentService = new DidDocumentService(configurationService, kmsService);
-        when(configurationService.getSigningKeyAlias())
-                .thenReturn("test-signing-key-alias");
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
         when(configurationService.getDidController())
-                .thenReturn("test-example-credential-issuer.gov.uk");    }
+                .thenReturn("test-example-credential-issuer.gov.uk");
+    }
 
     @Test
     void shouldReturnDidDocument()
