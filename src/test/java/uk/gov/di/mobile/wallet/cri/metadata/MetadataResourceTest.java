@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.core.Response;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,12 +24,19 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MetadataResourceTest {
 
-    private static final ConfigurationService configurationService = new ConfigurationService();
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
     private ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(new MetadataResource(configurationService, metadataBuilder))
                     .build();
+
+    @BeforeEach
+    void setUp() {
+        when(configurationService.getOneLoginAuthServerUrl())
+                .thenReturn("https://test-authorization-server.gov.uk");
+        when(configurationService.getSelfUrl()).thenReturn("https://test-credential-issuer.gov.uk");
+    }
 
     @Test
     @DisplayName("Should return 200 and the credential metadata")
@@ -69,7 +77,7 @@ class MetadataResourceTest {
                 objectMapper.readValue(testCredentialsSupportedString, Object.class);
         return new Metadata(
                 "https://test-credential-issuer.gov.uk/credential",
-                "https://test-authorization-server.gov.uk/auth-server",
+                "https://test-authorization-server.gov.uk",
                 "https://test-credential-issuer.gov.uk",
                 testCredentialsSupported);
     }

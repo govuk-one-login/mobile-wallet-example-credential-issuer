@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,12 +48,19 @@ class JwksServiceTest {
     private JwksService jwksService;
     private final JWKSource<SecurityContext> jwkSource = mock(JWKSource.class);
     private final KeyProvider kmsService = mock(KmsService.class);
-    private final ConfigurationService configurationService = new ConfigurationService();
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private static final String TEST_ARN =
             "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_KEY_ID =
             "d7cb2ed24d8f70433e293ebc270bf1de77fcfab02a7f631da396b70e9b3aa8d7";
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
+
+    @BeforeEach
+    void setUp() {
+        when(configurationService.getOneLoginAuthServerUrl())
+                .thenReturn("https://test-authorization-server.gov.uk");
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key");
+    }
 
     @Test
     void shouldReturnJwkWhenFound()

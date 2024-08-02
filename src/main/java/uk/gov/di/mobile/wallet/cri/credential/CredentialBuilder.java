@@ -27,7 +27,6 @@ public class CredentialBuilder {
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
     private static final JOSEObjectType JWT = JOSEObjectType.JWT;
     private static final String CONTEXT = "https://www.w3.org/2018/credentials/v1";
-
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
 

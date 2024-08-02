@@ -4,87 +4,79 @@ import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.impl.ECDSA;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
+import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.services.kms.model.SignRequest;
-import software.amazon.awssdk.services.kms.model.SignResponse;
-import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.time.Instant;
+import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CredentialOfferServiceTest {
 
     private CredentialOfferService credentialOfferService;
-    private final KmsService kmsService = mock(KmsService.class);
-    private final ConfigurationService configurationService = new ConfigurationService();
-    private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
+    private final PreAuthorizedCodeBuilder preAuthorizedCodeBuilder =
+            mock(PreAuthorizedCodeBuilder.class);
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
+    private static final String TEST_CREDENTIAL_ISSUER = "https://test-credential-issuer.gov.uk";
 
     @BeforeEach
     void setUp() {
-        credentialOfferService = new CredentialOfferService(configurationService, kmsService);
+        credentialOfferService =
+                new CredentialOfferService(configurationService, preAuthorizedCodeBuilder);
+        when(configurationService.getSelfUrl()).thenReturn(TEST_CREDENTIAL_ISSUER);
     }
 
     @Test
-    @DisplayName("Should build and return a credential offer")
-    void testItReturnsCredentialOffer()
-            throws SigningException, JOSEException, NoSuchAlgorithmException {
-        SignResponse signResponse = getMockedSignResponse();
-        when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
-        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
+    void shouldBuildAndReturnCredentialOffer()
+            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
+        SignedJWT preAuthorizedCode = getTestPreAuthCode();
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        preAuthorizedCode.sign(ecSigner);
+        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(any(String.class)))
+                .thenReturn(preAuthorizedCode);
 
         CredentialOffer credentialOffer =
                 credentialOfferService.buildCredentialOffer(
                         "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "TestCredentialType");
 
-        assertEquals("http://localhost:8080", credentialOffer.getCredentialIssuer());
-        assertEquals("http://localhost:8080", credentialOffer.getCredentialIssuerTemporary());
+        assertEquals(TEST_CREDENTIAL_ISSUER, credentialOffer.getCredentialIssuer());
+        assertEquals(TEST_CREDENTIAL_ISSUER, credentialOffer.getCredentialIssuerTemporary());
         assertArrayEquals(new String[] {"TestCredentialType"}, credentialOffer.getCredentials());
         assertThat(credentialOffer, hasProperty("grants"));
-        assertThat(
+        assertEquals(
                 credentialOffer
                         .getGrants()
                         .get("urn:ietf:params:oauth:grant-type:pre-authorized_code")
                         .get("pre-authorized_code"),
-                startsWith(
-                        "eyJraWQiOiI3OGZhMTMxZDY3N2MxYWMwZjE3MmM1M2I0N2FjMTY5YTk1YWQwZDkyYzM4YmQ3OTRhNzBkYTU5MDMyMDU4Mjc0IiwidHlwIjoiSldUIiwiYWxnIjoiRVMyNTYifQ."));
+                preAuthorizedCode.serialize());
     }
 
-    private SignResponse getMockedSignResponse() throws JOSEException {
-        var signingKey =
-                new ECKeyGenerator(Curve.P_256)
-                        .keyID(KEY_ID)
-                        .algorithm(JWSAlgorithm.ES256)
-                        .generate();
-        var ecdsaSigner = new ECDSASigner(signingKey);
-        var jwtClaimsSet = new JWTClaimsSet.Builder().build();
-        var jwsHeader = new JWSHeader(JWSAlgorithm.ES256);
-        var signedJWT = new SignedJWT(jwsHeader, jwtClaimsSet);
-        signedJWT.sign(ecdsaSigner);
-        byte[] derSignature = ECDSA.transcodeSignatureToDER(signedJWT.getSignature().decode());
+    private static SignedJWT getTestPreAuthCode() {
+        return new SignedJWT(
+                new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
+                new JWTClaimsSet.Builder().issueTime(Date.from(Instant.now())).build());
+    }
 
-        return SignResponse.builder()
-                .signature(SdkBytes.fromByteArray(derSignature))
-                .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
-                .keyId(KEY_ID)
-                .build();
+    private ECKey getEsPrivateKey() throws ParseException {
+        String privateKeyJwk =
+                "{\"kty\":\"EC\",\"d\":\"aWs8vn4m77PZ_SFMqpGgDlmgBCvtccsV1sE8UCmWPm0\",\"crv\":\"P-256\",\"x\":\"QW9GkrKtsARqx2stUsf1EwBmFaORYzheMbCq28oAIsg\",\"y\":\"DM7AJ0OmO9EduJoQEzGVT0pNKuzwGr1KI1r3fuU85oQ\"}";
+        return ECKey.parse(privateKeyJwk);
     }
 }

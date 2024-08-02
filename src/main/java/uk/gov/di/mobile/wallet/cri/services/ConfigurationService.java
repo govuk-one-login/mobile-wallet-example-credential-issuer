@@ -49,14 +49,6 @@ public class ConfigurationService extends Configuration {
         return "http://localhost:4560";
     }
 
-    public String getAuthServerJwksPath() {
-        return "/.well-known/jwks.json";
-    }
-
-    public String getCredentialStoreDocumentPath() {
-        return "/document/";
-    }
-
     public long getPreAuthorizedCodeTtlInSecs() {
         return 300;
     }

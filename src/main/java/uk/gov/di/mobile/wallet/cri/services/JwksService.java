@@ -21,15 +21,13 @@ public class JwksService {
     private final JWKSource<SecurityContext> jwkSource;
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
+    private static final String JWKS_PATH = "/.well-known/jwks.json"; // NOSONAR
 
     public JwksService(ConfigurationService configurationService, KeyProvider keyProvider)
             throws MalformedURLException {
         this.configurationService = configurationService;
         this.keyProvider = keyProvider;
-        URL url =
-                new URL(
-                        configurationService.getOneLoginAuthServerUrl()
-                                + configurationService.getAuthServerJwksPath());
+        URL url = new URL(configurationService.getOneLoginAuthServerUrl() + JWKS_PATH);
         this.jwkSource =
                 JWKSourceBuilder.create(url)
                         .retrying(true)

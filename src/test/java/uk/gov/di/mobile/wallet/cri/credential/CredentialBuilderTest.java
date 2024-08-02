@@ -14,7 +14,6 @@ import com.nimbusds.jose.jwk.gen.ECKeyGenerator;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.DisabledException;
@@ -47,17 +46,19 @@ class CredentialBuilderTest {
 
     private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);
-    private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
+    private static final String TEST_KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String TEST_HASHED_KEY_ID =
             "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
+    private static final String TEST_EXAMPLE_CREDENTIAL_ISSUER = "https://example-cri-url.gov.uk";
     private JsonNode documentDetails;
-    ConfigurationService configurationService;
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
-        configurationService = new ConfigurationService();
         credentialBuilder = new CredentialBuilder(configurationService, kmsService);
-
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
+        when(configurationService.getSelfUrl()).thenReturn(TEST_EXAMPLE_CREDENTIAL_ISSUER);
+        when(configurationService.getCredentialTtlInSecs()).thenReturn(300L);
         documentDetails =
                 new ObjectMapper()
                         .readTree(
@@ -65,13 +66,11 @@ class CredentialBuilderTest {
     }
 
     @Test
-    @DisplayName(
-            "Should build the verifiable credential with the correct claims and sign it with KMS")
-    void testItReturnsCredential()
+    void shouldBuildVerifiableCredentialAndSignItWithKms()
             throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
-        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
+        when(kmsService.getKeyId(any(String.class))).thenReturn(TEST_KEY_ID);
 
         Credential credentialBuilderReturnValue =
                 credentialBuilder.buildCredential("did:key:test-did-key", documentDetails);
@@ -82,7 +81,8 @@ class CredentialBuilderTest {
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getType(), equalTo(JOSEObjectType.JWT));
         assertThat(credential.getHeader().getKeyID(), equalTo(TEST_HASHED_KEY_ID));
-        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo("http://localhost:8080"));
+        assertThat(
+                credential.getJWTClaimsSet().getIssuer(), equalTo(TEST_EXAMPLE_CREDENTIAL_ISSUER));
         assertThat(credential.getJWTClaimsSet().getIssueTime(), notNullValue());
         assertThat(credential.getJWTClaimsSet().getNotBeforeTime(), notNullValue());
         assertThat(
@@ -99,9 +99,8 @@ class CredentialBuilderTest {
     }
 
     @Test
-    @DisplayName("Should throw a SigningException when KMS throws an exception")
-    void testItThrowsSigningException() {
-        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
+    void shouldThrowSigningExceptionWhenKmsThrowsException() {
+        when(kmsService.getKeyId(any(String.class))).thenReturn(TEST_KEY_ID);
         when(kmsService.sign(any(SignRequest.class))).thenThrow(DisabledException.class);
 
         SigningException exception =
@@ -116,7 +115,7 @@ class CredentialBuilderTest {
     private SignResponse getMockedSignResponse() throws JOSEException {
         var signingKey =
                 new ECKeyGenerator(Curve.P_256)
-                        .keyID(KEY_ID)
+                        .keyID(TEST_KEY_ID)
                         .algorithm(JWSAlgorithm.ES256)
                         .generate();
         var ecdsaSigner = new ECDSASigner(signingKey);
@@ -129,7 +128,7 @@ class CredentialBuilderTest {
         return SignResponse.builder()
                 .signature(SdkBytes.fromByteArray(derSignature))
                 .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
-                .keyId(KEY_ID)
+                .keyId(TEST_KEY_ID)
                 .build();
     }
 }
