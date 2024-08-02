@@ -222,6 +222,10 @@ Resources:
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
+      HealthCheckPath: "/healthcheck"
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 60
+      HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-499
       Port: 80
