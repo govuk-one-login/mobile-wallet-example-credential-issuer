@@ -9,13 +9,13 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.stream.Collectors;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.Response.Status.OK;
 import static jakarta.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
-import static org.apache.commons.lang3.StringUtils.defaultString;
 
 @Path("/")
 public class HealthCheckResource {
@@ -41,15 +41,13 @@ public class HealthCheckResource {
                                         healthCheckResult ->
                                                 java.util.Map.of(
                                                         "healthy",
+                                                        healthCheckResult.getValue().isHealthy(),
+                                                        "message",
+                                                        Objects.toString(
                                                                 healthCheckResult
                                                                         .getValue()
-                                                                        .isHealthy(),
-                                                        "message",
-                                                                defaultString(
-                                                                        healthCheckResult
-                                                                                .getValue()
-                                                                                .getMessage(),
-                                                                        "Healthy"))));
+                                                                        .getMessage(),
+                                                                "Healthy"))));
 
         Response.Status status = allHealthy(results.values()) ? OK : SERVICE_UNAVAILABLE;
 

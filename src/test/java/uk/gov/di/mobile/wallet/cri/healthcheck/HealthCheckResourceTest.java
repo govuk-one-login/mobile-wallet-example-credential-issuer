@@ -20,19 +20,19 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class HealthCheckResourceTest {
+class HealthCheckResourceTest {
     @Mock private Environment environment;
     @Mock private HealthCheckRegistry healthCheckRegistry;
     private HealthCheckResource resource;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         when(environment.healthChecks()).thenReturn(healthCheckRegistry);
         resource = new HealthCheckResource(environment);
     }
 
     @Test
-    public void shouldBeUnealthyResponseWhenServiceIsUnhealthy() throws JsonProcessingException {
+    void shouldBeUnealthyResponseWhenServiceIsUnhealthy() throws JsonProcessingException {
         SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
         map.put("ping", HealthCheck.Result.unhealthy("application is unavailable"));
         map.put("deadlocks", HealthCheck.Result.unhealthy("no new threads available"));
@@ -54,7 +54,7 @@ public class HealthCheckResourceTest {
     }
 
     @Test
-    public void shouldBeHealthyResponseWhenServiceIsHealthy() throws JsonProcessingException {
+    void shouldBeHealthyResponseWhenServiceIsHealthy() throws JsonProcessingException {
         SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
         map.put("ping", HealthCheck.Result.healthy());
         map.put("deadlocks", HealthCheck.Result.healthy());
