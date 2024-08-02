@@ -15,19 +15,22 @@ public class CredentialOfferService {
 
     private final ConfigurationService configurationService;
     private final KmsService kmsService;
+    private final PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferService.class);
 
     public CredentialOfferService(
-            ConfigurationService configurationService, KmsService kmsService) {
+            ConfigurationService configurationService,
+            KmsService kmsService,
+            PreAuthorizedCodeBuilder preAuthorizedCodeBuilder) {
         this.configurationService = configurationService;
         this.kmsService = kmsService;
+        this.preAuthorizedCodeBuilder = preAuthorizedCodeBuilder;
     }
 
     public CredentialOffer buildCredentialOffer(String credentialIdentifier, String credentialType)
             throws SigningException, NoSuchAlgorithmException {
         SignedJWT preAuthorizedCode =
-                new PreAuthorizedCodeBuilder(configurationService, kmsService)
-                        .buildPreAuthorizedCode(credentialIdentifier);
+                preAuthorizedCodeBuilder.buildPreAuthorizedCode(credentialIdentifier);
 
         LOGGER.info(
                 "Pre-authorized code created for credentialOfferId {} and credentialType {}",

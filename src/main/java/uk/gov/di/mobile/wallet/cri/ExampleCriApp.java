@@ -11,6 +11,7 @@ import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.credential.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
+import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
 import uk.gov.di.mobile.wallet.cri.jwks.JwksResource;
@@ -42,9 +43,11 @@ public class ExampleCriApp extends Application<ConfigurationService> {
             throws MalformedURLException {
 
         KmsService kmsService = new KmsService(configurationService);
+        PreAuthorizedCodeBuilder preAuthorizedCode =
+                new PreAuthorizedCodeBuilder(configurationService, kmsService);
 
         CredentialOfferService credentialOfferService =
-                new CredentialOfferService(configurationService, kmsService);
+                new CredentialOfferService(configurationService, kmsService, preAuthorizedCode);
 
         DynamoDbService dynamoDbService =
                 new DynamoDbService(
