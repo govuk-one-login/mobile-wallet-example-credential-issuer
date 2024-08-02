@@ -40,7 +40,6 @@ class AccessTokenServiceTest {
     private AccessTokenService accessTokenService;
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final JwksService jwksService = mock(JwksService.class);
-
     private static final String AUDIENCE = "self-url.gov.uk";
     private static final String ISSUER = "auth-url.gov.uk";
 

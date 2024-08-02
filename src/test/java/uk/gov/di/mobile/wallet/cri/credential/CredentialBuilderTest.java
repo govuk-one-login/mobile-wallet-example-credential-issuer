@@ -47,17 +47,18 @@ class CredentialBuilderTest {
 
     private CredentialBuilder credentialBuilder;
     private final KmsService kmsService = mock(KmsService.class);
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String TEST_HASHED_KEY_ID =
             "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
     private JsonNode documentDetails;
-    ConfigurationService configurationService;
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
-        configurationService = new ConfigurationService();
         credentialBuilder = new CredentialBuilder(configurationService, kmsService);
-
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
+        when(configurationService.getSelfUrl()).thenReturn("https://example-cri-url.gov.uk");
+        when(configurationService.getCredentialTtlInSecs()).thenReturn(300L);
         documentDetails =
                 new ObjectMapper()
                         .readTree(
@@ -82,7 +83,9 @@ class CredentialBuilderTest {
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getType(), equalTo(JOSEObjectType.JWT));
         assertThat(credential.getHeader().getKeyID(), equalTo(TEST_HASHED_KEY_ID));
-        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo("http://localhost:8080"));
+        assertThat(
+                credential.getJWTClaimsSet().getIssuer(),
+                equalTo("https://example-cri-url.gov.uk"));
         assertThat(credential.getJWTClaimsSet().getIssueTime(), notNullValue());
         assertThat(credential.getJWTClaimsSet().getNotBeforeTime(), notNullValue());
         assertThat(
