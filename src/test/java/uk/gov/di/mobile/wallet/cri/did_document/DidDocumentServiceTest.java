@@ -36,12 +36,12 @@ import static org.mockito.Mockito.when;
 class DidDocumentServiceTest {
     private DidDocumentService didDocumentService;
     private final KmsService kmsService = mock(KmsService.class);
-    private final ConfigurationService configurationService = new ConfigurationService();
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private static final String TEST_ARN =
             "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
-    private static final String TEST_CONTROLLER = "did:web:localhost:8080";
+    private static final String TEST_CONTROLLER = "did:web:test-example-credential-issuer.gov.uk";
     private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_KEY_ID;
     private static final List<String> TEST_CONTEXT =
             List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
@@ -51,7 +51,10 @@ class DidDocumentServiceTest {
     @BeforeEach
     void setUp() {
         didDocumentService = new DidDocumentService(configurationService, kmsService);
-    }
+        when(configurationService.getSigningKeyAlias())
+                .thenReturn("test-signing-key-alias");
+        when(configurationService.getDidController())
+                .thenReturn("test-example-credential-issuer.gov.uk");    }
 
     @Test
     void shouldReturnDidDocument()
