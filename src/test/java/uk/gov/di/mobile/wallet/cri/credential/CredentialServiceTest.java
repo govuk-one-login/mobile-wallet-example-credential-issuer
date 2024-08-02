@@ -55,7 +55,7 @@ class CredentialServiceTest {
     private final AccessTokenService accessTokenService = mock(AccessTokenService.class);
     private final ProofJwtService proofJwtService = mock(ProofJwtService.class);
     private final CredentialBuilder credentialBuilder = mock(CredentialBuilder.class);
-    private final ConfigurationService configurationService = new ConfigurationService();
+    private final ConfigurationService configurationService = mock(ConfigurationService.class);
 
     @BeforeEach
     void setUp() {
