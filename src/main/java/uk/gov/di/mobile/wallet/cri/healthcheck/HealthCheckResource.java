@@ -7,7 +7,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
@@ -15,12 +14,11 @@ import java.util.stream.Collectors;
 
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static jakarta.ws.rs.core.Response.Status.OK;
-import static jakarta.ws.rs.core.Response.Status.SERVICE_UNAVAILABLE;
 
 @Path("/")
 public class HealthCheckResource {
 
-    private Environment environment;
+    private final Environment environment;
 
     public HealthCheckResource(Environment environment) {
         this.environment = environment;
@@ -49,12 +47,6 @@ public class HealthCheckResource {
                                                                         .getMessage(),
                                                                 "Healthy"))));
 
-        Response.Status status = allHealthy(results.values()) ? OK : SERVICE_UNAVAILABLE;
-
-        return Response.status(status).entity(response).build();
-    }
-
-    private boolean allHealthy(Collection<HealthCheck.Result> results) {
-        return results.stream().allMatch(HealthCheck.Result::isHealthy);
+        return Response.status(OK).entity(response).build();
     }
 }

@@ -32,28 +32,6 @@ class HealthCheckResourceTest {
     }
 
     @Test
-    void shouldBeUnealthyResponseWhenServiceIsUnhealthy() throws JsonProcessingException {
-        SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
-        map.put("ping", HealthCheck.Result.unhealthy("application is unavailable"));
-        map.put("deadlocks", HealthCheck.Result.unhealthy("no new threads available"));
-
-        when(healthCheckRegistry.runHealthChecks()).thenReturn(map);
-
-        Response response = resource.healthCheck();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseBodyString = objectMapper.writeValueAsString(response.getEntity());
-        String expectedResponseBodyString =
-                "{\"ping\":{\"message\":\"application is unavailable\",\"healthy\":false},\"deadlocks\":{\"message\":\"no new threads available\",\"healthy\":false}}";
-        Object responseBody = objectMapper.readValue(responseBodyString, Object.class);
-        Object expectedResponseBody =
-                objectMapper.readValue(expectedResponseBodyString, Object.class);
-
-        assertThat(response.getStatus(), is(503));
-        assertThat(responseBody, is(expectedResponseBody));
-    }
-
-    @Test
     void shouldBeHealthyResponseWhenServiceIsHealthy() throws JsonProcessingException {
         SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
         map.put("ping", HealthCheck.Result.healthy());
@@ -72,29 +50,6 @@ class HealthCheckResourceTest {
                 objectMapper.readValue(expectedResponseBodyString, Object.class);
 
         assertThat(response.getStatus(), is(200));
-        assertThat(responseBody, is(expectedResponseBody));
-    }
-
-    @Test
-    void shouldBeUnhealthyResponseWhenServiceIsOnlyPartiallyHealthy()
-            throws JsonProcessingException {
-        SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
-        map.put("ping", HealthCheck.Result.healthy());
-        map.put("deadlocks", HealthCheck.Result.unhealthy("no new threads available"));
-
-        when(healthCheckRegistry.runHealthChecks()).thenReturn(map);
-
-        Response response = resource.healthCheck();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String responseBodyString = objectMapper.writeValueAsString(response.getEntity());
-        String expectedResponseBodyString =
-                "{\"ping\":{\"message\":\"Healthy\",\"healthy\":true},\"deadlocks\":{\"message\":\"no new threads available\",\"healthy\":false}}";
-        Object responseBody = objectMapper.readValue(responseBodyString, Object.class);
-        Object expectedResponseBody =
-                objectMapper.readValue(expectedResponseBodyString, Object.class);
-
-        assertThat(response.getStatus(), is(503));
         assertThat(responseBody, is(expectedResponseBody));
     }
 }
