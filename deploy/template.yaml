@@ -224,7 +224,7 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckPath: "/healthcheck"
       HealthCheckTimeoutSeconds: 2
-      HealthCheckIntervalSeconds: 15
+      HealthCheckIntervalSeconds: 60
       HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-499
