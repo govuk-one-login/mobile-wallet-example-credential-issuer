@@ -47,7 +47,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 new PreAuthorizedCodeBuilder(configurationService, kmsService);
 
         CredentialOfferService credentialOfferService =
-                new CredentialOfferService(configurationService, kmsService, preAuthorizedCode);
+                new CredentialOfferService(configurationService, preAuthorizedCode);
 
         DynamoDbService dynamoDbService =
                 new DynamoDbService(

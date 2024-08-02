@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
@@ -32,7 +31,6 @@ import static org.mockito.Mockito.when;
 class CredentialOfferServiceTest {
 
     private CredentialOfferService credentialOfferService;
-    private final KmsService kmsService = mock(KmsService.class);
     private final PreAuthorizedCodeBuilder preAuthorizedCodeBuilder =
             mock(PreAuthorizedCodeBuilder.class);
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
@@ -41,8 +39,7 @@ class CredentialOfferServiceTest {
     @BeforeEach
     void setUp() {
         credentialOfferService =
-                new CredentialOfferService(
-                        configurationService, kmsService, preAuthorizedCodeBuilder);
+                new CredentialOfferService(configurationService, preAuthorizedCodeBuilder);
         when(configurationService.getSelfUrl()).thenReturn(TEST_CREDENTIAL_ISSUER);
     }
 

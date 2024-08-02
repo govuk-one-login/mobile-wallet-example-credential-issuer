@@ -4,7 +4,6 @@ import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
@@ -14,16 +13,13 @@ import java.util.Map;
 public class CredentialOfferService {
 
     private final ConfigurationService configurationService;
-    private final KmsService kmsService;
     private final PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferService.class);
 
     public CredentialOfferService(
             ConfigurationService configurationService,
-            KmsService kmsService,
             PreAuthorizedCodeBuilder preAuthorizedCodeBuilder) {
         this.configurationService = configurationService;
-        this.kmsService = kmsService;
         this.preAuthorizedCodeBuilder = preAuthorizedCodeBuilder;
     }
 
