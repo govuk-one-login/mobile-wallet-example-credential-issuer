@@ -93,11 +93,6 @@ spotless {
 	}
 }
 
-test {
-	useJUnitPlatform()
-	finalizedBy jacocoTestReport
-}
-
 jacocoTestReport {
 	dependsOn test
 	reports {
@@ -108,7 +103,8 @@ jacocoTestReport {
 tasks.withType(Test) {
 	testLogging {
 		exceptionFormat "full"
-		events "started", "skipped", "passed", "failed"
-		showStandardStreams true
+		events "started", "skipped", "passed", "failed" /*, "standardOut", "standardError" */
 	}
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
 }
