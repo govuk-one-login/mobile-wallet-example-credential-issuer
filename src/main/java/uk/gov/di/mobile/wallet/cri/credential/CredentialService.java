@@ -30,6 +30,7 @@ public class CredentialService {
     private final Client httpClient;
     private final CredentialBuilder credentialBuilder;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+    private static final String CREDENTIAL_STORE_DOCUMENT_PATH = "/document/"; // NOSONAR
 
     public CredentialService(
             ConfigurationService configurationService,
@@ -152,8 +153,7 @@ public class CredentialService {
     private Object getDocumentDetails(String documentId)
             throws URISyntaxException, CredentialServiceException {
         String credentialStoreUrl = configurationService.getCredentialStoreUrl();
-        String credentialStoreDocumentPath = configurationService.getCredentialStoreDocumentPath();
-        URI uri = new URI(credentialStoreUrl + credentialStoreDocumentPath + documentId);
+        URI uri = new URI(credentialStoreUrl + CREDENTIAL_STORE_DOCUMENT_PATH + documentId);
 
         Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
 

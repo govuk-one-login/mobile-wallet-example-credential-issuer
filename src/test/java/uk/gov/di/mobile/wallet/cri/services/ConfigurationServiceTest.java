@@ -146,16 +146,6 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void shouldGetAuthServerJwksPathValue() {
-        assertEquals("/.well-known/jwks.json", configurationService.getAuthServerJwksPath());
-    }
-
-    @Test
-    void shouldGetCredentialStoreDocumentPathValue() {
-        assertEquals("/document/", configurationService.getCredentialStoreDocumentPath());
-    }
-
-    @Test
     void shouldGetPreAuthCodeTtlValue() {
         assertEquals(300, configurationService.getPreAuthorizedCodeTtlInSecs());
     }

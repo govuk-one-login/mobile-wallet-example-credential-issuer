@@ -29,11 +29,12 @@ public class MetadataResource {
     public Response getMetadata() {
         try {
 
+            String selfUrl = configurationService.getSelfUrl();
+
             Metadata metadata =
                     metadataBuilder
-                            .setCredentialIssuer(configurationService.getSelfUrl())
-                            .setCredentialsEndpoint(
-                                    configurationService.getSelfUrl() + CREDENTIAL_ENDPOINT)
+                            .setCredentialIssuer(selfUrl)
+                            .setCredentialsEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
                             .setAuthorizationServers(
                                     configurationService.getOneLoginAuthServerUrl())
                             .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
