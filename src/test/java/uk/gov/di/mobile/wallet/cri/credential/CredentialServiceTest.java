@@ -50,6 +50,7 @@ class CredentialServiceTest {
     @Mock private Invocation.Builder mockInvocationBuilder;
     @Mock private Response mockResponse;
     private CredentialService credentialService;
+    private CredentialOfferCacheItem credentialOfferCacheItem;
     private final DynamoDbService dynamoDbService = mock(DynamoDbService.class);
     private final AccessTokenService accessTokenService = mock(AccessTokenService.class);
     private final ProofJwtService proofJwtService = mock(ProofJwtService.class);
@@ -66,6 +67,12 @@ class CredentialServiceTest {
                         proofJwtService,
                         mockHttpClient,
                         credentialBuilder);
+        credentialOfferCacheItem =
+                new CredentialOfferCacheItem(
+                        "test-credential-identifier",
+                        "test-document-id",
+                        "test-wallet-sub",
+                        Instant.now().plusSeconds(Long.parseLong("900")).getEpochSecond());
     }
 
     @Test
@@ -126,7 +133,7 @@ class CredentialServiceTest {
                         CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals(
-                "Null response returned from database when fetching credential offer",
+                "Credential offer not found for credentialOfferId test-credential-identifier",
                 exception.getMessage());
         verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
         verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
@@ -158,13 +165,11 @@ class CredentialServiceTest {
             throws java.text.ParseException, DataStoreException, JOSEException {
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
         SignedJWT accessToken =
-                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub-1");
+                getTestAccessToken(
+                        "test-nonce", "test-credential-identifier", "different-test-wallet-sub");
         SignedJWT proofJwt = getTestProofJwt("test-nonce");
         accessToken.sign(ecSigner);
         proofJwt.sign(ecSigner);
-        CredentialOfferCacheItem credentialOfferCacheItem =
-                new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-sub-2");
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(credentialOfferCacheItem);
 
         AccessTokenValidationException exception =
@@ -176,6 +181,34 @@ class CredentialServiceTest {
                 containsString("Access token sub claim does not match cached walletSubjectId"));
         verify(dynamoDbService, times(1)).getCredentialOffer("test-credential-identifier");
         verify(dynamoDbService, times(0)).deleteCredentialOffer(any());
+    }
+
+    @Test
+    void shouldThrowCredentialOfferNotFoundExceptionWhenCredentialOfferIsExpired()
+            throws java.text.ParseException, DataStoreException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());
+        SignedJWT accessToken =
+                getTestAccessToken("test-nonce", "test-credential-identifier", "test-wallet-sub");
+        SignedJWT proofJwt = getTestProofJwt("test-nonce");
+        accessToken.sign(ecSigner);
+        proofJwt.sign(ecSigner);
+        CredentialOfferCacheItem expiredCredentialOfferCacheItem =
+                new CredentialOfferCacheItem(
+                        "test-credential-identifier",
+                        "test-document-id",
+                        "test-wallet-sub",
+                        Instant.now().minusSeconds(Long.parseLong("1")).getEpochSecond());
+        when(dynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(expiredCredentialOfferCacheItem);
+
+        CredentialOfferNotFoundException exception =
+                assertThrows(
+                        CredentialOfferNotFoundException.class,
+                        () -> credentialService.getCredential(accessToken, proofJwt));
+        assertThat(
+                exception.getMessage(),
+                containsString(
+                        "Credential offer for credentialOfferId test-credential-identifier expired at"));
     }
 
     @Test
@@ -191,9 +224,6 @@ class CredentialServiceTest {
         SignedJWT proofJwt = getTestProofJwt("test-nonce");
         accessToken.sign(ecSigner);
         proofJwt.sign(ecSigner);
-        CredentialOfferCacheItem credentialOfferCacheItem =
-                new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-sub");
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(credentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
@@ -236,9 +266,6 @@ class CredentialServiceTest {
         SignedJWT proofJwt = getTestProofJwt("test-nonce");
         accessToken.sign(ecSigner);
         proofJwt.sign(ecSigner);
-        CredentialOfferCacheItem credentialOfferCacheItem =
-                new CredentialOfferCacheItem(
-                        "test-credential-identifier", "test-document-id", "test-wallet-sub");
         when(dynamoDbService.getCredentialOffer(anyString())).thenReturn(credentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);

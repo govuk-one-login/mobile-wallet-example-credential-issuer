@@ -157,11 +157,16 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetPreAuthCodeTtlValue() {
-        assertEquals(300, configurationService.getPreAuthorizedCodeTtl());
+        assertEquals(300, configurationService.getPreAuthorizedCodeTtlInSecs());
     }
 
     @Test
     void shouldGetCredentialTtlValue() {
-        assertEquals(365, configurationService.getCredentialTtl());
+        assertEquals(365, configurationService.getCredentialTtlInSecs());
+    }
+
+    @Test
+    void shouldGetCredentialOfferTtlValue() {
+        assertEquals(900, configurationService.getCredentialOfferTtlInSecs());
     }
 }

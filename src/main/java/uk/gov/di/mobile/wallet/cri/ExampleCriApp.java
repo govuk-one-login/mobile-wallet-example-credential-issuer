@@ -51,7 +51,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         DynamoDbService dynamoDbService =
                 new DynamoDbService(
                         DynamoDbService.getClient(configurationService),
-                        configurationService.getCredentialOfferCacheTableName());
+                        configurationService.getCredentialOfferCacheTableName(),
+                        configurationService.getCredentialOfferTtlInSecs());
 
         MetadataBuilder metadataBuilder = new MetadataBuilder();
         Client httpClient =

@@ -78,7 +78,8 @@ public class PreAuthorizedCodeBuilder {
                         .expirationTime(
                                 Date.from(
                                         now.plus(
-                                                configurationService.getPreAuthorizedCodeTtl(),
+                                                configurationService
+                                                        .getPreAuthorizedCodeTtlInSecs(),
                                                 ChronoUnit.SECONDS)))
                         .claim("clientId", configurationService.getClientId())
                         .claim("credential_identifiers", new String[] {walletSubjectId});
