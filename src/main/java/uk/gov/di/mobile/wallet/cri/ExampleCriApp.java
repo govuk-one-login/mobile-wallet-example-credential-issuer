@@ -80,7 +80,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 new DidDocumentService(configurationService, kmsService);
 
         environment.healthChecks().register("ping", new Ping());
-        environment.jersey().register(new HealthCheckResource(environment));
+        environment.jersey().register(new HealthCheckResource());
 
         environment
                 .jersey()
