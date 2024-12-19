@@ -613,7 +613,7 @@ Resources:
         - AttributeName: credentialIdentifier
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
-      TableName: credential_offer_cache
+      TableName: !Sub "${AWS::StackName}-credential_offer_cache"
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH
@@ -731,3 +731,14 @@ Resources:
           Label: errorPercentage
           ReturnData: false
           Expression: (error/invocations) * 100
+
+Outputs:
+  CredIssuerFriendlyUrl:
+    Description: Friendly URL for the deployed credential issuer service
+    Value: !If
+      - StackNameIsWalletCredIssuerBE
+      - !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+      - !Sub
+        - "${AWS::StackName}-${SelfUrl}"
+        - SelfUrl:
+            !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
