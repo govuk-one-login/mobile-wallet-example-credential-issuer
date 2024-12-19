@@ -99,3 +99,24 @@ When testing with the [test harness](https://github.com/govuk-one-login/mobile-w
 ```
 ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run  
 ```
+
+## Deploy a stack in dev
+
+> For the following it is required to have a containerisation service (e.g. Docker Desktop) running and to be logged
+> into the Mobile Platform dev AWS account
+
+Run the script to build and push the Document Builder docker image, specifying your desired tag and the name of your AWS profile
+for the Mobile Platform dev AWS account (which can be found in your `~/.aws/credentials` file):
+
+```shell
+./build-and-deploy-image.sh <your-tag-name> <your-mobile-platform-dev-profile> 
+```
+
+This will build the docker image, log into ECR, push the image to ECR, and update the `template.yaml` to specify this
+image for the Document Builder ECS task.
+
+You can then build the template and deploy the stack:
+
+```bash
+sam build && sam deploy --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
+```
