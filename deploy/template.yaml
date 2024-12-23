@@ -419,22 +419,30 @@ Resources:
             - Name: ENVIRONMENT
               Value: !Sub "${Environment}"
             - Name: SELF_URL
-              Value: !Sub 
-                      - "https://${SelfUrl}"
-                      - SelfUrl:
-                          !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+              Value: !If
+                - StackNameIsWalletCredIssuerBE
+                - !Sub
+                  - "https://${SelfUrl}"
+                  - SelfUrl:
+                      !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+                - !Sub
+                  - "https://${AWS::StackName}-${SelfUrl}"
+                  - SelfUrl:
+                      !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
             - Name: DID_CONTROLLER
-              Value: !Sub
-                - ${SelfUrl}
-                - SelfUrl:
-                    !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+              Value: !If
+                - StackNameIsWalletCredIssuerBE
+                - !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
+                - !Sub
+                  - "${AWS::StackName}-${SelfUrl}"
+                  - SelfUrl:
+                      !FindInMap [ EnvironmentVariables, !Ref Environment, SelfUrl ]
             - Name: OIDC_CLIENT_ID
               Value: !Sub "{{resolve:ssm:/${DocumentBuilderStackName}/Config/OIDC/Client/Id}}"
             - Name: CREDENTIAL_STORE_URL
-              Value: !Sub 
+              Value: !Sub
                       - "https://${CredentialStoreUrl}"
-                      - CredentialStoreUrl:
-                          !FindInMap [ EnvironmentVariables, !Ref Environment, CredentialStoreUrl ]
+                      - CredentialStoreUrl: !FindInMap [ EnvironmentVariables, !Ref Environment, CredentialStoreUrl ]
             - Name: WALLET_APP_DEEP_LINK_URL
               Value: !Sub
                       - "https://${WalletAppDeepLinkUrl}"
