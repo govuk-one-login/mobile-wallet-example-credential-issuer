@@ -32,7 +32,7 @@ Build with `./gradlew`
 
 By default, this also calls `clean`,  `spotlessApply` and `test`.
 
-### Run
+### Running Locally
 
 #### Setting up the AWS CLI
 You will need to have the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed and configured to interact with the local database. You can configure the CLI with the values below by running `aws configure`:
@@ -43,7 +43,7 @@ Default region name [None]: eu-west-2
 Default output format [None]:
 ```
 
-####  Setting up LocalStack
+#### Setting up LocalStack
 This app uses LocalStack to run AWS services locally on port `4560`.
 
 To start the LocalStack container and provision a local version of KMS and the DynamoDB table where credential offers are stored, run `docker compose up`.
@@ -79,7 +79,7 @@ To get the JWKS:
 curl -X GET http://localhost:8080/.well-known/jwks.json | jq
 ```
 
-#### Reading from the Database
+#### Reading from the local Database
 To check that a credential offer was saved to the table, run:
 
 `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name credential_offer_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`
@@ -88,7 +88,7 @@ replacing the **credentialIdentifier** with the relevant one.
 
 To return all items from the table, run:
 
- `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name credential_offer_cache`.
+`aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name credential_offer_cache`.
 
 ### Test
 #### Unit Tests
@@ -98,4 +98,25 @@ Run unit tests with `./gradlew test`
 When testing with the [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-harness) locally, you must point the authorization server to the right address:
 ```
 ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run  
+```
+
+## Deploy a stack in dev
+
+> For the following it is required to have a containerisation service (e.g. Docker Desktop) running and to be logged
+> into the Mobile Platform dev AWS account
+
+Run the script to build and push the Document Builder docker image, specifying your desired tag and the name of your AWS profile
+for the Mobile Platform dev AWS account (which can be found in your `~/.aws/credentials` file):
+
+```shell
+./build-and-deploy-image.sh <your-tag-name> <your-mobile-platform-dev-profile> 
+```
+
+This will build the docker image, log into ECR, push the image to ECR, and update the `template.yaml` to specify this
+image for the Document Builder ECS task.
+
+You can then build the template and deploy the stack:
+
+```bash
+sam build && sam deploy --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
 ```
