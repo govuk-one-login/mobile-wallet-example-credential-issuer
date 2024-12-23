@@ -56,7 +56,7 @@ Run the application with `./gradlew run`
 #### Test API Request
 To get a credential offer:
 ```
-curl -X GET "http://localhost:8080/credential_offer?walletSubjectId=urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i&documentId=testDocumentId&credentialType=BasicCheckCredential" | jq
+curl -X GET http://localhost:8080/credential_offer?walletSubjectId=urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i&documentId=testDocumentId&credentialType=BasicCheckCredential | jq
 ```
 
 To get the credential metadata:
@@ -88,7 +88,7 @@ replacing the **credentialIdentifier** with the relevant one.
 
 To return all items from the table, run:
 
- `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name credential_offer_cache`.
+`aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name credential_offer_cache`.
 
 ### Test
 #### Unit Tests
