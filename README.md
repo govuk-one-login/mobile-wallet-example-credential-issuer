@@ -32,7 +32,7 @@ Build with `./gradlew`
 
 By default, this also calls `clean`,  `spotlessApply` and `test`.
 
-### Run
+### Running Locally
 
 #### Setting up the AWS CLI
 You will need to have the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed and configured to interact with the local database. You can configure the CLI with the values below by running `aws configure`:
@@ -43,7 +43,7 @@ Default region name [None]: eu-west-2
 Default output format [None]:
 ```
 
-####  Setting up LocalStack
+#### Setting up LocalStack
 This app uses LocalStack to run AWS services locally on port `4560`.
 
 To start the LocalStack container and provision a local version of KMS and the DynamoDB table where credential offers are stored, run `docker compose up`.
@@ -79,7 +79,7 @@ To get the JWKS:
 curl -X GET http://localhost:8080/.well-known/jwks.json | jq
 ```
 
-#### Reading from the Database
+#### Reading from the local Database
 To check that a credential offer was saved to the table, run:
 
 `aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name credential_offer_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`
