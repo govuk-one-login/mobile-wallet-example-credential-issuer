@@ -33,7 +33,7 @@ jobs:
           ref: ${{ inputs.gitRef }}
 
       - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@2360ef6d90015369947b45b496193ab9976a9b04 # pin@v2
+        uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # pin@v2
         with:
           version: 1.90.0
           use-installer: true
