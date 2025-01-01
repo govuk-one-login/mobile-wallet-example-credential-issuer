@@ -9,6 +9,7 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
@@ -17,6 +18,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -41,9 +43,14 @@ public class CredentialBuilder {
         var encodedHeader = getEncodedHeader(keyId);
         var encodedClaims = getEncodedClaims(proofJwtDidKey, documentDetails);
         var message = encodedHeader + "." + encodedClaims;
+
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] encodedHash = digest.digest(message.getBytes());
+
         var signRequest =
                 SignRequest.builder()
-                        .message(SdkBytes.fromByteArray(message.getBytes()))
+                        .message(SdkBytes.fromByteArray(encodedHash))
+                        .messageType(MessageType.DIGEST)
                         .keyId(keyId)
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
                         .build();
