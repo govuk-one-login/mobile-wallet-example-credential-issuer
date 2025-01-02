@@ -39,7 +39,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.beans.HasProperty.hasProperty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -86,11 +85,11 @@ class CredentialBuilderTest {
         // assert
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
-        assertEquals("ECDSA_SHA_256", capturedSignRequest.signingAlgorithm().name());
-        assertEquals("DIGEST", capturedSignRequest.messageType().name());
-        assertEquals(TEST_KEY_ID, capturedSignRequest.keyId());
+        assertThat(capturedSignRequest.signingAlgorithm().name(), equalTo("ECDSA_SHA_256"));
+        assertThat(capturedSignRequest.messageType().name(), equalTo("DIGEST"));
+        assertThat(capturedSignRequest.keyId(), equalTo(TEST_KEY_ID));
         assertThat(capturedSignRequest.message(), instanceOf(SdkBytes.class));
-        assertEquals(32, capturedSignRequest.message().asByteArray().length);
+        assertThat(capturedSignRequest.message().asByteArray().length, equalTo(32));
     }
 
     @Test
@@ -130,7 +129,7 @@ class CredentialBuilderTest {
         assertThat(
                 credential.getJWTClaimsSet().getClaim("context"),
                 equalTo(singletonList("https://www.w3.org/2018/credentials/v1")));
-        assertEquals(JWSObject.State.SIGNED, credential.getState());
+        assertThat(credential.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
     @Test
