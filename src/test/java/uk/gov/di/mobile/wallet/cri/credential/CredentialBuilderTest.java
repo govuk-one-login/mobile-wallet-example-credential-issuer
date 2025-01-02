@@ -3,8 +3,11 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.nimbusds.jose.*;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.crypto.impl.ECDSA;
 import com.nimbusds.jose.jwk.Curve;
@@ -15,7 +18,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import software.amazon.awssdk.core.SdkBytes;
-import software.amazon.awssdk.services.kms.model.*;
+import software.amazon.awssdk.services.kms.model.DisabledException;
+import software.amazon.awssdk.services.kms.model.SignRequest;
+import software.amazon.awssdk.services.kms.model.SignResponse;
+import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -28,11 +34,17 @@ import java.util.Date;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.beans.HasProperty.hasProperty;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class CredentialBuilderTest {
 
@@ -59,7 +71,8 @@ class CredentialBuilderTest {
     }
 
     @Test
-    void shouldCallKmsSignWithCorrectParameters() throws SigningException, JOSEException, NoSuchAlgorithmException, JsonProcessingException {
+    void shouldCallKmsSignWithCorrectParameters()
+            throws SigningException, JOSEException, NoSuchAlgorithmException {
         // arrange
         ArgumentCaptor<SignRequest> signRequestArgumentCaptor =
                 ArgumentCaptor.forClass(SignRequest.class);
@@ -78,12 +91,15 @@ class CredentialBuilderTest {
         assertEquals(TEST_KEY_ID, capturedSignRequest.keyId());
         assertThat(capturedSignRequest.message(), instanceOf(SdkBytes.class));
         assertEquals(32, capturedSignRequest.message().asByteArray().length);
-
     }
 
     @Test
     void shouldReturnValidCredential()
-            throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException, JsonProcessingException {
+            throws SigningException,
+                    ParseException,
+                    JOSEException,
+                    NoSuchAlgorithmException,
+                    JsonProcessingException {
         // arrange
         SignResponse mockSignResponse = mockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
@@ -110,7 +126,7 @@ class CredentialBuilderTest {
                         .before(Date.from(Instant.now().plus(365, ChronoUnit.DAYS))),
                 equalTo(true));
         assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(TEST_DID_KEY));
-        assertNotNull(credential.getJWTClaimsSet().getClaim("vc"));
+        assertThat(credential.getJWTClaimsSet().getClaim("vc"), notNullValue());
         assertThat(
                 credential.getJWTClaimsSet().getClaim("context"),
                 equalTo(singletonList("https://www.w3.org/2018/credentials/v1")));
@@ -127,9 +143,7 @@ class CredentialBuilderTest {
         SigningException exception =
                 assertThrows(
                         SigningException.class,
-                        () ->
-                                credentialBuilder.buildCredential(
-                                        TEST_DID_KEY, documentDetails));
+                        () -> credentialBuilder.buildCredential(TEST_DID_KEY, documentDetails));
 
         // assert
         assertThat(exception.getMessage(), containsString("Error signing token"));
