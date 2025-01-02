@@ -94,11 +94,7 @@ class CredentialBuilderTest {
 
     @Test
     void shouldReturnValidCredential()
-            throws SigningException,
-                    ParseException,
-                    JOSEException,
-                    NoSuchAlgorithmException,
-                    JsonProcessingException {
+            throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException {
         // arrange
         SignResponse mockSignResponse = mockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
