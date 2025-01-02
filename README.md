@@ -124,7 +124,6 @@ Mappings:
       ...
       CredentialStoreUrl: "<stack-name->stub-credential-issuer.mobile.dev.account.gov.uk"
       AuthServerUrl: "<stack-name->stub-credential-issuer.mobile.dev.account.gov.uk"
-      AuthServerUrl: "wallet-doc-builder-ddunford-stub-credential-issuer.mobile.dev.account.gov.uk"
 ```
 
 You can then build the template and deploy the stack:
