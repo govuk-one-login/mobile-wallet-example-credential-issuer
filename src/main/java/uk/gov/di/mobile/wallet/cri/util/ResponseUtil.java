@@ -5,6 +5,10 @@ import jakarta.ws.rs.core.Response;
 
 public class ResponseUtil {
 
+    private ResponseUtil() {
+        // Should never be instantiated
+    }
+
     public static Response ok(Object entity) {
         return jsonBuilder(Response.Status.OK, entity).build();
     }
