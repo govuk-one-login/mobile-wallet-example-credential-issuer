@@ -16,6 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.Objects;
 
@@ -45,21 +46,21 @@ public class CredentialResource {
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
             if (exception instanceof AccessTokenValidationException) {
-                return buildBadRequestResponse().entity("invalid_credential_request").build();
+                return ResponseUtil.badRequest(error("invalid_credential_request"));
             }
 
             if (exception instanceof ProofJwtValidationException) {
-                return buildBadRequestResponse().entity("invalid_proof").build();
+                return ResponseUtil.badRequest(error("invalid_proof"));
             }
 
             if (exception instanceof CredentialOfferNotFoundException) {
-                return buildNotFoundResponse().entity("invalid_credential_request").build();
+                return ResponseUtil.notFound(error("invalid_credential_request"));
             }
 
-            return buildInternalErrorResponse().entity("server_error").build();
+            return ResponseUtil.internalServerError();
         }
 
-        return buildSuccessResponse().entity(credential).build();
+        return ResponseUtil.ok(credential);
     }
 
     private SignedJWT parseAuthorizationHeader(String authorizationHeader)
@@ -98,19 +99,7 @@ public class CredentialResource {
         }
     }
 
-    private Response.ResponseBuilder buildSuccessResponse() {
-        return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON_TYPE);
-    }
-
-    private Response.ResponseBuilder buildBadRequestResponse() {
-        return Response.status(Response.Status.BAD_REQUEST);
-    }
-
-    private Response.ResponseBuilder buildNotFoundResponse() {
-        return Response.status(Response.Status.NOT_FOUND);
-    }
-
-    private Response.ResponseBuilder buildInternalErrorResponse() {
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR);
+    private String error(String error) {
+        return String.format("{\"error\":\"%s\"}", error);
     }
 }
