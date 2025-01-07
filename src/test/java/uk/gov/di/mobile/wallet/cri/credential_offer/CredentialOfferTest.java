@@ -21,9 +21,6 @@ class CredentialOfferTest {
                         "https://credential-issuer.example.com", "TestCredentialType", grantsMap);
         assertEquals(
                 "https://credential-issuer.example.com", credentialOffer.getCredentialIssuer());
-        assertEquals(
-                "https://credential-issuer.example.com",
-                credentialOffer.getCredentialIssuerTemporary());
         assertArrayEquals(new String[] {"TestCredentialType"}, credentialOffer.getCredentials());
         assertEquals(grantsMap, credentialOffer.getGrants());
     }
