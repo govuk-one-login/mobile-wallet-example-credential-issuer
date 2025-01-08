@@ -76,7 +76,7 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
-        assertThat(response.readEntity(String.class), is("invalid_proof"));
+        assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_proof\"}"));
     }
 
     @Test
@@ -102,7 +102,9 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
-        assertThat(response.readEntity(String.class), is("invalid_credential_request"));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"invalid_credential_request\"}"));
     }
 
     @Test
@@ -132,7 +134,9 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
-        assertThat(response.readEntity(String.class), is("invalid_credential_request"));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"invalid_credential_request\"}"));
     }
 
     @Test
@@ -164,7 +168,9 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(404));
-        assertThat(response.readEntity(String.class), is("invalid_credential_request"));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"invalid_credential_request\"}"));
         reset(credentialService);
     }
 
@@ -197,7 +203,6 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(500));
-        assertThat(response.readEntity(String.class), is("server_error"));
         reset(credentialService);
     }
 
@@ -230,7 +235,6 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(500));
-        assertThat(response.readEntity(String.class), is("server_error"));
         reset(credentialService);
     }
 

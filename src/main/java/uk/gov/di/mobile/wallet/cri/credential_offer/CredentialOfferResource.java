@@ -18,6 +18,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -71,7 +72,7 @@ public class CredentialOfferResource {
                     walletSubjectId,
                     documentId,
                     exception);
-            return buildInternalErrorResponse().build();
+            return ResponseUtil.internalServerError();
         }
 
         LOGGER.info(
@@ -88,7 +89,7 @@ public class CredentialOfferResource {
                     walletSubjectId,
                     documentId,
                     exception);
-            return buildInternalErrorResponse().build();
+            return ResponseUtil.internalServerError();
         }
 
         LOGGER.info(
@@ -107,15 +108,6 @@ public class CredentialOfferResource {
                         "/add?credential_offer=",
                         credentialOfferStringEncoded);
 
-        return buildSuccessResponse().entity(credentialOfferUri).build();
-    }
-
-    private Response.ResponseBuilder buildSuccessResponse() {
-        return Response.status(Response.Status.OK).type(MediaType.APPLICATION_JSON_TYPE);
-    }
-
-    private Response.ResponseBuilder buildInternalErrorResponse() {
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .type(MediaType.APPLICATION_JSON_TYPE);
+        return ResponseUtil.ok(credentialOfferUri);
     }
 }
