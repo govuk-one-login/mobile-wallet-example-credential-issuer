@@ -101,8 +101,8 @@ public class CredentialResource {
         }
     }
 
-    private String error(String error, String error_description) {
+    private String error(String error, String errorDescription) {
         return String.format(
-                "{\"error\":\"%s\", \"error_description\":\"%s\"}", error, error_description);
+                "{\"error\":\"%s\", \"error_description\":\"%s\"}", error, errorDescription);
     }
 }
