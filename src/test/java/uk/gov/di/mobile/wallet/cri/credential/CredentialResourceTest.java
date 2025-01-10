@@ -76,7 +76,10 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
-        assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_proof\", \"error_description\":\"Proof failed to validate\"}"));
+        assertThat(
+                response.readEntity(String.class),
+                is(
+                        "{\"error\":\"invalid_proof\", \"error_description\":\"Proof failed to validate\"}"));
     }
 
     @Test
@@ -104,7 +107,8 @@ class CredentialResourceTest {
         assertThat(response.getStatus(), is(400));
         assertThat(
                 response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\", \"error_description\":\"Access token failed to validate\"}"));
+                is(
+                        "{\"error\":\"invalid_credential_request\", \"error_description\":\"Access token failed to validate\"}"));
     }
 
     @Test
@@ -136,7 +140,8 @@ class CredentialResourceTest {
         assertThat(response.getStatus(), is(400));
         assertThat(
                 response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\", \"error_description\":\"Access token failed to validate\"}"));
+                is(
+                        "{\"error\":\"invalid_credential_request\", \"error_description\":\"Access token failed to validate\"}"));
     }
 
     @Test
@@ -170,7 +175,8 @@ class CredentialResourceTest {
         assertThat(response.getStatus(), is(400));
         assertThat(
                 response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\", \"error_description\":\"Credential offer not found\"}"));
+                is(
+                        "{\"error\":\"invalid_credential_request\", \"error_description\":\"Credential offer not found\"}"));
         reset(credentialService);
     }
 
