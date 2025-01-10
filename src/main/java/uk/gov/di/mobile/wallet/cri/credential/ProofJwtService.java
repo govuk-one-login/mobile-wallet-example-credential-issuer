@@ -22,7 +22,7 @@ public class ProofJwtService {
 
     private static final String PROOF_JWT_ALGORITHM = "ES256";
     private static final String PROOF_JWT_ISSUER = "urn:fdc:gov:uk:wallet";
-    private ConfigurationService configurationService;
+    private final ConfigurationService configurationService;
 
     public ProofJwtService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
