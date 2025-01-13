@@ -13,7 +13,7 @@ permissions:
 jobs:
   upload-s3-artifact-to-build:
     name: Validate & upload S3 artifact to build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # pin@v3
@@ -23,7 +23,7 @@ jobs:
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # pin@v2
         with:
-          version: 1.90.0
+          version: 1.131.0
           use-installer: true
 
       - name: Set up AWS creds
@@ -74,7 +74,7 @@ jobs:
           working-directory: ./deploy/.aws-sam/build
 
   code-analysis:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     permissions:
       # Set permissions for ${{ secrets.GITHUB_TOKEN }}
       # https://docs.github.com/en/actions/security-guides/automatic-token-authentication
