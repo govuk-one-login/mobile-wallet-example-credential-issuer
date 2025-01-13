@@ -140,7 +140,7 @@ class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn404WhenCredentialServiceThrowsACredentialOfferNotFoundException()
+    void shouldReturn400WhenCredentialServiceThrowsACredentialOfferNotFoundException()
             throws DataStoreException,
                     AccessTokenValidationException,
                     SigningException,
@@ -167,7 +167,7 @@ class CredentialResourceTest {
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(404));
+        assertThat(response.getStatus(), is(400));
         assertThat(
                 response.readEntity(String.class),
                 is("{\"error\":\"invalid_credential_request\"}"));
