@@ -45,18 +45,13 @@ public class CredentialResource {
             credential = credentialService.getCredential(accessToken, proofJwt);
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
-            if (exception instanceof AccessTokenValidationException) {
-                return ResponseUtil.badRequest(
-                        error("invalid_credential_request", "Access token failed to validate"));
+            if (exception instanceof AccessTokenValidationException
+                    || exception instanceof CredentialOfferNotFoundException) {
+                return ResponseUtil.badRequest(error("invalid_credential_request"));
             }
 
             if (exception instanceof ProofJwtValidationException) {
-                return ResponseUtil.badRequest(error("invalid_proof", "Proof failed to validate"));
-            }
-
-            if (exception instanceof CredentialOfferNotFoundException) {
-                return ResponseUtil.badRequest(
-                        error("invalid_credential_request", "Credential offer not found"));
+                return ResponseUtil.badRequest(error("invalid_proof"));
             }
 
             return ResponseUtil.internalServerError();
@@ -101,8 +96,7 @@ public class CredentialResource {
         }
     }
 
-    private String error(String error, String errorDescription) {
-        return String.format(
-                "{\"error\":\"%s\", \"error_description\":\"%s\"}", error, errorDescription);
+    private String error(String error) {
+        return String.format("{\"error\":\"%s\"}", error);
     }
 }
