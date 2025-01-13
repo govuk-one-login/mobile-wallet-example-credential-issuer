@@ -1,30 +1,23 @@
 ## Proposed changes
-<!-- Provide a general summary of your changes in the Title above -->
-<!-- Include the Jira ticket number in square brackets as prefix, eg `[DCMAW-XXXX] PR Title` -->
-
 ### What changed
-
-<!-- Describe the changes in detail - the "what"-->
+<!-- Describe the changes made -->
 
 ### Why did it change
-
-<!-- Describe the reason these changes were made - the "why" -->
+<!-- Describe the reason these changes were made -->
 
 ### Issue tracking
-<!-- List any related Jira tickets or GitHub issues -->
+<!-- List any related Jira tickets -->
 <!-- List any related ADRs or RFCs -->
-<!-- Delete/copy as appropriate -->
 
 - [DCMAW-XXXX](https://govukverify.atlassian.net/browse/DCMAW-XXX)
 
-## Checklists
+## Testing
+<!-- Give an overview of how the changes were tested and attach evidence (if applicable) -->
 
-### Environment variables or secrets
+## Checklist
+- [ ] Changes are backwards compatible
+- [ ] There are unit tests for any new logic implemented
+- [ ] Documentation (e.g. README.md) has been updated
 
-<!-- Delete if changes DO NOT include new environment variables or secrets -->
-- [ ] Documented in the README
-- [ ] Added screenshots to show the implementation is working
-- [ ] Ran cfn-lint on any SAM templates
-
-### Other considerations
-<!-- Add any other consideration if needed -->
+## Related Pull Requests
+<!-- List any related pull requests that need to be reviewed or merged alongside this one -->
