@@ -25,7 +25,7 @@ jobs:
 
   deploy_artifacts:
     name: "Deploy Image & Template to Dev"
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # pin@v3
@@ -35,7 +35,7 @@ jobs:
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # pin@v2
         with:
-          version: 1.90.0
+          version: 1.131.0
           use-installer: true
 
       - name: Fetch Commit SHA
