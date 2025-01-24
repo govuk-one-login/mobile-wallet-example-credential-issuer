@@ -23,6 +23,7 @@ class MetadataBuilderTest {
                 new MetadataBuilder()
                         .setCredentialIssuer("https://test-credential-issuer.gov.uk")
                         .setCredentialsEndpoint("https://test-credential-issuer.gov.uk/credential")
+                        .setCredentialEndpoint("https://test-credential-issuer.gov.uk/credential")
                         .setAuthorizationServers(
                                 "https://test-authorization-server.gov.uk/auth-server")
                         .setCredentialsSupported("test_valid_credentials_supported.json")
@@ -42,6 +43,8 @@ class MetadataBuilderTest {
                 response.authorization_servers);
         assertEquals(
                 "https://test-credential-issuer.gov.uk/credential", response.credentials_endpoint);
+        assertEquals(
+                "https://test-credential-issuer.gov.uk/credential", response.credential_endpoint);
         assertEquals(expectedCredentialsSupportedAsString, actualCredentialsSupportedAsString);
     }
 
@@ -90,6 +93,18 @@ class MetadataBuilderTest {
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialsEndpoint(null));
         Assertions.assertEquals("credentials_endpoint must not be null", thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName(
+            "Should throw IllegalArgumentException when setCredentialEndpoint is called with null value")
+    void shouldThrowIllegalArgumentExceptionOnNullCredentialEndpoint() {
+        MetadataBuilder metadataBuilder = new MetadataBuilder();
+        IllegalArgumentException thrown =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> metadataBuilder.setCredentialEndpoint(null));
+        Assertions.assertEquals("credential_endpoint must not be null", thrown.getMessage());
     }
 
     @Test
