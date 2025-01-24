@@ -152,7 +152,7 @@ class ConfigurationServiceTest {
 
     @Test
     void shouldGetCredentialTtlValue() {
-        assertEquals(365, configurationService.getCredentialTtlInSecs());
+        assertEquals(365, configurationService.getCredentialTtlInDays());
     }
 
     @Test

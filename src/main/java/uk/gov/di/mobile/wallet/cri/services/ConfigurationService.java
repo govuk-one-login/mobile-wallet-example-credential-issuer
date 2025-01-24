@@ -53,7 +53,7 @@ public class ConfigurationService extends Configuration {
         return 300;
     }
 
-    public long getCredentialTtlInSecs() {
+    public long getCredentialTtlInDays() {
         return 365;
     }
 
