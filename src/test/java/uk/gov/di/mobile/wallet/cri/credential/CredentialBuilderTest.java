@@ -62,7 +62,7 @@ class CredentialBuilderTest {
         credentialBuilder = new CredentialBuilder(configurationService, kmsService);
         when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
         when(configurationService.getSelfUrl()).thenReturn(TEST_EXAMPLE_CREDENTIAL_ISSUER);
-        when(configurationService.getCredentialTtlInSecs()).thenReturn(300L);
+        when(configurationService.getCredentialTtlInDays()).thenReturn(300L);
         documentDetails =
                 new ObjectMapper()
                         .readTree(
