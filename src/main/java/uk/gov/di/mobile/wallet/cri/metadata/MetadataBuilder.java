@@ -12,6 +12,7 @@ public class MetadataBuilder {
     String credential_issuer; // NOSONAR
     String authorization_servers; // NOSONAR
     String credentials_endpoint; // NOSONAR
+    String credential_endpoint; // NOSONAR
     Object credential_configurations_supported; // NOSONAR
 
     @JsonProperty("credential_issuer")
@@ -44,6 +45,16 @@ public class MetadataBuilder {
         return this;
     }
 
+    @JsonProperty("credential_endpoint")
+    public MetadataBuilder setCredentialEndpoint(String credentialEndpoint)
+            throws IllegalArgumentException {
+        if (credentialEndpoint == null) {
+            throw new IllegalArgumentException("credential_endpoint must not be null");
+        }
+        this.credential_endpoint = credentialEndpoint;
+        return this;
+    }
+
     @JsonProperty("credential_configurations_supported")
     public MetadataBuilder setCredentialsSupported(String fileName)
             throws IOException, IllegalArgumentException {
@@ -62,6 +73,7 @@ public class MetadataBuilder {
                 credential_issuer,
                 authorization_servers,
                 credentials_endpoint,
+                credential_endpoint,
                 credential_configurations_supported);
     }
 }
