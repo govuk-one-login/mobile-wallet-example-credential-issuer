@@ -79,6 +79,7 @@ class MetadataResourceTest {
                 "https://test-credential-issuer.gov.uk/credential",
                 "https://test-authorization-server.gov.uk",
                 "https://test-credential-issuer.gov.uk",
+                "https://test-credential-issuer.gov.uk",
                 testCredentialsSupported);
     }
 }

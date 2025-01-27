@@ -33,6 +33,7 @@ public class MetadataResource {
                     metadataBuilder
                             .setCredentialIssuer(selfUrl)
                             .setCredentialsEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
+                            .setCredentialEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
                             .setAuthorizationServers(
                                     configurationService.getOneLoginAuthServerUrl())
                             .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
