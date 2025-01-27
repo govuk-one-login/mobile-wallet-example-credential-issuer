@@ -14,7 +14,7 @@ public class Metadata {
         this.authorization_servers = new String[] {authorizationServers};
 
         this.credentials_endpoint = credentialsEndpoint;
-        // TODO: remove credentials_endpoint once SDK has been updated:
+        // TO DO: Remove credentials_endpoint once SDK has been updated:
         // https://govukverify.atlassian.net/browse/DCMAW-11040
         // https://govukverify.atlassian.net/browse/DCMAW-11043
 
