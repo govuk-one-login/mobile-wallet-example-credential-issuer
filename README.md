@@ -1,132 +1,92 @@
 # mobile-wallet-example-credential-issuer
 
 ## Overview
+
 A credential Issuer following the [OpenID for Verifiable Credential Issuance v1.0; pre-authorized code flow](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-pre-authorized-code-flow) to issue credentials into the GOV.UK wallet.
 
 ## Pre-requisites
 
-### SDKMan
-This project has an `.sdkmanrc` file.
+- Install Java
+- Install Gradle
+- [Install Docker Desktop](https://www.docker.com/products/docker-desktop/)
+- [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 
-Install SDKMan via the instructions on `https://sdkman.io/install`.
+This project uses [SDKMAN!](https://sdkman.io/) to manage Java versions. Follow the instructions on `https://sdkman.io/install` to install it.
 
-For auto-switching between JDK versions, edit your `~/.sdkman/etc/config` and set `sdkman_auto_env=true`.
-
-Then use sdkman to install Java JDK listed in this project's `.sdkmanrc`, e.g. `sdk install java x.y.z-amzn`.
-
-Restart your terminal.
-
-### Gradle
-Gradle 8 is used on this project.
+Then, use SDKMAN! to install the Java JDK listed in this project's `.sdkmanrc` file, e.g. `sdk install java x.y.z-amzn`. Restart your terminal.
 
 ## Quickstart
 
-### Linting
+### Format
 
 Check with `./gradlew spotlessCheck`
 
 Apply with `./gradlew spotlessApply`
 
 ### Build
+
 Build with `./gradlew`
 
-By default, this also calls `clean`,  `spotlessApply` and `test`.
+By default, this also calls `clean`, `spotlessApply` and `test`.
 
-### Running Locally
+### Run
 
-#### Setting up the AWS CLI
-You will need to have the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html) installed and configured to interact with the local database. You can configure the CLI with the values below by running `aws configure`:
+#### Set up LocalStack
+
+This app uses LocalStack to run AWS services (DynamoDB and KMS) locally on port `4560`.
+
+To start the LocalStack container and emulate the services, run:
 ```
-AWS Access Key ID [None]: na
-AWS Secret Access Key [None]: na
-Default region name [None]: eu-west-2
-Default output format [None]:
-```
-
-#### Setting up LocalStack
-This app uses LocalStack to run AWS services locally on port `4560`.
-
-To start the LocalStack container and provision a local version of KMS and the DynamoDB table where credential offers are stored, run `docker compose up`.
-
-You will need to have Docker Desktop or alternative like installed.
-
-#### Running the Application
-Run the application with `./gradlew run`
-
-#### Test API Request
-To get a credential offer:
-```
-curl -X GET http://localhost:8080/credential_offer?walletSubjectId=urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i&documentId=testDocumentId&credentialType=BasicCheckCredential | jq
+docker compose -f docker-compose.yml up --build -d --wait
 ```
 
-To get the credential metadata:
-```
-curl -X GET http://localhost:8080/.well-known/openid-credential-issuer | jq
-```
+#### Run the Application
 
-To get a credential (replace the proof JWT and bearer access token values before testing):
-```
-curl -d '{"proof":{"proof_type":"jwt", "jwt": "<<insert proof jwt>>" }}' -H "Content-Type: application/json" -H "Authorization: Bearer <<insert bearer token jwt>>" -X POST http://localhost:8080/credential | jq
-```
-
-To get the DID document:
-```
-curl -X GET http://localhost:8080/.well-known/did.json | jq
-```
-
-To get the JWKS:
-```
-curl -X GET http://localhost:8080/.well-known/jwks.json | jq
-```
-
-#### Reading from the local Database
-To check that a credential offer was saved to the table, run:
-
-`aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb query --table-name credential_offer_cache --key-condition-expression "credentialIdentifier = :credentialIdentifier" --expression-attribute-values "{ \":credentialIdentifier\" : { \"S\" : \"e457f329-923c-4eb6-85ca-ee7e04b3e173\" } }"`
-
-replacing the **credentialIdentifier** with the relevant one.
-
-To return all items from the table, run:
-
-`aws --endpoint-url=http://localhost:4560 --region eu-west-2 dynamodb scan --table-name credential_offer_cache`.
+Run with `./gradlew run`
 
 ### Test
+
 #### Unit Tests
+
 Run unit tests with `./gradlew test`
 
 #### Testing with the Example CRI Test Harness
-When testing with the [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-harness) locally, you must point the authorization server to the right address:
-```
-ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run  
-```
 
-## Deploy a stack in dev
+When testing with the [CRI Test Harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-harness), the test harness must stub the STS tokens.
 
-> For the following it is required to have a containerisation service (e.g. Docker Desktop) running and to be logged
-> into the Mobile Platform dev AWS account
+Therefore, you must run the Example CRI with `ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run`. 
 
-Run the script to build and push the Document Builder docker image, specifying your desired tag and the name of your AWS profile
-for the Mobile Platform dev AWS account (which can be found in your `~/.aws/credentials` file):
+## Deploy application to `dev`
+
+> You must be logged into the Mobile Platform `dev` AWS account.
+
+You can deploy the application to the `dev` AWS account by following these steps:
+
+### Build and push the docker image
+
+Run the script to build and push the Example CRI docker image, specifying an image tag and the name of your AWS profile
+for the Mobile Platform `dev` AWS account (which can be found in your `~/.aws/credentials` file):
 
 ```shell
-./build-and-deploy-image.sh <your-tag-name> <your-mobile-platform-dev-profile> 
+./build-and-deploy-image.sh <your-chosen-tag> <your-mobile-platform-dev-profile> 
 ```
 
 This will build the docker image, log into ECR, push the image to ECR, and update the `template.yaml` to specify this
-image for the Document Builder ECS task.
+image for the Example CRI ECS task.
 
-If using your own deployed version of the doc-builder the following mapping values in the template need to be updated:
+### Update the SAM template
+
+If using your own deployed version of the [Document Builder](https://github.com/govuk-one-login/mobile-wallet-document-builder), the following mapping values in the template must be updated:
 
 ```yaml
 Mappings:
   EnvironmentVariables:
     dev:
-      ...
       CredentialStoreUrl: "<stack-name->stub-credential-issuer.mobile.dev.account.gov.uk"
       AuthServerUrl: "<stack-name->stub-credential-issuer.mobile.dev.account.gov.uk"
 ```
 
-You can then build the template and deploy the stack:
+### Build and deploy the stack
 
 ```bash
 sam build && sam deploy --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
