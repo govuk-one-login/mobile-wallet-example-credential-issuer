@@ -1,11 +1,16 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.basicDiscloureCredential.*;
+import uk.gov.di.mobile.wallet.cri.credential.digitalVeteranCard.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digitalVeteranCard.VeteranCardCredentialSubjectV1;
+import uk.gov.di.mobile.wallet.cri.credential.socialSecurityCredential.*;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -20,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 
 public class CredentialService {
 
@@ -49,13 +55,13 @@ public class CredentialService {
 
     public Credential getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
-                    ProofJwtValidationException,
-                    SigningException,
-                    AccessTokenValidationException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
-                    CredentialServiceException,
-                    CredentialOfferNotFoundException {
+            ProofJwtValidationException,
+            SigningException,
+            AccessTokenValidationException,
+            NoSuchAlgorithmException,
+            URISyntaxException,
+            CredentialServiceException,
+            CredentialOfferNotFoundException, JsonProcessingException {
 
         accessTokenService.verifyAccessToken(accessToken);
 
@@ -95,16 +101,81 @@ public class CredentialService {
         }
 
         String documentId = credentialOffer.getDocumentId();
-        Object documentDetails = getDocumentDetails(documentId);
+        Document document = getDocument(documentId);
+
         LOGGER.info(
-                "Document details retrieved for credentialOfferId {} and documentId {}",
+                "{} retrieved for credentialOfferId {} and documentId {}",
+                document.getVcType(),
                 credentialOfferId,
                 documentId);
 
-        // credential offer is deleted to prevent replay
-        dataStore.deleteCredentialOffer(credentialOfferId);
+        dataStore.deleteCredentialOffer(
+                credentialOfferId); // delete credential offer to prevent replay
 
-        return credentialBuilder.buildCredential(proofJwtClaims.kid, documentDetails);
+        String sub = proofJwtClaims.kid;
+        String vcType = document.getVcType();
+
+        switch (CredentialType.valueOf(vcType)) {
+            case SocialSecurityCredential:
+                if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+                    SocialSecurityCredentialSubject socialSecurityCredentialSubject =
+                            CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document);
+                    SocialSecurityCredentialSubjectV1 socialSecurityCredentialSubjectV1 = new SocialSecurityCredentialSubjectV1(socialSecurityCredentialSubject.getName(), socialSecurityCredentialSubject.getSocialSecurityRecord());
+                    VCClaim vcClaim = new VCClaim(vcType, socialSecurityCredentialSubjectV1);
+                    return credentialBuilder.buildCredential(
+                            sub,
+                            vcClaim);
+                } else {
+                    SocialSecurityCredentialSubject socialSecurityCredentialSubject =
+                            CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
+                                    document, sub);
+                    return credentialBuilder.buildCredential(
+                            socialSecurityCredentialSubject, vcType);
+                }
+
+            case BasicCheckCredential:
+                if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+                    BasicCheckCredentialSubject basicCheckCredentialSubject =
+                            CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
+                                    document, configurationService.getCredentialTtlInDays());
+
+                    BasicCheckCredentialSubjectV1 basicCheckCredentialSubjectV1 = new BasicCheckCredentialSubjectV1(basicCheckCredentialSubject.getIssuanceDate(), basicCheckCredentialSubject.getExpirationDate(), basicCheckCredentialSubject.getName(), basicCheckCredentialSubject.getBirthDate(), basicCheckCredentialSubject.getAddress(), basicCheckCredentialSubject.getBasicCheckRecord());
+                    VCClaim vcClaim = new VCClaim(vcType, basicCheckCredentialSubjectV1);
+                    return credentialBuilder.buildCredential(
+                            sub,
+                            vcClaim);
+                } else {
+                    BasicCheckCredentialSubject basicCheckCredentialSubject =
+                            CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
+                                    document, configurationService.getCredentialTtlInDays(), sub);
+                    return credentialBuilder.buildCredential(
+                            basicCheckCredentialSubject,
+                            vcType,
+                            basicCheckCredentialSubject.getExpirationDate());
+                }
+
+            case digitalVeteranCard:
+                if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+                    VeteranCardCredentialSubject veteranCardCredentialSubject =
+                            CredentialSubjectMapper.buildVeteranCardCredentialSubject(document);
+
+                    VeteranCardCredentialSubjectV1 veteranCardCredentialSubjectV1 = new VeteranCardCredentialSubjectV1(veteranCardCredentialSubject.getName(), veteranCardCredentialSubject.getBirthDate(), veteranCardCredentialSubject.getVeteranCard());
+                    VCClaim vcClaim = new VCClaim(vcType, veteranCardCredentialSubjectV1);
+                    return credentialBuilder.buildCredential(
+                            sub,
+                            vcClaim);
+                } else {
+                    VeteranCardCredentialSubject veteranCardCredentialSubject =
+                            CredentialSubjectMapper.buildVeteranCardCredentialSubject(
+                                    document, sub);
+                    return credentialBuilder.buildCredential(
+                            veteranCardCredentialSubject,
+                            vcType,
+                            veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
+                }
+        }
+
+        throw new CredentialServiceException("Invalid verifiable credential type");
     }
 
     private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
@@ -150,7 +221,7 @@ public class CredentialService {
 
     private record ProofJwtClaims(String nonce, String kid) {}
 
-    private Object getDocumentDetails(String documentId)
+    private Document getDocument(String documentId)
             throws URISyntaxException, CredentialServiceException {
         String credentialStoreUrl = configurationService.getCredentialStoreUrl();
         URI uri = new URI(credentialStoreUrl + CREDENTIAL_STORE_DOCUMENT_PATH + documentId);
@@ -163,6 +234,6 @@ public class CredentialService {
                             "Request to fetch document details for documentId %s failed with status code %s",
                             documentId, response.getStatus()));
         }
-        return response.readEntity(Object.class);
+        return response.readEntity(Document.class);
     }
 }

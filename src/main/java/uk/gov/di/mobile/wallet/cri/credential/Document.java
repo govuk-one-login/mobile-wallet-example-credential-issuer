@@ -1,52 +1,62 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import net.minidev.json.JSONObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class Document {
+    @JsonProperty("documentId")
+    private String documentId;
 
-  private UUID documentId;
-  private JSONObject data;
-  private String vcType;
-  private String vcDataModel;
+    @JsonProperty("data")
+    private Map<String, Object> data;
 
-  public Document(UUID documentId, JSONObject data, String vcType, String vcDataModel) {
-    this.documentId = documentId;
-    this.data = data;
-    this.vcType = vcType;
-    this.vcDataModel = vcDataModel;
-  }
+    @JsonProperty("vcType")
+    private String vcType;
 
-  public UUID getDocumentId() {
-    return documentId;
-  }
+    @JsonProperty("vcDataModel")
+    private String vcDataModel;
 
-  public void setDocumentId(UUID documentId) {
-    this.documentId = documentId;
-  }
+    public Document() {}
 
-  public JSONObject getData() {
-    return data;
-  }
+    public Document(
+            String documentId, Map<String, Object> data, String vcType, String vcDataModel) {
+        this.documentId = documentId;
+        this.data = data;
+        this.vcType = vcType;
+        this.vcDataModel = vcDataModel;
+    }
 
-  public void setData(JSONObject data)  {
-    this.data = data;
-  }
+    public UUID getDocumentId() {
+        return UUID.fromString(documentId);
+    }
 
-  public String getVcType() {
-    return vcType;
-  }
+    public void setDocumentId(String documentId) {
+        this.documentId = documentId;
+    }
 
-  public void setVcType(String vcType) {
-    this.vcType = vcType;
-  }
+    public Map<String, Object> getData() {
+        return data;
+    }
 
-  public String getVcDataModel() {
-    return vcDataModel;
-  }
+    public void setData(Map<String, Object> data) {
+        this.data = data;
+    }
 
-  public void setVcDataModel(String vcDataModel) {
-    this.vcDataModel = vcDataModel;
-  }
+    public String getVcType() {
+        return vcType;
+    }
+
+    public void setVcType(String vcType) {
+        this.vcType = vcType;
+    }
+
+    public String getVcDataModel() {
+        return vcDataModel;
+    }
+
+    public void setVcDataModel(String vcDataModel) {
+        this.vcDataModel = vcDataModel;
+    }
 }

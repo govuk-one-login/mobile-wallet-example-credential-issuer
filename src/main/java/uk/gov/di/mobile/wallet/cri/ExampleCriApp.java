@@ -45,30 +45,35 @@ public class ExampleCriApp extends Application<ConfigurationService> {
             throws MalformedURLException {
 
         KmsService kmsService = new KmsService(configurationService);
+
         PreAuthorizedCodeBuilder preAuthorizedCode =
                 new PreAuthorizedCodeBuilder(configurationService, kmsService);
 
         CredentialOfferService credentialOfferService =
                 new CredentialOfferService(configurationService, preAuthorizedCode);
 
-        DynamoDbService dynamoDbService =
-                new DynamoDbService(
-                        DynamoDbService.getClient(configurationService),
-                        configurationService.getCredentialOfferCacheTableName(),
-                        configurationService.getCredentialOfferTtlInSecs());
-
         MetadataBuilder metadataBuilder = new MetadataBuilder();
+
         Client httpClient =
                 new JerseyClientBuilder(environment)
                         .using(new JerseyClientConfiguration())
                         .build("example-cri");
 
         JwksService jwksService = new JwksService(configurationService, kmsService);
+
         AccessTokenService accessTokenService =
                 new AccessTokenService(jwksService, configurationService);
+
         ProofJwtService proofJwtService = new ProofJwtService(configurationService);
+
         CredentialBuilder credentialBuilder =
                 new CredentialBuilder(configurationService, kmsService);
+
+        DynamoDbService dynamoDbService =
+                new DynamoDbService(
+                        DynamoDbService.getClient(configurationService),
+                        configurationService.getCredentialOfferCacheTableName(),
+                        configurationService.getCredentialOfferTtlInSecs());
 
         CredentialService credentialService =
                 new CredentialService(
@@ -83,6 +88,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 new DidDocumentService(configurationService, kmsService);
 
         environment.healthChecks().register("ping", new Ping());
+
         environment.jersey().register(new HealthCheckResource(environment));
 
         environment
@@ -90,7 +96,6 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 .register(
                         new CredentialOfferResource(
                                 credentialOfferService, configurationService, dynamoDbService));
-
         environment.jersey().register(new MetadataResource(configurationService, metadataBuilder));
 
         environment.jersey().register(new CredentialResource(credentialService));
