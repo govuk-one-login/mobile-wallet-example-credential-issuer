@@ -12,11 +12,7 @@ import uk.gov.di.mobile.wallet.cri.credential.socialSecurityCredential.SocialSec
 import uk.gov.di.mobile.wallet.cri.credential.socialSecurityCredential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.credential.socialSecurityCredential.SocialSecurityRecord;
 
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class CredentialSubjectMapper {
@@ -64,15 +60,15 @@ public class CredentialSubjectMapper {
 
     // VC MD v1.1 - this will be removed once the wallet can process VC MD v2.0
     public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
-            Document document, Long credentialTtlInDays) {
-        return buildBasicDisclosureCredentialSubject(document, credentialTtlInDays, null);
+            Document document) {
+        return buildBasicDisclosureCredentialSubject(document, null);
     }
 
     // VC MD v2.0
     public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
-            Document document, Long credentialTtlInDays, String id) {
+            Document document, String id) {
         BasicCheckCredentialSubjectBuilder builder =
-                buildCommonBasicDisclosureCredentialSubject(document, credentialTtlInDays);
+                buildCommonBasicDisclosureCredentialSubject(document);
         if (id != null) {
             builder.setId(id);
         }
@@ -80,19 +76,23 @@ public class CredentialSubjectMapper {
     }
 
     private static BasicCheckCredentialSubjectBuilder buildCommonBasicDisclosureCredentialSubject(
-            Document document, Long credentialTtlInDays) {
+            Document document) {
         ObjectMapper objectMapper = new ObjectMapper();
         final BasicCheckDocument basicCheckDocument =
                 objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
 
-        Date dateInOneYear = Date.from(Instant.now().plus(credentialTtlInDays, ChronoUnit.DAYS));
-        String expirationDate = new SimpleDateFormat("yyyy-MM-dd").format(dateInOneYear);
         String issuanceDate =
                 String.format(
                         "%s-%s-%s",
                         basicCheckDocument.getIssuanceYear(),
                         basicCheckDocument.getIssuanceMonth(),
                         basicCheckDocument.getIssuanceDay());
+        String expirationDate =
+                String.format(
+                        "%s-%s-%s",
+                        basicCheckDocument.getExpirationYear(),
+                        basicCheckDocument.getExpirationMonth(),
+                        basicCheckDocument.getExpirationDay());
 
         String[] givenNames = basicCheckDocument.getFirstName().split(" ");
         String[] familyNames = basicCheckDocument.getLastName().split(" ");

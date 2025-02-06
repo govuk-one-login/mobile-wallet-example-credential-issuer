@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -129,16 +131,14 @@ public class CredentialService {
                             CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                                     document, sub);
                     return credentialBuilder.buildCredential(
-                            socialSecurityCredentialSubject, vcType);
+                            socialSecurityCredentialSubject, vcType, null);
                 }
 
             case BasicCheckCredential:
                 // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
                     BasicCheckCredentialSubject basicCheckCredentialSubject =
-                            CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
-                                    document, configurationService.getCredentialTtlInDays());
-
+                            CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(document);
                     BasicCheckCredentialSubjectV1 basicCheckCredentialSubjectV1 =
                             new BasicCheckCredentialSubjectV1(
                                     basicCheckCredentialSubject.getIssuanceDate(),
@@ -152,7 +152,14 @@ public class CredentialService {
                 } else {
                     BasicCheckCredentialSubject basicCheckCredentialSubject =
                             CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
-                                    document, configurationService.getCredentialTtlInDays(), sub);
+                                    document, sub);
+                    try {
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        System.out.println(
+                                objectMapper.writeValueAsString(basicCheckCredentialSubject));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     return credentialBuilder.buildCredential(
                             basicCheckCredentialSubject,
                             vcType,

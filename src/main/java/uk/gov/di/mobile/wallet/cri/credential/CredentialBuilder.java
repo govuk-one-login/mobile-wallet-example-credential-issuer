@@ -22,7 +22,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -112,36 +112,6 @@ public class CredentialBuilder<T extends CredentialSubject> {
         }
     }
 
-    // VC MD v2.0
-    public Credential buildCredential(T credentialSubject, String credentialType)
-            throws SigningException, NoSuchAlgorithmException {
-        String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        var encodedHeader = getEncodedHeader(keyId, "vc+jwt", "vc");
-        var encodedClaims = getEncodedClaims(credentialSubject, credentialType);
-        var message = encodedHeader + "." + encodedClaims;
-
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] encodedHash = digest.digest(message.getBytes());
-
-        var signRequest =
-                SignRequest.builder()
-                        .message(SdkBytes.fromByteArray(encodedHash))
-                        .messageType(MessageType.DIGEST)
-                        .keyId(keyId)
-                        .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
-                        .build();
-
-        try {
-            SignResponse signResult = keyProvider.sign(signRequest);
-            String signature = encodedSignature(signResult);
-            SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
-            return new Credential(signedJWT);
-        } catch (Exception exception) {
-            throw new SigningException(
-                    String.format("Error signing token: %s", exception.getMessage()), exception);
-        }
-    }
-
     // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private Base64URL getEncodedClaims(String proofJwtDidKey, VCClaim vcClaim) {
         Instant now = clock.instant();
@@ -167,10 +137,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
             T credentialSubject, String credentialType, String validUntil) {
         Instant now = clock.instant();
         Date nowDate = Date.from(now);
-
-        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        LocalDate date = LocalDate.parse(validUntil, inputFormatter);
-        String validUntilISO = date.toString();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        String validFromIso = formatter.format(now.atZone(ZoneOffset.UTC));
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
@@ -188,35 +156,14 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .claim("issuer", configurationService.getSelfUrl())
                         .claim("name", credentialType)
                         .claim("description", credentialType)
-                        .claim("validFrom", now.toString())
-                        .claim("validUntil", validUntilISO)
+                        .claim("validFrom", validFromIso)
                         .claim("credentialSubject", credentialSubject);
-        return Base64URL.encode(claimsBuilder.build().toString());
-    }
 
-    private Base64URL getEncodedClaims(T credentialSubject, String credentialType) {
-        System.out.println("this function ****");
-        Instant now = clock.instant();
-        Date nowDate = Date.from(now);
+        if (validUntil != null) {
+            String validUntilISO = String.format("%s%s", validUntil, "T22:59:59Z");
+            claimsBuilder.claim("validUntil", validUntilISO);
+        }
 
-        var claimsBuilder =
-                new JWTClaimsSet.Builder()
-                        .issuer(configurationService.getSelfUrl())
-                        .subject(credentialSubject.getId())
-                        .issueTime(nowDate)
-                        .notBeforeTime(nowDate)
-                        .expirationTime(
-                                Date.from(
-                                        now.plus(
-                                                configurationService.getCredentialTtlInDays(),
-                                                ChronoUnit.DAYS)))
-                        .claim("@context", new String[] {CONTEXT_V2})
-                        .claim("type", new String[] {"VerifiableCredential", credentialType})
-                        .claim("issuer", configurationService.getSelfUrl())
-                        .claim("name", credentialType)
-                        .claim("description", credentialType)
-                        .claim("validFrom", now.toString())
-                        .claim("credentialSubject", credentialSubject);
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 

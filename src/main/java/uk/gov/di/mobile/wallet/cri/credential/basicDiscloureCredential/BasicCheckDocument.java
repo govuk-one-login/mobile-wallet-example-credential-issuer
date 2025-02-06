@@ -12,6 +12,15 @@ public class BasicCheckDocument {
     @JsonProperty("issuance-year")
     private String issuanceYear;
 
+    @JsonProperty("expiration-day")
+    private String expirationDay;
+
+    @JsonProperty("expiration-month")
+    private String expirationMonth;
+
+    @JsonProperty("expiration-year")
+    private String expirationYear;
+
     @JsonProperty("birth-day")
     private String birthDay;
 
@@ -54,6 +63,30 @@ public class BasicCheckDocument {
 
     public void setIssuanceYear(String issuanceYear) {
         this.issuanceYear = issuanceYear;
+    }
+
+    public String getExpirationDay() {
+        return expirationDay;
+    }
+
+    public void setExpirationDay(String expirationDay) {
+        this.expirationDay = expirationDay;
+    }
+
+    public String getExpirationMonth() {
+        return expirationMonth;
+    }
+
+    public void setExpirationMonth(String expirationMonth) {
+        this.expirationMonth = expirationMonth;
+    }
+
+    public String getExpirationYear() {
+        return expirationYear;
+    }
+
+    public void setExpirationYear(String expirationYear) {
+        this.expirationYear = expirationYear;
     }
 
     public String getBirthDay() {
