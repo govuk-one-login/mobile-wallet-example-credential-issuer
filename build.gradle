@@ -16,8 +16,8 @@ repositories {
 
 dependencies {
 	implementation "com.google.guava:guava:33.0.0-jre"
-	implementation group: "io.dropwizard", name: "dropwizard-core", version: "4.0.6"
-	implementation group: 'io.dropwizard', name: 'dropwizard-client', version: '4.0.7'
+	implementation group: "io.dropwizard", name: "dropwizard-core", version: "4.0.12"
+	implementation group: 'io.dropwizard', name: 'dropwizard-client', version: '4.0.12'
 	implementation 'org.bouncycastle:bcpkix-jdk18on:1.78.1'
 	implementation "com.nimbusds:oauth2-oidc-sdk:11.9.1"
 	implementation "software.amazon.awssdk:kms:2.24.13"
@@ -34,8 +34,8 @@ dependencies {
 	testImplementation "org.mockito:mockito-junit-jupiter:5.4.0"
 	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.6"
 	testImplementation "org.hamcrest:hamcrest:2.2"
-	testImplementation group: 'io.dropwizard', name: 'dropwizard-testing', version: '4.0.7'
-	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.9.0"
+	testImplementation group: 'io.dropwizard', name: 'dropwizard-testing', version: '4.0.12'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 application {
@@ -100,11 +100,12 @@ jacocoTestReport {
 	}
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
 	testLogging {
 		exceptionFormat "full"
-		events "started", "skipped", "passed", "failed" /*, "standardOut", "standardError" */
+		events "skipped", "passed", "failed"
 	}
 	useJUnitPlatform()
+	jvmArgs "-Xshare:off"
 	finalizedBy jacocoTestReport
 }
