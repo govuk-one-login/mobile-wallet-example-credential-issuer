@@ -11,7 +11,7 @@ public class SocialSecurityCredentialSubject implements CredentialSubject {
     private List<Name> name;
     private List<SocialSecurityRecord> socialSecurityRecord;
 
-    SocialSecurityCredentialSubject(
+    public SocialSecurityCredentialSubject(
             String id, List<Name> name, List<SocialSecurityRecord> socialSecurityRecord) {
         this.id = id;
         this.name = name;
@@ -21,7 +21,6 @@ public class SocialSecurityCredentialSubject implements CredentialSubject {
     public String getId() {
         return id;
     }
-
 
     public List<Name> getName() {
         return name;

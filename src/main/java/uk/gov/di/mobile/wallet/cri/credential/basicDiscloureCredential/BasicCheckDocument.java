@@ -5,16 +5,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class BasicCheckDocument {
     @JsonProperty("issuance-day")
     private String issuanceDay;
+
     @JsonProperty("issuance-month")
     private String issuanceMonth;
+
     @JsonProperty("issuance-year")
     private String issuanceYear;
+
     @JsonProperty("birth-day")
     private String birthDay;
+
     @JsonProperty("birth-month")
     private String birthMonth;
+
     @JsonProperty("birth-year")
     private String birthYear;
+
     private String firstName;
     private String lastName;
     private String subBuildingName;

@@ -25,22 +25,27 @@ public class CredentialSubjectMapper {
     }
 
     // VC MD v1.1 - this will be removed once the wallet can process VC MD v2.0
-    public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(Document document) {
+    public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
+            Document document) {
         return buildSocialSecurityCredentialSubject(document, null);
     }
 
     // VC MD v2.0
-    public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(Document document, String id) {
-        SocialSecurityCredentialSubjectBuilder builder = buildCommonSocialSecurityCredentialSubject(document);
+    public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
+            Document document, String id) {
+        SocialSecurityCredentialSubjectBuilder builder =
+                buildCommonSocialSecurityCredentialSubject(document);
         if (id != null) {
             builder.setId(id);
         }
         return builder.build();
     }
 
-    private static SocialSecurityCredentialSubjectBuilder buildCommonSocialSecurityCredentialSubject(Document document) {
+    private static SocialSecurityCredentialSubjectBuilder
+            buildCommonSocialSecurityCredentialSubject(Document document) {
         ObjectMapper objectMapper = new ObjectMapper();
-        final SocialSecurityDocument ninoDocument = objectMapper.convertValue(document.getData(), SocialSecurityDocument.class);
+        final SocialSecurityDocument ninoDocument =
+                objectMapper.convertValue(document.getData(), SocialSecurityDocument.class);
 
         String[] givenNames = ninoDocument.getGivenName().split(" ");
         String[] familyNames = ninoDocument.getFamilyName().split(" ");
@@ -58,26 +63,36 @@ public class CredentialSubjectMapper {
     }
 
     // VC MD v1.1 - this will be removed once the wallet can process VC MD v2.0
-    public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(Document document, Long credentialTtlInDays) {
+    public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
+            Document document, Long credentialTtlInDays) {
         return buildBasicDisclosureCredentialSubject(document, credentialTtlInDays, null);
     }
 
     // VC MD v2.0
-    public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(Document document, Long credentialTtlInDays, String id) {
-        BasicCheckCredentialSubjectBuilder builder = buildCommonBasicDisclosureCredentialSubject(document, credentialTtlInDays);
+    public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
+            Document document, Long credentialTtlInDays, String id) {
+        BasicCheckCredentialSubjectBuilder builder =
+                buildCommonBasicDisclosureCredentialSubject(document, credentialTtlInDays);
         if (id != null) {
             builder.setId(id);
         }
         return builder.build();
     }
 
-    private static BasicCheckCredentialSubjectBuilder buildCommonBasicDisclosureCredentialSubject(Document document, Long credentialTtlInDays) {
+    private static BasicCheckCredentialSubjectBuilder buildCommonBasicDisclosureCredentialSubject(
+            Document document, Long credentialTtlInDays) {
         ObjectMapper objectMapper = new ObjectMapper();
-        final BasicCheckDocument basicCheckDocument = objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
+        final BasicCheckDocument basicCheckDocument =
+                objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
 
         Date dateInOneYear = Date.from(Instant.now().plus(credentialTtlInDays, ChronoUnit.DAYS));
         String expirationDate = new SimpleDateFormat("yyyy-MM-dd").format(dateInOneYear);
-        String issuanceDate = String.format("%s-%s-%s", basicCheckDocument.getIssuanceYear(), basicCheckDocument.getIssuanceMonth(), basicCheckDocument.getIssuanceDay());
+        String issuanceDate =
+                String.format(
+                        "%s-%s-%s",
+                        basicCheckDocument.getIssuanceYear(),
+                        basicCheckDocument.getIssuanceMonth(),
+                        basicCheckDocument.getIssuanceDay());
 
         String[] givenNames = basicCheckDocument.getFirstName().split(" ");
         String[] familyNames = basicCheckDocument.getLastName().split(" ");
@@ -85,11 +100,16 @@ public class CredentialSubjectMapper {
 
         List<BirthDate> birthDates = new ArrayList<>();
         BirthDate birthDate = new BirthDate();
-        birthDate.setValue(String.format("%s-%s-%s", basicCheckDocument.getBirthYear(), basicCheckDocument.getBirthMonth(), basicCheckDocument.getBirthDay()));
+        birthDate.setValue(
+                String.format(
+                        "%s-%s-%s",
+                        basicCheckDocument.getBirthYear(),
+                        basicCheckDocument.getBirthMonth(),
+                        basicCheckDocument.getBirthDay()));
         birthDates.add(birthDate);
 
-        List<Address> addresses = getAddresses(basicCheckDocument);
-        List<BasicCheckRecord> basicCheckRecords = getBasicCheckRecords(basicCheckDocument);
+        List<Address> addresses = buildAddresses(basicCheckDocument);
+        List<BasicCheckRecord> basicCheckRecords = buildBasicCheckRecords(basicCheckDocument);
 
         return new BasicCheckCredentialSubjectBuilder()
                 .setIssuanceDate(issuanceDate)
@@ -101,22 +121,27 @@ public class CredentialSubjectMapper {
     }
 
     // VC MD v1.1 - this will be removed once the wallet can process VC MD v2.0
-    public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(Document document) {
+    public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
+            Document document) {
         return buildVeteranCardCredentialSubject(document, null);
     }
 
     // VC MD v2.0
-    public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(Document document, String sub) {
-        VeteranCardCredentialSubjectBuilder builder = buildCommonVeteranCardCredentialSubject(document);
+    public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
+            Document document, String sub) {
+        VeteranCardCredentialSubjectBuilder builder =
+                buildCommonVeteranCardCredentialSubject(document);
         if (sub != null) {
             builder.setId(sub);
         }
         return builder.build();
     }
 
-    private static VeteranCardCredentialSubjectBuilder buildCommonVeteranCardCredentialSubject(Document document) {
+    private static VeteranCardCredentialSubjectBuilder buildCommonVeteranCardCredentialSubject(
+            Document document) {
         ObjectMapper objectMapper = new ObjectMapper();
-        final VeteranCardDocument veteranCardDocument = objectMapper.convertValue(document.getData(), VeteranCardDocument.class);
+        final VeteranCardDocument veteranCardDocument =
+                objectMapper.convertValue(document.getData(), VeteranCardDocument.class);
 
         String[] givenNames = veteranCardDocument.getGivenName().split(" ");
         String[] familyNames = veteranCardDocument.getFamilyName().split(" ");
@@ -125,10 +150,15 @@ public class CredentialSubjectMapper {
 
         List<BirthDate> birthDates = new ArrayList<>();
         BirthDate birthDate = new BirthDate();
-        birthDate.setValue(String.format("%s-%s-%s", veteranCardDocument.getDateOfBirthYear(), veteranCardDocument.getDateOfBirthMonth(), veteranCardDocument.getDateOfBirthDay()));
+        birthDate.setValue(
+                String.format(
+                        "%s-%s-%s",
+                        veteranCardDocument.getDateOfBirthYear(),
+                        veteranCardDocument.getDateOfBirthMonth(),
+                        veteranCardDocument.getDateOfBirthDay()));
         birthDates.add(birthDate);
 
-        List<VeteranCard> veteranCards = getVeteranCards(veteranCardDocument);
+        List<VeteranCard> veteranCards = buildVeteranCards(veteranCardDocument);
 
         return new VeteranCardCredentialSubjectBuilder()
                 .setName(names)
@@ -136,9 +166,8 @@ public class CredentialSubjectMapper {
                 .setVeteranCard(veteranCards);
     }
 
-    private static @NotNull List<BasicCheckRecord> getBasicCheckRecords(
-            BasicCheckDocument basicCheckDocument
-                                                                       ) {
+    private static @NotNull List<BasicCheckRecord> buildBasicCheckRecords(
+            BasicCheckDocument basicCheckDocument) {
         List<BasicCheckRecord> basicCheckRecords = new ArrayList<>();
         BasicCheckRecord basicCheckRecord = new BasicCheckRecord();
         basicCheckRecord.setCertificateNumber(basicCheckDocument.getCertificateNumber());
@@ -150,9 +179,7 @@ public class CredentialSubjectMapper {
         return basicCheckRecords;
     }
 
-    private static @NotNull List<Address> getAddresses(
-            BasicCheckDocument basicCheckDocument
-                                                      ) {
+    private static @NotNull List<Address> buildAddresses(BasicCheckDocument basicCheckDocument) {
         List<Address> addresses = new ArrayList<>();
         Address address = new Address();
         address.setSubBuildingName(basicCheckDocument.getSubBuildingName());
@@ -165,7 +192,7 @@ public class CredentialSubjectMapper {
         return addresses;
     }
 
-    private static @NotNull List<VeteranCard> getVeteranCards(
+    private static @NotNull List<VeteranCard> buildVeteranCards(
             VeteranCardDocument veteranCardDocument) {
         List<VeteranCard> veteranCards = new ArrayList<>();
         VeteranCard veteranCard = new VeteranCard();
@@ -182,7 +209,8 @@ public class CredentialSubjectMapper {
         return veteranCards;
     }
 
-    private static @NotNull List<Name> buildNames(String title, String[] givenNames, String[] familyNames) {
+    private static @NotNull List<Name> buildNames(
+            String title, String[] givenNames, String[] familyNames) {
         List<NamePart> nameParts = new ArrayList<>();
         if (title != null && !title.isEmpty()) {
             nameParts.add(setNamePart(title, "Title"));
@@ -194,7 +222,8 @@ public class CredentialSubjectMapper {
         return buildNames(givenNames, familyNames, new ArrayList<>());
     }
 
-    private static List<Name> buildNames(String[] givenNames, String[] familyNames, List<NamePart> nameParts) {
+    private static List<Name> buildNames(
+            String[] givenNames, String[] familyNames, List<NamePart> nameParts) {
         for (String name : givenNames) {
             nameParts.add(setNamePart(name, "GivenName"));
         }

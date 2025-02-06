@@ -6,12 +6,12 @@ import uk.gov.di.mobile.wallet.cri.credential.Name;
 import java.util.List;
 
 public class BasicCheckCredentialSubjectV1 {
-    private  String issuanceDate;
-    private  String expirationDate;
-    private  List<Name> name;
-    private  List<BirthDate> birthDate;
-    private  List<Address> address;
-    private  List<BasicCheckRecord> basicCheckRecord;
+    private String issuanceDate;
+    private String expirationDate;
+    private List<Name> name;
+    private List<BirthDate> birthDate;
+    private List<Address> address;
+    private List<BasicCheckRecord> basicCheckRecord;
 
     public BasicCheckCredentialSubjectV1(
             String issuanceDate,
@@ -19,8 +19,7 @@ public class BasicCheckCredentialSubjectV1 {
             List<Name> name,
             List<BirthDate> birthDate,
             List<Address> address,
-            List<BasicCheckRecord> basicCheckRecord
-                                        ) {
+            List<BasicCheckRecord> basicCheckRecord) {
         this.issuanceDate = issuanceDate;
         this.expirationDate = expirationDate;
         this.name = name;
@@ -28,7 +27,6 @@ public class BasicCheckCredentialSubjectV1 {
         this.address = address;
         this.basicCheckRecord = basicCheckRecord;
     }
-
 
     public void setIssuanceDate(String issuanceDate) {
         this.issuanceDate = issuanceDate;

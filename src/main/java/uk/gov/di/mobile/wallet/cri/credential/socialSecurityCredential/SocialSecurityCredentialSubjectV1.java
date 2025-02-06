@@ -9,7 +9,8 @@ public class SocialSecurityCredentialSubjectV1 {
     private List<Name> name;
     private List<SocialSecurityRecord> socialSecurityRecord;
 
-    public SocialSecurityCredentialSubjectV1(List<Name> name, List<SocialSecurityRecord> socialSecurityRecord) {
+    public SocialSecurityCredentialSubjectV1(
+            List<Name> name, List<SocialSecurityRecord> socialSecurityRecord) {
         this.name = name;
         this.socialSecurityRecord = socialSecurityRecord;
     }
