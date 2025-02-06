@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -62,8 +60,7 @@ public class CredentialService {
                     NoSuchAlgorithmException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException,
-                    JsonProcessingException {
+                    CredentialOfferNotFoundException {
         accessTokenService.verifyAccessToken(accessToken);
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
         String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
@@ -131,10 +128,6 @@ public class CredentialService {
                     SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                             CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                                     document, sub);
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    //
-                    // System.out.println(objectMapper.writeValueAsString(socialSecurityCredentialSubject));
-
                     return credentialBuilder.buildCredential(
                             socialSecurityCredentialSubject, vcType);
                 }
