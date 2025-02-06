@@ -5,6 +5,7 @@ import uk.gov.di.mobile.wallet.cri.credential.Name;
 
 import java.util.List;
 
+// Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
 public class BasicCheckCredentialSubjectV1 {
     private String issuanceDate;
     private String expirationDate;
