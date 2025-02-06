@@ -89,7 +89,7 @@ public class VeteranCardDocument {
         return cardExpiryDateYear;
     }
 
-    public void setCardExpiryDateYear(String lastName) {
+    public void setCardExpiryDateYear(String cardExpiryDateYear) {
         this.cardExpiryDateYear = cardExpiryDateYear;
     }
 
