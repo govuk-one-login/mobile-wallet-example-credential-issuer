@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.basicDiscloureCredential;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.di.mobile.wallet.cri.credential.BirthDate;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.Name;
@@ -15,14 +17,15 @@ public class BasicCheckCredentialSubject implements CredentialSubject {
     private final List<Address> address;
     private final List<BasicCheckRecord> basicCheckRecord;
 
+    @JsonCreator
     BasicCheckCredentialSubject(
-            String id,
-            String issuanceDate,
-            String expirationDate,
-            List<Name> name,
-            List<BirthDate> birthDate,
-            List<Address> address,
-            List<BasicCheckRecord> basicCheckRecord) {
+            @JsonProperty("id") String id,
+            @JsonProperty("issuanceDate") String issuanceDate,
+            @JsonProperty("expiryDate") String expirationDate,
+            @JsonProperty("name") List<Name> name,
+            @JsonProperty("birthDate") List<BirthDate> birthDate,
+            @JsonProperty("address") List<Address> address,
+            @JsonProperty("basicCheckRecord") List<BasicCheckRecord> basicCheckRecord) {
         this.id = id;
         this.issuanceDate = issuanceDate;
         this.expirationDate = expirationDate;

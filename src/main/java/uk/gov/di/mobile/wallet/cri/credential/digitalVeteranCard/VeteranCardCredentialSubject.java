@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.digitalVeteranCard;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import uk.gov.di.mobile.wallet.cri.credential.BirthDate;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.Name;
@@ -13,8 +15,12 @@ public class VeteranCardCredentialSubject implements CredentialSubject {
     private final List<BirthDate> birthDate;
     private final List<VeteranCard> veteranCard;
 
+    @JsonCreator
     VeteranCardCredentialSubject(
-            String id, List<Name> name, List<BirthDate> birthDate, List<VeteranCard> veteranCard) {
+            @JsonProperty("id") String id,
+            @JsonProperty("name") List<Name> name,
+            @JsonProperty("birthDate") List<BirthDate> birthDate,
+            @JsonProperty("veteranCard") List<VeteranCard> veteranCard) {
         this.id = id;
         this.name = name;
         this.birthDate = birthDate;
