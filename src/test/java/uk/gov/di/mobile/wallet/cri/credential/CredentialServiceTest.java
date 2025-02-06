@@ -235,13 +235,15 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getTestSocialSecurityDocument("v2.0"));
-        when(mockCredentialBuilder.buildCredential(any(), anyString())).thenReturn(any());
+        when(mockCredentialBuilder.buildCredential(any(), anyString(), any())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
-                        any(SocialSecurityCredentialSubject.class), eq("SocialSecurityCredential"));
+                        any(SocialSecurityCredentialSubject.class),
+                        eq("SocialSecurityCredential"),
+                        eq(null));
     }
 
     @Test
@@ -270,7 +272,7 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq("BasicCheckCredential"),
-                        eq("2025-02-06"));
+                        eq("2025-07-11"));
     }
 
     @Test
@@ -351,7 +353,8 @@ class CredentialServiceTest {
                 SignedJWT.parse(
                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
         Credential mockCredential = new Credential(mockCredentialJwt);
-        when(mockCredentialBuilder.buildCredential(any(), anyString())).thenReturn(mockCredential);
+        when(mockCredentialBuilder.buildCredential(any(), anyString(), any()))
+                .thenReturn(mockCredential);
 
         Credential credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -363,7 +366,9 @@ class CredentialServiceTest {
         verify(mockDynamoDbService, times(1)).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
-                        any(SocialSecurityCredentialSubject.class), eq("SocialSecurityCredential"));
+                        any(SocialSecurityCredentialSubject.class),
+                        eq("SocialSecurityCredential"),
+                        eq(null));
     }
 
     private static @NotNull Document getTestSocialSecurityDocument(String vcDataModel) {
@@ -380,6 +385,9 @@ class CredentialServiceTest {
         data.put("issuance-day", "11");
         data.put("issuance-month", "07");
         data.put("issuance-year", "2024");
+        data.put("expiration-day", "11");
+        data.put("expiration-month", "07");
+        data.put("expiration-year", "2025");
         data.put("birth-day", "05");
         data.put("birth-month", "12");
         data.put("birth-year", "1970");
