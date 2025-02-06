@@ -76,9 +76,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId, "vc+jwt", "vc");
-        var encodedClaims =
-                getEncodedClaims(
-                        credentialSubject.getId(), credentialSubject, credentialType, validUntil);
+        var encodedClaims = getEncodedClaims(credentialSubject, credentialType, validUntil);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -108,8 +106,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId, "vc+jwt", "vc");
-        var encodedClaims =
-                getEncodedClaims(credentialSubject.getId(), credentialSubject, credentialType);
+        var encodedClaims = getEncodedClaims(credentialSubject, credentialType);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -155,7 +152,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     private Base64URL getEncodedClaims(
-            String subject, T credentialSubject, String credentialType, String validUntil) {
+            T credentialSubject, String credentialType, String validUntil) {
         Instant now = Instant.now();
         Date nowDate = Date.from(now);
 
@@ -168,7 +165,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
                         .issuer(configurationService.getSelfUrl())
-                        .subject(subject)
+                        .subject(credentialSubject.getId())
                         .issueTime(nowDate)
                         .notBeforeTime(nowDate)
                         .expirationTime(
@@ -187,7 +184,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
-    private Base64URL getEncodedClaims(String subject, T credentialSubject, String credentialType) {
+    private Base64URL getEncodedClaims(T credentialSubject, String credentialType) {
         Instant now = Instant.now();
         Date nowDate = Date.from(now);
 
@@ -196,7 +193,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
                         .issuer(configurationService.getSelfUrl())
-                        .subject(subject)
+                        .subject(credentialSubject.getId())
                         .issueTime(nowDate)
                         .notBeforeTime(nowDate)
                         .expirationTime(
