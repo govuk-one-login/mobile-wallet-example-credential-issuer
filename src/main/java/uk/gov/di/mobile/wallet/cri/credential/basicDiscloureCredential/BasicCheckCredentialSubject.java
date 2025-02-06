@@ -2,12 +2,14 @@ package uk.gov.di.mobile.wallet.cri.credential.basicDiscloureCredential;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import uk.gov.di.mobile.wallet.cri.credential.BirthDate;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.Name;
 
 import java.util.List;
 
+@Getter
 public class BasicCheckCredentialSubject implements CredentialSubject {
     private final String id;
     private final String issuanceDate;
@@ -33,33 +35,5 @@ public class BasicCheckCredentialSubject implements CredentialSubject {
         this.birthDate = birthDate;
         this.address = address;
         this.basicCheckRecord = basicCheckRecord;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public String getIssuanceDate() {
-        return issuanceDate;
-    }
-
-    public String getExpirationDate() {
-        return expirationDate;
-    }
-
-    public List<Name> getName() {
-        return name;
-    }
-
-    public List<BirthDate> getBirthDate() {
-        return birthDate;
-    }
-
-    public List<Address> getAddress() {
-        return address;
-    }
-
-    public List<BasicCheckRecord> getBasicCheckRecord() {
-        return basicCheckRecord;
     }
 }

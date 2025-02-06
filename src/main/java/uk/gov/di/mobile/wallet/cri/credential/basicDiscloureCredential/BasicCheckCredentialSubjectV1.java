@@ -1,11 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential.basicDiscloureCredential;
 
+import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.credential.BirthDate;
 import uk.gov.di.mobile.wallet.cri.credential.Name;
 
 import java.util.List;
 
-// Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
+@Setter
 public class BasicCheckCredentialSubjectV1 {
     private String issuanceDate;
     private String expirationDate;
@@ -26,30 +27,6 @@ public class BasicCheckCredentialSubjectV1 {
         this.name = name;
         this.birthDate = birthDate;
         this.address = address;
-        this.basicCheckRecord = basicCheckRecord;
-    }
-
-    public void setIssuanceDate(String issuanceDate) {
-        this.issuanceDate = issuanceDate;
-    }
-
-    public void setExpirationDate(String expirationDate) {
-        this.expirationDate = expirationDate;
-    }
-
-    public void setName(List<Name> name) {
-        this.name = name;
-    }
-
-    public void setBirthDate(List<BirthDate> birthDate) {
-        this.birthDate = birthDate;
-    }
-
-    public void setAddress(List<Address> address) {
-        this.address = address;
-    }
-
-    public void setBasicCheckRecord(List<BasicCheckRecord> basicCheckRecord) {
         this.basicCheckRecord = basicCheckRecord;
     }
 }
