@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -153,13 +151,6 @@ public class CredentialService {
                     BasicCheckCredentialSubject basicCheckCredentialSubject =
                             CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
                                     document, sub);
-                    try {
-                        ObjectMapper objectMapper = new ObjectMapper();
-                        System.out.println(
-                                objectMapper.writeValueAsString(basicCheckCredentialSubject));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
                     return credentialBuilder.buildCredential(
                             basicCheckCredentialSubject,
                             vcType,
