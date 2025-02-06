@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -44,7 +45,7 @@ public class CredentialService {
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
             Client httpClient,
-            CredentialBuilder credentialBuilder) {
+            CredentialBuilder<?> credentialBuilder) {
         this.configurationService = configurationService;
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
@@ -55,16 +56,15 @@ public class CredentialService {
 
     public Credential getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
-            ProofJwtValidationException,
-            SigningException,
-            AccessTokenValidationException,
-            NoSuchAlgorithmException,
-            URISyntaxException,
-            CredentialServiceException,
-            CredentialOfferNotFoundException, JsonProcessingException {
-
+                    ProofJwtValidationException,
+                    SigningException,
+                    AccessTokenValidationException,
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException,
+                    CredentialOfferNotFoundException,
+                    JsonProcessingException {
         accessTokenService.verifyAccessToken(accessToken);
-
         AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
         String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
         LOGGER.info("Access token for credentialOfferId {} verified", credentialOfferId);
@@ -117,33 +117,45 @@ public class CredentialService {
 
         switch (CredentialType.valueOf(vcType)) {
             case SocialSecurityCredential:
+                // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
                     SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                             CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document);
-                    SocialSecurityCredentialSubjectV1 socialSecurityCredentialSubjectV1 = new SocialSecurityCredentialSubjectV1(socialSecurityCredentialSubject.getName(), socialSecurityCredentialSubject.getSocialSecurityRecord());
+                    SocialSecurityCredentialSubjectV1 socialSecurityCredentialSubjectV1 =
+                            new SocialSecurityCredentialSubjectV1(
+                                    socialSecurityCredentialSubject.getName(),
+                                    socialSecurityCredentialSubject.getSocialSecurityRecord());
                     VCClaim vcClaim = new VCClaim(vcType, socialSecurityCredentialSubjectV1);
-                    return credentialBuilder.buildCredential(
-                            sub,
-                            vcClaim);
+                    return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
                     SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                             CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                                     document, sub);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    //
+                    // System.out.println(objectMapper.writeValueAsString(socialSecurityCredentialSubject));
+
                     return credentialBuilder.buildCredential(
                             socialSecurityCredentialSubject, vcType);
                 }
 
             case BasicCheckCredential:
+                // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
                     BasicCheckCredentialSubject basicCheckCredentialSubject =
                             CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
                                     document, configurationService.getCredentialTtlInDays());
 
-                    BasicCheckCredentialSubjectV1 basicCheckCredentialSubjectV1 = new BasicCheckCredentialSubjectV1(basicCheckCredentialSubject.getIssuanceDate(), basicCheckCredentialSubject.getExpirationDate(), basicCheckCredentialSubject.getName(), basicCheckCredentialSubject.getBirthDate(), basicCheckCredentialSubject.getAddress(), basicCheckCredentialSubject.getBasicCheckRecord());
+                    BasicCheckCredentialSubjectV1 basicCheckCredentialSubjectV1 =
+                            new BasicCheckCredentialSubjectV1(
+                                    basicCheckCredentialSubject.getIssuanceDate(),
+                                    basicCheckCredentialSubject.getExpirationDate(),
+                                    basicCheckCredentialSubject.getName(),
+                                    basicCheckCredentialSubject.getBirthDate(),
+                                    basicCheckCredentialSubject.getAddress(),
+                                    basicCheckCredentialSubject.getBasicCheckRecord());
                     VCClaim vcClaim = new VCClaim(vcType, basicCheckCredentialSubjectV1);
-                    return credentialBuilder.buildCredential(
-                            sub,
-                            vcClaim);
+                    return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
                     BasicCheckCredentialSubject basicCheckCredentialSubject =
                             CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
@@ -155,15 +167,18 @@ public class CredentialService {
                 }
 
             case digitalVeteranCard:
+                // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
                     VeteranCardCredentialSubject veteranCardCredentialSubject =
                             CredentialSubjectMapper.buildVeteranCardCredentialSubject(document);
 
-                    VeteranCardCredentialSubjectV1 veteranCardCredentialSubjectV1 = new VeteranCardCredentialSubjectV1(veteranCardCredentialSubject.getName(), veteranCardCredentialSubject.getBirthDate(), veteranCardCredentialSubject.getVeteranCard());
+                    VeteranCardCredentialSubjectV1 veteranCardCredentialSubjectV1 =
+                            new VeteranCardCredentialSubjectV1(
+                                    veteranCardCredentialSubject.getName(),
+                                    veteranCardCredentialSubject.getBirthDate(),
+                                    veteranCardCredentialSubject.getVeteranCard());
                     VCClaim vcClaim = new VCClaim(vcType, veteranCardCredentialSubjectV1);
-                    return credentialBuilder.buildCredential(
-                            sub,
-                            vcClaim);
+                    return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
                     VeteranCardCredentialSubject veteranCardCredentialSubject =
                             CredentialSubjectMapper.buildVeteranCardCredentialSubject(
@@ -186,12 +201,12 @@ public class CredentialService {
     private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
             throws AccessTokenValidationException {
         try {
-            List<Object> credentialIdentifiers =
-                    accessToken.getJWTClaimsSet().getListClaim("credential_identifiers");
+            List<String> credentialIdentifiers =
+                    accessToken.getJWTClaimsSet().getStringListClaim("credential_identifiers");
             if (credentialIdentifiers.isEmpty()) {
-                throw new InvalidAttributeValueException("credential_identifiers is invalid");
+                throw new InvalidAttributeValueException("Empty credential_identifiers");
             }
-            String credentialIdentifier = (String) credentialIdentifiers.get(0);
+            String credentialIdentifier = credentialIdentifiers.get(0);
             String sub = accessToken.getJWTClaimsSet().getStringClaim("sub");
             String cNonce = accessToken.getJWTClaimsSet().getStringClaim("c_nonce");
             return new AccessTokenClaims(credentialIdentifier, sub, cNonce);
