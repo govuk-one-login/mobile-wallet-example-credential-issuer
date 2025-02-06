@@ -20,6 +20,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +32,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
     private static final String CONTEXT_V1 = "https://www.w3.org/2018/credentials/v1";
     private static final String CONTEXT_V2 = "https://www.w3.org/ns/credentials/v2";
+    private final Clock clock;
 
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
@@ -38,6 +40,15 @@ public class CredentialBuilder<T extends CredentialSubject> {
     public CredentialBuilder(ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
         this.keyProvider = keyProvider;
+        this.clock = Clock.systemUTC();
+    }
+
+    // Required for unit tests
+    public CredentialBuilder(
+            ConfigurationService configurationService, KeyProvider keyProvider, Clock clock) {
+        this.configurationService = configurationService;
+        this.keyProvider = keyProvider;
+        this.clock = clock;
     }
 
     // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
@@ -133,13 +144,14 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
     // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private Base64URL getEncodedClaims(String proofJwtDidKey, VCClaim vcClaim) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
+        Date nowDate = Date.from(now);
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
                         .issuer(configurationService.getSelfUrl())
-                        .issueTime(Date.from(now))
-                        .notBeforeTime(Date.from(now))
+                        .issueTime(nowDate)
+                        .notBeforeTime(nowDate)
                         .expirationTime(
                                 Date.from(
                                         now.plus(
@@ -153,10 +165,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
     private Base64URL getEncodedClaims(
             T credentialSubject, String credentialType, String validUntil) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
         Date nowDate = Date.from(now);
-
-        String validFromISO = DateTimeFormatter.ISO_DATE.format(now);
 
         DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         LocalDate date = LocalDate.parse(validUntil, inputFormatter);
@@ -178,17 +188,16 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .claim("issuer", configurationService.getSelfUrl())
                         .claim("name", credentialType)
                         .claim("description", credentialType)
-                        .claim("validFrom", validFromISO)
+                        .claim("validFrom", now.toString())
                         .claim("validUntil", validUntilISO)
                         .claim("credentialSubject", credentialSubject);
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
     private Base64URL getEncodedClaims(T credentialSubject, String credentialType) {
-        Instant now = Instant.now();
+        System.out.println("this function ****");
+        Instant now = clock.instant();
         Date nowDate = Date.from(now);
-
-        String validFromISO = DateTimeFormatter.ISO_DATE.format(now);
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
@@ -206,7 +215,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .claim("issuer", configurationService.getSelfUrl())
                         .claim("name", credentialType)
                         .claim("description", credentialType)
-                        .claim("validFrom", validFromISO)
+                        .claim("validFrom", now.toString())
                         .claim("credentialSubject", credentialSubject);
         return Base64URL.encode(claimsBuilder.build().toString());
     }
