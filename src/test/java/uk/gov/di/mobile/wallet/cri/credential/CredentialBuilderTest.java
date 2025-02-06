@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.kms.model.DisabledException;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
+import uk.gov.di.mobile.wallet.cri.credential.basicDiscloureCredential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.socialSecurityCredential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
@@ -44,8 +45,11 @@ class CredentialBuilderTest {
     private final KmsService kmsService = mock(KmsService.class);
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
 
-    private CredentialBuilder<SocialSecurityCredentialSubject> credentialBuilder;
+    private CredentialBuilder<SocialSecurityCredentialSubject> credentialBuilderSocialSecurity;
+    private CredentialBuilder<BasicCheckCredentialSubject> credentialBuilderBasicCheck;
+
     private SocialSecurityCredentialSubject socialSecurityCredentialSubject;
+    private BasicCheckCredentialSubject basicCheckCredentialSubject;
 
     private static Instant fixedInstant;
 
@@ -64,7 +68,10 @@ class CredentialBuilderTest {
     @BeforeEach
     void setUp() throws JsonProcessingException {
         Clock nowClock = Clock.fixed(fixedInstant, ZoneId.systemDefault());
-        credentialBuilder = new CredentialBuilder<>(configurationService, kmsService, nowClock);
+        credentialBuilderSocialSecurity =
+                new CredentialBuilder<>(configurationService, kmsService, nowClock);
+        credentialBuilderBasicCheck =
+                new CredentialBuilder<>(configurationService, kmsService, nowClock);
         when(configurationService.getSigningKeyAlias()).thenReturn("mock-signing-key-alias");
         when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
         when(configurationService.getCredentialTtlInDays()).thenReturn(365L);
@@ -74,6 +81,11 @@ class CredentialBuilderTest {
                         .readValue(
                                 "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"Title\",\"value\":\"Miss\"},{\"type\":\"GivenName\",\"value\":\"Sarah\"},{\"type\":\"GivenName\",\"value\":\"Elizabeth\"},{\"type\":\"FamilyName\",\"value\":\"Edwards\"},{\"type\":\"FamilyName\",\"value\":\"Green\"}]}],\"socialSecurityRecord\":[{\"personalNumber\":\"QQ123456C\"}]}",
                                 SocialSecurityCredentialSubject.class);
+        basicCheckCredentialSubject =
+                new ObjectMapper()
+                        .readValue(
+                                "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"issuanceDate\":\"2024-07-11\",\"expirationDate\":\"2025-07-11\",\"name\":[{\"nameParts\":[{\"type\":\"GivenName\",\"value\":\"Bonnie\"},{\"type\":\"FamilyName\",\"value\":\"Blue\"}]}],\"birthDate\":[{\"value\":\"1970-12-05\"}],\"address\":[{\"subBuildingName\":\"Flat 11\",\"buildingName\":\"Blashford\",\"streetName\":\"Adelaide Road\",\"addressLocality\":\"London\",\"postalCode\":\"NW3 3RX\",\"addressCountry\":\"GB\"}],\"basicCheckRecord\":[{\"certificateNumber\":\"009878863\",\"applicationNumber\":\"E0023455534\",\"certificateType\":\"basic\",\"outcome\":\"Result clear\",\"policeRecordsCheck\":\"Clear\"}]}",
+                                BasicCheckCredentialSubject.class);
     }
 
     @Test
@@ -84,8 +96,8 @@ class CredentialBuilderTest {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
-        credentialBuilder.buildCredential(
-                socialSecurityCredentialSubject, "SocialSecurityCredential");
+        credentialBuilderSocialSecurity.buildCredential(
+                socialSecurityCredentialSubject, "SocialSecurityCredential", null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -104,9 +116,10 @@ class CredentialBuilderTest {
                 assertThrows(
                         SigningException.class,
                         () ->
-                                credentialBuilder.buildCredential(
+                                credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
-                                        "SocialSecurityCredential"));
+                                        "SocialSecurityCredential",
+                                        null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
@@ -118,8 +131,8 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         Credential credential =
-                credentialBuilder.buildCredential(
-                        socialSecurityCredentialSubject, "SocialSecurityCredential");
+                credentialBuilderSocialSecurity.buildCredential(
+                        socialSecurityCredentialSubject, "SocialSecurityCredential", null);
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
 
@@ -152,11 +165,60 @@ class CredentialBuilderTest {
                 equalTo("SocialSecurityCredential"));
         assertThat(
                 token.getJWTClaimsSet().getClaim("validFrom").toString(),
-                equalTo(fixedInstant.toString()));
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
         assertThat(
                 token.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
                         "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, name=[{nameParts=[{type=Title, value=Miss}, {type=GivenName, value=Sarah}, {type=GivenName, value=Elizabeth}, {type=FamilyName, value=Edwards}, {type=FamilyName, value=Green}]}], socialSecurityRecord=[{personalNumber=QQ123456C}]}"));
+        assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
+    }
+
+    @Test
+    void Should_Return_Basic_Check_Credential()
+            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
+        SignResponse mockSignResponse = getMockKmsSignResponse();
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
+
+        Credential credential =
+                credentialBuilderBasicCheck.buildCredential(
+                        basicCheckCredentialSubject, "BasicCheckCredential", "2025-07-11");
+
+        SignedJWT token = SignedJWT.parse(credential.getCredential());
+        assertThat(credential, hasProperty("credential"));
+        assertThat(token.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(token.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(token.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
+        assertThat(token.getHeader().getContentType(), equalTo("vc"));
+        assertThat(token.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(token.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
+        assertThat(
+                token.getJWTClaimsSet().getIssueTime().toString(),
+                equalTo(Date.from(fixedInstant).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getNotBeforeTime().toString(),
+                equalTo(Date.from(fixedInstant).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getExpirationTime().toString(),
+                equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getListClaim("@context"),
+                equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
+        assertThat(
+                token.getJWTClaimsSet().getListClaim("type"),
+                equalTo(List.of("VerifiableCredential", "BasicCheckCredential")));
+        assertThat(token.getJWTClaimsSet().getClaim("issuer"), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(token.getJWTClaimsSet().getClaim("name"), equalTo("BasicCheckCredential"));
+        assertThat(
+                token.getJWTClaimsSet().getClaim("description"), equalTo("BasicCheckCredential"));
+        assertThat(
+                token.getJWTClaimsSet().getClaim("validFrom").toString(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
+        assertThat(token.getJWTClaimsSet().getClaim("validUntil"), equalTo("2025-07-11T22:59:59Z"));
+        assertThat(
+                token.getJWTClaimsSet().getClaim("credentialSubject").toString(),
+                equalTo(
+                        "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, issuanceDate=2024-07-11, expirationDate=2025-07-11, name=[{nameParts=[{type=GivenName, value=Bonnie}, {type=FamilyName, value=Blue}]}], birthDate=[{value=1970-12-05}], address=[{subBuildingName=Flat 11, buildingName=Blashford, streetName=Adelaide Road, addressLocality=London, postalCode=NW3 3RX, addressCountry=GB}], basicCheckRecord=[{certificateNumber=009878863, applicationNumber=E0023455534, certificateType=basic, outcome=Result clear, policeRecordsCheck=Clear}]}"));
+
         assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
