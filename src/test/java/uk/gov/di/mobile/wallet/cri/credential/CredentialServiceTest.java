@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -227,8 +226,7 @@ class CredentialServiceTest {
                     CredentialOfferNotFoundException,
                     SigningException,
                     NoSuchAlgorithmException,
-                    URISyntaxException,
-                    JsonProcessingException {
+                    URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -255,8 +253,7 @@ class CredentialServiceTest {
                     CredentialOfferNotFoundException,
                     SigningException,
                     NoSuchAlgorithmException,
-                    URISyntaxException,
-                    JsonProcessingException {
+                    URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -285,8 +282,7 @@ class CredentialServiceTest {
                     CredentialOfferNotFoundException,
                     SigningException,
                     NoSuchAlgorithmException,
-                    URISyntaxException,
-                    JsonProcessingException {
+                    URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -315,8 +311,7 @@ class CredentialServiceTest {
                     CredentialOfferNotFoundException,
                     SigningException,
                     NoSuchAlgorithmException,
-                    URISyntaxException,
-                    JsonProcessingException {
+                    URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -333,7 +328,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void ShouldReturnCredential()
+    void Should_Return_Credential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     DataStoreException,
@@ -342,8 +337,7 @@ class CredentialServiceTest {
                     ParseException,
                     SigningException,
                     NoSuchAlgorithmException,
-                    URISyntaxException,
-                    JsonProcessingException {
+                    URISyntaxException {
 
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
