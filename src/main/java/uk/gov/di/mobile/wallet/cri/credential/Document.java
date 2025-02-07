@@ -24,8 +24,6 @@ public class Document {
     @JsonProperty("vcDataModel")
     private String vcDataModel;
 
-    public Document() {}
-
     public Document(
             String documentId, Map<String, Object> data, String vcType, String vcDataModel) {
         this.documentId = documentId;
