@@ -13,6 +13,7 @@ import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
@@ -37,13 +38,13 @@ public class CredentialBuilder<T extends CredentialSubject> {
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
 
+    @ExcludeFromGeneratedCoverageReport
     public CredentialBuilder(ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
         this.keyProvider = keyProvider;
         this.clock = Clock.systemUTC();
     }
 
-    // Required for unit tests
     public CredentialBuilder(
             ConfigurationService configurationService, KeyProvider keyProvider, Clock clock) {
         this.configurationService = configurationService;
