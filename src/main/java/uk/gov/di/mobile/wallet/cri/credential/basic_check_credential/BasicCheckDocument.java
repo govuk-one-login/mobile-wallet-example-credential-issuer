@@ -44,4 +44,7 @@ public class BasicCheckDocument {
     private String postalCode;
     private String certificateNumber;
     private String applicationNumber;
+    private String certificateType;
+    private String outcome;
+    private String policeRecordsCheck;
 }

@@ -429,6 +429,9 @@ class CredentialServiceTest {
         data.put("postalCode", "NW3 3RX");
         data.put("certificateNumber", "009878863");
         data.put("applicationNumber", "E0023455534");
+        data.put("certificateType", "basic");
+        data.put("outcome", "Result clear");
+        data.put("policeRecordsCheck", "Clear");
         return new Document(DOCUMENT_ID, data, "BasicCheckCredential", "v2.0");
     }
 
