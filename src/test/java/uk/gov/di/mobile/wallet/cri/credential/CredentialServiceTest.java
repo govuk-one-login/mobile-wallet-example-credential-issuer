@@ -166,14 +166,17 @@ class CredentialServiceTest {
     @Test
     void Should_Throw_AccessTokenValidationException_When_Wallet_Subject_IDs_Do_Not_Match()
             throws java.text.ParseException, DataStoreException, JOSEException {
-        SignedJWT mockAccessToken = getMockAccessToken("954a4cff-0d38-4558-b29d-ee709f4f227e");
+        SignedJWT mockAccessTokenWithDifferentSub =
+                getMockAccessToken("954a4cff-0d38-4558-b29d-ee709f4f227e");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () ->
+                                credentialService.getCredential(
+                                        mockAccessTokenWithDifferentSub, mockProofJwt));
 
         assertThat(
                 exception.getMessage(),
