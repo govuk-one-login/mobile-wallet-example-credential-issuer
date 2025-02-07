@@ -23,13 +23,6 @@ public class CredentialSubjectMapper {
         throw new IllegalStateException("Instantiation is not valid for this class.");
     }
 
-    // VC MD v1.1 - this will be removed once the wallet can process VC MD v2.0
-    public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
-            Document document) {
-        return buildSocialSecurityCredentialSubject(document, null);
-    }
-
-    // VC MD v2.0
     public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
             Document document, String id) {
         SocialSecurityCredentialSubjectBuilder builder =
@@ -61,13 +54,6 @@ public class CredentialSubjectMapper {
                 .setSocialSecurityRecord(socialSecurityRecords);
     }
 
-    // VC MD v1.1 - this will be removed once the wallet can process VC MD v2.0
-    public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
-            Document document) {
-        return buildBasicDisclosureCredentialSubject(document, null);
-    }
-
-    // VC MD v2.0
     public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
             Document document, String id) {
         BasicCheckCredentialSubjectBuilder builder =
@@ -120,13 +106,6 @@ public class CredentialSubjectMapper {
                 .setBasicCheckRecord(basicCheckRecords);
     }
 
-    // VC MD v1.1 - this will be removed once the wallet can process VC MD v2.0
-    public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
-            Document document) {
-        return buildVeteranCardCredentialSubject(document, null);
-    }
-
-    // VC MD v2.0
     public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
             Document document, String sub) {
         VeteranCardCredentialSubjectBuilder builder =
