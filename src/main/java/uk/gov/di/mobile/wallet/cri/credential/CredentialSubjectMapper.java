@@ -2,15 +2,15 @@ package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
-import uk.gov.di.mobile.wallet.cri.credential.BasicCheckCredential.*;
-import uk.gov.di.mobile.wallet.cri.credential.DigitalVeteranCard.VeteranCard;
-import uk.gov.di.mobile.wallet.cri.credential.DigitalVeteranCard.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.DigitalVeteranCard.VeteranCardCredentialSubjectBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.DigitalVeteranCard.VeteranCardDocument;
-import uk.gov.di.mobile.wallet.cri.credential.SocialSecurityCredential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.SocialSecurityCredential.SocialSecurityCredentialSubjectBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.SocialSecurityCredential.SocialSecurityDocument;
-import uk.gov.di.mobile.wallet.cri.credential.SocialSecurityCredential.SocialSecurityRecord;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.*;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCard;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubjectBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubjectBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityRecord;
 
 import java.util.ArrayList;
 import java.util.List;

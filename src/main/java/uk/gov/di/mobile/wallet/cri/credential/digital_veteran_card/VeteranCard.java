@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.DigitalVeteranCard;
+package uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card;
 
 import lombok.Getter;
 import lombok.Setter;

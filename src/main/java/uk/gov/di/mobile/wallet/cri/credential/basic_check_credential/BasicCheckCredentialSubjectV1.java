@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.BasicCheckCredential;
+package uk.gov.di.mobile.wallet.cri.credential.basic_check_credential;
 
 import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.credential.BirthDate;

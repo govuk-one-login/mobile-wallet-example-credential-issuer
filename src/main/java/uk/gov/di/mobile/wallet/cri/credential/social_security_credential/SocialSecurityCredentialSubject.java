@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.SocialSecurityCredential;
+package uk.gov.di.mobile.wallet.cri.credential.social_security_credential;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
