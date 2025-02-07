@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -36,11 +38,14 @@ public class CredentialService {
     private final Client httpClient;
     private final CredentialBuilder credentialBuilder;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
-    private static final String CREDENTIAL_STORE_DOCUMENT_PATH = "/v2/document/"; // NOSONAR
 
+    private static final String CREDENTIAL_STORE_DOCUMENT_PATH = "/v2/document/";
     private static final String SOCIAL_SECURITY_CREDENTIAL = "SocialSecurityCredential";
     private static final String BASIC_CHECK_CREDENTIAL = "BasicCheckCredential";
     private static final String DIGITAL_VETERAN_CARD = "digitalVeteranCard";
+    public static final String NATIONAL_INSURANCE_NUMBER = "National Insurance number";
+    public static final String BASIC_DBS_CHECK_RESULT = "Basic DBS check result";
+    public static final String HM_ARMED_FORCES_VETERAN_CARD = "HM Armed Forces Veteran Card";
 
     public CredentialService(
             ConfigurationService configurationService,
@@ -120,7 +125,7 @@ public class CredentialService {
         switch (vcType) {
             case SOCIAL_SECURITY_CREDENTIAL:
                 SocialSecurityCredentialSubject socialSecurityCredentialSubject =
-                        CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document);
+                        CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
                     VCClaim vcClaim =
                             new VCClaim(
@@ -130,12 +135,16 @@ public class CredentialService {
                     return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
                     return credentialBuilder.buildCredential(
-                            socialSecurityCredentialSubject, vcType, null);
+                            socialSecurityCredentialSubject,
+                            vcType,
+                            NATIONAL_INSURANCE_NUMBER,
+                            null);
                 }
 
             case BASIC_CHECK_CREDENTIAL:
                 BasicCheckCredentialSubject basicCheckCredentialSubject =
-                        CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(document);
+                        CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(
+                                document, sub);
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
                     VCClaim vcClaim =
                             new VCClaim(
@@ -146,12 +155,13 @@ public class CredentialService {
                     return credentialBuilder.buildCredential(
                             basicCheckCredentialSubject,
                             vcType,
+                            BASIC_DBS_CHECK_RESULT,
                             basicCheckCredentialSubject.getExpirationDate());
                 }
 
             case DIGITAL_VETERAN_CARD:
                 VeteranCardCredentialSubject veteranCardCredentialSubject =
-                        CredentialSubjectMapper.buildVeteranCardCredentialSubject(document);
+                        CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
                     VCClaim vcClaim =
                             new VCClaim(
@@ -160,9 +170,17 @@ public class CredentialService {
                                             veteranCardCredentialSubject));
                     return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
+                    try {
+                        System.out.println(
+                                new ObjectMapper()
+                                        .writeValueAsString(veteranCardCredentialSubject));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     return credentialBuilder.buildCredential(
                             veteranCardCredentialSubject,
                             vcType,
+                            HM_ARMED_FORCES_VETERAN_CARD,
                             veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
                 }
             default:

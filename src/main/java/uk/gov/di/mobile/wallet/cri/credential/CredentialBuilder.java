@@ -83,11 +83,13 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     // VC MD v2.0
-    public Credential buildCredential(T credentialSubject, String credentialType, String validUntil)
+    public Credential buildCredential(
+            T credentialSubject, String credentialType, String credentialName, String validUntil)
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId, "vc+jwt", "vc");
-        var encodedClaims = getEncodedClaims(credentialSubject, credentialType, validUntil);
+        var encodedClaims =
+                getEncodedClaims(credentialSubject, credentialType, credentialName, validUntil);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -134,7 +136,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     private Base64URL getEncodedClaims(
-            T credentialSubject, String credentialType, String validUntil) {
+            T credentialSubject, String credentialType, String credentialName, String validUntil) {
         Instant now = clock.instant();
         Date nowDate = Date.from(now);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -154,8 +156,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .claim("@context", new String[] {CONTEXT_V2})
                         .claim("type", new String[] {"VerifiableCredential", credentialType})
                         .claim("issuer", configurationService.getSelfUrl())
-                        .claim("name", credentialType)
-                        .claim("description", credentialType)
+                        .claim("name", credentialName)
+                        .claim("description", credentialName)
                         .claim("validFrom", validFromIso)
                         .claim("credentialSubject", credentialSubject);
 

@@ -19,6 +19,7 @@ import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
@@ -47,11 +48,14 @@ class CredentialBuilderTest {
 
     private CredentialBuilder<SocialSecurityCredentialSubject> credentialBuilderSocialSecurity;
     private CredentialBuilder<BasicCheckCredentialSubject> credentialBuilderBasicCheck;
+    private CredentialBuilder<VeteranCardCredentialSubject> credentialBuilderVeteranCard;
 
     private SocialSecurityCredentialSubject socialSecurityCredentialSubject;
     private BasicCheckCredentialSubject basicCheckCredentialSubject;
+    private VeteranCardCredentialSubject veteranCardCredentialSubject;
 
     private static Instant fixedInstant;
+    private static ObjectMapper objectMapper;
 
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String HASHED_KEY_ID =
@@ -63,6 +67,7 @@ class CredentialBuilderTest {
     @BeforeAll
     static void beforeAll() {
         fixedInstant = Instant.now();
+        objectMapper = new ObjectMapper();
     }
 
     @BeforeEach
@@ -72,20 +77,24 @@ class CredentialBuilderTest {
                 new CredentialBuilder<>(configurationService, kmsService, nowClock);
         credentialBuilderBasicCheck =
                 new CredentialBuilder<>(configurationService, kmsService, nowClock);
+        credentialBuilderVeteranCard =
+                new CredentialBuilder<>(configurationService, kmsService, nowClock);
         when(configurationService.getSigningKeyAlias()).thenReturn("mock-signing-key-alias");
         when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
         when(configurationService.getCredentialTtlInDays()).thenReturn(365L);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
         socialSecurityCredentialSubject =
-                new ObjectMapper()
-                        .readValue(
-                                "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"Title\",\"value\":\"Miss\"},{\"type\":\"GivenName\",\"value\":\"Sarah\"},{\"type\":\"GivenName\",\"value\":\"Elizabeth\"},{\"type\":\"FamilyName\",\"value\":\"Edwards\"},{\"type\":\"FamilyName\",\"value\":\"Green\"}]}],\"socialSecurityRecord\":[{\"personalNumber\":\"QQ123456C\"}]}",
-                                SocialSecurityCredentialSubject.class);
+                objectMapper.readValue(
+                        "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"Title\",\"value\":\"Miss\"},{\"type\":\"GivenName\",\"value\":\"Sarah\"},{\"type\":\"GivenName\",\"value\":\"Elizabeth\"},{\"type\":\"FamilyName\",\"value\":\"Edwards\"},{\"type\":\"FamilyName\",\"value\":\"Green\"}]}],\"socialSecurityRecord\":[{\"personalNumber\":\"QQ123456C\"}]}",
+                        SocialSecurityCredentialSubject.class);
         basicCheckCredentialSubject =
-                new ObjectMapper()
-                        .readValue(
-                                "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"issuanceDate\":\"2024-07-11\",\"expirationDate\":\"2025-07-11\",\"name\":[{\"nameParts\":[{\"type\":\"GivenName\",\"value\":\"Bonnie\"},{\"type\":\"FamilyName\",\"value\":\"Blue\"}]}],\"birthDate\":[{\"value\":\"1970-12-05\"}],\"address\":[{\"subBuildingName\":\"Flat 11\",\"buildingName\":\"Blashford\",\"streetName\":\"Adelaide Road\",\"addressLocality\":\"London\",\"postalCode\":\"NW3 3RX\",\"addressCountry\":\"GB\"}],\"basicCheckRecord\":[{\"certificateNumber\":\"009878863\",\"applicationNumber\":\"E0023455534\",\"certificateType\":\"basic\",\"outcome\":\"Result clear\",\"policeRecordsCheck\":\"Clear\"}]}",
-                                BasicCheckCredentialSubject.class);
+                objectMapper.readValue(
+                        "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"issuanceDate\":\"2024-07-11\",\"expirationDate\":\"2025-07-11\",\"name\":[{\"nameParts\":[{\"type\":\"GivenName\",\"value\":\"Bonnie\"},{\"type\":\"FamilyName\",\"value\":\"Blue\"}]}],\"birthDate\":[{\"value\":\"1970-12-05\"}],\"address\":[{\"subBuildingName\":\"Flat 11\",\"buildingName\":\"Blashford\",\"streetName\":\"Adelaide Road\",\"addressLocality\":\"London\",\"postalCode\":\"NW3 3RX\",\"addressCountry\":\"GB\"}],\"basicCheckRecord\":[{\"certificateNumber\":\"009878863\",\"applicationNumber\":\"E0023455534\",\"certificateType\":\"basic\",\"outcome\":\"Result clear\",\"policeRecordsCheck\":\"Clear\"}]}",
+                        BasicCheckCredentialSubject.class);
+        veteranCardCredentialSubject =
+                objectMapper.readValue(
+                        "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"GivenName\",\"value\":\"Bonnie\"},{\"type\":\"FamilyName\",\"value\":\"Blue\"}]}],\"birthDate\":[{\"value\":\"1970-12-05\"}],\"veteranCard\":[{\"expiryDate\":\"2000-07-11\",\"serviceNumber\":\"25057386\",\"serviceBranch\":\"HM Naval Service\",\"photo\":null}]}",
+                        VeteranCardCredentialSubject.class);
     }
 
     @Test
@@ -97,7 +106,10 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject, "SocialSecurityCredential", null);
+                socialSecurityCredentialSubject,
+                "SocialSecurityCredential",
+                "National Insurance number",
+                null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -119,6 +131,7 @@ class CredentialBuilderTest {
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
                                         "SocialSecurityCredential",
+                                        "National Insurance number",
                                         null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
@@ -132,7 +145,10 @@ class CredentialBuilderTest {
 
         Credential credential =
                 credentialBuilderSocialSecurity.buildCredential(
-                        socialSecurityCredentialSubject, "SocialSecurityCredential", null);
+                        socialSecurityCredentialSubject,
+                        "SocialSecurityCredential",
+                        "National Insurance number",
+                        null);
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
 
@@ -159,10 +175,10 @@ class CredentialBuilderTest {
                 token.getJWTClaimsSet().getListClaim("type"),
                 equalTo(List.of("VerifiableCredential", "SocialSecurityCredential")));
         assertThat(token.getJWTClaimsSet().getClaim("issuer"), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getClaim("name"), equalTo("SocialSecurityCredential"));
+        assertThat(token.getJWTClaimsSet().getClaim("name"), equalTo("National Insurance number"));
         assertThat(
                 token.getJWTClaimsSet().getClaim("description"),
-                equalTo("SocialSecurityCredential"));
+                equalTo("National Insurance number"));
         assertThat(
                 token.getJWTClaimsSet().getClaim("validFrom").toString(),
                 equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
@@ -181,7 +197,10 @@ class CredentialBuilderTest {
 
         Credential credential =
                 credentialBuilderBasicCheck.buildCredential(
-                        basicCheckCredentialSubject, "BasicCheckCredential", "2025-07-11");
+                        basicCheckCredentialSubject,
+                        "BasicCheckCredential",
+                        "Basic DBS check result",
+                        "2025-07-11");
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
         assertThat(credential, hasProperty("credential"));
@@ -207,9 +226,9 @@ class CredentialBuilderTest {
                 token.getJWTClaimsSet().getListClaim("type"),
                 equalTo(List.of("VerifiableCredential", "BasicCheckCredential")));
         assertThat(token.getJWTClaimsSet().getClaim("issuer"), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getClaim("name"), equalTo("BasicCheckCredential"));
+        assertThat(token.getJWTClaimsSet().getClaim("name"), equalTo("Basic DBS check result"));
         assertThat(
-                token.getJWTClaimsSet().getClaim("description"), equalTo("BasicCheckCredential"));
+                token.getJWTClaimsSet().getClaim("description"), equalTo("Basic DBS check result"));
         assertThat(
                 token.getJWTClaimsSet().getClaim("validFrom").toString(),
                 equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
@@ -218,6 +237,60 @@ class CredentialBuilderTest {
                 token.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
                         "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, issuanceDate=2024-07-11, expirationDate=2025-07-11, name=[{nameParts=[{type=GivenName, value=Bonnie}, {type=FamilyName, value=Blue}]}], birthDate=[{value=1970-12-05}], address=[{subBuildingName=Flat 11, buildingName=Blashford, streetName=Adelaide Road, addressLocality=London, postalCode=NW3 3RX, addressCountry=GB}], basicCheckRecord=[{certificateNumber=009878863, applicationNumber=E0023455534, certificateType=basic, outcome=Result clear, policeRecordsCheck=Clear}]}"));
+
+        assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
+    }
+
+    @Test
+    void Should_Return_Digital_Veteran_Card()
+            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
+        SignResponse mockSignResponse = getMockKmsSignResponse();
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
+
+        Credential credential =
+                credentialBuilderVeteranCard.buildCredential(
+                        veteranCardCredentialSubject,
+                        "digitalVeteranCard",
+                        "HM Armed Forces Veteran Card",
+                        "2000-07-11");
+
+        SignedJWT token = SignedJWT.parse(credential.getCredential());
+        assertThat(credential, hasProperty("credential"));
+        assertThat(token.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(token.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(token.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
+        assertThat(token.getHeader().getContentType(), equalTo("vc"));
+        assertThat(token.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(token.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
+        assertThat(
+                token.getJWTClaimsSet().getIssueTime().toString(),
+                equalTo(Date.from(fixedInstant).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getNotBeforeTime().toString(),
+                equalTo(Date.from(fixedInstant).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getExpirationTime().toString(),
+                equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getListClaim("@context"),
+                equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
+        assertThat(
+                token.getJWTClaimsSet().getListClaim("type"),
+                equalTo(List.of("VerifiableCredential", "digitalVeteranCard")));
+        assertThat(token.getJWTClaimsSet().getClaim("issuer"), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(
+                token.getJWTClaimsSet().getClaim("name"), equalTo("HM Armed Forces Veteran Card"));
+        assertThat(
+                token.getJWTClaimsSet().getClaim("description"),
+                equalTo("HM Armed Forces Veteran Card"));
+        assertThat(
+                token.getJWTClaimsSet().getClaim("validFrom").toString(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
+        assertThat(token.getJWTClaimsSet().getClaim("validUntil"), equalTo("2000-07-11T22:59:59Z"));
+        assertThat(
+                token.getJWTClaimsSet().getClaim("credentialSubject").toString(),
+                equalTo(
+                        "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, name=[{nameParts=[{type=GivenName, value=Bonnie}, {type=FamilyName, value=Blue}]}], birthDate=[{value=1970-12-05}], veteranCard=[{expiryDate=2000-07-11, serviceNumber=25057386, serviceBranch=HM Naval Service, photo=null}]}"));
 
         assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
     }

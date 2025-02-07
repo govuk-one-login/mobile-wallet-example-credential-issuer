@@ -244,7 +244,8 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getTestSocialSecurityDocument("v2.0"));
-        when(mockCredentialBuilder.buildCredential(any(), anyString(), any())).thenReturn(any());
+        when(mockCredentialBuilder.buildCredential(any(), anyString(), anyString(), any()))
+                .thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
@@ -252,6 +253,7 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq("SocialSecurityCredential"),
+                        eq("National Insurance number"),
                         eq(null));
     }
 
@@ -272,7 +274,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class)).thenReturn(getTestBasicCheckDocument());
-        when(mockCredentialBuilder.buildCredential(any(), anyString(), anyString()))
+        when(mockCredentialBuilder.buildCredential(any(), anyString(), anyString(), anyString()))
                 .thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -281,6 +283,7 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq("BasicCheckCredential"),
+                        eq("Basic DBS check result"),
                         eq("2025-07-11"));
     }
 
@@ -301,7 +304,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class)).thenReturn(getTestVeteranCardDocument());
-        when(mockCredentialBuilder.buildCredential(any(), anyString(), anyString()))
+        when(mockCredentialBuilder.buildCredential(any(), anyString(), anyString(), anyString()))
                 .thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -310,6 +313,7 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq("digitalVeteranCard"),
+                        eq("HM Armed Forces Veteran Card"),
                         eq("2000-07-11"));
     }
 
@@ -384,7 +388,7 @@ class CredentialServiceTest {
                 SignedJWT.parse(
                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
         Credential mockCredential = new Credential(mockCredentialJwt);
-        when(mockCredentialBuilder.buildCredential(any(), anyString(), any()))
+        when(mockCredentialBuilder.buildCredential(any(), anyString(), anyString(), any()))
                 .thenReturn(mockCredential);
 
         Credential credentialServiceReturnValue =
@@ -399,6 +403,7 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq("SocialSecurityCredential"),
+                        eq("National Insurance number"),
                         eq(null));
     }
 
