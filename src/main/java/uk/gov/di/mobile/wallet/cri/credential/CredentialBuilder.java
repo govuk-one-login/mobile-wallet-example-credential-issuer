@@ -85,12 +85,11 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
     // VC MD v2.0
     public Credential buildCredential(
-            T credentialSubject, String credentialType, String credentialName, String validUntil)
+            T credentialSubject, CredentialTypeAndName credentialTypeAndName, String validUntil)
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId, "vc+jwt", "vc");
-        var encodedClaims =
-                getEncodedClaims(credentialSubject, credentialType, credentialName, validUntil);
+        var encodedClaims = getEncodedClaims(credentialSubject, credentialTypeAndName, validUntil);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -137,7 +136,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     private Base64URL getEncodedClaims(
-            T credentialSubject, String credentialType, String credentialName, String validUntil) {
+            T credentialSubject, CredentialTypeAndName credentialTypeAndName, String validUntil) {
         Instant now = clock.instant();
         Date nowDate = Date.from(now);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
@@ -155,10 +154,14 @@ public class CredentialBuilder<T extends CredentialSubject> {
                                                 configurationService.getCredentialTtlInDays(),
                                                 ChronoUnit.DAYS)))
                         .claim("@context", new String[] {CONTEXT_V2})
-                        .claim("type", new String[] {"VerifiableCredential", credentialType})
+                        .claim(
+                                "type",
+                                new String[] {
+                                    "VerifiableCredential", credentialTypeAndName.getType()
+                                })
                         .claim("issuer", configurationService.getSelfUrl())
-                        .claim("name", credentialName)
-                        .claim("description", credentialName)
+                        .claim("name", credentialTypeAndName.getName())
+                        .claim("description", credentialTypeAndName.getName())
                         .claim("validFrom", validFromIso)
                         .claim("credentialSubject", credentialSubject);
 

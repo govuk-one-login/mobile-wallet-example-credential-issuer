@@ -113,8 +113,7 @@ class CredentialBuilderTest {
 
         credentialBuilderSocialSecurity.buildCredential(
                 socialSecurityCredentialSubject,
-                "SocialSecurityCredential",
-                "National Insurance number",
+                CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL,
                 null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
@@ -136,8 +135,7 @@ class CredentialBuilderTest {
                         () ->
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
-                                        "SocialSecurityCredential",
-                                        "National Insurance number",
+                                        CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL,
                                         null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
@@ -185,8 +183,7 @@ class CredentialBuilderTest {
         Credential credential =
                 credentialBuilderSocialSecurity.buildCredential(
                         socialSecurityCredentialSubject,
-                        "SocialSecurityCredential",
-                        "National Insurance number",
+                        CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL,
                         null);
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
@@ -237,8 +234,7 @@ class CredentialBuilderTest {
         Credential credential =
                 credentialBuilderBasicCheck.buildCredential(
                         basicCheckCredentialSubject,
-                        "BasicCheckCredential",
-                        "Basic DBS check result",
+                        CredentialTypeAndName.BASIC_CHECK_CREDENTIAL,
                         "2025-07-11");
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
@@ -289,8 +285,7 @@ class CredentialBuilderTest {
         Credential credential =
                 credentialBuilderVeteranCard.buildCredential(
                         veteranCardCredentialSubject,
-                        "digitalVeteranCard",
-                        "HM Armed Forces Veteran Card",
+                        CredentialTypeAndName.DIGITAL_VETERAN_CARD,
                         "2000-07-11");
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
