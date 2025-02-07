@@ -72,10 +72,10 @@ Resources:
           - RootCA
           - CertificateSigningRequest
       SigningAlgorithm: SHA256WITHECDSA
-      TemplateArn: arn:aws:acm-pca:::template/RootCACertificate/V1
+      TemplateArn: arn:aws:acm-pca:::template/BlankRootCACertificate_PathLen0_APIPassthrough/V1
       Validity:
         Type: DAYS
-        Value: 100
+        Value: 3285  # 9 years
       ApiPassthrough:
         Extensions:
           CustomExtensions:
@@ -85,16 +85,16 @@ Resources:
             KeyCertSign: true
             CRLSign: true
 
-#  RootCAActivation:
-#    Type: AWS::ACMPCA::CertificateAuthorityActivation
-#    Properties:
-#      CertificateAuthorityArn:
-#        Ref: RootCA
-#      Certificate:
-#        Fn::GetAtt:
-#          - RootCACertificate
-#          - Certificate
-#      Status: ACTIVE
+  RootCAActivation:
+    Type: AWS::ACMPCA::CertificateAuthorityActivation
+    Properties:
+      CertificateAuthorityArn:
+        Ref: RootCA
+      Certificate:
+        Fn::GetAtt:
+          - RootCACertificate
+          - Certificate
+      Status: ACTIVE
 #  RootCAPermission:
 #    Type: AWS::ACMPCA::Permission
 #    Properties:
