@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 
 import java.util.Map;
 import java.util.UUID;
@@ -23,6 +24,9 @@ public class Document {
     @Getter
     @JsonProperty("vcDataModel")
     private String vcDataModel;
+
+    @ExcludeFromGeneratedCoverageReport
+    public Document() {}
 
     public Document(
             String documentId, Map<String, Object> data, String vcType, String vcDataModel) {
