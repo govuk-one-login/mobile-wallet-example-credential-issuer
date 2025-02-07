@@ -166,7 +166,8 @@ public class CredentialService {
                             veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
                 }
             default:
-                throw new CredentialServiceException("Invalid verifiable credential type");
+                throw new CredentialServiceException(
+                        String.format("Invalid verifiable credential type %s", vcType));
         }
     }
 

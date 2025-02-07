@@ -339,6 +339,28 @@ class CredentialServiceTest {
     }
 
     @Test
+    void Should_Throw_CredentialServiceException_When_Document_Vc_Type_Is_Unknown()
+            throws DataStoreException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCredentialOfferCacheItem);
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getTestDocumentWithInvalidVcType());
+
+        CredentialServiceException exception =
+                assertThrows(
+                        CredentialServiceException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+
+        assertThat(
+                exception.getMessage(),
+                containsString("Invalid verifiable credential type SomeOtherVcType"));
+    }
+
+    @Test
     void Should_Return_Credential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
@@ -426,6 +448,11 @@ class CredentialServiceTest {
         data.put("serviceNumber", "25057386");
         data.put("serviceBranch", "HM Naval Service");
         return new Document(DOCUMENT_ID, data, "digitalVeteranCard", "v2.0");
+    }
+
+    private static @NotNull Document getTestDocumentWithInvalidVcType() {
+        HashMap<String, Object> data = new HashMap<>();
+        return new Document(DOCUMENT_ID, data, "SomeOtherVcType", "v2.0");
     }
 
     private static SignedJWT getMockProofJwt(String nonce) throws ParseException, JOSEException {
