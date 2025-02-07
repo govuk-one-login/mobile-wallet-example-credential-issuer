@@ -25,16 +25,6 @@ public class CredentialSubjectMapper {
 
     public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
             Document document, String id) {
-        SocialSecurityCredentialSubjectBuilder builder =
-                buildCommonSocialSecurityCredentialSubject(document);
-        if (id != null) {
-            builder.setId(id);
-        }
-        return builder.build();
-    }
-
-    private static SocialSecurityCredentialSubjectBuilder
-            buildCommonSocialSecurityCredentialSubject(Document document) {
         ObjectMapper objectMapper = new ObjectMapper();
         final SocialSecurityDocument ninoDocument =
                 objectMapper.convertValue(document.getData(), SocialSecurityDocument.class);
@@ -51,21 +41,13 @@ public class CredentialSubjectMapper {
 
         return new SocialSecurityCredentialSubjectBuilder()
                 .setName(names)
-                .setSocialSecurityRecord(socialSecurityRecords);
+                .setSocialSecurityRecord(socialSecurityRecords)
+                .setId(id)
+                .build();
     }
 
     public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
             Document document, String id) {
-        BasicCheckCredentialSubjectBuilder builder =
-                buildCommonBasicDisclosureCredentialSubject(document);
-        if (id != null) {
-            builder.setId(id);
-        }
-        return builder.build();
-    }
-
-    private static BasicCheckCredentialSubjectBuilder buildCommonBasicDisclosureCredentialSubject(
-            Document document) {
         ObjectMapper objectMapper = new ObjectMapper();
         final BasicCheckDocument basicCheckDocument =
                 objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
@@ -103,21 +85,13 @@ public class CredentialSubjectMapper {
                 .setName(names)
                 .setBirthDate(birthDates)
                 .setAddress(addresses)
-                .setBasicCheckRecord(basicCheckRecords);
+                .setBasicCheckRecord(basicCheckRecords)
+                .setId(id)
+                .build();
     }
 
     public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
-            Document document, String sub) {
-        VeteranCardCredentialSubjectBuilder builder =
-                buildCommonVeteranCardCredentialSubject(document);
-        if (sub != null) {
-            builder.setId(sub);
-        }
-        return builder.build();
-    }
-
-    private static VeteranCardCredentialSubjectBuilder buildCommonVeteranCardCredentialSubject(
-            Document document) {
+            Document document, String id) {
         ObjectMapper objectMapper = new ObjectMapper();
         final VeteranCardDocument veteranCardDocument =
                 objectMapper.convertValue(document.getData(), VeteranCardDocument.class);
@@ -142,7 +116,9 @@ public class CredentialSubjectMapper {
         return new VeteranCardCredentialSubjectBuilder()
                 .setName(names)
                 .setBirthDate(birthDates)
-                .setVeteranCard(veteranCards);
+                .setVeteranCard(veteranCards)
+                .setId(id)
+                .build();
     }
 
     private static @NotNull List<BasicCheckRecord> buildBasicCheckRecords(
