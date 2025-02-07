@@ -1,13 +1,16 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
 import java.util.Map;
 
 public class CredentialOffer {
 
     private final String credential_issuer; // NOSONAR
+    @Getter
     private final String[] credentials;
+    @Getter
     private final Map<String, Map<String, String>> grants;
 
     public CredentialOffer(
@@ -24,11 +27,4 @@ public class CredentialOffer {
         return credential_issuer;
     }
 
-    public String[] getCredentials() {
-        return credentials;
-    }
-
-    public Map<String, Map<String, String>> getGrants() {
-        return grants;
-    }
 }

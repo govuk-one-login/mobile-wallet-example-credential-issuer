@@ -1,20 +1,26 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 import java.util.UUID;
 
+@Setter
 public class Document {
     @JsonProperty("documentId")
     private String documentId;
 
+    @Getter
     @JsonProperty("data")
     private Map<String, Object> data;
 
+    @Getter
     @JsonProperty("vcType")
     private String vcType;
 
+    @Getter
     @JsonProperty("vcDataModel")
     private String vcDataModel;
 
@@ -32,31 +38,4 @@ public class Document {
         return UUID.fromString(documentId);
     }
 
-    public void setDocumentId(String documentId) {
-        this.documentId = documentId;
-    }
-
-    public Map<String, Object> getData() {
-        return data;
-    }
-
-    public void setData(Map<String, Object> data) {
-        this.data = data;
-    }
-
-    public String getVcType() {
-        return vcType;
-    }
-
-    public void setVcType(String vcType) {
-        this.vcType = vcType;
-    }
-
-    public String getVcDataModel() {
-        return vcDataModel;
-    }
-
-    public void setVcDataModel(String vcDataModel) {
-        this.vcDataModel = vcDataModel;
-    }
 }

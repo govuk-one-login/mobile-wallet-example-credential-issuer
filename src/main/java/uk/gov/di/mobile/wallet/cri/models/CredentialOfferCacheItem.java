@@ -1,14 +1,20 @@
 package uk.gov.di.mobile.wallet.cri.models;
 
+import lombok.Getter;
+import lombok.Setter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
+@Setter
 @DynamoDbBean
 public class CredentialOfferCacheItem {
 
     String credentialIdentifier;
+    @Getter
     String walletSubjectId;
+    @Getter
     String documentId;
+    @Getter
     Long timeToLive;
 
     // Required for DynamoDb BeanTableSchema
@@ -38,31 +44,4 @@ public class CredentialOfferCacheItem {
         return credentialIdentifier;
     }
 
-    public String getDocumentId() {
-        return documentId;
-    }
-
-    public String getWalletSubjectId() {
-        return walletSubjectId;
-    }
-
-    public Long getTimeToLive() {
-        return timeToLive;
-    }
-
-    public void setCredentialIdentifier(String credentialIdentifier) {
-        this.credentialIdentifier = credentialIdentifier;
-    }
-
-    public void setDocumentId(String documentId) {
-        this.documentId = documentId;
-    }
-
-    public void setWalletSubjectId(String walletSubjectId) {
-        this.walletSubjectId = walletSubjectId;
-    }
-
-    public void setTimeToLive(Long timeToLive) {
-        this.timeToLive = timeToLive;
-    }
 }
