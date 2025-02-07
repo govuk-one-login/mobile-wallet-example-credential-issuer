@@ -10,12 +10,9 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 public class CredentialOfferCacheItem {
 
     String credentialIdentifier;
-    @Getter
-    String walletSubjectId;
-    @Getter
-    String documentId;
-    @Getter
-    Long timeToLive;
+    @Getter String walletSubjectId;
+    @Getter String documentId;
+    @Getter Long timeToLive;
 
     // Required for DynamoDb BeanTableSchema
     public CredentialOfferCacheItem() {}
@@ -43,5 +40,4 @@ public class CredentialOfferCacheItem {
     public String getCredentialIdentifier() {
         return credentialIdentifier;
     }
-
 }

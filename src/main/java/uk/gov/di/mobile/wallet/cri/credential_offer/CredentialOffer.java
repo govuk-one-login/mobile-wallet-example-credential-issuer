@@ -8,10 +8,8 @@ import java.util.Map;
 public class CredentialOffer {
 
     private final String credential_issuer; // NOSONAR
-    @Getter
-    private final String[] credentials;
-    @Getter
-    private final Map<String, Map<String, String>> grants;
+    @Getter private final String[] credentials;
+    @Getter private final Map<String, Map<String, String>> grants;
 
     public CredentialOffer(
             String credentialIssuer,
@@ -26,5 +24,4 @@ public class CredentialOffer {
     public String getCredentialIssuer() {
         return credential_issuer;
     }
-
 }

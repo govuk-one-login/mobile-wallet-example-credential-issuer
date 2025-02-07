@@ -169,36 +169,30 @@ public class CredentialService {
     // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private static @NotNull SocialSecurityCredentialSubjectV1 getSocialSecurityCredentialSubjectV1(
             SocialSecurityCredentialSubject socialSecurityCredentialSubject) {
-        SocialSecurityCredentialSubjectV1 socialSecurityCredentialSubjectV1 =
-                new SocialSecurityCredentialSubjectV1(
-                        socialSecurityCredentialSubject.getName(),
-                        socialSecurityCredentialSubject.getSocialSecurityRecord());
-        return socialSecurityCredentialSubjectV1;
+        return new SocialSecurityCredentialSubjectV1(
+                socialSecurityCredentialSubject.getName(),
+                socialSecurityCredentialSubject.getSocialSecurityRecord());
     }
 
     // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private static @NotNull BasicCheckCredentialSubjectV1 getBasicCheckCredentialSubjectV1(
             BasicCheckCredentialSubject basicCheckCredentialSubject) {
-        BasicCheckCredentialSubjectV1 basicCheckCredentialSubjectV1 =
-                new BasicCheckCredentialSubjectV1(
-                        basicCheckCredentialSubject.getIssuanceDate(),
-                        basicCheckCredentialSubject.getExpirationDate(),
-                        basicCheckCredentialSubject.getName(),
-                        basicCheckCredentialSubject.getBirthDate(),
-                        basicCheckCredentialSubject.getAddress(),
-                        basicCheckCredentialSubject.getBasicCheckRecord());
-        return basicCheckCredentialSubjectV1;
+        return new BasicCheckCredentialSubjectV1(
+                basicCheckCredentialSubject.getIssuanceDate(),
+                basicCheckCredentialSubject.getExpirationDate(),
+                basicCheckCredentialSubject.getName(),
+                basicCheckCredentialSubject.getBirthDate(),
+                basicCheckCredentialSubject.getAddress(),
+                basicCheckCredentialSubject.getBasicCheckRecord());
     }
 
     // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private static @NotNull VeteranCardCredentialSubjectV1 getVeteranCardCredentialSubjectV1(
             VeteranCardCredentialSubject veteranCardCredentialSubject) {
-        VeteranCardCredentialSubjectV1 veteranCardCredentialSubjectV1 =
-                new VeteranCardCredentialSubjectV1(
-                        veteranCardCredentialSubject.getName(),
-                        veteranCardCredentialSubject.getBirthDate(),
-                        veteranCardCredentialSubject.getVeteranCard());
-        return veteranCardCredentialSubjectV1;
+        return new VeteranCardCredentialSubjectV1(
+                veteranCardCredentialSubject.getName(),
+                veteranCardCredentialSubject.getBirthDate(),
+                veteranCardCredentialSubject.getVeteranCard());
     }
 
     private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {

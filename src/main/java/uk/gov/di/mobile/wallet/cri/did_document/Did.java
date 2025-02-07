@@ -16,5 +16,4 @@ public class Did {
     String type;
     String controller;
     PublicKeyJwk publicKeyJwk;
-
 }

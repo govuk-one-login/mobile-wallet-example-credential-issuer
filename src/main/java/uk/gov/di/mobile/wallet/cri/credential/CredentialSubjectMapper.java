@@ -82,14 +82,12 @@ public class CredentialSubjectMapper {
                 objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
 
         String issuanceDate =
-                String.format(
-                        "%s-%s-%s",
+                getFormattedDate(
                         basicCheckDocument.getIssuanceYear(),
                         basicCheckDocument.getIssuanceMonth(),
                         basicCheckDocument.getIssuanceDay());
         String expirationDate =
-                String.format(
-                        "%s-%s-%s",
+                getFormattedDate(
                         basicCheckDocument.getExpirationYear(),
                         basicCheckDocument.getExpirationMonth(),
                         basicCheckDocument.getExpirationDay());
@@ -101,8 +99,7 @@ public class CredentialSubjectMapper {
         List<BirthDate> birthDates = new ArrayList<>();
         BirthDate birthDate = new BirthDate();
         birthDate.setValue(
-                String.format(
-                        "%s-%s-%s",
+                getFormattedDate(
                         basicCheckDocument.getBirthYear(),
                         basicCheckDocument.getBirthMonth(),
                         basicCheckDocument.getBirthDay()));
@@ -150,9 +147,9 @@ public class CredentialSubjectMapper {
 
         List<BirthDate> birthDates = new ArrayList<>();
         BirthDate birthDate = new BirthDate();
+
         birthDate.setValue(
-                String.format(
-                        "%s-%s-%s",
+                getFormattedDate(
                         veteranCardDocument.getDateOfBirthYear(),
                         veteranCardDocument.getDateOfBirthMonth(),
                         veteranCardDocument.getDateOfBirthDay()));
@@ -242,5 +239,9 @@ public class CredentialSubjectMapper {
         namePart.setValue(value);
         namePart.setType(type);
         return namePart;
+    }
+
+    private static @NotNull String getFormattedDate(String year, String month, String day) {
+        return String.format("%s-%s-%s", year, month, day);
     }
 }

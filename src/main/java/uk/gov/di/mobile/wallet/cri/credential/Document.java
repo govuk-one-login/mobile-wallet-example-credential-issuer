@@ -37,5 +37,4 @@ public class Document {
     public UUID getDocumentId() {
         return UUID.fromString(documentId);
     }
-
 }

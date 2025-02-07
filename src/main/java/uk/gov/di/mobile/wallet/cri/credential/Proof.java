@@ -20,5 +20,4 @@ public class Proof {
         this.proofType = proofType;
         this.jwt = jwt;
     }
-
 }
