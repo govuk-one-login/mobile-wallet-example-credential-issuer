@@ -1,5 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import lombok.Getter;
+
+@Getter
 public enum CredentialTypeAndName {
     SOCIAL_SECURITY_CREDENTIAL("SocialSecurityCredential", "National Insurance number"),
     BASIC_CHECK_CREDENTIAL("BasicCheckCredential", "Basic DBS check result"),
@@ -11,13 +14,5 @@ public enum CredentialTypeAndName {
     CredentialTypeAndName(String type, String name) {
         this.type = type;
         this.name = name;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public String getName() {
-        return name;
     }
 }
