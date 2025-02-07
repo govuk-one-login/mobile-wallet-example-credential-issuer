@@ -38,6 +38,10 @@ public class CredentialService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
     private static final String CREDENTIAL_STORE_DOCUMENT_PATH = "/document/"; // NOSONAR
 
+    private static final String SOCIAL_SECURITY_CREDENTIAL = "SocialSecurityCredential";
+    private static final String BASIC_CHECK_CREDENTIAL = "BasicCheckCredential";
+    private static final String DIGITAL_VETERAN_CARD = "digitalVeteranCard";
+
     public CredentialService(
             ConfigurationService configurationService,
             DataStore dataStore,
@@ -113,8 +117,8 @@ public class CredentialService {
         String sub = proofJwtClaims.kid;
         String vcType = document.getVcType();
 
-        switch (CredentialType.valueOf(vcType)) {
-            case SocialSecurityCredential:
+        switch (vcType) {
+            case SOCIAL_SECURITY_CREDENTIAL:
                 SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                         CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document);
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
@@ -129,7 +133,7 @@ public class CredentialService {
                             socialSecurityCredentialSubject, vcType, null);
                 }
 
-            case BasicCheckCredential:
+            case BASIC_CHECK_CREDENTIAL:
                 BasicCheckCredentialSubject basicCheckCredentialSubject =
                         CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(document);
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
@@ -145,7 +149,7 @@ public class CredentialService {
                             basicCheckCredentialSubject.getExpirationDate());
                 }
 
-            case digitalVeteranCard:
+            case DIGITAL_VETERAN_CARD:
                 VeteranCardCredentialSubject veteranCardCredentialSubject =
                         CredentialSubjectMapper.buildVeteranCardCredentialSubject(document);
                 if (Objects.equals(document.getVcDataModel(), "v1.1")) {
