@@ -10,7 +10,7 @@ public class VCClaim {
     private Object credentialSubject;
 
     VCClaim(String type, Object credentialSubject) {
-        this.type = List.of("VerifiableCredentialV2", type);
+        this.type = List.of("VerifiableCredential", type);
         this.credentialSubject = credentialSubject;
     }
 }
