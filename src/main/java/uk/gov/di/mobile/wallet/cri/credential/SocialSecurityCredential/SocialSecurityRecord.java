@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.socialSecurityCredential;
+package uk.gov.di.mobile.wallet.cri.credential.SocialSecurityCredential;
 
 import lombok.Getter;
 import lombok.Setter;

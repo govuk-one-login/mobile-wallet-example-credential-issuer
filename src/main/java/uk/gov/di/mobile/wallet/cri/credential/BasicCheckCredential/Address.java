@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.basicDiscloureCredential;
+package uk.gov.di.mobile.wallet.cri.credential.BasicCheckCredential;
 
 import lombok.Getter;
 import lombok.Setter;

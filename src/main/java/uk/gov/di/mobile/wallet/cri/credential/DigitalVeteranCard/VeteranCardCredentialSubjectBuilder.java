@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.digitalVeteranCard;
+package uk.gov.di.mobile.wallet.cri.credential.DigitalVeteranCard;
 
 import uk.gov.di.mobile.wallet.cri.credential.BirthDate;
 import uk.gov.di.mobile.wallet.cri.credential.Name;
