@@ -36,7 +36,7 @@ public class CredentialService {
     private final Client httpClient;
     private final CredentialBuilder credentialBuilder;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
-    private static final String CREDENTIAL_STORE_DOCUMENT_PATH = "/document/"; // NOSONAR
+    private static final String CREDENTIAL_STORE_DOCUMENT_PATH = "/v2/document/"; // NOSONAR
 
     private static final String SOCIAL_SECURITY_CREDENTIAL = "SocialSecurityCredential";
     private static final String BASIC_CHECK_CREDENTIAL = "BasicCheckCredential";
