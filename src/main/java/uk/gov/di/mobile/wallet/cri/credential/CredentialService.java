@@ -165,9 +165,9 @@ public class CredentialService {
                             vcType,
                             veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
                 }
+            default:
+                throw new CredentialServiceException("Invalid verifiable credential type");
         }
-
-        throw new CredentialServiceException("Invalid verifiable credential type");
     }
 
     // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
