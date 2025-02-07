@@ -18,6 +18,8 @@ import java.util.List;
 
 public class CredentialSubjectMapper {
 
+    static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
     @ExcludeFromGeneratedCoverageReport
     private CredentialSubjectMapper() {
         throw new IllegalStateException("Instantiation is not valid for this class.");
@@ -25,181 +27,207 @@ public class CredentialSubjectMapper {
 
     public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
             Document document, String id) {
-        ObjectMapper objectMapper = new ObjectMapper();
         final SocialSecurityDocument ninoDocument =
-                objectMapper.convertValue(document.getData(), SocialSecurityDocument.class);
+                OBJECT_MAPPER.convertValue(document.getData(), SocialSecurityDocument.class);
 
-        String[] givenNames = ninoDocument.getGivenName().split(" ");
-        String[] familyNames = ninoDocument.getFamilyName().split(" ");
-        String title = ninoDocument.getTitle();
-        List<Name> names = buildNames(title, givenNames, familyNames);
+        List<Name> name =
+                buildName(
+                        ninoDocument.getGivenName(),
+                        ninoDocument.getFamilyName(),
+                        ninoDocument.getTitle());
 
-        List<SocialSecurityRecord> socialSecurityRecords = new ArrayList<>();
-        SocialSecurityRecord socialSecurityRecord = new SocialSecurityRecord();
-        socialSecurityRecord.setPersonalNumber(ninoDocument.getNino());
-        socialSecurityRecords.add(socialSecurityRecord);
+        List<SocialSecurityRecord> socialSecurityRecord = buildSocialSecurityRecord(ninoDocument);
 
         return new SocialSecurityCredentialSubjectBuilder()
-                .setName(names)
-                .setSocialSecurityRecord(socialSecurityRecords)
+                .setName(name)
+                .setSocialSecurityRecord(socialSecurityRecord)
                 .setId(id)
                 .build();
     }
 
     public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
             Document document, String id) {
-        ObjectMapper objectMapper = new ObjectMapper();
         final BasicCheckDocument basicCheckDocument =
-                objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
+                OBJECT_MAPPER.convertValue(document.getData(), BasicCheckDocument.class);
+
+        List<Name> name =
+                buildName(
+                        basicCheckDocument.getFirstName(), basicCheckDocument.getLastName(), null);
 
         String issuanceDate =
                 getFormattedDate(
                         basicCheckDocument.getIssuanceYear(),
                         basicCheckDocument.getIssuanceMonth(),
                         basicCheckDocument.getIssuanceDay());
+
         String expirationDate =
                 getFormattedDate(
                         basicCheckDocument.getExpirationYear(),
                         basicCheckDocument.getExpirationMonth(),
                         basicCheckDocument.getExpirationDay());
 
-        String[] givenNames = basicCheckDocument.getFirstName().split(" ");
-        String[] familyNames = basicCheckDocument.getLastName().split(" ");
-        List<Name> names = buildNames(givenNames, familyNames);
-
-        List<BirthDate> birthDates = new ArrayList<>();
-        BirthDate birthDate = new BirthDate();
-        birthDate.setValue(
-                getFormattedDate(
+        List<BirthDate> birthDate =
+                buildBirthDate(
                         basicCheckDocument.getBirthYear(),
                         basicCheckDocument.getBirthMonth(),
-                        basicCheckDocument.getBirthDay()));
-        birthDates.add(birthDate);
+                        basicCheckDocument.getBirthDay());
 
-        List<Address> addresses = buildAddresses(basicCheckDocument);
-        List<BasicCheckRecord> basicCheckRecords = buildBasicCheckRecords(basicCheckDocument);
+        List<Address> address = buildAddress(basicCheckDocument);
+
+        List<BasicCheckRecord> basicCheckRecord = buildBasicCheckRecord(basicCheckDocument);
 
         return new BasicCheckCredentialSubjectBuilder()
                 .setIssuanceDate(issuanceDate)
                 .setExpirationDate(expirationDate)
-                .setName(names)
-                .setBirthDate(birthDates)
-                .setAddress(addresses)
-                .setBasicCheckRecord(basicCheckRecords)
+                .setName(name)
+                .setBirthDate(birthDate)
+                .setAddress(address)
+                .setBasicCheckRecord(basicCheckRecord)
                 .setId(id)
                 .build();
     }
 
     public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
             Document document, String id) {
-        ObjectMapper objectMapper = new ObjectMapper();
         final VeteranCardDocument veteranCardDocument =
-                objectMapper.convertValue(document.getData(), VeteranCardDocument.class);
+                OBJECT_MAPPER.convertValue(document.getData(), VeteranCardDocument.class);
 
-        String[] givenNames = veteranCardDocument.getGivenName().split(" ");
-        String[] familyNames = veteranCardDocument.getFamilyName().split(" ");
+        List<Name> name =
+                buildName(
+                        veteranCardDocument.getGivenName(),
+                        veteranCardDocument.getFamilyName(),
+                        null);
 
-        List<Name> names = buildNames(givenNames, familyNames);
-
-        List<BirthDate> birthDates = new ArrayList<>();
-        BirthDate birthDate = new BirthDate();
-
-        birthDate.setValue(
-                getFormattedDate(
+        List<BirthDate> birthDate =
+                buildBirthDate(
                         veteranCardDocument.getDateOfBirthYear(),
                         veteranCardDocument.getDateOfBirthMonth(),
-                        veteranCardDocument.getDateOfBirthDay()));
-        birthDates.add(birthDate);
+                        veteranCardDocument.getDateOfBirthDay());
 
-        List<VeteranCard> veteranCards = buildVeteranCards(veteranCardDocument);
+        List<VeteranCard> veteranCard = buildVeteranCard(veteranCardDocument);
 
         return new VeteranCardCredentialSubjectBuilder()
-                .setName(names)
-                .setBirthDate(birthDates)
-                .setVeteranCard(veteranCards)
+                .setName(name)
+                .setBirthDate(birthDate)
+                .setVeteranCard(veteranCard)
                 .setId(id)
                 .build();
     }
 
-    private static @NotNull List<BasicCheckRecord> buildBasicCheckRecords(
+    private static @NotNull List<SocialSecurityRecord> buildSocialSecurityRecord(
+            SocialSecurityDocument ninoDocument) {
+        List<SocialSecurityRecord> socialSecurityRecordList = new ArrayList<>();
+
+        SocialSecurityRecord socialSecurityRecord = new SocialSecurityRecord();
+        socialSecurityRecord.setPersonalNumber(ninoDocument.getNino());
+
+        socialSecurityRecordList.add(socialSecurityRecord);
+
+        return socialSecurityRecordList;
+    }
+
+    private static @NotNull List<BasicCheckRecord> buildBasicCheckRecord(
             BasicCheckDocument basicCheckDocument) {
-        List<BasicCheckRecord> basicCheckRecords = new ArrayList<>();
+        List<BasicCheckRecord> basicCheckRecordList = new ArrayList<>();
+
         BasicCheckRecord basicCheckRecord = new BasicCheckRecord();
+
         basicCheckRecord.setCertificateNumber(basicCheckDocument.getCertificateNumber());
         basicCheckRecord.setApplicationNumber(basicCheckDocument.getApplicationNumber());
-        basicCheckRecord.setCertificateType("basic");
-        basicCheckRecord.setOutcome("Result clear");
-        basicCheckRecord.setPoliceRecordsCheck("Clear");
-        basicCheckRecords.add(basicCheckRecord);
-        return basicCheckRecords;
+        basicCheckRecord.setCertificateType(basicCheckDocument.getCertificateType());
+        basicCheckRecord.setOutcome(basicCheckDocument.getOutcome());
+        basicCheckRecord.setPoliceRecordsCheck(basicCheckDocument.getPoliceRecordsCheck());
+
+        basicCheckRecordList.add(basicCheckRecord);
+
+        return basicCheckRecordList;
     }
 
-    private static @NotNull List<Address> buildAddresses(BasicCheckDocument basicCheckDocument) {
-        List<Address> addresses = new ArrayList<>();
-        Address address = new Address();
-        address.setSubBuildingName(basicCheckDocument.getSubBuildingName());
-        address.setBuildingName(basicCheckDocument.getBuildingName());
-        address.setStreetName(basicCheckDocument.getStreetName());
-        address.setAddressLocality(basicCheckDocument.getAddressLocality());
-        address.setPostalCode(basicCheckDocument.getPostalCode());
-        address.setAddressCountry(basicCheckDocument.getAddressCountry());
-        addresses.add(address);
-        return addresses;
-    }
-
-    private static @NotNull List<VeteranCard> buildVeteranCards(
+    private static @NotNull List<VeteranCard> buildVeteranCard(
             VeteranCardDocument veteranCardDocument) {
-        List<VeteranCard> veteranCards = new ArrayList<>();
+        List<VeteranCard> veteranCardList = new ArrayList<>();
+
         VeteranCard veteranCard = new VeteranCard();
+
         veteranCard.setExpiryDate(
-                String.format(
-                        "%s-%s-%s",
+                getFormattedDate(
                         veteranCardDocument.getCardExpiryDateYear(),
                         veteranCardDocument.getCardExpiryDateMonth(),
                         veteranCardDocument.getCardExpiryDateDay()));
         veteranCard.setServiceNumber(veteranCardDocument.getServiceNumber());
         veteranCard.setServiceBranch(veteranCardDocument.getServiceBranch());
         veteranCard.setPhoto(veteranCardDocument.getPhoto());
-        veteranCards.add(veteranCard);
-        return veteranCards;
+
+        veteranCardList.add(veteranCard);
+
+        return veteranCardList;
     }
 
-    private static @NotNull List<Name> buildNames(
-            String title, String[] givenNames, String[] familyNames) {
+    private static @NotNull List<Name> buildName(
+            String givenName, String familyName, String title) {
         List<NamePart> nameParts = new ArrayList<>();
+
         if (title != null && !title.isEmpty()) {
             nameParts.add(setNamePart(title, "Title"));
         }
-        return buildNames(givenNames, familyNames, nameParts);
-    }
 
-    private static @NotNull List<Name> buildNames(String[] givenNames, String[] familyNames) {
-        return buildNames(givenNames, familyNames, new ArrayList<>());
-    }
-
-    private static List<Name> buildNames(
-            String[] givenNames, String[] familyNames, List<NamePart> nameParts) {
+        String[] givenNames = givenName.split(" ");
         for (String name : givenNames) {
             nameParts.add(setNamePart(name, "GivenName"));
         }
+
+        String[] familyNames = familyName.split(" ");
         for (String name : familyNames) {
             nameParts.add(setNamePart(name, "FamilyName"));
         }
+
         Name name = new Name();
         name.setNameParts(nameParts);
-        List<Name> names = new ArrayList<>();
-        names.add(name);
-        return names;
+
+        List<Name> nameList = new ArrayList<>();
+        nameList.add(name);
+
+        return nameList;
     }
 
     private static NamePart setNamePart(String value, String type) {
         NamePart namePart = new NamePart();
+
         namePart.setValue(value);
         namePart.setType(type);
+
         return namePart;
     }
 
     private static @NotNull String getFormattedDate(String year, String month, String day) {
         return String.format("%s-%s-%s", year, month, day);
+    }
+
+    private static @NotNull List<BirthDate> buildBirthDate(String year, String month, String day) {
+        List<BirthDate> birthDateList = new ArrayList<>();
+
+        BirthDate birthDate = new BirthDate();
+        birthDate.setValue(getFormattedDate(year, month, day));
+
+        birthDateList.add(birthDate);
+
+        return birthDateList;
+    }
+
+    private static @NotNull List<Address> buildAddress(BasicCheckDocument basicCheckDocument) {
+        List<Address> addressList = new ArrayList<>();
+
+        Address address = new Address();
+
+        address.setSubBuildingName(basicCheckDocument.getSubBuildingName());
+        address.setBuildingName(basicCheckDocument.getBuildingName());
+        address.setStreetName(basicCheckDocument.getStreetName());
+        address.setAddressLocality(basicCheckDocument.getAddressLocality());
+        address.setPostalCode(basicCheckDocument.getPostalCode());
+        address.setAddressCountry(basicCheckDocument.getAddressCountry());
+
+        addressList.add(address);
+
+        return addressList;
     }
 }
