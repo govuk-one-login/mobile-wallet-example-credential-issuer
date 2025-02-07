@@ -115,88 +115,15 @@ public class CredentialService {
         String vcType = document.getVcType();
 
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            SocialSecurityCredentialSubject socialSecurityCredentialSubject =
-                    CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
-            if (Objects.equals(document.getVcDataModel(), "v1.1")) {
-                VCClaim vcClaim =
-                        new VCClaim(
-                                vcType,
-                                getSocialSecurityCredentialSubjectV1(
-                                        socialSecurityCredentialSubject));
-                return credentialBuilder.buildCredential(sub, vcClaim);
-            } else {
-                return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
-                        .buildCredential(
-                                socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
-            }
+            return getSocialSecurityCredential(document, sub, vcType);
         } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            BasicCheckCredentialSubject basicCheckCredentialSubject =
-                    CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(document, sub);
-            if (Objects.equals(document.getVcDataModel(), "v1.1")) {
-                VCClaim vcClaim =
-                        new VCClaim(
-                                vcType,
-                                getBasicCheckCredentialSubjectV1(basicCheckCredentialSubject));
-                return credentialBuilder.buildCredential(sub, vcClaim);
-            } else {
-                return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
-                        .buildCredential(
-                                basicCheckCredentialSubject,
-                                BASIC_CHECK_CREDENTIAL,
-                                basicCheckCredentialSubject.getExpirationDate());
-            }
+            return getBasicCheckCredential(document, sub, vcType);
         } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            VeteranCardCredentialSubject veteranCardCredentialSubject =
-                    CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
-            if (Objects.equals(document.getVcDataModel(), "v1.1")) {
-                VCClaim vcClaim =
-                        new VCClaim(
-                                vcType,
-                                getVeteranCardCredentialSubjectV1(veteranCardCredentialSubject));
-                return credentialBuilder.buildCredential(sub, vcClaim);
-            } else {
-                return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
-                        .buildCredential(
-                                veteranCardCredentialSubject,
-                                DIGITAL_VETERAN_CARD,
-                                veteranCardCredentialSubject
-                                        .getVeteranCard()
-                                        .get(0)
-                                        .getExpiryDate());
-            }
+            return getDigitalVeteranCard(document, sub, vcType);
         } else {
             throw new CredentialServiceException(
                     String.format("Invalid verifiable credential type %s", vcType));
         }
-    }
-
-    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private static @NotNull SocialSecurityCredentialSubjectV1 getSocialSecurityCredentialSubjectV1(
-            SocialSecurityCredentialSubject socialSecurityCredentialSubject) {
-        return new SocialSecurityCredentialSubjectV1(
-                socialSecurityCredentialSubject.getName(),
-                socialSecurityCredentialSubject.getSocialSecurityRecord());
-    }
-
-    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private static @NotNull BasicCheckCredentialSubjectV1 getBasicCheckCredentialSubjectV1(
-            BasicCheckCredentialSubject basicCheckCredentialSubject) {
-        return new BasicCheckCredentialSubjectV1(
-                basicCheckCredentialSubject.getIssuanceDate(),
-                basicCheckCredentialSubject.getExpirationDate(),
-                basicCheckCredentialSubject.getName(),
-                basicCheckCredentialSubject.getBirthDate(),
-                basicCheckCredentialSubject.getAddress(),
-                basicCheckCredentialSubject.getBasicCheckRecord());
-    }
-
-    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private static @NotNull VeteranCardCredentialSubjectV1 getVeteranCardCredentialSubjectV1(
-            VeteranCardCredentialSubject veteranCardCredentialSubject) {
-        return new VeteranCardCredentialSubjectV1(
-                veteranCardCredentialSubject.getName(),
-                veteranCardCredentialSubject.getBirthDate(),
-                veteranCardCredentialSubject.getVeteranCard());
     }
 
     private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
@@ -257,5 +184,88 @@ public class CredentialService {
                             documentId, response.getStatus()));
         }
         return response.readEntity(Document.class);
+    }
+
+    private Credential getSocialSecurityCredential(Document document, String sub, String vcType)
+            throws SigningException, NoSuchAlgorithmException {
+        SocialSecurityCredentialSubject socialSecurityCredentialSubject =
+                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
+        if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+            VCClaim vcClaim =
+                    new VCClaim(
+                            vcType,
+                            getSocialSecurityCredentialSubjectV1(socialSecurityCredentialSubject));
+            return credentialBuilder.buildCredential(sub, vcClaim);
+        } else {
+            return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
+                    .buildCredential(
+                            socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
+        }
+    }
+
+    private Credential getBasicCheckCredential(Document document, String sub, String vcType)
+            throws SigningException, NoSuchAlgorithmException {
+        BasicCheckCredentialSubject basicCheckCredentialSubject =
+                CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(document, sub);
+        if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+            VCClaim vcClaim =
+                    new VCClaim(
+                            vcType, getBasicCheckCredentialSubjectV1(basicCheckCredentialSubject));
+            return credentialBuilder.buildCredential(sub, vcClaim);
+        } else {
+            return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
+                    .buildCredential(
+                            basicCheckCredentialSubject,
+                            BASIC_CHECK_CREDENTIAL,
+                            basicCheckCredentialSubject.getExpirationDate());
+        }
+    }
+
+    private Credential getDigitalVeteranCard(Document document, String sub, String vcType)
+            throws SigningException, NoSuchAlgorithmException {
+        VeteranCardCredentialSubject veteranCardCredentialSubject =
+                CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
+        if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+            VCClaim vcClaim =
+                    new VCClaim(
+                            vcType,
+                            getVeteranCardCredentialSubjectV1(veteranCardCredentialSubject));
+            return credentialBuilder.buildCredential(sub, vcClaim);
+        } else {
+            return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
+                    .buildCredential(
+                            veteranCardCredentialSubject,
+                            DIGITAL_VETERAN_CARD,
+                            veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
+        }
+    }
+
+    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
+    private static @NotNull SocialSecurityCredentialSubjectV1 getSocialSecurityCredentialSubjectV1(
+            SocialSecurityCredentialSubject socialSecurityCredentialSubject) {
+        return new SocialSecurityCredentialSubjectV1(
+                socialSecurityCredentialSubject.getName(),
+                socialSecurityCredentialSubject.getSocialSecurityRecord());
+    }
+
+    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
+    private static @NotNull BasicCheckCredentialSubjectV1 getBasicCheckCredentialSubjectV1(
+            BasicCheckCredentialSubject basicCheckCredentialSubject) {
+        return new BasicCheckCredentialSubjectV1(
+                basicCheckCredentialSubject.getIssuanceDate(),
+                basicCheckCredentialSubject.getExpirationDate(),
+                basicCheckCredentialSubject.getName(),
+                basicCheckCredentialSubject.getBirthDate(),
+                basicCheckCredentialSubject.getAddress(),
+                basicCheckCredentialSubject.getBasicCheckRecord());
+    }
+
+    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
+    private static @NotNull VeteranCardCredentialSubjectV1 getVeteranCardCredentialSubjectV1(
+            VeteranCardCredentialSubject veteranCardCredentialSubject) {
+        return new VeteranCardCredentialSubjectV1(
+                veteranCardCredentialSubject.getName(),
+                veteranCardCredentialSubject.getBirthDate(),
+                veteranCardCredentialSubject.getVeteranCard());
     }
 }
