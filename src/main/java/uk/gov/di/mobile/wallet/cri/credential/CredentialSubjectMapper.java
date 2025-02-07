@@ -2,6 +2,7 @@ package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.*;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCard;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CredentialSubjectMapper {
+
+    @ExcludeFromGeneratedCoverageReport
     private CredentialSubjectMapper() {
         throw new IllegalStateException("Instantiation is not valid for this class.");
     }
