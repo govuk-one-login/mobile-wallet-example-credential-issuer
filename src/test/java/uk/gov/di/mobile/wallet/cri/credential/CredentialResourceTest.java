@@ -65,8 +65,7 @@ class CredentialResourceTest {
                     ProofJwtValidationException,
                     NoSuchAlgorithmException,
                     URISyntaxException,
-                    CredentialOfferNotFoundException,
-                    JsonProcessingException {
+                    CredentialOfferNotFoundException {
         final Response response =
                 resource.target("/credential")
                         .request()

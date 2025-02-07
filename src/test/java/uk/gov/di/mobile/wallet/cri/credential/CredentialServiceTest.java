@@ -100,12 +100,15 @@ class CredentialServiceTest {
     @Test
     void Should_Throw_AccessTokenValidationException_When_Credential_Identifiers_Claim_Is_Empty()
             throws JOSEException, ParseException {
-        SignedJWT mockAccessToken = getMockAccessToken();
+        SignedJWT mockAccessTokenWithEmptyCredentialIdentifier = getMockAccessToken();
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () ->
+                                credentialService.getCredential(
+                                        mockAccessTokenWithEmptyCredentialIdentifier,
+                                        mockProofJwt));
 
         assertThat(
                 exception.getMessage(),
@@ -116,12 +119,15 @@ class CredentialServiceTest {
     @Test
     void Should_Throw_ProofJwtValidationException_When_Nonce_Values_Do_Not_Match()
             throws JOSEException, ParseException {
-        SignedJWT mockProofJwt = getMockProofJwt("c5408ee2-9c5d-4be3-acda-06b95285489a");
+        SignedJWT mockProofJwtWithDifferentNonce =
+                getMockProofJwt("c5408ee2-9c5d-4be3-acda-06b95285489a");
 
         ProofJwtValidationException exception =
                 assertThrows(
                         ProofJwtValidationException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () ->
+                                credentialService.getCredential(
+                                        mockAccessToken, mockProofJwtWithDifferentNonce));
 
         assertEquals(
                 "Access token c_nonce claim does not match Proof JWT nonce claim",
@@ -179,11 +185,11 @@ class CredentialServiceTest {
             throws DataStoreException {
         long timeToLive =
                 Instant.now().minusSeconds(Long.parseLong("2")).getEpochSecond(); // 2 seconds ago
-        CredentialOfferCacheItem mockCredentialOfferCacheItem =
+        CredentialOfferCacheItem mockCredentialOfferCacheItemExpired =
                 new CredentialOfferCacheItem(
                         CREDENTIAL_IDENTIFIER, DOCUMENT_ID, WALLET_SUBJECT_ID, timeToLive);
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCredentialOfferCacheItemExpired);
 
         CredentialOfferNotFoundException exception =
                 assertThrows(
