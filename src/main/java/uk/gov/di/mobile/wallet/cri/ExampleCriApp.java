@@ -66,7 +66,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
 
         ProofJwtService proofJwtService = new ProofJwtService(configurationService);
 
-        CredentialBuilder<?> credentialBuilder =
+        CredentialBuilder<? extends CredentialSubject> credentialBuilder =
                 new CredentialBuilder<>(configurationService, kmsService);
 
         DynamoDbService dynamoDbService =

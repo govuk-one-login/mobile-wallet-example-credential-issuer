@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -36,10 +34,9 @@ public class CredentialService {
     private final AccessTokenService accessTokenService;
     private final ProofJwtService proofJwtService;
     private final Client httpClient;
-    private final CredentialBuilder credentialBuilder;
+    private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
-    private static final String CREDENTIAL_STORE_DOCUMENT_PATH = "/v2/document/";
     private static final String SOCIAL_SECURITY_CREDENTIAL = "SocialSecurityCredential";
     private static final String BASIC_CHECK_CREDENTIAL = "BasicCheckCredential";
     private static final String DIGITAL_VETERAN_CARD = "digitalVeteranCard";
@@ -134,11 +131,12 @@ public class CredentialService {
                                             socialSecurityCredentialSubject));
                     return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
-                    return credentialBuilder.buildCredential(
-                            socialSecurityCredentialSubject,
-                            vcType,
-                            NATIONAL_INSURANCE_NUMBER,
-                            null);
+                    return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
+                            .buildCredential(
+                                    socialSecurityCredentialSubject,
+                                    vcType,
+                                    NATIONAL_INSURANCE_NUMBER,
+                                    null);
                 }
 
             case BASIC_CHECK_CREDENTIAL:
@@ -152,11 +150,12 @@ public class CredentialService {
                                     getBasicCheckCredentialSubjectV1(basicCheckCredentialSubject));
                     return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
-                    return credentialBuilder.buildCredential(
-                            basicCheckCredentialSubject,
-                            vcType,
-                            BASIC_DBS_CHECK_RESULT,
-                            basicCheckCredentialSubject.getExpirationDate());
+                    return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
+                            .buildCredential(
+                                    basicCheckCredentialSubject,
+                                    vcType,
+                                    BASIC_DBS_CHECK_RESULT,
+                                    basicCheckCredentialSubject.getExpirationDate());
                 }
 
             case DIGITAL_VETERAN_CARD:
@@ -170,18 +169,15 @@ public class CredentialService {
                                             veteranCardCredentialSubject));
                     return credentialBuilder.buildCredential(sub, vcClaim);
                 } else {
-                    try {
-                        System.out.println(
-                                new ObjectMapper()
-                                        .writeValueAsString(veteranCardCredentialSubject));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-                    return credentialBuilder.buildCredential(
-                            veteranCardCredentialSubject,
-                            vcType,
-                            HM_ARMED_FORCES_VETERAN_CARD,
-                            veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
+                    return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
+                            .buildCredential(
+                                    veteranCardCredentialSubject,
+                                    vcType,
+                                    HM_ARMED_FORCES_VETERAN_CARD,
+                                    veteranCardCredentialSubject
+                                            .getVeteranCard()
+                                            .get(0)
+                                            .getExpiryDate());
                 }
             default:
                 throw new CredentialServiceException(
@@ -264,7 +260,8 @@ public class CredentialService {
     private Document getDocument(String documentId)
             throws URISyntaxException, CredentialServiceException {
         String credentialStoreUrl = configurationService.getCredentialStoreUrl();
-        URI uri = new URI(credentialStoreUrl + CREDENTIAL_STORE_DOCUMENT_PATH + documentId);
+        String documentEndpoint = configurationService.getDocumentEndpoint();
+        URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
 
         Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
 
