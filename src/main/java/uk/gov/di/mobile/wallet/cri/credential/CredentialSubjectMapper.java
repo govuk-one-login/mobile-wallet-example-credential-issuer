@@ -18,7 +18,7 @@ import java.util.List;
 
 public class CredentialSubjectMapper {
 
-    static ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    static final ObjectMapper objectMapper = new ObjectMapper();
 
     @ExcludeFromGeneratedCoverageReport
     private CredentialSubjectMapper() {
@@ -28,7 +28,7 @@ public class CredentialSubjectMapper {
     public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
             Document document, String id) {
         final SocialSecurityDocument ninoDocument =
-                OBJECT_MAPPER.convertValue(document.getData(), SocialSecurityDocument.class);
+                objectMapper.convertValue(document.getData(), SocialSecurityDocument.class);
 
         List<Name> name =
                 buildName(
@@ -48,7 +48,7 @@ public class CredentialSubjectMapper {
     public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
             Document document, String id) {
         final BasicCheckDocument basicCheckDocument =
-                OBJECT_MAPPER.convertValue(document.getData(), BasicCheckDocument.class);
+                objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
 
         List<Name> name =
                 buildName(
@@ -90,7 +90,7 @@ public class CredentialSubjectMapper {
     public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
             Document document, String id) {
         final VeteranCardDocument veteranCardDocument =
-                OBJECT_MAPPER.convertValue(document.getData(), VeteranCardDocument.class);
+                objectMapper.convertValue(document.getData(), VeteranCardDocument.class);
 
         List<Name> name =
                 buildName(
