@@ -50,6 +50,7 @@ class CredentialBuilderTest {
     private CredentialBuilder<BasicCheckCredentialSubject> credentialBuilderBasicCheck;
     private CredentialBuilder<VeteranCardCredentialSubject> credentialBuilderVeteranCard;
 
+    private Object documentV1;
     private SocialSecurityCredentialSubject socialSecurityCredentialSubject;
     private BasicCheckCredentialSubject basicCheckCredentialSubject;
     private VeteranCardCredentialSubject veteranCardCredentialSubject;
@@ -83,6 +84,11 @@ class CredentialBuilderTest {
         when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
         when(configurationService.getCredentialTtlInDays()).thenReturn(365L);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
+        documentV1 =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"credentialSubject\":{\"name\":[{\"nameParts\":[{\"type\": \"Title\",\"value\": \"Ms\"},{\"type\":\"GivenName\",\"value\":\"Irene\"},{\"type\":\"FamilyName\",\"value\":\"Adler\"}]}],\"socialSecurityRecord\": [{ \"personalNumber\": \"QQ123456A\" }]},\"type\": [\"VerifiableCredential\", \"SocialSecurityCredential\"]}");
+
         socialSecurityCredentialSubject =
                 objectMapper.readValue(
                         "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"Title\",\"value\":\"Miss\"},{\"type\":\"GivenName\",\"value\":\"Sarah\"},{\"type\":\"GivenName\",\"value\":\"Elizabeth\"},{\"type\":\"FamilyName\",\"value\":\"Edwards\"},{\"type\":\"FamilyName\",\"value\":\"Green\"}]}],\"socialSecurityRecord\":[{\"personalNumber\":\"QQ123456C\"}]}",
@@ -135,6 +141,39 @@ class CredentialBuilderTest {
                                         null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
+    }
+
+    @Test
+    void Should_Return_V1_Credential()
+            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
+        SignResponse mockSignResponse = getMockKmsSignResponse();
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
+
+        Credential credential =
+                credentialBuilderSocialSecurity.buildCredential(
+                        DID_KEY, new VCClaim("SocialSecurityCredential", documentV1));
+
+        SignedJWT token = SignedJWT.parse(credential.getCredential());
+
+        assertThat(credential, hasProperty("credential"));
+        assertThat(token.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(token.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(token.getHeader().getType(), equalTo(new JOSEObjectType("JWT")));
+        assertThat(token.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(token.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
+        assertThat(
+                token.getJWTClaimsSet().getIssueTime().toString(),
+                equalTo(Date.from(fixedInstant).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getNotBeforeTime().toString(),
+                equalTo(Date.from(fixedInstant).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getExpirationTime().toString(),
+                equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
+        assertThat(
+                token.getJWTClaimsSet().getListClaim("context"),
+                equalTo(List.of("https://www.w3.org/2018/credentials/v1")));
+        assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
     @Test
