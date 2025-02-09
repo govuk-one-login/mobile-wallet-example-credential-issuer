@@ -54,6 +54,14 @@ public class CredentialSubjectMapper {
                 buildName(
                         basicCheckDocument.getFirstName(), basicCheckDocument.getLastName(), null);
 
+        List<BirthDate> birthDate =
+                buildBirthDate(
+                        basicCheckDocument.getBirthYear(),
+                        basicCheckDocument.getBirthMonth(),
+                        basicCheckDocument.getBirthDay());
+
+        List<Address> address = buildAddress(basicCheckDocument);
+
         String issuanceDate =
                 getFormattedDate(
                         basicCheckDocument.getIssuanceYear(),
@@ -66,22 +74,14 @@ public class CredentialSubjectMapper {
                         basicCheckDocument.getExpirationMonth(),
                         basicCheckDocument.getExpirationDay());
 
-        List<BirthDate> birthDate =
-                buildBirthDate(
-                        basicCheckDocument.getBirthYear(),
-                        basicCheckDocument.getBirthMonth(),
-                        basicCheckDocument.getBirthDay());
-
-        List<Address> address = buildAddress(basicCheckDocument);
-
         List<BasicCheckRecord> basicCheckRecord = buildBasicCheckRecord(basicCheckDocument);
 
         return new BasicCheckCredentialSubjectBuilder()
-                .setIssuanceDate(issuanceDate)
-                .setExpirationDate(expirationDate)
                 .setName(name)
                 .setBirthDate(birthDate)
                 .setAddress(address)
+                .setIssuanceDate(issuanceDate)
+                .setExpirationDate(expirationDate)
                 .setBasicCheckRecord(basicCheckRecord)
                 .setId(id)
                 .build();
