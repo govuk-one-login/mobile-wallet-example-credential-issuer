@@ -31,12 +31,9 @@ import java.util.Date;
 public class CredentialBuilder<T extends CredentialSubject> {
 
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
-    private static final String CONTEXT_V1 = "https://www.w3.org/2018/credentials/v1";
-    private static final String CONTEXT_V2 = "https://www.w3.org/ns/credentials/v2";
-    private final Clock clock;
-
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
+    private final Clock clock;
 
     @ExcludeFromGeneratedCoverageReport
     public CredentialBuilder(ConfigurationService configurationService, KeyProvider keyProvider) {
@@ -45,6 +42,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         this.clock = Clock.systemUTC();
     }
 
+    // Required to mock time in unit tests
     public CredentialBuilder(
             ConfigurationService configurationService, KeyProvider keyProvider, Clock clock) {
         this.configurationService = configurationService;
@@ -57,7 +55,6 @@ public class CredentialBuilder<T extends CredentialSubject> {
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId);
-
         var encodedClaims = getEncodedClaims(proofJwtDidKey, vcClaim);
         var message = encodedHeader + "." + encodedClaims;
 
@@ -83,12 +80,11 @@ public class CredentialBuilder<T extends CredentialSubject> {
         }
     }
 
-    // VC MD v2.0
     public Credential buildCredential(
             T credentialSubject, CredentialType credentialType, String validUntil)
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        var encodedHeader = getEncodedHeader(keyId, "vc+jwt", "vc");
+        var encodedHeader = getEncodedHeader(keyId, "vc");
         var encodedClaims = getEncodedClaims(credentialSubject, credentialType, validUntil);
         var message = encodedHeader + "." + encodedClaims;
 
@@ -131,7 +127,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
                                                 ChronoUnit.DAYS)))
                         .subject(proofJwtDidKey)
                         .claim("vc", vcClaim)
-                        .claim("context", new String[] {CONTEXT_V1});
+                        .claim("context", new String[] {"https://www.w3.org/2018/credentials/v1"});
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
@@ -139,8 +135,11 @@ public class CredentialBuilder<T extends CredentialSubject> {
             T credentialSubject, CredentialType credentialType, String validUntil) {
         Instant now = clock.instant();
         Date nowDate = Date.from(now);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        String validFromIso = formatter.format(now.atZone(ZoneOffset.UTC));
+        Date expiryDate =
+                Date.from(now.plus(configurationService.getCredentialTtlInDays(), ChronoUnit.DAYS));
+        String validFromISO =
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                        .format(now.atZone(ZoneOffset.UTC));
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
@@ -148,19 +147,15 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .subject(credentialSubject.getId())
                         .issueTime(nowDate)
                         .notBeforeTime(nowDate)
-                        .expirationTime(
-                                Date.from(
-                                        now.plus(
-                                                configurationService.getCredentialTtlInDays(),
-                                                ChronoUnit.DAYS)))
-                        .claim("@context", new String[] {CONTEXT_V2})
+                        .expirationTime(expiryDate)
+                        .claim("@context", new String[] {"https://www.w3.org/ns/credentials/v2"})
                         .claim(
                                 "type",
                                 new String[] {"VerifiableCredential", credentialType.getType()})
                         .claim("issuer", configurationService.getSelfUrl())
                         .claim("name", credentialType.getName())
                         .claim("description", credentialType.getName())
-                        .claim("validFrom", validFromIso)
+                        .claim("validFrom", validFromISO)
                         .claim("credentialSubject", credentialSubject);
 
         if (validUntil != null) {
@@ -182,14 +177,13 @@ public class CredentialBuilder<T extends CredentialSubject> {
         return jwsHeader.toBase64URL();
     }
 
-    // VC MD v2.0
-    private Base64URL getEncodedHeader(String keyId, String type, String contentType)
+    private Base64URL getEncodedHeader(String keyId, String contentType)
             throws NoSuchAlgorithmException {
         String hashedKeyId = KeyHelper.hashKeyId(keyId);
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
                         .keyID(hashedKeyId)
-                        .type(new JOSEObjectType(type))
+                        .type(new JOSEObjectType("vc+jwt"))
                         .contentType(contentType)
                         .build();
         return jwsHeader.toBase64URL();
