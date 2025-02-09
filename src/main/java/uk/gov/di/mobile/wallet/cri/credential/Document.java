@@ -26,7 +26,9 @@ public class Document {
     private String vcDataModel;
 
     @ExcludeFromGeneratedCoverageReport
-    public Document() {}
+    public Document() {
+        // Empty constructor required for deserialization
+    }
 
     public Document(
             String documentId, Map<String, Object> data, String vcType, String vcDataModel) {
