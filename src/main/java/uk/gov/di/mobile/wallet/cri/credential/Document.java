@@ -6,22 +6,19 @@ import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 
 import java.util.Map;
-import java.util.UUID;
 
+@Getter
 @Setter
 public class Document {
     @JsonProperty("documentId")
     private String documentId;
 
-    @Getter
     @JsonProperty("data")
     private Map<String, Object> data;
 
-    @Getter
     @JsonProperty("vcType")
     private String vcType;
 
-    @Getter
     @JsonProperty("vcDataModel")
     private String vcDataModel;
 
@@ -36,9 +33,5 @@ public class Document {
         this.data = data;
         this.vcType = vcType;
         this.vcDataModel = vcDataModel;
-    }
-
-    public UUID getDocumentId() {
-        return UUID.fromString(documentId);
     }
 }
