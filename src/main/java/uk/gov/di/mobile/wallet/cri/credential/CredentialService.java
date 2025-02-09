@@ -206,7 +206,7 @@ public class CredentialService {
     private Credential getBasicCheckCredential(Document document, String sub, String vcType)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
-                CredentialSubjectMapper.buildBasicDisclosureCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
         if (Objects.equals(document.getVcDataModel(), "v1.1")) {
             VCClaim vcClaim =
                     new VCClaim(

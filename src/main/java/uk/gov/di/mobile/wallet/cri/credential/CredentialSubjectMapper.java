@@ -45,7 +45,7 @@ public class CredentialSubjectMapper {
                 .build();
     }
 
-    public static BasicCheckCredentialSubject buildBasicDisclosureCredentialSubject(
+    public static BasicCheckCredentialSubject buildBasicCheckCredentialSubject(
             Document document, String id) {
         final BasicCheckDocument basicCheckDocument =
                 objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
