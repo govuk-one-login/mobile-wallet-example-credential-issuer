@@ -6,16 +6,19 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 @Setter
+@Getter
 @DynamoDbBean
 public class CredentialOfferCacheItem {
 
     String credentialIdentifier;
-    @Getter String walletSubjectId;
-    @Getter String documentId;
-    @Getter Long timeToLive;
+    String walletSubjectId;
+    String documentId;
+    Long timeToLive;
 
     // Required for DynamoDb BeanTableSchema
-    public CredentialOfferCacheItem() {}
+    public CredentialOfferCacheItem() {
+        // Empty constructor required for DynamoDb BeanTableSchema
+    }
 
     public CredentialOfferCacheItem(
             String credentialIdentifier, String documentId, String walletSubjectId) {
