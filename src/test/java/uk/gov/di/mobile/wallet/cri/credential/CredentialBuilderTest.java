@@ -112,9 +112,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject,
-                CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL,
-                null);
+                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -135,7 +133,7 @@ class CredentialBuilderTest {
                         () ->
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
-                                        CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL,
+                                        CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                                         null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
@@ -183,7 +181,7 @@ class CredentialBuilderTest {
         Credential credential =
                 credentialBuilderSocialSecurity.buildCredential(
                         socialSecurityCredentialSubject,
-                        CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL,
+                        CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                         null);
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
@@ -234,7 +232,7 @@ class CredentialBuilderTest {
         Credential credential =
                 credentialBuilderBasicCheck.buildCredential(
                         basicCheckCredentialSubject,
-                        CredentialTypeAndName.BASIC_CHECK_CREDENTIAL,
+                        CredentialType.BASIC_CHECK_CREDENTIAL,
                         "2025-07-11");
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
@@ -285,7 +283,7 @@ class CredentialBuilderTest {
         Credential credential =
                 credentialBuilderVeteranCard.buildCredential(
                         veteranCardCredentialSubject,
-                        CredentialTypeAndName.DIGITAL_VETERAN_CARD,
+                        CredentialType.DIGITAL_VETERAN_CARD,
                         "2000-07-11");
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());

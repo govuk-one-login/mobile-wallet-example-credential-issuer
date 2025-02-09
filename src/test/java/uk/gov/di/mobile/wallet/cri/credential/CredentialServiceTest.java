@@ -251,7 +251,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
-                        eq(CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL),
+                        eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
     }
 
@@ -279,7 +279,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
-                        eq(CredentialTypeAndName.BASIC_CHECK_CREDENTIAL),
+                        eq(CredentialType.BASIC_CHECK_CREDENTIAL),
                         eq("2025-07-11"));
     }
 
@@ -307,7 +307,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
-                        eq(CredentialTypeAndName.DIGITAL_VETERAN_CARD),
+                        eq(CredentialType.DIGITAL_VETERAN_CARD),
                         eq("2000-07-11"));
     }
 
@@ -395,7 +395,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
-                        eq(CredentialTypeAndName.SOCIAL_SECURITY_CREDENTIAL),
+                        eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
     }
 

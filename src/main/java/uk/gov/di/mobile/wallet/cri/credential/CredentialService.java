@@ -27,7 +27,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialTypeAndName.*;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
 
 public class CredentialService {
 
