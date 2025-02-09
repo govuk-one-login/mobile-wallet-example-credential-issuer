@@ -242,7 +242,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0"));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0", null));
         when(mockCredentialBuilder.buildCredential(any(), any(), any())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -329,7 +329,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v1.1"));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v1.1", null));
         when(mockCredentialBuilder.buildCredential(anyString(), any())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -378,7 +378,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0"));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null, null));
         SignedJWT mockCredentialJwt =
                 SignedJWT.parse(
                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");

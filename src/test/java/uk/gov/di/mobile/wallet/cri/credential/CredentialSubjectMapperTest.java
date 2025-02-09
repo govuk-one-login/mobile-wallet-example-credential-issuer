@@ -8,14 +8,14 @@ import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialS
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static testUtils.mockDocuments.*;
 
-public class CredentialSubjectMapperTest {
+class CredentialSubjectMapperTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
 
     @Test
     void Should_Map_Document_Into_SocialSecurityCredentialSubject() {
-        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0");
+        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, null, null);
 
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
@@ -138,5 +138,40 @@ public class CredentialSubjectMapperTest {
         assertEquals(
                 "London", basicCheckCredentialSubject.getAddress().get(0).getAddressLocality());
         assertEquals("GB", basicCheckCredentialSubject.getAddress().get(0).getAddressCountry());
+    }
+
+    @Test
+    void Should_Allow_Empty_Given_Name() {
+        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, null, "");
+
+        SocialSecurityCredentialSubject socialSecurityCredentialSubject =
+                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
+                        document, WALLET_SUBJECT_ID);
+
+        assertEquals(WALLET_SUBJECT_ID, socialSecurityCredentialSubject.getId());
+        assertEquals(
+                "Title",
+                socialSecurityCredentialSubject.getName().get(0).getNameParts().get(0).getType());
+        assertEquals(
+                "Miss",
+                socialSecurityCredentialSubject.getName().get(0).getNameParts().get(0).getValue());
+        assertEquals(
+                "GivenName",
+                socialSecurityCredentialSubject.getName().get(0).getNameParts().get(1).getType());
+        assertEquals(
+                "",
+                socialSecurityCredentialSubject.getName().get(0).getNameParts().get(1).getValue());
+        assertEquals(
+                "FamilyName",
+                socialSecurityCredentialSubject.getName().get(0).getNameParts().get(2).getType());
+        assertEquals(
+                "Edwards",
+                socialSecurityCredentialSubject.getName().get(0).getNameParts().get(2).getValue());
+        assertEquals(
+                "QQ123456C",
+                socialSecurityCredentialSubject
+                        .getSocialSecurityRecord()
+                        .get(0)
+                        .getPersonalNumber());
     }
 }
