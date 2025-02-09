@@ -1,0 +1,67 @@
+package testUtils;
+
+import org.jetbrains.annotations.NotNull;
+import uk.gov.di.mobile.wallet.cri.credential.Document;
+
+import java.util.HashMap;
+
+public class mockDocuments {
+
+    public static @NotNull Document getMockSocialSecurityDocument(
+            String documentId, String vcDataModel) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("familyName", "Edwards Green");
+        data.put("givenName", "Sarah Elizabeth");
+        data.put("nino", "QQ123456C");
+        data.put("title", "Miss");
+        return new Document(documentId, data, "SocialSecurityCredential", vcDataModel);
+    }
+
+    public static @NotNull Document getMockBasicCheckDocument(String documentId) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("issuance-day", "11");
+        data.put("issuance-month", "07");
+        data.put("issuance-year", "2024");
+        data.put("expiration-day", "11");
+        data.put("expiration-month", "07");
+        data.put("expiration-year", "2025");
+        data.put("birth-day", "05");
+        data.put("birth-month", "12");
+        data.put("birth-year", "1970");
+        data.put("firstName", "Bonnie");
+        data.put("lastName", "Blue");
+        data.put("subBuildingName", "Flat 11");
+        data.put("buildingName", "Blashford");
+        data.put("streetName", "Adelaide Road");
+        data.put("addressLocality", "London");
+        data.put("addressCountry", "GB");
+        data.put("postalCode", "NW3 3RX");
+        data.put("certificateNumber", "009878863");
+        data.put("applicationNumber", "E0023455534");
+        data.put("certificateType", "basic");
+        data.put("outcome", "Result clear");
+        data.put("policeRecordsCheck", "Clear");
+        return new Document(documentId, data, "BasicCheckCredential", "v2.0");
+    }
+
+    public static @NotNull Document getMockVeteranCardDocument(String documentId) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("cardExpiryDate-day", "11");
+        data.put("cardExpiryDate-month", "07");
+        data.put("cardExpiryDate-year", "2000");
+        data.put("dateOfBirth-day", "05");
+        data.put("dateOfBirth-month", "12");
+        data.put("dateOfBirth-year", "1970");
+        data.put("givenName", "Bonnie");
+        data.put("familyName", "Blue");
+        data.put("serviceNumber", "25057386");
+        data.put("serviceBranch", "HM Naval Service");
+        data.put("photo", "base64EncodedPhoto");
+        return new Document(documentId, data, "digitalVeteranCard", "v2.0");
+    }
+
+    public static @NotNull Document getMockDocumentWithInvalidVcType(String documentId) {
+        HashMap<String, Object> data = new HashMap<>();
+        return new Document(documentId, data, "SomeOtherVcType", "v2.0");
+    }
+}

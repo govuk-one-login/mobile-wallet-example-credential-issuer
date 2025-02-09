@@ -12,7 +12,6 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -49,6 +47,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static testUtils.mockDocuments.*;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
@@ -243,7 +242,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
-                .thenReturn(getTestSocialSecurityDocument("v2.0"));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0"));
         when(mockCredentialBuilder.buildCredential(any(), any(), any())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -271,7 +270,8 @@ class CredentialServiceTest {
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class)).thenReturn(getTestBasicCheckDocument());
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getMockBasicCheckDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), anyString())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -299,7 +299,8 @@ class CredentialServiceTest {
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class)).thenReturn(getTestVeteranCardDocument());
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getMockVeteranCardDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), anyString())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -328,7 +329,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
-                .thenReturn(getTestSocialSecurityDocument("v1.1"));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v1.1"));
         when(mockCredentialBuilder.buildCredential(anyString(), any())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -346,7 +347,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
-                .thenReturn(getTestDocumentWithInvalidVcType());
+                .thenReturn(getMockDocumentWithInvalidVcType(DOCUMENT_ID));
 
         CredentialServiceException exception =
                 assertThrows(
@@ -377,7 +378,7 @@ class CredentialServiceTest {
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
-                .thenReturn(getTestSocialSecurityDocument("v2.0"));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0"));
         SignedJWT mockCredentialJwt =
                 SignedJWT.parse(
                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
@@ -397,62 +398,6 @@ class CredentialServiceTest {
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
-    }
-
-    private static @NotNull Document getTestSocialSecurityDocument(String vcDataModel) {
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("familyName", "Edwards Green");
-        data.put("givenName", "Sarah Elizabeth");
-        data.put("nino", "QQ123456C");
-        data.put("title", "Miss");
-        return new Document(DOCUMENT_ID, data, "SocialSecurityCredential", vcDataModel);
-    }
-
-    private static @NotNull Document getTestBasicCheckDocument() {
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("issuance-day", "11");
-        data.put("issuance-month", "07");
-        data.put("issuance-year", "2024");
-        data.put("expiration-day", "11");
-        data.put("expiration-month", "07");
-        data.put("expiration-year", "2025");
-        data.put("birth-day", "05");
-        data.put("birth-month", "12");
-        data.put("birth-year", "1970");
-        data.put("firstName", "Bonnie");
-        data.put("lastName", "Blue");
-        data.put("subBuildingName", "Flat 11");
-        data.put("buildingName", "Blashford");
-        data.put("streetName", "Adelaide Road");
-        data.put("addressLocality", "London");
-        data.put("addressCountry", "GB");
-        data.put("postalCode", "NW3 3RX");
-        data.put("certificateNumber", "009878863");
-        data.put("applicationNumber", "E0023455534");
-        data.put("certificateType", "basic");
-        data.put("outcome", "Result clear");
-        data.put("policeRecordsCheck", "Clear");
-        return new Document(DOCUMENT_ID, data, "BasicCheckCredential", "v2.0");
-    }
-
-    private static @NotNull Document getTestVeteranCardDocument() {
-        HashMap<String, Object> data = new HashMap<>();
-        data.put("cardExpiryDate-day", "11");
-        data.put("cardExpiryDate-month", "07");
-        data.put("cardExpiryDate-year", "2000");
-        data.put("dateOfBirth-day", "05");
-        data.put("dateOfBirth-month", "12");
-        data.put("dateOfBirth-year", "1970");
-        data.put("givenName", "Bonnie");
-        data.put("familyName", "Blue");
-        data.put("serviceNumber", "25057386");
-        data.put("serviceBranch", "HM Naval Service");
-        return new Document(DOCUMENT_ID, data, "digitalVeteranCard", "v2.0");
-    }
-
-    private static @NotNull Document getTestDocumentWithInvalidVcType() {
-        HashMap<String, Object> data = new HashMap<>();
-        return new Document(DOCUMENT_ID, data, "SomeOtherVcType", "v2.0");
     }
 
     private static SignedJWT getMockProofJwt(String nonce) throws ParseException, JOSEException {
