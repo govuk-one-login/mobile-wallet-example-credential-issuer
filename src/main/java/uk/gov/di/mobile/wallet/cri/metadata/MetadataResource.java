@@ -36,7 +36,7 @@ public class MetadataResource {
                             .setCredentialEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
                             .setAuthorizationServers(
                                     configurationService.getOneLoginAuthServerUrl())
-                            .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
+                            .setCredentialConfigurationsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
                             .build();
             return ResponseUtil.ok(metadata);
         } catch (Exception exception) {

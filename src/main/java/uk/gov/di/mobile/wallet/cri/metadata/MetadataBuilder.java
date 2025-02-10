@@ -56,15 +56,16 @@ public class MetadataBuilder {
     }
 
     @JsonProperty("credential_configurations_supported")
-    public MetadataBuilder setCredentialsSupported(String fileName)
+    public MetadataBuilder setCredentialConfigurationsSupported(String fileName)
             throws IOException, IllegalArgumentException {
         if (fileName == null) {
             throw new IllegalArgumentException("fileName must not be null");
         }
-        File credentialsSupportedFilePath = new File(Resources.getResource(fileName).getPath());
+        File credentialConfigurationsSupportedFilePath =
+                new File(Resources.getResource(fileName).getPath());
         ObjectMapper mapper = new ObjectMapper();
         this.credential_configurations_supported =
-                mapper.readValue(credentialsSupportedFilePath, Object.class);
+                mapper.readValue(credentialConfigurationsSupportedFilePath, Object.class);
         return this;
     }
 
