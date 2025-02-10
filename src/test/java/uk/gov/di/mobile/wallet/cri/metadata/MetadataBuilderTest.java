@@ -30,7 +30,7 @@ class MetadataBuilderTest {
                         .setAuthorizationServers(
                                 "https://test-authorization-server.gov.uk/auth-server")
                         .setCredentialConfigurationsSupported(
-                                "test_valid_credentials_supported.json")
+                                "test_valid_credential_configurations_supported.json")
                         .build();
 
         assertEquals("https://test-credential-issuer.gov.uk", metadata.credential_issuer);
@@ -45,7 +45,6 @@ class MetadataBuilderTest {
                 objectMapper.readTree(
                         objectMapper.writeValueAsString(
                                 metadata.credential_configurations_supported));
-        System.out.println(actualCredentialConfigurationsSupported);
         assertEquals(
                 expectedCredentialConfigurationsSupported, actualCredentialConfigurationsSupported);
     }
@@ -59,7 +58,7 @@ class MetadataBuilderTest {
                 () ->
                         new MetadataBuilder()
                                 .setCredentialConfigurationsSupported(
-                                        "test_invalid_credentials_supported.json"));
+                                        "test_invalid_credential_configurations_supported.json"));
     }
 
     @Test
