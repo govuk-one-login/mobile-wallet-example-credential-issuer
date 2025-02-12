@@ -7,7 +7,6 @@ updates:
       time: "06:00"
     target-branch: main
     labels:
-      - dependabot
       - dependencies
     commit-message:
       prefix: chore
@@ -18,7 +17,6 @@ updates:
       time: "06:00"
     target-branch: main
     labels:
-      - dependabot
       - dependencies
     commit-message:
       prefix: chore
@@ -29,7 +27,6 @@ updates:
       time: "06:00"
     target-branch: main
     labels:
-      - dependabot
       - dependencies
     commit-message:
       prefix: chore
