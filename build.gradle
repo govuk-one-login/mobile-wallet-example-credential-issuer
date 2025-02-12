@@ -25,7 +25,7 @@ dependencies {
 	implementation "software.amazon.awssdk:dynamodb-enhanced:2.24.13"
 	implementation "software.amazon.awssdk:url-connection-client:2.25.1"
 	implementation 'software.amazon.awssdk:core:2.30.17'
-	implementation 'software.amazon.awssdk:arns:2.25.36'
+	implementation 'software.amazon.awssdk:arns:2.30.18'
 	implementation "com.fasterxml.jackson.core:jackson-databind:2.18.2"
 	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.2.1'
 	implementation 'org.jetbrains:annotations:24.1.0'
