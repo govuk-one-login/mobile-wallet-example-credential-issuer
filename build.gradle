@@ -35,7 +35,7 @@ dependencies {
 	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.7"
 	testImplementation "org.hamcrest:hamcrest:2.2"
 	testImplementation group: 'io.dropwizard', name: 'dropwizard-testing', version: '4.0.12'
-	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.9.0"
+	testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.11.4"
 }
 
 application {
