@@ -1,0 +1,12 @@
+{
+    "Extensions": {
+        "KeyUsage": {
+            "DigitalSignature": true
+        },
+        "ExtendedKeyUsage": [
+            {
+                "ExtendedKeyUsageObjectIdentifier": "1.0.18013.5.1.2"
+            }
+        ]
+    }
+}
