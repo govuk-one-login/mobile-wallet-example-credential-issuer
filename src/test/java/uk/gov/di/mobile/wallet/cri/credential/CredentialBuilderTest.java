@@ -111,7 +111,7 @@ class CredentialBuilderTest {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
-        credentialBuilderSocialSecurity.buildCredential(
+        credentialBuilderSocialSecurity.buildV2Credential(
                 socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
@@ -131,7 +131,7 @@ class CredentialBuilderTest {
                 assertThrows(
                         SigningException.class,
                         () ->
-                                credentialBuilderSocialSecurity.buildCredential(
+                                credentialBuilderSocialSecurity.buildV2Credential(
                                         socialSecurityCredentialSubject,
                                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                                         null));
@@ -146,7 +146,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         Credential credential =
-                credentialBuilderSocialSecurity.buildCredential(
+                credentialBuilderSocialSecurity.buildV1Credential(
                         DID_KEY, new VCClaim("SocialSecurityCredential", documentV1));
 
         SignedJWT token = SignedJWT.parse(credential.getCredential());
@@ -179,7 +179,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         Credential credential =
-                credentialBuilderSocialSecurity.buildCredential(
+                credentialBuilderSocialSecurity.buildV2Credential(
                         socialSecurityCredentialSubject,
                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                         null);
@@ -230,7 +230,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         Credential credential =
-                credentialBuilderBasicCheck.buildCredential(
+                credentialBuilderBasicCheck.buildV2Credential(
                         basicCheckCredentialSubject,
                         CredentialType.BASIC_CHECK_CREDENTIAL,
                         "2025-07-11");
@@ -281,7 +281,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         Credential credential =
-                credentialBuilderVeteranCard.buildCredential(
+                credentialBuilderVeteranCard.buildV2Credential(
                         veteranCardCredentialSubject,
                         CredentialType.DIGITAL_VETERAN_CARD,
                         "2000-07-11");
