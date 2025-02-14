@@ -159,4 +159,9 @@ class ConfigurationServiceTest {
     void shouldGetCredentialOfferTtlValue() {
         assertEquals(900, configurationService.getCredentialOfferTtlInSecs());
     }
+
+    @Test
+    void shouldGetDocumentEndpoint() {
+        assertEquals("/v2/document/", configurationService.getDocumentEndpoint());
+    }
 }

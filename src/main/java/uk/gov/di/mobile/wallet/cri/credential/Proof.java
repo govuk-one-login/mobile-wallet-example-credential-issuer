@@ -2,7 +2,9 @@ package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 
+@Getter
 public class Proof {
 
     @JsonProperty("proof_type")
@@ -17,13 +19,5 @@ public class Proof {
             @JsonProperty(value = "jwt", required = true) String jwt) {
         this.proofType = proofType;
         this.jwt = jwt;
-    }
-
-    public String getProofType() {
-        return proofType;
-    }
-
-    public String getJwt() {
-        return jwt;
     }
 }

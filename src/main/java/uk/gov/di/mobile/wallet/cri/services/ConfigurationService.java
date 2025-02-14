@@ -64,4 +64,8 @@ public class ConfigurationService extends Configuration {
     public int getCredentialOfferTtlInSecs() {
         return 900;
     }
+
+    public String getDocumentEndpoint() {
+        return "/v2/document/";
+    }
 }
