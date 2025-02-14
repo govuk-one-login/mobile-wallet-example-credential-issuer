@@ -18,6 +18,7 @@ import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.NotFoundException;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
@@ -33,6 +34,7 @@ public class KmsService implements KeyProvider {
     private final KmsClient kmsClient;
     private static final Logger LOGGER = LoggerFactory.getLogger(KmsService.class);
 
+    @ExcludeFromGeneratedCoverageReport
     public KmsService(ConfigurationService configurationService) {
         this(
                 configurationService.getLocalstackEndpoint(),

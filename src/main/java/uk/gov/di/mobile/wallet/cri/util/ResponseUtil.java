@@ -17,10 +17,6 @@ public class ResponseUtil {
         return jsonBuilder(Response.Status.BAD_REQUEST, entity).build();
     }
 
-    public static Response notFound(String entity) {
-        return jsonBuilder(Response.Status.NOT_FOUND, entity).build();
-    }
-
     public static Response internalServerError() {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
     }
