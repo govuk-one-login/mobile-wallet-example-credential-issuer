@@ -195,10 +195,10 @@ public class CredentialService {
                     new VCClaim(
                             vcType,
                             getSocialSecurityCredentialSubjectV1(socialSecurityCredentialSubject));
-            return credentialBuilder.buildCredential(sub, vcClaim);
+            return credentialBuilder.buildCredentialV1(sub, vcClaim);
         } else {
             return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
-                    .buildCredential(
+                    .buildCredentialV2(
                             socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
         }
     }
@@ -211,10 +211,10 @@ public class CredentialService {
             VCClaim vcClaim =
                     new VCClaim(
                             vcType, getBasicCheckCredentialSubjectV1(basicCheckCredentialSubject));
-            return credentialBuilder.buildCredential(sub, vcClaim);
+            return credentialBuilder.buildCredentialV1(sub, vcClaim);
         } else {
             return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
-                    .buildCredential(
+                    .buildCredentialV2(
                             basicCheckCredentialSubject,
                             BASIC_CHECK_CREDENTIAL,
                             basicCheckCredentialSubject.getExpirationDate());
@@ -230,10 +230,10 @@ public class CredentialService {
                     new VCClaim(
                             vcType,
                             getVeteranCardCredentialSubjectV1(veteranCardCredentialSubject));
-            return credentialBuilder.buildCredential(sub, vcClaim);
+            return credentialBuilder.buildCredentialV1(sub, vcClaim);
         } else {
             return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
-                    .buildCredential(
+                    .buildCredentialV2(
                             veteranCardCredentialSubject,
                             DIGITAL_VETERAN_CARD,
                             veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());

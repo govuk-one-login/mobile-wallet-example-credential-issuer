@@ -51,11 +51,11 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    public Credential buildCredential(String proofJwtDidKey, VCClaim vcClaim)
+    public Credential buildCredentialV1(String proofJwtDidKey, VCClaim vcClaim)
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        var encodedHeader = getEncodedHeader(keyId);
-        var encodedClaims = getEncodedClaims(proofJwtDidKey, vcClaim);
+        var encodedHeader = getEncodedHeaderV1(keyId);
+        var encodedClaims = getV1EncodedClaims(proofJwtDidKey, vcClaim);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -80,12 +80,15 @@ public class CredentialBuilder<T extends CredentialSubject> {
         }
     }
 
-    public Credential buildCredential(
+    public Credential buildCredentialV2(
             T credentialSubject, CredentialType credentialType, String validUntil)
             throws SigningException, NoSuchAlgorithmException {
+        // keyId is the hashed key ID. This value must be appended to the string
+        // "did:web:example-credential-issuer.mobile.build.account.gov.uk#" in this ticket:
+        // https://govukverify.atlassian.net/browse/DCMAW-11424
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        var encodedHeader = getEncodedHeader(keyId, "vc");
-        var encodedClaims = getEncodedClaims(credentialSubject, credentialType, validUntil);
+        var encodedHeader = getEncodedHeaderV2(keyId);
+        var encodedClaims = getV2EncodedClaims(credentialSubject, credentialType, validUntil);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -111,7 +114,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private Base64URL getEncodedClaims(String proofJwtDidKey, VCClaim vcClaim) {
+    private Base64URL getV1EncodedClaims(String proofJwtDidKey, VCClaim vcClaim) {
         Instant now = clock.instant();
         Date nowDate = Date.from(now);
 
@@ -131,7 +134,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
-    private Base64URL getEncodedClaims(
+    private Base64URL getV2EncodedClaims(
             T credentialSubject, CredentialType credentialType, String validUntil) {
         Instant now = clock.instant();
         Date nowDate = Date.from(now);
@@ -159,6 +162,10 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .claim("credentialSubject", credentialSubject);
 
         if (validUntil != null) {
+            // Formatting validUntil with the DateTimeFormatter is not possible as its value
+            // may not be a valid date; therefore, we append "T22:59:59Z" to validUntil
+            // so that we can "convert" it to ISO format. This allows mocking up an invalid date and
+            // testing how the wallet handles such scenarios.
             String validUntilISO = String.format("%s%s", validUntil, "T22:59:59Z");
             claimsBuilder.claim("validUntil", validUntilISO);
         }
@@ -167,7 +174,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private Base64URL getEncodedHeader(String keyId) throws NoSuchAlgorithmException {
+    private Base64URL getEncodedHeaderV1(String keyId) throws NoSuchAlgorithmException {
         String hashedKeyId = KeyHelper.hashKeyId(keyId);
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
@@ -177,14 +184,13 @@ public class CredentialBuilder<T extends CredentialSubject> {
         return jwsHeader.toBase64URL();
     }
 
-    private Base64URL getEncodedHeader(String keyId, String contentType)
-            throws NoSuchAlgorithmException {
+    private Base64URL getEncodedHeaderV2(String keyId) throws NoSuchAlgorithmException {
         String hashedKeyId = KeyHelper.hashKeyId(keyId);
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
                         .keyID(hashedKeyId)
                         .type(new JOSEObjectType("vc+jwt"))
-                        .contentType(contentType)
+                        .contentType("vc")
                         .build();
         return jwsHeader.toBase64URL();
     }
