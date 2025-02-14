@@ -105,6 +105,12 @@ Resources:
       Enabled: true
       PendingWindowInDays: 7
 
+  DocumentSigningKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key"
+      TargetKeyId: !Ref DocumentSigningKey
+
 Outputs:
   CompleteCertificateChain:
     Value:
