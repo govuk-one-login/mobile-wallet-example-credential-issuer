@@ -191,14 +191,15 @@ public class CredentialService {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
         if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+            // Build "vc" claim required in VC DM v1.1
             VCClaim vcClaim =
                     new VCClaim(
                             vcType,
                             getSocialSecurityCredentialSubjectV1(socialSecurityCredentialSubject));
-            return credentialBuilder.buildCredentialV1(sub, vcClaim);
+            return credentialBuilder.buildV1Credential(sub, vcClaim);
         } else {
             return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
-                    .buildCredentialV2(
+                    .buildV2Credential(
                             socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
         }
     }
@@ -208,13 +209,14 @@ public class CredentialService {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
         if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+            // Build "vc" claim required in VC DM v1.1
             VCClaim vcClaim =
                     new VCClaim(
                             vcType, getBasicCheckCredentialSubjectV1(basicCheckCredentialSubject));
-            return credentialBuilder.buildCredentialV1(sub, vcClaim);
+            return credentialBuilder.buildV1Credential(sub, vcClaim);
         } else {
             return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
-                    .buildCredentialV2(
+                    .buildV2Credential(
                             basicCheckCredentialSubject,
                             BASIC_CHECK_CREDENTIAL,
                             basicCheckCredentialSubject.getExpirationDate());
@@ -226,14 +228,15 @@ public class CredentialService {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
         if (Objects.equals(document.getVcDataModel(), "v1.1")) {
+            // Build "vc" claim required in VC DM v1.1
             VCClaim vcClaim =
                     new VCClaim(
                             vcType,
                             getVeteranCardCredentialSubjectV1(veteranCardCredentialSubject));
-            return credentialBuilder.buildCredentialV1(sub, vcClaim);
+            return credentialBuilder.buildV1Credential(sub, vcClaim);
         } else {
             return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
-                    .buildCredentialV2(
+                    .buildV2Credential(
                             veteranCardCredentialSubject,
                             DIGITAL_VETERAN_CARD,
                             veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
@@ -243,6 +246,8 @@ public class CredentialService {
     // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private static @NotNull SocialSecurityCredentialSubjectV1 getSocialSecurityCredentialSubjectV1(
             SocialSecurityCredentialSubject socialSecurityCredentialSubject) {
+        // Map SocialSecurityCredentialSubject into SocialSecurityCredentialSubjectV1 (i.e. no "id"
+        // property)
         return new SocialSecurityCredentialSubjectV1(
                 socialSecurityCredentialSubject.getName(),
                 socialSecurityCredentialSubject.getSocialSecurityRecord());
@@ -251,6 +256,8 @@ public class CredentialService {
     // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private static @NotNull BasicCheckCredentialSubjectV1 getBasicCheckCredentialSubjectV1(
             BasicCheckCredentialSubject basicCheckCredentialSubject) {
+        // Map BasicCheckCredentialSubject into BasicCheckCredentialSubjectV1 (i.e. no "id"
+        // property)
         return new BasicCheckCredentialSubjectV1(
                 basicCheckCredentialSubject.getIssuanceDate(),
                 basicCheckCredentialSubject.getExpirationDate(),
@@ -263,6 +270,8 @@ public class CredentialService {
     // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
     private static @NotNull VeteranCardCredentialSubjectV1 getVeteranCardCredentialSubjectV1(
             VeteranCardCredentialSubject veteranCardCredentialSubject) {
+        // Map VeteranCardCredentialSubject into VeteranCardCredentialSubjectV1 (i.e. no "id"
+        // property)
         return new VeteranCardCredentialSubjectV1(
                 veteranCardCredentialSubject.getName(),
                 veteranCardCredentialSubject.getBirthDate(),
