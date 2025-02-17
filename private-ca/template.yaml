@@ -30,6 +30,49 @@ Resources:
       RevocationConfiguration:
         OcspConfiguration:
           Enabled: true
+        CrlConfiguration:
+          Enabled: true
+          S3ObjectAcl: BUCKET_OWNER_FULL_CONTROL
+          S3BucketName: !Ref CRL
+          ExpirationInDays: 7
+
+  CRL:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-crl"
+      VersioningConfiguration:
+        Status: "Enabled"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  CRLBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CRL
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+              - s3:GetBucketAcl
+              - s3:GetBucketLocation
+            Effect: Allow
+            Resource:
+              - !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-crl"
+              - !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-crl/*"
+            Principal:
+              Service: acm-pca.amazonaws.com
+            Condition:
+              StringEquals:
+                "aws:SourceAccount": !Ref AWS::AccountId
 
   RootCACertificate:
     Type: AWS::ACMPCA::Certificate
