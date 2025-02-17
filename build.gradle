@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-	implementation "com.google.guava:guava:33.0.0-jre"
+	implementation "com.google.guava:guava:33.4.0-jre"
 	implementation group: "io.dropwizard", name: "dropwizard-core", version: "4.0.12"
 	implementation group: 'io.dropwizard', name: 'dropwizard-client', version: '4.0.12'
 	implementation 'org.bouncycastle:bcpkix-jdk18on:1.80'
