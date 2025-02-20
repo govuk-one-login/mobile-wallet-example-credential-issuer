@@ -22,7 +22,7 @@ dependencies {
 	implementation "com.nimbusds:oauth2-oidc-sdk:11.23"
 	implementation "software.amazon.awssdk:kms:2.30.22"
 	implementation "software.amazon.awssdk:dynamodb:2.30.21"
-	implementation "software.amazon.awssdk:dynamodb-enhanced:2.30.22"
+	implementation "software.amazon.awssdk:dynamodb-enhanced:2.30.24"
 	implementation "software.amazon.awssdk:url-connection-client:2.30.22"
 	implementation 'software.amazon.awssdk:core:2.30.21'
 	implementation 'software.amazon.awssdk:arns:2.30.22'
