@@ -14,7 +14,8 @@ import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 public class MetadataResource {
 
     private static final String CREDENTIAL_ENDPOINT = "/credential";
-    private static final String CREDENTIALS_SUPPORTED_FILE_NAME = "credentials_supported.json";
+    private static final String CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME =
+            "credential_configurations_supported.json";
     private final ConfigurationService configurationService;
     private final MetadataBuilder metadataBuilder;
     private static final Logger LOGGER = LoggerFactory.getLogger(MetadataResource.class);
@@ -36,7 +37,8 @@ public class MetadataResource {
                             .setCredentialEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
                             .setAuthorizationServers(
                                     configurationService.getOneLoginAuthServerUrl())
-                            .setCredentialsSupported(CREDENTIALS_SUPPORTED_FILE_NAME)
+                            .setCredentialConfigurationsSupported(
+                                    CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
                             .build();
             return ResponseUtil.ok(metadata);
         } catch (Exception exception) {

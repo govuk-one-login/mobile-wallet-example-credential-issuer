@@ -243,12 +243,12 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0", null));
-        when(mockCredentialBuilder.buildCredential(any(), any(), any())).thenReturn(any());
+        when(mockCredentialBuilder.buildV2Credential(any(), any(), any())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
-                .buildCredential(
+                .buildV2Credential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
@@ -272,12 +272,12 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockBasicCheckDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), anyString())).thenReturn(any());
+        when(mockCredentialBuilder.buildV2Credential(any(), any(), anyString())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
-                .buildCredential(
+                .buildV2Credential(
                         any(BasicCheckCredentialSubject.class),
                         eq(CredentialType.BASIC_CHECK_CREDENTIAL),
                         eq("2025-07-11"));
@@ -301,12 +301,12 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockVeteranCardDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), anyString())).thenReturn(any());
+        when(mockCredentialBuilder.buildV2Credential(any(), any(), anyString())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
-                .buildCredential(
+                .buildV2Credential(
                         any(VeteranCardCredentialSubject.class),
                         eq(CredentialType.DIGITAL_VETERAN_CARD),
                         eq("2000-07-11"));
@@ -330,11 +330,11 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v1.1", null));
-        when(mockCredentialBuilder.buildCredential(anyString(), any())).thenReturn(any());
+        when(mockCredentialBuilder.buildV1Credential(anyString(), any())).thenReturn(any());
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-        verify(mockCredentialBuilder, times(1)).buildCredential(eq(DID_KEY), any(VCClaim.class));
+        verify(mockCredentialBuilder, times(1)).buildV1Credential(eq(DID_KEY), any(VCClaim.class));
     }
 
     @Test
@@ -383,7 +383,8 @@ class CredentialServiceTest {
                 SignedJWT.parse(
                         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
         Credential mockCredential = new Credential(mockCredentialJwt);
-        when(mockCredentialBuilder.buildCredential(any(), any(), any())).thenReturn(mockCredential);
+        when(mockCredentialBuilder.buildV2Credential(any(), any(), any()))
+                .thenReturn(mockCredential);
 
         Credential credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -394,7 +395,7 @@ class CredentialServiceTest {
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
         verify(mockDynamoDbService, times(1)).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
-                .buildCredential(
+                .buildV2Credential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
