@@ -59,7 +59,8 @@ Resources:
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
-          - Action:
+          - Sid: AllowPrivateCAPrincipalReadWrite
+            Action:
               - s3:PutObject
               - s3:PutObjectAcl
               - s3:GetBucketAcl
@@ -73,91 +74,56 @@ Resources:
             Condition:
               StringEquals:
                 "aws:SourceAccount": !Ref AWS::AccountId
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Action:
+              - s3:GetObject
+            Resource:
+              - !Sub "arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-crl/*"
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Effect: Allow
+            Condition:
+              StringEquals:
+                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
 
-  NoCachePolicy:
-    Type: AWS::CloudFront::CachePolicy
+  OriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
     Properties:
-      CachePolicyConfig:
-        Comment: No caching
-        DefaultTTL: 0
-        MinTTL: 0
-        MaxTTL: 0
-        Name: NoCache
-        ParametersInCacheKeyAndForwardedToOrigin:
-          CookiesConfig:
-            CookieBehavior: none
-          EnableAcceptEncodingGzip: false
-          HeadersConfig:
-            HeaderBehavior: none
-          QueryStringsConfig:
-            QueryStringBehavior: none
-
-  OriginAccessIdentity:
-    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
-    Properties:
-      CloudFrontOriginAccessIdentityConfig:
-        Comment: !Ref AWS::StackName
+      OriginAccessControlConfig:
+        Name: !Sub "${AWS::StackName}-crl-bucket"
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
 
   Distribution:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
-        Enabled: 'true'
+        Enabled: true
         Comment: !Sub "${AWS::StackName} CRL Cloudfront Distribution"
-#        DefaultRootObject: !Ref IndexDocument
-        HttpVersion: http2
-#        CustomErrorResponses:
-#          - ErrorCachingMinTTL: 86400
-#            ErrorCode: 403 # object not found in bucket
-#            ResponseCode: 404
-#            ResponsePagePath: !Sub "/${ErrorDocument}"
+        DefaultRootObject: index.html
+        HttpVersion: http1.1
         Origins:
           - DomainName: !Sub "${CRL}.s3.${AWS::Region}.amazonaws.com"
             Id: bucketOrigin
+            OriginAccessControlId: !Ref OriginAccessControl
             S3OriginConfig:
-              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+              OriginAccessIdentity: ""
         DefaultCacheBehavior:
-          Compress: false
           CachedMethods:
             - GET
             - HEAD
           AllowedMethods:
             - GET
             - HEAD
-            - OPTIONS
-            - PUT
-            - PATCH
-            - POST
-            - DELETE
           TargetOriginId: bucketOrigin
-          CachePolicyId: !Ref NoCachePolicy
-          ViewerProtocolPolicy: https-only
-          OriginRequestPolicyId: !Ref DistributionPolicy
-#        PriceClass: !Ref CloudFrontPriceClass
+          CachePolicyId: "4135ea2d-6df8-44a3-9df3-4b5a84be39ad"  # see https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html#managed-cache-policy-caching-disabled
+          ViewerProtocolPolicy: allow-all
+        PriceClass: PriceClass_All
 #        Logging:
 #          Bucket: !Sub "${LoggingBucket}.s3.amazonaws.com"
 #          IncludeCookies: false
 #          Prefix: ""
-
-  DistributionPolicy:
-    Type: AWS::CloudFront::OriginRequestPolicy
-    Properties:
-      OriginRequestPolicyConfig:
-        CookiesConfig:
-          CookieBehavior: all
-        HeadersConfig:
-          HeaderBehavior: allViewer
-        Name: passthrough
-        QueryStringsConfig:
-          QueryStringBehavior: all
-
-#  DistributionMonitoringSubscription:
-#    Type: AWS::CloudFront::MonitoringSubscription
-#    Properties:
-#      DistributionId: !Ref Distribution
-#      MonitoringSubscription:
-#        RealtimeMetricsSubscriptionConfig:
-#          RealtimeMetricsSubscriptionStatus: "Enabled"
 
   RootCACertificate:
     Type: AWS::ACMPCA::Certificate
