@@ -74,6 +74,91 @@ Resources:
               StringEquals:
                 "aws:SourceAccount": !Ref AWS::AccountId
 
+  NoCachePolicy:
+    Type: AWS::CloudFront::CachePolicy
+    Properties:
+      CachePolicyConfig:
+        Comment: No caching
+        DefaultTTL: 0
+        MinTTL: 0
+        MaxTTL: 0
+        Name: NoCache
+        ParametersInCacheKeyAndForwardedToOrigin:
+          CookiesConfig:
+            CookieBehavior: none
+          EnableAcceptEncodingGzip: false
+          HeadersConfig:
+            HeaderBehavior: none
+          QueryStringsConfig:
+            QueryStringBehavior: none
+
+  OriginAccessIdentity:
+    Type: AWS::CloudFront::CloudFrontOriginAccessIdentity
+    Properties:
+      CloudFrontOriginAccessIdentityConfig:
+        Comment: !Ref AWS::StackName
+
+  Distribution:
+    Type: AWS::CloudFront::Distribution
+    Properties:
+      DistributionConfig:
+        Enabled: 'true'
+        Comment: !Sub "${AWS::StackName} CRL Cloudfront Distribution"
+#        DefaultRootObject: !Ref IndexDocument
+        HttpVersion: http2
+#        CustomErrorResponses:
+#          - ErrorCachingMinTTL: 86400
+#            ErrorCode: 403 # object not found in bucket
+#            ResponseCode: 404
+#            ResponsePagePath: !Sub "/${ErrorDocument}"
+        Origins:
+          - DomainName: !Sub "${CRL}.s3.${AWS::Region}.amazonaws.com"
+            Id: bucketOrigin
+            S3OriginConfig:
+              OriginAccessIdentity: !Sub origin-access-identity/cloudfront/${OriginAccessIdentity}
+        DefaultCacheBehavior:
+          Compress: false
+          CachedMethods:
+            - GET
+            - HEAD
+          AllowedMethods:
+            - GET
+            - HEAD
+            - OPTIONS
+            - PUT
+            - PATCH
+            - POST
+            - DELETE
+          TargetOriginId: bucketOrigin
+          CachePolicyId: !Ref NoCachePolicy
+          ViewerProtocolPolicy: https-only
+          OriginRequestPolicyId: !Ref DistributionPolicy
+#        PriceClass: !Ref CloudFrontPriceClass
+#        Logging:
+#          Bucket: !Sub "${LoggingBucket}.s3.amazonaws.com"
+#          IncludeCookies: false
+#          Prefix: ""
+
+  DistributionPolicy:
+    Type: AWS::CloudFront::OriginRequestPolicy
+    Properties:
+      OriginRequestPolicyConfig:
+        CookiesConfig:
+          CookieBehavior: all
+        HeadersConfig:
+          HeaderBehavior: allViewer
+        Name: passthrough
+        QueryStringsConfig:
+          QueryStringBehavior: all
+
+#  DistributionMonitoringSubscription:
+#    Type: AWS::CloudFront::MonitoringSubscription
+#    Properties:
+#      DistributionId: !Ref Distribution
+#      MonitoringSubscription:
+#        RealtimeMetricsSubscriptionConfig:
+#          RealtimeMetricsSubscriptionStatus: "Enabled"
+
   RootCACertificate:
     Type: AWS::ACMPCA::Certificate
     Properties:
