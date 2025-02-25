@@ -37,7 +37,7 @@ Resources:
           CustomCname: !GetAtt CRLDistribution.DomainName
           S3ObjectAcl: BUCKET_OWNER_FULL_CONTROL
           S3BucketName: !Ref CRLBucket
-          ExpirationInDays: 7
+          ExpirationInDays: 2
 
   CRLBucket:
     Type: AWS::S3::Bucket
