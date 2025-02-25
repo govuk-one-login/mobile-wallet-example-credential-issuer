@@ -192,6 +192,21 @@ Resources:
       AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key2"
       TargetKeyId: !Ref DocumentSigningKey
 
+  DocumentSigningKey3:
+    Type: AWS::KMS::Key
+    Properties:
+      KeySpec: ECC_NIST_P256
+      KeyUsage: SIGN_VERIFY
+      Description: !Sub "Example Document Signing Key 3 for ${AWS::StackName}"
+      Enabled: true
+      PendingWindowInDays: 7
+
+  DocumentSigningKey3Alias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key3"
+      TargetKeyId: !Ref DocumentSigningKey
+
 Outputs:
   RootCertificate:
     Value:
