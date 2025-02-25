@@ -3,19 +3,32 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: daily
+      interval: "daily"
       time: "06:00"
-    target-branch: main
     labels:
       - dependencies
     commit-message:
       prefix: chore
-  - package-ecosystem: docker
+    groups:
+      version-updates:
+        applies-to: version-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      security-updates:
+        applies-to: security-updates
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "docker"
     directory: "/"
     schedule:
-      interval: daily
+      interval: "daily"
       time: "06:00"
-    target-branch: main
     labels:
       - dependencies
     commit-message:
@@ -23,9 +36,8 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: daily
+      interval: "daily"
       time: "06:00"
-    target-branch: main
     labels:
       - dependencies
     commit-message:
