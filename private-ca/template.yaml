@@ -8,6 +8,7 @@ Description: >
 Resources:
   RootCA:
     Type: AWS::ACMPCA::CertificateAuthority
+    DependsOn: CRLBucketPolicy
     Properties:
       Type: ROOT
       KeyAlgorithm: EC_prime256v1
@@ -32,16 +33,18 @@ Resources:
           Enabled: true
         CrlConfiguration:
           Enabled: true
+          CrlType: COMPLETE
+          CustomCname: !GetAtt CRLDistribution.DomainName
           S3ObjectAcl: BUCKET_OWNER_FULL_CONTROL
-          S3BucketName: !Ref CRL
+          S3BucketName: !Ref CRLBucket
           ExpirationInDays: 7
 
-  CRL:
+  CRLBucket:
     Type: AWS::S3::Bucket
     Properties:
       BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-crl"
       VersioningConfiguration:
-        Status: "Enabled"
+        Status: Enabled
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -55,7 +58,7 @@ Resources:
   CRLBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
-      Bucket: !Ref CRL
+      Bucket: !Ref CRLBucket
       PolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -84,9 +87,9 @@ Resources:
             Effect: Allow
             Condition:
               StringEquals:
-                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${Distribution}"
+                "AWS:SourceArn": !Sub "arn:aws:cloudfront::${AWS::AccountId}:distribution/${CRLDistribution}"
 
-  OriginAccessControl:
+  CRLOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl
     Properties:
       OriginAccessControlConfig:
@@ -95,7 +98,7 @@ Resources:
         SigningBehavior: always
         SigningProtocol: sigv4
 
-  Distribution:
+  CRLDistribution:
     Type: AWS::CloudFront::Distribution
     Properties:
       DistributionConfig:
@@ -104,9 +107,9 @@ Resources:
         DefaultRootObject: index.html
         HttpVersion: http1.1
         Origins:
-          - DomainName: !Sub "${CRL}.s3.${AWS::Region}.amazonaws.com"
+          - DomainName: !Sub "${CRLBucket}.s3.${AWS::Region}.amazonaws.com"
             Id: bucketOrigin
-            OriginAccessControlId: !Ref OriginAccessControl
+            OriginAccessControlId: !Ref CRLOriginAccessControl
             S3OriginConfig:
               OriginAccessIdentity: ""
         DefaultCacheBehavior:
