@@ -20,7 +20,7 @@ dependencies {
 	implementation group: 'io.dropwizard', name: 'dropwizard-client', version: '4.0.12'
 	implementation 'org.bouncycastle:bcpkix-jdk18on:1.80'
 	implementation "com.nimbusds:oauth2-oidc-sdk:11.23"
-	implementation "software.amazon.awssdk:kms:2.30.26"
+	implementation "software.amazon.awssdk:kms:2.30.27"
 	implementation "software.amazon.awssdk:dynamodb:2.30.27"
 	implementation "software.amazon.awssdk:dynamodb-enhanced:2.30.27"
 	implementation "software.amazon.awssdk:url-connection-client:2.30.27"
