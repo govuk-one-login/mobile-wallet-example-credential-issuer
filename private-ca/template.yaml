@@ -218,15 +218,3 @@ Outputs:
       Fn::GetAtt:
         - RootCACertificate
         - Arn
-  CRLDistributionPoint:
-    Value:
-      Fn::Base64:
-        Fn::Sub:
-          - "http://${domain}/crl/${ca_id}.crl"
-          - domain: !GetAtt CRLDistribution.DomainName
-            ca_id:
-              Fn::Select:
-                - 1
-                - Fn::Split:
-                    - "/"
-                    - !GetAtt RootCA.Arn
