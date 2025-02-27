@@ -7,6 +7,12 @@
             {
                 "ExtendedKeyUsageObjectIdentifier": "1.0.18013.5.1.2"
             }
+        ],
+        "CustomExtensions": [
+            {
+                "ObjectIdentifier": "2.5.29.18",
+                "Value": "MB+BHWlzc3VlckBleGFtcGxlLmFjY291bnQuZ292LnVr"
+            }
         ]
     }
 }
