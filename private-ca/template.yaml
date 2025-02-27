@@ -14,12 +14,12 @@ Resources:
       KeyAlgorithm: EC_prime256v1
       SigningAlgorithm: SHA256WITHECDSA
       Subject:
-        Country: UK
+        Country: "UK"
 #        Organization: string
 #        OrganizationalUnit: string
 #        DistinguishedNameQualifier: string
 #        State: string
-        CommonName: 'mDL IACA Root'
+        CommonName: "mDL Example IACA Root"
 #        SerialNumber: string
 #        Locality: string
 #        Title: string
@@ -141,12 +141,12 @@ Resources:
       TemplateArn: arn:aws:acm-pca:::template/BlankRootCACertificate_PathLen0_APIPassthrough/V1
       Validity:
         Type: DAYS
-        Value: 3285  # 9 years
+        Value: 4046  # 11 years and 1 month
       ApiPassthrough:
         Extensions:
           CustomExtensions:
-            - ObjectIdentifier: "2.5.29.31"
-              Value: "MEgwRqBEoEKGQGh0dHA6Ly9leGFtcGxlLmNvbS9jcmwvMDExNnoxMjMtZHY3YS01OWIxLXg3YmUtMTIzMXY3MjU3MTEzNi5jcmw="
+            - ObjectIdentifier: "2.5.29.18"  # Issuer Alternative Name
+              Value: "MB+BHWlzc3VlckBleGFtcGxlLmFjY291bnQuZ292LnVr"  # base64 ASN1 encoding of value
           KeyUsage:
             KeyCertSign: true
             CRLSign: true
