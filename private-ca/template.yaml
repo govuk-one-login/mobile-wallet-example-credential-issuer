@@ -70,6 +70,26 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
+  CRLLoggingBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-crl-access-logs"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      OwnershipControls:
+        Rules:
+          - ObjectOwnership: BucketOwnerPreferred
+      AccessControl: BucketOwnerFullControl
+
   CRLBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -138,10 +158,10 @@ Resources:
           CachePolicyId: "83da9c7e-98b4-4e11-a168-04f0df8e2c65"  # see https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html#managed-cache-policy-origin-cache-headers
           ViewerProtocolPolicy: allow-all
         PriceClass: PriceClass_All
-#        Logging:
-#          Bucket: !Sub "${LoggingBucket}.s3.amazonaws.com"
-#          IncludeCookies: false
-#          Prefix: ""
+        Logging:
+          Bucket: !Sub "${CRLLoggingBucket}.s3.amazonaws.com"
+          IncludeCookies: false
+          Prefix: ""
 
   RootCACertificate:
     Type: AWS::ACMPCA::Certificate
