@@ -5,6 +5,21 @@ Description: >
 
   Sample SAM Template for private-ca
 
+Parameters:
+  Environment:
+    Description: "The environment type"
+    Type: "String"
+    Default: dev
+    AllowedValues:
+      - "dev"
+      - "build"
+      - "staging"
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      IssuerAltName: "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="  # base64 ASN.1 encoding of "https://mobile.dev.account.gov.uk/"
+
 Resources:
   RootCA:
     Type: AWS::ACMPCA::CertificateAuthority
@@ -146,7 +161,7 @@ Resources:
         Extensions:
           CustomExtensions:
             - ObjectIdentifier: "2.5.29.18"  # Issuer Alternative Name
-              Value: "MB+BHWlzc3VlckBleGFtcGxlLmFjY291bnQuZ292LnVr"  # base64 ASN1 encoding of value
+              Value: !FindInMap [EnvironmentVariables, !Ref Environment, IssuerAltName]
           KeyUsage:
             KeyCertSign: true
             CRLSign: true
