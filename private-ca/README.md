@@ -1,6 +1,73 @@
-# private-ca Spike
+# mDL - Issuing Authority Certificate Authority - IACA
 
-# Generating the CSR and signing it with the KMS key
+## Introduction
+
+The template.yaml in this repo deploys:
+
+- a Private Certificate Authority
+- a brand new root certificate for the new root keypair embedded with the Private CA
+- a bucket to hold the Certificate Revocation List for the new Certificate Authority
+- a CloudFront distribution to sit in front of the bucket, so it is served via a CDN
+- 
+
+## Generatjng the Issuer Alternative Name
+
+All certificates (IACA root certificate, link certificate and document signing certificate) must have an Issuer Alternative Name embedded as an X509v3 extension. This can be either an email address, URI, or both, and should enable someone viewing the certificate to gain more confidence about the legitimacy of the issuing organisation. These value(s) need to be specified as an base64 ASN.1 data structure. This can be generated using the supplied command line utility as:
+
+Email address only:
+
+```bash
+private-ca % ./utils/issuer-alt-name.py -e 'hello@example.com'
+MBOBEWhlbGxvQGV4YW1wbGUuY29t
+```
+
+URI only:
+
+```bash
+private-ca % ./utils/issuer-alt-name.py -u 'https://issuer.example.com'
+MByGGmh0dHBzOi8vaXNzdWVyLmV4YW1wbGUuY29t
+```
+
+Both email address and URI:
+
+```bash
+private-ca % ./utils/issuer-alt-name.py -e 'hello@example.com' -u 'https://issuer.example.com'
+MC+BEWhlbGxvQGV4YW1wbGUuY29thhpodHRwczovL2lzc3Vlci5leGFtcGxlLmNvbQ==
+```
+
+The resulting string needs to be embedded in the Mappings in the template, which is used to create the root certificate
+
+```yaml
+Mappings:
+  EnvironmentVariables:
+    dev:
+      IssuerAltName: "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="  # base64 ASN.1 encoding of "https://mobile.dev.account.gov.uk/"
+```
+
+and in the extensionSigner.txt file which is used to create the document signing certificate:
+
+```json
+{
+    "Extensions": {
+        "KeyUsage": {
+            "DigitalSignature": true
+        },
+        "ExtendedKeyUsage": [
+            {
+                "ExtendedKeyUsageObjectIdentifier": "1.0.18013.5.1.2"  /* mDL - see https://oid-base.com/get/1.0.18013.5.1.2 */
+            }
+        ],
+        "CustomExtensions": [
+            {
+                "ObjectIdentifier": "2.5.29.18",  /* Issuer Alternative Name - see https://oid-base.com/get/2.5.29.18 */
+                "Value": "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="
+            }
+        ]
+    }
+}
+```
+
+## Generating the CSR and signing it with the KMS key
 
 Generate a new temporary EC256 keypair:
 
@@ -11,12 +78,29 @@ openssl ecparam -genkey -name prime256v1 -noout -out ec256-key-pair.pem
 Generate a skeleton CSR:
 
 ```bash
-openssl req -new -key ec256-key-pair.pem -nodes -out test.csr
+openssl req -new -key ec256-key-pair.pem -nodes -out ec256-key-pair-csr.pem
 ```
 
 Run the script to replace with the KMS public key signed by the KMS private key
 
 ```bash
-./aws-kms-sign-csr.py --keyid alias/private-ca-ddunford-doc-signing-key --profile mp-dev-admin --signalgo ECDSA test.csr
+./aws-kms-sign-csr.py --keyid alias/private-ca-ddunford-doc-signing-key --profile mp-dev-admin --signalgo ECDSA ec256-key-pair-csr.pem
 ```
 
+Issue certificate with CA
+
+```bash
+aws acm-pca issue-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/b5abfa26-1b03-4d08-b3b8-224fc5fb6ee9 --template-arn "arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1" --signing-algorithm SHA256WITHECDSA --csr fileb://ec256-key-pair-csr.pem --validity Value=1825,Type="DAYS" --api-passthrough file://extensionSigner.txt
+```
+
+Retrieve certificate
+
+```bash
+aws acm-pca get-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/b5abfa26-1b03-4d08-b3b8-224fc5fb6ee9 --certificate-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/b5abfa26-1b03-4d08-b3b8-224fc5fb6ee9/certificate/d822e3878149ee6786e9d6d33fc564fc --output text > doc-signing-cert.pem
+```
+
+View certificate
+
+```bash
+openssl x509 -in doc-signing-cert.pem -text -noout
+```

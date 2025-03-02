@@ -23,4 +23,4 @@ if args.uri:
 
 extension = x509.IssuerAlternativeName(general_names)
 
-print(base64.b64encode(extension.public_bytes()))
+print(base64.b64encode(extension.public_bytes()).decode("utf-8"))
