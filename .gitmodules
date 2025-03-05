@@ -1,0 +1,3 @@
+[submodule "private-ca/utils/csrbuilderforkms"]
+	path = private-ca/utils/csrbuilderforkms
+	url = https://github.com/aws-samples/csr-builder-for-kms.git

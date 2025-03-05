@@ -71,34 +71,22 @@ and in the extensionSigner.txt file which is used to create the document signing
 
 ## Generating the CSR and signing it with the KMS key
 
-Generate a new temporary EC256 keypair:
+Generate a Certificate Signing Request for the KMS asymmetric key created in the template
 
 ```bash
-openssl ecparam -genkey -name prime256v1 -noout -out ec256-key-pair.pem
-```
-
-Generate a skeleton CSR:
-
-```bash
-openssl req -new -key ec256-key-pair.pem -nodes -out ec256-key-pair-csr.pem
-```
-
-Run the script to replace with the KMS public key signed by the KMS private key
-
-```bash
-./aws-kms-sign-csr.py --keyid alias/private-ca-ddunford-doc-signing-key --profile mp-dev-admin --signalgo ECDSA ec256-key-pair-csr.pem
+./utils/builder.py > ec256-key-pair-csr.pem
 ```
 
 Issue certificate with CA
 
 ```bash
-aws acm-pca issue-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/b5abfa26-1b03-4d08-b3b8-224fc5fb6ee9 --template-arn "arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1" --signing-algorithm SHA256WITHECDSA --csr fileb://ec256-key-pair-csr.pem --validity Value=1825,Type="DAYS" --api-passthrough file://extensionSigner.txt
+aws acm-pca issue-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/d75dce3e-abb8-4f4a-b809-31aa2c37ef87 --template-arn "arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1" --signing-algorithm SHA256WITHECDSA --csr fileb://ec256-key-pair-csr.pem --validity Value=1825,Type="DAYS" --api-passthrough file://extensionSigner.txt
 ```
 
 Retrieve certificate
 
 ```bash
-aws acm-pca get-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/b5abfa26-1b03-4d08-b3b8-224fc5fb6ee9 --certificate-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/b5abfa26-1b03-4d08-b3b8-224fc5fb6ee9/certificate/d822e3878149ee6786e9d6d33fc564fc --output text > doc-signing-cert.pem
+aws acm-pca get-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/d75dce3e-abb8-4f4a-b809-31aa2c37ef87 --certificate-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/d75dce3e-abb8-4f4a-b809-31aa2c37ef87/certificate/35986bb74cee3ef0058d5a99ad6b1139 --output text > doc-signing-cert.pem
 ```
 
 View certificate
