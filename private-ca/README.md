@@ -14,26 +14,29 @@ The template.yaml in this repo deploys:
 
 ## Generating the Issuer Alternative Name
 
-All certificates (IACA root certificate, link certificate and document signing certificate) must have an Issuer Alternative Name embedded as an X509v3 extension. This can be either an email address, URI, or both, and should enable someone viewing the certificate to gain more confidence about the legitimacy of the issuing organisation. These value(s) need to be specified as an base64 ASN.1 data structure. This can be generated using the supplied command line utility as:
+All certificates (IACA root certificate, link certificate and document signing certificate) must have an Issuer Alternative Name embedded as an X509v3 extension.
+This can be either an email address, URI, or both, and should enable someone viewing the certificate to gain more confidence about the legitimacy of the issuing organisation.
+These value(s) need to be specified as an base64 ASN.1 data structure.
+This can be generated using the supplied command line utility as:
 
 Email address only:
 
 ```bash
-private-ca % ./utils/issuer-alt-name.py -e 'hello@example.com'
+private-ca % ./utils/certificate-builder.py -i -e 'hello@example.com'
 MBOBEWhlbGxvQGV4YW1wbGUuY29t
 ```
 
 URI only:
 
 ```bash
-private-ca % ./utils/issuer-alt-name.py -u 'https://issuer.example.com'
+private-ca % ./utils/certificate-builder.py -i -u 'https://issuer.example.com'
 MByGGmh0dHBzOi8vaXNzdWVyLmV4YW1wbGUuY29t
 ```
 
 Both email address and URI:
 
 ```bash
-private-ca % ./utils/issuer-alt-name.py -e 'hello@example.com' -u 'https://issuer.example.com'
+private-ca % ./utils/certificate-builder.py -i -e 'hello@example.com' -u 'https://issuer.example.com'
 MC+BEWhlbGxvQGV4YW1wbGUuY29thhpodHRwczovL2lzc3Vlci5leGFtcGxlLmNvbQ==
 ```
 
@@ -46,51 +49,10 @@ Mappings:
       IssuerAltName: "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="  # base64 ASN.1 encoding of "https://mobile.dev.account.gov.uk/"
 ```
 
-and in the extensionSigner.txt file which is used to create the document signing certificate:
-
-```json
-{
-    "Extensions": {
-        "KeyUsage": {
-            "DigitalSignature": true
-        },
-        "ExtendedKeyUsage": [
-            {
-                "ExtendedKeyUsageObjectIdentifier": "1.0.18013.5.1.2"  /* mDL - see https://oid-base.com/get/1.0.18013.5.1.2 */
-            }
-        ],
-        "CustomExtensions": [
-            {
-                "ObjectIdentifier": "2.5.29.18",  /* Issuer Alternative Name - see https://oid-base.com/get/2.5.29.18 */
-                "Value": "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="
-            }
-        ]
-    }
-}
-```
-
-## Generating the CSR and signing it with the KMS key
+## Generating a Document Signing Key
 
 Generate a Certificate Signing Request for the KMS asymmetric key created in the template
 
 ```bash
-./utils/builder.py > ec256-key-pair-csr.pem
-```
-
-Issue certificate with CA
-
-```bash
-aws acm-pca issue-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/d75dce3e-abb8-4f4a-b809-31aa2c37ef87 --template-arn "arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1" --signing-algorithm SHA256WITHECDSA --csr fileb://ec256-key-pair-csr.pem --validity Value=1825,Type="DAYS" --api-passthrough file://extensionSigner.txt
-```
-
-Retrieve certificate
-
-```bash
-aws acm-pca get-certificate --region eu-west-2 --certificate-authority-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/d75dce3e-abb8-4f4a-b809-31aa2c37ef87 --certificate-arn arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/d75dce3e-abb8-4f4a-b809-31aa2c37ef87/certificate/35986bb74cee3ef0058d5a99ad6b1139 --output text > doc-signing-cert.pem
-```
-
-View certificate
-
-```bash
-openssl x509 -in doc-signing-cert.pem -text -noout
+./utils/certificate-builder.py -c arn:aws:acm-pca:eu-west-2:ACCOUNT-ID:certificate-authority/CA-ID -k arn:aws:kms:eu-west-2:ACCOUNT-ID:key/KMS-KEY-ID -n "Example Issuer Document Signing Certificate" -u "https://mobile.dev.account.gov.uk/"
 ```

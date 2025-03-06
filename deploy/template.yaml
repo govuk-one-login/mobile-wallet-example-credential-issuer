@@ -383,7 +383,7 @@ Resources:
     Properties:
       ContainerDefinitions:
         - Essential: true
-          Image: 671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:ddunford14
+          Image: 671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:ddunford18
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
