@@ -32,12 +32,12 @@ class KmsServiceTest {
     private static final String TEST_KEY_ALIAS = "test-signing-key";
 
     @Test
-    void shouldCreateKmsService() {
+    void should_Create_Kms_Service() {
         assertNotNull(kmsService);
     }
 
     @Test
-    void shouldReturnKeyId() {
+    void should_Return_KeyId() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(getMockDescribeKeyResponse(TEST_KEY_ID, true, null));
         when(kmsService.getKeyId(TEST_KEY_ALIAS)).thenCallRealMethod();
@@ -47,7 +47,7 @@ class KmsServiceTest {
     }
 
     @Test
-    void shouldReturnPublicKeyAsJwk() throws PEMException, NoSuchAlgorithmException {
+    void should_Return_PublicKey_As_Jwk() throws PEMException, NoSuchAlgorithmException {
         String mockPublicKey =
                 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZS4QGXEhtywj9ivxlgx1dIJkFS7l2TInfT9r3Onmpvq64gfgiSQcFQ6eBIJDb9udSzWgi9+Z4Ls+wRkRqzghgQ==";
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))

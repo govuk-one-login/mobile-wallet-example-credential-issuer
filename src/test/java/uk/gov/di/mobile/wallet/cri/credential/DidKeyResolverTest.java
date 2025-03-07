@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -16,7 +17,7 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void shouldDecodeDidKeyIntoAPublicKey() throws AddressFormatException, InvalidDidKeyException {
+    void should_Decode_DidKey_Into_A_PublicKey() throws AddressFormatException, InvalidDidKeyException {
         DidKeyResolver.DecodedKeyData decodedKeyData =
                 didKeyResolver.decodeDidKey(
                         "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX");
@@ -27,7 +28,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void shouldThrowInvalidDidKeyExceptionWhenDidKeyPrefixIsInvalid() {
+    @DisplayName("should Throw Invalid Did Key Exception when Did Key Prefix is invalid")
+    void should_ThrowException_When_DidKey_Prefix_Is_Invalid() {
         InvalidDidKeyException thrown =
                 assertThrows(
                         InvalidDidKeyException.class,
@@ -38,7 +40,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void shouldThrowInvalidDidKeyExceptionWhenDidKeyMultibaseEncodingPrefixCodeIsNotZ() {
+    @DisplayName("should Throw Invalid Did Key Exception when Did Key Multibase Encoding Prefix Code is not Z")
+    void should_ThrowException_When_DidKey_MultibaseEncoding_Prefix_Code_Is_Not_Z() {
         InvalidDidKeyException thrown =
                 assertThrows(
                         InvalidDidKeyException.class,
@@ -51,7 +54,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void shouldThrowInvalidDidKeyExceptionWhenDidKeyBase58EncodingIsInvalid() {
+    @DisplayName("should Throw Invalid Did Key Exception when Did Key Base58 Encoding is invalid")
+    void should_ThrowException_When_DidKey_Base58Encoding_Is_Invalid() {
         AddressFormatException thrown =
                 assertThrows(
                         AddressFormatException.class,
@@ -62,7 +66,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void shouldThrowInvalidDidKeyExceptionWhenDidKeyMulticodecValueIsNotSupported() {
+    @DisplayName("should Throw Invalid Did Key Exception when Did Key Multicodec Value is not supported")
+    void should_ThrowException_When_DidKey_Multicodec_Value_Is_Not_Supported() {
         InvalidDidKeyException thrown =
                 assertThrows(
                         InvalidDidKeyException.class,
@@ -73,7 +78,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void shouldThrowInvalidDidKeyExceptionWhenPublicKeyLengthIsNot33Bytes() {
+    @DisplayName("should Throw Invalid Did Key Exception when Public Key Length is not 33 Bytes")
+    void should_ThrowException_When_PublicKey_Length_Is_Not_33Bytes() {
         InvalidDidKeyException thrown =
                 assertThrows(
                         InvalidDidKeyException.class,
@@ -84,7 +90,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void shouldThrowInvalidDidKeyExceptionWhenPublicKeyPrefixIsNot2Or3() {
+    @DisplayName("Should Throw Invalid Did Key Exception when PublicKey Prefix is not 2Or3")
+    void should_ThrowException_When_PublicKey_Prefix_Is_Not_2Or3() {
         InvalidDidKeyException thrown =
                 assertThrows(
                         InvalidDidKeyException.class,

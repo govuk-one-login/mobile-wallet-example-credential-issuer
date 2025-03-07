@@ -9,6 +9,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.core.Response;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -57,7 +58,8 @@ class DidDocumentResourceTest {
     }
 
     @Test
-    void shouldReturn500WhenDidDocumentServiceThrowsAnException()
+    @DisplayName("should return 500 when DidDocument Service Throws an Exception")
+    void should_Return_500_When_DidDocumentService_ThrowException()
             throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
 
         doThrow(new NoSuchAlgorithmException("Mock error message", new Exception()))
@@ -72,7 +74,7 @@ class DidDocumentResourceTest {
     }
 
     @Test
-    void shouldReturn200AndDidDocument()
+    void should_Return_200_And_DidDocument()
             throws JsonProcessingException,
                     InvalidAlgorithmParameterException,
                     NoSuchAlgorithmException,

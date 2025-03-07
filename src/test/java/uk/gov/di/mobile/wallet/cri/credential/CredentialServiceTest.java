@@ -13,6 +13,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -97,7 +98,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_AccessTokenValidationException_When_Credential_Identifiers_Claim_Is_Empty()
+    @DisplayName("Should Throw Access Token Validation Exception when Credential Identifiers Claim is empty")
+    void Should_ThrowException_When_CredentialIdentifiers_Claim_Is_Empty()
             throws JOSEException, ParseException {
         SignedJWT mockAccessTokenWithEmptyCredentialIdentifier = getMockAccessToken();
 
@@ -116,7 +118,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_ProofJwtValidationException_When_Nonce_Values_Do_Not_Match()
+    @DisplayName("Should Throw Proof Jwt Validation Exception when nonce values do not match")
+    void Should_ThrowException_When_Nonce_Values_Do_Not_Match()
             throws JOSEException, ParseException {
         SignedJWT mockProofJwtWithDifferentNonce =
                 getMockProofJwt("c5408ee2-9c5d-4be3-acda-06b95285489a");
@@ -134,7 +137,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_CredentialOfferNotFoundException_When_Credential_Offer_Not_Found()
+    @DisplayName("Should Throw Credential Offer Not Found Exception when Credential Offer not found")
+    void Should_ThrowException_When_CredentialOffer_Not_Found()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
@@ -149,7 +153,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_DataStoreException_When_Call_To_Database_Throws_Error()
+    @DisplayName("Should Throw DataStore Exception when call to Database Throws Error")
+    void Should_ThrowException_When_Call_To_Database_ThrowsError()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenThrow(new DataStoreException("Some database error"));
@@ -163,7 +168,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_AccessTokenValidationException_When_Wallet_Subject_IDs_Do_Not_Match()
+    @DisplayName("Should Throw Access Token Validation Exception when Wallet_Subject_IDs do not match")
+    void Should_ThrowException_When_WalletSubjectIDs_Do_Not_Match()
             throws java.text.ParseException, DataStoreException, JOSEException {
         SignedJWT mockAccessTokenWithDifferentSub =
                 getMockAccessToken("954a4cff-0d38-4558-b29d-ee709f4f227e");
@@ -183,7 +189,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_CredentialOfferNotFoundException_When_Credential_Offer_Is_Expired()
+    @DisplayName("Should Throw Credential Offer Not Found Exception when Credential Offer is expired")
+    void Should_ThrowException_When_CredentialOffer_Is_Expired()
             throws DataStoreException {
         long timeToLive =
                 Instant.now().minusSeconds(Long.parseLong("2")).getEpochSecond(); // 2 seconds ago
@@ -338,7 +345,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_CredentialServiceException_When_Document_Vc_Type_Is_Unknown()
+    void Should_Throw_CredentialServiceException_When_Document_VcType_Is_Unknown()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);

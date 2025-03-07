@@ -11,6 +11,7 @@ import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,7 +52,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenJwtHeaderAlgDoesNotMatchConfig()
+    @DisplayName("Should Throw AccessToken Validation Exception when JWT header Alg does not match Config")
+    void should_ThrowException_When_JwtHeaderAlg_Does_Not_Match_Config()
             throws JOSEException, InvalidKeySpecException, NoSuchAlgorithmException {
         SignedJWT signedJwt =
                 new SignedJWT(
@@ -70,7 +72,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenJwtHeaderKidIsNull()
+    @DisplayName("Should Throw AccessToken Validation Exception when JWT header Kid is Null")
+    void should_ThrowException_When_JwtHeaderKid_Is_Null()
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 new SignedJWT(
@@ -87,7 +90,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenRequiredClaimAreNull()
+    @DisplayName("Should Throw AccessToken Validation Exception when required claims are Null")
+    void should_ThrowException_When_Required_Claims_Are_Null()
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 new SignedJWT(
@@ -108,7 +112,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenAudienceClaimDoesNotMatchConfig()
+    @DisplayName("should Throw AccessToken Validation Exception when Audience Claim does not match Config")
+    void should_ThrowException_When_AudienceClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
         SignedJWT signedJwt = getTestAccessToken(ISSUER, "invalid-audience");
         ECDSASigner ecSigner = new ECDSASigner(getEsKey());
@@ -124,7 +129,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenIssuerClaimDoesNotMatchConfig()
+    @DisplayName("Should Throw AccessToken Validation Exception when Issuer Claim does not match Config")
+    void should_ThrowException_When_IssuerClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
 
         SignedJWT signedJwt = getTestAccessToken("invalid-issuer", AUDIENCE);
@@ -141,7 +147,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenSignatureVerificationFails()
+    @DisplayName("Should Throw AccessToken Validation Exception when Signature Verification fails")
+    void should_ThrowException_When_Signature_Verification_Fails()
             throws JOSEException, ParseException {
         JWK publicKey =
                 JWK.parse(
@@ -160,7 +167,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldThrowAccessTokenValidationExceptionWhenJwksServiceThrowsKeySourceException()
+    @DisplayName("Should Throw AccessToken Validation Exception when Jwks Service Throws KeySource Exception")
+    void should_ThrowException_When_JwksService_ThrowException()
             throws JOSEException, ParseException {
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class)))
                 .thenThrow(new KeySourceException("Some error fetching JWKs"));
@@ -177,7 +185,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
+    @DisplayName("Should not ThrowError when Jwt Verification succeeds")
+    void should_Not_ThrowError_When_JwtVerification_Succeeds() throws JOSEException, ParseException {
         ECKey key = getEsKey();
         JWK publicKey = key.toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);

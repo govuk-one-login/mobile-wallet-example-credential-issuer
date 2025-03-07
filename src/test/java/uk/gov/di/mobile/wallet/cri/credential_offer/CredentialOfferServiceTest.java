@@ -44,7 +44,7 @@ class CredentialOfferServiceTest {
     }
 
     @Test
-    void shouldBuildAndReturnCredentialOffer()
+    void should_Build_And_Return_CredentialOffer()
             throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
         SignedJWT preAuthorizedCode = getTestPreAuthCode();
         ECDSASigner ecSigner = new ECDSASigner(getEsPrivateKey());

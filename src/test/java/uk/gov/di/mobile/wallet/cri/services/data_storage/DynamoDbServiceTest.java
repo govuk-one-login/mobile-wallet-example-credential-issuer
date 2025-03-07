@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,7 +45,7 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void shouldSaveCredentialOfferToCache() throws DataStoreException {
+    void should_Save_CredentialOffer_To_Cache() throws DataStoreException {
         dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
                 ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
@@ -66,7 +67,8 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void shouldThrowDataStoreExceptionWhenErrorHappensWhileTryingToSaveItem()
+    @DisplayName("Should Throw DataStore Exception When error happens while trying to save item")
+    void should_ThrowException_If_Error_Happens_When_Saving_Item()
             throws DataStoreException {
         dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
@@ -83,7 +85,8 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void shouldGetCredentialOfferFromCacheThroughPartitionKey() throws DataStoreException {
+    @DisplayName("Should get CredentialOffer from Cache through PartitionKey")
+    void should_Get_CredentialOffer_From_Cache() throws DataStoreException {
         dynamoDbService.getCredentialOffer(TEST_PARTITION_KEY);
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
         verify(mockDynamoDbTable).getItem(keyCaptor.capture());
@@ -92,7 +95,8 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void shouldThrowDataStoreExceptionWhenErrorHappensWhileTryingToGetItem()
+    @DisplayName("Should Throw DataStore Exception when error happens while trying to get Item")
+    void should_ThrowException_If_Error_Happens_When_Getting_Item()
             throws DataStoreException {
         dynamoDbService.getCredentialOffer(TEST_PARTITION_KEY);
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
@@ -108,7 +112,8 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void shouldDeleteCredentialOfferFromCacheThroughPartitionKey() throws DataStoreException {
+    @DisplayName("Should delete CredentialOffer from Cache through PartitionKey")
+    void should_Delete_CredentialOffer_From_Cache() throws DataStoreException {
         dynamoDbService.deleteCredentialOffer(TEST_PARTITION_KEY);
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
         verify(mockDynamoDbTable).deleteItem(keyCaptor.capture());
@@ -117,7 +122,8 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void shouldThrowDataStoreExceptionWhenErrorHappensWhileTryingToDeleteItem()
+    @DisplayName("Should Throw DataStore Exception when error happens while trying to delete Item")
+    void should_ThrowException_If_Error_Happens_When_Deleting_Item()
             throws DataStoreException {
         dynamoDbService.deleteCredentialOffer(TEST_PARTITION_KEY);
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);

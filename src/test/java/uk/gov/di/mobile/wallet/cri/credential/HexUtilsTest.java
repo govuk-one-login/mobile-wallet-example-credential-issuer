@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HexUtilsTest {
 
     @Test
-    void shouldHexEncodeABytesArray() {
+    void should_Hex_Encode_A_BytesArray() {
         assertEquals("54657374537472696E67", HexUtils.bytesToHex("TestString".getBytes()));
     }
 
     @Test
-    void shouldConvertHexToVarint() {
+    void should_Convert_Hex_To_Varint() {
         assertEquals("8024", HexUtils.hexToVarintHex("1200"));
     }
 }

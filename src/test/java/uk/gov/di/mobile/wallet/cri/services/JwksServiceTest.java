@@ -10,6 +10,7 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -63,7 +64,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldReturnJwkWhenFound()
+    void should_Return_Jwk_When_Found()
             throws AddressFormatException, KeySourceException, ParseException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         JWK publicKey =
@@ -78,7 +79,8 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldThrowKeySourceExceptionWhenJwkNotFound()
+    @DisplayName("Should Throw KeySource Exception When Jwk not found")
+    void should_ThrowException_When_Jwk_Not_Found()
             throws AddressFormatException, KeySourceException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         final List<JWK> jwkList = Collections.emptyList();
@@ -95,7 +97,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldTestAdditionalClassConstructor()
+    void should_Test_Additional_Class_Constructor()
             throws AddressFormatException, MalformedURLException {
         jwksService = new JwksService(configurationService, kmsService);
 
@@ -103,7 +105,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void shouldReturnPublicKeyAsJwks()
+    void should_Return_PublicKey_As_Jwks()
             throws AddressFormatException,
                     MalformedURLException,
                     InvalidAlgorithmParameterException,

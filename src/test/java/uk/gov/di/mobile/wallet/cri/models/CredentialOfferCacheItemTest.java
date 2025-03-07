@@ -20,7 +20,7 @@ class CredentialOfferCacheItemTest {
     }
 
     @Test
-    void shouldCreateCredentialOfferCacheItem() {
+    void should_Create_CredentialOffer_CacheItem() {
         assertEquals(
                 "test-credential-identifier", credentialOfferCacheItem.getCredentialIdentifier());
         assertEquals("test-document-id", credentialOfferCacheItem.getDocumentId());

@@ -10,6 +10,7 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,7 +58,7 @@ class CredentialResourceTest {
                 "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}", // "'proof_type' param is not 'jwt'"
                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}" // JWT is invalid
             })
-    void shouldReturn400AndInvalidProofWhenProofJwtIsInvalid(String arg)
+    void should_Return_400_And_Invalid_Proof_When_ProofJwt_Is_Invalid(String arg)
             throws DataStoreException,
                     AccessTokenValidationException,
                     CredentialServiceException,
@@ -80,7 +81,8 @@ class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn400AndInvalidCredentialRequestWhenAuthorizationHeaderIsMissing()
+    @DisplayName("should return 400 and invalid Credential Request when Authorization Header is missing")
+    void should_Return_400_When_AuthorizationHeader_Is_Missing()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
@@ -108,17 +110,17 @@ class CredentialResourceTest {
     }
 
     @Test
-    void
-            shouldReturn400AndInvalidCredentialRequestWhenAuthorizationHeaderIsNotValidBearerAccessToken()
-                    throws JsonProcessingException,
-                            DataStoreException,
-                            AccessTokenValidationException,
-                            SigningException,
-                            ProofJwtValidationException,
-                            NoSuchAlgorithmException,
-                            URISyntaxException,
-                            CredentialServiceException,
-                            CredentialOfferNotFoundException {
+    @DisplayName("should return 400 and invalid Credential Request when AuthorizationHeader is not valid Bearer Access Token")
+    void should_Return_400_When_AuthorizationHeader_Is_Not_Valid_Bearer_AccessToken()
+            throws JsonProcessingException,
+                    DataStoreException,
+                    AccessTokenValidationException,
+                    SigningException,
+                    ProofJwtValidationException,
+                    NoSuchAlgorithmException,
+                    URISyntaxException,
+                    CredentialServiceException,
+                    CredentialOfferNotFoundException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -140,7 +142,8 @@ class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn400WhenCredentialServiceThrowsACredentialOfferNotFoundException()
+    @DisplayName("should return 400 when Credential Service Throws a Credential Offer Not Found Exception")
+    void should_Return_400_When_CredentialService_ThrowsException()
             throws DataStoreException,
                     AccessTokenValidationException,
                     SigningException,
@@ -175,7 +178,8 @@ class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn500WhenCredentialServiceThrowsASigningException()
+    @DisplayName("should return 500 when Credential Service Throws a Signing Exception")
+    void should_Return_500_When_CredentialService_Throws_A_Signing_Exception()
             throws DataStoreException,
                     AccessTokenValidationException,
                     SigningException,
@@ -207,7 +211,8 @@ class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn500WhenCredentialServiceThrowsADataStoreException()
+    @DisplayName("should return 500 when Credential Service Throws a DataStore Exception")
+    void should_Return_500_When_CredentialService_Throws_A_DataStore_Exception()
             throws DataStoreException,
                     AccessTokenValidationException,
                     SigningException,
@@ -239,7 +244,7 @@ class CredentialResourceTest {
     }
 
     @Test
-    void shouldReturn200AndTheCredential()
+    void should_Return_200_And_TheCredential()
             throws DataStoreException,
                     AccessTokenValidationException,
                     SigningException,
