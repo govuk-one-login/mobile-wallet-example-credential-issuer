@@ -17,7 +17,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    void should_Decode_DidKey_Into_A_PublicKey() throws AddressFormatException, InvalidDidKeyException {
+    void should_Decode_DidKey_Into_A_PublicKey()
+            throws AddressFormatException, InvalidDidKeyException {
         DidKeyResolver.DecodedKeyData decodedKeyData =
                 didKeyResolver.decodeDidKey(
                         "did:key:zDnaewZMz7MN6xSaAFADkDZJzMLbGSV25uKHAeXaxnPCwZomX");
@@ -40,7 +41,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    @DisplayName("should Throw Invalid Did Key Exception when Did Key Multibase Encoding Prefix Code is not Z")
+    @DisplayName(
+            "should Throw Invalid Did Key Exception when Did Key Multibase Encoding Prefix Code is not Z")
     void should_ThrowException_When_DidKey_MultibaseEncoding_Prefix_Code_Is_Not_Z() {
         InvalidDidKeyException thrown =
                 assertThrows(
@@ -66,7 +68,8 @@ class DidKeyResolverTest {
     }
 
     @Test
-    @DisplayName("should Throw Invalid Did Key Exception when Did Key Multicodec Value is not supported")
+    @DisplayName(
+            "should Throw Invalid Did Key Exception when Did Key Multicodec Value is not supported")
     void should_ThrowException_When_DidKey_Multicodec_Value_Is_Not_Supported() {
         InvalidDidKeyException thrown =
                 assertThrows(

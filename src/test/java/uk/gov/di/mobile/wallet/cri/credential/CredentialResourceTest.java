@@ -81,7 +81,8 @@ class CredentialResourceTest {
     }
 
     @Test
-    @DisplayName("should return 400 and invalid Credential Request when Authorization Header is missing")
+    @DisplayName(
+            "should return 400 and invalid Credential Request when Authorization Header is missing")
     void should_Return_400_When_AuthorizationHeader_Is_Missing()
             throws JsonProcessingException,
                     DataStoreException,
@@ -110,7 +111,8 @@ class CredentialResourceTest {
     }
 
     @Test
-    @DisplayName("should return 400 and invalid Credential Request when AuthorizationHeader is not valid Bearer Access Token")
+    @DisplayName(
+            "should return 400 and invalid Credential Request when AuthorizationHeader is not valid Bearer Access Token")
     void should_Return_400_When_AuthorizationHeader_Is_Not_Valid_Bearer_AccessToken()
             throws JsonProcessingException,
                     DataStoreException,
@@ -142,7 +144,8 @@ class CredentialResourceTest {
     }
 
     @Test
-    @DisplayName("should return 400 when Credential Service Throws a Credential Offer Not Found Exception")
+    @DisplayName(
+            "should return 400 when Credential Service Throws a Credential Offer Not Found Exception")
     void should_Return_400_When_CredentialService_ThrowsException()
             throws DataStoreException,
                     AccessTokenValidationException,

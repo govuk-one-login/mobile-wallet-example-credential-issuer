@@ -44,7 +44,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    @DisplayName("should Throw Proof Jwt Validation Exception When JwtHeader Alg does not match Config")
+    @DisplayName(
+            "should Throw Proof Jwt Validation Exception When JwtHeader Alg does not match Config")
     void should_ThrowException_When_JwtHeader_Alg_Does_Not_Match_Config()
             throws JOSEException, InvalidKeySpecException, NoSuchAlgorithmException {
         SignedJWT signedJwt =
@@ -66,8 +67,7 @@ class ProofJwtServiceTest {
 
     @Test
     @DisplayName("should Throw Proof Jwt Validation Exception when Jwt Header Kid is Null")
-    void should_ThrowException_When_JwtHeader_Kid_Is_Null()
-            throws JOSEException, ParseException {
+    void should_ThrowException_When_JwtHeader_Kid_Is_Null() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
@@ -85,8 +85,7 @@ class ProofJwtServiceTest {
 
     @Test
     @DisplayName("should Throw Proof Jwt Validation Exception when Required Claims are Null")
-    void should_ThrowException_When_RequiredClaims_Are_Null()
-            throws JOSEException, ParseException {
+    void should_ThrowException_When_RequiredClaims_Are_Null() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
@@ -105,7 +104,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    @DisplayName("should Throw Proof Jwt Validation Exception when Audience Claim does not match Config")
+    @DisplayName(
+            "should Throw Proof Jwt Validation Exception when Audience Claim does not match Config")
     void should_ThrowException_When_AudienceClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
@@ -127,7 +127,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    @DisplayName("should Throw Proof Jwt Validation Exception when an Issuer Claim does not match Config")
+    @DisplayName(
+            "should Throw Proof Jwt Validation Exception when an Issuer Claim does not match Config")
     void should_ThrowException_When_IssuerClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
@@ -149,8 +150,7 @@ class ProofJwtServiceTest {
 
     @Test
     @DisplayName("should Throw Proof Jwt Validation Exception when Did Key is invalid")
-    void should_ThrowException_When_DidKey_Is_Invalid()
-            throws JOSEException, ParseException {
+    void should_ThrowException_When_DidKey_Is_Invalid() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
                         "did:key:notAValidDidKey", "urn:fdc:gov:uk:wallet", TEST_EXAMPLE_CRI_URL);
@@ -190,7 +190,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void should_Not_ThrowError_When_JwtVerification_Succeeds() throws JOSEException, ParseException {
+    void should_Not_ThrowError_When_JwtVerification_Succeeds()
+            throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
                         "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf",

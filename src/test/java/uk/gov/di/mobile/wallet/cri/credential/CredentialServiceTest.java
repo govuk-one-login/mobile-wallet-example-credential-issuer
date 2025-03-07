@@ -98,7 +98,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw Access Token Validation Exception when Credential Identifiers Claim is empty")
+    @DisplayName(
+            "Should Throw Access Token Validation Exception when Credential Identifiers Claim is empty")
     void Should_ThrowException_When_CredentialIdentifiers_Claim_Is_Empty()
             throws JOSEException, ParseException {
         SignedJWT mockAccessTokenWithEmptyCredentialIdentifier = getMockAccessToken();
@@ -137,9 +138,9 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw Credential Offer Not Found Exception when Credential Offer not found")
-    void Should_ThrowException_When_CredentialOffer_Not_Found()
-            throws DataStoreException {
+    @DisplayName(
+            "Should Throw Credential Offer Not Found Exception when Credential Offer not found")
+    void Should_ThrowException_When_CredentialOffer_Not_Found() throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
         CredentialOfferNotFoundException exception =
@@ -154,8 +155,7 @@ class CredentialServiceTest {
 
     @Test
     @DisplayName("Should Throw DataStore Exception when call to Database Throws Error")
-    void Should_ThrowException_When_Call_To_Database_ThrowsError()
-            throws DataStoreException {
+    void Should_ThrowException_When_Call_To_Database_ThrowsError() throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenThrow(new DataStoreException("Some database error"));
 
@@ -168,7 +168,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw Access Token Validation Exception when Wallet_Subject_IDs do not match")
+    @DisplayName(
+            "Should Throw Access Token Validation Exception when Wallet_Subject_IDs do not match")
     void Should_ThrowException_When_WalletSubjectIDs_Do_Not_Match()
             throws java.text.ParseException, DataStoreException, JOSEException {
         SignedJWT mockAccessTokenWithDifferentSub =
@@ -189,9 +190,9 @@ class CredentialServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw Credential Offer Not Found Exception when Credential Offer is expired")
-    void Should_ThrowException_When_CredentialOffer_Is_Expired()
-            throws DataStoreException {
+    @DisplayName(
+            "Should Throw Credential Offer Not Found Exception when Credential Offer is expired")
+    void Should_ThrowException_When_CredentialOffer_Is_Expired() throws DataStoreException {
         long timeToLive =
                 Instant.now().minusSeconds(Long.parseLong("2")).getEpochSecond(); // 2 seconds ago
         CredentialOfferCacheItem mockCredentialOfferCacheItemExpired =

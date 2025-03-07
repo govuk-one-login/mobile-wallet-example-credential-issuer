@@ -52,7 +52,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw AccessToken Validation Exception when JWT header Alg does not match Config")
+    @DisplayName(
+            "Should Throw AccessToken Validation Exception when JWT header Alg does not match Config")
     void should_ThrowException_When_JwtHeaderAlg_Does_Not_Match_Config()
             throws JOSEException, InvalidKeySpecException, NoSuchAlgorithmException {
         SignedJWT signedJwt =
@@ -73,8 +74,7 @@ class AccessTokenServiceTest {
 
     @Test
     @DisplayName("Should Throw AccessToken Validation Exception when JWT header Kid is Null")
-    void should_ThrowException_When_JwtHeaderKid_Is_Null()
-            throws JOSEException, ParseException {
+    void should_ThrowException_When_JwtHeaderKid_Is_Null() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
@@ -112,7 +112,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    @DisplayName("should Throw AccessToken Validation Exception when Audience Claim does not match Config")
+    @DisplayName(
+            "should Throw AccessToken Validation Exception when Audience Claim does not match Config")
     void should_ThrowException_When_AudienceClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
         SignedJWT signedJwt = getTestAccessToken(ISSUER, "invalid-audience");
@@ -129,7 +130,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw AccessToken Validation Exception when Issuer Claim does not match Config")
+    @DisplayName(
+            "Should Throw AccessToken Validation Exception when Issuer Claim does not match Config")
     void should_ThrowException_When_IssuerClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
 
@@ -167,7 +169,8 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw AccessToken Validation Exception when Jwks Service Throws KeySource Exception")
+    @DisplayName(
+            "Should Throw AccessToken Validation Exception when Jwks Service Throws KeySource Exception")
     void should_ThrowException_When_JwksService_ThrowException()
             throws JOSEException, ParseException {
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class)))
@@ -186,7 +189,8 @@ class AccessTokenServiceTest {
 
     @Test
     @DisplayName("Should not ThrowError when Jwt Verification succeeds")
-    void should_Not_ThrowError_When_JwtVerification_Succeeds() throws JOSEException, ParseException {
+    void should_Not_ThrowError_When_JwtVerification_Succeeds()
+            throws JOSEException, ParseException {
         ECKey key = getEsKey();
         JWK publicKey = key.toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);

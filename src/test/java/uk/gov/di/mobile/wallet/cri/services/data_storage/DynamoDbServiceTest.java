@@ -68,8 +68,7 @@ class DynamoDbServiceTest {
 
     @Test
     @DisplayName("Should Throw DataStore Exception When error happens while trying to save item")
-    void should_ThrowException_If_Error_Happens_When_Saving_Item()
-            throws DataStoreException {
+    void should_ThrowException_If_Error_Happens_When_Saving_Item() throws DataStoreException {
         dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
         ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
                 ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
@@ -96,8 +95,7 @@ class DynamoDbServiceTest {
 
     @Test
     @DisplayName("Should Throw DataStore Exception when error happens while trying to get Item")
-    void should_ThrowException_If_Error_Happens_When_Getting_Item()
-            throws DataStoreException {
+    void should_ThrowException_If_Error_Happens_When_Getting_Item() throws DataStoreException {
         dynamoDbService.getCredentialOffer(TEST_PARTITION_KEY);
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
         doThrow(new UnsupportedOperationException())
@@ -123,8 +121,7 @@ class DynamoDbServiceTest {
 
     @Test
     @DisplayName("Should Throw DataStore Exception when error happens while trying to delete Item")
-    void should_ThrowException_If_Error_Happens_When_Deleting_Item()
-            throws DataStoreException {
+    void should_ThrowException_If_Error_Happens_When_Deleting_Item() throws DataStoreException {
         dynamoDbService.deleteCredentialOffer(TEST_PARTITION_KEY);
         ArgumentCaptor<Key> keyCaptor = ArgumentCaptor.forClass(Key.class);
         doThrow(new UnsupportedOperationException())
