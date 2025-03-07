@@ -67,7 +67,7 @@ public class PreAuthorizedCodeBuilder {
                 .toString();
     }
 
-    private Base64URL getEncodedClaims(String credentialIdentifier) {
+    private Base64URL getEncodedClaims(String walletSubjectId) {
         Instant now = Instant.now();
 
         var claimsBuilder =
@@ -82,7 +82,7 @@ public class PreAuthorizedCodeBuilder {
                                                         .getPreAuthorizedCodeTtlInSecs(),
                                                 ChronoUnit.SECONDS)))
                         .claim("clientId", configurationService.getClientId())
-                        .claim("credential_identifiers", new String[] {credentialIdentifier});
+                        .claim("credential_identifiers", new String[] {walletSubjectId});
 
         return Base64URL.encode(claimsBuilder.build().toString());
     }
