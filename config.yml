@@ -1,10 +1,15 @@
-
-
-
+server:
+  requestLog:
+    appenders:
+      - type: console
+        layout:
+          type: access-json
+        filterFactories:
+          - type: uri
+            uris:
+              - "/healthcheck"
 logging:
   level: INFO
-  loggers:
-    uk.gov.di.mobile.wallet.cri: INFO
   appenders:
     - type: console
       layout:
