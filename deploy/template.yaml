@@ -49,8 +49,8 @@ Mappings:
   EnvironmentVariables:
     dev:
       SelfUrl: "example-credential-issuer.mobile.dev.account.gov.uk"
-      CredentialStoreUrl: "wallet-doc-builder-ddunford-stub-credential-issuer.mobile.dev.account.gov.uk"
-      AuthServerUrl: "wallet-doc-builder-ddunford-stub-credential-issuer.mobile.dev.account.gov.uk"
+      CredentialStoreUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
+      AuthServerUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.dev.account.gov.uk/wallet"
       BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
     build:
@@ -385,7 +385,7 @@ Resources:
     Properties:
       ContainerDefinitions:
         - Essential: true
-          Image: 671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:ddunford18
+          Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
             - Name: SIGNING_KEY_ALIAS
