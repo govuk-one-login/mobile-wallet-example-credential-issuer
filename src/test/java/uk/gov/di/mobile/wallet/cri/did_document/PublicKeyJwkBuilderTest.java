@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -45,7 +46,8 @@ class PublicKeyJwkBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullKid() {
+    @DisplayName("Should Throw Illegal Argument Exception on Null Kid")
+    void should_ThrowException_On_Null_Kid() {
         PublicKeyJwkBuilder publicKeyJwkBuilder = new PublicKeyJwkBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
@@ -54,7 +56,8 @@ class PublicKeyJwkBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullKty() {
+    @DisplayName("Should Throw Illegal Argument Exception on Null Kty")
+    void should_ThrowException_On_Null_Kty() {
         PublicKeyJwkBuilder publicKeyJwkBuilder = new PublicKeyJwkBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
@@ -63,7 +66,8 @@ class PublicKeyJwkBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullCrv() {
+    @DisplayName("Should Throw Illegal Argument Exception on Null Crv")
+    void should_ThrowException_On_Null_Crv() {
         PublicKeyJwkBuilder publicKeyJwkBuilder = new PublicKeyJwkBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
@@ -72,7 +76,8 @@ class PublicKeyJwkBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullX() {
+    @DisplayName("Should Throw Illegal Argument Exception on Null X")
+    void should_ThrowException_On_Null_X() {
         PublicKeyJwkBuilder publicKeyJwkBuilder = new PublicKeyJwkBuilder();
         IllegalArgumentException thrown =
                 assertThrows(IllegalArgumentException.class, () -> publicKeyJwkBuilder.setX(null));
@@ -80,7 +85,8 @@ class PublicKeyJwkBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullY() {
+    @DisplayName("Should Throw Illegal Argument Exception on Null Y")
+    void should_ThrowException_On_Null_Y() {
         PublicKeyJwkBuilder publicKeyJwkBuilder = new PublicKeyJwkBuilder();
         IllegalArgumentException thrown =
                 assertThrows(IllegalArgumentException.class, () -> publicKeyJwkBuilder.setY(null));

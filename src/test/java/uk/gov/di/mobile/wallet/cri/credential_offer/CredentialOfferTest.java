@@ -13,7 +13,7 @@ class CredentialOfferTest {
 
     @Test
     @DisplayName("Should create a credential offer")
-    void shouldCreateCredentialOffer() {
+    void should_Create_CredentialOffer() {
         Map<String, Map<String, String>> grantsMap = getGrantsMap();
 
         CredentialOffer credentialOffer =

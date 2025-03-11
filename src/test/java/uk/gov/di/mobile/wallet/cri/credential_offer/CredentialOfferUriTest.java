@@ -11,17 +11,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CredentialOfferUriTest {
 
-    private static final String WALLET_RUL = "https://mobile.test.account.gov.uk/wallet";
+    private static final String WALLET_URL = "https://mobile.test.account.gov.uk/wallet";
     private static final String PATH = "/add?credential_offer=";
     private static final String CREDENTIAL_OFFER = "uriEncodedCredentialOffer";
 
     @Test
     @DisplayName(
             "Should create the credential offer URI with the right property name (credential_offer_uri)")
-    void testItCreatesCredentialOfferUri() throws JsonProcessingException {
+    void test_It_Creates_CredentialOffer_Uri() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         CredentialOfferUri credentialOfferUriObject =
-                new CredentialOfferUri(WALLET_RUL, PATH, CREDENTIAL_OFFER);
+                new CredentialOfferUri(WALLET_URL, PATH, CREDENTIAL_OFFER);
 
         String credentialOfferUriObjectAsString =
                 mapper.writeValueAsString(credentialOfferUriObject);

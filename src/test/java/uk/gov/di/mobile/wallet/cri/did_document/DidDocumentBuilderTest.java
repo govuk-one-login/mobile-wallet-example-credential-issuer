@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -30,7 +31,7 @@ class DidDocumentBuilderTest {
     private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_KEY_ID;
 
     @Test
-    void shouldReturnDidDocument()
+    void should_Return_DidDocument()
             throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         List<String> testAssertionMethod = Collections.singletonList("test_assertion_method");
         ECKey testJwk = getTestJwk();
@@ -58,7 +59,8 @@ class DidDocumentBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullVerificationMethod() {
+    @DisplayName("should Throw Illegal Argument Exception On Null VerificationMethod")
+    void should_ThrowException_On_Null_VerificationMethod() {
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
@@ -68,7 +70,8 @@ class DidDocumentBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullId() {
+    @DisplayName("should Throw Illegal Argument Exception On Null Id")
+    void should_ThrowException_On_Null_Id() {
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         IllegalArgumentException thrown =
                 assertThrows(IllegalArgumentException.class, () -> didDocumentBuilder.setId(null));
@@ -76,7 +79,8 @@ class DidDocumentBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullAssertionMethod() {
+    @DisplayName("should Throw Illegal Argument Exception On Null AssertionMethod")
+    void should_ThrowException_On_Null_AssertionMethod() {
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
@@ -86,7 +90,8 @@ class DidDocumentBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullContext() {
+    @DisplayName("should Throw Illegal Argument Exception On Null Context")
+    void should_ThrowException_On_Null_Context() {
         DidDocumentBuilder didDocumentBuilder = new DidDocumentBuilder();
         IllegalArgumentException thrown =
                 assertThrows(

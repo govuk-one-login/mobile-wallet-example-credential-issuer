@@ -62,7 +62,7 @@ class PreAuthorizedCodeBuilderTest {
     @Test
     @DisplayName(
             "Should build the pre-authorized code with the correct claims and sign it with KMS")
-    void testItReturnsSignedJwt()
+    void test_It_Returns_SignedJwt()
             throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
@@ -97,7 +97,7 @@ class PreAuthorizedCodeBuilderTest {
 
     @Test
     @DisplayName("Should throw a SigningException when KMS throws an exception")
-    void testItThrowsSigningException() {
+    void test_It_Throws_SigningException() {
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
         when(kmsService.sign(any(SignRequest.class))).thenThrow(DisabledException.class);
 
