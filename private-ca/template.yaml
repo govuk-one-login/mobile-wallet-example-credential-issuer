@@ -1,9 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: >
-  private-ca
-
-  Sample SAM Template for private-ca
+Description: Private CA to act as the Issuing Authority Certificate Authority
 
 Parameters:
   Environment:
@@ -19,10 +16,22 @@ Parameters:
     Description: "ID for ACM certificate to deploy to Cloudfront in us-east-1"
     Type: "String"
 
+  IssuerAlternativeNameOverride:
+    Description: The base64 encoded ASN1 string of the Issuer Alt Name to use when deploying to a branch in DEV
+    Type: String
+    Default: "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="  # base64 ASN.1 encoding of "https://mobile.dev.account.gov.uk/"
+
 Mappings:
   EnvironmentVariables:
     dev:
-      IssuerAltName: "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="  # base64 ASN.1 encoding of "https://mobile.dev.account.gov.uk/"
+      IssuerAlternativeName: "MCSGImh0dHBzOi8vbW9iaWxlLmRldi5hY2NvdW50Lmdvdi51ay8="  # base64 ASN.1 encoding of "https://mobile.dev.account.gov.uk/"
+      RootCertificateParameter: "/ca/iaca/root-certificate"
+      IssuerAlternativeNameParameter: "/ca/iaca/issuer-alternative-name"
+      CertificateId: "57424a61-5f53-4339-8ede-3da214837455"
+      CommonName: "mDL Example IACA Root"
+
+Conditions:
+  StackNameIsWalletCredIssuerCA: !Equals [!Ref "AWS::StackName", "wallet-cred-issuer-ca"]
 
 Resources:
   RootCA:
@@ -34,19 +43,7 @@ Resources:
       SigningAlgorithm: SHA256WITHECDSA
       Subject:
         Country: "UK"
-#        Organization: string
-#        OrganizationalUnit: string
-#        DistinguishedNameQualifier: string
-#        State: string
-        CommonName: "mDL Example IACA Root"
-#        SerialNumber: string
-#        Locality: string
-#        Title: string
-#        Surname: string
-#        GivenName: string
-#        Initials: DG
-#        Pseudonym: string
-#        GenerationQualifier: DBG
+        CommonName: !FindInMap [EnvironmentVariables, !Ref Environment, CommonName]
       RevocationConfiguration:
         CrlConfiguration:
           Enabled: true
@@ -199,7 +196,10 @@ Resources:
         Extensions:
           CustomExtensions:
             - ObjectIdentifier: "2.5.29.18"  # Issuer Alternative Name
-              Value: !FindInMap [EnvironmentVariables, !Ref Environment, IssuerAltName]
+              Value: !If
+                - StackNameIsWalletCredIssuerCA
+                - !FindInMap [EnvironmentVariables, !Ref Environment, IssuerAlternativeName]
+                - !Ref IssuerAlternativeNameOverride
           KeyUsage:
             KeyCertSign: true
             CRLSign: true
@@ -215,27 +215,39 @@ Resources:
           - Certificate
       Status: ACTIVE
 
-  DocumentSigningKey:
-    Type: AWS::KMS::Key
-    Properties:
-      KeySpec: ECC_NIST_P256
-      KeyUsage: SIGN_VERIFY
-      Description: !Sub "Example Document Signing Key for ${AWS::StackName}"
-      Enabled: true
-      PendingWindowInDays: 7
+#  DocumentSigningKey:
+#    Type: AWS::KMS::Key
+#    Properties:
+#      KeySpec: ECC_NIST_P256
+#      KeyUsage: SIGN_VERIFY
+#      Description: !Sub "Example Document Signing Key for ${AWS::StackName}"
+#      Enabled: true
+#      PendingWindowInDays: 7
+#
+#  DocumentSigningKeyAlias:
+#    Type: AWS::KMS::Alias
+#    Properties:
+#      AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key"
+#      TargetKeyId: !Ref DocumentSigningKey
 
-  DocumentSigningKeyAlias:
-    Type: AWS::KMS::Alias
+  RootCertificateParameter:
+    Type: AWS::SSM::Parameter
     Properties:
-      AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key"
-      TargetKeyId: !Ref DocumentSigningKey
+      Name: !FindInMap [EnvironmentVariables, !Ref Environment, RootCertificateParameter]
+      Type: String
+      Value:
+        Fn::GetAtt:
+          - RootCAActivation
+          - CompleteCertificateChain
+
+  IssuerAlternativeNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !FindInMap [EnvironmentVariables, !Ref Environment, IssuerAlternativeNameParameter]
+      Type: String
+      Value: !FindInMap [EnvironmentVariables, !Ref Environment, IssuerAlternativeName]
 
 Outputs:
-  RootCertificate:
-    Value:
-      Fn::GetAtt:
-        - RootCAActivation
-        - CompleteCertificateChain
   RootCertificateArn:
     Value:
       Fn::GetAtt:
