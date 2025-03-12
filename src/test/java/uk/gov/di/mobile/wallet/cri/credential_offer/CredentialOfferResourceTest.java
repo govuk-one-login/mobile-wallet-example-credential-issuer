@@ -71,7 +71,7 @@ class CredentialOfferResourceTest {
 
     @Test
     @DisplayName("Should return 200 and the URL encoded credential offer")
-    void testItReturns200AndUrlEncodedCredentialOffer()
+    void should_Return_200_And_Url_Encoded_CredentialOffer()
             throws JOSEException, DataStoreException, SigningException, NoSuchAlgorithmException {
         SignResponse signResponse = getMockedSignResponse();
         CredentialOffer mockCredentialOffer = getMockCredentialOffer();
@@ -103,7 +103,7 @@ class CredentialOfferResourceTest {
 
     @Test
     @DisplayName("Should return 500 when a DataStoreException is caught")
-    void testItReturns500() throws JOSEException, DataStoreException {
+    void test_It_Returns_500() throws JOSEException, DataStoreException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
         doThrow(new DataStoreException("Mock error message", new Exception()))
@@ -124,7 +124,7 @@ class CredentialOfferResourceTest {
 
     @Test
     @DisplayName("Should return 400 when a walletSubjectID is not a valid value")
-    void testItValidatesInputParam_walletSubjectID() {
+    void test_It_Validates_InputParam_walletSubjectID() {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", "123")
@@ -137,7 +137,7 @@ class CredentialOfferResourceTest {
 
     @Test
     @DisplayName("Should return 400 when a documentId is not a valid value")
-    void testItValidatesInputParam_documentId() {
+    void test_It_Validates_InputParam_documentId() {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
@@ -150,7 +150,7 @@ class CredentialOfferResourceTest {
 
     @Test
     @DisplayName("Should return 400 when a credentialType is not a valid value")
-    void testItValidatesInputParam_credentialType() {
+    void test_It_Validates_InputParam_credentialType() {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)

@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.security.InvalidAlgorithmParameterException;
@@ -27,7 +28,7 @@ class DidBuilderTest {
     private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_KEY_ID;
 
     @Test
-    void shouldReturnDid() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
+    void should_Return_Did() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
         ECKey testJwk = getTestJwk();
 
         Did response =
@@ -51,7 +52,8 @@ class DidBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullJwk() {
+    @DisplayName("should Throw Illegal Argument Exception On Null Jwk")
+    void should_ThrowException_On_Null_Jwk() {
         DidBuilder didBuilder = new DidBuilder();
         IllegalArgumentException thrown =
                 assertThrows(
@@ -60,7 +62,8 @@ class DidBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullId() {
+    @DisplayName("should Throw Illegal Argument Exception On Null Id")
+    void should_ThrowException_On_Null_Id() {
         DidBuilder didBuilder = new DidBuilder();
         IllegalArgumentException thrown =
                 assertThrows(IllegalArgumentException.class, () -> didBuilder.setId(null));
@@ -68,7 +71,8 @@ class DidBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullType() {
+    @DisplayName("should Throw Illegal Argument Exception On Null Type")
+    void should_ThrowException_On_Null_Type() {
         DidBuilder didBuilder = new DidBuilder();
         IllegalArgumentException thrown =
                 assertThrows(IllegalArgumentException.class, () -> didBuilder.setType(null));
@@ -76,7 +80,8 @@ class DidBuilderTest {
     }
 
     @Test
-    void shouldThrowIllegalArgumentExceptionOnNullController() {
+    @DisplayName("should Throw Illegal Argument Exception On Null Controller")
+    void should_ThrowException_On_Null_Controller() {
         DidBuilder didBuilder = new DidBuilder();
         IllegalArgumentException thrown =
                 assertThrows(IllegalArgumentException.class, () -> didBuilder.setController(null));

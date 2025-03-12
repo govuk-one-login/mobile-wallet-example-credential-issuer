@@ -57,7 +57,7 @@ class MetadataResourceTest {
 
     @Test
     @DisplayName("Should return 500 status code when MetadataBuilder throws an exception")
-    void testReturns500() {
+    void test_Returns_500() {
         when(metadataBuilder.build()).thenThrow(IllegalArgumentException.class);
 
         final Response response =

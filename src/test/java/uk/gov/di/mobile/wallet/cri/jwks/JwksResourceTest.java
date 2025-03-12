@@ -7,6 +7,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.core.Response;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -40,7 +41,8 @@ class JwksResourceTest {
     }
 
     @Test
-    void shouldReturn500WhenJwksServiceThrowsAnException()
+    @DisplayName("Should return 500 when Jwks Service Throws an Exception")
+    void should_Return_500_When_JwksService_ThrowsException()
             throws KeyNotActiveException, PEMException, NoSuchAlgorithmException {
         doThrow(new PEMException("Mock error message")).when(jwksService).generateJwks();
 
@@ -52,7 +54,7 @@ class JwksResourceTest {
     }
 
     @Test
-    void shouldReturn200AndJwksJson()
+    void should_Return_200_And_JwksJson()
             throws ParseException, KeyNotActiveException, PEMException, NoSuchAlgorithmException {
         JWK publicKey =
                 JWK.parse(

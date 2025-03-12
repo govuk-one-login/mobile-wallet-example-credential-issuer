@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,7 +33,8 @@ class HealthCheckResourceTest {
     }
 
     @Test
-    void shouldBeHealthyResponseWhenServiceIsHealthy() throws JsonProcessingException {
+    @DisplayName("Should be Healthy Response when Service is healthy")
+    void should_Be_HealthyResponse_When_Service_Is_Healthy() throws JsonProcessingException {
         SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
         map.put("ping", HealthCheck.Result.healthy());
         map.put("deadlocks", HealthCheck.Result.healthy());

@@ -4,6 +4,7 @@ import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -91,7 +92,8 @@ class DidDocumentServiceTest {
     }
 
     @Test
-    void shouldThrowKeyNotActiveExceptionIfKeyIsInactive() {
+    @DisplayName("Should Throw Key Not Active Exception if Key is Inactive")
+    void should_ThrowException_If_Key_Is_Inactive() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenThrow(NotFoundException.class);
 
@@ -103,7 +105,8 @@ class DidDocumentServiceTest {
     }
 
     @Test
-    void shouldThrowKeyNotActiveExceptionIfKeyIsNotEnabled() {
+    @DisplayName("Should Throw Key Not Active Exception if Key is not Enabled")
+    void should_ThrowException_If_Key_Is_Not_Enabled() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(getMockDescribeKeyResponse(TEST_ARN, false, null));
 
@@ -115,7 +118,8 @@ class DidDocumentServiceTest {
     }
 
     @Test
-    void shouldThrowKeyNotActiveExceptionIfKeyIsDueForDeletion() {
+    @DisplayName("Should Throw Key Not Active Exception if Key is due for deletion")
+    void should_ThrowException_If_Key_Is_Due_For_Deletion() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(
                         getMockDescribeKeyResponse(TEST_ARN, true, Instant.now().plusSeconds(60)));

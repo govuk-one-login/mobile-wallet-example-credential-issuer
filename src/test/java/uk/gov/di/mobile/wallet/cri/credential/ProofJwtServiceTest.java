@@ -9,6 +9,7 @@ import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
@@ -43,7 +44,9 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenJwtHeaderAlgDoesNotMatchConfig()
+    @DisplayName(
+            "should Throw Proof Jwt Validation Exception When JwtHeader Alg does not match Config")
+    void should_ThrowException_When_JwtHeader_Alg_Does_Not_Match_Config()
             throws JOSEException, InvalidKeySpecException, NoSuchAlgorithmException {
         SignedJWT signedJwt =
                 new SignedJWT(
@@ -63,8 +66,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenJwtHeaderKidIsNull()
-            throws JOSEException, ParseException {
+    @DisplayName("should Throw Proof Jwt Validation Exception when Jwt Header Kid is Null")
+    void should_ThrowException_When_JwtHeader_Kid_Is_Null() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
@@ -81,8 +84,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenRequiredClaimAreNull()
-            throws JOSEException, ParseException {
+    @DisplayName("should Throw Proof Jwt Validation Exception when Required Claims are Null")
+    void should_ThrowException_When_RequiredClaims_Are_Null() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
@@ -101,7 +104,9 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenAudienceClaimDoesNotMatchConfig()
+    @DisplayName(
+            "should Throw Proof Jwt Validation Exception when Audience Claim does not match Config")
+    void should_ThrowException_When_AudienceClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
@@ -122,7 +127,9 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenAIssuerClaimDoesNotMatchConfig()
+    @DisplayName(
+            "should Throw Proof Jwt Validation Exception when an Issuer Claim does not match Config")
+    void should_ThrowException_When_IssuerClaim_Does_Not_Match_Config()
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
@@ -142,8 +149,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenDidKeyIsInvalid()
-            throws JOSEException, ParseException {
+    @DisplayName("should Throw Proof Jwt Validation Exception when Did Key is invalid")
+    void should_ThrowException_When_DidKey_Is_Invalid() throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
                         "did:key:notAValidDidKey", "urn:fdc:gov:uk:wallet", TEST_EXAMPLE_CRI_URL);
@@ -161,7 +168,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldThrowProofJwtValidationExceptionWhenSignatureVerificationFailed()
+    @DisplayName("should Throw Proof Jwt Validation Exception when Signature Verification Failed")
+    void should_ThrowException_When_SignatureVerification_Failed()
             throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
@@ -182,7 +190,8 @@ class ProofJwtServiceTest {
     }
 
     @Test
-    void shouldNotThrowErrorWhenJwtVerificationSucceeds() throws JOSEException, ParseException {
+    void should_Not_ThrowError_When_JwtVerification_Succeeds()
+            throws JOSEException, ParseException {
         SignedJWT signedJwt =
                 getTestProofJwt(
                         "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf",

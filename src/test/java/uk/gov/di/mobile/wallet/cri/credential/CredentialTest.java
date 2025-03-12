@@ -16,7 +16,7 @@ class CredentialTest {
 
     @Test
     @DisplayName("Should create the credential with the right property name (credential)")
-    void testItCreatesCredential() throws ParseException, JsonProcessingException {
+    void test_It_Creates_Credential() throws ParseException, JsonProcessingException {
         String testCredential =
                 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
         SignedJWT credential = SignedJWT.parse(testCredential);

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class KeyHelperTest {
     @Test
-    void shouldHashAKeyId() throws NoSuchAlgorithmException {
+    void should_Hash_A_KeyId() throws NoSuchAlgorithmException {
         String keyId = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
 
         assertEquals(

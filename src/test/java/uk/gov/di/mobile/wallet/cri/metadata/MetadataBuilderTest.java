@@ -61,7 +61,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw a JsonParseException when credential_configurations_supported is not a valid JSON")
-    void testInvalidJSON() {
+    void test_Invalid_JSON() {
         assertThrows(
                 JsonParseException.class,
                 () ->
@@ -72,7 +72,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with a file name that does not exist")
-    void testInvalidFileName() {
+    void test_Invalid_FileName() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -86,7 +86,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with null")
-    void testCredentialConfigurationsSupportedNullValue() {
+    void test_CredentialConfigurationsSupported_Null_Value() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -97,7 +97,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialsEndpoint is called with null")
-    void testCredentialsEndpointNullValue() {
+    void test_CredentialsEndpoint_Null_Value() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -109,7 +109,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialEndpoint is called with null")
-    void testCredentialEndpointNullValue() {
+    void test_CredentialEndpoint_Null_Value() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -121,7 +121,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setAuthorizationServers is called with null")
-    void testAuthorizationServersNullValue() {
+    void test_AuthorizationServers_Null_Value() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -133,7 +133,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialIssuer is called with null")
-    void testCredentialIssuerNullValue() {
+    void test_CredentialIssuer_Null_Value() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
