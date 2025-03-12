@@ -12,14 +12,12 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
-import java.util.Arrays;
-import java.util.HashSet;
+import javax.management.InvalidAttributeValueException;
+import java.text.ParseException;
+import java.util.List;
 import java.util.Set;
 
 public class AccessTokenService {
-
-    private static final String ACCESS_TOKEN_ALGORITHM = "ES256";
-
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
 
@@ -28,7 +26,8 @@ public class AccessTokenService {
         this.configurationService = configurationService;
     }
 
-    public void verifyAccessToken(SignedJWT accessToken) throws AccessTokenValidationException {
+    public void verifyAccessToken(SignedJWT accessToken)
+            throws AccessTokenValidationException {
         verifyTokenHeader(accessToken);
         verifyTokenClaims(accessToken);
         if (!this.verifyTokenSignature(accessToken)) {
@@ -37,7 +36,7 @@ public class AccessTokenService {
     }
 
     private void verifyTokenHeader(SignedJWT accessToken) throws AccessTokenValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ACCESS_TOKEN_ALGORITHM);
+        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse("ES256");
         JWSAlgorithm jwtAlgorithm = accessToken.getHeader().getAlgorithm();
         if (jwtAlgorithm != clientAlgorithm) {
             throw new AccessTokenValidationException(
@@ -52,18 +51,16 @@ public class AccessTokenService {
         }
     }
 
-    private void verifyTokenClaims(SignedJWT accessToken) throws AccessTokenValidationException {
-        Set<String> requiredClaims =
-                new HashSet<>(Arrays.asList("sub", "c_nonce", "credential_identifiers"));
+    private void verifyTokenClaims(SignedJWT accessToken)
+            throws AccessTokenValidationException {
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
                         .issuer(configurationService.getOneLoginAuthServerUrl())
                         .audience(configurationService.getSelfUrl())
                         .build();
-
-        JWTClaimsSet jwtClaimsSet;
+        Set<String> requiredClaims = Set.of("sub", "c_nonce", "credential_identifiers");
         try {
-            jwtClaimsSet = accessToken.getJWTClaimsSet();
+            JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
@@ -82,6 +79,30 @@ public class AccessTokenService {
             return accessToken.verify(verifier);
         } catch (JOSEException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
+        }
+    }
+
+    public record AccessTokenClaims(String credentialIdentifier, String sub, String cNonce) {}
+
+    public AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
+            throws AccessTokenValidationException {
+        try {
+            JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
+
+            List<String> credentialIdentifiers =
+                    jwtClaimsSet.getStringListClaim("credential_identifiers");
+            if (credentialIdentifiers.isEmpty()) {
+                throw new InvalidAttributeValueException("Empty credential_identifiers");
+            }
+            String credentialIdentifier = credentialIdentifiers.get(0);
+            String sub = jwtClaimsSet.getStringClaim("sub");
+            String cNonce = jwtClaimsSet.getStringClaim("c_nonce");
+            return new AccessTokenClaims(credentialIdentifier, sub, cNonce);
+        } catch (ParseException | NullPointerException | InvalidAttributeValueException exception) {
+            throw new AccessTokenValidationException(
+                    String.format(
+                            "Error parsing access token custom claims: %s",
+                            exception.getMessage()));
         }
     }
 }
