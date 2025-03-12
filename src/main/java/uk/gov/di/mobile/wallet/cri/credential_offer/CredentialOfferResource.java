@@ -102,12 +102,11 @@ public class CredentialOfferResource {
         String credentialOfferStringEncoded =
                 URLEncoder.encode(credentialOfferString, StandardCharsets.UTF_8);
 
-        CredentialOfferUri credentialOfferUri =
-                new CredentialOfferUri(
-                        configurationService.getWalletDeepLinkUrl(),
-                        "/add?credential_offer=",
-                        credentialOfferStringEncoded);
+        String credentialOfferUrl =
+                configurationService.getWalletDeepLinkUrl()
+                        + "/add?credential_offer="
+                        + credentialOfferStringEncoded;
 
-        return ResponseUtil.ok(credentialOfferUri);
+        return ResponseUtil.ok(credentialOfferUrl);
     }
 }
