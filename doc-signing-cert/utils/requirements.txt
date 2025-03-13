@@ -1,6 +1,0 @@
-boto3
-pyasn1
-pyasn1-modules
-asn1crypto
-oscrypto
-cryptography

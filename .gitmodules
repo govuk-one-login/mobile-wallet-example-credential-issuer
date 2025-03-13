@@ -1,3 +1,0 @@
-[submodule "doc-signing-cert/utils/csrbuilderforkms"]
-	path = doc-signing-cert/utils/csrbuilderforkms
-	url = https://github.com/aws-samples/csr-builder-for-kms.git
