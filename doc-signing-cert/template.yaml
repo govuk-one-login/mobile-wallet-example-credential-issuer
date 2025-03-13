@@ -1,0 +1,49 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Private CA to act as the Issuing Authority Certificate Authority
+
+Parameters:
+  Environment:
+    Description: "The environment type"
+    Type: "String"
+    Default: "dev"
+    AllowedValues:
+      - "dev"
+      - "build"
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      DocumentSigningKey1Arn: "/ca/iaca/doc-signing-key-1-arn"
+    build:
+      DocumentSigningKey1Arn: "/ca/iaca/doc-signing-key-1-arn"
+
+Resources:
+  DocumentSigningKey1:
+    Type: AWS::KMS::Key
+    Properties:
+      KeySpec: ECC_NIST_P256
+      KeyUsage: SIGN_VERIFY
+      Description: !Sub "Example Document Signing Key 1 for ${AWS::StackName}"
+      Enabled: true
+      PendingWindowInDays: 7
+
+  DocumentSigningKeyAlias1:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key-1"
+      TargetKeyId: !Ref DocumentSigningKey1
+
+  DocSigningKey1ArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKey1Arn]
+      Type: String
+      Value: !GetAtt DocumentSigningKey1.Arn
+
+Outputs:
+  DocSigningKey1Arn:
+    Description: ARN for Document Signing Key 1 KMS resource
+    Value: !GetAtt DocumentSigningKey1.Arn
+    Export:
+      Name: !Sub "${AWS::StackName}-document-signing-key-1-arn"
