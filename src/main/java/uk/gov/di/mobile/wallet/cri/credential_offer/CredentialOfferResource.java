@@ -62,6 +62,9 @@ public class CredentialOfferResource {
         UUID uuid = UUID.randomUUID();
         String credentialOfferId = uuid.toString();
 
+        UUID notificationUuid = UUID.randomUUID();
+        String notificationId = notificationUuid.toString();
+
         CredentialOffer credentialOffer;
         try {
             credentialOffer =
@@ -82,7 +85,7 @@ public class CredentialOfferResource {
 
         try {
             dataStore.saveCredentialOffer(
-                    new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId));
+                    new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId, notificationId));
         } catch (DataStoreException exception) {
             LOGGER.error(
                     "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",
