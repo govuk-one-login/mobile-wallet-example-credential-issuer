@@ -14,22 +14,24 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.InvalidKeySpecException;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 
 public class ProofJwtService {
 
-    private static final String PROOF_JWT_ALGORITHM = "ES256";
-    private static final String PROOF_JWT_ISSUER = "urn:fdc:gov:uk:wallet";
+    private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
+    private static final String EXPECTED_ISSUER = "urn:fdc:gov:uk:wallet";
     private final ConfigurationService configurationService;
+    public String kid;
+    public String nonce;
 
     public ProofJwtService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
 
     /**
-     * Verifies the Proof JWT's header and payload claims and its signature.
+     * Verifies the Proof JWT header and payload claims and its signature.
      *
      * @param proofJwt The Proof JWT to verify
      * @throws ProofJwtValidationException On any error verifying the token claims and signature
@@ -49,19 +51,18 @@ public class ProofJwtService {
      * @throws ProofJwtValidationException On invalid header claims
      */
     private void verifyTokenHeader(SignedJWT proofJwt) throws ProofJwtValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ProofJwtService.PROOF_JWT_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = proofJwt.getHeader().getAlgorithm();
-        if (jwtAlgorithm != clientAlgorithm) {
+        if (jwtAlgorithm != EXPECTED_SIGNING_ALGORITHM) {
             throw new ProofJwtValidationException(
                     String.format(
                             "JWT alg header claim [%s] does not match client config alg [%s]",
-                            jwtAlgorithm, clientAlgorithm));
+                            jwtAlgorithm, EXPECTED_SIGNING_ALGORITHM));
         }
 
-        String keyId = proofJwt.getHeader().getKeyID();
-        if (keyId == null) {
+        if (proofJwt.getHeader().getKeyID() == null) {
             throw new ProofJwtValidationException("JWT kid header claim is null");
         }
+        kid = proofJwt.getHeader().getKeyID();
     }
 
     /**
@@ -71,19 +72,23 @@ public class ProofJwtService {
      * @throws ProofJwtValidationException On invalid payload claims
      */
     private void verifyTokenClaims(SignedJWT proofJwt) throws ProofJwtValidationException {
-        Set<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
+        String expectedAudience = configurationService.getSelfUrl();
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
-                        .issuer(PROOF_JWT_ISSUER)
-                        .audience(configurationService.getSelfUrl())
+                        .issuer(EXPECTED_ISSUER)
+                        .audience(expectedAudience)
                         .build();
+        HashSet<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
 
         try {
             JWTClaimsSet jwtClaimsSet = proofJwt.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
-        } catch (BadJWTException | java.text.ParseException exception) {
+
+            nonce = jwtClaimsSet.getClaim("nonce").toString();
+
+        } catch (BadJWTException | ParseException exception) {
             throw new ProofJwtValidationException(exception.getMessage(), exception);
         }
     }
