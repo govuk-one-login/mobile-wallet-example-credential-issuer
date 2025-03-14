@@ -8,21 +8,21 @@ import lombok.Getter;
 public class NotificationRequestBody {
 
     @JsonProperty("notification_id")
-    private String notification_id;
+    private String notificationId;
 
     @JsonProperty("event")
     private String event;
 
     @JsonProperty("event_description")
-    private String event_description;
+    private String eventDescription;
 
     @JsonCreator
     public NotificationRequestBody(
-            @JsonProperty(value = "notification_id", required = true) String notification_id,
-            @JsonProperty(value = "event", required = true) String event,
+            @JsonProperty(value = "notification_id") String notification_id,
+            @JsonProperty(value = "event") String event,
             @JsonProperty(value = "event_description") String event_description) {
-        this.notification_id = notification_id;
+        this.notificationId = notification_id;
         this.event = event;
-        this.event_description = event_description;
+        this.eventDescription = event_description;
     }
 }
