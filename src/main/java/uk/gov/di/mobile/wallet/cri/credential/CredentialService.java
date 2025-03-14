@@ -7,24 +7,22 @@ import jakarta.ws.rs.core.Response;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.*;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubjectV1;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubjectV1;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.*;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubjectV1;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import javax.management.InvalidAttributeValueException;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.time.Instant;
-import java.util.List;
 import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
@@ -63,16 +61,16 @@ public class CredentialService {
                     URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferNotFoundException {
-        accessTokenService.verifyAccessToken(accessToken);
-        AccessTokenClaims accessTokenCustomClaims = getAccessTokenClaims(accessToken);
-        String credentialOfferId = accessTokenCustomClaims.credentialIdentifier();
+
+        AccessTokenService.AccessTokenData accessTokenData =
+                accessTokenService.verifyAccessToken(accessToken);
+        String credentialOfferId = accessTokenData.credentialIdentifier();
         LOGGER.info("Access token for credentialOfferId {} verified", credentialOfferId);
 
-        proofJwtService.verifyProofJwt(proofJwt);
-        ProofJwtClaims proofJwtClaims = getProofJwtClaims(proofJwt);
+        ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
         LOGGER.info("Proof JWT for credentialOfferId {} verified", credentialOfferId);
 
-        if (!proofJwtClaims.nonce().equals(accessTokenCustomClaims.cNonce())) {
+        if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
             throw new ProofJwtValidationException(
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
@@ -94,7 +92,7 @@ public class CredentialService {
         }
         LOGGER.info("Credential offer retrieved for credentialOfferId {}", credentialOfferId);
 
-        if (!credentialOffer.getWalletSubjectId().equals(accessTokenCustomClaims.sub())) {
+        if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
             throw new AccessTokenValidationException(
                     "Access token sub claim does not match cached walletSubjectId");
         }
@@ -111,7 +109,7 @@ public class CredentialService {
         dataStore.deleteCredentialOffer(
                 credentialOfferId); // delete credential offer to prevent replay
 
-        String sub = proofJwtClaims.kid;
+        String sub = proofJwtData.keyId();
         String vcType = document.getVcType();
 
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
@@ -130,44 +128,6 @@ public class CredentialService {
         long now = Instant.now().getEpochSecond();
         return now > credentialOffer.getTimeToLive();
     }
-
-    private static AccessTokenClaims getAccessTokenClaims(SignedJWT accessToken)
-            throws AccessTokenValidationException {
-        try {
-            List<String> credentialIdentifiers =
-                    accessToken.getJWTClaimsSet().getStringListClaim("credential_identifiers");
-            if (credentialIdentifiers.isEmpty()) {
-                throw new InvalidAttributeValueException("Empty credential_identifiers");
-            }
-            String credentialIdentifier = credentialIdentifiers.get(0);
-            String sub = accessToken.getJWTClaimsSet().getStringClaim("sub");
-            String cNonce = accessToken.getJWTClaimsSet().getStringClaim("c_nonce");
-            return new AccessTokenClaims(credentialIdentifier, sub, cNonce);
-        } catch (ParseException | NullPointerException | InvalidAttributeValueException exception) {
-            throw new AccessTokenValidationException(
-                    String.format(
-                            "Error parsing access token custom claims: %s",
-                            exception.getMessage()));
-        }
-    }
-
-    private record AccessTokenClaims(String credentialIdentifier, String sub, String cNonce) {}
-
-    private static ProofJwtClaims getProofJwtClaims(SignedJWT proofJwt)
-            throws CredentialServiceException {
-        try {
-            String nonce = proofJwt.getJWTClaimsSet().getStringClaim("nonce");
-            String kid = proofJwt.getHeader().getKeyID();
-            return new ProofJwtClaims(nonce, kid);
-        } catch (ParseException exception) {
-            throw new CredentialServiceException(
-                    String.format(
-                            "Error parsing RequestBody JWT custom claims: %s",
-                            exception.getMessage()));
-        }
-    }
-
-    private record ProofJwtClaims(String nonce, String kid) {}
 
     private Document getDocument(String documentId)
             throws URISyntaxException, CredentialServiceException {
