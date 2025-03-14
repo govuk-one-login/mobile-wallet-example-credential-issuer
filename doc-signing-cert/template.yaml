@@ -3,6 +3,12 @@ Transform: AWS::Serverless-2016-10-31
 Description: Private CA to act as the Issuing Authority Certificate Authority
 
 Parameters:
+  CodeSigningConfigArn:
+    Description: |
+      The ARN of the Code Signing Config to use, provided by the deployment pipeline
+    Type: String
+    Default: none
+
   Environment:
     Description: "The environment type"
     Type: "String"
@@ -11,14 +17,148 @@ Parameters:
       - "dev"
       - "build"
 
+  PermissionsBoundary:
+    Description: |
+      The ARN of the permissions boundary to apply to any role created by the template
+    Type: String
+    Default: none
+
+  VpcStackName:
+    Description: |
+      The stack name of the VPC where the TokenExchanger Function will be deployed
+    Type: String
+    Default: platform-vpc
+
+Conditions:
+  UsePermissionsBoundary: !Not
+    - !Equals
+      - !Ref PermissionsBoundary
+      - none
+
+  UseCodeSigning: !Not
+    - !Equals
+      - !Ref CodeSigningConfigArn
+      - none
+
 Mappings:
   EnvironmentVariables:
     dev:
-      DocumentSigningKey1Arn: "/ca/iaca/doc-signing-key-1-arn"
+      DocumentSigningKeyParameterPrefix: "/iaca/"
+      PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
+      PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
+      CloudwatchLogRetentionDays: 3
     build:
-      DocumentSigningKey1Arn: "/ca/iaca/doc-signing-key-1-arn"
+      DocumentSigningKeyParameterPrefix: "/iaca/"
+      PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
+      PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
+      CloudwatchLogRetentionDays: 3650
+
+Globals:
+  Function:
+    LoggingConfig:
+      LogFormat: JSON
+    Runtime: nodejs20.x
+    Architectures:
+      - arm64
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
 
 Resources:
+  IssueDocSigningCertificateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
+      CodeUri: issue-document-signing-certificate/
+      Handler: issueDocumentSigningCertificate.handler
+      Timeout: 900
+      MemorySize: 512
+      ReservedConcurrentExecutions: 1
+      LoggingConfig:
+        LogGroup: !Ref IssueDocSigningCertificateFunctionLogGroup
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
+          POWERTOOLS_METRICS_NAMESPACE: tmp
+          LOG_LEVEL: INFO
+          PLATFORM_CA_ARN_PARAMETER: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+          PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+          DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
+          DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
+      Policies:
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+        - S3CrudPolicy:
+            BucketName: !Ref DocSigningCertificateBucket
+        - Statement:
+            - Sid: KMSAccessDocumentSigningKeyPolicy
+              Effect: Allow
+              Action:
+                - kms:GetPublicKey
+                - kms:Sign
+              Resource: !GetAtt DocumentSigningKey1.Arn
+        - Statement:
+            - Sid: ACMPCAIssueCertificatePolicy
+              Effect: Allow
+              Action:
+                - acm-pca:IssueCertificate
+                - acm-pca:GetCertificate
+              Resource:
+                Fn::Sub:
+                  - "{{resolve:ssm:${ParameterName}}}"
+                  - ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+#      VpcConfig:
+#        SecurityGroupIds:
+#          - !ImportValue
+#            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+#        SubnetIds:
+#          - !ImportValue
+#            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+#          - !ImportValue
+#            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+#          - !ImportValue
+#            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+          - issueDocumentSigningCertificate.ts
+
+  IssueDocSigningCertificateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue-doc-signing-certificate
+      RetentionInDays: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - CloudwatchLogRetentionDays
+
+  DocSigningCertificateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-certificates"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
   DocumentSigningKey1:
     Type: AWS::KMS::Key
     Properties:
@@ -33,17 +173,3 @@ Resources:
     Properties:
       AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key-1"
       TargetKeyId: !Ref DocumentSigningKey1
-
-  DocSigningKey1ArnParameter:
-    Type: AWS::SSM::Parameter
-    Properties:
-      Name: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKey1Arn]
-      Type: String
-      Value: !GetAtt DocumentSigningKey1.Arn
-
-Outputs:
-  DocSigningKey1Arn:
-    Description: ARN for Document Signing Key 1 KMS resource
-    Value: !GetAtt DocumentSigningKey1.Arn
-    Export:
-      Name: !Sub "${AWS::StackName}-document-signing-key-1-arn"
