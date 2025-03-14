@@ -83,7 +83,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     public Credential buildV2Credential(
             T credentialSubject, CredentialType credentialType, String validUntil)
             throws SigningException, NoSuchAlgorithmException {
-        // didKey is the hashed key ID. This value must be appended to the string
+        // keyId is the hashed key ID. This value must be appended to the string
         // "did:web:example-credential-issuer.mobile.build.account.gov.uk#" in this ticket:
         // https://govukverify.atlassian.net/browse/DCMAW-11424
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
