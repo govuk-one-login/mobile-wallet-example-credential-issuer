@@ -44,6 +44,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
     public void run(final ConfigurationService configurationService, final Environment environment)
             throws MalformedURLException {
 
+        System.out.println("TEST LOG");
+
         KmsService kmsService = new KmsService(configurationService);
         PreAuthorizedCodeBuilder preAuthorizedCode =
                 new PreAuthorizedCodeBuilder(configurationService, kmsService);
