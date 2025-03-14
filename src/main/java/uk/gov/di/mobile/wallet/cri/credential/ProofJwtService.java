@@ -2,6 +2,7 @@ package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
@@ -20,11 +21,11 @@ import java.util.HashSet;
 
 public class ProofJwtService {
 
+    public record ProofJwtData(String keyId, String nonce) {}
+
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
     private static final String EXPECTED_ISSUER = "urn:fdc:gov:uk:wallet";
     private final ConfigurationService configurationService;
-    public String kid;
-    public String nonce;
 
     public ProofJwtService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
@@ -34,14 +35,17 @@ public class ProofJwtService {
      * Verifies the Proof JWT header and payload claims and its signature.
      *
      * @param proofJwt The Proof JWT to verify
+     * @return ProofJwtClaims
      * @throws ProofJwtValidationException On any error verifying the token claims and signature
      */
-    public void verifyProofJwt(SignedJWT proofJwt) throws ProofJwtValidationException {
+    public ProofJwtData verifyProofJwt(SignedJWT proofJwt) throws ProofJwtValidationException {
         verifyTokenHeader(proofJwt);
         verifyTokenClaims(proofJwt);
         if (!this.verifyTokenSignature(proofJwt)) {
             throw new ProofJwtValidationException("Proof JWT signature verification failed");
         }
+
+        return extractProofJwtData(proofJwt);
     }
 
     /**
@@ -62,7 +66,6 @@ public class ProofJwtService {
         if (proofJwt.getHeader().getKeyID() == null) {
             throw new ProofJwtValidationException("JWT kid header claim is null");
         }
-        kid = proofJwt.getHeader().getKeyID();
     }
 
     /**
@@ -85,9 +88,6 @@ public class ProofJwtService {
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
-
-            nonce = jwtClaimsSet.getClaim("nonce").toString();
-
         } catch (BadJWTException | ParseException exception) {
             throw new ProofJwtValidationException(exception.getMessage(), exception);
         }
@@ -118,6 +118,18 @@ public class ProofJwtService {
             throw new ProofJwtValidationException(
                     String.format("Error verifying signature: %s", exception.getMessage()),
                     exception);
+        }
+    }
+
+    private static ProofJwtData extractProofJwtData(SignedJWT token)
+            throws ProofJwtValidationException {
+        try {
+            JWSHeader header = token.getHeader();
+            JWTClaimsSet claimsSet = token.getJWTClaimsSet();
+
+            return new ProofJwtData(header.getKeyID(), claimsSet.getStringClaim("nonce"));
+        } catch (ParseException exception) {
+            throw new ProofJwtValidationException(exception.getMessage(), exception);
         }
     }
 }

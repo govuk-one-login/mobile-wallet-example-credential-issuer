@@ -15,30 +15,30 @@ import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import javax.management.InvalidAttributeValueException;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 public class AccessTokenService {
+
+    public record AccessTokenData(
+            String walletSubjectId, String nonce, String credentialIdentifier) {}
 
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
-    public String sub;
-    public String credentialIdentifier;
-    public String cNonce;
 
     public AccessTokenService(JwksService jwksService, ConfigurationService configurationService) {
         this.jwksService = jwksService;
         this.configurationService = configurationService;
     }
 
-    public void verifyAccessToken(SignedJWT accessToken) throws AccessTokenValidationException {
+    public AccessTokenData verifyAccessToken(SignedJWT accessToken)
+            throws AccessTokenValidationException {
         verifyTokenHeader(accessToken);
         verifyTokenClaims(accessToken);
         if (!this.verifyTokenSignature(accessToken)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
+        return extractAccessTokenData(accessToken);
     }
 
     private void verifyTokenHeader(SignedJWT accessToken) throws AccessTokenValidationException {
@@ -72,14 +72,9 @@ public class AccessTokenService {
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
 
-            sub = jwtClaimsSet.getSubject();
-            cNonce = jwtClaimsSet.getClaim("c_nonce").toString();
-            List<String> credentialIdentifiers =
-                    jwtClaimsSet.getStringListClaim("credential_identifiers");
-            if (credentialIdentifiers.isEmpty()) {
+            if (jwtClaimsSet.getStringListClaim("credential_identifiers").isEmpty()) {
                 throw new InvalidAttributeValueException("Empty credential_identifiers claim");
             }
-            credentialIdentifier = credentialIdentifiers.get(0);
 
         } catch (BadJWTException | InvalidAttributeValueException | ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
@@ -95,6 +90,19 @@ public class AccessTokenService {
             ECDSAVerifier verifier = new ECDSAVerifier(publicKey);
             return accessToken.verify(verifier);
         } catch (JOSEException exception) {
+            throw new AccessTokenValidationException(exception.getMessage(), exception);
+        }
+    }
+
+    private static AccessTokenData extractAccessTokenData(SignedJWT token)
+            throws AccessTokenValidationException {
+        try {
+            JWTClaimsSet jwtClaimsSet = token.getJWTClaimsSet();
+            return new AccessTokenData(
+                    jwtClaimsSet.getSubject(),
+                    jwtClaimsSet.getStringClaim("c_nonce"),
+                    jwtClaimsSet.getListClaim("credential_identifiers").get(0).toString());
+        } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
     }
