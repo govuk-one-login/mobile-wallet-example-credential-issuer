@@ -35,7 +35,7 @@ public class ProofJwtService {
      * Verifies the Proof JWT header and payload claims and its signature.
      *
      * @param proofJwt The Proof JWT to verify
-     * @return ProofJwtClaims
+     * @return ProofJwtData
      * @throws ProofJwtValidationException On any error verifying the token claims and signature
      */
     public ProofJwtData verifyProofJwt(SignedJWT proofJwt) throws ProofJwtValidationException {
