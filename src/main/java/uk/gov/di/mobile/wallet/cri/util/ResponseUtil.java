@@ -13,8 +13,16 @@ public class ResponseUtil {
         return jsonBuilder(Response.Status.OK, entity).build();
     }
 
+    public static Response noContent() {
+        return Response.status(Response.Status.NO_CONTENT).build();
+    }
+
     public static Response badRequest(String entity) {
         return jsonBuilder(Response.Status.BAD_REQUEST, entity).build();
+    }
+
+    public static Response unauthorized() {
+        return Response.status(Response.Status.UNAUTHORIZED).build();
     }
 
     public static Response internalServerError() {
