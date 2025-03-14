@@ -5,228 +5,174 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.crypto.RSASSASigner;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import testUtils.MockAccessTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.interfaces.RSAPrivateKey;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.text.ParseException;
-import java.time.Instant;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.Date;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AccessTokenServiceTest {
 
     private AccessTokenService accessTokenService;
+    private ECDSASigner ecSigner;
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final JwksService jwksService = mock(JwksService.class);
-    private static final String AUDIENCE = "self-url.gov.uk";
-    private static final String ISSUER = "auth-url.gov.uk";
 
     @BeforeEach
-    void setup() {
+    void setup() throws ParseException, JOSEException {
+        ecSigner = new ECDSASigner(getEsKey());
         accessTokenService = new AccessTokenService(jwksService, configurationService);
-        when(configurationService.getSelfUrl()).thenReturn(AUDIENCE);
-        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(ISSUER);
+        when(configurationService.getSelfUrl()).thenReturn("https://issuer-url.gov.uk");
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
     }
 
     @Test
-    @DisplayName(
-            "Should Throw AccessToken Validation Exception when JWT header Alg does not match Config")
-    void should_ThrowException_When_JwtHeaderAlg_Does_Not_Match_Config()
-            throws JOSEException, InvalidKeySpecException, NoSuchAlgorithmException {
-        SignedJWT signedJwt =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.RS256).build(),
-                        new JWTClaimsSet.Builder().build());
-        RSASSASigner rsaSigner = new RSASSASigner(getRsaKey());
-        signedJwt.sign(rsaSigner);
+    void Should_ThrowException_When_AlgParamDoesNotMatchConfig() {
+        SignedJWT mockAccessToken = new MockAccessTokenBuilder("RS256").build();
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
                 "JWT alg header claim [RS256] does not match client config alg [ES256]",
                 exception.getMessage());
     }
 
     @Test
-    @DisplayName("Should Throw AccessToken Validation Exception when JWT header Kid is Null")
-    void should_ThrowException_When_JwtHeaderKid_Is_Null() throws JOSEException, ParseException {
-        SignedJWT signedJwt =
-                new SignedJWT(
-                        new JWSHeader.Builder(JWSAlgorithm.ES256).build(),
-                        new JWTClaimsSet.Builder().build());
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
-        signedJwt.sign(ecSigner);
+    void Should_ThrowAccessTokenValidationException_When_KidParamIsNull() {
+        SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").withKid(null).build();
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals("JWT kid header claim is null", exception.getMessage());
     }
 
     @Test
-    @DisplayName("Should Throw AccessToken Validation Exception when required claims are Null")
-    void should_ThrowException_When_Required_Claims_Are_Null()
-            throws JOSEException, ParseException {
-        SignedJWT signedJwt =
+    void Should_ThrowAccessTokenValidationException_When_RequiredClaimsAreMissing() {
+        SignedJWT mockAccessToken =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
                                 .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
                                 .build(),
                         new JWTClaimsSet.Builder().build());
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
-        signedJwt.sign(ecSigner);
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
                 "JWT missing required claims: [aud, c_nonce, credential_identifiers, iss, sub]",
                 exception.getMessage());
     }
 
     @Test
-    @DisplayName(
-            "should Throw AccessToken Validation Exception when Audience Claim does not match Config")
-    void should_ThrowException_When_AudienceClaim_Does_Not_Match_Config()
-            throws JOSEException, ParseException {
-        SignedJWT signedJwt = getTestAccessToken(ISSUER, "invalid-audience");
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
-        signedJwt.sign(ecSigner);
+    void Should_ThrowAccessTokenValidationException_When_CredentialIdentifiersClaimIsEmpty() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim("credential_identifiers", List.of())
+                        .build();
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
-        assertEquals(
-                "JWT aud claim has value [invalid-audience], must be [self-url.gov.uk]",
-                exception.getMessage());
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals("Empty credential_identifiers claim", exception.getMessage());
     }
 
     @Test
-    @DisplayName(
-            "Should Throw AccessToken Validation Exception when Issuer Claim does not match Config")
-    void should_ThrowException_When_IssuerClaim_Does_Not_Match_Config()
-            throws JOSEException, ParseException {
-
-        SignedJWT signedJwt = getTestAccessToken("invalid-issuer", AUDIENCE);
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
-        signedJwt.sign(ecSigner);
+    void Should_ThrowAccessTokenValidationException_When_AudClaimDoesNotMatchConfig() {
+        MockAccessTokenBuilder builder = new MockAccessTokenBuilder("ES256");
+        SignedJWT mockAccessToken = builder.withAudience("invalid-audience").build();
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
-                "JWT iss claim has value invalid-issuer, must be auth-url.gov.uk",
+                "JWT aud claim has value [invalid-audience], must be [https://issuer-url.gov.uk]",
                 exception.getMessage());
     }
 
     @Test
-    @DisplayName("Should Throw AccessToken Validation Exception when Signature Verification fails")
-    void should_ThrowException_When_Signature_Verification_Fails()
+    void Should_ThrowAccessTokenValidationException_When_IssClaimDoesNotMatchConfig() {
+        MockAccessTokenBuilder builder = new MockAccessTokenBuilder("ES256");
+        SignedJWT mockAccessToken = builder.withIssuer("invalid-issuer").build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals(
+                "JWT iss claim has value invalid-issuer, must be https://auth-url.gov.uk",
+                exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_SignatureVerificationFails()
             throws JOSEException, ParseException {
         JWK publicKey =
                 JWK.parse(
                         "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
-
-        SignedJWT signedJwt = getTestAccessToken(ISSUER, AUDIENCE);
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
-        signedJwt.sign(ecSigner);
+        SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
+        mockAccessToken.sign(ecSigner);
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals("Access token signature verification failed", exception.getMessage());
     }
 
     @Test
-    @DisplayName(
-            "Should Throw AccessToken Validation Exception when Jwks Service Throws KeySource Exception")
-    void should_ThrowException_When_JwksService_ThrowException()
-            throws JOSEException, ParseException {
+    void Should_ThrowAccessTokenValidationException_When_JwksServiceThrowsKeySourceException()
+            throws JOSEException {
+        SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class)))
                 .thenThrow(new KeySourceException("Some error fetching JWKs"));
-
-        SignedJWT signedJwt = getTestAccessToken(ISSUER, AUDIENCE);
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
-        signedJwt.sign(ecSigner);
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> accessTokenService.verifyAccessToken(signedJwt));
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals("Some error fetching JWKs", exception.getMessage());
     }
 
     @Test
-    @DisplayName("Should not ThrowError when Jwt Verification succeeds")
-    void should_Not_ThrowError_When_JwtVerification_Succeeds()
-            throws JOSEException, ParseException {
-        ECKey key = getEsKey();
-        JWK publicKey = key.toPublicJWK();
+    void Should_ReturnTokenData_When_JwtVerificationSucceeds()
+            throws JOSEException, ParseException, AccessTokenValidationException {
+        JWK publicKey = getEsKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
+        SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
+        mockAccessToken.sign(ecSigner);
 
-        SignedJWT signedJwt = getTestAccessToken(ISSUER, AUDIENCE);
-        ECDSASigner ecSigner = new ECDSASigner(key);
-        signedJwt.sign(ecSigner);
+        AccessTokenService.AccessTokenData response =
+                accessTokenService.verifyAccessToken(mockAccessToken);
 
-        assertDoesNotThrow(() -> accessTokenService.verifyAccessToken(signedJwt));
-        verify(jwksService).retrieveJwkFromURLWithKeyId(any(String.class));
-    }
-
-    private static SignedJWT getTestAccessToken(String issuer, String audience) {
-        return new SignedJWT(
-                new JWSHeader.Builder(JWSAlgorithm.ES256)
-                        .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
-                        .build(),
-                new JWTClaimsSet.Builder()
-                        .issueTime(Date.from(Instant.now()))
-                        .issuer(issuer)
-                        .audience(audience)
-                        .subject("test-sub")
-                        .claim("c_nonce", "test-c-nonce")
-                        .claim(
-                                "credential_identifiers",
-                                Arrays.asList("test-credential-identifier"))
-                        .build());
-    }
-
-    private RSAPrivateKey getRsaKey() throws InvalidKeySpecException, NoSuchAlgorithmException {
-        String privateKey =
-                "MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC3ZD/jwRxlA/vv43rx9T6ovlczQnsntAjgTbDRTDcsw7TYM1Q3wwD3OPYt5qaKg5qTKaOB90at2jBPih8QH/jDXfSjlU7RlSe8p7fYxaj73ds4ULGAOWaQqmbu+BppcUUPzKII1QBF8Mk2qn/GiVVfqCwDx7uOOT+jPr3H/Wysi+lI8JFYn60wj4oanmbr6iuIVKGWP41STlLu7aLhVM4JxAA2T85Ddot9nPCMftXLBW+QDZUvrbv4CSbtLjuxuqkKdN6FNpSjvx/oSZDDw6jyWydLI68CUQ09Nbm63oY/KpY5V/o+m81Uv2J0Ov+oHCF/0SU8/Nf7kWTK9uTXRW03AgMBAAECggEAE5rV8aUNQgdBAY4R8JfFEQj4DXTH8aCfaksj4dwB8fkh9hLWp/divQsL1jBYEWqsNZs37YbfuWofzAD5/SFN2KTMqEgn2uPVEafkUXof7Hz1GHoX35tDSafNxTIksKz5Mw0vLT6H/vIUsJFdg33e8JDr06Ogez3Hfc4RP7XpzjAgdUoVcEhF4VKFo6r7ImETUWQ4E5mCmWnqKPiqrGrVcwP0xVtz09yeE45eAVX89Sgn4Brxv48TDnKtKYxU2NhEKRJyL2EU0QLjW80tyGl/zzEzhn/QpjJqfKPB5REP41oPBfER/HVHoXDinelcNXYUkBUqbtcKexNI8wPHA5/TcQKBgQDb9UsmJiDHvlaTZS/Ge7+6wcn2zDT/o0S3ZRLzJeWcNLBonohiOt0FBvj/NvttqDGK53yjZZFRfWqJaG2pFJqhY/PLiX4hlt6nAQkzUDxpI08sU0Q4IgEomJUvXmicEJNHR1L4YYyPyv5nDB3fmGsyUTdbeWOFJRIxr25lOS1MNQKBgQDVcRPjsXJSDuRNOo/GnAGZiYlfAvxeXfkIsB45vbfEp+9HcvA7BZZP3b2JbMDIj2JcpYo5+W/Z3uU5nBVU0WjtXZ79uSvV/14oH95z5uAIm6JtIWgVGC31fGyPl8RLgn00fYa6MGXWUo82WnLYDBmC3wa7Xfar/dKVUQBZWGsJOwKBgC3+dOBdSK17146qsfrHFahvrVO2D78E3PGcaQH/AqxPODQoMkyYEm9ird5wGNMtQG7TSPTB4Ekx+H0TIRsh+9OTmv8MmRtc+OHjDZF1TayOfZe/MZyrP6LFhSyKiUVZEfLtryPRAhtvTxMtLXH75S54XSL7lxvYTJ2nGWaBNj+hAoGAf67ujAZp8ibQcla3DcPjvRqm3/ykRjuHL6hT3IzeszkXDjH2/gfgnJR0vxIc3Z3Q5MVuxDGwtK//hpAVvrCrSVv5MaUlURY8GFrAM6uIl/2qlAgpAH1/eNxfASN0HQvJpK32+8jaEvU+kPBYxV+vnzeWCl4yoz7rS8GyKMCY/2MCgYEAtDBPMVHPbjauWjzIjXlaJTMlAoWOmnTB36rkNC9U0SRCxvP6hcLTgvDv1TR2+mKM5tQS2/C1XC3zajUFhIqR0funEEWqUoKfZEWqagOILxpIaeida2MwWXNYLQIAimoMQ6CbqdHsPOrQ/ZtxqlwDUnPYumRawSyxsGIThDnN4oc=";
-        return (RSAPrivateKey)
-                KeyFactory.getInstance("RSA")
-                        .generatePrivate(
-                                new PKCS8EncodedKeySpec(Base64.getDecoder().decode(privateKey)));
+        assertEquals("efb52887-48d6-43b7-b14c-da7896fbf54d", response.credentialIdentifier());
+        assertEquals(
+                "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+                response.walletSubjectId());
+        assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
     }
 
     private ECKey getEsKey() throws ParseException {
