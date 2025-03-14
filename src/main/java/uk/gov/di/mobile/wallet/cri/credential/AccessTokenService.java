@@ -20,12 +20,15 @@ import java.util.HashSet;
 
 public class AccessTokenService {
 
-    public record AccessTokenData(
-            String walletSubjectId, String nonce, String credentialIdentifier) {}
-
+    public static final String CREDENTIAL_IDENTIFIERS = "credential_identifiers";
+    public static final String C_NONCE = "c_nonce";
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
+
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
+
+    public record AccessTokenData(
+            String walletSubjectId, String nonce, String credentialIdentifier) {}
 
     public AccessTokenService(JwksService jwksService, ConfigurationService configurationService) {
         this.jwksService = jwksService;
@@ -65,7 +68,7 @@ public class AccessTokenService {
                         .audience(expectedAudience)
                         .build();
         HashSet<String> requiredClaims =
-                new HashSet<>(Arrays.asList("sub", "c_nonce", "credential_identifiers"));
+                new HashSet<>(Arrays.asList("sub", C_NONCE, CREDENTIAL_IDENTIFIERS));
 
         try {
             JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
@@ -73,7 +76,7 @@ public class AccessTokenService {
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
 
-            if (jwtClaimsSet.getStringListClaim("credential_identifiers").isEmpty()) {
+            if (jwtClaimsSet.getStringListClaim(CREDENTIAL_IDENTIFIERS).isEmpty()) {
                 throw new InvalidAttributeValueException("Empty credential_identifiers claim");
             }
 
@@ -101,8 +104,8 @@ public class AccessTokenService {
             JWTClaimsSet jwtClaimsSet = token.getJWTClaimsSet();
             return new AccessTokenData(
                     jwtClaimsSet.getSubject(),
-                    jwtClaimsSet.getStringClaim("c_nonce"),
-                    jwtClaimsSet.getListClaim("credential_identifiers").get(0).toString());
+                    jwtClaimsSet.getStringClaim(C_NONCE),
+                    jwtClaimsSet.getListClaim(CREDENTIAL_IDENTIFIERS).get(0).toString());
         } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }

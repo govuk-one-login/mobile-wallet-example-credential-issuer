@@ -21,11 +21,13 @@ import java.util.HashSet;
 
 public class ProofJwtService {
 
-    public record ProofJwtData(String keyId, String nonce) {}
-
+    public static final String NONCE = "nonce";
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
     private static final String EXPECTED_ISSUER = "urn:fdc:gov:uk:wallet";
+
     private final ConfigurationService configurationService;
+
+    public record ProofJwtData(String keyId, String nonce) {}
 
     public ProofJwtService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
@@ -81,7 +83,7 @@ public class ProofJwtService {
                         .issuer(EXPECTED_ISSUER)
                         .audience(expectedAudience)
                         .build();
-        HashSet<String> requiredClaims = new HashSet<>(Arrays.asList("iat", "nonce"));
+        HashSet<String> requiredClaims = new HashSet<>(Arrays.asList("iat", NONCE));
 
         try {
             JWTClaimsSet jwtClaimsSet = proofJwt.getJWTClaimsSet();
@@ -127,7 +129,7 @@ public class ProofJwtService {
             JWSHeader header = token.getHeader();
             JWTClaimsSet claimsSet = token.getJWTClaimsSet();
 
-            return new ProofJwtData(header.getKeyID(), claimsSet.getStringClaim("nonce"));
+            return new ProofJwtData(header.getKeyID(), claimsSet.getStringClaim(NONCE));
         } catch (ParseException exception) {
             throw new ProofJwtValidationException(exception.getMessage(), exception);
         }
