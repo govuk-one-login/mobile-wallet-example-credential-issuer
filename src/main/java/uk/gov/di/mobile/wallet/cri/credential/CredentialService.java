@@ -109,7 +109,7 @@ public class CredentialService {
         dataStore.deleteCredentialOffer(
                 credentialOfferId); // delete credential offer to prevent replay
 
-        String sub = proofJwtData.keyId();
+        String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
 
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {

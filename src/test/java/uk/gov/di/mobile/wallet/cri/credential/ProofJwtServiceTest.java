@@ -150,6 +150,7 @@ class ProofJwtServiceTest {
         ProofJwtService.ProofJwtData response = proofJwtService.verifyProofJwt(mockProof);
 
         assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
-        assertEquals("did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf", response.keyId());
+        assertEquals(
+                "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf", response.didKey());
     }
 }

@@ -27,7 +27,7 @@ public class ProofJwtService {
 
     private final ConfigurationService configurationService;
 
-    public record ProofJwtData(String keyId, String nonce) {}
+    public record ProofJwtData(String didKey, String nonce) {}
 
     public ProofJwtService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
