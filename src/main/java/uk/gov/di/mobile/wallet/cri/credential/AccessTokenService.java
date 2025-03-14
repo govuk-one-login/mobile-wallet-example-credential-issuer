@@ -15,7 +15,8 @@ import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import javax.management.InvalidAttributeValueException;
 
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
 
 public class AccessTokenService {
 
