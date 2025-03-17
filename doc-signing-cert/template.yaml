@@ -115,17 +115,17 @@ Resources:
                 Fn::Sub:
                   - "{{resolve:ssm:${ParameterName}}}"
                   - ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
-#      VpcConfig:
-#        SecurityGroupIds:
-#          - !ImportValue
-#            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-#        SubnetIds:
-#          - !ImportValue
-#            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
-#          - !ImportValue
-#            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
-#          - !ImportValue
-#            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
