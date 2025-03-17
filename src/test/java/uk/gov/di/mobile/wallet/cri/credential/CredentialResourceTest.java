@@ -263,7 +263,6 @@ class CredentialResourceTest {
                         .readTree(
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
 
-        Credential credential = getMockCredential();
         CredentialResponse credentialResponse = getMockCredentialResponse();
 
         when(credentialService.getCredential(any(SignedJWT.class), any(SignedJWT.class)))
@@ -294,5 +293,4 @@ class CredentialResourceTest {
     private CredentialResponse getMockCredentialResponse() throws ParseException {
         return new CredentialResponse(getMockCredential(), "3fwe98js");
     }
-    ;
 }

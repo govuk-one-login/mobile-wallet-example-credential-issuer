@@ -55,7 +55,6 @@ class CredentialOfferResourceTest {
     private static final String DOCUMENT_ID = "mock-document-id";
     private static final String CREDENTIAL_TYPE = "TestCredentialType";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
-    private static final String NOTIFICATION_ID = "mock-notification-id";
     private static final KmsService kmsService = mock(KmsService.class);
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private static final CredentialOfferService credentialOfferService =
