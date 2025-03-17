@@ -16,6 +16,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignRequest;
@@ -31,6 +33,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -41,6 +44,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource.LOGGER;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
@@ -51,6 +55,7 @@ class CredentialOfferResourceTest {
     private static final String DOCUMENT_ID = "mock-document-id";
     private static final String CREDENTIAL_TYPE = "TestCredentialType";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
+    private static final String NOTIFICATION_ID = "mock-notification-id";
     private static final KmsService kmsService = mock(KmsService.class);
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private static final CredentialOfferService credentialOfferService =
@@ -85,20 +90,31 @@ class CredentialOfferResourceTest {
                 .when(mockDataStore)
                 .saveCredentialOffer(new CredentialOfferCacheItem());
 
-        final Response response =
-                resource.target("/credential_offer")
-                        .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
-                        .queryParam("documentId", DOCUMENT_ID)
-                        .queryParam("credentialType", CREDENTIAL_TYPE)
-                        .request()
-                        .get();
+        UUID mockCredentialOfferId = UUID.randomUUID();
+        UUID mockNotificationId = UUID.randomUUID();
 
-        String expectedCredentialOfferString =
-                "{\"credential_offer_uri\":\"https://mobile.test.account.gov.uk/wallet/add?credential_offer=%7B%22credentials%22%3A%5B%22TestCredentialType%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJraWQiOiJmZjI3NWI5Mi0wZGVmLTRkZmMtYjBmNi04N2M5NmIyNmM2YzciLCJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJ1cm46ZmRjOmdvdjp1azp3YWxsZXQiLCJjbGllbnRJZCI6ImFiYzEyMyIsImlzcyI6InVybjpmZGM6Z292OnVrOjxITVJDPiIsImNyZWRlbnRpYWxfaWRlbnRpZmllcnMiOlsiOWVlNzQxNjctYzYxZC00ZWE3LWFiZTEtZTI3OGYxMThlYTU1Il0sImV4cCI6MTcxMDIzNjM0NSwiaWF0IjoxNzEwMjM2MDQ1fQ.X89-rmLzo9UhzPe1t857N-0YBLRwQLu2jNYnxjSgAcU87d8wyWbbzML2wM_-rrdG5PyOWcup4-mpuFEI4VsSVA%22%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%7D\"}";
+        try (MockedStatic<UUID> mockedUuid = Mockito.mockStatic(UUID.class)) {
+            mockedUuid.when(UUID::randomUUID).thenReturn(mockCredentialOfferId, mockNotificationId);
 
-        verify(mockDataStore, times(1)).saveCredentialOffer(any());
-        assertThat(response.getStatus(), is(200));
-        assertThat(response.readEntity(String.class), is(expectedCredentialOfferString));
+            final Response response =
+                    resource.target("/credential_offer")
+                            .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
+                            .queryParam("documentId", DOCUMENT_ID)
+                            .queryParam("credentialType", CREDENTIAL_TYPE)
+                            .request()
+                            .get();
+
+            String expectedCredentialOfferString =
+                    "{\"credential_offer_uri\":\"https://mobile.test.account.gov.uk/wallet/add?credential_offer=%7B%22credentials%22%3A%5B%22TestCredentialType%22%5D%2C%22grants%22%3A%7B%22urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Apre-authorized_code%22%3A%7B%22pre-authorized_code%22%3A%22eyJraWQiOiJmZjI3NWI5Mi0wZGVmLTRkZmMtYjBmNi04N2M5NmIyNmM2YzciLCJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJ1cm46ZmRjOmdvdjp1azp3YWxsZXQiLCJjbGllbnRJZCI6ImFiYzEyMyIsImlzcyI6InVybjpmZGM6Z292OnVrOjxITVJDPiIsImNyZWRlbnRpYWxfaWRlbnRpZmllcnMiOlsiOWVlNzQxNjctYzYxZC00ZWE3LWFiZTEtZTI3OGYxMThlYTU1Il0sImV4cCI6MTcxMDIzNjM0NSwiaWF0IjoxNzEwMjM2MDQ1fQ.X89-rmLzo9UhzPe1t857N-0YBLRwQLu2jNYnxjSgAcU87d8wyWbbzML2wM_-rrdG5PyOWcup4-mpuFEI4VsSVA%22%7D%7D%2C%22credential_issuer%22%3A%22https%3A%2F%2Fcredential-issuer.example.com%22%7D\"}";
+
+            verify(mockDataStore, times(1)).saveCredentialOffer(any());
+            assertThat(response.getStatus(), is(200));
+            assertThat(response.readEntity(String.class), is(expectedCredentialOfferString));
+
+            mockedUuid.verify(UUID::randomUUID, times(2));
+
+            LOGGER.info("Generated notification ID: {} ", mockNotificationId);
+        }
     }
 
     @Test

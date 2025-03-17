@@ -71,6 +71,7 @@ class CredentialServiceTest {
     private SignedJWT mockAccessToken;
 
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
+    private static final String NOTIFICATION_ID = "3fwe98js";
     private static final String CREDENTIAL_IDENTIFIER = "efb52887-48d6-43b7-b14c-da7896fbf54d";
     private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
     private static final String WALLET_SUBJECT_ID =
@@ -92,7 +93,11 @@ class CredentialServiceTest {
                 Instant.now().plusSeconds(Long.parseLong("900")).getEpochSecond(); // 15 minutes
         mockCredentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        CREDENTIAL_IDENTIFIER, DOCUMENT_ID, WALLET_SUBJECT_ID, timeToLive);
+                        CREDENTIAL_IDENTIFIER,
+                        DOCUMENT_ID,
+                        WALLET_SUBJECT_ID,
+                        NOTIFICATION_ID,
+                        timeToLive);
         mockProofJwt = getMockProofJwt(NONCE);
         mockAccessToken = getMockAccessToken(WALLET_SUBJECT_ID);
     }
@@ -100,7 +105,7 @@ class CredentialServiceTest {
     @Test
     @DisplayName(
             "Should Throw Access Token Validation Exception when Credential Identifiers Claim is empty")
-    void Should_ThrowException_When_CredentialIdentifiers_Claim_Is_Empty()
+    void Should_ThrowException_When_CredentialIdentifiersClaimIsEmpty()
             throws JOSEException, ParseException {
         SignedJWT mockAccessTokenWithEmptyCredentialIdentifier = getMockAccessToken();
 
@@ -120,8 +125,7 @@ class CredentialServiceTest {
 
     @Test
     @DisplayName("Should Throw Proof Jwt Validation Exception when nonce values do not match")
-    void Should_ThrowException_When_Nonce_Values_Do_Not_Match()
-            throws JOSEException, ParseException {
+    void Should_ThrowException_When_NonceValuesDoNotMatch() throws JOSEException, ParseException {
         SignedJWT mockProofJwtWithDifferentNonce =
                 getMockProofJwt("c5408ee2-9c5d-4be3-acda-06b95285489a");
 
@@ -140,7 +144,7 @@ class CredentialServiceTest {
     @Test
     @DisplayName(
             "Should Throw Credential Offer Not Found Exception when Credential Offer not found")
-    void Should_ThrowException_When_CredentialOffer_Not_Found() throws DataStoreException {
+    void Should_ThrowException_When_CredentialOfferNotFound() throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
         CredentialOfferNotFoundException exception =
@@ -155,7 +159,7 @@ class CredentialServiceTest {
 
     @Test
     @DisplayName("Should Throw DataStore Exception when call to Database Throws Error")
-    void Should_ThrowException_When_Call_To_Database_ThrowsError() throws DataStoreException {
+    void Should_ThrowException_WhenCallToDatabaseThrowsError() throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenThrow(new DataStoreException("Some database error"));
 
@@ -170,7 +174,7 @@ class CredentialServiceTest {
     @Test
     @DisplayName(
             "Should Throw Access Token Validation Exception when Wallet_Subject_IDs do not match")
-    void Should_ThrowException_When_WalletSubjectIDs_Do_Not_Match()
+    void Should_ThrowException_WhenWalletSubjectIDsDoNotMatch()
             throws java.text.ParseException, DataStoreException, JOSEException {
         SignedJWT mockAccessTokenWithDifferentSub =
                 getMockAccessToken("954a4cff-0d38-4558-b29d-ee709f4f227e");
@@ -192,12 +196,16 @@ class CredentialServiceTest {
     @Test
     @DisplayName(
             "Should Throw Credential Offer Not Found Exception when Credential Offer is expired")
-    void Should_ThrowException_When_CredentialOffer_Is_Expired() throws DataStoreException {
+    void Should_ThrowException_When_CredentialOfferIsExpired() throws DataStoreException {
         long timeToLive =
                 Instant.now().minusSeconds(Long.parseLong("2")).getEpochSecond(); // 2 seconds ago
         CredentialOfferCacheItem mockCredentialOfferCacheItemExpired =
                 new CredentialOfferCacheItem(
-                        CREDENTIAL_IDENTIFIER, DOCUMENT_ID, WALLET_SUBJECT_ID, timeToLive);
+                        CREDENTIAL_IDENTIFIER,
+                        DOCUMENT_ID,
+                        WALLET_SUBJECT_ID,
+                        NOTIFICATION_ID,
+                        timeToLive);
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItemExpired);
 
@@ -213,8 +221,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_RuntimeException_When_Document_Endpoint_Returns_500()
-            throws DataStoreException {
+    void Should_ThrowRuntimeException_When_DocumentEndpointReturns500() throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -346,8 +353,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_CredentialServiceException_When_Document_VcType_Is_Unknown()
-            throws DataStoreException {
+    void Should_ThrowException_When_DocumentVcTypeIsUnknown() throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -368,7 +374,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Return_Credential()
+    void Should_Return_CredentialResponse()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     DataStoreException,
@@ -394,10 +400,12 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildV2Credential(any(), any(), any()))
                 .thenReturn(mockCredential);
 
-        Credential credentialServiceReturnValue =
+        CredentialResponse credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-        assertEquals(mockCredential.getCredential(), credentialServiceReturnValue.getCredential());
+        assertEquals(mockCredential, credentialServiceReturnValue.getCredential());
+        assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
+
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
         verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
