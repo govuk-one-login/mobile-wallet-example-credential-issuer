@@ -121,11 +121,11 @@ Resources:
             Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
