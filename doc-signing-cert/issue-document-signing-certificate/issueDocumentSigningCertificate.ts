@@ -131,6 +131,11 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       }
     }
 
+    if (!getCertificateCommandOutput.Certificate) {
+      logger.error("FAILED TO RETURN CERTIFICATE", { getCertificateCommandOutput })
+      return
+    }
+
     logger.info('CERTIFICATE RETRIEVED', { getCertificateCommandOutput });
     await putObject(
       config.DOC_SIGNING_KEY_BUCKET,
@@ -138,5 +143,13 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       getCertificateCommandOutput.Certificate,
     );
     logger.info('CERTIFICATE WRITTEN TO S3');
+
+    // decode certificate and write to bucket
+    const decodedCertificate = new x509.X509Certificate(getCertificateCommandOutput.Certificate)
+    await putObject(
+      config.DOC_SIGNING_KEY_BUCKET,
+      config.DOC_SIGNING_KEY_ID + '/certificate-metadata.json',
+      JSON.stringify(decodedCertificate),
+    );
   };
 }
