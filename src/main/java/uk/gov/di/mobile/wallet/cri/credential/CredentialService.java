@@ -131,11 +131,6 @@ public class CredentialService {
         }
     }
 
-    public CredentialResponse getCredentialResponse(Credential credential, String notificationId) {
-        return new CredentialResponse(credential, notificationId);
-    }
-    ;
-
     private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
         long now = Instant.now().getEpochSecond();
         return now > credentialOffer.getTimeToLive();
