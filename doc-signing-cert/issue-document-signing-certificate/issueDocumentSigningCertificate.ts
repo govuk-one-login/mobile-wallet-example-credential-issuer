@@ -1,25 +1,24 @@
 import { Buffer } from 'buffer';
 import * as x509 from '@peculiar/x509';
-import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import {
   ACMPCAClient,
   GetCertificateCommand,
   GetCertificateCommandOutput,
-  IssueCertificateCommand, IssueCertificateCommandOutput,
-  RequestInProgressException
-} from "@aws-sdk/client-acm-pca";
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+  IssueCertificateCommand,
+  IssueCertificateCommandOutput,
+  RequestInProgressException,
+} from '@aws-sdk/client-acm-pca';
 import { KMSClient } from '@aws-sdk/client-kms';
 import { Pkcs10CertificateRequestGeneratorUsingKmsKey } from './services/Pkcs10CertificateRequestGeneratorUsingKmsKey';
 import { logger } from './logging/logger';
 import { Context } from 'aws-lambda';
 import { getConfigFromEnvironment } from './issueDocumentSigningCertificateConfig';
 import { LogMessage } from './logging/LogMessages';
+import { headObject, putObject } from './adapters/aws/s3Adapter';
+import { getSsmParameter } from './adapters/aws/ssmAdapter';
 
-const ssmClient = new SSMClient();
 const pcaClient = new ACMPCAClient();
 const kmsClient = new KMSClient();
-const s3Client = new S3Client();
 
 export type IssueDocumentSigningCertificateDependencies = {
   env: NodeJS.ProcessEnv;
@@ -31,22 +30,12 @@ const dependencies: IssueDocumentSigningCertificateDependencies = {
 
 export const handler = lambdaHandlerConstructor(dependencies);
 
-async function getSsmParameter(parameterName: string) {
-  const getParameterCommandOutput = await ssmClient.send(
-    new GetParameterCommand({
-      Name: parameterName,
-    }),
-  );
-  return getParameterCommandOutput.Parameter?.Value;
-}
-
 export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCertificateDependencies) {
   return async (_event: any, context: Context) => {
     logger.addContext(context);
     logger.info('STARTING');
 
     const configResult = getConfigFromEnvironment(dependencies.env);
-    logger.info('CONFIG RESULT',{ configResult })
     if (configResult.isError) {
       logger.error(LogMessage.APP_CHECK_INCIDENT_CHECKER_FAILED_TO_DETERMINE_APP_CHECK_STATUS, {
         data: { reason: 'Invalid Config' },
@@ -54,12 +43,16 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       return;
     }
     const config = configResult.value;
-    logger.info('CONFIG', { config })
+    logger.info('CONFIG', { config });
 
     const certificateAuthorityArn = await getSsmParameter(config.PLATFORM_CA_ARN_PARAMETER);
     const issuerAlternativeName = await getSsmParameter(config.PLATFORM_CA_ISSUER_ALTERNATIVE_NAME);
 
-    logger.info('PARAMETERS', { certificateAuthorityArn, issuerAlternativeName })
+    // Abort if certificate already exists in the bucket
+    if (await headObject(config.DOC_SIGNING_KEY_BUCKET, config.DOC_SIGNING_KEY_ID + '/certificate.pem')) {
+      logger.error('ABORTED - CERTIFICATE ALREADY EXISTS FOR THIS KMS KEY');
+      return;
+    }
 
     // Generate CSR
     const alg = {
@@ -79,7 +72,7 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       kmsClient,
     );
 
-    logger.info('CSR', { string: csr.toString() })
+    logger.info('CSR', { string: csr.toString() });
 
     // Send Request to AWS Private CA to issue Certificate
     const issueCertificateCommand = new IssueCertificateCommand({
@@ -111,18 +104,17 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       },
     });
 
-    logger.info("ISSUING CERTIFICATE")
+    logger.info('ISSUING CERTIFICATE');
     let issueCertificateCommandOutput: IssueCertificateCommandOutput;
     try {
       issueCertificateCommandOutput = await pcaClient.send(issueCertificateCommand);
     } catch (e) {
-      logger.info("Exception in Issuing Certificate", {e})
+      logger.info('Exception in Issuing Certificate', { e });
       throw e;
     }
-    logger.info('ISSUE CERTIFICATE', {issueCertificateCommandOutput})
+    logger.info('ISSUE CERTIFICATE COMMAND ACCEPTED');
 
     let getCertificateCommandOutput: GetCertificateCommandOutput;
-
     while (true) {
       const getCertificateCommand = new GetCertificateCommand({
         CertificateArn: issueCertificateCommandOutput.CertificateArn,
@@ -139,15 +131,12 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       }
     }
 
-    logger.info('CERTIFICATE ISSUED', { getCertificateCommandOutput });
-
-    const putObjectCommand = new PutObjectCommand({
-      Bucket: config.DOC_SIGNING_KEY_BUCKET,
-      Key: config.DOC_SIGNING_KEY_ID + '/certificate.pem',
-      Body: getCertificateCommandOutput.Certificate,
-    });
-    const putObjectCommandOutput = await s3Client.send(putObjectCommand);
-
-    logger.info('CERTIFICATE WRITTEN TO S3', { putObjectCommandOutput });
+    logger.info('CERTIFICATE RETRIEVED', { getCertificateCommandOutput });
+    await putObject(
+      config.DOC_SIGNING_KEY_BUCKET,
+      config.DOC_SIGNING_KEY_ID + '/certificate.pem',
+      getCertificateCommandOutput.Certificate,
+    );
+    logger.info('CERTIFICATE WRITTEN TO S3');
   };
 }
