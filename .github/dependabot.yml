@@ -45,3 +45,16 @@ updates:
       github-actions-updates:
         patterns:
           - "*"
+
+  - package-ecosystem: npm
+    directories:
+      - /doc-signing-cert
+    schedule:
+      interval: weekly
+      day: sunday
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      infra-test-versions:
+        patterns:
+          - "*"
