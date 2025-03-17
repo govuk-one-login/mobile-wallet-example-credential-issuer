@@ -10,41 +10,44 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import testUtils.MockAccessTokenBuilder;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferNotFoundException;
+import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
 import java.text.ParseException;
 import java.util.Base64;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
 class NotificationResourceTest {
 
-    private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final NotificationService notificationService = mock(NotificationService.class);
     private final ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(
-                            new NotificationResource(notificationService, configurationService))
+                            new NotificationResource(notificationService))
                     .build();
-    SignedJWT mockAccessToken;
+    private SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
 
     @BeforeEach
     void setUp() throws ParseException, JOSEException {
         ECDSASigner ecSigner = new ECDSASigner(getEsKey());
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         mockAccessToken.sign(ecSigner);
-        when(configurationService.getOneLoginAuthServerUrl())
-                .thenReturn("https://test-authorization-server.gov.uk");
-        when(configurationService.getSelfUrl()).thenReturn("https://test-credential-issuer.gov.uk");
     }
 
     @ParameterizedTest
@@ -89,9 +92,61 @@ class NotificationResourceTest {
                 is("{\"error\":\"invalid_notification_request\"}"));
     }
 
+    @ParameterizedTest
+    @MethodSource("provideAuthorizationHeaders")
+    void Should_Return401_When_AuthorizationHeaderIsInvalid(String authorizationHeader) {
+        final Response response =
+                resource.target("/notification")
+                        .request()
+                        .header("Authorization", authorizationHeader)
+                        .post(Entity.entity("{\"notification_id\":\"77368ca6-877b-4208-a397-99f1df890400\",\"event\":\"credential_accepted\",\"event_description\":\"Credential stored\"}", MediaType.APPLICATION_JSON));
+
+        assertThat(response.getStatus(), is(401));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"invalid_token\"}"));
+    }
+
+
+    private Stream<String> provideAuthorizationHeaders() throws ParseException, JOSEException {
+        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
+        mockAccessToken = new MockAccessTokenBuilder("ES256").build();
+        mockAccessToken.sign(ecSigner);
+
+        return Stream.of(
+                "", // Empty authorization header
+                "Bearer" + this.mockAccessToken.serialize(), // No space between 'Bearer' and access token
+                this.mockAccessToken.serialize(), // No 'Bearer ' before access token
+                "Bearer invalid token" // Invalid access token
+
+                        );
+    }
+
+    @Test
+    void Should_Return400_When_NotificationServiceThrowsAccessTokenValidationException() throws DataStoreException, AccessTokenValidationException, InvalidNotificationIdException, CredentialOfferNotFoundException {
+        doThrow(new AccessTokenValidationException("Some error"))
+                .when(notificationService)
+                .processNotification(any(), any());
+
+        final Response response =
+                resource.target("/notification")
+                        .request()
+                        .header("Authorization", "Bearer " + mockAccessToken.serialize())
+                        .post(Entity.entity("{\"notification_id\":\"77368ca6-877b-4208-a397-99f1df890400\",\"event\":\"credential_accepted\",\"event_description\":\"Credential stored\"}", MediaType.APPLICATION_JSON));
+
+        assertThat(response.getStatus(), is(401));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"invalid_token\"}"));
+    }
+
+
+
     private ECKey getEsKey() throws ParseException {
         String privateKeyJwkBase64 =
                 "eyJrdHkiOiJFQyIsImQiOiI4SGJYN0xib1E1OEpJOGo3eHdfQXp0SlRVSDVpZTFtNktIQlVmX3JnakVrIiwidXNlIjoic2lnIiwiY3J2IjoiUC0yNTYiLCJraWQiOiJmMDYxMWY3Zi04YTI5LTQ3ZTEtYmVhYy1mNWVlNWJhNzQ3MmUiLCJ4IjoiSlpKeE83b2JSOElzdjU4NUVzaWcwYlAwQUdfb1N6MDhSMS11VXBiYl9JRSIsInkiOiJtNjBRMmtMMExiaEhTbHRjS1lyTG8wczE1M1hveF9tVDV2UlV6Z3g4TWtFIiwiaWF0IjoxNzEyMTQ2MTc5fQ==";
         return ECKey.parse(new String(Base64.getDecoder().decode(privateKeyJwkBase64)));
     }
+
+
 }

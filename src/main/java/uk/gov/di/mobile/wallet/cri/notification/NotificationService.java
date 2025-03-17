@@ -3,8 +3,9 @@ package uk.gov.di.mobile.wallet.cri.notification;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.*;
-import uk.gov.di.mobile.wallet.cri.credential.AccessTokenService;
+import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
+import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
@@ -19,42 +20,36 @@ public class NotificationService {
         this.accessTokenService = accessTokenService;
     }
 
-    public void processNotification(SignedJWT accessToken, RequestBody requestBody)
+    public void processNotification(SignedJWT accessToken, NotificationRequestBody notificationRequestBody)
             throws DataStoreException,
-                    AccessTokenValidationException,
-                    CredentialOfferNotFoundException {
+            AccessTokenValidationException,
+            InvalidNotificationIdException {
 
-        // Verify access token
-        // accessTokenService.verifyAccessToken(accessToken);
-        // AccessTokenService.AccessTokenClaims accessTokenClaims =
-        // accessTokenService.getAccessTokenClaims(accessToken);
+        AccessTokenService.AccessTokenData accessTokenData =
+                accessTokenService.verifyAccessToken(accessToken);
 
-        // Extract access token data
-        // String credentialOfferId = accessTokenClaims.credentialIdentifier();
-        // LOGGER.info("Access token for credentialOfferId {} verified", credentialOfferId);
+        String credentialOfferId = accessTokenData.credentialIdentifier();
 
-        // Fetch credential offer from cache
-        // CredentialOfferCacheItem credentialOffer =
-        // dataStore.getCredentialOffer(credentialOfferId);
+        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
-        //        if (credentialOffer == null) {
-        //            throw new CredentialOfferNotFoundException(
-        //                    String.format(
-        //                            "Credential offer not found for credentialOfferId %s",
-        //                            credentialOfferId));
-        //        }
-        //        LOGGER.info("Credential offer retrieved for credentialOfferId {}",
-        // credentialOfferId);
+        if (credentialOffer == null) {
+            throw new AccessTokenValidationException(
+                    String.format(
+                            "Credential offer with credentialOfferId %s not found",
+                            credentialOfferId));
+        }
 
-        // Check if wallet subject ID's match
-//        if (!credentialOffer.getWalletSubjectId().equals(accessTokenClaims.sub())) {
-//            throw new AccessTokenValidationException(
-//                    "Access token sub claim does not match cached walletSubjectId");
+        if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
+            throw new AccessTokenValidationException(
+                    "Access token 'sub' claim does not match cached 'walletSubjectId'");
+        }
+
+//        Functionality not available yet so commenting out the code for now
+//        if (!credentialOffer.getNotificationId().equals(notificationRequestBody.getNotificationId())) {
+//            throw new InvalidNotificationIdException(
+//                    "Request 'notification_id' does not match cached 'notificationId'");
 //        }
 
-        // Delete credential offer
-        //    dataStore.deleteCredentialOffer(
-        //            credentialOfferId);
-
+        LOGGER.info("Notification received: {}", notificationRequestBody);
     }
 }

@@ -21,8 +21,8 @@ public class ResponseUtil {
         return jsonBuilder(Response.Status.BAD_REQUEST, entity).build();
     }
 
-    public static Response unauthorized() {
-        return Response.status(Response.Status.UNAUTHORIZED).build();
+    public static Response unauthorized(String entity) {
+        return jsonBuilder(Response.Status.UNAUTHORIZED, entity).build();
     }
 
     public static Response internalServerError() {

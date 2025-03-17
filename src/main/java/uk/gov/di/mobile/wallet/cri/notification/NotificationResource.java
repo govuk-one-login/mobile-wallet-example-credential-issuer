@@ -15,7 +15,6 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.*;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.UUID;
@@ -25,14 +24,11 @@ import java.util.stream.Stream;
 @Path("/notification")
 public class NotificationResource {
 
-    private final ConfigurationService configurationService;
     private final NotificationService notificationService;
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationResource.class);
 
-    public NotificationResource(
-            NotificationService notificationService, ConfigurationService configurationService) {
+    public NotificationResource(NotificationService notificationService) {
         this.notificationService = notificationService;
-        this.configurationService = configurationService;
     }
 
     @POST
@@ -42,15 +38,20 @@ public class NotificationResource {
             SignedJWT accessToken = parseAuthorizationHeader(authorizationHeader);
             NotificationRequestBody notificationRequestBody = parseRequestBody(payload);
 
+            notificationService.processNotification(accessToken, notificationRequestBody);
         } catch (Exception exception) {
             LOGGER.error(
                     "An error happened trying to process the notification request: ", exception);
             if (exception instanceof AccessTokenValidationException) {
-                return ResponseUtil.unauthorized();
+                return ResponseUtil.unauthorized(error("invalid_token"));
             }
 
-            if (exception instanceof RequestBodyValidationException) {
-                return ResponseUtil.badRequest(error(exception.getMessage()));
+            if (exception instanceof InvalidNotificationIdException) {
+                return ResponseUtil.badRequest(error("invalid_notification_id"));
+            }
+
+            if (exception instanceof InvalidNotificationRequestException) {
+                return ResponseUtil.badRequest(error("invalid_notification_request"));
             }
 
             return ResponseUtil.internalServerError();
@@ -66,50 +67,46 @@ public class NotificationResource {
             return SignedJWT.parse(bearerAccessToken.getValue());
         } catch (ParseException | java.text.ParseException exception) {
             throw new AccessTokenValidationException(
-                    "Failed to parse authorization header as Signed JWT: ", exception);
+                    "Failed to parse authorization header", exception);
         }
     }
 
     private NotificationRequestBody parseRequestBody(String payload)
-            throws RequestBodyValidationException {
+            throws InvalidNotificationIdException, InvalidNotificationRequestException{
         ObjectMapper mapper =
                 new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
+
         NotificationRequestBody requestBody;
         try {
             requestBody = mapper.readValue(payload, NotificationRequestBody.class);
         } catch (JsonProcessingException exception) {
-            throw new RequestBodyValidationException("invalid_notification_request", exception);
+            throw new InvalidNotificationRequestException("Failed to parse request body", exception);
         }
 
         if (requestBody.getNotificationId() == null) {
-            LOGGER.error("notification_id not in request body");
-            throw new RequestBodyValidationException("invalid_notification_id");
+            throw new InvalidNotificationIdException("Missing property notification_id");
         }
 
         try {
             UUID.fromString(requestBody.getNotificationId());
         } catch (IllegalArgumentException exception) {
-            LOGGER.error("notification_id is not a valid UUID");
-            throw new RequestBodyValidationException("invalid_notification_id");
+            throw new InvalidNotificationIdException("Invalid notification_id: must be UUID");
         }
 
         if (requestBody.getEvent() == null) {
-            LOGGER.error("event not in request body");
-            throw new RequestBodyValidationException("invalid_notification_request");
+            throw new InvalidNotificationRequestException("Missing property event");
         }
 
         if (Stream.of("credential_accepted", "credential_failure", "credential_deleted")
                 .noneMatch(valid -> valid.equals(requestBody.getEvent()))) {
-            LOGGER.error(
-                    "event is not valid: must be one of 'credential_accepted', 'credential_failure', 'credential_deleted'");
-            throw new RequestBodyValidationException("invalid_notification_request");
+
+            throw new InvalidNotificationRequestException("Invalid event: must be one of 'credential_accepted', 'credential_failure', 'credential_deleted'");
         }
 
         if (requestBody.getEventDescription() != null
                 && !requestBody.getEventDescription().matches("\\A\\p{ASCII}*\\z")) {
-            LOGGER.error("event_description is invalid: must contain only ASCII characters");
-            throw new RequestBodyValidationException("invalid_notification_request");
+            throw new InvalidNotificationRequestException("Invalid event_description: must contain only ASCII characters");
         }
 
         return requestBody;
