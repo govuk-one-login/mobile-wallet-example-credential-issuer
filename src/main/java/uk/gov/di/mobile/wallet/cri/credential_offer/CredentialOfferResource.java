@@ -32,7 +32,7 @@ public class CredentialOfferResource {
     private final CredentialOfferService credentialOfferService;
     private final ConfigurationService configurationService;
     private final DataStore dataStore;
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
 
     private static final String WALLET_SUBJECT_ID_PATTERN =
             "^urn:fdc:wallet\\.account\\.gov\\.uk:2024:[a-zA-Z0-9_-]{43}$";
@@ -85,7 +85,8 @@ public class CredentialOfferResource {
 
         try {
             dataStore.saveCredentialOffer(
-                    new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId, notificationId));
+                    new CredentialOfferCacheItem(
+                            credentialOfferId, documentId, walletSubjectId, notificationId));
         } catch (DataStoreException exception) {
             LOGGER.error(
                     "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",
@@ -96,9 +97,11 @@ public class CredentialOfferResource {
         }
 
         LOGGER.info(
-                "Credential offer saved for walletSubjectId {} and credentialOfferId {}",
+                "Credential offer saved for walletSubjectId {} and credentialOfferId {} with documentId {} and notificationId {}",
                 walletSubjectId,
-                credentialOfferId);
+                credentialOfferId,
+                documentId,
+                notificationId);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);

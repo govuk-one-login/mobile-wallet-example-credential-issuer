@@ -22,7 +22,10 @@ public class CredentialOfferCacheItem {
     }
 
     public CredentialOfferCacheItem(
-            String credentialIdentifier, String documentId, String walletSubjectId, String notificationId) {
+            String credentialIdentifier,
+            String documentId,
+            String walletSubjectId,
+            String notificationId) {
         this.credentialIdentifier = credentialIdentifier;
         this.documentId = documentId;
         this.walletSubjectId = walletSubjectId;

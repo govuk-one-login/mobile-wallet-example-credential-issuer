@@ -54,7 +54,7 @@ public class CredentialService {
         this.credentialBuilder = credentialBuilder;
     }
 
-    public Credential getCredential(SignedJWT accessToken, SignedJWT proofJwt)
+    public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
                     ProofJwtValidationException,
                     SigningException,
@@ -114,17 +114,27 @@ public class CredentialService {
         String sub = proofJwtClaims.kid;
         String vcType = document.getVcType();
 
+        String notificationId = credentialOffer.getNotificationId();
+
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            return getSocialSecurityCredential(document, sub, vcType);
+            return new CredentialResponse(
+                    getSocialSecurityCredential(document, sub, vcType), notificationId);
         } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            return getBasicCheckCredential(document, sub, vcType);
+            return new CredentialResponse(
+                    getBasicCheckCredential(document, sub, vcType), notificationId);
         } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            return getDigitalVeteranCard(document, sub, vcType);
+            return new CredentialResponse(
+                    getDigitalVeteranCard(document, sub, vcType), notificationId);
         } else {
             throw new CredentialServiceException(
                     String.format("Invalid verifiable credential type %s", vcType));
         }
     }
+
+    public CredentialResponse getCredentialResponse(Credential credential, String notificationId) {
+        return new CredentialResponse(credential, notificationId);
+    }
+    ;
 
     private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
         long now = Instant.now().getEpochSecond();
