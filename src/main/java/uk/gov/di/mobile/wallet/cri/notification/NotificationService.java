@@ -13,11 +13,20 @@ public class NotificationService {
 
     private final DataStore dataStore;
     private final AccessTokenService accessTokenService;
-    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationService.class);
+    private final Logger LOGGER;
 
     public NotificationService(DataStore dataStore, AccessTokenService accessTokenService) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
+        this.LOGGER = LoggerFactory.getLogger(NotificationService.class);
+    }
+
+    // Required for unit testing
+    public NotificationService(
+            DataStore dataStore, AccessTokenService accessTokenService, Logger logger) {
+        this.dataStore = dataStore;
+        this.accessTokenService = accessTokenService;
+        this.LOGGER = logger;
     }
 
     public void processNotification(
@@ -42,7 +51,7 @@ public class NotificationService {
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
             throw new AccessTokenValidationException(
-                    "Access token 'sub' claim does not match cached 'walletSubjectId'");
+                    "Access token and cached wallet subject identifiers do not match");
         }
 
         //        Functionality not available yet so commenting out the code for now
