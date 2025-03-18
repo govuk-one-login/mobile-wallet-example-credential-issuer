@@ -12,19 +12,15 @@ import { GetPublicKeyCommand, KMSClient, SignCommand } from '@aws-sdk/client-kms
 import { CertificationRequest, CertificationRequestInfo } from '@peculiar/asn1-csr';
 import { AsnConvert } from '@peculiar/asn1-schema';
 import {
-  Attribute as AsnAttribute,
-  Extension as AsnExtension,
-  Extensions,
   Name as AsnName,
   SubjectPublicKeyInfo,
 } from '@peculiar/asn1-x509';
-import { id_pkcs9_at_extensionRequest } from '@peculiar/asn1-pkcs9';
 import { container } from 'tsyringe';
 import { Buffer } from 'buffer';
 
 export class Pkcs10CertificateRequestGeneratorUsingKmsKey {
   public static async create(
-    params: Partial<Pkcs10CertificateRequestCreateParams>,
+    params: Pick<Pkcs10CertificateRequestCreateParams, "name" | "signingAlgorithm">,
     kmsId: string,
     kmsClient: KMSClient,
   ) {
@@ -45,24 +41,6 @@ export class Pkcs10CertificateRequestGeneratorUsingKmsKey {
     if (params.name) {
       const name = params.name instanceof Name ? params.name : new Name(params.name);
       asnReq.certificationRequestInfo.subject = AsnConvert.parse(name.toArrayBuffer(), AsnName);
-    }
-
-    // if (params.attributes) {
-    //   // Add attributes
-    //   for (const o of params.attributes) {
-    //     asnReq.certificationRequestInfo.attributes.push(AsnConvert.parse(o.rawData, AsnAttribute));
-    //   }
-    // }
-
-    // Add extensions
-    if (params.extensions && params.extensions.length) {
-      const attr = new AsnAttribute({ type: id_pkcs9_at_extensionRequest });
-      const extensions = new Extensions();
-      for (const o of params.extensions) {
-        extensions.push(AsnConvert.parse(o.rawData, AsnExtension));
-      }
-      attr.values.push(AsnConvert.serialize(extensions));
-      asnReq.certificationRequestInfo.attributes.push(attr);
     }
 
     // Set signing algorithm

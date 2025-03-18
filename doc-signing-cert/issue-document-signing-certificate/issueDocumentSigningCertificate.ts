@@ -64,9 +64,6 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       {
         name: [{ CN: ['Test Certificate'] }, { C: ['UK'] }],
         signingAlgorithm: alg,
-        extensions: [
-          new x509.KeyUsagesExtension(x509.KeyUsageFlags.digitalSignature | x509.KeyUsageFlags.keyEncipherment),
-        ],
       },
       config.DOC_SIGNING_KEY_ID,
       kmsClient,
