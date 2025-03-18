@@ -10,12 +10,12 @@ Parameters:
     Default: none
 
   Environment:
-    Description: "The environment type"
-    Type: "String"
-    Default: "dev"
+    Description: The environment type
+    Type: String
+    Default: dev
     AllowedValues:
-      - "dev"
-      - "build"
+      - dev
+      - build
 
   PermissionsBoundary:
     Description: |
@@ -25,7 +25,7 @@ Parameters:
 
   VpcStackName:
     Description: |
-      The stack name of the VPC where the TokenExchanger Function will be deployed
+      The stack name of the VPC where Issue Document Signing Certificate Lambda will be deployed
     Type: String
     Default: platform-vpc
 
@@ -52,16 +52,28 @@ Mappings:
       PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
       PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
       CloudwatchLogRetentionDays: 3
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: DEBUG
     build:
       DocumentSigningKeyParameterPrefix: "/iaca/"
       PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
       PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
       CloudwatchLogRetentionDays: 3650
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: INFO
 
 Globals:
   Function:
     LoggingConfig:
       LogFormat: JSON
+      ApplicationLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      SystemLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
     Runtime: nodejs20.x
     Architectures:
       - arm64
@@ -74,6 +86,46 @@ Globals:
       - UseCodeSigning
       - !Ref CodeSigningConfigArn
       - !Ref AWS::NoValue
+    Environment:
+      Variables:
+        DT_CLUSTER_ID: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_BASE_URL: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
+        DT_TENANT: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+    Layers:
+      - !Sub
+        - '{{resolve:secretsmanager:${SecretArn}:SecretString:NODEJS_LAYER}}'
+        - SecretArn: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - DynatraceSecretArn
 
 Resources:
   IssueDocSigningCertificateFunction:
@@ -82,7 +134,7 @@ Resources:
       FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
       CodeUri: issue-document-signing-certificate/
       Handler: issueDocumentSigningCertificate.handler
-      Timeout: 900
+      Timeout: 15
       MemorySize: 512
       ReservedConcurrentExecutions: 1
       LoggingConfig:
@@ -90,8 +142,6 @@ Resources:
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
-          POWERTOOLS_METRICS_NAMESPACE: tmp
-          LOG_LEVEL: INFO
           PLATFORM_CA_ARN_PARAMETER: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
           PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
           DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1

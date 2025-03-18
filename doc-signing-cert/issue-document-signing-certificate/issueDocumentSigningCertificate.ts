@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import { KeyUsagesExtension, KeyUsageFlags, X509Certificate } from "@peculiar/x509";
+import { X509Certificate } from "@peculiar/x509";
 import {
   ACMPCAClient,
   GetCertificateCommand,
