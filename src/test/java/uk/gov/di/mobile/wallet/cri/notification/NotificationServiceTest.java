@@ -2,7 +2,6 @@ package uk.gov.di.mobile.wallet.cri.notification;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jwt.SignedJWT;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,13 +19,13 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.Base64;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import static testUtils.EsKeyHelper.getEsKey;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -143,12 +142,6 @@ class NotificationServiceTest {
         verify(mockLogger).info("Notification received: {}", requestBody);
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
-    }
-
-    private ECKey getEsKey() throws ParseException {
-        String privateKeyJwkBase64 =
-                "eyJrdHkiOiJFQyIsImQiOiI4SGJYN0xib1E1OEpJOGo3eHdfQXp0SlRVSDVpZTFtNktIQlVmX3JnakVrIiwidXNlIjoic2lnIiwiY3J2IjoiUC0yNTYiLCJraWQiOiJmMDYxMWY3Zi04YTI5LTQ3ZTEtYmVhYy1mNWVlNWJhNzQ3MmUiLCJ4IjoiSlpKeE83b2JSOElzdjU4NUVzaWcwYlAwQUdfb1N6MDhSMS11VXBiYl9JRSIsInkiOiJtNjBRMmtMMExiaEhTbHRjS1lyTG8wczE1M1hveF9tVDV2UlV6Z3g4TWtFIiwiaWF0IjoxNzEyMTQ2MTc5fQ==";
-        return ECKey.parse(new String(Base64.getDecoder().decode(privateKeyJwkBase64)));
     }
 
     private CredentialOfferCacheItem getMockCredentialOfferCacheItem(String walletSubjectId) {

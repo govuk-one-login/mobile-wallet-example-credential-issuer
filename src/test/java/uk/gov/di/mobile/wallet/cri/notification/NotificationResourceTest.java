@@ -2,7 +2,6 @@ package uk.gov.di.mobile.wallet.cri.notification;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jwt.SignedJWT;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -23,12 +22,12 @@ import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidation
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
+import static testUtils.EsKeyHelper.getEsKey;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -202,11 +201,5 @@ class NotificationResourceTest {
                                         MediaType.APPLICATION_JSON));
 
         assertThat(response.getStatus(), is(204));
-    }
-
-    private ECKey getEsKey() throws ParseException {
-        String privateKeyJwkBase64 =
-                "eyJrdHkiOiJFQyIsImQiOiI4SGJYN0xib1E1OEpJOGo3eHdfQXp0SlRVSDVpZTFtNktIQlVmX3JnakVrIiwidXNlIjoic2lnIiwiY3J2IjoiUC0yNTYiLCJraWQiOiJmMDYxMWY3Zi04YTI5LTQ3ZTEtYmVhYy1mNWVlNWJhNzQ3MmUiLCJ4IjoiSlpKeE83b2JSOElzdjU4NUVzaWcwYlAwQUdfb1N6MDhSMS11VXBiYl9JRSIsInkiOiJtNjBRMmtMMExiaEhTbHRjS1lyTG8wczE1M1hveF9tVDV2UlV6Z3g4TWtFIiwiaWF0IjoxNzEyMTQ2MTc5fQ==";
-        return ECKey.parse(new String(Base64.getDecoder().decode(privateKeyJwkBase64)));
     }
 }
