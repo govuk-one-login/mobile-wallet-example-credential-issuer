@@ -12,62 +12,75 @@ import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
+import javax.management.InvalidAttributeValueException;
+
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Set;
 
 public class AccessTokenService {
 
-    private static final String ACCESS_TOKEN_ALGORITHM = "ES256";
+    public static final String CREDENTIAL_IDENTIFIERS = "credential_identifiers";
+    public static final String C_NONCE = "c_nonce";
+    private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
+
+    public record AccessTokenData(
+            String walletSubjectId, String nonce, String credentialIdentifier) {}
 
     public AccessTokenService(JwksService jwksService, ConfigurationService configurationService) {
         this.jwksService = jwksService;
         this.configurationService = configurationService;
     }
 
-    public void verifyAccessToken(SignedJWT accessToken) throws AccessTokenValidationException {
+    public AccessTokenData verifyAccessToken(SignedJWT accessToken)
+            throws AccessTokenValidationException {
         verifyTokenHeader(accessToken);
         verifyTokenClaims(accessToken);
         if (!this.verifyTokenSignature(accessToken)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
+        return extractAccessTokenData(accessToken);
     }
 
     private void verifyTokenHeader(SignedJWT accessToken) throws AccessTokenValidationException {
-        JWSAlgorithm clientAlgorithm = JWSAlgorithm.parse(ACCESS_TOKEN_ALGORITHM);
         JWSAlgorithm jwtAlgorithm = accessToken.getHeader().getAlgorithm();
-        if (jwtAlgorithm != clientAlgorithm) {
+        if (jwtAlgorithm != EXPECTED_SIGNING_ALGORITHM) {
             throw new AccessTokenValidationException(
                     String.format(
                             "JWT alg header claim [%s] does not match client config alg [%s]",
-                            jwtAlgorithm, clientAlgorithm));
+                            jwtAlgorithm, EXPECTED_SIGNING_ALGORITHM));
         }
 
-        String keyId = accessToken.getHeader().getKeyID();
-        if (keyId == null) {
+        if (accessToken.getHeader().getKeyID() == null) {
             throw new AccessTokenValidationException("JWT kid header claim is null");
         }
     }
 
     private void verifyTokenClaims(SignedJWT accessToken) throws AccessTokenValidationException {
-        Set<String> requiredClaims =
-                new HashSet<>(Arrays.asList("sub", "c_nonce", "credential_identifiers"));
+        String expectedIssuer = configurationService.getOneLoginAuthServerUrl();
+        String expectedAudience = configurationService.getSelfUrl();
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
-                        .issuer(configurationService.getOneLoginAuthServerUrl())
-                        .audience(configurationService.getSelfUrl())
+                        .issuer(expectedIssuer)
+                        .audience(expectedAudience)
                         .build();
+        HashSet<String> requiredClaims =
+                new HashSet<>(Arrays.asList("sub", C_NONCE, CREDENTIAL_IDENTIFIERS));
 
-        JWTClaimsSet jwtClaimsSet;
         try {
-            jwtClaimsSet = accessToken.getJWTClaimsSet();
+            JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
-        } catch (BadJWTException | java.text.ParseException exception) {
+
+            if (jwtClaimsSet.getStringListClaim(CREDENTIAL_IDENTIFIERS).isEmpty()) {
+                throw new InvalidAttributeValueException("Empty credential_identifiers claim");
+            }
+
+        } catch (BadJWTException | InvalidAttributeValueException | ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
     }
@@ -81,6 +94,19 @@ public class AccessTokenService {
             ECDSAVerifier verifier = new ECDSAVerifier(publicKey);
             return accessToken.verify(verifier);
         } catch (JOSEException exception) {
+            throw new AccessTokenValidationException(exception.getMessage(), exception);
+        }
+    }
+
+    private static AccessTokenData extractAccessTokenData(SignedJWT token)
+            throws AccessTokenValidationException {
+        try {
+            JWTClaimsSet jwtClaimsSet = token.getJWTClaimsSet();
+            return new AccessTokenData(
+                    jwtClaimsSet.getSubject(),
+                    jwtClaimsSet.getStringClaim(C_NONCE),
+                    jwtClaimsSet.getListClaim(CREDENTIAL_IDENTIFIERS).get(0).toString());
+        } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
     }

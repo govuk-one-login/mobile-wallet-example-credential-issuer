@@ -15,7 +15,6 @@ public class CredentialOfferCacheItem {
     String documentId;
     Long timeToLive;
 
-    // Required for DynamoDb BeanTableSchema
     public CredentialOfferCacheItem() {
         // Empty constructor required for DynamoDb BeanTableSchema
     }
