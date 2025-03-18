@@ -8,6 +8,7 @@ const REQUIRED_ENVIRONMENT_VARIABLES = [
   'PLATFORM_CA_ISSUER_ALTERNATIVE_NAME',
   'DOC_SIGNING_KEY_ID',
   'DOC_SIGNING_KEY_BUCKET',
+  'DOC_SIGNING_KEY_VALIDITY_PERIOD',
 ] as const;
 
 export type IssueDocumentSigningCertificateConfig = Config<(typeof REQUIRED_ENVIRONMENT_VARIABLES)[number]>;

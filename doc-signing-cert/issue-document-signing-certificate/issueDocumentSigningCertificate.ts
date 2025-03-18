@@ -1,5 +1,5 @@
 import { Buffer } from 'buffer';
-import * as x509 from '@peculiar/x509';
+import { KeyUsagesExtension, KeyUsageFlags, X509Certificate } from "@peculiar/x509";
 import {
   ACMPCAClient,
   GetCertificateCommand,
@@ -71,37 +71,43 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
 
     logger.info('CSR', { string: csr.toString() });
 
-    // Send Request to AWS Private CA to issue Certificate
-    const issueCertificateCommand = new IssueCertificateCommand({
-      ApiPassthrough: {
-        Extensions: {
-          KeyUsage: {
-            DigitalSignature: true,
+    // Construct Issue Certificate Command
+    let issueCertificateCommand: IssueCertificateCommand;
+    try {
+      issueCertificateCommand = new IssueCertificateCommand({
+        ApiPassthrough: {
+          Extensions: {
+            KeyUsage: {
+              DigitalSignature: true,
+            },
+            ExtendedKeyUsage: [
+              {
+                ExtendedKeyUsageObjectIdentifier: '1.0.18013.5.1.2', // identifier for ISO mDL
+              },
+            ],
+            CustomExtensions: [
+              {
+                ObjectIdentifier: '2.5.29.18',
+                Value: issuerAlternativeName,
+              },
+            ],
           },
-          ExtendedKeyUsage: [
-            {
-              ExtendedKeyUsageObjectIdentifier: '1.0.18013.5.1.2', // identifier for ISO mDL
-            },
-          ],
-          CustomExtensions: [
-            {
-              ObjectIdentifier: '2.5.29.18',
-              Value: issuerAlternativeName,
-            },
-          ],
         },
-      },
-      CertificateAuthorityArn: certificateAuthorityArn,
-      Csr: Buffer.from(csr.toString()),
-      SigningAlgorithm: 'SHA256WITHECDSA',
-      TemplateArn: 'arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1',
-      Validity: {
-        Value: 1825,
-        Type: 'DAYS',
-      },
-    });
+        CertificateAuthorityArn: certificateAuthorityArn,
+        Csr: Buffer.from(csr.toString()),
+        SigningAlgorithm: 'SHA256WITHECDSA',
+        TemplateArn: 'arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1',
+        Validity: {
+          Value: Number(config.DOC_SIGNING_KEY_VALIDITY_PERIOD),
+          Type: 'DAYS',
+        },
+      });
+    } catch (e) {
+      logger.error("UNABLE TO CONSTRUCT ISSUE CERTIFICATE COMMAND")
+      return;
+    }
 
-    logger.info('ISSUING CERTIFICATE');
+    // Send Request to AWS Private CA to issue Certificate
     let issueCertificateCommandOutput: IssueCertificateCommandOutput;
     try {
       issueCertificateCommandOutput = await pcaClient.send(issueCertificateCommand);
@@ -142,7 +148,7 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
     logger.info('CERTIFICATE WRITTEN TO S3');
 
     // decode certificate and write to bucket
-    const decodedCertificate = new x509.X509Certificate(getCertificateCommandOutput.Certificate)
+    const decodedCertificate = new X509Certificate(getCertificateCommandOutput.Certificate)
     await putObject(
       config.DOC_SIGNING_KEY_BUCKET,
       config.DOC_SIGNING_KEY_ID + '/certificate-metadata.json',

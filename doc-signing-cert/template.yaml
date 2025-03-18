@@ -29,6 +29,11 @@ Parameters:
     Type: String
     Default: platform-vpc
 
+  CertificateValidityPeriod:
+    Description: Number of days the issued certificate will be valid for
+    Type: Number
+    Default: "760" # ~25 months
+
 Conditions:
   UsePermissionsBoundary: !Not
     - !Equals
@@ -91,6 +96,7 @@ Resources:
           PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
           DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
           DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
+          DOC_SIGNING_KEY_VALIDITY_PERIOD: !Ref CertificateValidityPeriod
       Policies:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
