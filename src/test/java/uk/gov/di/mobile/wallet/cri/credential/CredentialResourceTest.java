@@ -17,6 +17,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -60,7 +61,7 @@ class CredentialResourceTest {
             })
     void should_Return_400_And_Invalid_Proof_When_ProofJwt_Is_Invalid(String arg)
             throws DataStoreException,
-                    AccessTokenValidationException,
+            AccessTokenValidationException,
                     CredentialServiceException,
                     SigningException,
                     ProofJwtValidationException,
