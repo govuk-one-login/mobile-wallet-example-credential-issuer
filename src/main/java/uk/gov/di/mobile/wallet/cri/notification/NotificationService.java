@@ -20,10 +20,11 @@ public class NotificationService {
         this.accessTokenService = accessTokenService;
     }
 
-    public void processNotification(SignedJWT accessToken, NotificationRequestBody notificationRequestBody)
+    public void processNotification(
+            SignedJWT accessToken, NotificationRequestBody notificationRequestBody)
             throws DataStoreException,
-            AccessTokenValidationException,
-            InvalidNotificationIdException {
+                    AccessTokenValidationException,
+                    InvalidNotificationIdException {
 
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
@@ -44,11 +45,12 @@ public class NotificationService {
                     "Access token 'sub' claim does not match cached 'walletSubjectId'");
         }
 
-//        Functionality not available yet so commenting out the code for now
-//        if (!credentialOffer.getNotificationId().equals(notificationRequestBody.getNotificationId())) {
-//            throw new InvalidNotificationIdException(
-//                    "Request 'notification_id' does not match cached 'notificationId'");
-//        }
+        //        Functionality not available yet so commenting out the code for now
+        //        if
+        // (!credentialOffer.getNotificationId().equals(notificationRequestBody.getNotificationId())) {
+        //            throw new InvalidNotificationIdException(
+        //                    "Request 'notification_id' does not match cached 'notificationId'");
+        //        }
 
         LOGGER.info("Notification received: {}", notificationRequestBody);
     }

@@ -58,7 +58,7 @@ public class CredentialService {
             throws DataStoreException,
                     ProofJwtValidationException,
                     SigningException,
-            AccessTokenValidationException,
+                    AccessTokenValidationException,
                     NoSuchAlgorithmException,
                     URISyntaxException,
                     CredentialServiceException,

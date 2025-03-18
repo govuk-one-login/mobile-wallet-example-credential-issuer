@@ -72,7 +72,7 @@ public class NotificationResource {
     }
 
     private NotificationRequestBody parseRequestBody(String payload)
-            throws InvalidNotificationIdException, InvalidNotificationRequestException{
+            throws InvalidNotificationIdException, InvalidNotificationRequestException {
         ObjectMapper mapper =
                 new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
@@ -81,7 +81,8 @@ public class NotificationResource {
         try {
             requestBody = mapper.readValue(payload, NotificationRequestBody.class);
         } catch (JsonProcessingException exception) {
-            throw new InvalidNotificationRequestException("Failed to parse request body", exception);
+            throw new InvalidNotificationRequestException(
+                    "Failed to parse request body", exception);
         }
 
         if (requestBody.getNotificationId() == null) {
@@ -101,12 +102,14 @@ public class NotificationResource {
         if (Stream.of("credential_accepted", "credential_failure", "credential_deleted")
                 .noneMatch(valid -> valid.equals(requestBody.getEvent()))) {
 
-            throw new InvalidNotificationRequestException("Invalid event: must be one of 'credential_accepted', 'credential_failure', 'credential_deleted'");
+            throw new InvalidNotificationRequestException(
+                    "Invalid event: must be one of 'credential_accepted', 'credential_failure', 'credential_deleted'");
         }
 
         if (requestBody.getEventDescription() != null
                 && !requestBody.getEventDescription().matches("\\A\\p{ASCII}*\\z")) {
-            throw new InvalidNotificationRequestException("Invalid event_description: must contain only ASCII characters");
+            throw new InvalidNotificationRequestException(
+                    "Invalid event_description: must contain only ASCII characters");
         }
 
         return requestBody;

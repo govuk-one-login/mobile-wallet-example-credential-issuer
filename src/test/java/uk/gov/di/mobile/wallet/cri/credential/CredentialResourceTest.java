@@ -61,7 +61,7 @@ class CredentialResourceTest {
             })
     void should_Return_400_And_Invalid_Proof_When_ProofJwt_Is_Invalid(String arg)
             throws DataStoreException,
-            AccessTokenValidationException,
+                    AccessTokenValidationException,
                     CredentialServiceException,
                     SigningException,
                     ProofJwtValidationException,
