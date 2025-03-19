@@ -1,0 +1,29 @@
+import { GetPublicKeyCommand, KMSClient, SignCommand } from '@aws-sdk/client-kms';
+
+const kmsClient = new KMSClient();
+
+export async function getPublicKey(kmsId: string) {
+  const getPublicKeyCommand = new GetPublicKeyCommand({
+    KeyId: kmsId,
+  });
+  const getPublicKeyCommandOutput = await kmsClient.send(getPublicKeyCommand);
+  const spki = getPublicKeyCommandOutput.PublicKey;
+  if (spki === undefined) {
+    throw Error('Error retrieving public key from KMS');
+  }
+  return spki;
+}
+
+export async function signWithEcdsaSha256(kmsId: string, tbs: ArrayBuffer) {
+  const signCommand = new SignCommand({
+    KeyId: kmsId,
+    Message: Buffer.from(tbs),
+    SigningAlgorithm: 'ECDSA_SHA_256',
+  });
+  const signCommandOutput = await kmsClient.send(signCommand);
+  const signature = signCommandOutput.Signature;
+  if (signature === undefined) {
+    throw Error('An error occured when signing the request with KMS');
+  }
+  return signature;
+}

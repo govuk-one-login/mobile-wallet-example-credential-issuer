@@ -8,30 +8,18 @@ import {
   Pkcs10CertificateRequest,
   Pkcs10CertificateRequestCreateParams,
 } from '@peculiar/x509';
-import { GetPublicKeyCommand, KMSClient, SignCommand } from '@aws-sdk/client-kms';
 import { CertificationRequest, CertificationRequestInfo } from '@peculiar/asn1-csr';
 import { AsnConvert } from '@peculiar/asn1-schema';
-import {
-  Name as AsnName,
-  SubjectPublicKeyInfo,
-} from '@peculiar/asn1-x509';
+import { Name as AsnName, SubjectPublicKeyInfo } from '@peculiar/asn1-x509';
 import { container } from 'tsyringe';
-import { Buffer } from 'buffer';
+import { signWithEcdsaSha256, getPublicKey } from '../adapters/aws/kmsAdapter';
 
 export class Pkcs10CertificateRequestGeneratorUsingKmsKey {
   public static async create(
-    params: Pick<Pkcs10CertificateRequestCreateParams, "name" | "signingAlgorithm">,
+    params: Pick<Pkcs10CertificateRequestCreateParams, 'name' | 'signingAlgorithm'>,
     kmsId: string,
-    kmsClient: KMSClient,
   ) {
-    const getPublicKeyCommand = new GetPublicKeyCommand({
-      KeyId: kmsId,
-    });
-    const getPublicKeyCommandOutput = await kmsClient.send(getPublicKeyCommand);
-    const spki = getPublicKeyCommandOutput.PublicKey;
-    if (spki === undefined) {
-      throw Error('Error retrieving public key from KMS');
-    }
+    const spki = await getPublicKey(kmsId);
 
     const asnReq = new CertificationRequest({
       certificationRequestInfo: new CertificationRequestInfo({
@@ -50,16 +38,7 @@ export class Pkcs10CertificateRequestGeneratorUsingKmsKey {
 
     // Sign
     const tbs = AsnConvert.serialize(asnReq.certificationRequestInfo);
-    const signCommand = new SignCommand({
-      KeyId: kmsId,
-      Message: Buffer.from(tbs),
-      SigningAlgorithm: 'ECDSA_SHA_256',
-    });
-    const signCommandOutput = await kmsClient.send(signCommand);
-    const signature = signCommandOutput.Signature;
-    if (signature === undefined) {
-      throw Error('An error occured when signing the request with KMS');
-    }
+    const signature = await signWithEcdsaSha256(kmsId, tbs);
 
     // Convert WebCrypto signature to ASN.1 format
     const signatureFormatters = container.resolveAll<IAsnSignatureFormatter>(diAsnSignatureFormatter).reverse();

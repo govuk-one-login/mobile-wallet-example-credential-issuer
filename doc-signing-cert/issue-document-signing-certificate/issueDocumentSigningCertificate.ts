@@ -1,14 +1,4 @@
-import { Buffer } from 'buffer';
-import { X509Certificate } from "@peculiar/x509";
-import {
-  ACMPCAClient,
-  GetCertificateCommand,
-  GetCertificateCommandOutput,
-  IssueCertificateCommand,
-  IssueCertificateCommandOutput,
-  RequestInProgressException,
-} from '@aws-sdk/client-acm-pca';
-import { KMSClient } from '@aws-sdk/client-kms';
+import { X509Certificate } from '@peculiar/x509';
 import { Pkcs10CertificateRequestGeneratorUsingKmsKey } from './services/Pkcs10CertificateRequestGeneratorUsingKmsKey';
 import { logger } from './logging/logger';
 import { Context } from 'aws-lambda';
@@ -16,9 +6,10 @@ import { getConfigFromEnvironment } from './issueDocumentSigningCertificateConfi
 import { LogMessage } from './logging/LogMessages';
 import { headObject, putObject } from './adapters/aws/s3Adapter';
 import { getSsmParameter } from './adapters/aws/ssmAdapter';
-
-const pcaClient = new ACMPCAClient();
-const kmsClient = new KMSClient();
+import {
+  issueMdlDocSigningCertificateUsingSha256WithEcdsa,
+  retrieveIssuedCertificate,
+} from './adapters/aws/acmPcaAdapter';
 
 export type IssueDocumentSigningCertificateDependencies = {
   env: NodeJS.ProcessEnv;
@@ -66,93 +57,28 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
         signingAlgorithm: alg,
       },
       config.DOC_SIGNING_KEY_ID,
-      kmsClient,
     );
 
     logger.info('CSR', { string: csr.toString() });
 
-    // Construct Issue Certificate Command
-    let issueCertificateCommand: IssueCertificateCommand;
-    try {
-      issueCertificateCommand = new IssueCertificateCommand({
-        ApiPassthrough: {
-          Extensions: {
-            KeyUsage: {
-              DigitalSignature: true,
-            },
-            ExtendedKeyUsage: [
-              {
-                ExtendedKeyUsageObjectIdentifier: '1.0.18013.5.1.2', // identifier for ISO mDL
-              },
-            ],
-            CustomExtensions: [
-              {
-                ObjectIdentifier: '2.5.29.18',
-                Value: issuerAlternativeName,
-              },
-            ],
-          },
-        },
-        CertificateAuthorityArn: certificateAuthorityArn,
-        Csr: Buffer.from(csr.toString()),
-        SigningAlgorithm: 'SHA256WITHECDSA',
-        TemplateArn: 'arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1',
-        Validity: {
-          Value: Number(config.DOC_SIGNING_KEY_VALIDITY_PERIOD),
-          Type: 'DAYS',
-        },
-      });
-    } catch (e) {
-      logger.error("UNABLE TO CONSTRUCT ISSUE CERTIFICATE COMMAND")
-      return;
-    }
-
-    // Send Request to AWS Private CA to issue Certificate
-    let issueCertificateCommandOutput: IssueCertificateCommandOutput;
-    try {
-      issueCertificateCommandOutput = await pcaClient.send(issueCertificateCommand);
-    } catch (e) {
-      logger.info('Exception in Issuing Certificate', { e });
-      throw e;
-    }
-    logger.info('ISSUE CERTIFICATE COMMAND ACCEPTED');
-
-    let getCertificateCommandOutput: GetCertificateCommandOutput;
-    while (true) {
-      const getCertificateCommand = new GetCertificateCommand({
-        CertificateArn: issueCertificateCommandOutput.CertificateArn,
-        CertificateAuthorityArn: certificateAuthorityArn,
-      });
-      try {
-        getCertificateCommandOutput = await pcaClient.send(getCertificateCommand);
-        break;
-      } catch (e) {
-        if (RequestInProgressException.isInstance(e)) {
-          continue;
-        }
-        throw e;
-      }
-    }
-
-    if (!getCertificateCommandOutput.Certificate) {
-      logger.error("FAILED TO RETURN CERTIFICATE", { getCertificateCommandOutput })
-      return
-    }
-
-    logger.info('CERTIFICATE RETRIEVED', { getCertificateCommandOutput });
-    await putObject(
-      config.DOC_SIGNING_KEY_BUCKET,
-      config.DOC_SIGNING_KEY_ID + '/certificate.pem',
-      getCertificateCommandOutput.Certificate,
+    const issuedCertificateArn = await issueMdlDocSigningCertificateUsingSha256WithEcdsa(
+      issuerAlternativeName,
+      certificateAuthorityArn,
+      Buffer.from(csr.toString()),
+      Number(config.DOC_SIGNING_KEY_VALIDITY_PERIOD),
     );
-    logger.info('CERTIFICATE WRITTEN TO S3');
 
-    // decode certificate and write to bucket
-    const decodedCertificate = new X509Certificate(getCertificateCommandOutput.Certificate)
+    const issuedCertificate = await retrieveIssuedCertificate(issuedCertificateArn, certificateAuthorityArn);
+
+    await putObject(config.DOC_SIGNING_KEY_BUCKET, config.DOC_SIGNING_KEY_ID + '/certificate.pem', issuedCertificate);
+
+    const decodedCertificate = new X509Certificate(issuedCertificate);
     await putObject(
       config.DOC_SIGNING_KEY_BUCKET,
       config.DOC_SIGNING_KEY_ID + '/certificate-metadata.json',
       JSON.stringify(decodedCertificate),
     );
+
+    logger.info('CERTIFICATE ISSUED AND WRITTEN TO BUCKET');
   };
 }
