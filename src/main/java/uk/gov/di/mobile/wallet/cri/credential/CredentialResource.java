@@ -37,15 +37,12 @@ public class CredentialResource {
     public Response getCredential(
             @HeaderParam("Authorization") String authorizationHeader, String payload) {
 
-        CredentialResponse credential;
         try {
             SignedJWT accessToken = parseAuthorizationHeader(authorizationHeader);
             SignedJWT proofJwt = parseRequestBody(payload);
 
-            credential = credentialService.getCredential(accessToken, proofJwt);
-
+            CredentialResponse credential = credentialService.getCredential(accessToken, proofJwt);
             return ResponseUtil.ok(credential);
-
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
             if (exception instanceof AccessTokenValidationException

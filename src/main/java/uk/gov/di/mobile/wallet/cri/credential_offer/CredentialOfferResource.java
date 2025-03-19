@@ -59,11 +59,9 @@ public class CredentialOfferResource {
                     String credentialType)
             throws JsonProcessingException {
 
-        UUID uuid = UUID.randomUUID();
-        String credentialOfferId = uuid.toString();
+        String credentialOfferId = UUID.randomUUID().toString();
 
-        UUID notificationUuid = UUID.randomUUID();
-        String notificationId = notificationUuid.toString();
+        String notificationId = UUID.randomUUID().toString();
 
         CredentialOffer credentialOffer;
         try {

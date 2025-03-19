@@ -115,20 +115,22 @@ public class CredentialService {
         String vcType = document.getVcType();
 
         String notificationId = credentialOffer.getNotificationId();
+        SignedJWT credential;
 
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            return new CredentialResponse(
-                    getSocialSecurityCredential(document, sub, vcType), notificationId);
+            credential = getSocialSecurityCredential(document, sub, vcType);
+
         } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            return new CredentialResponse(
-                    getBasicCheckCredential(document, sub, vcType), notificationId);
+            credential = getBasicCheckCredential(document, sub, vcType);
+
         } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            return new CredentialResponse(
-                    getDigitalVeteranCard(document, sub, vcType), notificationId);
+            credential = getDigitalVeteranCard(document, sub, vcType);
+
         } else {
             throw new CredentialServiceException(
                     String.format("Invalid verifiable credential type %s", vcType));
         }
+        return new CredentialResponse(credential.serialize(), notificationId);
     }
 
     private static boolean isExpired(CredentialOfferCacheItem credentialOffer) {
@@ -191,7 +193,7 @@ public class CredentialService {
         return response.readEntity(Document.class);
     }
 
-    private Credential getSocialSecurityCredential(Document document, String sub, String vcType)
+    private SignedJWT getSocialSecurityCredential(Document document, String sub, String vcType)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
@@ -209,7 +211,7 @@ public class CredentialService {
         }
     }
 
-    private Credential getBasicCheckCredential(Document document, String sub, String vcType)
+    private SignedJWT getBasicCheckCredential(Document document, String sub, String vcType)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
@@ -228,7 +230,7 @@ public class CredentialService {
         }
     }
 
-    private Credential getDigitalVeteranCard(Document document, String sub, String vcType)
+    private SignedJWT getDigitalVeteranCard(Document document, String sub, String vcType)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
