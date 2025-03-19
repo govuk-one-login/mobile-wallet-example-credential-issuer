@@ -340,7 +340,6 @@ class CredentialServiceTest {
                     DataStoreException,
                     CredentialServiceException,
                     CredentialOfferNotFoundException,
-                    ParseException,
                     SigningException,
                     NoSuchAlgorithmException,
                     URISyntaxException {
