@@ -6,7 +6,7 @@ import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCr
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static testUtils.mockDocuments.*;
+import static testUtils.MockDocuments.*;
 
 class CredentialSubjectMapperTest {
     private static final String WALLET_SUBJECT_ID =
@@ -15,7 +15,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Map_Document_Into_SocialSecurityCredentialSubject() {
-        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, null, null);
+        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0", null);
 
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
@@ -56,7 +56,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Map_Document_Into_VeteranCardCredentialSubject() {
-        Document document = getMockVeteranCardDocument(DOCUMENT_ID);
+        Document document = getMockVeteranCardDocument(DOCUMENT_ID, "v2.0");
 
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(
@@ -91,7 +91,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Map_Document_Into_BasicCheckCredentialSubject() {
-        Document document = getMockBasicCheckDocument(DOCUMENT_ID);
+        Document document = getMockBasicCheckDocument(DOCUMENT_ID, "v2.0");
 
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(
@@ -142,7 +142,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Allow_Empty_Given_Name() {
-        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, null, "");
+        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0", "");
 
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
