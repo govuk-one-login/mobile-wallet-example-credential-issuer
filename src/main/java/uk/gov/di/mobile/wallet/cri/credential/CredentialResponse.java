@@ -6,10 +6,11 @@ import lombok.Getter;
 @Getter
 public class CredentialResponse {
     private final String credential;
+
+    @JsonProperty("notification_id")
     private final String notificationId;
 
-    public CredentialResponse(
-            String credential, @JsonProperty("notification_id") String notificationId) {
+    public CredentialResponse(String credential, String notificationId) {
         this.credential = credential;
         this.notificationId = notificationId;
     }
