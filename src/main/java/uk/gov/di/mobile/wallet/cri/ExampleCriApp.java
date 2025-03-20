@@ -106,6 +106,5 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new JwksResource(jwksService));
 
         environment.jersey().register(new NotificationResource(notificationService));
-
     }
 }

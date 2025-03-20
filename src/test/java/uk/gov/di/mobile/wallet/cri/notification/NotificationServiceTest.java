@@ -141,7 +141,10 @@ class NotificationServiceTest {
                     InvalidNotificationIdException {
         notificationService.processNotification(accessToken, requestBody);
 
-        verify(mockLogger).info("Notification received: {}", requestBody);
+        verify(mockLogger)
+                .info(
+                        "Notification received - notification_id {}",
+                        "77368ca6-877b-4208-a397-99f1df890400");
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
     }

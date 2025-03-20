@@ -52,7 +52,10 @@ public class NotificationService {
                     "Request 'notification_id' does not match cached 'notificationId'");
         }
 
-        getLogger().info("Notification received: {}", notificationRequestBody);
+        getLogger()
+                .info(
+                        "Notification received - notification_id {}",
+                        notificationRequestBody.getNotificationId());
     }
 
     protected Logger getLogger() {
