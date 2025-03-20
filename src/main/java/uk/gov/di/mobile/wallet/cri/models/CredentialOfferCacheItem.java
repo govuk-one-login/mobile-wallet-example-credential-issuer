@@ -13,6 +13,7 @@ public class CredentialOfferCacheItem {
     String credentialIdentifier;
     String walletSubjectId;
     String documentId;
+    String notificationId;
     Long timeToLive;
 
     public CredentialOfferCacheItem() {
@@ -20,10 +21,14 @@ public class CredentialOfferCacheItem {
     }
 
     public CredentialOfferCacheItem(
-            String credentialIdentifier, String documentId, String walletSubjectId) {
+            String credentialIdentifier,
+            String documentId,
+            String walletSubjectId,
+            String notificationId) {
         this.credentialIdentifier = credentialIdentifier;
         this.documentId = documentId;
         this.walletSubjectId = walletSubjectId;
+        this.notificationId = notificationId;
     }
 
     // Required for unit testing
@@ -31,10 +36,12 @@ public class CredentialOfferCacheItem {
             String credentialIdentifier,
             String documentId,
             String walletSubjectId,
+            String notificationId,
             Long timeToLive) {
         this.credentialIdentifier = credentialIdentifier;
         this.documentId = documentId;
         this.walletSubjectId = walletSubjectId;
+        this.notificationId = notificationId;
         this.timeToLive = timeToLive;
     }
 

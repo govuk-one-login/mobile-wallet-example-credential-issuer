@@ -61,8 +61,10 @@ class CredentialServiceTest {
     private SignedJWT mockProofJwt;
     private SignedJWT mockAccessToken;
     private ProofJwtService.ProofJwtData mockAccessProofJwtData;
+    private SignedJWT mockCredentialJwt;
 
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
+    private static final String NOTIFICATION_ID = "3fwe98js";
     private static final String CREDENTIAL_IDENTIFIER = "efb52887-48d6-43b7-b14c-da7896fbf54d";
     private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
     private static final String WALLET_SUBJECT_ID =
@@ -71,7 +73,8 @@ class CredentialServiceTest {
             "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==";
 
     @BeforeEach
-    void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
+    void setUp()
+            throws AccessTokenValidationException, ProofJwtValidationException, ParseException {
         mockCredentialOfferCacheItem = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "300");
         mockProofJwt = new MockProofBuilder("ES256").build();
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
@@ -86,6 +89,10 @@ class CredentialServiceTest {
         mockAccessProofJwtData = getMockProofJwtData(NONCE);
         when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
+
+        mockCredentialJwt =
+                SignedJWT.parse(
+                        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
     }
 
     @Test
@@ -168,7 +175,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ThrowRuntimeException_When_DocumentEndpointReturns500() throws DataStoreException {
+    void Should_Throw_RuntimeException_When_Document_Endpoint_Returns_500()
+            throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -205,7 +213,8 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0", null));
-        when(mockCredentialBuilder.buildV2Credential(any(), any(), any())).thenReturn(any());
+        when(mockCredentialBuilder.buildV2Credential(any(), any(), any()))
+                .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
@@ -234,7 +243,8 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockBasicCheckDocument(DOCUMENT_ID, "v2.0"));
-        when(mockCredentialBuilder.buildV2Credential(any(), any(), anyString())).thenReturn(any());
+        when(mockCredentialBuilder.buildV2Credential(any(), any(), anyString()))
+                .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
@@ -263,7 +273,8 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockVeteranCardDocument(DOCUMENT_ID, "v2.0"));
-        when(mockCredentialBuilder.buildV2Credential(any(), any(), anyString())).thenReturn(any());
+        when(mockCredentialBuilder.buildV2Credential(any(), any(), anyString()))
+                .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
@@ -292,7 +303,8 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, "v1.1", null));
-        when(mockCredentialBuilder.buildV1Credential(anyString(), any())).thenReturn(any());
+        when(mockCredentialBuilder.buildV1Credential(anyString(), any()))
+                .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
@@ -322,13 +334,12 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ReturnCredential()
+    void Should_ReturnCredentialResponse()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     DataStoreException,
                     CredentialServiceException,
                     CredentialOfferNotFoundException,
-                    ParseException,
                     SigningException,
                     NoSuchAlgorithmException,
                     URISyntaxException {
@@ -340,17 +351,15 @@ class CredentialServiceTest {
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null, null));
-        SignedJWT mockCredentialJwt =
-                SignedJWT.parse(
-                        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
-        Credential mockCredential = new Credential(mockCredentialJwt);
         when(mockCredentialBuilder.buildV2Credential(any(), any(), any()))
-                .thenReturn(mockCredential);
+                .thenReturn(mockCredentialJwt);
 
-        Credential credentialServiceReturnValue =
+        CredentialResponse credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-        assertEquals(mockCredential.getCredential(), credentialServiceReturnValue.getCredential());
+        assertEquals(mockCredentialJwt.serialize(), credentialServiceReturnValue.getCredential());
+        assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
+
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
         verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
@@ -368,7 +377,11 @@ class CredentialServiceTest {
                 Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
 
         return new CredentialOfferCacheItem(
-                CREDENTIAL_IDENTIFIER, DOCUMENT_ID, walletSubjectId, timeToLiveValue);
+                CREDENTIAL_IDENTIFIER,
+                DOCUMENT_ID,
+                walletSubjectId,
+                NOTIFICATION_ID,
+                timeToLiveValue);
     }
 
     private AccessTokenService.AccessTokenData getMockAccessTokenData() {

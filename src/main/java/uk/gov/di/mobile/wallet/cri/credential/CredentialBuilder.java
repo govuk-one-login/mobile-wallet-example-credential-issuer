@@ -51,7 +51,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     // VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    public Credential buildV1Credential(String proofJwtDidKey, VCClaim vcClaim)
+    public SignedJWT buildV1Credential(String proofJwtDidKey, VCClaim vcClaim)
             throws SigningException, NoSuchAlgorithmException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getV1EncodedHeader(keyId);
@@ -72,15 +72,14 @@ public class CredentialBuilder<T extends CredentialSubject> {
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
             String signature = encodedSignature(signResult);
-            SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
-            return new Credential(signedJWT);
+            return SignedJWT.parse(message + "." + signature);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing token: %s", exception.getMessage()), exception);
         }
     }
 
-    public Credential buildV2Credential(
+    public SignedJWT buildV2Credential(
             T credentialSubject, CredentialType credentialType, String validUntil)
             throws SigningException, NoSuchAlgorithmException {
         // keyId is the hashed key ID. This value must be appended to the string
@@ -105,8 +104,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
             String signature = encodedSignature(signResult);
-            SignedJWT signedJWT = SignedJWT.parse(message + "." + signature);
-            return new Credential(signedJWT);
+            return SignedJWT.parse(message + "." + signature);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing token: %s", exception.getMessage()), exception);
