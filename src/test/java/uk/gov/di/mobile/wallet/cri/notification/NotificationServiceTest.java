@@ -111,7 +111,7 @@ class NotificationServiceTest {
 
         assertThat(
                 exception.getMessage(),
-                containsString("Access token and cached wallet subject identifiers do not match"));
+                containsString("Access token 'sub' does not match cached 'walletSubjectId'"));
     }
 
     @Test

@@ -42,7 +42,7 @@ public class NotificationService {
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
             throw new AccessTokenValidationException(
-                    "Access token and cached wallet subject identifiers do not match");
+                    "Access token 'sub' does not match cached 'walletSubjectId'");
         }
 
         if (!credentialOffer
