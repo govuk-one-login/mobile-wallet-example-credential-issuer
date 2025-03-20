@@ -18,11 +18,11 @@ public class NotificationRequestBody {
 
     @JsonCreator
     public NotificationRequestBody(
-            @JsonProperty(value = "notification_id") String notification_id,
+            @JsonProperty(value = "notification_id") String notificationId,
             @JsonProperty(value = "event") String event,
-            @JsonProperty(value = "event_description") String event_description) {
-        this.notificationId = notification_id;
+            @JsonProperty(value = "event_description") String eventDescription) {
+        this.notificationId = notificationId;
         this.event = event;
-        this.eventDescription = event_description;
+        this.eventDescription = eventDescription;
     }
 }
