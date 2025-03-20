@@ -14,6 +14,7 @@ import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 public class MetadataResource {
 
     private static final String CREDENTIAL_ENDPOINT = "/credential";
+    private static final String NOTIFICATION_ENDPOINT = "/notification";
     private static final String CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME =
             "credential_configurations_supported.json";
     private final ConfigurationService configurationService;
@@ -37,6 +38,7 @@ public class MetadataResource {
                             .setCredentialEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
                             .setAuthorizationServers(
                                     configurationService.getOneLoginAuthServerUrl())
+                            .setNotificationEndpoint(selfUrl + NOTIFICATION_ENDPOINT)
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
                             .build();

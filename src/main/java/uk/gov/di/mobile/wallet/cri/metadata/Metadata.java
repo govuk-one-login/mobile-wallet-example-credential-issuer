@@ -9,16 +9,16 @@ public class Metadata {
             String authorizationServers,
             String credentialsEndpoint,
             String credentialEndpoint,
+            String notificationEndpoint,
             Object credentialConfigurationsSupported) {
         this.credential_issuer = credentialIssuer;
         this.authorization_servers = new String[] {authorizationServers};
-
-        this.credentials_endpoint = credentialsEndpoint;
         // TO DO: Remove credentials_endpoint once SDK has been updated:
         // https://govukverify.atlassian.net/browse/DCMAW-11040
         // https://govukverify.atlassian.net/browse/DCMAW-11043
-
+        this.credentials_endpoint = credentialsEndpoint;
         this.credential_endpoint = credentialEndpoint;
+        this.notification_endpoint = notificationEndpoint;
         this.credential_configurations_supported = credentialConfigurationsSupported;
     }
 
@@ -26,7 +26,18 @@ public class Metadata {
     String[] authorization_servers; // NOSONAR
     String credentials_endpoint; // NOSONAR
     String credential_endpoint; // NOSONAR
+    String notification_endpoint; // NOSONAR
     Object credential_configurations_supported; // NOSONAR
+
+    @JsonProperty("credential_issuer")
+    public String getCredentialIssuer() {
+        return credential_issuer;
+    }
+
+    @JsonProperty("authorization_servers")
+    public String[] getAuthorizationServers() {
+        return authorization_servers;
+    }
 
     @JsonProperty("credentials_endpoint")
     public String getCredentialsEndpoint() {
@@ -38,14 +49,9 @@ public class Metadata {
         return credential_endpoint;
     }
 
-    @JsonProperty("authorization_servers")
-    public String[] getAuthorizationServers() {
-        return authorization_servers;
-    }
-
-    @JsonProperty("credential_issuer")
-    public String getCredentialIssuer() {
-        return credential_issuer;
+    @JsonProperty("notification_endpoint")
+    public String getNotificationEndpoint() {
+        return notification_endpoint;
     }
 
     @JsonProperty("credential_configurations_supported")
