@@ -13,7 +13,7 @@ public class MetadataBuilder {
     String authorization_servers; // NOSONAR
     String credentials_endpoint; // NOSONAR
     String credential_endpoint; // NOSONAR
-    String notification_endpoint;
+    String notification_endpoint; // NOSONAR
     Object credential_configurations_supported; // NOSONAR
 
     @JsonProperty("credential_issuer")
