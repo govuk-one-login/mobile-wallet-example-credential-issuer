@@ -37,13 +37,13 @@ class NotificationServiceTest {
     private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
+    private static final String NOTIFICATION_ID = "77368ca6-877b-4208-a397-99f1df890400";
 
     private final DynamoDbService mockDynamoDbService = mock(DynamoDbService.class);
     private final AccessTokenService mockAccessTokenService = mock(AccessTokenService.class);
-    Logger mockLogger = mock(Logger.class);
 
+    private Logger mockLogger;
     private CredentialOfferCacheItem mockCredentialOfferCacheItem;
-
     private NotificationService notificationService;
     private SignedJWT accessToken;
     private NotificationRequestBody requestBody;
@@ -63,8 +63,14 @@ class NotificationServiceTest {
                         "credential_accepted",
                         "Credential stored");
 
+        mockLogger = mock(Logger.class);
         notificationService =
-                new NotificationService(mockDynamoDbService, mockAccessTokenService, mockLogger);
+                new NotificationService(mockDynamoDbService, mockAccessTokenService) {
+                    @Override
+                    protected Logger getLogger() {
+                        return mockLogger;
+                    }
+                };
 
         AccessTokenService.AccessTokenData mockAccessTokenData =
                 new AccessTokenService.AccessTokenData(
@@ -108,29 +114,25 @@ class NotificationServiceTest {
                 containsString("Access token and cached wallet subject identifiers do not match"));
     }
 
-    //    @Test
-    //    void Should_ThrowInvalidNotificationIdException_When_NotificationIDsDoNotMatch()
-    //            throws InvalidNotificationIdException, DataStoreException {
-    //        when(mockDynamoDbService.getCredentialOffer(anyString()))
-    //                .thenReturn(mockCredentialOfferCacheItem);
-    //
-    //        requestBody =
-    //                new NotificationRequestBody(
-    //                        "not_the_same_notification_id",
-    //                        "credential_accepted",
-    //                        "Credential stored");
-    //
-    //        InvalidNotificationIdException exception =
-    //                assertThrows(
-    //                        InvalidNotificationIdException.class,
-    //                        () -> notificationService.processNotification(accessToken,
-    // requestBody));
-    //
-    //        assertThat(
-    //                exception.getMessage(),
-    //                containsString("Access token and cached wallet subject identifiers do not
-    // match"));
-    //    }
+    @Test
+    void Should_ThrowInvalidNotificationIdException_When_NotificationIDsDoNotMatch()
+            throws DataStoreException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCredentialOfferCacheItem);
+
+        requestBody =
+                new NotificationRequestBody(
+                        "not_the_same_notification_id", "credential_accepted", "Credential stored");
+
+        InvalidNotificationIdException exception =
+                assertThrows(
+                        InvalidNotificationIdException.class,
+                        () -> notificationService.processNotification(accessToken, requestBody));
+
+        assertThat(
+                exception.getMessage(),
+                containsString("Request 'notification_id' does not match cached 'notificationId'"));
+    }
 
     @Test
     void Should_LogNotification_When_RequestIsValid()
@@ -148,6 +150,10 @@ class NotificationServiceTest {
         Long timeToLiveValue = Instant.now().plusSeconds(Long.parseLong("300")).getEpochSecond();
 
         return new CredentialOfferCacheItem(
-                CREDENTIAL_IDENTIFIER, DOCUMENT_ID, walletSubjectId, timeToLiveValue);
+                CREDENTIAL_IDENTIFIER,
+                DOCUMENT_ID,
+                walletSubjectId,
+                NOTIFICATION_ID,
+                timeToLiveValue);
     }
 }

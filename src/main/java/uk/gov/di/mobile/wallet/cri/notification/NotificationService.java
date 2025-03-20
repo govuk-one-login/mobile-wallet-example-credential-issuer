@@ -9,24 +9,15 @@ import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidation
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
-public class NotificationService {
+public abstract class NotificationService {
 
     private final DataStore dataStore;
     private final AccessTokenService accessTokenService;
-    private final Logger LOGGER;
+    private static final Logger LOGGER = LoggerFactory.getLogger(NotificationService.class);
 
     public NotificationService(DataStore dataStore, AccessTokenService accessTokenService) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
-        this.LOGGER = LoggerFactory.getLogger(NotificationService.class);
-    }
-
-    // Required for unit testing
-    public NotificationService(
-            DataStore dataStore, AccessTokenService accessTokenService, Logger logger) {
-        this.dataStore = dataStore;
-        this.accessTokenService = accessTokenService;
-        this.LOGGER = logger;
     }
 
     public void processNotification(
@@ -61,6 +52,8 @@ public class NotificationService {
                     "Request 'notification_id' does not match cached 'notificationId'");
         }
 
-        LOGGER.info("Notification received: {}", notificationRequestBody);
+        getLogger().info("Notification received: {}", notificationRequestBody);
     }
+
+    protected abstract Logger getLogger();
 }
