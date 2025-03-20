@@ -54,12 +54,12 @@ public class NotificationService {
                     "Access token and cached wallet subject identifiers do not match");
         }
 
-        //        Functionality not available yet so commenting out the code for now
-        //        if
-        // (!credentialOffer.getNotificationId().equals(notificationRequestBody.getNotificationId())) {
-        //            throw new InvalidNotificationIdException(
-        //                    "Request 'notification_id' does not match cached 'notificationId'");
-        //        }
+        if (!credentialOffer
+                .getNotificationId()
+                .equals(notificationRequestBody.getNotificationId())) {
+            throw new InvalidNotificationIdException(
+                    "Request 'notification_id' does not match cached 'notificationId'");
+        }
 
         LOGGER.info("Notification received: {}", notificationRequestBody);
     }
