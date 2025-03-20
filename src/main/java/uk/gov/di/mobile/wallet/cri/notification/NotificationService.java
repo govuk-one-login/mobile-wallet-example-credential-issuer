@@ -9,7 +9,7 @@ import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidation
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
-public abstract class NotificationService {
+public class NotificationService {
 
     private final DataStore dataStore;
     private final AccessTokenService accessTokenService;
@@ -55,5 +55,7 @@ public abstract class NotificationService {
         getLogger().info("Notification received: {}", notificationRequestBody);
     }
 
-    protected abstract Logger getLogger();
+    protected Logger getLogger() {
+        return LOGGER;
+    }
 }
