@@ -25,7 +25,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static testUtils.EsKeyHelper.getEsKey;
+import static testUtils.EcKeyHelper.getEcKey;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -54,7 +54,7 @@ class NotificationServiceTest {
                     JOSEException,
                     AccessTokenValidationException,
                     DataStoreException {
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEcKey());
         accessToken = new MockAccessTokenBuilder("ES256").build();
         accessToken.sign(ecSigner);
         requestBody =

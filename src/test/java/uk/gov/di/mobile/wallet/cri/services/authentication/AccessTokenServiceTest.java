@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static testUtils.EsKeyHelper.getEsKey;
+import static testUtils.EcKeyHelper.getEcKey;
 
 @ExtendWith(MockitoExtension.class)
 class AccessTokenServiceTest {
@@ -35,7 +35,7 @@ class AccessTokenServiceTest {
 
     @BeforeEach
     void setup() throws ParseException, JOSEException {
-        ecSigner = new ECDSASigner(getEsKey());
+        ecSigner = new ECDSASigner(getEcKey());
         accessTokenService = new AccessTokenService(jwksService, configurationService);
         when(configurationService.getSelfUrl()).thenReturn("https://issuer-url.gov.uk");
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
@@ -159,7 +159,7 @@ class AccessTokenServiceTest {
     @Test
     void Should_ReturnTokenData_When_JwtVerificationSucceeds()
             throws JOSEException, ParseException, AccessTokenValidationException {
-        JWK publicKey = getEsKey().toPublicJWK();
+        JWK publicKey = getEcKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
         SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         mockAccessToken.sign(ecSigner);

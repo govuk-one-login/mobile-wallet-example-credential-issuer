@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.*;
-import static testUtils.EsKeyHelper.getEsKey;
+import static testUtils.EcKeyHelper.getEcKey;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(DropwizardExtensionsSupport.class)
@@ -43,7 +43,7 @@ class NotificationResourceTest {
 
     @BeforeEach
     void setUp() throws ParseException, JOSEException {
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEcKey());
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         mockAccessToken.sign(ecSigner);
         Mockito.reset(notificationService);
@@ -108,7 +108,7 @@ class NotificationResourceTest {
     }
 
     private Stream<String> provideAuthorizationHeaders() throws ParseException, JOSEException {
-        ECDSASigner ecSigner = new ECDSASigner(getEsKey());
+        ECDSASigner ecSigner = new ECDSASigner(getEcKey());
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         mockAccessToken.sign(ecSigner);
 
