@@ -19,6 +19,8 @@ import uk.gov.di.mobile.wallet.cri.healthcheck.Ping;
 import uk.gov.di.mobile.wallet.cri.jwks.JwksResource;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
+import uk.gov.di.mobile.wallet.cri.notification.NotificationResource;
+import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -83,6 +85,9 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
 
+        NotificationService notificationService =
+                new NotificationService(dynamoDbService, accessTokenService);
+
         environment.healthChecks().register("ping", new Ping());
         environment.jersey().register(new HealthCheckResource(environment));
 
@@ -99,5 +104,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new DidDocumentResource(didDocumentService));
 
         environment.jersey().register(new JwksResource(jwksService));
+
+        environment.jersey().register(new NotificationResource(notificationService));
+
     }
 }
