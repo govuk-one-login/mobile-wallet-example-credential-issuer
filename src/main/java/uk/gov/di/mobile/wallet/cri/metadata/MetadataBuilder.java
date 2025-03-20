@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.metadata;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 
@@ -9,64 +8,58 @@ import java.io.IOException;
 
 public class MetadataBuilder {
 
-    String credential_issuer; // NOSONAR
-    String authorization_servers; // NOSONAR
-    String credentials_endpoint; // NOSONAR
-    String credential_endpoint; // NOSONAR
-    String notification_endpoint; // NOSONAR
-    Object credential_configurations_supported; // NOSONAR
+    String credentialIssuer;
+    String authorizationServers;
+    String credentialsEndpoint;
+    String credentialEndpoint;
+    String notificationEndpoint;
+    Object credentialConfigurationsSupported;
 
-    @JsonProperty("credential_issuer")
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {
         if (credentialIssuer == null) {
-            throw new IllegalArgumentException("credential_issuer must not be null");
+            throw new IllegalArgumentException("credentialIssuer must not be null");
         }
-        this.credential_issuer = credentialIssuer;
+        this.credentialIssuer = credentialIssuer;
         return this;
     }
 
-    @JsonProperty("authorization_servers")
     public MetadataBuilder setAuthorizationServers(String authorizationServers)
             throws IllegalArgumentException {
         if (authorizationServers == null) {
-            throw new IllegalArgumentException("authorization_servers must not be null");
+            throw new IllegalArgumentException("authorizationServers must not be null");
         }
-        this.authorization_servers = authorizationServers;
+        this.authorizationServers = authorizationServers;
         return this;
     }
 
-    @JsonProperty("credentials_endpoint")
     public MetadataBuilder setCredentialsEndpoint(String credentialsEndpoint)
             throws IllegalArgumentException {
         if (credentialsEndpoint == null) {
-            throw new IllegalArgumentException("credentials_endpoint must not be null");
+            throw new IllegalArgumentException("credentialsEndpoint must not be null");
         }
-        this.credentials_endpoint = credentialsEndpoint;
+        this.credentialsEndpoint = credentialsEndpoint;
         return this;
     }
 
-    @JsonProperty("credential_endpoint")
     public MetadataBuilder setCredentialEndpoint(String credentialEndpoint)
             throws IllegalArgumentException {
         if (credentialEndpoint == null) {
-            throw new IllegalArgumentException("credential_endpoint must not be null");
+            throw new IllegalArgumentException("credentialEndpoint must not be null");
         }
-        this.credential_endpoint = credentialEndpoint;
+        this.credentialEndpoint = credentialEndpoint;
         return this;
     }
 
-    @JsonProperty("notification_endpoint")
     public MetadataBuilder setNotificationEndpoint(String notificationEndpoint)
             throws IllegalArgumentException {
         if (notificationEndpoint == null) {
-            throw new IllegalArgumentException("notification_endpoint must not be null");
+            throw new IllegalArgumentException("notificationEndpoint must not be null");
         }
-        this.notification_endpoint = notificationEndpoint;
+        this.notificationEndpoint = notificationEndpoint;
         return this;
     }
 
-    @JsonProperty("credential_configurations_supported")
     public MetadataBuilder setCredentialConfigurationsSupported(String fileName)
             throws IOException, IllegalArgumentException {
         if (fileName == null) {
@@ -75,18 +68,18 @@ public class MetadataBuilder {
         File credentialConfigurationsSupportedFilePath =
                 new File(Resources.getResource(fileName).getPath());
         ObjectMapper mapper = new ObjectMapper();
-        this.credential_configurations_supported =
+        this.credentialConfigurationsSupported =
                 mapper.readValue(credentialConfigurationsSupportedFilePath, Object.class);
         return this;
     }
 
     public Metadata build() {
         return new Metadata(
-                credential_issuer,
-                authorization_servers,
-                credentials_endpoint,
-                credential_endpoint,
-                notification_endpoint,
-                credential_configurations_supported);
+                credentialIssuer,
+                authorizationServers,
+                credentialsEndpoint,
+                credentialEndpoint,
+                notificationEndpoint,
+                credentialConfigurationsSupported);
     }
 }
