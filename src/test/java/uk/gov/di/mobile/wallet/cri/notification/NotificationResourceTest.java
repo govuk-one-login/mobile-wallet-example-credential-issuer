@@ -57,7 +57,7 @@ class NotificationResourceTest {
                 // is empty string
                 "{\"notification_id\":\"123\",\"event\":\"credential_accepted\"}", // 'notification_id' is not UUID
             })
-    void Should_Return400_When_NotificationIdIsInvalid(String requestBody) throws JOSEException {
+    void Should_Return400_When_NotificationIdIsInvalid(String requestBody) {
         final Response response =
                 resource.target("/notification")
                         .request()
