@@ -24,8 +24,7 @@ class MetadataBuilderTest {
     }
 
     @Test
-    @DisplayName("Should return the CRI metadata")
-    void testReturnsCRIMetadata() throws IOException {
+    void Should_ReturnMetadata() throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode expectedCredentialConfigurationsSupported =
                 objectMapper.readTree(
@@ -38,22 +37,27 @@ class MetadataBuilderTest {
                         .setCredentialEndpoint("https://test-credential-issuer.gov.uk/credential")
                         .setAuthorizationServers(
                                 "https://test-authorization-server.gov.uk/auth-server")
+                        .setNotificationEndpoint(
+                                "https://test-credential-issuer.gov.uk/notification")
                         .setCredentialConfigurationsSupported(
                                 "test_valid_credential_configurations_supported.json")
                         .build();
 
-        assertEquals("https://test-credential-issuer.gov.uk", metadata.credential_issuer);
+        assertEquals("https://test-credential-issuer.gov.uk", metadata.credentialIssuer);
         assertArrayEquals(
                 new String[] {"https://test-authorization-server.gov.uk/auth-server"},
-                metadata.authorization_servers);
+                metadata.authorizationServers);
         assertEquals(
-                "https://test-credential-issuer.gov.uk/credential", metadata.credentials_endpoint);
+                "https://test-credential-issuer.gov.uk/credential", metadata.credentialsEndpoint);
         assertEquals(
-                "https://test-credential-issuer.gov.uk/credential", metadata.credential_endpoint);
+                "https://test-credential-issuer.gov.uk/credential", metadata.credentialEndpoint);
+        assertEquals(
+                "https://test-credential-issuer.gov.uk/notification",
+                metadata.notificationEndpoint);
         JsonNode actualCredentialConfigurationsSupported =
                 objectMapper.readTree(
                         objectMapper.writeValueAsString(
-                                metadata.credential_configurations_supported));
+                                metadata.credentialConfigurationsSupported));
         assertEquals(
                 expectedCredentialConfigurationsSupported, actualCredentialConfigurationsSupported);
     }
@@ -61,7 +65,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw a JsonParseException when credential_configurations_supported is not a valid JSON")
-    void test_Invalid_JSON() {
+    void Should_ThrowJsonParseException_On_InvalidJSON() {
         assertThrows(
                 JsonParseException.class,
                 () ->
@@ -72,7 +76,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with a file name that does not exist")
-    void test_Invalid_FileName() {
+    void Should_ThrowIllegalArgumentException_When_FileDoesNotExist() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -86,7 +90,7 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with null")
-    void test_CredentialConfigurationsSupported_Null_Value() {
+    void Should_ThrowIllegalArgumentException_When_FileNameIsNull() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -97,47 +101,59 @@ class MetadataBuilderTest {
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialsEndpoint is called with null")
-    void test_CredentialsEndpoint_Null_Value() {
+    void Should_ThrowIllegalArgumentException_When_ACredentialsEndpointIsNull() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialsEndpoint(null));
         Assertions.assertEquals(
-                "credentials_endpoint must not be null", exceptionThrown.getMessage());
+                "credentialsEndpoint must not be null", exceptionThrown.getMessage());
     }
 
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialEndpoint is called with null")
-    void test_CredentialEndpoint_Null_Value() {
+    void Should_ThrowIllegalArgumentException_When_ACredentialEndpointIsNull() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialEndpoint(null));
         Assertions.assertEquals(
-                "credential_endpoint must not be null", exceptionThrown.getMessage());
+                "credentialEndpoint must not be null", exceptionThrown.getMessage());
     }
 
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setAuthorizationServers is called with null")
-    void test_AuthorizationServers_Null_Value() {
+    void Should_ThrowIllegalArgumentException_When_AuthorizationServersIsNull() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setAuthorizationServers(null));
         Assertions.assertEquals(
-                "authorization_servers must not be null", exceptionThrown.getMessage());
+                "authorizationServers must not be null", exceptionThrown.getMessage());
     }
 
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialIssuer is called with null")
-    void test_CredentialIssuer_Null_Value() {
+    void Should_ThrowIllegalArgumentException_When_CredentialIssuerIsNull() {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialIssuer(null));
-        Assertions.assertEquals("credential_issuer must not be null", exceptionThrown.getMessage());
+        Assertions.assertEquals("credentialIssuer must not be null", exceptionThrown.getMessage());
+    }
+
+    @Test
+    @DisplayName(
+            "Should throw IllegalArgumentException when setNotificationEndpoint is called with 'null'")
+    void Should_ThrowIllegalArgumentException_When_NotificationEndpointIsNull() {
+        IllegalArgumentException exceptionThrown =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> metadataBuilder.setNotificationEndpoint(null));
+        Assertions.assertEquals(
+                "notificationEndpoint must not be null", exceptionThrown.getMessage());
     }
 }

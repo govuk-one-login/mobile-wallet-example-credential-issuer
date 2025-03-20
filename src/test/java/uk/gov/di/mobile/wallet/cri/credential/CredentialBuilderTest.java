@@ -145,31 +145,28 @@ class CredentialBuilderTest {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
-        Credential credential =
+        SignedJWT credential =
                 credentialBuilderSocialSecurity.buildV1Credential(
                         DID_KEY, new VCClaim("SocialSecurityCredential", documentV1));
 
-        SignedJWT token = SignedJWT.parse(credential.getCredential());
-
-        assertThat(credential, hasProperty("credential"));
-        assertThat(token.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(token.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
-        assertThat(token.getHeader().getType(), equalTo(new JOSEObjectType("JWT")));
-        assertThat(token.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
+        assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(credential.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("JWT")));
+        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
         assertThat(
-                token.getJWTClaimsSet().getIssueTime().toString(),
+                credential.getJWTClaimsSet().getIssueTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getNotBeforeTime().toString(),
+                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getExpirationTime().toString(),
+                credential.getJWTClaimsSet().getExpirationTime().toString(),
                 equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
         assertThat(
-                token.getJWTClaimsSet().getListClaim("context"),
+                credential.getJWTClaimsSet().getListClaim("context"),
                 equalTo(List.of("https://www.w3.org/2018/credentials/v1")));
-        assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
+        assertThat(credential.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
     @Test
@@ -178,49 +175,50 @@ class CredentialBuilderTest {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
-        Credential credential =
+        SignedJWT credential =
                 credentialBuilderSocialSecurity.buildV2Credential(
                         socialSecurityCredentialSubject,
                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                         null);
 
-        SignedJWT token = SignedJWT.parse(credential.getCredential());
-
-        assertThat(credential, hasProperty("credential"));
-        assertThat(token.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(token.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
-        assertThat(token.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
-        assertThat(token.getHeader().getContentType(), equalTo("vc"));
-        assertThat(token.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
+        assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(credential.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
+        assertThat(credential.getHeader().getContentType(), equalTo("vc"));
+        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
         assertThat(
-                token.getJWTClaimsSet().getIssueTime().toString(),
+                credential.getJWTClaimsSet().getIssueTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getNotBeforeTime().toString(),
+                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getExpirationTime().toString(),
+                credential.getJWTClaimsSet().getExpirationTime().toString(),
                 equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
         assertThat(
-                token.getJWTClaimsSet().getListClaim("@context"),
+                credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
         assertThat(
-                token.getJWTClaimsSet().getListClaim("type"),
+                credential.getJWTClaimsSet().getListClaim("type"),
                 equalTo(List.of("VerifiableCredential", "SocialSecurityCredential")));
-        assertThat(token.getJWTClaimsSet().getClaim("issuer"), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getClaim("name"), equalTo("National Insurance number"));
         assertThat(
-                token.getJWTClaimsSet().getClaim("description"),
+                credential.getJWTClaimsSet().getClaim("issuer"),
+                equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("name"),
                 equalTo("National Insurance number"));
         assertThat(
-                token.getJWTClaimsSet().getClaim("validFrom").toString(),
+                credential.getJWTClaimsSet().getClaim("description"),
+                equalTo("National Insurance number"));
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("validFrom").toString(),
                 equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
         assertThat(
-                token.getJWTClaimsSet().getClaim("credentialSubject").toString(),
+                credential.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
                         "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, name=[{nameParts=[{type=Title, value=Miss}, {type=GivenName, value=Sarah}, {type=GivenName, value=Elizabeth}, {type=FamilyName, value=Edwards}, {type=FamilyName, value=Green}]}], socialSecurityRecord=[{personalNumber=QQ123456C}]}"));
-        assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
+        assertThat(credential.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
     @Test
@@ -229,49 +227,53 @@ class CredentialBuilderTest {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
-        Credential credential =
+        SignedJWT credential =
                 credentialBuilderBasicCheck.buildV2Credential(
                         basicCheckCredentialSubject,
                         CredentialType.BASIC_CHECK_CREDENTIAL,
                         "2025-07-11");
 
-        SignedJWT token = SignedJWT.parse(credential.getCredential());
-        assertThat(credential, hasProperty("credential"));
-        assertThat(token.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(token.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
-        assertThat(token.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
-        assertThat(token.getHeader().getContentType(), equalTo("vc"));
-        assertThat(token.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
+        assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(credential.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
+        assertThat(credential.getHeader().getContentType(), equalTo("vc"));
+        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
         assertThat(
-                token.getJWTClaimsSet().getIssueTime().toString(),
+                credential.getJWTClaimsSet().getIssueTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getNotBeforeTime().toString(),
+                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getExpirationTime().toString(),
+                credential.getJWTClaimsSet().getExpirationTime().toString(),
                 equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
         assertThat(
-                token.getJWTClaimsSet().getListClaim("@context"),
+                credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
         assertThat(
-                token.getJWTClaimsSet().getListClaim("type"),
+                credential.getJWTClaimsSet().getListClaim("type"),
                 equalTo(List.of("VerifiableCredential", "BasicCheckCredential")));
-        assertThat(token.getJWTClaimsSet().getClaim("issuer"), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getClaim("name"), equalTo("Basic DBS check result"));
         assertThat(
-                token.getJWTClaimsSet().getClaim("description"), equalTo("Basic DBS check result"));
+                credential.getJWTClaimsSet().getClaim("issuer"),
+                equalTo(EXAMPLE_CREDENTIAL_ISSUER));
         assertThat(
-                token.getJWTClaimsSet().getClaim("validFrom").toString(),
+                credential.getJWTClaimsSet().getClaim("name"), equalTo("Basic DBS check result"));
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("description"),
+                equalTo("Basic DBS check result"));
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("validFrom").toString(),
                 equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
-        assertThat(token.getJWTClaimsSet().getClaim("validUntil"), equalTo("2025-07-11T22:59:59Z"));
         assertThat(
-                token.getJWTClaimsSet().getClaim("credentialSubject").toString(),
+                credential.getJWTClaimsSet().getClaim("validUntil"),
+                equalTo("2025-07-11T22:59:59Z"));
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
                         "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, issuanceDate=2024-07-11, expirationDate=2025-07-11, name=[{nameParts=[{type=GivenName, value=Bonnie}, {type=FamilyName, value=Blue}]}], birthDate=[{value=1970-12-05}], address=[{subBuildingName=Flat 11, buildingName=Blashford, streetName=Adelaide Road, addressLocality=London, postalCode=NW3 3RX, addressCountry=GB}], basicCheckRecord=[{certificateNumber=009878863, applicationNumber=E0023455534, certificateType=basic, outcome=Result clear, policeRecordsCheck=Clear}]}"));
 
-        assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
+        assertThat(credential.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
     @Test
@@ -280,51 +282,54 @@ class CredentialBuilderTest {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
-        Credential credential =
+        SignedJWT credential =
                 credentialBuilderVeteranCard.buildV2Credential(
                         veteranCardCredentialSubject,
                         CredentialType.DIGITAL_VETERAN_CARD,
                         "2000-07-11");
 
-        SignedJWT token = SignedJWT.parse(credential.getCredential());
-        assertThat(credential, hasProperty("credential"));
-        assertThat(token.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(token.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
-        assertThat(token.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
-        assertThat(token.getHeader().getContentType(), equalTo("vc"));
-        assertThat(token.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(token.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
+        assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
+        assertThat(credential.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
+        assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
+        assertThat(credential.getHeader().getContentType(), equalTo("vc"));
+        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
+        assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
         assertThat(
-                token.getJWTClaimsSet().getIssueTime().toString(),
+                credential.getJWTClaimsSet().getIssueTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getNotBeforeTime().toString(),
+                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
-                token.getJWTClaimsSet().getExpirationTime().toString(),
+                credential.getJWTClaimsSet().getExpirationTime().toString(),
                 equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
         assertThat(
-                token.getJWTClaimsSet().getListClaim("@context"),
+                credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
         assertThat(
-                token.getJWTClaimsSet().getListClaim("type"),
+                credential.getJWTClaimsSet().getListClaim("type"),
                 equalTo(List.of("VerifiableCredential", "digitalVeteranCard")));
-        assertThat(token.getJWTClaimsSet().getClaim("issuer"), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
         assertThat(
-                token.getJWTClaimsSet().getClaim("name"), equalTo("HM Armed Forces Veteran Card"));
+                credential.getJWTClaimsSet().getClaim("issuer"),
+                equalTo(EXAMPLE_CREDENTIAL_ISSUER));
         assertThat(
-                token.getJWTClaimsSet().getClaim("description"),
+                credential.getJWTClaimsSet().getClaim("name"),
                 equalTo("HM Armed Forces Veteran Card"));
         assertThat(
-                token.getJWTClaimsSet().getClaim("validFrom").toString(),
-                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
-        assertThat(token.getJWTClaimsSet().getClaim("validUntil"), equalTo("2000-07-11T22:59:59Z"));
+                credential.getJWTClaimsSet().getClaim("description"),
+                equalTo("HM Armed Forces Veteran Card"));
         assertThat(
-                token.getJWTClaimsSet().getClaim("credentialSubject").toString(),
+                credential.getJWTClaimsSet().getClaim("validFrom").toString(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("validUntil"),
+                equalTo("2000-07-11T22:59:59Z"));
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
                         "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, name=[{nameParts=[{type=GivenName, value=Bonnie}, {type=FamilyName, value=Blue}]}], birthDate=[{value=1970-12-05}], veteranCard=[{expiryDate=2000-07-11, serviceNumber=25057386, serviceBranch=HM Naval Service, photo=null}]}"));
 
-        assertThat(token.getState(), equalTo(JWSObject.State.SIGNED));
+        assertThat(credential.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
     private SignResponse getMockKmsSignResponse() throws JOSEException {

@@ -39,7 +39,10 @@ class DynamoDbServiceTest {
                 .thenReturn(mockDynamoDbTable);
         credentialOfferCacheItem =
                 new CredentialOfferCacheItem(
-                        TEST_PARTITION_KEY, "test-document-id", "test-wallet-subject-id");
+                        TEST_PARTITION_KEY,
+                        "test-document-id",
+                        "test-wallet-subject-id",
+                        "test-notification-id");
         dynamoDbService =
                 new DynamoDbService(mockDynamoDbEnhancedClient, TEST_TABLE_NAME, TEST_TTL);
     }
