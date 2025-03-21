@@ -67,8 +67,10 @@ public class CredentialService {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
         String credentialOfferId = accessTokenData.credentialIdentifier();
+        LOGGER.info("Access token for credential offer {} verified", credentialOfferId);
 
         ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
+        LOGGER.info("Proof JWT for credential offer {} verified", credentialOfferId);
 
         if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
             throw new ProofJwtValidationException(
@@ -77,7 +79,7 @@ public class CredentialService {
 
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
-        if (!isValidCredentialOffer(credentialOffer)) {
+        if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
             throw new CredentialOfferException("Credential offer validation failed");
         }
 
@@ -120,20 +122,21 @@ public class CredentialService {
         return new CredentialResponse(credential.serialize(), notificationId);
     }
 
-    private static boolean isValidCredentialOffer(CredentialOfferCacheItem credentialOffer) {
+    private boolean isValidCredentialOffer(
+            CredentialOfferCacheItem credentialOffer, String credentialOfferId) {
         if (credentialOffer == null) {
-            LOGGER.error("Credential offer is null");
+            getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
         }
 
         if (credentialOffer.getRedeemed()) {
-            LOGGER.error("Credential offer has already been redeemed");
+            getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
         }
 
         long now = Instant.now().getEpochSecond();
         if (now > credentialOffer.getExpiry()) {
-            LOGGER.error("Credential offer is expired");
+            getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }
         return true;
@@ -150,7 +153,7 @@ public class CredentialService {
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
             throw new CredentialServiceException(
                     String.format(
-                            "Request to fetch document details for documentId %s failed with status code %s",
+                            "Request to fetch document %s failed with status code %s",
                             documentId, response.getStatus()));
         }
         return response.readEntity(Document.class);
@@ -246,5 +249,9 @@ public class CredentialService {
                 veteranCardCredentialSubject.getName(),
                 veteranCardCredentialSubject.getBirthDate(),
                 veteranCardCredentialSubject.getVeteranCard());
+    }
+
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.notification;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -24,7 +25,8 @@ public class NotificationService {
             SignedJWT accessToken, NotificationRequestBody notificationRequestBody)
             throws DataStoreException,
                     AccessTokenValidationException,
-                    InvalidNotificationIdException {
+                    InvalidNotificationIdException,
+                    CredentialOfferException {
 
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
@@ -33,11 +35,10 @@ public class NotificationService {
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
         if (credentialOffer == null) {
-            throw new AccessTokenValidationException(
-                    String.format(
-                            "Credential offer with credentialOfferId %s not found",
-                            credentialOfferId));
+            throw new CredentialOfferException(
+                    String.format("Credential offer %s was not found", credentialOfferId));
         }
+
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
             throw new AccessTokenValidationException(
                     "Access token 'sub' does not match cached 'walletSubjectId'");
