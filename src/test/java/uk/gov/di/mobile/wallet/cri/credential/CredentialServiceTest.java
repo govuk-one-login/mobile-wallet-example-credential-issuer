@@ -365,7 +365,7 @@ class CredentialServiceTest {
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
         verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
-        verify(mockDynamoDbService, times(1)).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
+        verify(mockDynamoDbService, times(1)).updateCredentialOffer(mockCredentialOfferCacheItem);
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildV2Credential(
                         any(SocialSecurityCredentialSubject.class),
@@ -375,15 +375,16 @@ class CredentialServiceTest {
 
     private CredentialOfferCacheItem getMockCredentialOfferCacheItem(
             String walletSubjectId, String expiresInSeconds) {
-        Long timeToLiveValue =
-                Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
-
+        Long expiry = Instant.now().plusSeconds(300).getEpochSecond();
+        Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
         return new CredentialOfferCacheItem(
                 CREDENTIAL_IDENTIFIER,
                 DOCUMENT_ID,
                 walletSubjectId,
                 NOTIFICATION_ID,
-                timeToLiveValue);
+                false,
+                expiry,
+                ttl);
     }
 
     private AccessTokenService.AccessTokenData getMockAccessTokenData() {
