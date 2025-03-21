@@ -60,11 +60,12 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public void deleteCredentialOffer(String partitionValue) throws DataStoreException {
+    public void updateCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
+            throws DataStoreException {
         try {
-            getTable().deleteItem(Key.builder().partitionValue(partitionValue).build());
+            getTable().updateItem(credentialOfferCacheItem);
         } catch (Exception exception) {
-            throw new DataStoreException("Error deleting credential offer", exception);
+            throw new DataStoreException("Error updating credential offer", exception);
         }
     }
 

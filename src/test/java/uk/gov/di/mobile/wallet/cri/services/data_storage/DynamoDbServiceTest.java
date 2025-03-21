@@ -124,27 +124,43 @@ class DynamoDbServiceTest {
     }
 
     @Test
-    void Should_DeleteCredentialOfferFromCache() throws DataStoreException {
-        dynamoDbService.deleteCredentialOffer(PARTITION_KEY);
+    void Should_UpdateCachedCredentialOffer() throws DataStoreException {
+        dynamoDbService.updateCredentialOffer(credentialOfferCacheItem);
 
-        ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
-        verify(mockDynamoDbTable).deleteItem(argumentCaptor.capture());
-        assertEquals(PARTITION_KEY, argumentCaptor.getValue().partitionKeyValue().s());
+        ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
+                ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
+        verify(mockDynamoDbTable).updateItem(credentialOfferCacheItemArgumentCaptor.capture());
+        assertEquals(
+                PARTITION_KEY,
+                credentialOfferCacheItemArgumentCaptor.getValue().getCredentialIdentifier());
+        assertEquals(
+                "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77",
+                credentialOfferCacheItemArgumentCaptor.getValue().getDocumentId());
+        assertEquals(
+                "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+                credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
+        assertEquals(
+                "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
+                credentialOfferCacheItemArgumentCaptor.getValue().getNotificationId());
+        assertEquals(false, credentialOfferCacheItemArgumentCaptor.getValue().getRedeemed());
+        assertEquals(EXPIRY, credentialOfferCacheItemArgumentCaptor.getValue().getExpiry());
+        assertEquals(TTL, credentialOfferCacheItemArgumentCaptor.getValue().getTimeToLive());
     }
 
     @Test
-    void Should_ThrowDataStoreException_When_ErrorHappensDeletingCredentialOffer()
+    void Should_ThrowDataStoreException_When_ErrorHappensUpdatingCredentialOffer()
             throws DataStoreException {
-        dynamoDbService.deleteCredentialOffer(PARTITION_KEY);
+        dynamoDbService.updateCredentialOffer(credentialOfferCacheItem);
 
-        ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
+        ArgumentCaptor<CredentialOfferCacheItem> argumentCaptor =
+                ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
         doThrow(new UnsupportedOperationException())
                 .when(mockDynamoDbTable)
-                .deleteItem(argumentCaptor.capture());
+                .updateItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
                         DataStoreException.class,
-                        () -> dynamoDbService.deleteCredentialOffer(PARTITION_KEY));
-        assertEquals("Error deleting credential offer", exception.getMessage());
+                        () -> dynamoDbService.updateCredentialOffer(credentialOfferCacheItem));
+        assertEquals("Error updating credential offer", exception.getMessage());
     }
 }
