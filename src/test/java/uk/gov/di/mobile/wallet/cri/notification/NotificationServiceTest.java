@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
@@ -24,7 +25,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static testUtils.EcKeyHelper.getEcKey;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -32,17 +37,15 @@ import static testUtils.EcKeyHelper.getEcKey;
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
-    private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
     private static final String CREDENTIAL_IDENTIFIER = "efb52887-48d6-43b7-b14c-da7896fbf54d";
-    private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String NOTIFICATION_ID = "77368ca6-877b-4208-a397-99f1df890400";
 
-    private final DynamoDbService mockDynamoDbService = mock(DynamoDbService.class);
-    private final AccessTokenService mockAccessTokenService = mock(AccessTokenService.class);
+    @Mock private DynamoDbService mockDynamoDbService;
+    @Mock private AccessTokenService mockAccessTokenService;
+    @Mock private Logger mockLogger;
 
-    private Logger mockLogger;
     private CredentialOfferCacheItem mockCredentialOfferCacheItem;
     private NotificationService notificationService;
     private SignedJWT accessToken;
@@ -57,13 +60,11 @@ class NotificationServiceTest {
         ECDSASigner ecSigner = new ECDSASigner(getEcKey());
         accessToken = new MockAccessTokenBuilder("ES256").build();
         accessToken.sign(ecSigner);
+
         requestBody =
                 new NotificationRequestBody(
-                        "77368ca6-877b-4208-a397-99f1df890400",
-                        EventType.credential_accepted,
-                        "Credential stored");
+                        NOTIFICATION_ID, EventType.credential_accepted, "Credential stored");
 
-        mockLogger = mock(Logger.class);
         notificationService =
                 new NotificationService(mockDynamoDbService, mockAccessTokenService) {
                     @Override
@@ -74,8 +75,11 @@ class NotificationServiceTest {
 
         AccessTokenService.AccessTokenData mockAccessTokenData =
                 new AccessTokenService.AccessTokenData(
-                        WALLET_SUBJECT_ID, NONCE, CREDENTIAL_IDENTIFIER);
+                        WALLET_SUBJECT_ID,
+                        "134e0c41-a8b4-46d4-aec8-cd547e125589",
+                        CREDENTIAL_IDENTIFIER);
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
+
         mockCredentialOfferCacheItem = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID);
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
@@ -149,18 +153,21 @@ class NotificationServiceTest {
                         "77368ca6-877b-4208-a397-99f1df890400",
                         "credential_accepted",
                         "Credential stored");
+
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
     }
 
     private CredentialOfferCacheItem getMockCredentialOfferCacheItem(String walletSubjectId) {
-        Long timeToLiveValue = Instant.now().plusSeconds(Long.parseLong("300")).getEpochSecond();
-
+        Long expiry = Instant.now().plusSeconds(300).getEpochSecond();
+        Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
         return new CredentialOfferCacheItem(
                 CREDENTIAL_IDENTIFIER,
-                DOCUMENT_ID,
+                "de9cbf02-2fbc-4d61-a627-f97851f6840b",
                 walletSubjectId,
                 NOTIFICATION_ID,
-                timeToLiveValue);
+                false,
+                expiry,
+                ttl);
     }
 }
