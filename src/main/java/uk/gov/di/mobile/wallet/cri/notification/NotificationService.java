@@ -54,8 +54,10 @@ public class NotificationService {
 
         getLogger()
                 .info(
-                        "Notification received - notification_id {}",
-                        notificationRequestBody.getNotificationId());
+                        "Notification received - notification_id: {}, event: {}, event_description: {}",
+                        notificationRequestBody.getNotificationId(),
+                        notificationRequestBody.getEvent(),
+                        notificationRequestBody.getEventDescription());
     }
 
     protected Logger getLogger() {

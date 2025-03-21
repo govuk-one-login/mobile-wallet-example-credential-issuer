@@ -143,8 +143,10 @@ class NotificationServiceTest {
 
         verify(mockLogger)
                 .info(
-                        "Notification received - notification_id {}",
-                        "77368ca6-877b-4208-a397-99f1df890400");
+                        "Notification received - notification_id: {}, event: {}, event_description: {}",
+                        "77368ca6-877b-4208-a397-99f1df890400",
+                        "credential_accepted",
+                        "Credential stored");
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
     }
