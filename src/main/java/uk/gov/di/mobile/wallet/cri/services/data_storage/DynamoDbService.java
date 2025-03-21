@@ -11,20 +11,13 @@ import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
-import java.time.Instant;
 
 public class DynamoDbService implements DataStore {
-
     private final String tableName;
-    private final int credentialOfferTtl;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
-    public DynamoDbService(
-            DynamoDbEnhancedClient dynamoDbEnhancedClient,
-            String tableName,
-            int credentialOfferTtl) {
+    public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient, String tableName) {
         this.tableName = tableName;
-        this.credentialOfferTtl = credentialOfferTtl;
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
     }
 
@@ -49,8 +42,6 @@ public class DynamoDbService implements DataStore {
     @Override
     public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
             throws DataStoreException {
-        credentialOfferCacheItem.setTimeToLive(
-                Instant.now().plusSeconds(credentialOfferTtl).getEpochSecond());
         try {
             getTable().putItem(credentialOfferCacheItem);
         } catch (Exception exception) {
