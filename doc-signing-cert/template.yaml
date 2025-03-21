@@ -49,6 +49,8 @@ Mappings:
   EnvironmentVariables:
     dev:
       DocumentSigningKeyParameterPrefix: "/iaca/"
+      DocumentSigningKeyCommonName: "Example Issuer DSC (DEV)"
+      DocumentSigningKeyCountryName: "UK"
       PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
       PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
       CloudwatchLogRetentionDays: 3
@@ -56,6 +58,8 @@ Mappings:
       LambdaLogLevel: DEBUG
     build:
       DocumentSigningKeyParameterPrefix: "/iaca/"
+      DocumentSigningKeyCommonName: "Example Issuer DSC (BUILD)"
+      DocumentSigningKeyCountryName: "UK"
       PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
       PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
       CloudwatchLogRetentionDays: 3650
@@ -147,6 +151,8 @@ Resources:
           DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
           DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
           DOC_SIGNING_KEY_VALIDITY_PERIOD: !Ref CertificateValidityPeriod
+          DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
+          DOC_SIGNING_KEY_COUNTRY_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
       Policies:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]

@@ -1,6 +1,4 @@
 import { Result } from './types/Result';
-import { logger } from './logging/logger';
-import { LogMessage } from './logging/LogMessages';
 import { Config, getRequiredEnvironmentVariables, MissingEnvVarError } from './utils/environment';
 
 const REQUIRED_ENVIRONMENT_VARIABLES = [
@@ -9,6 +7,8 @@ const REQUIRED_ENVIRONMENT_VARIABLES = [
   'DOC_SIGNING_KEY_ID',
   'DOC_SIGNING_KEY_BUCKET',
   'DOC_SIGNING_KEY_VALIDITY_PERIOD',
+  'DOC_SIGNING_KEY_COMMON_NAME',
+  'DOC_SIGNING_KEY_COUNTRY_NAME',
 ] as const;
 
 export type IssueDocumentSigningCertificateConfig = Config<(typeof REQUIRED_ENVIRONMENT_VARIABLES)[number]>;
@@ -16,11 +16,5 @@ export type IssueDocumentSigningCertificateConfig = Config<(typeof REQUIRED_ENVI
 export function getConfigFromEnvironment(
   env: NodeJS.ProcessEnv,
 ): Result<IssueDocumentSigningCertificateConfig, MissingEnvVarError> {
-  const envVarsResult = getRequiredEnvironmentVariables(env, REQUIRED_ENVIRONMENT_VARIABLES);
-  if (envVarsResult.isError) {
-    logger.error(LogMessage.APP_CHECK_INCIDENT_CHECKER_INVALID_CONFIG, {
-      data: { missingEnvironmentVariables: envVarsResult.error.missingEnvVars },
-    });
-  }
-  return envVarsResult;
+  return getRequiredEnvironmentVariables(env, REQUIRED_ENVIRONMENT_VARIABLES);
 }

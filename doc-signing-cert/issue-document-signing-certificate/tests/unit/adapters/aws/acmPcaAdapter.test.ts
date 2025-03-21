@@ -2,174 +2,165 @@ import {
   ACMPCAClient,
   GetCertificateCommand,
   IssueCertificateCommand,
-  RequestInProgressException
-} from "@aws-sdk/client-acm-pca";
-import { mockClient } from "aws-sdk-client-mock";
-import "aws-sdk-client-mock-jest";
+  RequestInProgressException,
+} from '@aws-sdk/client-acm-pca';
+import { mockClient } from 'aws-sdk-client-mock';
+import 'aws-sdk-client-mock-jest';
 import {
   issueMdlDocSigningCertificateUsingSha256WithEcdsa,
-  retrieveIssuedCertificate
-} from "../../../../adapters/aws/acmPcaAdapter";
+  retrieveIssuedCertificate,
+} from '../../../../adapters/aws/acmPcaAdapter';
 
 const mockAcmPcaClient = mockClient(ACMPCAClient);
 
-describe("acmPcaAdapter", () => {
+describe('acmPcaAdapter', () => {
   beforeEach(() => {
     mockAcmPcaClient.reset();
   });
 
-  describe("issueMdlDocSigningCertificateUsingSha256WithEcdsa", () => {
-    it("should pass the call on to the AWS API can return the CertificateArn", async () => {
+  describe('issueMdlDocSigningCertificateUsingSha256WithEcdsa', () => {
+    it('should pass the call on to the AWS API can return the CertificateArn', async () => {
       // ARRANGE
       mockAcmPcaClient.on(IssueCertificateCommand).resolves({
-        CertificateArn: "CERTIFICATE_ARN"
+        CertificateArn: 'CERTIFICATE_ARN',
       });
 
       // ACT
       const response = await issueMdlDocSigningCertificateUsingSha256WithEcdsa(
-        "ISSUER_ALT_NAME",
-        "CA_ARN",
-        Buffer.from("CSR"),
-        500
+        'ISSUER_ALT_NAME',
+        'CA_ARN',
+        Buffer.from('CSR'),
+        500,
       );
 
       // ASSERT
-      expect(response).toEqual("CERTIFICATE_ARN");
+      expect(response).toEqual('CERTIFICATE_ARN');
       expect(mockAcmPcaClient).toHaveReceivedCommandWith(IssueCertificateCommand, {
         ApiPassthrough: {
           Extensions: {
             KeyUsage: {
-              DigitalSignature: true
+              DigitalSignature: true,
             },
             ExtendedKeyUsage: [
               {
-                ExtendedKeyUsageObjectIdentifier: "1.0.18013.5.1.2" // identifier for ISO mDL
-              }
+                ExtendedKeyUsageObjectIdentifier: '1.0.18013.5.1.2', // identifier for ISO mDL
+              },
             ],
             CustomExtensions: [
               {
-                ObjectIdentifier: "2.5.29.18",
-                Value: "ISSUER_ALT_NAME"
-              }
-            ]
-          }
+                ObjectIdentifier: '2.5.29.18',
+                Value: 'ISSUER_ALT_NAME',
+              },
+            ],
+          },
         },
-        CertificateAuthorityArn: "CA_ARN",
-        Csr: Buffer.from("CSR"),
-        SigningAlgorithm: "SHA256WITHECDSA",
-        TemplateArn: "arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1",
+        CertificateAuthorityArn: 'CA_ARN',
+        Csr: Buffer.from('CSR'),
+        SigningAlgorithm: 'SHA256WITHECDSA',
+        TemplateArn: 'arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1',
         Validity: {
           Value: 500,
-          Type: "DAYS"
-        }
+          Type: 'DAYS',
+        },
       });
     });
 
-    it("should reject if the AWS API rejects", async () => {
+    it('should reject if the AWS API rejects', async () => {
       // ARRANGE
-      mockAcmPcaClient.on(IssueCertificateCommand).rejects("REJECTED");
+      mockAcmPcaClient.on(IssueCertificateCommand).rejects('REJECTED');
 
       // ACT
       const promise = issueMdlDocSigningCertificateUsingSha256WithEcdsa(
-        "ISSUER_ALT_NAME",
-        "CA_ARN",
-        Buffer.from("CSR"),
-        500
+        'ISSUER_ALT_NAME',
+        'CA_ARN',
+        Buffer.from('CSR'),
+        500,
       );
 
       // ASSERT
-      return expect(promise).rejects.toEqual(Error("REJECTED"));
+      return expect(promise).rejects.toEqual(Error('REJECTED'));
     });
 
-    it("should reject if the CertificateArn is not returned", async () => {
+    it('should reject if the CertificateArn is not returned', async () => {
       // ARRANGE
       mockAcmPcaClient.on(IssueCertificateCommand).resolves({
-        CertificateArn: undefined
+        CertificateArn: undefined,
       });
 
       // ACT
       const promise = issueMdlDocSigningCertificateUsingSha256WithEcdsa(
-        "ISSUER_ALT_NAME",
-        "CA_ARN",
-        Buffer.from("CSR"),
-        500
+        'ISSUER_ALT_NAME',
+        'CA_ARN',
+        Buffer.from('CSR'),
+        500,
       );
 
       // ASSERT
-      return expect(promise).rejects.toEqual(Error("Failed to issue certificate"));
+      return expect(promise).rejects.toEqual(Error('Failed to issue certificate'));
     });
   });
 
-  describe("retrieveIssuedCertificate", () => {
-    it("should pass the call on to the AWS API and return the certificate", async () => {
+  describe('retrieveIssuedCertificate', () => {
+    it('should pass the call on to the AWS API and return the certificate', async () => {
       // ARRANGE
       mockAcmPcaClient.on(GetCertificateCommand).resolves({
-        Certificate: "BEGIN_CERTIFICATE"
+        Certificate: 'BEGIN_CERTIFICATE',
       });
 
       // ACT
-      const response = await retrieveIssuedCertificate(
-        "ISSUED_CERT_ARN",
-        "CA_ARN"
-      );
+      const response = await retrieveIssuedCertificate('ISSUED_CERT_ARN', 'CA_ARN');
 
       // ASSERT
-      expect(response).toEqual("BEGIN_CERTIFICATE")
+      expect(response).toEqual('BEGIN_CERTIFICATE');
       expect(mockAcmPcaClient).toHaveReceivedCommandWith(GetCertificateCommand, {
-        CertificateArn: "ISSUED_CERT_ARN",
-        CertificateAuthorityArn: "CA_ARN"
+        CertificateArn: 'ISSUED_CERT_ARN',
+        CertificateAuthorityArn: 'CA_ARN',
       });
     });
 
-    it("should reject if the AWS API call rejects", async () => {
+    it('should reject if the AWS API call rejects', async () => {
       // ARRANGE
-      mockAcmPcaClient.on(GetCertificateCommand).rejects("REJECTED");
+      mockAcmPcaClient.on(GetCertificateCommand).rejects('REJECTED');
 
       // ACT
-      const promise = retrieveIssuedCertificate(
-        "ISSUED_CERT_ARN",
-        "CA_ARN"
-      );
+      const promise = retrieveIssuedCertificate('ISSUED_CERT_ARN', 'CA_ARN');
 
       // ASSERT
-      return expect(promise).rejects.toEqual(Error("REJECTED"));
+      return expect(promise).rejects.toEqual(Error('REJECTED'));
     });
 
-    it("should reject if the Certificate is not returned", async () => {
+    it('should reject if the Certificate is not returned', async () => {
       // ARRANGE
       mockAcmPcaClient.on(GetCertificateCommand).resolves({
-        Certificate: undefined
+        Certificate: undefined,
       });
 
       // ACT
-      const promise = retrieveIssuedCertificate(
-        "ISSUED_CERT_ARN",
-        "CA_ARN"
-      );
+      const promise = retrieveIssuedCertificate('ISSUED_CERT_ARN', 'CA_ARN');
 
       // ASSERT
-      return expect(promise).rejects.toEqual(Error("Failed to retrieve certificate"));
+      return expect(promise).rejects.toEqual(Error('Failed to retrieve certificate'));
     });
 
-    it("should retry if a RequestInProgressException is thrown", async () => {
+    it('should retry if a RequestInProgressException is thrown', async () => {
       // ARRANGE
-      mockAcmPcaClient.on(GetCertificateCommand)
-        .rejectsOnce(new RequestInProgressException({
-          $metadata: {},
-          message: ""
-        }))
+      mockAcmPcaClient
+        .on(GetCertificateCommand)
+        .rejectsOnce(
+          new RequestInProgressException({
+            $metadata: {},
+            message: '',
+          }),
+        )
         .resolves({
-          Certificate: "BEGIN_CERTIFICATE"
+          Certificate: 'BEGIN_CERTIFICATE',
         });
 
       // ACT
-      await retrieveIssuedCertificate(
-        "ISSUED_CERT_ARN",
-        "CA_ARN"
-      );
+      await retrieveIssuedCertificate('ISSUED_CERT_ARN', 'CA_ARN');
 
       // ASSERT
-      expect(mockAcmPcaClient).toHaveReceivedCommandTimes(GetCertificateCommand, 2)
+      expect(mockAcmPcaClient).toHaveReceivedCommandTimes(GetCertificateCommand, 2);
     });
   });
 });

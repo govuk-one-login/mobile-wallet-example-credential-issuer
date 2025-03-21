@@ -19,8 +19,7 @@
     "@peculiar/asn1-schema": "^2.3.15",
     "@peculiar/asn1-x509": "^2.3.15",
     "@peculiar/x509": "^1.12.3",
-    "esbuild": "^0.25.1",
-    "tsyringe": "^4.8.0"
+    "esbuild": "^0.25.1"
   },
   "engines": {
     "node": ">=20.0.0 <21.0.0"

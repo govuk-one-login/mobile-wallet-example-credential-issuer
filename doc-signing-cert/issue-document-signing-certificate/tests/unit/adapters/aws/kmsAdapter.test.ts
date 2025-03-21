@@ -85,11 +85,11 @@ describe('kmsAdapter', () => {
       return expect(promise).rejects.toEqual(Error('REJECTED'));
     });
 
-    it("should reject if the public key is not returned", async () => {
+    it('should reject if the public key is not returned', async () => {
       // ARRANGE
       mockKmsClient.on(GetPublicKeyCommand).resolves({
         PublicKey: undefined,
-      })
+      });
 
       // ACT
       const promise = getPublicKey('KEYID');
@@ -97,6 +97,6 @@ describe('kmsAdapter', () => {
       // ASSERT
       expect(mockKmsClient).toHaveReceivedCommandTimes(GetPublicKeyCommand, 1);
       return expect(promise).rejects.toEqual(Error('Error retrieving public key from KMS'));
-    })
+    });
   });
 });
