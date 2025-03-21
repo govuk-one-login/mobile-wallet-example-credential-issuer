@@ -37,7 +37,6 @@ public class NotificationResource {
         try {
             SignedJWT accessToken = parseAuthorizationHeader(authorizationHeader);
             NotificationRequestBody notificationRequestBody = parseRequestBody(payload);
-
             notificationService.processNotification(accessToken, notificationRequestBody);
         } catch (Exception exception) {
             LOGGER.error(
@@ -45,18 +44,14 @@ public class NotificationResource {
             if (exception instanceof AccessTokenValidationException) {
                 return ResponseUtil.unauthorized(error("invalid_token"));
             }
-
             if (exception instanceof InvalidNotificationIdException) {
                 return ResponseUtil.badRequest(error("invalid_notification_id"));
             }
-
             if (exception instanceof InvalidNotificationRequestException) {
                 return ResponseUtil.badRequest(error("invalid_notification_request"));
             }
-
             return ResponseUtil.internalServerError();
         }
-
         return ResponseUtil.noContent();
     }
 
@@ -76,7 +71,6 @@ public class NotificationResource {
         ObjectMapper mapper =
                 new ObjectMapper()
                         .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
-
         NotificationRequestBody requestBody;
         try {
             requestBody = mapper.readValue(payload, NotificationRequestBody.class);
@@ -84,34 +78,28 @@ public class NotificationResource {
             throw new InvalidNotificationRequestException(
                     "Failed to parse request body", exception);
         }
-
         if (requestBody.getNotificationId() == null) {
             throw new InvalidNotificationIdException("Missing property notification_id");
         }
-
         try {
             UUID.fromString(requestBody.getNotificationId());
         } catch (IllegalArgumentException exception) {
             throw new InvalidNotificationIdException("Invalid notification_id: must be UUID");
         }
-
         if (requestBody.getEvent() == null) {
             throw new InvalidNotificationRequestException("Missing property event");
         }
-
         if (Stream.of("credential_accepted", "credential_failure", "credential_deleted")
                 .noneMatch(valid -> valid.equals(requestBody.getEvent()))) {
 
             throw new InvalidNotificationRequestException(
                     "Invalid event: must be one of 'credential_accepted', 'credential_failure', 'credential_deleted'");
         }
-
         if (requestBody.getEventDescription() != null
                 && !requestBody.getEventDescription().matches("\\A\\p{ASCII}*\\z")) {
             throw new InvalidNotificationRequestException(
                     "Invalid event_description: must contain only ASCII characters");
         }
-
         return requestBody;
     }
 
