@@ -123,9 +123,7 @@ class CredentialServiceTest {
                         CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
 
-        assertEquals(
-                "Credential offer not found for credentialOfferId efb52887-48d6-43b7-b14c-da7896fbf54d",
-                exception.getMessage());
+        assertEquals("Credential offer validation failed", exception.getMessage());
     }
 
     @Test
@@ -170,10 +168,7 @@ class CredentialServiceTest {
                 assertThrows(
                         CredentialOfferNotFoundException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-        assertThat(
-                exception.getMessage(),
-                containsString(
-                        "Credential offer for credentialOfferId efb52887-48d6-43b7-b14c-da7896fbf54d expired at"));
+        assertEquals("Credential offer validation failed", exception.getMessage());
     }
 
     @Test
@@ -375,7 +370,8 @@ class CredentialServiceTest {
 
     private CredentialOfferCacheItem getMockCredentialOfferCacheItem(
             String walletSubjectId, String expiresInSeconds) {
-        Long expiry = Instant.now().plusSeconds(300).getEpochSecond();
+        Long expiry = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
+
         Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
         return new CredentialOfferCacheItem(
                 CREDENTIAL_IDENTIFIER,
