@@ -118,9 +118,9 @@ class CredentialServiceTest {
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
-        CredentialOfferNotFoundException exception =
+        CredentialOfferException exception =
                 assertThrows(
-                        CredentialOfferNotFoundException.class,
+                        CredentialOfferException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
 
         assertEquals("Credential offer validation failed", exception.getMessage());
@@ -164,9 +164,9 @@ class CredentialServiceTest {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
 
-        CredentialOfferNotFoundException exception =
+        CredentialOfferException exception =
                 assertThrows(
-                        CredentialOfferNotFoundException.class,
+                        CredentialOfferException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
         assertEquals("Credential offer validation failed", exception.getMessage());
     }
@@ -198,7 +198,7 @@ class CredentialServiceTest {
                     ProofJwtValidationException,
                     DataStoreException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException,
+                    CredentialOfferException,
                     SigningException,
                     NoSuchAlgorithmException,
                     URISyntaxException {
@@ -228,7 +228,7 @@ class CredentialServiceTest {
                     ProofJwtValidationException,
                     DataStoreException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException,
+                    CredentialOfferException,
                     SigningException,
                     NoSuchAlgorithmException,
                     URISyntaxException {
@@ -258,7 +258,7 @@ class CredentialServiceTest {
                     ProofJwtValidationException,
                     DataStoreException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException,
+                    CredentialOfferException,
                     SigningException,
                     NoSuchAlgorithmException,
                     URISyntaxException {
@@ -288,7 +288,7 @@ class CredentialServiceTest {
                     ProofJwtValidationException,
                     DataStoreException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException,
+                    CredentialOfferException,
                     SigningException,
                     NoSuchAlgorithmException,
                     URISyntaxException {
@@ -336,7 +336,7 @@ class CredentialServiceTest {
                     ProofJwtValidationException,
                     DataStoreException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException,
+                    CredentialOfferException,
                     SigningException,
                     NoSuchAlgorithmException,
                     URISyntaxException {

@@ -47,7 +47,7 @@ public class CredentialResource {
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
             if (exception instanceof AccessTokenValidationException
-                    || exception instanceof CredentialOfferNotFoundException) {
+                    || exception instanceof CredentialOfferException) {
                 return ResponseUtil.badRequest(error("invalid_credential_request"));
             }
 

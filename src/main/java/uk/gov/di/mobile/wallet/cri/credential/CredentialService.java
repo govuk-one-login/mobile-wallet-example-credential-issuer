@@ -62,7 +62,7 @@ public class CredentialService {
                     NoSuchAlgorithmException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
 
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
@@ -78,7 +78,7 @@ public class CredentialService {
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
         if (!isValidCredentialOffer(credentialOffer)) {
-            throw new CredentialOfferNotFoundException("Credential offer validation failed");
+            throw new CredentialOfferException("Credential offer validation failed");
         }
 
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
