@@ -50,7 +50,6 @@ class CredentialBuilderTest {
     private CredentialBuilder<BasicCheckCredentialSubject> credentialBuilderBasicCheck;
     private CredentialBuilder<VeteranCardCredentialSubject> credentialBuilderVeteranCard;
 
-    private Object documentV1;
     private SocialSecurityCredentialSubject socialSecurityCredentialSubject;
     private BasicCheckCredentialSubject basicCheckCredentialSubject;
     private VeteranCardCredentialSubject veteranCardCredentialSubject;
@@ -84,11 +83,6 @@ class CredentialBuilderTest {
         when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
         when(configurationService.getCredentialTtlInDays()).thenReturn(365L);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
-        documentV1 =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"credentialSubject\":{\"name\":[{\"nameParts\":[{\"type\": \"Title\",\"value\": \"Ms\"},{\"type\":\"GivenName\",\"value\":\"Irene\"},{\"type\":\"FamilyName\",\"value\":\"Adler\"}]}],\"socialSecurityRecord\": [{ \"personalNumber\": \"QQ123456A\" }]},\"type\": [\"VerifiableCredential\", \"SocialSecurityCredential\"]}");
-
         socialSecurityCredentialSubject =
                 objectMapper.readValue(
                         "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"Title\",\"value\":\"Miss\"},{\"type\":\"GivenName\",\"value\":\"Sarah\"},{\"type\":\"GivenName\",\"value\":\"Elizabeth\"},{\"type\":\"FamilyName\",\"value\":\"Edwards\"},{\"type\":\"FamilyName\",\"value\":\"Green\"}]}],\"socialSecurityRecord\":[{\"personalNumber\":\"QQ123456C\"}]}",
@@ -111,7 +105,7 @@ class CredentialBuilderTest {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
-        credentialBuilderSocialSecurity.buildV2Credential(
+        credentialBuilderSocialSecurity.buildCredential(
                 socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
@@ -131,42 +125,12 @@ class CredentialBuilderTest {
                 assertThrows(
                         SigningException.class,
                         () ->
-                                credentialBuilderSocialSecurity.buildV2Credential(
+                                credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
                                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                                         null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
-    }
-
-    @Test
-    void Should_Return_V1_Credential()
-            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
-        SignResponse mockSignResponse = getMockKmsSignResponse();
-        when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
-
-        SignedJWT credential =
-                credentialBuilderSocialSecurity.buildV1Credential(
-                        DID_KEY, new VCClaim("SocialSecurityCredential", documentV1));
-
-        assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(credential.getHeader().getKeyID(), equalTo(HASHED_KEY_ID));
-        assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("JWT")));
-        assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
-        assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
-        assertThat(
-                credential.getJWTClaimsSet().getIssueTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
-        assertThat(
-                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
-        assertThat(
-                credential.getJWTClaimsSet().getExpirationTime().toString(),
-                equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
-        assertThat(
-                credential.getJWTClaimsSet().getListClaim("context"),
-                equalTo(List.of("https://www.w3.org/2018/credentials/v1")));
-        assertThat(credential.getState(), equalTo(JWSObject.State.SIGNED));
     }
 
     @Test
@@ -176,7 +140,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         SignedJWT credential =
-                credentialBuilderSocialSecurity.buildV2Credential(
+                credentialBuilderSocialSecurity.buildCredential(
                         socialSecurityCredentialSubject,
                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                         null);
@@ -228,7 +192,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         SignedJWT credential =
-                credentialBuilderBasicCheck.buildV2Credential(
+                credentialBuilderBasicCheck.buildCredential(
                         basicCheckCredentialSubject,
                         CredentialType.BASIC_CHECK_CREDENTIAL,
                         "2025-07-11");
@@ -283,7 +247,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         SignedJWT credential =
-                credentialBuilderVeteranCard.buildV2Credential(
+                credentialBuilderVeteranCard.buildCredential(
                         veteranCardCredentialSubject,
                         CredentialType.DIGITAL_VETERAN_CARD,
                         "2000-07-11");

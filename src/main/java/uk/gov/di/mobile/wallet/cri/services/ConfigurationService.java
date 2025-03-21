@@ -66,6 +66,6 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getDocumentEndpoint() {
-        return "/v2/document/";
+        return "/document/";
     }
 }

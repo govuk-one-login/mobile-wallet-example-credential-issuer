@@ -15,7 +15,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Map_Document_Into_SocialSecurityCredentialSubject() {
-        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0", null);
+        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, null);
 
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
@@ -56,7 +56,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Map_Document_Into_VeteranCardCredentialSubject() {
-        Document document = getMockVeteranCardDocument(DOCUMENT_ID, "v2.0");
+        Document document = getMockVeteranCardDocument(DOCUMENT_ID);
 
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(
@@ -91,7 +91,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Map_Document_Into_BasicCheckCredentialSubject() {
-        Document document = getMockBasicCheckDocument(DOCUMENT_ID, "v2.0");
+        Document document = getMockBasicCheckDocument(DOCUMENT_ID);
 
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(
@@ -142,7 +142,7 @@ class CredentialSubjectMapperTest {
 
     @Test
     void Should_Allow_Empty_Given_Name() {
-        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, "v2.0", "");
+        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, "");
 
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(

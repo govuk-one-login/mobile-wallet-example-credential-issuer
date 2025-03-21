@@ -162,6 +162,6 @@ class ConfigurationServiceTest {
 
     @Test
     void should_Get_Document_Endpoint() {
-        assertEquals("/v2/document/", configurationService.getDocumentEndpoint());
+        assertEquals("/document/", configurationService.getDocumentEndpoint());
     }
 }
