@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.models;
 
 import lombok.Getter;
+import lombok.Setter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
@@ -12,7 +13,7 @@ public class CredentialOfferCacheItem {
     String walletSubjectId;
     String documentId;
     String notificationId;
-    Boolean redeemed;
+    @Setter Boolean redeemed;
     Long expiry;
     Long timeToLive;
 
