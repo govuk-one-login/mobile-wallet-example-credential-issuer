@@ -10,7 +10,6 @@ public class MetadataBuilder {
 
     String credentialIssuer;
     String authorizationServers;
-    String credentialsEndpoint;
     String credentialEndpoint;
     String notificationEndpoint;
     Object credentialConfigurationsSupported;
@@ -30,15 +29,6 @@ public class MetadataBuilder {
             throw new IllegalArgumentException("authorizationServers must not be null");
         }
         this.authorizationServers = authorizationServers;
-        return this;
-    }
-
-    public MetadataBuilder setCredentialsEndpoint(String credentialsEndpoint)
-            throws IllegalArgumentException {
-        if (credentialsEndpoint == null) {
-            throw new IllegalArgumentException("credentialsEndpoint must not be null");
-        }
-        this.credentialsEndpoint = credentialsEndpoint;
         return this;
     }
 
@@ -77,7 +67,6 @@ public class MetadataBuilder {
         return new Metadata(
                 credentialIssuer,
                 authorizationServers,
-                credentialsEndpoint,
                 credentialEndpoint,
                 notificationEndpoint,
                 credentialConfigurationsSupported);
