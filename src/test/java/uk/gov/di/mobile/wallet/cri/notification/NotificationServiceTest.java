@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -86,17 +87,17 @@ class NotificationServiceTest {
     }
 
     @Test
-    void Should_ThrowAccessTokenValidationException_When_CredentialOfferNotFound()
+    void Should_ThrowCredentialOfferException_When_CredentialOfferNotFound()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
-        AccessTokenValidationException exception =
+        CredentialOfferException exception =
                 assertThrows(
-                        AccessTokenValidationException.class,
+                        CredentialOfferException.class,
                         () -> notificationService.processNotification(accessToken, requestBody));
 
         assertEquals(
-                "Credential offer with credentialOfferId efb52887-48d6-43b7-b14c-da7896fbf54d not found",
+                "Credential offer efb52887-48d6-43b7-b14c-da7896fbf54d was not found",
                 exception.getMessage());
     }
 
@@ -144,7 +145,8 @@ class NotificationServiceTest {
     void Should_LogNotification_When_RequestIsValid()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    InvalidNotificationIdException {
+                    InvalidNotificationIdException,
+                    CredentialOfferException {
         notificationService.processNotification(accessToken, requestBody);
 
         verify(mockLogger)

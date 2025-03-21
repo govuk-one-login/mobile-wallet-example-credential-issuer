@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
 import testUtils.MockProofBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
@@ -52,6 +53,7 @@ class CredentialServiceTest {
     @Mock private Invocation.Builder mockInvocationBuilder;
     @Mock private Response mockResponse;
     @Mock private CredentialBuilder<?> mockCredentialBuilder;
+    @Mock private Logger mockLogger;
 
     private final DynamoDbService mockDynamoDbService = mock(DynamoDbService.class);
     private final AccessTokenService mockAccessTokenService = mock(AccessTokenService.class);
@@ -77,7 +79,8 @@ class CredentialServiceTest {
     @BeforeEach
     void setUp()
             throws AccessTokenValidationException, ProofJwtValidationException, ParseException {
-        mockCredentialOfferCacheItem = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "300");
+        mockCredentialOfferCacheItem =
+                getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "300");
         mockProofJwt = new MockProofBuilder("ES256").build();
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         credentialService =
@@ -87,7 +90,12 @@ class CredentialServiceTest {
                         mockAccessTokenService,
                         mockProofJwtService,
                         mockHttpClient,
-                        mockCredentialBuilder);
+                        mockCredentialBuilder) {
+                    @Override
+                    protected Logger getLogger() {
+                        return mockLogger;
+                    }
+                };
         mockAccessProofJwtData = getMockProofJwtData(NONCE);
         when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
@@ -124,6 +132,8 @@ class CredentialServiceTest {
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
 
         assertEquals("Credential offer validation failed", exception.getMessage());
+        verify(mockLogger)
+                .error("Credential offer {} was not found", "efb52887-48d6-43b7-b14c-da7896fbf54d");
     }
 
     @Test
@@ -143,7 +153,7 @@ class CredentialServiceTest {
     void Should_ThrowAccessTokenValidationException_When_WalletSubjectIDsDontMatch()
             throws DataStoreException {
         mockCredentialOfferCacheItem =
-                getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id", "300");
+                getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id", false, "300");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
 
@@ -158,9 +168,10 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ThrowCredentialOfferNotFoundException_When_CredentialOfferIsExpired()
+    void Should_ThrowCredentialOfferException_When_CredentialOfferIsExpired()
             throws DataStoreException {
-        mockCredentialOfferCacheItem = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "-1");
+        mockCredentialOfferCacheItem =
+                getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "-1");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
 
@@ -169,6 +180,27 @@ class CredentialServiceTest {
                         CredentialOfferException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
         assertEquals("Credential offer validation failed", exception.getMessage());
+        verify(mockLogger)
+                .error("Credential offer {} is expired", "efb52887-48d6-43b7-b14c-da7896fbf54d");
+    }
+
+    @Test
+    void Should_ThrowCredentialOfferException_When_CredentialOfferHasBeenRedeemed()
+            throws DataStoreException {
+        mockCredentialOfferCacheItem =
+                getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, true, "300");
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCredentialOfferCacheItem);
+
+        CredentialOfferException exception =
+                assertThrows(
+                        CredentialOfferException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+        assertEquals("Credential offer validation failed", exception.getMessage());
+        verify(mockLogger)
+                .error(
+                        "Credential offer {} has already been redeemed",
+                        "efb52887-48d6-43b7-b14c-da7896fbf54d");
     }
 
     @Test
@@ -189,7 +221,7 @@ class CredentialServiceTest {
         assertThat(
                 exception.getMessage(),
                 containsString(
-                        "Request to fetch document details for documentId de9cbf02-2fbc-4d61-a627-f97851f6840b failed with status code 500"));
+                        "Request to fetch document de9cbf02-2fbc-4d61-a627-f97851f6840b failed with status code 500"));
     }
 
     @Test
@@ -369,16 +401,15 @@ class CredentialServiceTest {
     }
 
     private CredentialOfferCacheItem getMockCredentialOfferCacheItem(
-            String walletSubjectId, String expiresInSeconds) {
+            String walletSubjectId, Boolean redeemed, String expiresInSeconds) {
         Long expiry = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
-
         Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
         return new CredentialOfferCacheItem(
                 CREDENTIAL_IDENTIFIER,
                 DOCUMENT_ID,
                 walletSubjectId,
                 NOTIFICATION_ID,
-                false,
+                redeemed,
                 expiry,
                 ttl);
     }

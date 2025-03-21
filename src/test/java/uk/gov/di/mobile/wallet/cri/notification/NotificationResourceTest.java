@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import testUtils.MockAccessTokenBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
@@ -126,7 +127,8 @@ class NotificationResourceTest {
     void Should_Return401_When_NotificationServiceThrowsAccessTokenValidationException()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    InvalidNotificationIdException {
+                    InvalidNotificationIdException,
+                    CredentialOfferException {
         doThrow(new AccessTokenValidationException("Invalid access token"))
                 .when(notificationService)
                 .processNotification(any(), any());
@@ -148,7 +150,8 @@ class NotificationResourceTest {
     void Should_Return400_When_NotificationServiceThrowsInvalidNotificationIdException()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    InvalidNotificationIdException {
+                    InvalidNotificationIdException,
+                    CredentialOfferException {
         doThrow(new InvalidNotificationIdException("Invalid notification_id"))
                 .when(notificationService)
                 .processNotification(any(), any());
@@ -171,7 +174,8 @@ class NotificationResourceTest {
     void Should_Return500_When_NotificationServiceThrowsDataStoreException()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    InvalidNotificationIdException {
+                    InvalidNotificationIdException,
+                    CredentialOfferException {
         doThrow(new DataStoreException("Some error"))
                 .when(notificationService)
                 .processNotification(any(), any());
