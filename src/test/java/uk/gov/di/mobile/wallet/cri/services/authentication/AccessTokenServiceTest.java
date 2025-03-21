@@ -1,11 +1,10 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.services.authentication;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.KeySourceException;
 import com.nimbusds.jose.crypto.ECDSASigner;
-import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -18,13 +17,13 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
 import java.text.ParseException;
-import java.util.Base64;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static testUtils.EcKeyHelper.getEcKey;
 
 @ExtendWith(MockitoExtension.class)
 class AccessTokenServiceTest {
@@ -36,7 +35,7 @@ class AccessTokenServiceTest {
 
     @BeforeEach
     void setup() throws ParseException, JOSEException {
-        ecSigner = new ECDSASigner(getEsKey());
+        ecSigner = new ECDSASigner(getEcKey());
         accessTokenService = new AccessTokenService(jwksService, configurationService);
         when(configurationService.getSelfUrl()).thenReturn("https://issuer-url.gov.uk");
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
@@ -160,7 +159,7 @@ class AccessTokenServiceTest {
     @Test
     void Should_ReturnTokenData_When_JwtVerificationSucceeds()
             throws JOSEException, ParseException, AccessTokenValidationException {
-        JWK publicKey = getEsKey().toPublicJWK();
+        JWK publicKey = getEcKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
         SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         mockAccessToken.sign(ecSigner);
@@ -173,11 +172,5 @@ class AccessTokenServiceTest {
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                 response.walletSubjectId());
         assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
-    }
-
-    private ECKey getEsKey() throws ParseException {
-        String privateKeyJwkBase64 =
-                "eyJrdHkiOiJFQyIsImQiOiI4SGJYN0xib1E1OEpJOGo3eHdfQXp0SlRVSDVpZTFtNktIQlVmX3JnakVrIiwidXNlIjoic2lnIiwiY3J2IjoiUC0yNTYiLCJraWQiOiJmMDYxMWY3Zi04YTI5LTQ3ZTEtYmVhYy1mNWVlNWJhNzQ3MmUiLCJ4IjoiSlpKeE83b2JSOElzdjU4NUVzaWcwYlAwQUdfb1N6MDhSMS11VXBiYl9JRSIsInkiOiJtNjBRMmtMMExiaEhTbHRjS1lyTG8wczE1M1hveF9tVDV2UlV6Z3g4TWtFIiwiaWF0IjoxNzEyMTQ2MTc5fQ==";
-        return ECKey.parse(new String(Base64.getDecoder().decode(privateKeyJwkBase64)));
     }
 }

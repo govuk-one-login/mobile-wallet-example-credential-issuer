@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.services.authentication;
 
 public class AccessTokenValidationException extends Exception {
 
