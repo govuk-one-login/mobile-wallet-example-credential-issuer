@@ -28,7 +28,6 @@ public class NotificationService {
 
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
-
         String credentialOfferId = accessTokenData.credentialIdentifier();
 
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
@@ -39,12 +38,10 @@ public class NotificationService {
                             "Credential offer with credentialOfferId %s not found",
                             credentialOfferId));
         }
-
         if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
             throw new AccessTokenValidationException(
                     "Access token 'sub' does not match cached 'walletSubjectId'");
         }
-
         if (!credentialOffer
                 .getNotificationId()
                 .equals(notificationRequestBody.getNotificationId())) {
@@ -56,7 +53,7 @@ public class NotificationService {
                 .info(
                         "Notification received - notification_id: {}, event: {}, event_description: {}",
                         notificationRequestBody.getNotificationId(),
-                        notificationRequestBody.getEvent(),
+                        notificationRequestBody.getEvent().toString(),
                         notificationRequestBody.getEventDescription());
     }
 

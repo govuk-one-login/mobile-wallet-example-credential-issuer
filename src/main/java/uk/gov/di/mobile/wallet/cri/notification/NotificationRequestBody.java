@@ -11,7 +11,7 @@ public class NotificationRequestBody {
     private String notificationId;
 
     @JsonProperty("event")
-    private String event;
+    private EventType event;
 
     @JsonProperty("event_description")
     private String eventDescription;
@@ -19,7 +19,7 @@ public class NotificationRequestBody {
     @JsonCreator
     public NotificationRequestBody(
             @JsonProperty(value = "notification_id") String notificationId,
-            @JsonProperty(value = "event") String event,
+            @JsonProperty(value = "event") EventType event,
             @JsonProperty(value = "event_description") String eventDescription) {
         this.notificationId = notificationId;
         this.event = event;

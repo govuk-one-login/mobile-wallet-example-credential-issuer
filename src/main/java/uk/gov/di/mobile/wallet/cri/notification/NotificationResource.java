@@ -18,7 +18,6 @@ import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidation
 import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Path("/notification")
@@ -88,12 +87,6 @@ public class NotificationResource {
         }
         if (requestBody.getEvent() == null) {
             throw new InvalidNotificationRequestException("Missing property event");
-        }
-        if (Stream.of("credential_accepted", "credential_failure", "credential_deleted")
-                .noneMatch(valid -> valid.equals(requestBody.getEvent()))) {
-
-            throw new InvalidNotificationRequestException(
-                    "Invalid event: must be one of 'credential_accepted', 'credential_failure', 'credential_deleted'");
         }
         if (requestBody.getEventDescription() != null
                 && !requestBody.getEventDescription().matches("\\A\\p{ASCII}*\\z")) {

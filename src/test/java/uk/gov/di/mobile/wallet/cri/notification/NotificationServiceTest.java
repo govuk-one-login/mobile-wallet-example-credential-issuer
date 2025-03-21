@@ -60,7 +60,7 @@ class NotificationServiceTest {
         requestBody =
                 new NotificationRequestBody(
                         "77368ca6-877b-4208-a397-99f1df890400",
-                        "credential_accepted",
+                        EventType.credential_accepted,
                         "Credential stored");
 
         mockLogger = mock(Logger.class);
@@ -122,7 +122,9 @@ class NotificationServiceTest {
 
         requestBody =
                 new NotificationRequestBody(
-                        "not_the_same_notification_id", "credential_accepted", "Credential stored");
+                        "not_the_same_notification_id",
+                        EventType.credential_accepted,
+                        "Credential stored");
 
         InvalidNotificationIdException exception =
                 assertThrows(
