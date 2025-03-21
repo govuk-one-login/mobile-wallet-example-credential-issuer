@@ -9,7 +9,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 @DynamoDbBean
 public class CredentialOfferCacheItem {
 
-    String credentialIdentifier;
+    @Setter String credentialIdentifier;
     String walletSubjectId;
     String documentId;
     String notificationId;
