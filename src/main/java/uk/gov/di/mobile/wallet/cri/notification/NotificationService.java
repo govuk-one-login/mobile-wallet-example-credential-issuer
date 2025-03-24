@@ -53,7 +53,7 @@ public class NotificationService {
                 .info(
                         "Notification received - notification_id: {}, event: {}, event_description: {}",
                         notificationRequestBody.getNotificationId(),
-                        notificationRequestBody.getEvent().toString(),
+                        notificationRequestBody.getEvent(),
                         notificationRequestBody.getEventDescription());
     }
 
