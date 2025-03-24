@@ -6,14 +6,15 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
 @Getter
+@Setter
 @DynamoDbBean
 public class CredentialOfferCacheItem {
 
-    @Setter String credentialIdentifier;
+    String credentialIdentifier;
     String walletSubjectId;
     String documentId;
     String notificationId;
-    @Setter Boolean redeemed;
+    Boolean redeemed;
     Long expiry;
     Long timeToLive;
 
