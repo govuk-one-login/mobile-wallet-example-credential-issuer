@@ -129,17 +129,25 @@ public class CredentialService {
             return false;
         }
 
-        if (credentialOffer.getRedeemed()) {
+        if (hasOfferBeenRedeemed(credentialOffer)) {
             getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
         }
 
-        long now = Instant.now().getEpochSecond();
-        if (now > credentialOffer.getExpiry()) {
+        if (isOfferExpired(credentialOffer)) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }
         return true;
+    }
+
+    private static boolean isOfferExpired(CredentialOfferCacheItem credentialOffer) {
+        long now = Instant.now().getEpochSecond();
+        return now > credentialOffer.getExpiry();
+    }
+
+    private static Boolean hasOfferBeenRedeemed(CredentialOfferCacheItem credentialOffer) {
+        return credentialOffer.getRedeemed();
     }
 
     private Document getDocument(String documentId)
