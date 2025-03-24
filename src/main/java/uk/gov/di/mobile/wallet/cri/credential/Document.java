@@ -19,19 +19,14 @@ public class Document {
     @JsonProperty("vcType")
     private String vcType;
 
-    @JsonProperty("vcDataModel")
-    private String vcDataModel;
-
     @ExcludeFromGeneratedCoverageReport
     public Document() {
         // Empty constructor required for deserialization
     }
 
-    public Document(
-            String documentId, Map<String, Object> data, String vcType, String vcDataModel) {
+    public Document(String documentId, Map<String, Object> data, String vcType) {
         this.documentId = documentId;
         this.data = data;
         this.vcType = vcType;
-        this.vcDataModel = vcDataModel;
     }
 }
