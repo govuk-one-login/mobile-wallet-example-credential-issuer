@@ -8,17 +8,16 @@ import java.util.HashMap;
 public class MockDocuments {
 
     public static @NotNull Document getMockSocialSecurityDocument(
-            String documentId, String vcDataModel, String givenName) {
+            String documentId, String givenName) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("familyName", "Edwards Green");
         data.put("givenName", (givenName != null) ? givenName : "Sarah Elizabeth");
         data.put("nino", "QQ123456C");
         data.put("title", "Miss");
-        return new Document(documentId, data, "SocialSecurityCredential", vcDataModel);
+        return new Document(documentId, data, "SocialSecurityCredential");
     }
 
-    public static @NotNull Document getMockBasicCheckDocument(
-            String documentId, String vcDataModel) {
+    public static @NotNull Document getMockBasicCheckDocument(String documentId) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("issuance-day", "11");
         data.put("issuance-month", "07");
@@ -42,11 +41,10 @@ public class MockDocuments {
         data.put("certificateType", "basic");
         data.put("outcome", "Result clear");
         data.put("policeRecordsCheck", "Clear");
-        return new Document(documentId, data, "BasicCheckCredential", vcDataModel);
+        return new Document(documentId, data, "BasicCheckCredential");
     }
 
-    public static @NotNull Document getMockVeteranCardDocument(
-            String documentId, String vcDataModel) {
+    public static @NotNull Document getMockVeteranCardDocument(String documentId) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("cardExpiryDate-day", "11");
         data.put("cardExpiryDate-month", "07");
@@ -59,11 +57,11 @@ public class MockDocuments {
         data.put("serviceNumber", "25057386");
         data.put("serviceBranch", "HM Naval Service");
         data.put("photo", "base64EncodedPhoto");
-        return new Document(documentId, data, "digitalVeteranCard", vcDataModel);
+        return new Document(documentId, data, "digitalVeteranCard");
     }
 
     public static @NotNull Document getMockDocumentWithInvalidVcType(String documentId) {
         HashMap<String, Object> data = new HashMap<>();
-        return new Document(documentId, data, "SomeOtherVcType", "v2.0");
+        return new Document(documentId, data, "SomeOtherVcType");
     }
 }

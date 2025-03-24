@@ -4,15 +4,11 @@ import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubjectV1;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubjectV1;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubjectV1;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -118,13 +114,13 @@ public class CredentialService {
         SignedJWT credential;
 
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            credential = getSocialSecurityCredential(document, sub, vcType);
+            credential = getSocialSecurityCredential(document, sub);
 
         } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            credential = getBasicCheckCredential(document, sub, vcType);
+            credential = getBasicCheckCredential(document, sub);
 
         } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            credential = getDigitalVeteranCard(document, sub, vcType);
+            credential = getDigitalVeteranCard(document, sub);
 
         } else {
             throw new CredentialServiceException(
@@ -155,95 +151,34 @@ public class CredentialService {
         return response.readEntity(Document.class);
     }
 
-    private SignedJWT getSocialSecurityCredential(Document document, String sub, String vcType)
+    private SignedJWT getSocialSecurityCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
-        if (Objects.equals(document.getVcDataModel(), "v1.1")) {
-            // Build "vc" claim required in VC DM v1.1
-            VCClaim vcClaim =
-                    new VCClaim(
-                            vcType,
-                            getSocialSecurityCredentialSubjectV1(socialSecurityCredentialSubject));
-            return credentialBuilder.buildV1Credential(sub, vcClaim);
-        } else {
-            return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
-                    .buildV2Credential(
-                            socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
-        }
+        return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
+                .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
     }
 
-    private SignedJWT getBasicCheckCredential(Document document, String sub, String vcType)
+    private SignedJWT getBasicCheckCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
-        if (Objects.equals(document.getVcDataModel(), "v1.1")) {
-            // Build "vc" claim required in VC DM v1.1
-            VCClaim vcClaim =
-                    new VCClaim(
-                            vcType, getBasicCheckCredentialSubjectV1(basicCheckCredentialSubject));
-            return credentialBuilder.buildV1Credential(sub, vcClaim);
-        } else {
-            return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
-                    .buildV2Credential(
-                            basicCheckCredentialSubject,
-                            BASIC_CHECK_CREDENTIAL,
-                            basicCheckCredentialSubject.getExpirationDate());
-        }
+
+        return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
+                .buildCredential(
+                        basicCheckCredentialSubject,
+                        BASIC_CHECK_CREDENTIAL,
+                        basicCheckCredentialSubject.getExpirationDate());
     }
 
-    private SignedJWT getDigitalVeteranCard(Document document, String sub, String vcType)
+    private SignedJWT getDigitalVeteranCard(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
-        if (Objects.equals(document.getVcDataModel(), "v1.1")) {
-            // Build "vc" claim required in VC DM v1.1
-            VCClaim vcClaim =
-                    new VCClaim(
-                            vcType,
-                            getVeteranCardCredentialSubjectV1(veteranCardCredentialSubject));
-            return credentialBuilder.buildV1Credential(sub, vcClaim);
-        } else {
-            return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
-                    .buildV2Credential(
-                            veteranCardCredentialSubject,
-                            DIGITAL_VETERAN_CARD,
-                            veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
-        }
-    }
-
-    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private static @NotNull SocialSecurityCredentialSubjectV1 getSocialSecurityCredentialSubjectV1(
-            SocialSecurityCredentialSubject socialSecurityCredentialSubject) {
-        // Map SocialSecurityCredentialSubject into SocialSecurityCredentialSubjectV1 (i.e. no "id"
-        // property)
-        return new SocialSecurityCredentialSubjectV1(
-                socialSecurityCredentialSubject.getName(),
-                socialSecurityCredentialSubject.getSocialSecurityRecord());
-    }
-
-    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private static @NotNull BasicCheckCredentialSubjectV1 getBasicCheckCredentialSubjectV1(
-            BasicCheckCredentialSubject basicCheckCredentialSubject) {
-        // Map BasicCheckCredentialSubject into BasicCheckCredentialSubjectV1 (i.e. no "id"
-        // property)
-        return new BasicCheckCredentialSubjectV1(
-                basicCheckCredentialSubject.getIssuanceDate(),
-                basicCheckCredentialSubject.getExpirationDate(),
-                basicCheckCredentialSubject.getName(),
-                basicCheckCredentialSubject.getBirthDate(),
-                basicCheckCredentialSubject.getAddress(),
-                basicCheckCredentialSubject.getBasicCheckRecord());
-    }
-
-    // Needed for VC MD v1.1 - to be removed once Wallet switches over to VC MD v2.0
-    private static @NotNull VeteranCardCredentialSubjectV1 getVeteranCardCredentialSubjectV1(
-            VeteranCardCredentialSubject veteranCardCredentialSubject) {
-        // Map VeteranCardCredentialSubject into VeteranCardCredentialSubjectV1 (i.e. no "id"
-        // property)
-        return new VeteranCardCredentialSubjectV1(
-                veteranCardCredentialSubject.getName(),
-                veteranCardCredentialSubject.getBirthDate(),
-                veteranCardCredentialSubject.getVeteranCard());
+        return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
+                .buildCredential(
+                        veteranCardCredentialSubject,
+                        DIGITAL_VETERAN_CARD,
+                        veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 }
