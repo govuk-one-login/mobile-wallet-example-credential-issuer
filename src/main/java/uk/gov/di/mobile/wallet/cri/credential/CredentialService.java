@@ -142,7 +142,7 @@ public class CredentialService {
         return now > credentialOffer.getExpiry();
     }
 
-    private static Boolean hasOfferBeenRedeemed(CredentialOfferCacheItem credentialOffer) {
+    private static boolean hasOfferBeenRedeemed(CredentialOfferCacheItem credentialOffer) {
         return credentialOffer.getRedeemed();
     }
 
