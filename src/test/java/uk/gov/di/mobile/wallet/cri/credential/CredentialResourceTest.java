@@ -66,7 +66,7 @@ class CredentialResourceTest {
                     ProofJwtValidationException,
                     NoSuchAlgorithmException,
                     URISyntaxException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
         final Response response =
                 resource.target("/credential")
                         .request()
@@ -92,7 +92,7 @@ class CredentialResourceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -122,7 +122,7 @@ class CredentialResourceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -155,12 +155,12 @@ class CredentialResourceTest {
                     JsonProcessingException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-        doThrow(new CredentialOfferNotFoundException("Credential offer not found"))
+        doThrow(new CredentialOfferException("Credential offer not found"))
                 .when(credentialService)
                 .getCredential(any(), any());
 
@@ -191,7 +191,7 @@ class CredentialResourceTest {
                     JsonProcessingException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -224,7 +224,7 @@ class CredentialResourceTest {
                     JsonProcessingException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -256,7 +256,7 @@ class CredentialResourceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferNotFoundException {
+                    CredentialOfferException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(

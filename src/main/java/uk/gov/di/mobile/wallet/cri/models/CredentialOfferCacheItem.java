@@ -5,8 +5,8 @@ import lombok.Setter;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 
-@Setter
 @Getter
+@Setter
 @DynamoDbBean
 public class CredentialOfferCacheItem {
 
@@ -14,6 +14,8 @@ public class CredentialOfferCacheItem {
     String walletSubjectId;
     String documentId;
     String notificationId;
+    Boolean redeemed;
+    Long expiry;
     Long timeToLive;
 
     public CredentialOfferCacheItem() {
@@ -24,24 +26,16 @@ public class CredentialOfferCacheItem {
             String credentialIdentifier,
             String documentId,
             String walletSubjectId,
-            String notificationId) {
-        this.credentialIdentifier = credentialIdentifier;
-        this.documentId = documentId;
-        this.walletSubjectId = walletSubjectId;
-        this.notificationId = notificationId;
-    }
-
-    // Required for unit testing
-    public CredentialOfferCacheItem(
-            String credentialIdentifier,
-            String documentId,
-            String walletSubjectId,
             String notificationId,
+            Boolean redeemed,
+            Long expiry,
             Long timeToLive) {
         this.credentialIdentifier = credentialIdentifier;
         this.documentId = documentId;
         this.walletSubjectId = walletSubjectId;
         this.notificationId = notificationId;
+        this.redeemed = redeemed;
+        this.expiry = expiry;
         this.timeToLive = timeToLive;
     }
 

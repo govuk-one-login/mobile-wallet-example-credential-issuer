@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItemBuilder;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
@@ -23,6 +24,8 @@ import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Singleton
@@ -61,8 +64,6 @@ public class CredentialOfferResource {
 
         String credentialOfferId = UUID.randomUUID().toString();
 
-        String notificationId = UUID.randomUUID().toString();
-
         CredentialOffer credentialOffer;
         try {
             credentialOffer =
@@ -81,10 +82,28 @@ public class CredentialOfferResource {
                 walletSubjectId,
                 credentialOfferId);
 
+        String notificationId = UUID.randomUUID().toString();
+        long credentialOfferTtl =
+                Instant.now()
+                        .plusSeconds(configurationService.getCredentialOfferTtlInSecs())
+                        .getEpochSecond();
+        long tableItemTtl =
+                Instant.now()
+                        .plus(configurationService.getTableItemTtlInDays(), ChronoUnit.DAYS)
+                        .getEpochSecond();
         try {
-            dataStore.saveCredentialOffer(
-                    new CredentialOfferCacheItem(
-                            credentialOfferId, documentId, walletSubjectId, notificationId));
+            CredentialOfferCacheItem credentialOfferCacheItem =
+                    new CredentialOfferCacheItemBuilder()
+                            .credentialIdentifier(credentialOfferId)
+                            .documentId(documentId)
+                            .walletSubjectId(walletSubjectId)
+                            .notificationId(notificationId)
+                            .redeemed(false)
+                            .expiry(credentialOfferTtl)
+                            .timeToLive(tableItemTtl)
+                            .build();
+
+            dataStore.saveCredentialOffer(credentialOfferCacheItem);
         } catch (DataStoreException exception) {
             LOGGER.error(
                     "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",

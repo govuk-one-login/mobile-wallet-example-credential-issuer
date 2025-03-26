@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
@@ -40,7 +41,8 @@ public class NotificationResource {
         } catch (Exception exception) {
             LOGGER.error(
                     "An error happened trying to process the notification request: ", exception);
-            if (exception instanceof AccessTokenValidationException) {
+            if (exception instanceof AccessTokenValidationException
+                    || exception instanceof CredentialOfferException) {
                 return ResponseUtil.unauthorized(error("invalid_token"));
             }
             if (exception instanceof InvalidNotificationIdException) {

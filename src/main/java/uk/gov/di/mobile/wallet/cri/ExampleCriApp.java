@@ -8,7 +8,11 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
-import uk.gov.di.mobile.wallet.cri.credential.*;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialResource;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -57,8 +61,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         DynamoDbService dynamoDbService =
                 new DynamoDbService(
                         DynamoDbService.getClient(configurationService),
-                        configurationService.getCredentialOfferCacheTableName(),
-                        configurationService.getCredentialOfferTtlInSecs());
+                        configurationService.getCredentialOfferCacheTableName());
 
         MetadataBuilder metadataBuilder = new MetadataBuilder();
         Client httpClient =
