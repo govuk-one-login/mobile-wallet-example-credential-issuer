@@ -41,7 +41,7 @@ describe('kmsAdapter', () => {
       return expect(promise).rejects.toEqual(Error('REJECTED'));
     });
 
-    it('should reject if AWS rejects', async () => {
+    it('should reject if KMS does not return a Signature', async () => {
       // ARRANGE
       mockKmsClient.on(SignCommand).resolves({
         Signature: undefined,
