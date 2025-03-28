@@ -70,7 +70,7 @@ export async function retrieveIssuedCertificate(issuedCertificateArn: string, ce
   }
 
   if (!getCertificateCommandOutput.Certificate) {
-    throw Error('Failed to retrieve certificate');
+    throw new Error('Failed to retrieve certificate');
   }
 
   return getCertificateCommandOutput.Certificate;
