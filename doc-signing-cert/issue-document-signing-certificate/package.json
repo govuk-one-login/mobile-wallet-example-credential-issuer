@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "tests": "node_modules/.bin/jest",
+    "test": "node_modules/.bin/jest",
     "lint": "node_modules/.bin/eslint .",
     "format": "node_modules/.bin/prettier --write .",
     "format:check": "node_modules/.bin/prettier --check ."
