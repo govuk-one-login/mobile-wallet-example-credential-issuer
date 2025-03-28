@@ -712,6 +712,3 @@ Outputs:
       - !Sub
         - "${AWS::StackName}-${SelfUrl}"
         - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
-  TestOutput:
-    Description: Test value for deployment
-    Value: Test
