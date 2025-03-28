@@ -29,7 +29,7 @@ describe('kmsAdapter', () => {
       });
     });
 
-    it('should reject if KMS does not return a Signature', async () => {
+    it('should reject if AWS rejects', async () => {
       // ARRANGE
       mockKmsClient.on(SignCommand).rejects('REJECTED');
 
