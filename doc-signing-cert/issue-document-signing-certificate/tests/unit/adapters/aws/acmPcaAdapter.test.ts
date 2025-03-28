@@ -19,7 +19,7 @@ describe('acmPcaAdapter', () => {
   });
 
   describe('issueMdlDocSigningCertificateUsingSha256WithEcdsa', () => {
-    it('should pass the call on to the AWS API can return the CertificateArn', async () => {
+    it('should pass the call on to the AWS API and return the CertificateArn', async () => {
       // ARRANGE
       mockAcmPcaClient.on(IssueCertificateCommand).resolves({
         CertificateArn: 'CERTIFICATE_ARN',
