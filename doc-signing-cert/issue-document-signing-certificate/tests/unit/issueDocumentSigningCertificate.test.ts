@@ -117,7 +117,7 @@ describe('issueDocumentSigningCertificate handler', () => {
       expect(retrieveIssuedCertificate).toHaveBeenCalledWith('CERT_ARN', 'VALUE');
     });
 
-    it('adds context, service, correlation ID and function version to log attributes and logs STARTED message', async () => {
+    it('adds context, service, correlation ID and function version to log attributes', async () => {
       // ACT
       await lambdaHandlerConstructor(dependencies)(requestEvent, context);
 
