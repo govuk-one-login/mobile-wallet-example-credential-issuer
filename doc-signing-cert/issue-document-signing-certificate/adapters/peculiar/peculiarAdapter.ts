@@ -5,7 +5,7 @@ import {
   Pkcs10CertificateRequest,
   Pkcs10CertificateRequestCreateParamsName,
   X509Certificate,
-} from "@peculiar/x509";
+} from '@peculiar/x509';
 import { CertificationRequest, CertificationRequestInfo } from '@peculiar/asn1-csr';
 import { AsnConvert } from '@peculiar/asn1-schema';
 import { Name as AsnName, SubjectPublicKeyInfo } from '@peculiar/asn1-x509';
@@ -36,7 +36,7 @@ export async function createCertificateRequestFromEs256KmsKey(
   asnReq.signatureAlgorithm = algProv.toAsnAlgorithm(signingAlgorithm);
 
   const tbs = AsnConvert.serialize(asnReq.certificationRequestInfo);
-  const signature = await signWithEcdsaSha256(kmsId, tbs);
+  const signature = await signWithEcdsaSha256(keyId, tbs);
 
   const signatureFormatter = new AsnEcSignatureFormatter();
   const asnSignature = signatureFormatter.toAsnSignature(signingAlgorithm, signature);

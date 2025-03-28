@@ -52,7 +52,7 @@ describe('kmsAdapter', () => {
 
       // ASSERT
       expect(mockKmsClient).toHaveReceivedCommandTimes(SignCommand, 1);
-      return expect(promise).rejects.toEqual(Error('An error occured when signing the request with KMS'));
+      return expect(promise).rejects.toEqual(Error('An error occurred when signing the request with KMS'));
     });
   });
 

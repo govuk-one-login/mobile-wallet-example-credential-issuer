@@ -1,4 +1,4 @@
-import { createCertificateRequestFromEs256KmsKey, decodeX509Certificate } from "./adapters/peculiar/peculiarAdapter";
+import { createCertificateRequestFromEs256KmsKey, decodeX509Certificate } from './adapters/peculiar/peculiarAdapter';
 import { logger } from './logging/logger';
 import { Context } from 'aws-lambda';
 import { getConfigFromEnvironment } from './issueDocumentSigningCertificateConfig';
@@ -63,10 +63,9 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       );
 
       logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
-
     } catch (error) {
-      logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUE_FAILED, { data: e });
-      throw e;
+      logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUE_FAILED, { data: error });
+      throw error;
     }
   };
 }

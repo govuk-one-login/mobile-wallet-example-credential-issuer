@@ -11,7 +11,7 @@ const pcaClient = new ACMPCAClient();
 export async function issueMdlDocSigningCertificateUsingSha256WithEcdsa(
   issuerAlternativeName: string,
   certificateAuthorityArn: string,
-  certificateSigningRequest : Uint8Array<ArrayBufferLike>,
+  certificateSigningRequest: Uint8Array<ArrayBufferLike>,
   validityPeriod: number,
 ) {
   const issueCertificateCommand = new IssueCertificateCommand({
