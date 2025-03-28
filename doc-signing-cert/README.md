@@ -10,7 +10,7 @@ The template.yaml in this project deploys the following AWS resources:
 
 ## Pre-requisites
 
-This stack can only be deployed into an account which already has the `mobile-platform-infra/platform-ca` deployed.
+This stack can only be deployed into an account which already has the `mobile-platform-infra/platform-ca` CloudFormation stack deployed.
 The dependency provides the AWS Private CA resource, root certificate and references to it as SSM parameters.
 
 ## Invocation
