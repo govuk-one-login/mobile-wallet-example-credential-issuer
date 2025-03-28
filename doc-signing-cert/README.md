@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The template.yaml in this repo deploys:
+The template.yaml in this project deploys the following AWS resources:
 
 - a Lambda function which can be run in Console or via the AWS CLI to issue an X.509 Document Signing Certificate using an instance of AWS Private CA deployed in to the account with the `mobile-platform-infra/platform-ca` stack.
 - an asymmetric ECC_NIST_P256 KMS key to act as the Document Signing Key and securely manage the key material and signing function
