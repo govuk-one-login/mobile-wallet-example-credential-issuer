@@ -38,7 +38,7 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
 
     if (await headObject(config.DOC_SIGNING_KEY_BUCKET, config.DOC_SIGNING_KEY_ID + '/certificate.pem')) {
       logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ALREADY_EXISTS);
-      throw Error('Certificate already exists for this KMS Key');
+      throw new Error('Certificate already exists for this KMS Key');
     }
 
     try {
