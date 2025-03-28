@@ -28,7 +28,7 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
     const configResult = getConfigFromEnvironment(dependencies.env);
     if (configResult.isError) {
       logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_FAILED);
-      throw Error('Invalid configuration');
+      throw new Error('Invalid configuration');
     }
     const config = configResult.value;
     logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_SUCCESS, { config });
