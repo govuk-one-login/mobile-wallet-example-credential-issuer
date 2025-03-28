@@ -45,7 +45,7 @@ export async function issueMdlDocSigningCertificateUsingSha256WithEcdsa(
 
   const issueCertificateCommandOutput = await pcaClient.send(issueCertificateCommand);
   if (issueCertificateCommandOutput.CertificateArn === undefined) {
-    throw Error('Failed to issue certificate');
+    throw new Error('Failed to issue certificate');
   }
 
   return issueCertificateCommandOutput.CertificateArn;
