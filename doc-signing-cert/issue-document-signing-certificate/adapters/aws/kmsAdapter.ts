@@ -9,7 +9,7 @@ export async function getPublicKey(keyId: string) {
   const getPublicKeyCommandOutput = await kmsClient.send(getPublicKeyCommand);
   const spki = getPublicKeyCommandOutput.PublicKey;
   if (spki === undefined) {
-    throw Error('Error retrieving public key from KMS');
+    throw new Error('Error retrieving public key from KMS');
   }
   return spki;
 }
