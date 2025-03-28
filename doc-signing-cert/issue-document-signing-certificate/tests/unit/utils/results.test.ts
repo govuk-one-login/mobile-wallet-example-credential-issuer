@@ -1,12 +1,4 @@
-import { emptyFailure, emptySuccess, failure, success } from '../../../utils/results';
-
-describe('emptySuccess', () => {
-  it('Returns an empty success object', () => {
-    expect(emptySuccess()).toEqual({
-      isError: false,
-    });
-  });
-});
+import { failure, success } from '../../../utils/results';
 
 describe('success', () => {
   it('Returns a success object with argument as value', () => {
@@ -14,14 +6,6 @@ describe('success', () => {
     expect(success(object)).toEqual({
       isError: false,
       value: object,
-    });
-  });
-});
-
-describe('emptyFailure', () => {
-  it('Returns an empty failure object', () => {
-    expect(emptyFailure()).toEqual({
-      isError: true,
     });
   });
 });

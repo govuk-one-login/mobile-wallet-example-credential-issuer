@@ -1,21 +1,9 @@
-import { EmptyFailure, EmptySuccess, FailureWithError, SuccessWithValue } from '../types/Result';
-
-export function emptySuccess(): EmptySuccess {
-  return {
-    isError: false,
-  };
-}
+import { FailureWithError, SuccessWithValue } from '../types/Result';
 
 export function success<T>(value: T): SuccessWithValue<T> {
   return {
     isError: false,
     value,
-  };
-}
-
-export function emptyFailure(): EmptyFailure {
-  return {
-    isError: true,
   };
 }
 
