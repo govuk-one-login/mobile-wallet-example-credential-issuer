@@ -18,11 +18,11 @@ export async function headObject(bucket: string, key: string) {
       Key: key,
     });
     await s3Client.send(headObjectCommand);
-  } catch (e) {
-    if (NotFound.isInstance(e)) {
+  } catch (error) {
+    if (NotFound.isInstance(error)) {
       return false;
     }
-    throw e;
+    throw error;
   }
   return true;
 }
