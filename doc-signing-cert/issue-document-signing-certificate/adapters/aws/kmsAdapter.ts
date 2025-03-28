@@ -23,7 +23,7 @@ export async function signWithEcdsaSha256(kmsId: string, tbs: ArrayBuffer) {
   const signCommandOutput = await kmsClient.send(signCommand);
   const signature = signCommandOutput.Signature;
   if (signature === undefined) {
-    throw Error('An error occured when signing the request with KMS');
+    throw new Error('An error occurred when signing the request with KMS');
   }
   return signature;
 }
