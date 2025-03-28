@@ -2,9 +2,9 @@ import { GetPublicKeyCommand, KMSClient, SignCommand } from '@aws-sdk/client-kms
 
 const kmsClient = new KMSClient();
 
-export async function getPublicKey(kmsId: string) {
+export async function getPublicKey(keyId: string) {
   const getPublicKeyCommand = new GetPublicKeyCommand({
-    KeyId: kmsId,
+    KeyId: keyId,
   });
   const getPublicKeyCommandOutput = await kmsClient.send(getPublicKeyCommand);
   const spki = getPublicKeyCommandOutput.PublicKey;
