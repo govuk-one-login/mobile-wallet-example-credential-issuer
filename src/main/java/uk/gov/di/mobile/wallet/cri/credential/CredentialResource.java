@@ -16,6 +16,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.Objects;
@@ -37,16 +38,16 @@ public class CredentialResource {
     public Response getCredential(
             @HeaderParam("Authorization") String authorizationHeader, String payload) {
 
-        Credential credential;
         try {
             SignedJWT accessToken = parseAuthorizationHeader(authorizationHeader);
             SignedJWT proofJwt = parseRequestBody(payload);
 
-            credential = credentialService.getCredential(accessToken, proofJwt);
+            CredentialResponse credential = credentialService.getCredential(accessToken, proofJwt);
+            return ResponseUtil.ok(credential);
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
             if (exception instanceof AccessTokenValidationException
-                    || exception instanceof CredentialOfferNotFoundException) {
+                    || exception instanceof CredentialOfferException) {
                 return ResponseUtil.badRequest(error("invalid_credential_request"));
             }
 
@@ -56,8 +57,6 @@ public class CredentialResource {
 
             return ResponseUtil.internalServerError();
         }
-
-        return ResponseUtil.ok(credential);
     }
 
     private SignedJWT parseAuthorizationHeader(String authorizationHeader)

@@ -14,6 +14,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItemBuilder;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
@@ -23,6 +24,8 @@ import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Singleton
@@ -32,7 +35,7 @@ public class CredentialOfferResource {
     private final CredentialOfferService credentialOfferService;
     private final ConfigurationService configurationService;
     private final DataStore dataStore;
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
 
     private static final String WALLET_SUBJECT_ID_PATTERN =
             "^urn:fdc:wallet\\.account\\.gov\\.uk:2024:[a-zA-Z0-9_-]{43}$";
@@ -59,8 +62,7 @@ public class CredentialOfferResource {
                     String credentialType)
             throws JsonProcessingException {
 
-        UUID uuid = UUID.randomUUID();
-        String credentialOfferId = uuid.toString();
+        String credentialOfferId = UUID.randomUUID().toString();
 
         CredentialOffer credentialOffer;
         try {
@@ -80,9 +82,28 @@ public class CredentialOfferResource {
                 walletSubjectId,
                 credentialOfferId);
 
+        String notificationId = UUID.randomUUID().toString();
+        long credentialOfferTtl =
+                Instant.now()
+                        .plusSeconds(configurationService.getCredentialOfferTtlInSecs())
+                        .getEpochSecond();
+        long tableItemTtl =
+                Instant.now()
+                        .plus(configurationService.getTableItemTtlInDays(), ChronoUnit.DAYS)
+                        .getEpochSecond();
         try {
-            dataStore.saveCredentialOffer(
-                    new CredentialOfferCacheItem(credentialOfferId, documentId, walletSubjectId));
+            CredentialOfferCacheItem credentialOfferCacheItem =
+                    new CredentialOfferCacheItemBuilder()
+                            .credentialIdentifier(credentialOfferId)
+                            .documentId(documentId)
+                            .walletSubjectId(walletSubjectId)
+                            .notificationId(notificationId)
+                            .redeemed(false)
+                            .expiry(credentialOfferTtl)
+                            .timeToLive(tableItemTtl)
+                            .build();
+
+            dataStore.saveCredentialOffer(credentialOfferCacheItem);
         } catch (DataStoreException exception) {
             LOGGER.error(
                     "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",
@@ -93,9 +114,11 @@ public class CredentialOfferResource {
         }
 
         LOGGER.info(
-                "Credential offer saved for walletSubjectId {} and credentialOfferId {}",
+                "Credential offer saved for walletSubjectId {} and credentialOfferId {} with documentId {} and notificationId {}",
                 walletSubjectId,
-                credentialOfferId);
+                credentialOfferId,
+                documentId,
+                notificationId);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);

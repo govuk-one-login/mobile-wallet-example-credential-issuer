@@ -510,7 +510,7 @@ Resources:
                 Action:
                   - 'dynamodb:PutItem'
                   - 'dynamodb:GetItem'
-                  - 'dynamodb:DeleteItem'
+                  - 'dynamodb:UpdateItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
               - Effect: Allow
                 Action:

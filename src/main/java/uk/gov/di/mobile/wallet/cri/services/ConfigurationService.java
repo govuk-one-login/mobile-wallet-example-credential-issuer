@@ -65,7 +65,14 @@ public class ConfigurationService extends Configuration {
         return 900;
     }
 
+    /*
+    DynamoDB table items are set to be automatically deleted after three days to prevent data building up.
+    */
+    public int getTableItemTtlInDays() {
+        return 3;
+    }
+
     public String getDocumentEndpoint() {
-        return "/v2/document/";
+        return "/document/";
     }
 }
