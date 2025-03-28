@@ -16,7 +16,7 @@ The dependency provides the AWS Private CA resource, root certificate and refere
 ## Invocation
 
 The required input parameters for the issue certificate lambda are specified in environment variables and are deployed as part of this stack.
-The issue certificate Lambda can be invoked either in AWS Console or using the following command-line in a shell which has active AWS credentials available:
+The issue certificate Lambda can be invoked through the AWS Console or via the AWS CLI using the following command in a shell which has active AWS credentials available:
 
 ```bash
 % aws lambda invoke --function-name iaca-doc-signing-cert-ddunford-issue-doc-signing-certificate output.txt 
