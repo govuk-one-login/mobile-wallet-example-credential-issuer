@@ -64,7 +64,7 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
 
       logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
 
-    } catch (e) {
+    } catch (error) {
       logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUE_FAILED, { data: e });
       throw e;
     }
