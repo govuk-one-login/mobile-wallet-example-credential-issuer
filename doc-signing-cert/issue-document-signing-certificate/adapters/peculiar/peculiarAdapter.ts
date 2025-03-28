@@ -13,9 +13,9 @@ import { signWithEcdsaSha256, getPublicKey } from '../aws/kmsAdapter';
 
 export async function createCertificateRequestFromEs256KmsKey(
   csrName: Pkcs10CertificateRequestCreateParamsName,
-  kmsId: string,
+  keyId: string,
 ) {
-  const spki = await getPublicKey(kmsId);
+  const spki = await getPublicKey(keyId);
 
   const asnReq = new CertificationRequest({
     certificationRequestInfo: new CertificationRequestInfo({
