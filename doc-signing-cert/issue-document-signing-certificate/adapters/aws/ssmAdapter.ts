@@ -10,7 +10,7 @@ export async function getSsmParameter(parameterName: string) {
   );
 
   if (!getParameterCommandOutput.Parameter?.Value) {
-    throw Error('Unable to retrieve parameter from SSM');
+    throw new Error('Unable to retrieve parameter from SSM');
   }
 
   return getParameterCommandOutput.Parameter?.Value;
