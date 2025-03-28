@@ -34,7 +34,7 @@ export async function issueMdlDocSigningCertificateUsingSha256WithEcdsa(
       },
     },
     CertificateAuthorityArn: certificateAuthorityArn,
-    Csr: csr,
+    Csr: certificateSigningRequest,
     SigningAlgorithm: 'SHA256WITHECDSA',
     TemplateArn: 'arn:aws:acm-pca:::template/BlankEndEntityCertificate_APIPassthrough/V1',
     Validity: {
