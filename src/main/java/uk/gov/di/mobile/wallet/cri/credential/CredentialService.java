@@ -59,7 +59,6 @@ public class CredentialService {
                     URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferException {
-
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
         String credentialOfferId = accessTokenData.credentialIdentifier();
@@ -110,6 +109,9 @@ public class CredentialService {
 
         } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
             credential = getDigitalVeteranCard(document, sub);
+
+        } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
+            credential = getMobileDrivingLicence(document, sub);
 
         } else {
             throw new CredentialServiceException(
@@ -192,6 +194,16 @@ public class CredentialService {
                         veteranCardCredentialSubject,
                         DIGITAL_VETERAN_CARD,
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
+    }
+
+    private void getMobileDrivingLicence(Document document, String sub) {
+//        VeteranCardCredentialSubject veteranCardCredentialSubject =
+//                CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
+//        return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
+//                .buildCredential(
+//                        veteranCardCredentialSubject,
+//                        DIGITAL_VETERAN_CARD,
+//                        veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 
     protected Logger getLogger() {
