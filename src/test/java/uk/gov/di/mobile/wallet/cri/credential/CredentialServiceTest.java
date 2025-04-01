@@ -28,7 +28,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-import java.text.ParseException;
 import java.time.Instant;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -77,8 +76,7 @@ class CredentialServiceTest {
             "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==";
 
     @BeforeEach
-    void setUp()
-            throws AccessTokenValidationException, ProofJwtValidationException, ParseException {
+    void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
         mockCachedCredentialOffer =
                 getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "300");
         mockProofJwt = new MockProofBuilder("ES256").build();
