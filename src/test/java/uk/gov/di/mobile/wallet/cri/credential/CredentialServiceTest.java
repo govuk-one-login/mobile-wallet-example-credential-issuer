@@ -374,6 +374,33 @@ class CredentialServiceTest {
                         eq(null));
     }
 
+    @Test
+    void Should_BuildMDLCredential()
+            throws AccessTokenValidationException,
+                    ProofJwtValidationException,
+                    DataStoreException,
+                    CredentialServiceException,
+                    CredentialOfferException,
+                    SigningException,
+                    NoSuchAlgorithmException,
+                    URISyntaxException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCredentialOfferCacheItem);
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getMockMobileDrivingLicence(DOCUMENT_ID));
+
+        CredentialResponse credentialServiceReturnValue =
+                credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+        //        assertEquals(mockCredentialJwt.serialize(),
+        // credentialServiceReturnValue.getCredential());
+        assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
+    }
+
     private CredentialOfferCacheItem getMockCredentialOfferCacheItem(
             String walletSubjectId, Boolean redeemed, String expiresInSeconds) {
         Long expiry = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
