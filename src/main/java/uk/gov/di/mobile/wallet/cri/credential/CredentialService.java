@@ -85,11 +85,11 @@ public class CredentialService {
         }
 
         String documentId = credentialOffer.getDocumentId();
-        Document document = getDocument(documentId);
+        DocumentAPIResponse documentAPIResponse = getDocumentData(documentId);
 
         LOGGER.info(
                 "{} retrieved for credentialOfferId {} and documentId {}",
-                document.getVcType(),
+                documentAPIResponse.getVcType(),
                 credentialOfferId,
                 documentId);
 
@@ -97,19 +97,19 @@ public class CredentialService {
         dataStore.updateCredentialOffer(credentialOffer);
 
         String sub = proofJwtData.didKey();
-        String vcType = document.getVcType();
+        String vcType = documentAPIResponse.getVcType();
 
         String notificationId = credentialOffer.getNotificationId();
         SignedJWT credential;
 
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            credential = getSocialSecurityCredential(document, sub);
+            credential = getSocialSecurityCredential(documentAPIResponse, sub);
 
         } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            credential = getBasicCheckCredential(document, sub);
+            credential = getBasicCheckCredential(documentAPIResponse, sub);
 
         } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            credential = getDigitalVeteranCard(document, sub);
+            credential = getDigitalVeteranCard(documentAPIResponse, sub);
 
         } else {
             throw new CredentialServiceException(
@@ -146,7 +146,7 @@ public class CredentialService {
         return credentialOffer.getRedeemed();
     }
 
-    private Document getDocument(String documentId)
+    private DocumentAPIResponse getDocumentData(String documentId)
             throws URISyntaxException, CredentialServiceException {
         String credentialStoreUrl = configurationService.getCredentialStoreUrl();
         String documentEndpoint = configurationService.getDocumentEndpoint();
@@ -160,21 +160,21 @@ public class CredentialService {
                             "Request to fetch document %s failed with status code %s",
                             documentId, response.getStatus()));
         }
-        return response.readEntity(Document.class);
+        return response.readEntity(DocumentAPIResponse.class);
     }
 
-    private SignedJWT getSocialSecurityCredential(Document document, String sub)
+    private SignedJWT getSocialSecurityCredential(DocumentAPIResponse documentAPIResponse, String sub)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
-                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(documentAPIResponse, sub);
         return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
                 .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
     }
 
-    private SignedJWT getBasicCheckCredential(Document document, String sub)
+    private SignedJWT getBasicCheckCredential(DocumentAPIResponse documentAPIResponse, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
-                CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildBasicCheckCredentialSubject(documentAPIResponse, sub);
 
         return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
                 .buildCredential(
@@ -183,10 +183,10 @@ public class CredentialService {
                         basicCheckCredentialSubject.getExpirationDate());
     }
 
-    private SignedJWT getDigitalVeteranCard(Document document, String sub)
+    private SignedJWT getDigitalVeteranCard(DocumentAPIResponse documentAPIResponse, String sub)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
-                CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildVeteranCardCredentialSubject(documentAPIResponse, sub);
         return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         veteranCardCredentialSubject,

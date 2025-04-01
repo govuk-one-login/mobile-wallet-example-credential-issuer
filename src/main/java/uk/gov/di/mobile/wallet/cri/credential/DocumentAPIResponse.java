@@ -9,7 +9,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class Document {
+public class DocumentAPIResponse {
     @JsonProperty("documentId")
     private String documentId;
 
@@ -20,11 +20,11 @@ public class Document {
     private String vcType;
 
     @ExcludeFromGeneratedCoverageReport
-    public Document() {
+    public DocumentAPIResponse() {
         // Empty constructor required for deserialization
     }
 
-    public Document(String documentId, Map<String, Object> data, String vcType) {
+    public DocumentAPIResponse(String documentId, Map<String, Object> data, String vcType) {
         this.documentId = documentId;
         this.data = data;
         this.vcType = vcType;
