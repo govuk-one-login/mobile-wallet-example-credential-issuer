@@ -97,14 +97,14 @@ public class CredentialService {
 
         String notificationId = credentialOffer.getNotificationId();
 
-        SignedJWT credential =
+        String credential =
                 switch (CredentialType.valueOf(vcType)) {
                     case SocialSecurityCredential -> getSocialSecurityCredential(document, sub);
                     case BasicCheckCredential -> getBasicCheckCredential(document, sub);
                     case digitalVeteranCard -> getDigitalVeteranCard(document, sub);
                 };
 
-        return new CredentialResponse(credential.serialize(), notificationId);
+        return new CredentialResponse(credential, notificationId);
     }
 
     private boolean isValidCredentialOffer(
@@ -143,7 +143,7 @@ public class CredentialService {
     }
 
     @SuppressWarnings("unchecked")
-    private SignedJWT getSocialSecurityCredential(Document document, String sub)
+    private String getSocialSecurityCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
@@ -152,7 +152,7 @@ public class CredentialService {
     }
 
     @SuppressWarnings("unchecked")
-    private SignedJWT getBasicCheckCredential(Document document, String sub)
+    private String getBasicCheckCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
@@ -165,7 +165,7 @@ public class CredentialService {
     }
 
     @SuppressWarnings("unchecked")
-    private SignedJWT getDigitalVeteranCard(Document document, String sub)
+    private String getDigitalVeteranCard(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);

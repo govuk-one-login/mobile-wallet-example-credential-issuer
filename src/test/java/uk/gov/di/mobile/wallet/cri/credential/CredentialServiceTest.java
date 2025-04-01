@@ -65,7 +65,7 @@ class CredentialServiceTest {
     private SignedJWT mockProofJwt;
     private SignedJWT mockAccessToken;
     private ProofJwtService.ProofJwtData mockAccessProofJwtData;
-    private SignedJWT mockCredentialJwt;
+    private String mockCredentialJwt;
 
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
     private static final String NOTIFICATION_ID = "3fwe98js";
@@ -101,8 +101,7 @@ class CredentialServiceTest {
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
 
         mockCredentialJwt =
-                SignedJWT.parse(
-                        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c");
+                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
     }
 
     @Test
@@ -353,7 +352,7 @@ class CredentialServiceTest {
         CredentialResponse credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-        assertEquals(mockCredentialJwt.serialize(), credentialServiceReturnValue.getCredential());
+        assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
         assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
 
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
