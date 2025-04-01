@@ -8,6 +8,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -20,7 +23,9 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
+
 import java.time.Instant;
+import java.util.HexFormat;
 import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
@@ -197,13 +202,15 @@ public class CredentialService {
     }
 
     private void getMobileDrivingLicence(Document document, String sub) {
-//        VeteranCardCredentialSubject veteranCardCredentialSubject =
-//                CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
-//        return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
-//                .buildCredential(
-//                        veteranCardCredentialSubject,
-//                        DIGITAL_VETERAN_CARD,
-//                        veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
+        IssuerSignedItemFactory issuerSignedItemFactory = new IssuerSignedItemFactory(new DigestIDGenerator());
+
+        DocumentFactory documentFactory
+                = new DocumentFactory(issuerSignedItemFactory);
+//        Document document = documentFactory.build(document);
+//        DocumentCborEncoder documentCborEncoder
+//                = new DocumentCborEncoder(JacksonCborEncoderProvider.configuredCborMapper());
+//        return HexFormat.of().formatHex(documentCborEncoder.encode(document));
+
     }
 
     protected Logger getLogger() {
