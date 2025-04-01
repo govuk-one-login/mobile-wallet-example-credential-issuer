@@ -17,7 +17,7 @@ import testUtils.MockProofBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -61,7 +61,7 @@ class CredentialServiceTest {
     private final ConfigurationService mockConfigurationService = mock(ConfigurationService.class);
 
     private CredentialService credentialService;
-    private CredentialOfferCacheItem mockCredentialOfferCacheItem;
+    private CachedCredentialOffer mockCachedCredentialOffer;
     private SignedJWT mockProofJwt;
     private SignedJWT mockAccessToken;
     private ProofJwtService.ProofJwtData mockAccessProofJwtData;
@@ -79,7 +79,7 @@ class CredentialServiceTest {
     @BeforeEach
     void setUp()
             throws AccessTokenValidationException, ProofJwtValidationException, ParseException {
-        mockCredentialOfferCacheItem =
+        mockCachedCredentialOffer =
                 getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "300");
         mockProofJwt = new MockProofBuilder("ES256").build();
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
@@ -152,10 +152,10 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_WalletSubjectIDsDontMatch()
             throws DataStoreException {
-        mockCredentialOfferCacheItem =
+        mockCachedCredentialOffer =
                 getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id", false, "300");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
 
         AccessTokenValidationException exception =
                 assertThrows(
@@ -170,10 +170,9 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialOfferException_When_CredentialOfferIsExpired()
             throws DataStoreException {
-        mockCredentialOfferCacheItem =
-                getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "-1");
+        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "-1");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
 
         CredentialOfferException exception =
                 assertThrows(
@@ -187,10 +186,9 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialOfferException_When_CredentialOfferHasBeenRedeemed()
             throws DataStoreException {
-        mockCredentialOfferCacheItem =
-                getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, true, "300");
+        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, true, "300");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
 
         CredentialOfferException exception =
                 assertThrows(
@@ -207,7 +205,7 @@ class CredentialServiceTest {
     void Should_Throw_RuntimeException_When_Document_Endpoint_Returns_500()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -235,7 +233,7 @@ class CredentialServiceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -250,7 +248,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
-                        eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
+                        eq(CredentialType.SocialSecurityCredential),
                         eq(null));
     }
 
@@ -265,7 +263,7 @@ class CredentialServiceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -280,7 +278,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
-                        eq(CredentialType.BASIC_CHECK_CREDENTIAL),
+                        eq(CredentialType.BasicCheckCredential),
                         eq("2025-07-11"));
     }
 
@@ -295,7 +293,7 @@ class CredentialServiceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -310,15 +308,15 @@ class CredentialServiceTest {
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
-                        eq(CredentialType.DIGITAL_VETERAN_CARD),
+                        eq(CredentialType.digitalVeteranCard),
                         eq("2000-07-11"));
     }
 
     @Test
-    void Should_ThrowCredentialServiceException_When_DocumentVcTypeIsUnknown()
+    void Should_ThrowIllegalArgumentException_When_DocumentVcTypeIsUnknown()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -326,14 +324,9 @@ class CredentialServiceTest {
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockDocumentWithInvalidVcType(DOCUMENT_ID));
 
-        CredentialServiceException exception =
-                assertThrows(
-                        CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
-        assertThat(
-                exception.getMessage(),
-                containsString("Invalid verifiable credential type SomeOtherVcType"));
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
     }
 
     @Test
@@ -347,7 +340,7 @@ class CredentialServiceTest {
                     NoSuchAlgorithmException,
                     URISyntaxException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
@@ -366,19 +359,19 @@ class CredentialServiceTest {
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
         verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
-        verify(mockDynamoDbService, times(1)).updateCredentialOffer(mockCredentialOfferCacheItem);
+        verify(mockDynamoDbService, times(1)).updateCredentialOffer(mockCachedCredentialOffer);
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
-                        eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
+                        eq(CredentialType.SocialSecurityCredential),
                         eq(null));
     }
 
-    private CredentialOfferCacheItem getMockCredentialOfferCacheItem(
+    private CachedCredentialOffer getMockCredentialOfferCacheItem(
             String walletSubjectId, Boolean redeemed, String expiresInSeconds) {
         Long expiry = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
         Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
-        return new CredentialOfferCacheItem(
+        return new CachedCredentialOffer(
                 CREDENTIAL_IDENTIFIER,
                 DOCUMENT_ID,
                 walletSubjectId,

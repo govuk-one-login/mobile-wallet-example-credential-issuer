@@ -4,7 +4,7 @@ import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -32,7 +32,7 @@ public class NotificationService {
                 accessTokenService.verifyAccessToken(accessToken);
         String credentialOfferId = accessTokenData.credentialIdentifier();
 
-        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
+        CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
 
         if (credentialOffer == null) {
             throw new CredentialOfferException(

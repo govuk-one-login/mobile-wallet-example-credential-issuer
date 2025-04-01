@@ -106,7 +106,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null);
+                socialSecurityCredentialSubject, CredentialType.SocialSecurityCredential, null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -127,7 +127,7 @@ class CredentialBuilderTest {
                         () ->
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
-                                        CredentialType.SOCIAL_SECURITY_CREDENTIAL,
+                                        CredentialType.SocialSecurityCredential,
                                         null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
@@ -142,7 +142,7 @@ class CredentialBuilderTest {
         SignedJWT credential =
                 credentialBuilderSocialSecurity.buildCredential(
                         socialSecurityCredentialSubject,
-                        CredentialType.SOCIAL_SECURITY_CREDENTIAL,
+                        CredentialType.SocialSecurityCredential,
                         null);
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -194,7 +194,7 @@ class CredentialBuilderTest {
         SignedJWT credential =
                 credentialBuilderBasicCheck.buildCredential(
                         basicCheckCredentialSubject,
-                        CredentialType.BASIC_CHECK_CREDENTIAL,
+                        CredentialType.BasicCheckCredential,
                         "2025-07-11");
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -249,7 +249,7 @@ class CredentialBuilderTest {
         SignedJWT credential =
                 credentialBuilderVeteranCard.buildCredential(
                         veteranCardCredentialSubject,
-                        CredentialType.DIGITAL_VETERAN_CARD,
+                        CredentialType.digitalVeteranCard,
                         "2000-07-11");
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));

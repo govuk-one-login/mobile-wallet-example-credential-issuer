@@ -1,14 +1,13 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 
 public interface DataStore {
 
-    void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
-            throws DataStoreException;
+    void saveCredentialOffer(CachedCredentialOffer cachedCredentialOffer) throws DataStoreException;
 
-    CredentialOfferCacheItem getCredentialOffer(String credentialOfferId) throws DataStoreException;
+    CachedCredentialOffer getCredentialOffer(String credentialOfferId) throws DataStoreException;
 
-    void updateCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
+    void updateCredentialOffer(CachedCredentialOffer cachedCredentialOffer)
             throws DataStoreException;
 }

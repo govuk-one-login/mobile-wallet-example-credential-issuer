@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
@@ -47,7 +47,7 @@ class NotificationServiceTest {
     @Mock private AccessTokenService mockAccessTokenService;
     @Mock private Logger mockLogger;
 
-    private CredentialOfferCacheItem mockCredentialOfferCacheItem;
+    private CachedCredentialOffer mockCachedCredentialOffer;
     private NotificationService notificationService;
     private SignedJWT accessToken;
     private NotificationRequestBody requestBody;
@@ -81,9 +81,9 @@ class NotificationServiceTest {
                         CREDENTIAL_IDENTIFIER);
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
 
-        mockCredentialOfferCacheItem = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID);
+        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID);
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
     }
 
     @Test
@@ -104,10 +104,10 @@ class NotificationServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_WalletSubjectIDsDoNotMatch()
             throws DataStoreException {
-        mockCredentialOfferCacheItem =
+        mockCachedCredentialOffer =
                 getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
 
         AccessTokenValidationException exception =
                 assertThrows(
@@ -123,7 +123,7 @@ class NotificationServiceTest {
     void Should_ThrowInvalidNotificationIdException_When_NotificationIDsDoNotMatch()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCredentialOfferCacheItem);
+                .thenReturn(mockCachedCredentialOffer);
 
         requestBody =
                 new NotificationRequestBody(
@@ -160,10 +160,10 @@ class NotificationServiceTest {
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
     }
 
-    private CredentialOfferCacheItem getMockCredentialOfferCacheItem(String walletSubjectId) {
+    private CachedCredentialOffer getMockCredentialOfferCacheItem(String walletSubjectId) {
         Long expiry = Instant.now().plusSeconds(300).getEpochSecond();
         Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
-        return new CredentialOfferCacheItem(
+        return new CachedCredentialOffer(
                 CREDENTIAL_IDENTIFIER,
                 "de9cbf02-2fbc-4d61-a627-f97851f6840b",
                 walletSubjectId,
