@@ -104,16 +104,16 @@ public class CredentialService {
         String vcType = document.getVcType();
 
         String notificationId = credentialOffer.getNotificationId();
-        SignedJWT credential;
+        String credential;
 
         if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            credential = getSocialSecurityCredential(document, sub);
+            credential = getSocialSecurityCredential(document, sub).toString();
 
         } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            credential = getBasicCheckCredential(document, sub);
+            credential = getBasicCheckCredential(document, sub).toString();
 
         } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            credential = getDigitalVeteranCard(document, sub);
+            credential = getDigitalVeteranCard(document, sub).toString();
 
         } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
             credential = getMobileDrivingLicence(document, sub);
@@ -122,7 +122,7 @@ public class CredentialService {
             throw new CredentialServiceException(
                     String.format("Invalid verifiable credential type %s", vcType));
         }
-        return new CredentialResponse(credential.serialize(), notificationId);
+        return new CredentialResponse(credential, notificationId);
     }
 
     private boolean isValidCredentialOffer(
@@ -201,7 +201,7 @@ public class CredentialService {
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 
-    private void getMobileDrivingLicence(Document document, String sub) {
+    private String getMobileDrivingLicence(Document document, String sub) {
         IssuerSignedItemFactory issuerSignedItemFactory = new IssuerSignedItemFactory(new DigestIDGenerator());
 
         DocumentFactory documentFactory
