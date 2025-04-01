@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -8,10 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MDL;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -24,7 +24,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
-
 import java.time.Instant;
 import java.util.Collections;
 import java.util.Objects;
@@ -117,7 +116,9 @@ public class CredentialService {
             credential = getDigitalVeteranCard(document, sub).toString();
 
         } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-            credential = getMobileDrivingLicence(document, sub);
+            credential = getMobileDrivingLicence(document);
+
+            System.out.println(credential);
 
         } else {
             throw new CredentialServiceException(
@@ -203,12 +204,19 @@ public class CredentialService {
     }
 
     private String getMobileDrivingLicence(Document document) {
-        IssuerSignedItemFactory issuerSignedItemFactory = new IssuerSignedItemFactory(new DigestIDGenerator());
+        final DrivingLicenceDocument drivingLicenceDocument =
+                new ObjectMapper().convertValue(document.getData(), DrivingLicenceDocument.class);
+        IssuerSignedItemFactory issuerSignedItemFactory =
+                new IssuerSignedItemFactory(new DigestIDGenerator());
+        MDLDocumentFactory mdlDocumentFactory = new MDLDocumentFactory(issuerSignedItemFactory);
+        MDLDocument mdlDocument = mdlDocumentFactory.build(drivingLicenceDocument);
+        MDL mdl = new MDL("1", Collections.singletonList(mdlDocument));
 
-        DocumentFactory documentFactory
-                = new DocumentFactory(issuerSignedItemFactory);
-
-        MDL mdl = new MDL("1", Collections.singletonList(documentFactory.build(document)));
+        try {
+            return new ObjectMapper().writeValueAsString(mdl);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected Logger getLogger() {
