@@ -64,7 +64,7 @@ public class MockDocuments {
         HashMap<String, Object> data = new HashMap<>();
         data.put("family_name", "Edwards");
         data.put("given_name", "Sarah");
-        data.put("image", "basd64EncodedImage");
+        data.put("portrait", "basd64EncodedImage");
         data.put("birth_date", "2000-10-20");
         data.put("birth_place", "London");
         data.put("issue_date", "2018-08-09");

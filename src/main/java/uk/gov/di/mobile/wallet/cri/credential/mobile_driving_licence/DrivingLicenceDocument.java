@@ -13,7 +13,7 @@ public class DrivingLicenceDocument {
     @JsonProperty("given_name")
     private String givenName;
 
-    private String image;
+    private String portrait;
 
     @JsonProperty("birth_date")
     private String birthDate;
