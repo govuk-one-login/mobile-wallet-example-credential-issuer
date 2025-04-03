@@ -79,8 +79,6 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-String jacocoBuildReportPath = "reports/jacoco/test/jacocoTestReport.xml"
-
 sonar {
 	properties {
 		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
