@@ -51,15 +51,10 @@ public class CredentialService {
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
-            throws DataStoreException,
-                    ProofJwtValidationException,
-                    SigningException,
+            throws ProofJwtValidationException,
                     AccessTokenValidationException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferException {
-
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
         String credentialOfferId = accessTokenData.credentialIdentifier();
@@ -73,49 +68,59 @@ public class CredentialService {
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
-        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
+        try {
 
-        if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
-            throw new CredentialOfferException("Credential offer validation failed");
-        }
+            CredentialOfferCacheItem credentialOffer =
+                    dataStore.getCredentialOffer(credentialOfferId);
 
-        if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
-            throw new AccessTokenValidationException(
-                    "Access token sub claim does not match cached walletSubjectId");
-        }
+            if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
+                throw new CredentialOfferException("Credential offer validation failed");
+            }
 
-        String documentId = credentialOffer.getDocumentId();
-        Document document = getDocument(documentId);
+            if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
+                throw new AccessTokenValidationException(
+                        "Access token sub claim does not match cached walletSubjectId");
+            }
 
-        LOGGER.info(
-                "{} retrieved for credentialOfferId {} and documentId {}",
-                document.getVcType(),
-                credentialOfferId,
-                documentId);
+            String documentId = credentialOffer.getDocumentId();
+            Document document = getDocument(documentId);
+            LOGGER.info(
+                    "{} retrieved for credentialOfferId {} and documentId {}",
+                    document.getVcType(),
+                    credentialOfferId,
+                    documentId);
 
-        credentialOffer.setRedeemed(true); // mark credential offer as redeemed to prevent replay
-        dataStore.updateCredentialOffer(credentialOffer);
+            credentialOffer.setRedeemed(
+                    true); // mark credential offer as redeemed to prevent replay
+            dataStore.updateCredentialOffer(credentialOffer);
 
-        String sub = proofJwtData.didKey();
-        String vcType = document.getVcType();
+            String sub = proofJwtData.didKey();
+            String vcType = document.getVcType();
 
-        String notificationId = credentialOffer.getNotificationId();
-        SignedJWT credential;
+            SignedJWT credential;
+            if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
+                credential = getSocialSecurityCredential(document, sub);
 
-        if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            credential = getSocialSecurityCredential(document, sub);
+            } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
+                credential = getBasicCheckCredential(document, sub);
 
-        } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            credential = getBasicCheckCredential(document, sub);
+            } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
+                credential = getDigitalVeteranCard(document, sub);
 
-        } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            credential = getDigitalVeteranCard(document, sub);
+            } else {
+                throw new CredentialServiceException(
+                        String.format("Invalid verifiable credential type %s", vcType));
+            }
 
-        } else {
+            return new CredentialResponse(
+                    credential.serialize(), credentialOffer.getNotificationId());
+        } catch (SigningException
+                | NoSuchAlgorithmException
+                | URISyntaxException
+                | DataStoreException exception) {
             throw new CredentialServiceException(
-                    String.format("Invalid verifiable credential type %s", vcType));
+                    "Failed to issue credential due to an internal error.", exception);
         }
-        return new CredentialResponse(credential.serialize(), notificationId);
     }
 
     private boolean isValidCredentialOffer(
