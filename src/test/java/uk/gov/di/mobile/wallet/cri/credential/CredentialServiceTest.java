@@ -136,20 +136,16 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ThrowCredentialServiceException_When_CallToDatabaseThrowsError()
-            throws DataStoreException {
+    void Should_ThrowDataStoreException_When_CallToDatabaseThrowsError() throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenThrow(new DataStoreException("Some database error"));
 
-        CredentialServiceException exception =
+        DataStoreException exception =
                 assertThrows(
-                        CredentialServiceException.class,
+                        DataStoreException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
 
-        assertEquals(
-                "Failed to issue credential due to an internal error.", exception.getMessage());
-        assertEquals("DataStoreException", exception.getCause().getClass().getSimpleName());
-        assertEquals("Some database error", exception.getCause().getMessage());
+        assertEquals("Some database error", exception.getMessage());
     }
 
     @Test

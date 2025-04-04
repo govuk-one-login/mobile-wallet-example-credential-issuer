@@ -54,7 +54,8 @@ public class CredentialService {
             throws ProofJwtValidationException,
                     AccessTokenValidationException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DataStoreException {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
         String credentialOfferId = accessTokenData.credentialIdentifier();
@@ -68,56 +69,42 @@ public class CredentialService {
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
+        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
+        if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
+            throw new CredentialOfferException("Credential offer validation failed");
+        }
+        if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
+            throw new AccessTokenValidationException(
+                    "Access token sub claim does not match cached walletSubjectId");
+        }
+
+        String documentId = credentialOffer.getDocumentId();
+        Document document = getDocument(documentId);
+        LOGGER.info(
+                "{} retrieved for credentialOfferId {} and documentId {}",
+                document.getVcType(),
+                credentialOfferId,
+                documentId);
+        credentialOffer.setRedeemed(true); // mark credential offer as redeemed to prevent replay
+        dataStore.updateCredentialOffer(credentialOffer);
+
+        String sub = proofJwtData.didKey();
+        String vcType = document.getVcType();
+        SignedJWT credential;
         try {
-
-            CredentialOfferCacheItem credentialOffer =
-                    dataStore.getCredentialOffer(credentialOfferId);
-
-            if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
-                throw new CredentialOfferException("Credential offer validation failed");
-            }
-
-            if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
-                throw new AccessTokenValidationException(
-                        "Access token sub claim does not match cached walletSubjectId");
-            }
-
-            String documentId = credentialOffer.getDocumentId();
-            Document document = getDocument(documentId);
-            LOGGER.info(
-                    "{} retrieved for credentialOfferId {} and documentId {}",
-                    document.getVcType(),
-                    credentialOfferId,
-                    documentId);
-
-            credentialOffer.setRedeemed(
-                    true); // mark credential offer as redeemed to prevent replay
-            dataStore.updateCredentialOffer(credentialOffer);
-
-            String sub = proofJwtData.didKey();
-            String vcType = document.getVcType();
-
-            SignedJWT credential;
             if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
                 credential = getSocialSecurityCredential(document, sub);
-
             } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
                 credential = getBasicCheckCredential(document, sub);
-
             } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
                 credential = getDigitalVeteranCard(document, sub);
-
             } else {
                 throw new CredentialServiceException(
                         String.format("Invalid verifiable credential type %s", vcType));
             }
-
             return new CredentialResponse(
                     credential.serialize(), credentialOffer.getNotificationId());
-        } catch (SigningException
-                | NoSuchAlgorithmException
-                | URISyntaxException
-                | DataStoreException exception) {
+        } catch (SigningException | NoSuchAlgorithmException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error.", exception);
         }
@@ -129,12 +116,10 @@ public class CredentialService {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
         }
-
         if (hasOfferBeenRedeemed(credentialOffer)) {
             getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
         }
-
         if (isOfferExpired(credentialOffer)) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
@@ -151,21 +136,24 @@ public class CredentialService {
         return credentialOffer.getRedeemed();
     }
 
-    private Document getDocument(String documentId)
-            throws URISyntaxException, CredentialServiceException {
+    private Document getDocument(String documentId) throws CredentialServiceException {
         String credentialStoreUrl = configurationService.getCredentialStoreUrl();
         String documentEndpoint = configurationService.getDocumentEndpoint();
-        URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
-
-        Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
-
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new CredentialServiceException(
-                    String.format(
-                            "Request to fetch document %s failed with status code %s",
-                            documentId, response.getStatus()));
+        try {
+            URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
+            Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
+            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                throw new CredentialServiceException(
+                        String.format(
+                                "Request to fetch document %s failed with status code %s",
+                                documentId, response.getStatus()));
+            }
+            return response.readEntity(Document.class);
+        } catch (URISyntaxException exception) {
+            String errorMessage =
+                    String.format("Invalid URI constructed for document: %s", documentId);
+            throw new CredentialServiceException(errorMessage, exception);
         }
-        return response.readEntity(Document.class);
     }
 
     private SignedJWT getSocialSecurityCredential(Document document, String sub)

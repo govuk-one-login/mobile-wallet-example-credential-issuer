@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -56,7 +57,8 @@ class CredentialResourceTest {
             throws AccessTokenValidationException,
                     CredentialServiceException,
                     ProofJwtValidationException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DataStoreException {
         final Response response =
                 resource.target("/credential")
                         .request()
@@ -76,7 +78,8 @@ class CredentialResourceTest {
                     AccessTokenValidationException,
                     ProofJwtValidationException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DataStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -100,7 +103,8 @@ class CredentialResourceTest {
                     AccessTokenValidationException,
                     ProofJwtValidationException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DataStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -127,7 +131,8 @@ class CredentialResourceTest {
                     ProofJwtValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DataStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -158,7 +163,8 @@ class CredentialResourceTest {
                     ProofJwtValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DataStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -186,7 +192,8 @@ class CredentialResourceTest {
                     ProofJwtValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DataStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
