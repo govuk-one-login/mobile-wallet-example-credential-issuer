@@ -236,8 +236,7 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException {
+                    NoSuchAlgorithmException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -266,8 +265,7 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException {
+                    NoSuchAlgorithmException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -296,8 +294,7 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException {
+                    NoSuchAlgorithmException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
@@ -348,8 +345,7 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException {
+                    NoSuchAlgorithmException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
