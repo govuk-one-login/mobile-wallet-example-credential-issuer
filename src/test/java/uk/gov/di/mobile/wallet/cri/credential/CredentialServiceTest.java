@@ -121,7 +121,20 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ThrowProofJwtValidationException_When_CredentialOfferNotFound()
+    void Should_ThrowDataStoreException_When_CallToDatabaseThrowsError() throws DataStoreException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenThrow(new DataStoreException("Some database error"));
+
+        DataStoreException exception =
+                assertThrows(
+                        DataStoreException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+
+        assertEquals("Some database error", exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowCredentialOfferException_When_CredentialOfferNotFound()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
 
@@ -133,19 +146,6 @@ class CredentialServiceTest {
         assertEquals("Credential offer validation failed", exception.getMessage());
         verify(mockLogger)
                 .error("Credential offer {} was not found", "efb52887-48d6-43b7-b14c-da7896fbf54d");
-    }
-
-    @Test
-    void Should_ThrowDataStoreException_When_CallToDatabaseThrowsError() throws DataStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenThrow(new DataStoreException("Some database error"));
-
-        DataStoreException exception =
-                assertThrows(
-                        DataStoreException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
-        assertEquals("Some database error", exception.getMessage());
     }
 
     @Test
@@ -221,6 +221,27 @@ class CredentialServiceTest {
                 exception.getMessage(),
                 containsString(
                         "Request to fetch document de9cbf02-2fbc-4d61-a627-f97851f6840b failed with status code 500"));
+    }
+
+    @Test
+    void Should_ThrowCredentialOfferException_When_SigningExceptionIsThrown()
+            throws DataStoreException, SigningException, NoSuchAlgorithmException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCredentialOfferCacheItem);
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
+        when(mockCredentialBuilder.buildCredential(any(), any(), any()))
+                .thenThrow(new SigningException("Some signing error", new RuntimeException()));
+
+        CredentialServiceException exception =
+                assertThrows(
+                        CredentialServiceException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+        assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
     }
 
     @Test
