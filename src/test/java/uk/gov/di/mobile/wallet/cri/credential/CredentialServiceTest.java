@@ -26,7 +26,6 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
