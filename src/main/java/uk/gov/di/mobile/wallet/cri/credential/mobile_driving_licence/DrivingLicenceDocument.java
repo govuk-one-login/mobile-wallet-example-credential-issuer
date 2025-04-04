@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Setter
 @Getter
 public class DrivingLicenceDocument {
@@ -16,16 +18,16 @@ public class DrivingLicenceDocument {
     private String portrait;
 
     @JsonProperty("birth_date")
-    private String birthDate;
+    private LocalDate birthDate;
 
     @JsonProperty("birth_place")
     private String birthPlace;
 
     @JsonProperty("issue_date")
-    private String issueDate;
+    private LocalDate issueDate;
 
     @JsonProperty("expiry_date")
-    private String expiryDate;
+    private LocalDate expiryDate;
 
     @JsonProperty("issuing_authority")
     private String issuingAuthority;

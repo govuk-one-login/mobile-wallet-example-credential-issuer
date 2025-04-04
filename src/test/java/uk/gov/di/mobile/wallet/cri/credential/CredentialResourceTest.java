@@ -185,11 +185,8 @@ class CredentialResourceTest {
     void should_Return_500_When_CredentialService_Throws_A_Signing_Exception()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException,
                     JsonProcessingException,
-                    URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferException {
         JsonNode requestBody =
@@ -218,7 +215,6 @@ class CredentialResourceTest {
     void should_Return_500_When_CredentialService_Throws_A_DataStore_Exception()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    SigningException,
                     ProofJwtValidationException,
                     NoSuchAlgorithmException,
                     JsonProcessingException,

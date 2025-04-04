@@ -30,6 +30,8 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.3'
 	implementation 'org.jetbrains:annotations:26.0.2'
 	implementation group: 'io.dropwizard', name: 'dropwizard-json-logging', version: '4.0.13'
+	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.18.3'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
 
 	compileOnly "org.projectlombok:lombok:1.18.36"
 	annotationProcessor 'org.projectlombok:lombok:1.18.36'

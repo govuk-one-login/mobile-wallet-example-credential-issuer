@@ -1,7 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
@@ -26,6 +28,7 @@ import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HexFormat;
 import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
@@ -58,10 +61,7 @@ public class CredentialService {
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
                     ProofJwtValidationException,
-                    SigningException,
                     AccessTokenValidationException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferException {
         AccessTokenService.AccessTokenData accessTokenData =
@@ -78,7 +78,6 @@ public class CredentialService {
         }
 
         CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-
         if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
             throw new CredentialOfferException("Credential offer validation failed");
         }
@@ -90,41 +89,36 @@ public class CredentialService {
 
         String documentId = credentialOffer.getDocumentId();
         Document document = getDocument(documentId);
-
         LOGGER.info(
                 "{} retrieved for credentialOfferId {} and documentId {}",
                 document.getVcType(),
                 credentialOfferId,
                 documentId);
 
-        credentialOffer.setRedeemed(true); // mark credential offer as redeemed to prevent replay
+        credentialOffer.setRedeemed(true); // Mark credential offer as redeemed to prevent replay
         dataStore.updateCredentialOffer(credentialOffer);
 
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
-
-        String notificationId = credentialOffer.getNotificationId();
         String credential;
-
-        if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            credential = getSocialSecurityCredential(document, sub).toString();
-
-        } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-            credential = getBasicCheckCredential(document, sub).toString();
-
-        } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-            credential = getDigitalVeteranCard(document, sub).toString();
-
-        } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-            credential = getMobileDrivingLicence(document);
-
-            System.out.println(credential);
-
-        } else {
+        try {
+            if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
+                credential = getSocialSecurityCredential(document, sub).toString();
+            } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
+                credential = getBasicCheckCredential(document, sub).toString();
+            } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
+                credential = getDigitalVeteranCard(document, sub).toString();
+            } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
+                credential = getMobileDrivingLicence(document);
+            } else {
+                throw new CredentialServiceException(
+                        String.format("Invalid verifiable credential type %s", vcType));
+            }
+            return new CredentialResponse(credential, credentialOffer.getNotificationId());
+        } catch (NoSuchAlgorithmException | IllegalAccessException | SigningException exception) {
             throw new CredentialServiceException(
-                    String.format("Invalid verifiable credential type %s", vcType));
+                    "Failed to issue credential due to an internal error.", exception);
         }
-        return new CredentialResponse(credential, notificationId);
     }
 
     private boolean isValidCredentialOffer(
@@ -133,12 +127,10 @@ public class CredentialService {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
         }
-
         if (hasOfferBeenRedeemed(credentialOffer)) {
             getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
         }
-
         if (isOfferExpired(credentialOffer)) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
@@ -155,21 +147,25 @@ public class CredentialService {
         return credentialOffer.getRedeemed();
     }
 
-    private Document getDocument(String documentId)
-            throws URISyntaxException, CredentialServiceException {
+    private Document getDocument(String documentId) throws CredentialServiceException {
         String credentialStoreUrl = configurationService.getCredentialStoreUrl();
         String documentEndpoint = configurationService.getDocumentEndpoint();
-        URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
 
-        Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
-
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new CredentialServiceException(
-                    String.format(
-                            "Request to fetch document %s failed with status code %s",
-                            documentId, response.getStatus()));
+        try {
+            URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
+            Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
+            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                throw new CredentialServiceException(
+                        String.format(
+                                "Request to fetch document %s failed with status code %s",
+                                documentId, response.getStatus()));
+            }
+            return response.readEntity(Document.class);
+        } catch (URISyntaxException exception) {
+            String errorMessage =
+                    String.format("Invalid URI constructed for document: %s", documentId);
+            throw new CredentialServiceException(errorMessage, exception);
         }
-        return response.readEntity(Document.class);
     }
 
     private SignedJWT getSocialSecurityCredential(Document document, String sub)
@@ -203,19 +199,28 @@ public class CredentialService {
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 
-    private String getMobileDrivingLicence(Document document) {
+    private String getMobileDrivingLicence(Document document) throws IllegalAccessException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+
         final DrivingLicenceDocument drivingLicenceDocument =
-                new ObjectMapper().convertValue(document.getData(), DrivingLicenceDocument.class);
+                mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
         IssuerSignedItemFactory issuerSignedItemFactory =
                 new IssuerSignedItemFactory(new DigestIDGenerator());
-        MDLDocumentFactory mdlDocumentFactory = new MDLDocumentFactory(issuerSignedItemFactory);
-        MDLDocument mdlDocument = mdlDocumentFactory.build(drivingLicenceDocument);
-        MDL mdl = new MDL("1", Collections.singletonList(mdlDocument));
+        DocumentFactory documentFactory = new DocumentFactory(issuerSignedItemFactory);
+        DeviceResponse deviceResponse =
+                new DeviceResponse(
+                        "1",
+                        Collections.singletonList(documentFactory.build(drivingLicenceDocument)));
+
+        CBOREncoder cborEncoder =
+                new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
 
         try {
-            return new ObjectMapper().writeValueAsString(mdl);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            System.out.println(HexFormat.of().formatHex(cborEncoder.encode(deviceResponse)));
+            return HexFormat.of().formatHex(cborEncoder.encode(deviceResponse));
+        } catch (Exception exception) {
+            throw new RuntimeException();
         }
     }
 
