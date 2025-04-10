@@ -25,7 +25,7 @@ public class LocalDateCBORSerializer extends JsonSerializer<LocalDate> {
             cborGenerator.writeTag(1004);
             generator.writeString(dateString);
         } else {
-            throw new IllegalArgumentException("This serializer only supports CBORGenerator.");
+            throw new IllegalArgumentException("This serializer only supports CBORGenerator");
         }
     }
 }

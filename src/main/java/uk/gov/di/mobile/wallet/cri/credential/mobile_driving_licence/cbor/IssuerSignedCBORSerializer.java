@@ -24,12 +24,10 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
             cborGenerator.writeStartObject();
             cborGenerator.writeFieldName("nameSpaces");
             cborGenerator.writeStartObject();
-
             for (Map.Entry<String, List<IssuerSignedItem>> entry :
                     issuerSigned.nameSpaces().entrySet()) {
                 cborGenerator.writeFieldName(entry.getKey());
                 cborGenerator.writeStartArray();
-
                 for (IssuerSignedItem item : entry.getValue()) {
                     // '24' is a tag that represents encoded CBOR data items. It's used when
                     // embedding CBOR data within CBOR.
@@ -41,7 +39,7 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
             cborGenerator.writeEndObject();
             cborGenerator.writeEndObject();
         } else {
-            throw new IllegalArgumentException("This serializer only supports CBORGenerator.");
+            throw new IllegalArgumentException("This serializer only supports CBORGenerator");
         }
     }
 }
