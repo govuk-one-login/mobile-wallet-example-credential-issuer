@@ -1,8 +1,9 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,21 +27,23 @@ public class DocumentFactory {
     }
 
     private Map<String, List<IssuerSignedItem>> buildNameSpaces(
-            final DrivingLicenceDocument drivingLicence) throws IllegalAccessException {
+            final DrivingLicenceDocument drivingLicence) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        Map<String, Object> drivingLicenceMap =
+                objectMapper.convertValue(drivingLicence, Map.class);
+
         List<IssuerSignedItem> issuerSignedItems = new ArrayList<>();
-        for (Field field : drivingLicence.getClass().getDeclaredFields()) {
-            String fieldName = field.getName();
+        for (Map.Entry<String, Object> entry : drivingLicenceMap.entrySet()) {
+            String fieldName = entry.getKey();
+            Object fieldValue = entry.getValue();
 
             String asSnakeCase = CamelToSnakeCaseConvertor.convert(fieldName);
-            field.setAccessible(true);
-
-            Object fieldValue = field.get(drivingLicence);
 
             IssuerSignedItem issuerSignedItem =
                     issuerSignedItemFactory.build(asSnakeCase, fieldValue);
             issuerSignedItems.add(issuerSignedItem);
         }
-
         return Map.of(MOBILE_DRIVING_LICENCE_NAMESPACE, issuerSignedItems);
     }
 
