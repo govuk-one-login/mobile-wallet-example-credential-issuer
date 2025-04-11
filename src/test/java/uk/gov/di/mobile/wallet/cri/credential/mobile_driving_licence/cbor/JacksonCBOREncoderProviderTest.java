@@ -42,7 +42,8 @@ class JacksonCBOREncoderProviderTest {
 
         // Deserialize back to ensure correct serialization
         Map<?, ?> deserialized = mapper.readValue(serialized, Map.class);
-        assertNotNull(deserialized.get("date"), "Date field should be present after deserialization");
+        assertNotNull(
+                deserialized.get("date"), "Date field should be present after deserialization");
     }
 
     @Test
@@ -60,7 +61,9 @@ class JacksonCBOREncoderProviderTest {
         // Deserialize back to ensure correct serialization
         Map<?, ?> deserialized = mapper.readValue(serialized, Map.class);
         System.out.println(deserialized);
-        assertNotNull(deserialized.get("issuerSigned"), "Date field should be present after deserialization");
+        assertNotNull(
+                deserialized.get("issuerSigned"),
+                "Date field should be present after deserialization");
     }
 
     private IssuerSigned createTestIssuerSigned() {

@@ -18,10 +18,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
-
-import java.net.URISyntaxException;
-import java.security.NoSuchAlgorithmException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
