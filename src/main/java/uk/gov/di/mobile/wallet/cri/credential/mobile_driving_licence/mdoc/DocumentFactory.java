@@ -2,6 +2,8 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.base.CaseFormat;
+import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 
 import java.util.ArrayList;
@@ -37,13 +39,17 @@ public class DocumentFactory {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
 
-            String asSnakeCase = CamelToSnakeCaseConvertor.convert(fieldName);
+            String asSnakeCase = getAsSnakeCase(fieldName);
 
             IssuerSignedItem issuerSignedItem =
                     issuerSignedItemFactory.build(asSnakeCase, fieldValue);
             issuerSignedItems.add(issuerSignedItem);
         }
         return Map.of(MOBILE_DRIVING_LICENCE_NAMESPACE, issuerSignedItems);
+    }
+
+    private static @NotNull String getAsSnakeCase(String fieldName) {
+        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
     }
 
     private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> nameSpaces) {
