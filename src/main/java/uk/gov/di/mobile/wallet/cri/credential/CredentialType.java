@@ -4,9 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum CredentialType {
-    SocialSecurityCredential("SocialSecurityCredential", "National Insurance number"), // NOSONAR
-    BasicCheckCredential("BasicCheckCredential", "Basic DBS check result"), // NOSONAR
-    digitalVeteranCard("digitalVeteranCard", "HM Armed Forces Veteran Card"); // NOSONAR
+    SOCIAL_SECURITY_CREDENTIAL("SocialSecurityCredential", "National Insurance number"),
+    BASIC_CHECK_CREDENTIAL("BasicCheckCredential", "Basic DBS check result"),
+    DIGITAL_VETERAN_CARD("digitalVeteranCard", "HM Armed Forces Veteran Card");
 
     private final String type;
     private final String name;
