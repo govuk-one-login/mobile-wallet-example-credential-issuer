@@ -44,8 +44,8 @@ public class CredentialOfferCacheItemBuilder {
         return this;
     }
 
-    public CredentialOfferCacheItem build() {
-        return new CredentialOfferCacheItem(
+    public CachedCredentialOffer build() {
+        return new CachedCredentialOffer(
                 credentialIdentifier,
                 documentId,
                 walletSubjectId,

@@ -13,7 +13,7 @@ class CredentialOfferCacheItemBuilderTest {
         Long expiry = Instant.now().plusSeconds(300).getEpochSecond();
         Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
 
-        CredentialOfferCacheItem credentialOfferCacheItem =
+        CachedCredentialOffer cachedCredentialOffer =
                 new CredentialOfferCacheItemBuilder()
                         .credentialIdentifier("4a1b1b18-b495-45ac-b0ce-73848bd32b70")
                         .documentId("cb2e831f-b2d9-4c7a-b42e-be5370ea4c77")
@@ -27,17 +27,15 @@ class CredentialOfferCacheItemBuilderTest {
 
         assertEquals(
                 "4a1b1b18-b495-45ac-b0ce-73848bd32b70",
-                credentialOfferCacheItem.getCredentialIdentifier());
-        assertEquals(
-                "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77", credentialOfferCacheItem.getDocumentId());
+                cachedCredentialOffer.getCredentialIdentifier());
+        assertEquals("cb2e831f-b2d9-4c7a-b42e-be5370ea4c77", cachedCredentialOffer.getDocumentId());
         assertEquals(
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
-                credentialOfferCacheItem.getWalletSubjectId());
+                cachedCredentialOffer.getWalletSubjectId());
         assertEquals(
-                "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
-                credentialOfferCacheItem.getNotificationId());
-        assertEquals(false, credentialOfferCacheItem.getRedeemed());
-        assertEquals(expiry, credentialOfferCacheItem.getExpiry());
-        assertEquals(ttl, credentialOfferCacheItem.getTimeToLive());
+                "267b1335-fc0e-41cf-a2b1-16134bf62dc4", cachedCredentialOffer.getNotificationId());
+        assertEquals(false, cachedCredentialOffer.getRedeemed());
+        assertEquals(expiry, cachedCredentialOffer.getExpiry());
+        assertEquals(ttl, cachedCredentialOffer.getTimeToLive());
     }
 }

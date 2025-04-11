@@ -18,7 +18,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Digest
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -84,20 +84,15 @@ public class CredentialService {
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
-        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
+        CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
         if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
             throw new CredentialOfferException("Credential offer validation failed");
-        }
-
-        if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
-            throw new AccessTokenValidationException(
-                    "Access token sub claim does not match cached walletSubjectId");
         }
 
         String documentId = credentialOffer.getDocumentId();
         Document document = getDocument(documentId);
         LOGGER.info(
-                "{} retrieved for credentialOfferId {} and documentId {}",
+                "{} retrieved - credentialOfferId: {}, documentId: {}",
                 document.getVcType(),
                 credentialOfferId,
                 documentId);
@@ -110,11 +105,11 @@ public class CredentialService {
         String credential;
         try {
             if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-                credential = getSocialSecurityCredential(document, sub).toString();
+                credential = getSocialSecurityCredential(document, sub);
             } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-                credential = getBasicCheckCredential(document, sub).toString();
+                credential = getBasicCheckCredential(document, sub);
             } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-                credential = getDigitalVeteranCard(document, sub).toString();
+                credential = getDigitalVeteranCard(document, sub);
             } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
                 credential = getMobileDrivingLicence(document);
             } else {
@@ -129,29 +124,21 @@ public class CredentialService {
     }
 
     private boolean isValidCredentialOffer(
-            CredentialOfferCacheItem credentialOffer, String credentialOfferId) {
+            CachedCredentialOffer credentialOffer, String credentialOfferId) {
+        long now = Instant.now().getEpochSecond();
+
         if (credentialOffer == null) {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
-        }
-        if (hasOfferBeenRedeemed(credentialOffer)) {
+        } else if (credentialOffer.getRedeemed()) {
             getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
-        }
-        if (isOfferExpired(credentialOffer)) {
+        } else if (now > credentialOffer.getExpiry()) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }
+
         return true;
-    }
-
-    private static boolean isOfferExpired(CredentialOfferCacheItem credentialOffer) {
-        long now = Instant.now().getEpochSecond();
-        return now > credentialOffer.getExpiry();
-    }
-
-    private static boolean hasOfferBeenRedeemed(CredentialOfferCacheItem credentialOffer) {
-        return credentialOffer.getRedeemed();
     }
 
     private Document getDocument(String documentId) throws CredentialServiceException {
@@ -175,7 +162,8 @@ public class CredentialService {
         }
     }
 
-    private SignedJWT getSocialSecurityCredential(Document document, String sub)
+    @SuppressWarnings("unchecked")
+    private String getSocialSecurityCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
@@ -183,7 +171,8 @@ public class CredentialService {
                 .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
     }
 
-    private SignedJWT getBasicCheckCredential(Document document, String sub)
+    @SuppressWarnings("unchecked")
+    private String getBasicCheckCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
@@ -195,7 +184,8 @@ public class CredentialService {
                         basicCheckCredentialSubject.getExpirationDate());
     }
 
-    private SignedJWT getDigitalVeteranCard(Document document, String sub)
+    @SuppressWarnings("unchecked")
+    private String getDigitalVeteranCard(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);

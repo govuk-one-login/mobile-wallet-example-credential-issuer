@@ -7,7 +7,6 @@ import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.impl.ECDSA;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
-import com.nimbusds.jwt.SignedJWT;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
@@ -50,7 +49,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         this.clock = clock;
     }
 
-    public SignedJWT buildCredential(
+    public String buildCredential(
             T credentialSubject, CredentialType credentialType, String validUntil)
             throws SigningException, NoSuchAlgorithmException {
         // keyId is the hashed key ID. This value must be appended to the string
@@ -75,7 +74,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
             String signature = encodedSignature(signResult);
-            return SignedJWT.parse(message + "." + signature);
+            return message + "." + signature;
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing token: %s", exception.getMessage()), exception);

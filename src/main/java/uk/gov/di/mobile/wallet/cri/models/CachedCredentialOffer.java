@@ -8,7 +8,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 @Getter
 @Setter
 @DynamoDbBean
-public class CredentialOfferCacheItem {
+public class CachedCredentialOffer {
 
     String credentialIdentifier;
     String walletSubjectId;
@@ -18,11 +18,11 @@ public class CredentialOfferCacheItem {
     Long expiry;
     Long timeToLive;
 
-    public CredentialOfferCacheItem() {
+    public CachedCredentialOffer() {
         // Empty constructor required for DynamoDb BeanTableSchema
     }
 
-    public CredentialOfferCacheItem(
+    public CachedCredentialOffer(
             String credentialIdentifier,
             String documentId,
             String walletSubjectId,
