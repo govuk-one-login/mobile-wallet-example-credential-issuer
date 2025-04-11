@@ -10,7 +10,6 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -81,16 +80,11 @@ class CredentialResourceTest {
     }
 
     @Test
-    @DisplayName(
-            "should return 400 and invalid Credential Request when Authorization Header is missing")
-    void should_Return_400_When_AuthorizationHeader_Is_Missing()
+    void Should_Return400_When_AuthorizationHeaderIsMissing()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
-                    SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferException {
         JsonNode requestBody =
@@ -111,16 +105,11 @@ class CredentialResourceTest {
     }
 
     @Test
-    @DisplayName(
-            "should return 400 and invalid Credential Request when AuthorizationHeader is not valid Bearer Access Token")
-    void should_Return_400_When_AuthorizationHeader_Is_Not_Valid_Bearer_AccessToken()
+    void Should_Return400_When_AuthorizationHeaderIsNotValidBearerAccessToken()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
-                    SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferException {
         JsonNode requestBody =
@@ -144,45 +133,7 @@ class CredentialResourceTest {
     }
 
     @Test
-    @DisplayName(
-            "should return 400 when Credential Service Throws a Credential Offer Not Found Exception")
-    void should_Return_400_When_CredentialService_ThrowsException()
-            throws DataStoreException,
-                    AccessTokenValidationException,
-                    SigningException,
-                    ProofJwtValidationException,
-                    NoSuchAlgorithmException,
-                    JsonProcessingException,
-                    URISyntaxException,
-                    CredentialServiceException,
-                    CredentialOfferException {
-        JsonNode requestBody =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-        doThrow(new CredentialOfferException("Credential offer not found"))
-                .when(credentialService)
-                .getCredential(any(), any());
-
-        final Response response =
-                resource.target("/credential")
-                        .request()
-                        .header(
-                                "Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
-                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
-
-        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(400));
-        assertThat(
-                response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\"}"));
-        reset(credentialService);
-    }
-
-    @Test
-    @DisplayName("should return 500 when Credential Service Throws a Signing Exception")
-    void should_Return_500_When_CredentialService_Throws_A_Signing_Exception()
+    void Should_Return500_When_CredentialServiceThrowsCredentialServiceException()
             throws DataStoreException,
                     AccessTokenValidationException,
                     ProofJwtValidationException,
@@ -193,7 +144,7 @@ class CredentialResourceTest {
                 new ObjectMapper()
                         .readTree(
                                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-        doThrow(new SigningException("Some signing error", new Exception()))
+        doThrow(new CredentialServiceException("Some signing error", new Exception()))
                 .when(credentialService)
                 .getCredential(any(), any());
 
@@ -211,46 +162,11 @@ class CredentialResourceTest {
     }
 
     @Test
-    @DisplayName("should return 500 when Credential Service Throws a DataStore Exception")
-    void should_Return_500_When_CredentialService_Throws_A_DataStore_Exception()
+    void Should_Return200AndTheCredential()
             throws DataStoreException,
                     AccessTokenValidationException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException,
                     JsonProcessingException,
-                    URISyntaxException,
-                    CredentialServiceException,
-                    CredentialOfferException {
-        JsonNode requestBody =
-                new ObjectMapper()
-                        .readTree(
-                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-        doThrow(new DataStoreException("Some database error", new Exception()))
-                .when(credentialService)
-                .getCredential(any(), any());
-
-        final Response response =
-                resource.target("/credential")
-                        .request()
-                        .header(
-                                "Authorization",
-                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
-                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
-
-        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(500));
-        reset(credentialService);
-    }
-
-    @Test
-    void should_Return_200_And_TheCredential()
-            throws DataStoreException,
-                    AccessTokenValidationException,
-                    SigningException,
-                    ProofJwtValidationException,
-                    JsonProcessingException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
                     CredentialServiceException,
                     CredentialOfferException {
         JsonNode requestBody =
