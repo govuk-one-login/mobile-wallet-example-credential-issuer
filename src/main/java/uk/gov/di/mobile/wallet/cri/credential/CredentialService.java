@@ -21,6 +21,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
 
@@ -96,14 +97,20 @@ public class CredentialService {
         String vcType = document.getVcType();
 
         String notificationId = credentialOffer.getNotificationId();
+        String credential;
+        if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
+            credential = getSocialSecurityCredential(document, sub);
 
-        String credential =
-                switch (CredentialType.valueOf(vcType)) {
-                    case SocialSecurityCredential -> getSocialSecurityCredential(document, sub);
-                    case BasicCheckCredential -> getBasicCheckCredential(document, sub);
-                    case digitalVeteranCard -> getDigitalVeteranCard(document, sub);
-                };
+        } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
+            credential = getBasicCheckCredential(document, sub);
 
+        } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
+            credential = getDigitalVeteranCard(document, sub);
+
+        } else {
+            throw new CredentialServiceException(
+                    String.format("Invalid verifiable credential type %s", vcType));
+        }
         return new CredentialResponse(credential, notificationId);
     }
 
@@ -148,7 +155,7 @@ public class CredentialService {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
         return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
-                .buildCredential(socialSecurityCredentialSubject, SocialSecurityCredential, null);
+                .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
     }
 
     @SuppressWarnings("unchecked")
@@ -160,7 +167,7 @@ public class CredentialService {
         return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         basicCheckCredentialSubject,
-                        BasicCheckCredential,
+                        BASIC_CHECK_CREDENTIAL,
                         basicCheckCredentialSubject.getExpirationDate());
     }
 
@@ -172,7 +179,7 @@ public class CredentialService {
         return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         veteranCardCredentialSubject,
-                        digitalVeteranCard,
+                        DIGITAL_VETERAN_CARD,
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 
