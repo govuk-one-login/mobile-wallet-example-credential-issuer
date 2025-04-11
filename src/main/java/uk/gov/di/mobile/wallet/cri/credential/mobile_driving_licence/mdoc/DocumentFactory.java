@@ -19,8 +19,7 @@ public class DocumentFactory {
         this.issuerSignedItemFactory = issuerSignedItemFactory;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence)
-            throws IllegalAccessException {
+    public Document build(final DrivingLicenceDocument drivingLicence) {
         Map<String, List<IssuerSignedItem>> nameSpaces = buildNameSpaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
         return new Document(MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE, issuerSigned);

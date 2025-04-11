@@ -23,6 +23,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
@@ -115,7 +116,7 @@ public class CredentialService {
                         String.format("Invalid verifiable credential type %s", vcType));
             }
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
-        } catch (NoSuchAlgorithmException | IllegalAccessException | SigningException exception) {
+        } catch (NoSuchAlgorithmException | SigningException | IOException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error.", exception);
         }
@@ -199,7 +200,7 @@ public class CredentialService {
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 
-    private String getMobileDrivingLicence(Document document) throws IllegalAccessException {
+    private String getMobileDrivingLicence(Document document) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
 
@@ -216,11 +217,7 @@ public class CredentialService {
         CBOREncoder cborEncoder =
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
 
-        try {
-            return HexFormat.of().formatHex(cborEncoder.encode(deviceResponse));
-        } catch (Exception exception) {
-            throw new RuntimeException();
-        }
+        return HexFormat.of().formatHex(cborEncoder.encode(deviceResponse));
     }
 
     protected Logger getLogger() {
