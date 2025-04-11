@@ -21,7 +21,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
 
@@ -98,13 +97,13 @@ public class CredentialService {
 
         String notificationId = credentialOffer.getNotificationId();
         String credential;
-        if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
+        if (vcType.equals(SOCIAL_SECURITY_CREDENTIAL.getType())) {
             credential = getSocialSecurityCredential(document, sub);
 
-        } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
+        } else if (vcType.equals(BASIC_CHECK_CREDENTIAL.getType())) {
             credential = getBasicCheckCredential(document, sub);
 
-        } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
+        } else if (vcType.equals(DIGITAL_VETERAN_CARD.getType())) {
             credential = getDigitalVeteranCard(document, sub);
 
         } else {
