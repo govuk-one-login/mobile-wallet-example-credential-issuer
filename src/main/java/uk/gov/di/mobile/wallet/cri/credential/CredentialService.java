@@ -89,8 +89,14 @@ public class CredentialService {
             throw new CredentialOfferException("Credential offer validation failed");
         }
 
+        if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
+            throw new AccessTokenValidationException(
+                    "Access token sub claim does not match cached walletSubjectId");
+        }
+
         String documentId = credentialOffer.getDocumentId();
         Document document = getDocument(documentId);
+
         LOGGER.info(
                 "{} retrieved - credentialOfferId: {}, documentId: {}",
                 document.getVcType(),
@@ -144,6 +150,7 @@ public class CredentialService {
     private Document getDocument(String documentId) throws CredentialServiceException {
         String credentialStoreUrl = configurationService.getCredentialStoreUrl();
         String documentEndpoint = configurationService.getDocumentEndpoint();
+        System.out.println(1);
 
         try {
             URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
