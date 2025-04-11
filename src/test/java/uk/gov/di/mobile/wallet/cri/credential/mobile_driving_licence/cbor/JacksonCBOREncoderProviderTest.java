@@ -8,6 +8,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,29 +24,43 @@ class JacksonCBOREncoderProviderTest {
     }
 
     @Test
-    void Should_ConfigureCBORMapperWithCustomSerializers() {
-        assertTrue(mapper.canSerialize(LocalDate.class));
-        assertTrue(mapper.canSerialize(IssuerSigned.class));
+    void Should_ReturnNonNullMapper_When_CBORMapperIsConfigured() {
+        assertNotNull(mapper, "Configured CBOR mapper should not be null");
     }
 
     @Test
     void Should_SerializeLocalDate() throws Exception {
+        // Create a LocalDate object for testing
+        Map<String, Object> testObj = new HashMap<>();
         LocalDate testDate = LocalDate.of(2025, 4, 4);
+        testObj.put("date", testDate);
 
-        byte[] serialized = mapper.writeValueAsBytes(testDate);
+        // Serialize to bytes
+        byte[] serialized = mapper.writeValueAsBytes(testObj);
+        assertNotNull(serialized, "Serialization of LocalDate should work");
+        assertTrue(serialized.length > 0, "Serialized data should not be empty");
 
-        assertNotNull(serialized);
-        assertTrue(serialized.length > 0);
+        // Deserialize back to ensure correct serialization
+        Map<?, ?> deserialized = mapper.readValue(serialized, Map.class);
+        assertNotNull(deserialized.get("date"), "Date field should be present after deserialization");
     }
 
     @Test
     void Should_SerializeIssuerSigned() throws Exception {
+        // Create an IssuerSigned object for testing
         IssuerSigned testIssuerSigned = createTestIssuerSigned();
+        Map<String, Object> testObj = new HashMap<>();
+        testObj.put("issuerSigned", testIssuerSigned);
 
-        byte[] serialized = mapper.writeValueAsBytes(testIssuerSigned);
+        // Serialize to bytes
+        byte[] serialized = mapper.writeValueAsBytes(testObj);
+        assertNotNull(serialized, "Serialization of IssuerSigned should work");
+        assertTrue(serialized.length > 0, "Serialized data should not be empty");
 
-        assertNotNull(serialized);
-        assertTrue(serialized.length > 0);
+        // Deserialize back to ensure correct serialization
+        Map<?, ?> deserialized = mapper.readValue(serialized, Map.class);
+        System.out.println(deserialized);
+        assertNotNull(deserialized.get("issuerSigned"), "Date field should be present after deserialization");
     }
 
     private IssuerSigned createTestIssuerSigned() {

@@ -217,7 +217,6 @@ public class CredentialService {
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
 
         try {
-            System.out.println(HexFormat.of().formatHex(cborEncoder.encode(deviceResponse)));
             return HexFormat.of().formatHex(cborEncoder.encode(deviceResponse));
         } catch (Exception exception) {
             throw new RuntimeException();

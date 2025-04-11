@@ -61,10 +61,7 @@ class CredentialResourceTest {
             throws DataStoreException,
                     AccessTokenValidationException,
                     CredentialServiceException,
-                    SigningException,
                     ProofJwtValidationException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
                     CredentialOfferException {
         final Response response =
                 resource.target("/credential")
