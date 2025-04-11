@@ -11,7 +11,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 
 import java.time.Instant;
 
@@ -31,18 +31,18 @@ class DynamoDbServiceTest {
     private static final Long TTL = Instant.now().plusSeconds(1000).getEpochSecond();
 
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
-    @Mock private DynamoDbTable<CredentialOfferCacheItem> mockDynamoDbTable;
-    private CredentialOfferCacheItem credentialOfferCacheItem;
+    @Mock private DynamoDbTable<CachedCredentialOffer> mockDynamoDbTable;
+    private CachedCredentialOffer cachedCredentialOffer;
     private DynamoDbService dynamoDbService;
 
     @BeforeEach
     void setUp() {
         when(mockDynamoDbEnhancedClient.table(
-                        anyString(), ArgumentMatchers.<TableSchema<CredentialOfferCacheItem>>any()))
+                        anyString(), ArgumentMatchers.<TableSchema<CachedCredentialOffer>>any()))
                 .thenReturn(mockDynamoDbTable);
 
-        credentialOfferCacheItem =
-                new CredentialOfferCacheItem(
+        cachedCredentialOffer =
+                new CachedCredentialOffer(
                         PARTITION_KEY,
                         "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77",
                         "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
@@ -56,10 +56,10 @@ class DynamoDbServiceTest {
 
     @Test
     void Should_SaveCredentialOfferToCache() throws DataStoreException {
-        dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
+        dynamoDbService.saveCredentialOffer(cachedCredentialOffer);
 
-        ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
-                ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
+        ArgumentCaptor<CachedCredentialOffer> credentialOfferCacheItemArgumentCaptor =
+                ArgumentCaptor.forClass(CachedCredentialOffer.class);
         verify(mockDynamoDbTable).putItem(credentialOfferCacheItemArgumentCaptor.capture());
         assertEquals(
                 PARTITION_KEY,
@@ -81,30 +81,30 @@ class DynamoDbServiceTest {
     @Test
     void Should_ThrowDataStoreException_When_ErrorHappensSavingCredentialOffer()
             throws DataStoreException {
-        dynamoDbService.saveCredentialOffer(credentialOfferCacheItem);
+        dynamoDbService.saveCredentialOffer(cachedCredentialOffer);
 
-        ArgumentCaptor<CredentialOfferCacheItem> argumentCaptor =
-                ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
+        ArgumentCaptor<CachedCredentialOffer> argumentCaptor =
+                ArgumentCaptor.forClass(CachedCredentialOffer.class);
         doThrow(new UnsupportedOperationException())
                 .when(mockDynamoDbTable)
                 .putItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
                         DataStoreException.class,
-                        () -> dynamoDbService.saveCredentialOffer(credentialOfferCacheItem));
+                        () -> dynamoDbService.saveCredentialOffer(cachedCredentialOffer));
         assertEquals("Error saving credential offer", exception.getMessage());
     }
 
     @Test
     void Should_ReturnCachedCredentialOffer() throws DataStoreException {
-        when(mockDynamoDbTable.getItem(any(Key.class))).thenReturn(credentialOfferCacheItem);
+        when(mockDynamoDbTable.getItem(any(Key.class))).thenReturn(cachedCredentialOffer);
 
-        CredentialOfferCacheItem response = dynamoDbService.getCredentialOffer(PARTITION_KEY);
+        CachedCredentialOffer response = dynamoDbService.getCredentialOffer(PARTITION_KEY);
 
         ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
         verify(mockDynamoDbTable).getItem(argumentCaptor.capture());
         assertEquals(PARTITION_KEY, argumentCaptor.getValue().partitionKeyValue().s());
-        assertEquals(credentialOfferCacheItem, response);
+        assertEquals(cachedCredentialOffer, response);
     }
 
     @Test
@@ -125,10 +125,10 @@ class DynamoDbServiceTest {
 
     @Test
     void Should_UpdateCachedCredentialOffer() throws DataStoreException {
-        dynamoDbService.updateCredentialOffer(credentialOfferCacheItem);
+        dynamoDbService.updateCredentialOffer(cachedCredentialOffer);
 
-        ArgumentCaptor<CredentialOfferCacheItem> credentialOfferCacheItemArgumentCaptor =
-                ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
+        ArgumentCaptor<CachedCredentialOffer> credentialOfferCacheItemArgumentCaptor =
+                ArgumentCaptor.forClass(CachedCredentialOffer.class);
         verify(mockDynamoDbTable).updateItem(credentialOfferCacheItemArgumentCaptor.capture());
         assertEquals(
                 PARTITION_KEY,
@@ -150,17 +150,17 @@ class DynamoDbServiceTest {
     @Test
     void Should_ThrowDataStoreException_When_ErrorHappensUpdatingCredentialOffer()
             throws DataStoreException {
-        dynamoDbService.updateCredentialOffer(credentialOfferCacheItem);
+        dynamoDbService.updateCredentialOffer(cachedCredentialOffer);
 
-        ArgumentCaptor<CredentialOfferCacheItem> argumentCaptor =
-                ArgumentCaptor.forClass(CredentialOfferCacheItem.class);
+        ArgumentCaptor<CachedCredentialOffer> argumentCaptor =
+                ArgumentCaptor.forClass(CachedCredentialOffer.class);
         doThrow(new UnsupportedOperationException())
                 .when(mockDynamoDbTable)
                 .updateItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
                         DataStoreException.class,
-                        () -> dynamoDbService.updateCredentialOffer(credentialOfferCacheItem));
+                        () -> dynamoDbService.updateCredentialOffer(cachedCredentialOffer));
         assertEquals("Error updating credential offer", exception.getMessage());
     }
 }
