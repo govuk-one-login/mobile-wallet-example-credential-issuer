@@ -13,10 +13,15 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class IssuerSignedCBORSerializerTest {
@@ -39,7 +44,7 @@ class IssuerSignedCBORSerializerTest {
     void Should_SerializeIssuerSignedWithCBORGenerator_SingleNameSpaceWithMultipleItems()
             throws IOException {
         // Create a map with one namespace containing two items
-        Map<String, List<IssuerSignedItem>> nameSpaces = new HashMap<>();
+        Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
         nameSpaces.put("namespace1", Arrays.asList(issuerSignedItem1, issuerSignedItem2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
@@ -72,8 +77,8 @@ class IssuerSignedCBORSerializerTest {
     void Should_SerializeIssuerSignedWithCBORGenerator_MultipleNameSpaces() throws IOException {
         // Create a map with two namespaces, each with one item
         Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
-        nameSpaces.put("namespace1", Arrays.asList(issuerSignedItem1));
-        nameSpaces.put("namespace2", Arrays.asList(issuerSignedItem2));
+        nameSpaces.put("namespace1", List.of(issuerSignedItem1));
+        nameSpaces.put("namespace2", List.of(issuerSignedItem2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
         serializer.serialize(issuerSigned, cborGenerator, serializerProvider);
