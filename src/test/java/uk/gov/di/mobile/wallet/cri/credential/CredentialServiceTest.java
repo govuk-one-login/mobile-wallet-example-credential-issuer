@@ -203,7 +203,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_RuntimeException_When_Document_Endpoint_Returns_500()
+    void Should_Throw_CredentialServiceException_When_Document_Endpoint_Returns_500()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCredentialOfferCacheItem);
@@ -221,6 +221,55 @@ class CredentialServiceTest {
                 exception.getMessage(),
                 containsString(
                         "Request to fetch document de9cbf02-2fbc-4d61-a627-f97851f6840b failed with status code 500"));
+    }
+
+    @Test
+    void
+            Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsNoSuchAlgorithmException()
+                    throws DataStoreException, SigningException, NoSuchAlgorithmException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCredentialOfferCacheItem);
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
+        when(mockCredentialBuilder.buildCredential(any(), any(), any()))
+                .thenThrow(new NoSuchAlgorithmException("Some algorithm error"));
+
+        CredentialServiceException exception =
+                assertThrows(
+                        CredentialServiceException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+
+        assertThat(
+                exception.getMessage(),
+                containsString("Failed to issue credential due to an internal error"));
+    }
+
+    @Test
+    void Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsSigningException()
+            throws DataStoreException, SigningException, NoSuchAlgorithmException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCredentialOfferCacheItem);
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
+        when(mockCredentialBuilder.buildCredential(any(), any(), any()))
+                .thenThrow(new SigningException("Some signing error", new RuntimeException()));
+
+        CredentialServiceException exception =
+                assertThrows(
+                        CredentialServiceException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+
+        assertThat(
+                exception.getMessage(),
+                containsString("Failed to issue credential due to an internal error"));
     }
 
     @Test

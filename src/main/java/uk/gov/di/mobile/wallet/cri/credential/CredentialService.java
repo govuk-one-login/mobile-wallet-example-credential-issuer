@@ -118,7 +118,7 @@ public class CredentialService {
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
         } catch (NoSuchAlgorithmException | SigningException | IOException exception) {
             throw new CredentialServiceException(
-                    "Failed to issue credential due to an internal error.", exception);
+                    "Failed to issue credential due to an internal error", exception);
         }
     }
 
