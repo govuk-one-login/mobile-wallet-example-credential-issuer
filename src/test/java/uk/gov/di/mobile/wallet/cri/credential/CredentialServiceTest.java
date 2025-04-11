@@ -245,7 +245,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
-                        eq(CredentialType.SocialSecurityCredential),
+                        eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
     }
 
@@ -275,7 +275,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
-                        eq(CredentialType.BasicCheckCredential),
+                        eq(CredentialType.BASIC_CHECK_CREDENTIAL),
                         eq("2025-07-11"));
     }
 
@@ -305,12 +305,12 @@ class CredentialServiceTest {
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
-                        eq(CredentialType.digitalVeteranCard),
+                        eq(CredentialType.DIGITAL_VETERAN_CARD),
                         eq("2000-07-11"));
     }
 
     @Test
-    void Should_ThrowIllegalArgumentException_When_DocumentVcTypeIsUnknown()
+    void Should_ThrowCredentialServiceException_When_DocumentVcTypeIsUnknown()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
@@ -321,9 +321,14 @@ class CredentialServiceTest {
         when(mockResponse.readEntity(Document.class))
                 .thenReturn(getMockDocumentWithInvalidVcType(DOCUMENT_ID));
 
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+        CredentialServiceException exception =
+                assertThrows(
+                        CredentialServiceException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+
+        assertThat(
+                exception.getMessage(),
+                containsString("Invalid verifiable credential type SomeOtherVcType"));
     }
 
     @Test
@@ -360,7 +365,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
-                        eq(CredentialType.SocialSecurityCredential),
+                        eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
     }
 

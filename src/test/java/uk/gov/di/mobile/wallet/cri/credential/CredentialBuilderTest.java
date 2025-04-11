@@ -106,7 +106,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject, CredentialType.SocialSecurityCredential, null);
+                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -127,7 +127,7 @@ class CredentialBuilderTest {
                         () ->
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
-                                        CredentialType.SocialSecurityCredential,
+                                        CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                                         null));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
@@ -143,7 +143,7 @@ class CredentialBuilderTest {
                 SignedJWT.parse(
                         credentialBuilderSocialSecurity.buildCredential(
                                 socialSecurityCredentialSubject,
-                                CredentialType.SocialSecurityCredential,
+                                CredentialType.SOCIAL_SECURITY_CREDENTIAL,
                                 null));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -196,7 +196,7 @@ class CredentialBuilderTest {
                 SignedJWT.parse(
                         credentialBuilderBasicCheck.buildCredential(
                                 basicCheckCredentialSubject,
-                                CredentialType.BasicCheckCredential,
+                                CredentialType.BASIC_CHECK_CREDENTIAL,
                                 "2025-07-11"));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -252,7 +252,7 @@ class CredentialBuilderTest {
                 SignedJWT.parse(
                         credentialBuilderVeteranCard.buildCredential(
                                 veteranCardCredentialSubject,
-                                CredentialType.digitalVeteranCard,
+                                CredentialType.DIGITAL_VETERAN_CARD,
                                 "2000-07-11"));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
