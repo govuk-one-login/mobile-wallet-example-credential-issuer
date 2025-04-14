@@ -64,4 +64,12 @@ public class DrivingLicenceDocument {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return LocalDate.parse(dateString, dateFormat);
     }
+
+    public void setResidentAddress(String[] residentAddress) {
+        this.residentAddress = concatenateResidentAddressArray(residentAddress);
+    }
+
+    public String concatenateResidentAddressArray(String[] stringArray) {
+        return String.join(", ", stringArray);
+    }
 }

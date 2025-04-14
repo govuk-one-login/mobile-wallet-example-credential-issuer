@@ -72,7 +72,7 @@ public class MockDocuments {
         data.put("issuing_authority", "TEST");
         data.put("issuing_country", "UK");
         data.put("document_number", "123456789");
-        data.put("resident_address", "64 Berry Street");
+        data.put("resident_address", new String[] {"Flat 2a", "64 Berry Street"});
         data.put("resident_postal_code", "N1 7FN");
         data.put("resident_city", "London");
 
