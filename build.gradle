@@ -17,6 +17,7 @@ repositories {
 ext {
 	awsSdkVersion = "2.31.21"
 	dropwizardVersion = "4.0.13"
+	jacksonVersion = "2.18.3"
 	lombokVersion = "1.18.38"
 }
 
@@ -37,8 +38,8 @@ dependencies {
 
 	implementation "org.jetbrains:annotations:26.0.2"
 
-	implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-cbor', version: '2.18.3'
-	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
+	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
 	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
