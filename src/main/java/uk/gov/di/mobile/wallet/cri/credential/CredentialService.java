@@ -136,7 +136,7 @@ public class CredentialService {
         if (credentialOffer == null) {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
-        } else if (credentialOffer.getRedeemed()) {
+        } else if (Boolean.TRUE.equals(credentialOffer.getRedeemed())) {
             getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
         } else if (now > credentialOffer.getExpiry()) {
