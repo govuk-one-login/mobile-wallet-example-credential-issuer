@@ -1,7 +1,7 @@
 plugins {
 	id "application"
 	id "java"
-	id "com.diffplug.spotless" version "7.0.2"
+	id "com.diffplug.spotless" version "7.0.3"
 	id "org.sonarqube" version "6.1.0.5360"
 	id "jacoco"
 }
@@ -15,7 +15,7 @@ repositories {
 }
 
 ext {
-	awsSdkVersion = "2.31.16"
+	awsSdkVersion = "2.31.21"
 	dropwizardVersion = "4.0.13"
 	lombokVersion = "1.18.38"
 }
@@ -45,9 +45,9 @@ dependencies {
 
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "org.jetbrains:annotations:26.0.2"
-	testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.1"
+	testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.2"
 	testImplementation "org.mockito:mockito-junit-jupiter:5.17.0"
-	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.7"
+	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.8"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
