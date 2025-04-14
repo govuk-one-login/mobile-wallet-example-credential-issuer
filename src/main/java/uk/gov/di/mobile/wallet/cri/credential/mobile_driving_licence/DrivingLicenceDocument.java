@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 @Setter
 @Getter
@@ -46,4 +47,21 @@ public class DrivingLicenceDocument {
 
     @JsonProperty("resident_city")
     private String residentCity;
+
+    public void setBirthDate(String birthDate) {
+        this.birthDate = parseDate(birthDate);
+    }
+
+    public void setIssueDate(String issueDate) {
+        this.issueDate = parseDate(issueDate);
+    }
+
+    public void setExpiryDate(String expiryDate) {
+        this.expiryDate = parseDate(expiryDate);
+    }
+
+    private LocalDate parseDate(String dateString) {
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+        return LocalDate.parse(dateString, dateFormat);
+    }
 }
