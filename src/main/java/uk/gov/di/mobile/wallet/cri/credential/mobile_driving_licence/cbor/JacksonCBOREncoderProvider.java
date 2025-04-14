@@ -10,7 +10,7 @@ import java.time.LocalDate;
 public final class JacksonCBOREncoderProvider {
 
     private JacksonCBOREncoderProvider() {
-        // Should never be instantiated
+        throw new IllegalStateException("Instantiation is not valid for this class.");
     }
 
     public static CBORMapper configuredCBORMapper() {
