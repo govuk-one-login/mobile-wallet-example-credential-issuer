@@ -65,10 +65,10 @@ public class MockDocuments {
         data.put("family_name", "Edwards");
         data.put("given_name", "Sarah Ann");
         data.put("portrait", "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg==");
-        data.put("birth_date", "2000-10-20");
+        data.put("birth_date", "01-02-2000");
         data.put("birth_place", "London");
-        data.put("issue_date", "2018-08-09");
-        data.put("expiry_date", "2024-10-20");
+        data.put("issue_date", "08-04-2020");
+        data.put("expiry_date", "08-04-2025");
         data.put("issuing_authority", "TEST");
         data.put("issuing_country", "UK");
         data.put("document_number", "123456789");
