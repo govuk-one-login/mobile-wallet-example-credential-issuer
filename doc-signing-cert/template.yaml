@@ -29,11 +29,6 @@ Parameters:
     Type: String
     Default: platform-vpc
 
-  CertificateValidityPeriod:
-    Description: Number of days the issued certificate will be valid for
-    Type: Number
-    Default: "760" # ~25 months
-
 Conditions:
   UsePermissionsBoundary: !Not
     - !Equals
@@ -56,6 +51,8 @@ Mappings:
       CloudwatchLogRetentionDays: 3
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: DEBUG
+      CertificateValidityPeriodInDays: 397  # 366 (1 year) + 31 (1 month), worse case
+      CertificateRetentionPeriodInDays: 427  # validity period + 30 days
     build:
       DocumentSigningKeyParameterPrefix: "/iaca/"
       DocumentSigningKeyCommonName: "Example Issuer DSC (BUILD)"
@@ -65,6 +62,8 @@ Mappings:
       CloudwatchLogRetentionDays: 3650
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
+      CertificateValidityPeriodInDays: 397  # 366 (1 year) + 31 (1 month), worse case
+      CertificateRetentionPeriodInDays: 427  # validity period + 30 days
 
 Globals:
   Function:
@@ -150,7 +149,7 @@ Resources:
           PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
           DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
           DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
-          DOC_SIGNING_KEY_VALIDITY_PERIOD: !Ref CertificateValidityPeriod
+          DOC_SIGNING_KEY_VALIDITY_PERIOD: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateValidityPeriodInDays]
           DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
           DOC_SIGNING_KEY_COUNTRY_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
       Policies:
@@ -220,6 +219,14 @@ Resources:
         ServerSideEncryptionConfiguration:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: RemoveExpiredCertificates
+            Prefix: results/
+            ExpirationInDays: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateRetentionPeriodInDays]
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 14
+            Status: Enabled
 
   DocumentSigningKey1:
     Type: AWS::KMS::Key
