@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.CaseFormat;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncodingException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,32 +18,37 @@ public class DocumentFactory {
             MOBILE_DRIVING_LICENCE_NAMESPACE + ".mDL";
 
     private final IssuerSignedItemFactory issuerSignedItemFactory;
+    private final CBOREncoder cborEncoder;
 
-    public DocumentFactory(IssuerSignedItemFactory issuerSignedItemFactory) {
+    public DocumentFactory(
+            IssuerSignedItemFactory issuerSignedItemFactory, CBOREncoder cborEncoder) {
         this.issuerSignedItemFactory = issuerSignedItemFactory;
+        this.cborEncoder = cborEncoder;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence) {
-        Map<String, List<IssuerSignedItem>> nameSpaces = buildNameSpaces(drivingLicence);
+    public Document build(final DrivingLicenceDocument drivingLicence)
+            throws CBOREncodingException {
+        Map<String, List<byte[]>> nameSpaces = buildNameSpaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
         return new Document(MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE, issuerSigned);
     }
 
-    private Map<String, List<IssuerSignedItem>> buildNameSpaces(
-            final DrivingLicenceDocument drivingLicence) {
+    private Map<String, List<byte[]>> buildNameSpaces(final DrivingLicenceDocument drivingLicence)
+            throws CBOREncodingException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         Map<String, Object> drivingLicenceMap =
                 objectMapper.convertValue(drivingLicence, Map.class);
 
-        List<IssuerSignedItem> issuerSignedItems = new ArrayList<>();
+        List<byte[]> issuerSignedItems = new ArrayList<>();
         for (Map.Entry<String, Object> entry : drivingLicenceMap.entrySet()) {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
             String asSnakeCase = getAsSnakeCase(fieldName);
             IssuerSignedItem issuerSignedItem =
                     issuerSignedItemFactory.build(asSnakeCase, fieldValue);
-            issuerSignedItems.add(issuerSignedItem);
+            byte[] issuerSignedItemBytes = cborEncoder.encode(issuerSignedItem);
+            issuerSignedItems.add(issuerSignedItemBytes);
         }
         return Map.of(MOBILE_DRIVING_LICENCE_NAMESPACE, issuerSignedItems);
     }
@@ -50,7 +57,7 @@ public class DocumentFactory {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
     }
 
-    private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> nameSpaces) {
+    private IssuerSigned buildIssuerSigned(final Map<String, List<byte[]>> nameSpaces) {
         return new IssuerSigned(nameSpaces, new IssuerAuth());
     }
 }
