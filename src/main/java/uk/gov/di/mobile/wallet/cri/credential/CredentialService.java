@@ -71,7 +71,6 @@ public class CredentialService {
                     CredentialOfferException {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
-        String credentialOfferId = accessTokenData.credentialIdentifier();
 
         ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
 
@@ -80,6 +79,7 @@ public class CredentialService {
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
+        String credentialOfferId = accessTokenData.credentialIdentifier();
         CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
         if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
             throw new CredentialOfferException("Credential offer validation failed");
