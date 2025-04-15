@@ -72,10 +72,8 @@ public class CredentialService {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
         String credentialOfferId = accessTokenData.credentialIdentifier();
-        LOGGER.info("Access token for credential offer {} verified", credentialOfferId);
 
         ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
-        LOGGER.info("Proof JWT for credential offer {} verified", credentialOfferId);
 
         if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
             throw new ProofJwtValidationException(
