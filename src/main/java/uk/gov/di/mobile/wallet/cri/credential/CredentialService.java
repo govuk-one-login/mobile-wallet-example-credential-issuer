@@ -144,11 +144,8 @@ public class CredentialService {
     }
 
     private Document getDocument(String documentId) throws CredentialServiceException {
-        String credentialStoreUrl = configurationService.getCredentialStoreUrl();
-        String documentEndpoint = configurationService.getDocumentEndpoint();
-
         try {
-            URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
+            URI uri = buildDocumentUri(documentId);
             Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
             if (response.getStatus() != Response.Status.OK.getStatusCode()) {
                 throw new CredentialServiceException(
@@ -162,6 +159,12 @@ public class CredentialService {
                     String.format("Invalid URI constructed for document: %s", documentId);
             throw new CredentialServiceException(errorMessage, exception);
         }
+    }
+
+    private URI buildDocumentUri(String documentId) throws URISyntaxException {
+        String credentialStoreUrl = configurationService.getCredentialStoreUrl();
+        String documentEndpoint = configurationService.getDocumentEndpoint();
+        return new URI(credentialStoreUrl + documentEndpoint + documentId);
     }
 
     @SuppressWarnings("unchecked")
