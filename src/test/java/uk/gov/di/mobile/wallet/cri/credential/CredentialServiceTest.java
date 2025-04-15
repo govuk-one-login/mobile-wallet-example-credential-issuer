@@ -414,7 +414,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_BuildMDLCredential()
+    void Should_BuildMobileDrivingLicenceCredential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     DataStoreException,

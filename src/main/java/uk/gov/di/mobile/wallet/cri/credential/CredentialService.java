@@ -12,8 +12,8 @@ import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckC
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncodingException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceResponse;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
@@ -26,12 +26,10 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.Collections;
 import java.util.HexFormat;
 import java.util.Objects;
 
@@ -123,7 +121,7 @@ public class CredentialService {
                         String.format("Invalid verifiable credential type %s", vcType));
             }
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
-        } catch (NoSuchAlgorithmException | SigningException | IOException exception) {
+        } catch (NoSuchAlgorithmException | SigningException | CBOREncodingException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
@@ -202,24 +200,25 @@ public class CredentialService {
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 
-    private String getMobileDrivingLicence(Document document) throws IOException {
+    private String getMobileDrivingLicence(Document document) throws CBOREncodingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JavaTimeModule());
-
         final DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-        IssuerSignedItemFactory issuerSignedItemFactory =
-                new IssuerSignedItemFactory(new DigestIDGenerator());
-        DocumentFactory documentFactory = new DocumentFactory(issuerSignedItemFactory);
-        DeviceResponse deviceResponse =
-                new DeviceResponse(
-                        "1",
-                        Collections.singletonList(documentFactory.build(drivingLicenceDocument)));
 
         CBOREncoder cborEncoder =
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
+        IssuerSignedItemFactory issuerSignedItemFactory =
+                new IssuerSignedItemFactory(new DigestIDGenerator());
+        DocumentFactory documentFactory = new DocumentFactory(issuerSignedItemFactory, cborEncoder);
 
-        return HexFormat.of().formatHex(cborEncoder.encode(deviceResponse));
+        System.out.println(
+                HexFormat.of()
+                        .formatHex(
+                                cborEncoder.encode(documentFactory.build(drivingLicenceDocument))));
+
+        return HexFormat.of()
+                .formatHex(cborEncoder.encode(documentFactory.build(drivingLicenceDocument)));
     }
 
     protected Logger getLogger() {
