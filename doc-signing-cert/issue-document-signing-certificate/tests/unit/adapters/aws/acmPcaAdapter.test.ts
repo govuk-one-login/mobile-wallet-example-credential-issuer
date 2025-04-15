@@ -101,6 +101,14 @@ describe('acmPcaAdapter', () => {
   });
 
   describe('retrieveIssuedCertificate', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
     it('should pass the call on to the AWS API and return the certificate', async () => {
       // ARRANGE
       mockAcmPcaClient.on(GetCertificateCommand).resolves({
@@ -162,5 +170,22 @@ describe('acmPcaAdapter', () => {
       // ASSERT
       expect(mockAcmPcaClient).toHaveReceivedCommandTimes(GetCertificateCommand, 2);
     });
+
+    it('should timeout if the retrying exceeds the timeout limit', async () => {
+      // ARRANGE
+      mockAcmPcaClient.on(GetCertificateCommand).rejects(
+        new RequestInProgressException({
+          $metadata: {},
+          message: '',
+        }),
+      );
+
+      // ACT
+      const promise = retrieveIssuedCertificate('ISSUED_CERT_ARN', 'CA_ARN', 1000);
+      jest.runAllTimers();
+
+      // ASSERT
+      return expect(promise).rejects.toEqual(Error('Request timed out'));
+    }, 1500);
   });
 });

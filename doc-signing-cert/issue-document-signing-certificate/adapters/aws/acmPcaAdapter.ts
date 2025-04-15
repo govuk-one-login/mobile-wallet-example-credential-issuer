@@ -51,22 +51,38 @@ export async function issueMdlDocSigningCertificateUsingSha256WithEcdsa(
   return issueCertificateCommandOutput.CertificateArn;
 }
 
-export async function retrieveIssuedCertificate(issuedCertificateArn: string, certificateAuthorityArn: string) {
-  let getCertificateCommandOutput: GetCertificateCommandOutput;
-  while (true) {
+export async function retrieveIssuedCertificate(
+  issuedCertificateArn: string,
+  certificateAuthorityArn: string,
+  timeoutMs: number = 10000,
+) {
+  const getCertificate = async () => {
     const getCertificateCommand = new GetCertificateCommand({
       CertificateArn: issuedCertificateArn,
       CertificateAuthorityArn: certificateAuthorityArn,
     });
     try {
-      getCertificateCommandOutput = await pcaClient.send(getCertificateCommand);
-      break;
+      return await pcaClient.send(getCertificateCommand);
     } catch (e) {
-      if (RequestInProgressException.isInstance(e)) {
-        continue;
+      if (!RequestInProgressException.isInstance(e)) {
+        throw e;
       }
-      throw e;
     }
+  };
+
+  const makeTimeoutPromise = (timeoutMs: number): Promise<void> =>
+    new Promise(function (resolve, reject) {
+      setTimeout(() => reject(Error('Request timed out')), timeoutMs);
+    });
+
+  const timeoutPromise = makeTimeoutPromise(timeoutMs);
+
+  let getCertificateCommandOutput: GetCertificateCommandOutput | undefined = undefined;
+
+  while (getCertificateCommandOutput === undefined) {
+    getCertificateCommandOutput = (await Promise.race([getCertificate(), timeoutPromise])) as
+      | GetCertificateCommandOutput
+      | undefined;
   }
 
   if (!getCertificateCommandOutput.Certificate) {
