@@ -5,7 +5,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerAuth;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -60,18 +59,15 @@ class JacksonCBOREncoderProviderTest {
 
         // Deserialize back to ensure correct serialization
         Map<?, ?> deserialized = mapper.readValue(serialized, Map.class);
-        System.out.println(deserialized);
         assertNotNull(
                 deserialized.get("issuerSigned"),
                 "Date field should be present after deserialization");
     }
 
     private IssuerSigned createTestIssuerSigned() {
-        byte[] randomBytes = {0x01, 0x02, 0x03, 0x04};
-        IssuerSignedItem testIssuerSignedItem =
-                new IssuerSignedItem(2, randomBytes, "family_name", "Bonbon");
-        Map<String, List<IssuerSignedItem>> testNameSpaces =
-                Map.of("namespace", List.of(testIssuerSignedItem));
+        byte[] issuerSignedItemBytes = {1, 2, 3, 4};
+        Map<String, List<byte[]>> testNameSpaces =
+                Map.of("namespace", List.of(issuerSignedItemBytes));
         return new IssuerSigned(testNameSpaces, new IssuerAuth());
     }
 }
