@@ -24,8 +24,7 @@ class CBOREncoderTest {
     }
 
     @Test
-    void Should_ReturnEncodedBytes_When_EncodingDocument()
-            throws IOException, CBOREncodingException {
+    void Should_ReturnEncodedBytes_When_EncodingDocument() throws IOException, MDLException {
         Document document = mock(Document.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
         when(mockMapper.writeValueAsBytes(document)).thenReturn(expectedEncodedBytes);
@@ -37,7 +36,7 @@ class CBOREncoderTest {
 
     @Test
     void Should_ReturnEncodedBytes_When_EncodingIssuerSignedItem()
-            throws IOException, CBOREncodingException {
+            throws IOException, MDLException {
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
         when(mockMapper.writeValueAsBytes(issuerSignedItem)).thenReturn(expectedEncodedBytes);

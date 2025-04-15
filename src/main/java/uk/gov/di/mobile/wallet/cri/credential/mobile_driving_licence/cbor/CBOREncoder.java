@@ -26,13 +26,13 @@ public class CBOREncoder {
      *
      * @param dataToEncode The Java object to encode into CBOR format.
      * @return A byte array containing the CBOR representation of the input object.
-     * @throws CBOREncodingException If an error occurs during the encoding process.
+     * @throws MDLException If an error occurs during the encoding process.
      */
-    public byte[] encode(Object dataToEncode) throws CBOREncodingException {
+    public byte[] encode(Object dataToEncode) throws MDLException {
         try {
             return this.mapper.writeValueAsBytes(dataToEncode);
         } catch (IOException exception) {
-            throw new CBOREncodingException("Failed to CBOR encode data", exception);
+            throw new MDLException("Failed to CBOR encode data", exception);
         }
     }
 }

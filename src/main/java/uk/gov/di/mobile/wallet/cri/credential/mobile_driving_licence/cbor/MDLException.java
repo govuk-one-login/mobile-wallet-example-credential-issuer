@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-public class CBOREncodingException extends Exception {
+public class MDLException extends Exception {
 
-    public CBOREncodingException(String message, Exception exception) {
+    public MDLException(String message, Exception exception) {
         super(message, exception);
     }
 }
