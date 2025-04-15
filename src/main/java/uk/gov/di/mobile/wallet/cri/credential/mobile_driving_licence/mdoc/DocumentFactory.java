@@ -13,7 +13,7 @@ import java.util.Map;
 public class DocumentFactory {
     private static final String MOBILE_DRIVING_LICENCE_NAMESPACE = "org.iso.18013.5.1";
     private static final String MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE =
-            MOBILE_DRIVING_LICENCE_NAMESPACE + "mDL";
+            MOBILE_DRIVING_LICENCE_NAMESPACE + ".mDL";
 
     private final IssuerSignedItemFactory issuerSignedItemFactory;
 
@@ -38,9 +38,7 @@ public class DocumentFactory {
         for (Map.Entry<String, Object> entry : drivingLicenceMap.entrySet()) {
             String fieldName = entry.getKey();
             Object fieldValue = entry.getValue();
-
             String asSnakeCase = getAsSnakeCase(fieldName);
-
             IssuerSignedItem issuerSignedItem =
                     issuerSignedItemFactory.build(asSnakeCase, fieldValue);
             issuerSignedItems.add(issuerSignedItem);
