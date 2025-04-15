@@ -211,12 +211,6 @@ public class CredentialService {
         IssuerSignedItemFactory issuerSignedItemFactory =
                 new IssuerSignedItemFactory(new DigestIDGenerator());
         DocumentFactory documentFactory = new DocumentFactory(issuerSignedItemFactory, cborEncoder);
-
-        System.out.println(
-                HexFormat.of()
-                        .formatHex(
-                                cborEncoder.encode(documentFactory.build(drivingLicenceDocument))));
-
         return HexFormat.of()
                 .formatHex(cborEncoder.encode(documentFactory.build(drivingLicenceDocument)));
     }
