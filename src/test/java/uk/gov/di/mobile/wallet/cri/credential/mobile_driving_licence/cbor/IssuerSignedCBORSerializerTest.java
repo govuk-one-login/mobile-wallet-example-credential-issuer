@@ -10,7 +10,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -32,8 +31,9 @@ class IssuerSignedCBORSerializerTest {
     @Mock private JsonGenerator regularGenerator;
     @Mock private SerializerProvider serializerProvider;
     @Mock private IssuerSigned issuerSigned;
-    @Mock private IssuerSignedItem issuerSignedItem1;
-    @Mock private IssuerSignedItem issuerSignedItem2;
+
+    private final byte[] issuerSignedItemBytes1 = new byte[] {1, 2, 3};
+    private final byte[] issuerSignedItemBytes2 = new byte[] {4, 5, 6};
 
     @BeforeEach
     void setUp() {
@@ -44,8 +44,8 @@ class IssuerSignedCBORSerializerTest {
     void Should_SerializeIssuerSignedWithCBORGenerator_SingleNameSpaceWithMultipleItems()
             throws IOException {
         // Create a map with one namespace containing two items
-        Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
-        nameSpaces.put("namespace1", Arrays.asList(issuerSignedItem1, issuerSignedItem2));
+        Map<String, List<byte[]>> nameSpaces = new LinkedHashMap<>();
+        nameSpaces.put("namespace1", Arrays.asList(issuerSignedItemBytes1, issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
         serializer.serialize(issuerSigned, cborGenerator, serializerProvider);
@@ -64,9 +64,9 @@ class IssuerSignedCBORSerializerTest {
 
         // For each item: write tag 24 then write the object
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItem1);
+        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes1);
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItem2);
+        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes2);
 
         // Close the array and objects
         inOrder.verify(cborGenerator).writeEndArray();
@@ -76,9 +76,9 @@ class IssuerSignedCBORSerializerTest {
     @Test
     void Should_SerializeIssuerSignedWithCBORGenerator_MultipleNameSpaces() throws IOException {
         // Create a map with two namespaces, each with one item
-        Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
-        nameSpaces.put("namespace1", List.of(issuerSignedItem1));
-        nameSpaces.put("namespace2", List.of(issuerSignedItem2));
+        Map<String, List<byte[]>> nameSpaces = new LinkedHashMap<>();
+        nameSpaces.put("namespace1", List.of(issuerSignedItemBytes1));
+        nameSpaces.put("namespace2", List.of(issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
         serializer.serialize(issuerSigned, cborGenerator, serializerProvider);
@@ -95,14 +95,14 @@ class IssuerSignedCBORSerializerTest {
         inOrder.verify(cborGenerator).writeFieldName("namespace1");
         inOrder.verify(cborGenerator).writeStartArray();
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItem1);
+        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes1);
         inOrder.verify(cborGenerator).writeEndArray();
 
         // Write the second namespace
         inOrder.verify(cborGenerator).writeFieldName("namespace2");
         inOrder.verify(cborGenerator).writeStartArray();
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItem2);
+        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes2);
         inOrder.verify(cborGenerator).writeEndArray();
 
         // Close objects
