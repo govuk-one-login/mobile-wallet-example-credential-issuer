@@ -3,7 +3,8 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceResponse;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
 
@@ -23,12 +24,25 @@ class CBOREncoderTest {
     }
 
     @Test
-    void Should_ReturnEncodedBytes() throws IOException {
-        DeviceResponse mockDeviceResponse = mock(DeviceResponse.class);
+    void Should_ReturnEncodedBytes_When_EncodingDocument()
+            throws IOException, CBOREncodingException {
+        Document document = mock(Document.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
-        when(mockMapper.writeValueAsBytes(mockDeviceResponse)).thenReturn(expectedEncodedBytes);
+        when(mockMapper.writeValueAsBytes(document)).thenReturn(expectedEncodedBytes);
 
-        byte[] actualEncodedBytes = cborEncoder.encode(mockDeviceResponse);
+        byte[] actualEncodedBytes = cborEncoder.encode(document);
+
+        assertArrayEquals(expectedEncodedBytes, actualEncodedBytes);
+    }
+
+    @Test
+    void Should_ReturnEncodedBytes_When_EncodingIssuerSignedItem()
+            throws IOException, CBOREncodingException {
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
+        byte[] expectedEncodedBytes = {1, 2, 3, 4};
+        when(mockMapper.writeValueAsBytes(issuerSignedItem)).thenReturn(expectedEncodedBytes);
+
+        byte[] actualEncodedBytes = cborEncoder.encode(issuerSignedItem);
 
         assertArrayEquals(expectedEncodedBytes, actualEncodedBytes);
     }
