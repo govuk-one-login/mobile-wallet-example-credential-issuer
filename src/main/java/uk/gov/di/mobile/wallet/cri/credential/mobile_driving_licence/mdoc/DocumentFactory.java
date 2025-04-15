@@ -1,13 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.google.common.base.CaseFormat;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncodingException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,25 +25,32 @@ public class DocumentFactory {
         this.cborEncoder = cborEncoder;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence)
-            throws CBOREncodingException {
+    public Document build(final DrivingLicenceDocument drivingLicence) throws MDLException {
         Map<String, List<byte[]>> nameSpaces = buildNameSpaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
         return new Document(MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE, issuerSigned);
     }
 
+    @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
     private Map<String, List<byte[]>> buildNameSpaces(final DrivingLicenceDocument drivingLicence)
-            throws CBOREncodingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        Map<String, Object> drivingLicenceMap =
-                objectMapper.convertValue(drivingLicence, Map.class);
-
+            throws MDLException {
         List<byte[]> issuerSignedItems = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : drivingLicenceMap.entrySet()) {
-            String fieldName = entry.getKey();
-            Object fieldValue = entry.getValue();
+        for (Field field : drivingLicence.getClass().getDeclaredFields()) {
+            String fieldName = field.getName();
+
+            // The elementIdentifier within an IssuerSignedItem must be in snake case
             String asSnakeCase = getAsSnakeCase(fieldName);
+            field.setAccessible(true);
+
+            Object fieldValue;
+            try {
+                fieldValue = field.get(drivingLicence);
+            } catch (IllegalAccessException exception) {
+                throw new MDLException(
+                        "Filed to access Driving Licence properties to build IssuerSignedItem",
+                        exception);
+            }
+
             IssuerSignedItem issuerSignedItem =
                     issuerSignedItemFactory.build(asSnakeCase, fieldValue);
             byte[] issuerSignedItemBytes = cborEncoder.encode(issuerSignedItem);

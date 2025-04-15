@@ -7,7 +7,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncodingException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildDocumentWithCorrectDocumentType() throws CBOREncodingException {
+    void Should_BuildDocumentWithCorrectDocumentType() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
 
         Document document = documentFactory.build(drivingLicence);
@@ -40,7 +40,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildWithCorrectNamespaceInIssuerSigned() throws CBOREncodingException {
+    void Should_BuildWithCorrectNamespaceInIssuerSigned() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
 
         Document document = documentFactory.build(drivingLicence);
@@ -55,7 +55,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence() throws CBOREncodingException {
+    void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
 
         Document document = documentFactory.build(drivingLicence);
@@ -66,7 +66,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_IncludeIssuerAuth() throws CBOREncodingException {
+    void Should_IncludeIssuerAuth() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
 
         Document document = documentFactory.build(drivingLicence);
