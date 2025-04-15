@@ -59,7 +59,7 @@ Mappings:
       DocumentSigningKeyCountryName: "UK"
       PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
       PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
-      CloudwatchLogRetentionDays: 3650
+      CloudwatchLogRetentionDays: 3650  # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
       CertificateValidityPeriodInDays: 458  # 366 (1 year) + 92 (3 months), worse case
