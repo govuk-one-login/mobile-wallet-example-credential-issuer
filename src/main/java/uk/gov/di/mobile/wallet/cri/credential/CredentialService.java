@@ -11,12 +11,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -30,7 +26,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_CHECK_CREDENTIAL;
@@ -46,6 +41,8 @@ public class CredentialService {
     private final ProofJwtService proofJwtService;
     private final Client httpClient;
     private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
+    private final MobileDrivingLicenceService mobileDrivingLicenceService;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService(
@@ -54,13 +51,15 @@ public class CredentialService {
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
             Client httpClient,
-            CredentialBuilder<?> credentialBuilder) {
+            CredentialBuilder<?> credentialBuilder,
+            MobileDrivingLicenceService mobileDrivingLicenceService) {
         this.configurationService = configurationService;
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
         this.httpClient = httpClient;
         this.credentialBuilder = credentialBuilder;
+        this.mobileDrivingLicenceService = mobileDrivingLicenceService;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -207,13 +206,7 @@ public class CredentialService {
         final DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
-        CBOREncoder cborEncoder =
-                new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
-        IssuerSignedItemFactory issuerSignedItemFactory =
-                new IssuerSignedItemFactory(new DigestIDGenerator());
-        DocumentFactory documentFactory = new DocumentFactory(issuerSignedItemFactory, cborEncoder);
-        byte[] cborEncodedData = cborEncoder.encode(documentFactory.build(drivingLicenceDocument));
-        return HexFormat.of().formatHex(cborEncodedData);
+        return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 
     protected Logger getLogger() {

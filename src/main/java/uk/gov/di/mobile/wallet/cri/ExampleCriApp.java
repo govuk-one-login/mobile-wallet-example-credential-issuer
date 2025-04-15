@@ -13,6 +13,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialResource;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -75,6 +76,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         ProofJwtService proofJwtService = new ProofJwtService(configurationService);
         CredentialBuilder<? extends CredentialSubject> credentialBuilder =
                 new CredentialBuilder<>(configurationService, kmsService);
+        MobileDrivingLicenceService mobileDrivingLicenceService = new MobileDrivingLicenceService();
 
         CredentialService credentialService =
                 new CredentialService(
@@ -83,7 +85,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                         accessTokenService,
                         proofJwtService,
                         httpClient,
-                        credentialBuilder);
+                        credentialBuilder,
+                        mobileDrivingLicenceService);
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
