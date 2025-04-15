@@ -1,9 +1,9 @@
 plugins {
 	id "application"
 	id "java"
-	id "com.diffplug.spotless" version "7.0.2"
-	id "org.sonarqube" version "6.0.1.5171"
-	id "jacoco-report-aggregation"
+	id "com.diffplug.spotless" version "7.0.3"
+	id "org.sonarqube" version "6.1.0.5360"
+	id "jacoco"
 }
 
 defaultTasks "clean", "spotlessApply", "build"
@@ -14,33 +14,38 @@ repositories {
 	}
 }
 
+ext {
+	awsSdkVersion = "2.31.21"
+	dropwizardVersion = "4.0.13"
+	lombokVersion = "1.18.38"
+}
+
 dependencies {
-	implementation "com.google.guava:guava:33.4.5-jre"
-	implementation group: "io.dropwizard", name: "dropwizard-core", version: "4.0.12"
-	implementation group: 'io.dropwizard', name: 'dropwizard-client', version: '4.0.12'
-	implementation 'org.bouncycastle:bcpkix-jdk18on:1.80'
+	implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
+	implementation "software.amazon.awssdk:arns"
+	implementation "software.amazon.awssdk:dynamodb-enhanced"
+	implementation "software.amazon.awssdk:kms"
+	implementation "software.amazon.awssdk:url-connection-client"
+
+	implementation platform("io.dropwizard:dropwizard-bom:${dropwizardVersion}")
+	implementation "io.dropwizard:dropwizard-client"
+	implementation "io.dropwizard:dropwizard-core"
+	implementation "io.dropwizard:dropwizard-json-logging"
+
 	implementation "com.nimbusds:oauth2-oidc-sdk:11.23.1"
-	implementation "software.amazon.awssdk:kms:2.31.6"
-	implementation "software.amazon.awssdk:dynamodb:2.31.6"
-	implementation "software.amazon.awssdk:dynamodb-enhanced:2.31.6"
-	implementation "software.amazon.awssdk:url-connection-client:2.31.6"
-	implementation 'software.amazon.awssdk:core:2.31.6'
-	implementation 'software.amazon.awssdk:arns:2.31.6'
-	implementation "com.fasterxml.jackson.core:jackson-databind:2.18.3"
-	implementation 'com.fasterxml.jackson.core:jackson-annotations:2.18.3'
-	implementation 'org.jetbrains:annotations:26.0.2'
-	implementation group: 'io.dropwizard', name: 'dropwizard-json-logging', version: '4.0.12'
+	implementation "org.bouncycastle:bcpkix-jdk18on:1.80"
 
-	compileOnly "org.projectlombok:lombok:1.18.36"
-	annotationProcessor 'org.projectlombok:lombok:1.18.36'
+	implementation "org.jetbrains:annotations:26.0.2"
 
-	testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.1"
-	testImplementation "org.mockito:mockito-junit-jupiter:5.16.1"
-	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.7"
-	testImplementation "org.hamcrest:hamcrest:3.0"
-	testImplementation group: 'io.dropwizard', name: 'dropwizard-testing', version: '4.0.12'
+	compileOnly "org.projectlombok:lombok:${lombokVersion}"
+	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
+	testImplementation "org.jetbrains:annotations:26.0.2"
+	testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.2"
+	testImplementation "org.mockito:mockito-junit-jupiter:5.17.0"
+	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.8"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
 
 application {
@@ -50,7 +55,10 @@ application {
 jar {
 	manifest {
 		attributes(
-				"Main-Class": "uk.gov.di.mobile.wallet.cri.ExampleCriApp")
+				"Main-Class": "uk.gov.di.mobile.wallet.cri.ExampleCriApp",
+				"Implementation-Title": project.name,
+				"Implementation-Version": project.version
+				)
 	}
 
 	from {
@@ -69,16 +77,14 @@ java {
 	targetCompatibility = JavaVersion.VERSION_17
 }
 
-String jacocoBuildReportPath = "reports/jacoco/test/jacocoTestReport.xml"
-
 sonar {
 	properties {
 		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
 		property "sonar.organization", "govuk-one-login"
 		property "sonar.host.url", "https://sonarcloud.io"
 		property "sonar.coverage.exclusions", "**/src/test/**"
-		property 'sonar.coverage.exclusions', "**/src/main/java/uk/gov/di/mobile/wallet/cri/ExampleCriApp.java"
-		property "sonar.coverage.jacoco.xmlReportPaths", "$project.buildDir/$jacocoBuildReportPath"
+		property "sonar.coverage.exclusions", "**/src/main/java/uk/gov/di/mobile/wallet/cri/ExampleCriApp.java"
+		property "sonar.coverage.jacoco.xmlReportPath", layout.buildDirectory.file("reports/jacoco/reports/reports.xml")
 	}
 }
 
@@ -90,6 +96,7 @@ spotless {
 		endWithNewline()
 		removeUnusedImports()
 	}
+
 	groovyGradle {
 		target "**/*.gradle"
 		greclipse()
@@ -110,6 +117,7 @@ tasks.withType(Test).configureEach {
 		exceptionFormat "full"
 		events "skipped", "passed", "failed"
 	}
+
 	useJUnitPlatform()
 	jvmArgs "-Xshare:off"
 	finalizedBy jacocoTestReport

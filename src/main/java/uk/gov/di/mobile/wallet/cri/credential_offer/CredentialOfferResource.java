@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItemBuilder;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -35,7 +35,7 @@ public class CredentialOfferResource {
     private final CredentialOfferService credentialOfferService;
     private final ConfigurationService configurationService;
     private final DataStore dataStore;
-    public static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialOfferResource.class);
 
     private static final String WALLET_SUBJECT_ID_PATTERN =
             "^urn:fdc:wallet\\.account\\.gov\\.uk:2024:[a-zA-Z0-9_-]{43}$";
@@ -70,7 +70,7 @@ public class CredentialOfferResource {
                     credentialOfferService.buildCredentialOffer(credentialOfferId, credentialType);
         } catch (SigningException | NoSuchAlgorithmException exception) {
             LOGGER.error(
-                    "Failed to create credential offer for walletSubjectId {} and documentId {}",
+                    "Failed to create credential offer - walletSubjectId: {}, documentId: {}",
                     walletSubjectId,
                     documentId,
                     exception);
@@ -78,9 +78,10 @@ public class CredentialOfferResource {
         }
 
         LOGGER.info(
-                "Credential offer created for walletSubjectId {} and credentialOfferId {}",
+                "Credential offer created - walletSubjectId: {}, credentialOfferId: {}, documentId: {}",
                 walletSubjectId,
-                credentialOfferId);
+                credentialOfferId,
+                documentId);
 
         String notificationId = UUID.randomUUID().toString();
         long credentialOfferTtl =
@@ -92,7 +93,7 @@ public class CredentialOfferResource {
                         .plus(configurationService.getTableItemTtlInDays(), ChronoUnit.DAYS)
                         .getEpochSecond();
         try {
-            CredentialOfferCacheItem credentialOfferCacheItem =
+            CachedCredentialOffer cachedCredentialOffer =
                     new CredentialOfferCacheItemBuilder()
                             .credentialIdentifier(credentialOfferId)
                             .documentId(documentId)
@@ -103,22 +104,23 @@ public class CredentialOfferResource {
                             .timeToLive(tableItemTtl)
                             .build();
 
-            dataStore.saveCredentialOffer(credentialOfferCacheItem);
+            dataStore.saveCredentialOffer(cachedCredentialOffer);
         } catch (DataStoreException exception) {
             LOGGER.error(
-                    "Failed to save credential offer for walletSubjectId {} and credentialOfferId {}",
+                    "Failed to save credential offer - walletSubjectId: {}, documentId: {}",
                     walletSubjectId,
                     documentId,
                     exception);
             return ResponseUtil.internalServerError();
         }
 
-        LOGGER.info(
-                "Credential offer saved for walletSubjectId {} and credentialOfferId {} with documentId {} and notificationId {}",
-                walletSubjectId,
-                credentialOfferId,
-                documentId,
-                notificationId);
+        getLogger()
+                .info(
+                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}, notificationId: {}",
+                        walletSubjectId,
+                        credentialOfferId,
+                        documentId,
+                        notificationId);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
@@ -131,5 +133,9 @@ public class CredentialOfferResource {
                         + credentialOfferStringEncoded;
 
         return ResponseUtil.ok(credentialOfferUrl);
+    }
+
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -21,7 +21,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
 
@@ -62,19 +61,16 @@ public class CredentialService {
 
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
-        String credentialOfferId = accessTokenData.credentialIdentifier();
-        LOGGER.info("Access token for credential offer {} verified", credentialOfferId);
 
         ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
-        LOGGER.info("Proof JWT for credential offer {} verified", credentialOfferId);
 
         if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
             throw new ProofJwtValidationException(
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 
-        CredentialOfferCacheItem credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-
+        String credentialOfferId = accessTokenData.credentialIdentifier();
+        CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
         if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
             throw new CredentialOfferException("Credential offer validation failed");
         }
@@ -88,7 +84,7 @@ public class CredentialService {
         Document document = getDocument(documentId);
 
         LOGGER.info(
-                "{} retrieved for credentialOfferId {} and documentId {}",
+                "{} retrieved - credentialOfferId: {}, documentId: {}",
                 document.getVcType(),
                 credentialOfferId,
                 documentId);
@@ -100,50 +96,39 @@ public class CredentialService {
         String vcType = document.getVcType();
 
         String notificationId = credentialOffer.getNotificationId();
-        SignedJWT credential;
-
-        if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
+        String credential;
+        if (vcType.equals(SOCIAL_SECURITY_CREDENTIAL.getType())) {
             credential = getSocialSecurityCredential(document, sub);
 
-        } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
+        } else if (vcType.equals(BASIC_CHECK_CREDENTIAL.getType())) {
             credential = getBasicCheckCredential(document, sub);
 
-        } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
+        } else if (vcType.equals(DIGITAL_VETERAN_CARD.getType())) {
             credential = getDigitalVeteranCard(document, sub);
 
         } else {
             throw new CredentialServiceException(
                     String.format("Invalid verifiable credential type %s", vcType));
         }
-        return new CredentialResponse(credential.serialize(), notificationId);
+        return new CredentialResponse(credential, notificationId);
     }
 
     private boolean isValidCredentialOffer(
-            CredentialOfferCacheItem credentialOffer, String credentialOfferId) {
+            CachedCredentialOffer credentialOffer, String credentialOfferId) {
+        long now = Instant.now().getEpochSecond();
+
         if (credentialOffer == null) {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
-        }
-
-        if (hasOfferBeenRedeemed(credentialOffer)) {
+        } else if (credentialOffer.getRedeemed()) {
             getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
-        }
-
-        if (isOfferExpired(credentialOffer)) {
+        } else if (now > credentialOffer.getExpiry()) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }
+
         return true;
-    }
-
-    private static boolean isOfferExpired(CredentialOfferCacheItem credentialOffer) {
-        long now = Instant.now().getEpochSecond();
-        return now > credentialOffer.getExpiry();
-    }
-
-    private static boolean hasOfferBeenRedeemed(CredentialOfferCacheItem credentialOffer) {
-        return credentialOffer.getRedeemed();
     }
 
     private Document getDocument(String documentId)
@@ -163,7 +148,8 @@ public class CredentialService {
         return response.readEntity(Document.class);
     }
 
-    private SignedJWT getSocialSecurityCredential(Document document, String sub)
+    @SuppressWarnings("unchecked")
+    private String getSocialSecurityCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
@@ -171,7 +157,8 @@ public class CredentialService {
                 .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
     }
 
-    private SignedJWT getBasicCheckCredential(Document document, String sub)
+    @SuppressWarnings("unchecked")
+    private String getBasicCheckCredential(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
@@ -183,7 +170,8 @@ public class CredentialService {
                         basicCheckCredentialSubject.getExpirationDate());
     }
 
-    private SignedJWT getDigitalVeteranCard(Document document, String sub)
+    @SuppressWarnings("unchecked")
+    private String getDigitalVeteranCard(Document document, String sub)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);

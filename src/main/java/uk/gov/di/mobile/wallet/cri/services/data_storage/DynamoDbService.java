@@ -7,7 +7,7 @@ import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItem;
+import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
@@ -40,17 +40,17 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public void saveCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
+    public void saveCredentialOffer(CachedCredentialOffer cachedCredentialOffer)
             throws DataStoreException {
         try {
-            getTable().putItem(credentialOfferCacheItem);
+            getTable().putItem(cachedCredentialOffer);
         } catch (Exception exception) {
             throw new DataStoreException("Error saving credential offer", exception);
         }
     }
 
     @Override
-    public CredentialOfferCacheItem getCredentialOffer(String partitionValue)
+    public CachedCredentialOffer getCredentialOffer(String partitionValue)
             throws DataStoreException {
         try {
             return getItemByKey(Key.builder().partitionValue(partitionValue).build());
@@ -60,21 +60,21 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public void updateCredentialOffer(CredentialOfferCacheItem credentialOfferCacheItem)
+    public void updateCredentialOffer(CachedCredentialOffer cachedCredentialOffer)
             throws DataStoreException {
         try {
-            getTable().updateItem(credentialOfferCacheItem);
+            getTable().updateItem(cachedCredentialOffer);
         } catch (Exception exception) {
             throw new DataStoreException("Error updating credential offer", exception);
         }
     }
 
-    private CredentialOfferCacheItem getItemByKey(Key key) {
+    private CachedCredentialOffer getItemByKey(Key key) {
         return getTable().getItem(key);
     }
 
-    private DynamoDbTable<CredentialOfferCacheItem> getTable() {
+    private DynamoDbTable<CachedCredentialOffer> getTable() {
         return dynamoDbEnhancedClient.table(
-                tableName, TableSchema.fromBean(CredentialOfferCacheItem.class));
+                tableName, TableSchema.fromBean(CachedCredentialOffer.class));
     }
 }
