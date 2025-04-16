@@ -17,11 +17,11 @@ public class Metadata {
         this.credentialConfigurationsSupported = credentialConfigurationsSupported;
     }
 
-    String credentialIssuer; // NOSONAR
-    String[] authorizationServers; // NOSONAR
-    String credentialEndpoint; // NOSONAR
-    String notificationEndpoint; // NOSONAR
-    Object credentialConfigurationsSupported; // NOSONAR
+    String credentialIssuer;
+    String[] authorizationServers;
+    String credentialEndpoint;
+    String notificationEndpoint;
+    Object credentialConfigurationsSupported;
 
     @JsonProperty("credential_issuer")
     public String getCredentialIssuer() {
