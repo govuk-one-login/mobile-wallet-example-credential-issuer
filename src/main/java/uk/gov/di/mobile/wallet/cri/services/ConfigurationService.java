@@ -77,6 +77,6 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getJwksEndpoint() {
-        return "/document/";
+        return "/.well-known/jwks.json";
     }
 }
