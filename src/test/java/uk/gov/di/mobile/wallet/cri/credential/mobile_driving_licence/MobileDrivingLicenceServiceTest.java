@@ -87,13 +87,15 @@ class MobileDrivingLicenceServiceTest {
 
     @Test
     void Should_CreateMobileDrivingLicence_WithRealDependencies() throws MDLException {
-        MobileDrivingLicenceService mobileDrivingLicenceService = new MobileDrivingLicenceService();
+        MobileDrivingLicenceService mobileDrivingLicenceServiceDefaultConstructor =
+                new MobileDrivingLicenceService();
         DrivingLicenceDocument document = createTestDrivingLicenceDocument();
 
-        String result = mobileDrivingLicenceService.createMobileDrivingLicence(document);
+        String result =
+                mobileDrivingLicenceServiceDefaultConstructor.createMobileDrivingLicence(document);
 
         assertNotNull(result);
-        assertTrue(result.length() > 0);
+        assertFalse(result.isEmpty());
         assertDoesNotThrow(() -> HexFormat.of().parseHex(result));
     }
 
