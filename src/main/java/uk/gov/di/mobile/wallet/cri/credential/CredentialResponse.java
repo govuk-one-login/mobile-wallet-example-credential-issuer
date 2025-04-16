@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class CredentialResponse {
-    private final String credential; // NOSONAR
-    private final String notificationId; // NOSONAR
+    private final String credential;
+    private final String notificationId;
 
     public CredentialResponse(String credential, String notificationId) {
         this.credential = credential;
