@@ -16,6 +16,9 @@ import testUtils.MockAccessTokenBuilder;
 import testUtils.MockProofBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -51,6 +54,8 @@ class CredentialServiceTest {
     @Mock private Invocation.Builder mockInvocationBuilder;
     @Mock private Response mockResponse;
     @Mock private CredentialBuilder<?> mockCredentialBuilder;
+    @Mock private MobileDrivingLicenceService mockMobileDrivingLicenceService;
+
     @Mock private Logger mockLogger;
 
     private final DynamoDbService mockDynamoDbService = mock(DynamoDbService.class);
@@ -87,7 +92,8 @@ class CredentialServiceTest {
                         mockAccessTokenService,
                         mockProofJwtService,
                         mockHttpClient,
-                        mockCredentialBuilder) {
+                        mockCredentialBuilder,
+                        mockMobileDrivingLicenceService) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
@@ -355,6 +361,29 @@ class CredentialServiceTest {
     }
 
     @Test
+    void Should_BuildMobileDrivingLicenceCredential()
+            throws AccessTokenValidationException,
+                    ProofJwtValidationException,
+                    DataStoreException,
+                    CredentialServiceException,
+                    CredentialOfferException,
+                    MDLException {
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCachedCredentialOffer);
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
+        when(mockResponse.getStatus()).thenReturn(200);
+        when(mockResponse.readEntity(Document.class))
+                .thenReturn(getMockMobileDrivingLicence(DOCUMENT_ID));
+
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+        verify(mockMobileDrivingLicenceService, times(1))
+                .createMobileDrivingLicence(any(DrivingLicenceDocument.class));
+    }
+
+    @Test
     void Should_ThrowCredentialServiceException_When_DocumentVcTypeIsUnknown()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
@@ -411,28 +440,6 @@ class CredentialServiceTest {
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
                         eq(null));
-    }
-
-    @Test
-    void Should_BuildMobileDrivingLicenceCredential()
-            throws AccessTokenValidationException,
-                    ProofJwtValidationException,
-                    DataStoreException,
-                    CredentialServiceException,
-                    CredentialOfferException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
-                .thenReturn(getMockMobileDrivingLicence(DOCUMENT_ID));
-
-        CredentialResponse credentialServiceReturnValue =
-                credentialService.getCredential(mockAccessToken, mockProofJwt);
-
-        assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(
