@@ -25,7 +25,7 @@ public class DocumentFactory {
         this.cborEncoder = cborEncoder;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence) throws MDLException {
+    public Document build(final DrivingLicenceDocument nameSpaces) throws MDLException {
         Map<String, List<byte[]>> nameSpaces = buildNameSpaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
         return new Document(MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE, issuerSigned);
