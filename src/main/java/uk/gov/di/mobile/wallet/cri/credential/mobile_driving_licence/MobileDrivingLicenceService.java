@@ -4,6 +4,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
 
@@ -29,7 +30,8 @@ public class MobileDrivingLicenceService {
 
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws MDLException {
-        byte[] cborEncodedData = cborEncoder.encode(documentFactory.build(drivingLicenceDocument));
-        return HexFormat.of().formatHex(cborEncodedData);
+        Document mdoc = documentFactory.build(drivingLicenceDocument);
+        byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
+        return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);
     }
 }
