@@ -138,7 +138,6 @@ public class CredentialService {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }
-
         return true;
     }
 
@@ -205,9 +204,6 @@ public class CredentialService {
         mapper.registerModule(new JavaTimeModule());
         final DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-
-        System.out.println("getMobileDrivingLicence");
-
         return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 
