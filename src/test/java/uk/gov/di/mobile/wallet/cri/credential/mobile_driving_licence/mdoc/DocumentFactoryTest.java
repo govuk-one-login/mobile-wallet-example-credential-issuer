@@ -3,22 +3,18 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentFactoryTest {
-
-    @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
-    @Mock private CBOREncoder mockCborEncoder;
 
     private DocumentFactory documentFactory;
     Map<String, List<byte[]>> testNameSpaces = new LinkedHashMap<>();
@@ -39,29 +35,33 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildWithCorrectNamespaceInIssuerSigned() throws MDLException {
+    void Should_BuildDocumentWithOneNamespaceInIssuerSigned() throws MDLException {
+        List<byte[]> testIssuerSignedItems1 = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
+        testNameSpaces.put("nameSpace1", testIssuerSignedItems1);
+
         Document document = documentFactory.build(testNameSpaces);
 
         IssuerSigned issuerSigned = document.issuerSigned();
-        assertNotNull(issuerSigned, "IssuerSigned should not be null");
         Map<String, List<byte[]>> namespaces = issuerSigned.nameSpaces();
-        assertNotNull(namespaces, "Namespaces should not be null");
-        assertTrue(
-                namespaces.containsKey("org.iso.18013.5.1"),
-                "Namespaces should have the mobile driving licence namespace");
+        assertEquals(1, namespaces.size(), "There should be one namespace object in namespaces");
     }
 
     @Test
-    void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence() throws MDLException {
+    void Should_BuildDocumentWithTwoNamespacesInIssuerSigned() throws MDLException {
+        List<byte[]> testIssuerSignedItems1 = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
+        List<byte[]> testIssuerSignedItems2 = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
+        testNameSpaces.put("nameSpace1", testIssuerSignedItems1);
+        testNameSpaces.put("nameSpace2", testIssuerSignedItems2);
+
         Document document = documentFactory.build(testNameSpaces);
 
         IssuerSigned issuerSigned = document.issuerSigned();
-        List<byte[]> items = issuerSigned.nameSpaces().get("org.iso.18013.5.1");
-        assertEquals(13, items.size(), "Should create one IssuerSignedItem per field");
+        Map<String, List<byte[]>> namespaces = issuerSigned.nameSpaces();
+        assertEquals(2, namespaces.size(), "There should be two namespace objects in namespaces");
     }
 
     @Test
-    void Should_IncludeIssuerAuth() throws MDLException {
+    void Should_BuildDocumentWithIssuerAuthInIssuerSigned() throws MDLException {
         Document document = documentFactory.build(testNameSpaces);
 
         IssuerSigned issuerSigned = document.issuerSigned();
