@@ -43,13 +43,13 @@ class MobileDrivingLicenceServiceTest {
     private MobileDrivingLicenceService mobileDrivingLicenceService;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         mobileDrivingLicenceService =
                 new MobileDrivingLicenceService(cborEncoder, documentFactory, namespaceFactory);
     }
 
     @Test
-    public void Should_CreateMobileDrivingLicence() throws MDLException {
+    void Should_CreateMobileDrivingLicence() throws MDLException {
         List<byte[]> mockIssuerSignedItems = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
         byte[] mockCborEncoding = new byte[] {10, 20, 30, 40, 50};
         String expectedHexString = HexFormat.of().formatHex(mockCborEncoding);
@@ -81,8 +81,7 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    public void Should_PropagateException_When_NameSpaceFactoryThrowsMDLException()
-            throws MDLException {
+    void Should_PropagateException_When_NameSpaceFactoryThrowsMDLException() throws MDLException {
         MDLException expectedException =
                 new MDLException("Some NameSpaceFactory error", new RuntimeException());
         when(namespaceFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
