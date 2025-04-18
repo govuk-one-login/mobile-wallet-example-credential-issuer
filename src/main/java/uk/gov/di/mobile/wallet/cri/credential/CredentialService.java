@@ -206,6 +206,8 @@ public class CredentialService {
         final DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
+        System.out.println("getMobileDrivingLicence");
+
         return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 

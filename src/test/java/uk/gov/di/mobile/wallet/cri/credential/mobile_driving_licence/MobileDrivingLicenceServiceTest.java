@@ -10,6 +10,9 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Docume
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 
 import java.util.HexFormat;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -23,6 +26,7 @@ class MobileDrivingLicenceServiceTest {
 
     DrivingLicenceDocument mockDrivingLicenceDocument = mock(DrivingLicenceDocument.class);
     Document mockDocument = mock(Document.class);
+    Map<String, List<byte[]>> testNameSpaces = new LinkedHashMap<>();
 
     @BeforeEach
     void setUp() {
@@ -35,14 +39,14 @@ class MobileDrivingLicenceServiceTest {
         byte[] encodedData = {0x01, 0x02, 0x03, 0x04};
         String expectedHex = "01020304";
 
-        when(documentFactory.build(mockDrivingLicenceDocument)).thenReturn(mockDocument);
+        when(documentFactory.build(testNameSpaces)).thenReturn(mockDocument);
         when(cborEncoder.encode(mockDocument)).thenReturn(encodedData);
 
         String result =
                 mobileDrivingLicenceService.createMobileDrivingLicence(mockDrivingLicenceDocument);
 
         assertEquals(expectedHex, result);
-        verify(documentFactory).build(mockDrivingLicenceDocument);
+        verify(documentFactory).build(testNameSpaces);
         verify(cborEncoder).encode(mockDocument);
     }
 
@@ -51,7 +55,7 @@ class MobileDrivingLicenceServiceTest {
         MDLException expectedException =
                 new MDLException("Some DocumentFactory error", new RuntimeException());
 
-        when(documentFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
+        when(documentFactory.build(testNameSpaces)).thenThrow(expectedException);
 
         MDLException thrownException =
                 assertThrows(
@@ -61,7 +65,7 @@ class MobileDrivingLicenceServiceTest {
                                         mockDrivingLicenceDocument));
 
         assertEquals(expectedException, thrownException);
-        verify(documentFactory).build(mockDrivingLicenceDocument);
+        verify(documentFactory).build(testNameSpaces);
         verify(cborEncoder, never()).encode(any());
     }
 
@@ -70,7 +74,7 @@ class MobileDrivingLicenceServiceTest {
         MDLException expectedException =
                 new MDLException("Some CBOREncoder error", new RuntimeException());
 
-        when(documentFactory.build(mockDrivingLicenceDocument)).thenReturn(mockDocument);
+        when(documentFactory.build(testNameSpaces)).thenReturn(mockDocument);
         when(cborEncoder.encode(mockDocument)).thenThrow(expectedException);
 
         MDLException thrownException =
@@ -81,7 +85,7 @@ class MobileDrivingLicenceServiceTest {
                                         mockDrivingLicenceDocument));
 
         assertEquals(expectedException, thrownException);
-        verify(documentFactory).build(mockDrivingLicenceDocument);
+        verify(documentFactory).build(testNameSpaces);
         verify(cborEncoder).encode(mockDocument);
     }
 
