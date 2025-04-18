@@ -8,18 +8,18 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NamespaceBuilder {
+public class NameSpaceFactory {
     private final IssuerSignedItemFactory issuerSignedItemFactory;
     private final CBOREncoder cborEncoder;
 
-    public NamespaceBuilder(
+    public NameSpaceFactory(
             IssuerSignedItemFactory issuerSignedItemFactory, CBOREncoder cborEncoder) {
         this.issuerSignedItemFactory = issuerSignedItemFactory;
         this.cborEncoder = cborEncoder;
     }
 
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
-    public List<byte[]> buildNamespace(Object input) throws MDLException {
+    public List<byte[]> build(Object input) throws MDLException {
         List<byte[]> issuerSignedItems = new ArrayList<>();
         for (Field field : input.getClass().getDeclaredFields()) {
             String fieldName = field.getName();

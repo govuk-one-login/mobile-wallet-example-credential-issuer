@@ -14,6 +14,12 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NameSpaceFactory;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -76,7 +82,17 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         ProofJwtService proofJwtService = new ProofJwtService(configurationService);
         CredentialBuilder<? extends CredentialSubject> credentialBuilder =
                 new CredentialBuilder<>(configurationService, kmsService);
-        MobileDrivingLicenceService mobileDrivingLicenceService = new MobileDrivingLicenceService();
+
+        CBOREncoder cborEncoder =
+                new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
+        IssuerSignedItemFactory issuerSignedItemFactory =
+                new IssuerSignedItemFactory(new DigestIDGenerator());
+        DocumentFactory documentFactory = new DocumentFactory();
+        NameSpaceFactory nameSpaceFactory =
+                new NameSpaceFactory(issuerSignedItemFactory, cborEncoder);
+
+        MobileDrivingLicenceService mobileDrivingLicenceService =
+                new MobileDrivingLicenceService(cborEncoder, documentFactory, nameSpaceFactory);
 
         CredentialService credentialService =
                 new CredentialService(
