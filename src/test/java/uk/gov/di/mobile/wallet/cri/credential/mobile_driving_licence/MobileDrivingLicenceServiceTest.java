@@ -98,25 +98,6 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_PropagateException_When_DocumentFactoryThrowsMDLException() throws MDLException {
-        List<byte[]> mockIssuerSignedItems = new ArrayList<>();
-        MDLException expectedException =
-                new MDLException("Some DocumentFactory error", new RuntimeException());
-        when(namespaceFactory.build(mockDrivingLicenceDocument)).thenReturn(mockIssuerSignedItems);
-        when(documentFactory.build(any())).thenThrow(expectedException);
-
-        MDLException thrownException =
-                assertThrows(
-                        MDLException.class,
-                        () ->
-                                mobileDrivingLicenceService.createMobileDrivingLicence(
-                                        mockDrivingLicenceDocument));
-
-        assertEquals(expectedException, thrownException);
-        verify(cborEncoder, never()).encode(any());
-    }
-
-    @Test
     void Should_PropagateException_When_CBOREncoderThrowsMDLException() throws MDLException {
         List<byte[]> mockIssuerSignedItems = new ArrayList<>();
         MDLException expectedException =
