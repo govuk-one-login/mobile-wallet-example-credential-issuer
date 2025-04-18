@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -25,7 +24,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildDocumentWithCorrectDocumentType() throws MDLException {
+    void Should_BuildDocumentWithCorrectDocumentType() {
         Document document = documentFactory.build(testNameSpaces);
 
         assertEquals(
@@ -35,7 +34,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildDocumentWithOneNamespaceInIssuerSigned() throws MDLException {
+    void Should_BuildDocumentWithOneNamespaceInIssuerSigned() {
         List<byte[]> testIssuerSignedItems1 = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
         testNameSpaces.put("nameSpace1", testIssuerSignedItems1);
 
@@ -47,7 +46,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildDocumentWithTwoNamespacesInIssuerSigned() throws MDLException {
+    void Should_BuildDocumentWithTwoNamespacesInIssuerSigned() {
         List<byte[]> testIssuerSignedItems1 = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
         List<byte[]> testIssuerSignedItems2 = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
         testNameSpaces.put("nameSpace1", testIssuerSignedItems1);
@@ -61,7 +60,7 @@ class DocumentFactoryTest {
     }
 
     @Test
-    void Should_BuildDocumentWithIssuerAuthInIssuerSigned() throws MDLException {
+    void Should_BuildDocumentWithIssuerAuthInIssuerSigned() {
         Document document = documentFactory.build(testNameSpaces);
 
         IssuerSigned issuerSigned = document.issuerSigned();
