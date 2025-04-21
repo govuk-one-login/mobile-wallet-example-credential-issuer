@@ -1,10 +1,4 @@
-import {
-  AlgorithmProvider,
-  AsnEcSignatureFormatter,
-  Name,
-  Pkcs10CertificateRequest,
-  X509Certificate,
-} from '@peculiar/x509';
+import { AlgorithmProvider, AsnEcSignatureFormatter, Name, Pkcs10CertificateRequest } from '@peculiar/x509';
 import { CertificationRequest, CertificationRequestInfo } from '@peculiar/asn1-csr';
 import { AsnConvert } from '@peculiar/asn1-schema';
 import { Name as AsnName, SubjectPublicKeyInfo } from '@peculiar/asn1-x509';
@@ -35,8 +29,4 @@ export async function createCertificateRequestFromEs256KmsKey(commonName: string
     signature: asnSignature,
   });
   return new Pkcs10CertificateRequest(AsnConvert.serialize(asnRequest)).toString();
-}
-
-export function decodeX509Certificate(certificatePem: string): X509Certificate {
-  return new X509Certificate(certificatePem);
 }

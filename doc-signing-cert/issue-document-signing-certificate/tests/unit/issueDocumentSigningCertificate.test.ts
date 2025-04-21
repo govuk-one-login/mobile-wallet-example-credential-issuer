@@ -9,17 +9,13 @@ import { IssueDocumentSigningCertificateConfig } from '../../issueDocumentSignin
 import { logger } from '../../logging/logger';
 import { headObject, putObject } from '../../adapters/aws/s3Adapter';
 import { LogMessage } from '../../logging/LogMessages';
-import {
-  createCertificateRequestFromEs256KmsKey,
-  decodeX509Certificate,
-} from '../../adapters/peculiar/peculiarAdapter';
+import { createCertificateRequestFromEs256KmsKey } from '../../adapters/peculiar/peculiarAdapter';
 import {
   issueMdlDocSigningCertificateUsingSha256WithEcdsa,
   retrieveIssuedCertificate,
 } from '../../adapters/aws/acmPcaAdapter';
 import { getSsmParameter } from '../../adapters/aws/ssmAdapter';
 import { getPublicKey } from '../../adapters/aws/kmsAdapter';
-import { X509Certificate } from '@peculiar/x509';
 
 jest.mock('../../adapters/aws/ssmAdapter');
 jest.mock('../../adapters/aws/s3Adapter');
@@ -83,7 +79,6 @@ describe('issueDocumentSigningCertificate handler', () => {
     jest.mocked(retrieveIssuedCertificate).mockResolvedValue('CERTIFICATE');
     jest.mocked(issueMdlDocSigningCertificateUsingSha256WithEcdsa).mockResolvedValue('CERT_ARN');
     jest.mocked(createCertificateRequestFromEs256KmsKey).mockResolvedValue('CSR');
-    jest.mocked(decodeX509Certificate).mockReturnValue('CERTIFICATE_DECODED' as unknown as X509Certificate);
   });
 
   describe('When processing starts', () => {
@@ -94,7 +89,6 @@ describe('issueDocumentSigningCertificate handler', () => {
       // ASSERT
       expect(logger.info).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
       expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
-      expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate-metadata.json', '"CERTIFICATE_DECODED"');
       expect(createCertificateRequestFromEs256KmsKey).toHaveBeenCalledWith('commonName', 'UK', 'keyId');
       expect(issueMdlDocSigningCertificateUsingSha256WithEcdsa).toBeCalledWith(
         'VALUE',

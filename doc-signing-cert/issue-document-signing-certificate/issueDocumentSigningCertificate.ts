@@ -1,4 +1,4 @@
-import { createCertificateRequestFromEs256KmsKey, decodeX509Certificate } from './adapters/peculiar/peculiarAdapter';
+import { createCertificateRequestFromEs256KmsKey } from './adapters/peculiar/peculiarAdapter';
 import { logger } from './logging/logger';
 import { Context } from 'aws-lambda';
 import { getConfigFromEnvironment } from './issueDocumentSigningCertificateConfig';
@@ -57,11 +57,6 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
 
       const issuedCertificate = await retrieveIssuedCertificate(issuedCertificateArn, certificateAuthorityArn);
       await putObject(config.DOC_SIGNING_KEY_BUCKET, config.DOC_SIGNING_KEY_ID + '/certificate.pem', issuedCertificate);
-      await putObject(
-        config.DOC_SIGNING_KEY_BUCKET,
-        config.DOC_SIGNING_KEY_ID + '/certificate-metadata.json',
-        JSON.stringify(decodeX509Certificate(issuedCertificate)),
-      );
 
       logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
     } catch (error) {
