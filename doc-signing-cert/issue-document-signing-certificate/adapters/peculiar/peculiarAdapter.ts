@@ -5,20 +5,20 @@ import { Name as AsnName, SubjectPublicKeyInfo } from '@peculiar/asn1-x509';
 import { signWithEcdsaSha256, getPublicKey } from '../aws/kmsAdapter';
 
 export async function createCertificateRequestFromEs256KmsKey(commonName: string, countryName: string, keyId: string) {
-  const spki = await getPublicKey(keyId);
-
-  const name = new Name([{ CN: [commonName] }, { C: [countryName] }]);
-  const certificationRequestInfo = new CertificationRequestInfo({
-    subjectPKInfo: AsnConvert.parse(spki, SubjectPublicKeyInfo),
-    subject: AsnConvert.parse(name.toArrayBuffer(), AsnName),
-  });
-  const tbs = AsnConvert.serialize(certificationRequestInfo);
-  const signature = await signWithEcdsaSha256(keyId, tbs);
   const signingAlgorithm = {
     name: 'ECDSA',
     namedCurve: 'P-256',
     hash: 'SHA-256',
   };
+
+  const spki = await getPublicKey(keyId);
+  const name = new Name([{ CN: [commonName] }, { C: [countryName] }]);
+  const certificationRequestInfo = new CertificationRequestInfo({
+    subjectPKInfo: AsnConvert.parse(spki, SubjectPublicKeyInfo),
+    subject: AsnConvert.parse(name.toArrayBuffer(), AsnName),
+  });
+  const toBeSigned = AsnConvert.serialize(certificationRequestInfo);
+  const signature = await signWithEcdsaSha256(keyId, toBeSigned);
   const asnSignature = new AsnEcSignatureFormatter().toAsnSignature(signingAlgorithm, signature);
   if (!asnSignature) {
     throw new Error('Cannot convert WebCrypto signature value to ASN.1 format');

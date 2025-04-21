@@ -1,6 +1,6 @@
 import { createCertificateRequestFromEs256KmsKey } from '../../../../adapters/peculiar/peculiarAdapter';
 import { getPublicKey, signWithEcdsaSha256 } from '../../../../adapters/aws/kmsAdapter';
-import { mockCsr, mockPublicKey, mockSignature } from '../../data/mockCsr';
+import { mockEs256Csr, mockPublicKey, mockSignature, commonName, countryName } from '../../data/mockEs256Csr';
 import { AsnEcSignatureFormatter } from '@peculiar/x509';
 
 jest.mock('../../../../adapters/aws/kmsAdapter');
@@ -14,14 +14,10 @@ describe('createCertificateRequestFromEs256KmsKey', () => {
 
   it('should create a CSR using an ES256 KMS Key via the KMS Adapter', async () => {
     // ACT
-    const response = await createCertificateRequestFromEs256KmsKey(
-      'commonName',
-      'UK',
-      '0dda229a-4395-400c-947b-bed7ead4f16d',
-    );
+    const response = await createCertificateRequestFromEs256KmsKey(commonName, countryName, 'KEYID');
 
     // ASSERT
-    expect(response).toEqual(mockCsr);
+    expect(response).toEqual(mockEs256Csr);
   });
 
   it('should throw if the signature could not be converted to ASN.1', async () => {
