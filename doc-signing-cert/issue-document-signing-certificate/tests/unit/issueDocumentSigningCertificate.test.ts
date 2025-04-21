@@ -19,7 +19,7 @@ import {
 } from '../../adapters/aws/acmPcaAdapter';
 import { getSsmParameter } from '../../adapters/aws/ssmAdapter';
 import { getPublicKey } from '../../adapters/aws/kmsAdapter';
-import { Pkcs10CertificateRequest, X509Certificate } from '@peculiar/x509';
+import { X509Certificate } from '@peculiar/x509';
 
 jest.mock('../../adapters/aws/ssmAdapter');
 jest.mock('../../adapters/aws/s3Adapter');
@@ -84,7 +84,7 @@ describe('issueDocumentSigningCertificate handler', () => {
     jest.mocked(issueMdlDocSigningCertificateUsingSha256WithEcdsa).mockResolvedValue('CERT_ARN');
     jest
       .mocked(createCertificateRequestFromEs256KmsKey)
-      .mockResolvedValue('CSR' as unknown as Pkcs10CertificateRequest);
+      .mockResolvedValue('CSR');
     jest.mocked(decodeX509Certificate).mockReturnValue('CERTIFICATE_DECODED' as unknown as X509Certificate);
   });
 

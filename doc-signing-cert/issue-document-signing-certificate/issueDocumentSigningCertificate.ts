@@ -51,7 +51,7 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       const issuedCertificateArn = await issueMdlDocSigningCertificateUsingSha256WithEcdsa(
         issuerAlternativeName,
         certificateAuthorityArn,
-        Buffer.from(csr.toString()),
+        Buffer.from(csr),
         Number(config.DOC_SIGNING_KEY_VALIDITY_PERIOD),
       );
 

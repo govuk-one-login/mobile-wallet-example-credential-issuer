@@ -40,7 +40,7 @@ export async function createCertificateRequestFromEs256KmsKey(
     signatureAlgorithm: new AlgorithmProvider().toAsnAlgorithm(signingAlgorithm),
     signature: asnSignature,
   });
-  return new Pkcs10CertificateRequest(AsnConvert.serialize(asnRequest));
+  return new Pkcs10CertificateRequest(AsnConvert.serialize(asnRequest)).toString();
 }
 
 export function decodeX509Certificate(certificatePem: string): X509Certificate {
