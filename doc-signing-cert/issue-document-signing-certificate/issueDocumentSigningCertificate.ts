@@ -43,7 +43,8 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
 
     try {
       const csr = await createCertificateRequestFromEs256KmsKey(
-        [{ CN: [config.DOC_SIGNING_KEY_COMMON_NAME] }, { C: [config.DOC_SIGNING_KEY_COUNTRY_NAME] }],
+        config.DOC_SIGNING_KEY_COMMON_NAME,
+        config.DOC_SIGNING_KEY_COUNTRY_NAME,
         config.DOC_SIGNING_KEY_ID,
       );
 

@@ -98,14 +98,8 @@ describe('issueDocumentSigningCertificate handler', () => {
       expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
       expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate-metadata.json', '"CERTIFICATE_DECODED"');
       expect(createCertificateRequestFromEs256KmsKey).toHaveBeenCalledWith(
-        [
-          {
-            CN: ['commonName'],
-          },
-          {
-            C: ['UK'],
-          },
-        ],
+        'commonName',
+        'UK',
         'keyId',
       );
       expect(issueMdlDocSigningCertificateUsingSha256WithEcdsa).toBeCalledWith(
