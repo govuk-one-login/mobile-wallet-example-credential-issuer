@@ -82,9 +82,7 @@ describe('issueDocumentSigningCertificate handler', () => {
     jest.mocked(getPublicKey).mockResolvedValue(Buffer.from('PUBLIC_KEY'));
     jest.mocked(retrieveIssuedCertificate).mockResolvedValue('CERTIFICATE');
     jest.mocked(issueMdlDocSigningCertificateUsingSha256WithEcdsa).mockResolvedValue('CERT_ARN');
-    jest
-      .mocked(createCertificateRequestFromEs256KmsKey)
-      .mockResolvedValue('CSR');
+    jest.mocked(createCertificateRequestFromEs256KmsKey).mockResolvedValue('CSR');
     jest.mocked(decodeX509Certificate).mockReturnValue('CERTIFICATE_DECODED' as unknown as X509Certificate);
   });
 
@@ -97,11 +95,7 @@ describe('issueDocumentSigningCertificate handler', () => {
       expect(logger.info).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
       expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
       expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate-metadata.json', '"CERTIFICATE_DECODED"');
-      expect(createCertificateRequestFromEs256KmsKey).toHaveBeenCalledWith(
-        'commonName',
-        'UK',
-        'keyId',
-      );
+      expect(createCertificateRequestFromEs256KmsKey).toHaveBeenCalledWith('commonName', 'UK', 'keyId');
       expect(issueMdlDocSigningCertificateUsingSha256WithEcdsa).toBeCalledWith(
         'VALUE',
         'VALUE',

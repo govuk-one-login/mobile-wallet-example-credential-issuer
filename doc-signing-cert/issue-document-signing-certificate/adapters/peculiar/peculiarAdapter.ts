@@ -10,16 +10,10 @@ import { AsnConvert } from '@peculiar/asn1-schema';
 import { Name as AsnName, SubjectPublicKeyInfo } from '@peculiar/asn1-x509';
 import { signWithEcdsaSha256, getPublicKey } from '../aws/kmsAdapter';
 
-export async function createCertificateRequestFromEs256KmsKey(
-  commonName: string,
-  countryName: string,
-  keyId: string,
-) {
+export async function createCertificateRequestFromEs256KmsKey(commonName: string, countryName: string, keyId: string) {
   const spki = await getPublicKey(keyId);
 
-  const name = new Name(
-    [{ CN: [commonName] }, { C: [countryName] }],
-)
+  const name = new Name([{ CN: [commonName] }, { C: [countryName] }]);
   const certificationRequestInfo = new CertificationRequestInfo({
     subjectPKInfo: AsnConvert.parse(spki, SubjectPublicKeyInfo),
     subject: AsnConvert.parse(name.toArrayBuffer(), AsnName),
