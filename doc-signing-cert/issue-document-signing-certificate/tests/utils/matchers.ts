@@ -1,5 +1,7 @@
 import { expect } from '@jest/globals';
 
+/* eslint @typescript-eslint/no-explicit-any: 0 */
+
 function isSubsetOf(object: any, targetObject: any) {
   return Object.keys(object).every((key) => deepEquals(object[key], targetObject[key]));
 }

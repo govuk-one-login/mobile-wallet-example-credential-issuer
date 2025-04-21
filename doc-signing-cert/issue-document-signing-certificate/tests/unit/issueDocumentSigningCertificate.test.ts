@@ -17,6 +17,8 @@ import {
 import { getSsmParameter } from '../../adapters/aws/ssmAdapter';
 import { getPublicKey } from '../../adapters/aws/kmsAdapter';
 
+/* eslint @typescript-eslint/no-dynamic-delete: 0 */
+
 jest.mock('../../adapters/aws/ssmAdapter');
 jest.mock('../../adapters/aws/s3Adapter');
 jest.mock('../../adapters/aws/kmsAdapter');

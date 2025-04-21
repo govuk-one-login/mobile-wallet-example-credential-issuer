@@ -1,3 +1,5 @@
+/* eslint @typescript-eslint/no-invalid-void-type: 0 */
+
 export type Result<T, E> = Success<T> | Failure<E>;
 
 export type Success<T> = T extends void ? EmptySuccess : SuccessWithValue<T>;
