@@ -7,11 +7,10 @@ import java.util.HashMap;
 
 public class MockDocuments {
 
-    public static @NotNull Document getMockSocialSecurityDocument(
-            String documentId, String givenName) {
+    public static @NotNull Document getMockSocialSecurityDocument(String documentId) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("familyName", "Edwards Green");
-        data.put("givenName", (givenName != null) ? givenName : "Sarah Elizabeth");
+        data.put("givenName", "Sarah Elizabeth");
         data.put("nino", "QQ123456C");
         data.put("title", "Miss");
         return new Document(documentId, data, "SocialSecurityCredential");

@@ -6,11 +6,14 @@ import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckDocument;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -99,13 +102,26 @@ public class CredentialService {
         String credential;
         try {
             if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-                credential = getSocialSecurityCredential(document, sub);
+                credential =
+                        getSocialSecurityCredential(
+                                mapper.convertValue(
+                                        document.getData(), SocialSecurityDocument.class),
+                                sub);
             } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
-                credential = getBasicCheckCredential(document, sub);
+                credential =
+                        getBasicCheckCredential(
+                                mapper.convertValue(document.getData(), BasicCheckDocument.class),
+                                sub);
             } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-                credential = getDigitalVeteranCard(document, sub);
+                credential =
+                        getDigitalVeteranCard(
+                                mapper.convertValue(document.getData(), VeteranCardDocument.class),
+                                sub);
             } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-                credential = getMobileDrivingLicence(document);
+                credential =
+                        getMobileDrivingLicence(
+                                mapper.convertValue(
+                                        document.getData(), DrivingLicenceDocument.class));
             } else {
                 throw new CredentialServiceException(
                         String.format("Invalid verifiable credential type %s", vcType));
@@ -135,19 +151,21 @@ public class CredentialService {
     }
 
     @SuppressWarnings("unchecked")
-    private String getSocialSecurityCredential(Document document, String sub)
+    private String getSocialSecurityCredential(
+            SocialSecurityDocument socialSecurityDocument, String sub)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
-                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
+                        socialSecurityDocument, sub);
         return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
                 .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
     }
 
     @SuppressWarnings("unchecked")
-    private String getBasicCheckCredential(Document document, String sub)
+    private String getBasicCheckCredential(BasicCheckDocument basicCheckDocument, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
-                CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildBasicCheckCredentialSubject(basicCheckDocument, sub);
 
         return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
                 .buildCredential(
@@ -157,10 +175,10 @@ public class CredentialService {
     }
 
     @SuppressWarnings("unchecked")
-    private String getDigitalVeteranCard(Document document, String sub)
+    private String getDigitalVeteranCard(VeteranCardDocument veteranCardDocument, String sub)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
-                CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildVeteranCardCredentialSubject(veteranCardDocument, sub);
         return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         veteranCardCredentialSubject,
@@ -168,9 +186,8 @@ public class CredentialService {
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
     }
 
-    private String getMobileDrivingLicence(Document document) throws MDLException {
-        final DrivingLicenceDocument drivingLicenceDocument =
-                mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+    private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
+            throws MDLException {
         return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 

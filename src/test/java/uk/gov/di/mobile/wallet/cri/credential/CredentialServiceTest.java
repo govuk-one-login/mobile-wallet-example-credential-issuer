@@ -201,7 +201,7 @@ class CredentialServiceTest {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenThrow(new NoSuchAlgorithmException("Some algorithm error"));
 
@@ -224,7 +224,7 @@ class CredentialServiceTest {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenThrow(new SigningException("Some signing error", new RuntimeException()));
 
@@ -251,7 +251,7 @@ class CredentialServiceTest {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenReturn(mockCredentialJwt);
 
@@ -367,7 +367,7 @@ class CredentialServiceTest {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
+                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenReturn(mockCredentialJwt);
 
