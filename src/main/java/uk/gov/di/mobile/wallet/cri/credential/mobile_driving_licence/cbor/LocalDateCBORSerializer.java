@@ -21,7 +21,6 @@ public class LocalDateCBORSerializer extends JsonSerializer<LocalDate> {
         if (generator instanceof CBORGenerator cborGenerator) {
             String dateString = localDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
             // '1004' is a tag indicating that the CBOR value should be interpreted as a date
-            // value.
             cborGenerator.writeTag(1004);
             generator.writeString(dateString);
         } else {
