@@ -7,11 +7,10 @@ import java.util.HashMap;
 
 public class MockDocuments {
 
-    public static @NotNull Document getMockSocialSecurityDocument(
-            String documentId, String givenName) {
+    public static @NotNull Document getMockSocialSecurityDocument(String documentId) {
         HashMap<String, Object> data = new HashMap<>();
         data.put("familyName", "Edwards Green");
-        data.put("givenName", (givenName != null) ? givenName : "Sarah Elizabeth");
+        data.put("givenName", "Sarah Elizabeth");
         data.put("nino", "QQ123456C");
         data.put("title", "Miss");
         return new Document(documentId, data, "SocialSecurityCredential");
@@ -58,6 +57,25 @@ public class MockDocuments {
         data.put("serviceBranch", "HM Naval Service");
         data.put("photo", "base64EncodedPhoto");
         return new Document(documentId, data, "digitalVeteranCard");
+    }
+
+    public static @NotNull Document getMockMobileDrivingLicence(String documentId) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("family_name", "Edwards");
+        data.put("given_name", "Sarah Ann");
+        data.put("portrait", "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg==");
+        data.put("birth_date", "01-02-2000");
+        data.put("birth_place", "London");
+        data.put("issue_date", "08-04-2020");
+        data.put("expiry_date", "08-04-2025");
+        data.put("issuing_authority", "TEST");
+        data.put("issuing_country", "UK");
+        data.put("document_number", "123456789");
+        data.put("resident_address", new String[] {"Flat 2a", "64 Berry Street"});
+        data.put("resident_postal_code", "N1 7FN");
+        data.put("resident_city", "London");
+
+        return new Document(documentId, data, "mobileDrivingLicence");
     }
 
     public static @NotNull Document getMockDocumentWithInvalidVcType(String documentId) {
