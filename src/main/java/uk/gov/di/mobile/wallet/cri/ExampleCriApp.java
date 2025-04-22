@@ -19,7 +19,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.Jackso
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NameSpaceFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespaceFactory;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -88,11 +88,11 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         IssuerSignedItemFactory issuerSignedItemFactory =
                 new IssuerSignedItemFactory(new DigestIDGenerator());
         DocumentFactory documentFactory = new DocumentFactory();
-        NameSpaceFactory nameSpaceFactory =
-                new NameSpaceFactory(issuerSignedItemFactory, cborEncoder);
+        NamespaceFactory namespaceFactory =
+                new NamespaceFactory(issuerSignedItemFactory, cborEncoder);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(cborEncoder, documentFactory, nameSpaceFactory);
+                new MobileDrivingLicenceService(cborEncoder, documentFactory, namespaceFactory);
 
         CredentialService credentialService =
                 new CredentialService(

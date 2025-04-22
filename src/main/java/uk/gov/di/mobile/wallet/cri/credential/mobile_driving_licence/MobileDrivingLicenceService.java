@@ -4,7 +4,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NameSpaceFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespaceFactory;
 
 import java.util.HexFormat;
 import java.util.LinkedHashMap;
@@ -30,7 +30,7 @@ public class MobileDrivingLicenceService {
     private final DocumentFactory documentFactory;
 
     /** Factory for creating a namespace from driving licence documents. */
-    private final NameSpaceFactory namespaceFactory;
+    private final NamespaceFactory namespaceFactory;
 
     /**
      * Constructs a new MobileDrivingLicenceService with all required dependencies.
@@ -43,7 +43,7 @@ public class MobileDrivingLicenceService {
     public MobileDrivingLicenceService(
             CBOREncoder cborEncoder,
             DocumentFactory documentFactory,
-            NameSpaceFactory namespaceFactory) {
+            NamespaceFactory namespaceFactory) {
         this.cborEncoder = cborEncoder;
         this.documentFactory = documentFactory;
         this.namespaceFactory = namespaceFactory;
@@ -59,11 +59,11 @@ public class MobileDrivingLicenceService {
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws MDLException {
-        Map<String, List<byte[]>> nameSpaces = new LinkedHashMap<>();
+        Map<String, List<byte[]>> namespaces = new LinkedHashMap<>();
         List<byte[]> namespace = namespaceFactory.build(drivingLicenceDocument);
-        nameSpaces.put(MOBILE_DRIVING_LICENCE_NAMESPACE, namespace);
+        namespaces.put(MOBILE_DRIVING_LICENCE_NAMESPACE, namespace);
 
-        Document mdoc = documentFactory.build(nameSpaces);
+        Document mdoc = documentFactory.build(namespaces);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
         return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);
     }

@@ -10,7 +10,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NameSpaceFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespaceFactory;
 
 import java.util.ArrayList;
 import java.util.HexFormat;
@@ -34,7 +34,7 @@ class MobileDrivingLicenceServiceTest {
 
     @Mock private DocumentFactory documentFactory;
 
-    @Mock private NameSpaceFactory namespaceFactory;
+    @Mock private NamespaceFactory namespaceFactory;
 
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
 
@@ -83,7 +83,7 @@ class MobileDrivingLicenceServiceTest {
     @Test
     void Should_PropagateException_When_NameSpaceFactoryThrowsMDLException() throws MDLException {
         MDLException expectedException =
-                new MDLException("Some NameSpaceFactory error", new RuntimeException());
+                new MDLException("Some NamespaceFactory error", new RuntimeException());
         when(namespaceFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
 
         MDLException thrownException =

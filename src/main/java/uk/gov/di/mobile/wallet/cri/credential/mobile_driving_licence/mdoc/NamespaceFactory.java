@@ -13,7 +13,7 @@ import java.util.List;
  * class uses reflection to iterate through the fields of an input object, converts each field's
  * name to snake_case, and creates an IssuerSignedItem for each field.
  */
-public class NameSpaceFactory {
+public class NamespaceFactory {
     /** Factory for creating IssuerSignedItem objects from field names and values */
     private final IssuerSignedItemFactory issuerSignedItemFactory;
 
@@ -21,12 +21,12 @@ public class NameSpaceFactory {
     private final CBOREncoder cborEncoder;
 
     /**
-     * Constructs a NameSpaceFactory with the necessary dependencies.
+     * Constructs a NamespaceFactory with the necessary dependencies.
      *
      * @param issuerSignedItemFactory Factory to create IssuerSignedItem objects
      * @param cborEncoder Encoder to serialize objects into CBOR format
      */
-    public NameSpaceFactory(
+    public NamespaceFactory(
             IssuerSignedItemFactory issuerSignedItemFactory, CBOREncoder cborEncoder) {
         this.issuerSignedItemFactory = issuerSignedItemFactory;
         this.cborEncoder = cborEncoder;

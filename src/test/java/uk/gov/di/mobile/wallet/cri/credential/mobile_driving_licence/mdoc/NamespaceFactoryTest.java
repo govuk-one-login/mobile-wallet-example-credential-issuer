@@ -19,23 +19,23 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class NameSpaceFactoryTest {
+class NamespaceFactoryTest {
 
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
     @Mock private CBOREncoder mockCborEncoder;
     @Captor private ArgumentCaptor<String> elementIdentifierCaptor;
 
-    private NameSpaceFactory nameSpaceFactory;
+    private NamespaceFactory namespaceFactory;
 
     @BeforeEach
     void setUp() {
-        nameSpaceFactory = new NameSpaceFactory(mockIssuerSignedItemFactory, mockCborEncoder);
+        namespaceFactory = new NamespaceFactory(mockIssuerSignedItemFactory, mockCborEncoder);
     }
 
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
-        List<byte[]> issuerSignedItems = nameSpaceFactory.build(drivingLicence);
+        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence);
 
         assertEquals(
                 13,
@@ -47,7 +47,7 @@ class NameSpaceFactoryTest {
     void Should_CorrectlyConvertFieldNamesToSnakeCase() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
 
-        nameSpaceFactory.build(drivingLicence);
+        namespaceFactory.build(drivingLicence);
 
         // Capture all calls to mockIssuerSignedItemFactory build method
         verify(mockIssuerSignedItemFactory, times(13))
