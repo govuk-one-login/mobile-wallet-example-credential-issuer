@@ -8,11 +8,7 @@ import io.dropwizard.core.Application;
 import io.dropwizard.core.setup.Bootstrap;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialResource;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.*;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
@@ -94,13 +90,15 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         MobileDrivingLicenceService mobileDrivingLicenceService =
                 new MobileDrivingLicenceService(cborEncoder, documentFactory, namespaceFactory);
 
+        DocumentStoreClient documentStoreClient =
+                new DocumentStoreClient(configurationService, httpClient);
+
         CredentialService credentialService =
                 new CredentialService(
-                        configurationService,
                         dynamoDbService,
                         accessTokenService,
                         proofJwtService,
-                        httpClient,
+                        documentStoreClient,
                         credentialBuilder,
                         mobileDrivingLicenceService);
 
@@ -112,21 +110,15 @@ public class ExampleCriApp extends Application<ConfigurationService> {
 
         environment.healthChecks().register("ping", new Ping());
         environment.jersey().register(new HealthCheckResource(environment));
-
         environment
                 .jersey()
                 .register(
                         new CredentialOfferResource(
                                 credentialOfferService, configurationService, dynamoDbService));
-
         environment.jersey().register(new MetadataResource(configurationService, metadataBuilder));
-
         environment.jersey().register(new CredentialResource(credentialService));
-
         environment.jersey().register(new DidDocumentResource(didDocumentService));
-
         environment.jersey().register(new JwksResource(jwksService));
-
         environment.jersey().register(new NotificationResource(notificationService));
     }
 }

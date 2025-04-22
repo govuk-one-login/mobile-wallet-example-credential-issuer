@@ -58,7 +58,8 @@ class CredentialResourceTest {
                     AccessTokenValidationException,
                     CredentialServiceException,
                     ProofJwtValidationException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DocumentStoreException {
         final Response response =
                 resource.target("/credential")
                         .request()
@@ -79,7 +80,8 @@ class CredentialResourceTest {
                     AccessTokenValidationException,
                     ProofJwtValidationException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DocumentStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -104,7 +106,8 @@ class CredentialResourceTest {
                     AccessTokenValidationException,
                     ProofJwtValidationException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DocumentStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -132,7 +135,8 @@ class CredentialResourceTest {
                     ProofJwtValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DocumentStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(
@@ -161,7 +165,8 @@ class CredentialResourceTest {
                     ProofJwtValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DocumentStoreException {
         JsonNode requestBody =
                 new ObjectMapper()
                         .readTree(

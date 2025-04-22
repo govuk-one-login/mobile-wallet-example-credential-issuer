@@ -1,11 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jwt.SignedJWT;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.client.WebTarget;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,14 +16,12 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivi
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
@@ -49,10 +42,6 @@ import static testUtils.MockDocuments.*;
 @ExtendWith(MockitoExtension.class)
 class CredentialServiceTest {
 
-    @Mock private Client mockHttpClient;
-    @Mock private WebTarget mockWebTarget;
-    @Mock private Invocation.Builder mockInvocationBuilder;
-    @Mock private Response mockResponse;
     @Mock private CredentialBuilder<?> mockCredentialBuilder;
     @Mock private MobileDrivingLicenceService mockMobileDrivingLicenceService;
 
@@ -61,7 +50,7 @@ class CredentialServiceTest {
     private final DynamoDbService mockDynamoDbService = mock(DynamoDbService.class);
     private final AccessTokenService mockAccessTokenService = mock(AccessTokenService.class);
     private final ProofJwtService mockProofJwtService = mock(ProofJwtService.class);
-    private final ConfigurationService mockConfigurationService = mock(ConfigurationService.class);
+    private final DocumentStoreClient mockDocumentStoreClient = mock(DocumentStoreClient.class);
 
     private CredentialService credentialService;
     private CachedCredentialOffer mockCachedCredentialOffer;
@@ -87,11 +76,10 @@ class CredentialServiceTest {
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         credentialService =
                 new CredentialService(
-                        mockConfigurationService,
                         mockDynamoDbService,
                         mockAccessTokenService,
                         mockProofJwtService,
-                        mockHttpClient,
+                        mockDocumentStoreClient,
                         mockCredentialBuilder,
                         mockMobileDrivingLicenceService) {
                     @Override
@@ -204,37 +192,15 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_Throw_CredentialServiceException_When_Document_Endpoint_Returns_500()
-            throws DataStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(500);
-
-        CredentialServiceException exception =
-                assertThrows(
-                        CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
-        assertThat(
-                exception.getMessage(),
-                containsString(
-                        "Request to fetch document de9cbf02-2fbc-4d61-a627-f97851f6840b failed with status code 500"));
-    }
-
-    @Test
     void
             Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsNoSuchAlgorithmException()
-                    throws DataStoreException, SigningException, NoSuchAlgorithmException {
+                    throws DataStoreException,
+                            SigningException,
+                            NoSuchAlgorithmException,
+                            DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenThrow(new NoSuchAlgorithmException("Some algorithm error"));
@@ -251,14 +217,13 @@ class CredentialServiceTest {
 
     @Test
     void Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsSigningException()
-            throws DataStoreException, SigningException, NoSuchAlgorithmException {
+            throws DataStoreException,
+                    SigningException,
+                    NoSuchAlgorithmException,
+                    DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenThrow(new SigningException("Some signing error", new RuntimeException()));
@@ -281,14 +246,11 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenReturn(mockCredentialJwt);
@@ -310,14 +272,11 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockBasicCheckDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), anyString()))
                 .thenReturn(mockCredentialJwt);
@@ -339,14 +298,11 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockVeteranCardDocument(DOCUMENT_ID));
         when(mockCredentialBuilder.buildCredential(any(), any(), anyString()))
                 .thenReturn(mockCredentialJwt);
@@ -367,14 +323,11 @@ class CredentialServiceTest {
                     DataStoreException,
                     CredentialServiceException,
                     CredentialOfferException,
-                    MDLException {
+                    MDLException,
+                    DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockMobileDrivingLicence(DOCUMENT_ID));
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -385,14 +338,10 @@ class CredentialServiceTest {
 
     @Test
     void Should_ThrowCredentialServiceException_When_DocumentVcTypeIsUnknown()
-            throws DataStoreException {
+            throws DataStoreException, DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockDocumentWithInvalidVcType(DOCUMENT_ID));
 
         CredentialServiceException exception =
@@ -413,14 +362,11 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException {
+                    NoSuchAlgorithmException,
+                    DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
-        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
-        when(mockInvocationBuilder.get()).thenReturn(mockResponse);
-        when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class))
+        when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID, null));
         when(mockCredentialBuilder.buildCredential(any(), any(), any()))
                 .thenReturn(mockCredentialJwt);

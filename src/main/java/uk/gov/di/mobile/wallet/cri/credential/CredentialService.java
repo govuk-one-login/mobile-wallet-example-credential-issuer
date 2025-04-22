@@ -3,9 +3,6 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
@@ -15,15 +12,12 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivi
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Objects;
@@ -35,29 +29,26 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECUR
 
 public class CredentialService {
 
-    private final ConfigurationService configurationService;
     private final DataStore dataStore;
     private final AccessTokenService accessTokenService;
     private final ProofJwtService proofJwtService;
-    private final Client httpClient;
+    private final DocumentStoreClient documentStoreClient;
     private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
     private final MobileDrivingLicenceService mobileDrivingLicenceService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService(
-            ConfigurationService configurationService,
             DataStore dataStore,
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
-            Client httpClient,
+            DocumentStoreClient documentStoreClient,
             CredentialBuilder<?> credentialBuilder,
             MobileDrivingLicenceService mobileDrivingLicenceService) {
-        this.configurationService = configurationService;
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
-        this.httpClient = httpClient;
+        this.documentStoreClient = documentStoreClient;
         this.credentialBuilder = credentialBuilder;
         this.mobileDrivingLicenceService = mobileDrivingLicenceService;
     }
@@ -67,7 +58,8 @@ public class CredentialService {
                     ProofJwtValidationException,
                     AccessTokenValidationException,
                     CredentialServiceException,
-                    CredentialOfferException {
+                    CredentialOfferException,
+                    DocumentStoreException {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
 
@@ -90,7 +82,7 @@ public class CredentialService {
         }
 
         String documentId = credentialOffer.getDocumentId();
-        Document document = getDocument(documentId);
+        Document document = documentStoreClient.getDocument(documentId);
 
         LOGGER.info(
                 "{} retrieved - credentialOfferId: {}, documentId: {}",
@@ -139,30 +131,6 @@ public class CredentialService {
             return false;
         }
         return true;
-    }
-
-    private Document getDocument(String documentId) throws CredentialServiceException {
-        try {
-            URI uri = buildDocumentUri(documentId);
-            Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
-            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-                throw new CredentialServiceException(
-                        String.format(
-                                "Request to fetch document %s failed with status code %s",
-                                documentId, response.getStatus()));
-            }
-            return response.readEntity(Document.class);
-        } catch (URISyntaxException exception) {
-            String errorMessage =
-                    String.format("Invalid URI constructed for document: %s", documentId);
-            throw new CredentialServiceException(errorMessage, exception);
-        }
-    }
-
-    private URI buildDocumentUri(String documentId) throws URISyntaxException {
-        String credentialStoreUrl = configurationService.getCredentialStoreUrl();
-        String documentEndpoint = configurationService.getDocumentEndpoint();
-        return new URI(credentialStoreUrl + documentEndpoint + documentId);
     }
 
     @SuppressWarnings("unchecked")
