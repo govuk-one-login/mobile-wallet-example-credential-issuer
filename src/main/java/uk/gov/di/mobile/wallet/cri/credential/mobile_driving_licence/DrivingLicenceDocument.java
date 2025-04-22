@@ -66,10 +66,6 @@ public class DrivingLicenceDocument {
     }
 
     public void setResidentAddress(String[] residentAddress) {
-        this.residentAddress = concatenateResidentAddressArray(residentAddress);
-    }
-
-    public String concatenateResidentAddressArray(String[] stringArray) {
-        return String.join(", ", stringArray);
+        this.residentAddress = String.join(", ", residentAddress);
     }
 }
