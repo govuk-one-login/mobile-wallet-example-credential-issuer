@@ -36,6 +36,7 @@ public class CredentialService {
     private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
     private final MobileDrivingLicenceService mobileDrivingLicenceService;
 
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService(
@@ -168,8 +169,6 @@ public class CredentialService {
     }
 
     private String getMobileDrivingLicence(Document document) throws MDLException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
         final DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
         return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
