@@ -22,7 +22,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-public class DocumentStoreClientTest {
+class DocumentStoreClientTest {
     @Mock private Client mockHttpClient;
     @Mock private WebTarget mockWebTarget;
     @Mock private Invocation.Builder mockInvocationBuilder;
