@@ -149,7 +149,7 @@ class CredentialBuilderTest {
                                 null));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(credential.getHeader().getKeyID(), equalTo(CREDENTIAL_KEY_ID));
+        assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
         assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
         assertThat(credential.getHeader().getContentType(), equalTo("vc"));
         assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
@@ -202,7 +202,7 @@ class CredentialBuilderTest {
                                 "2025-07-11"));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(credential.getHeader().getKeyID(), equalTo(CREDENTIAL_KEY_ID));
+        assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
         assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
         assertThat(credential.getHeader().getContentType(), equalTo("vc"));
         assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
@@ -258,7 +258,7 @@ class CredentialBuilderTest {
                                 "2000-07-11"));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
-        assertThat(credential.getHeader().getKeyID(), equalTo(CREDENTIAL_KEY_ID));
+        assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
         assertThat(credential.getHeader().getType(), equalTo(new JOSEObjectType("vc+jwt")));
         assertThat(credential.getHeader().getContentType(), equalTo("vc"));
         assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
