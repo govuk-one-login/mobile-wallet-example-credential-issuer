@@ -122,9 +122,10 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
     private Base64URL getEncodedHeader(String keyId) throws NoSuchAlgorithmException {
         String hashedKeyId = KeyHelper.hashKeyId(keyId);
+        String didKeyId = "did:web:" + configurationService.getDidController() + "#" + hashedKeyId;
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
-                        .keyID(hashedKeyId)
+                        .keyID(didKeyId)
                         .type(new JOSEObjectType("vc+jwt"))
                         .contentType("vc")
                         .build();
