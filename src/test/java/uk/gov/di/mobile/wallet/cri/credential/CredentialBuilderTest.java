@@ -58,7 +58,7 @@ class CredentialBuilderTest {
     private static ObjectMapper objectMapper;
 
     private static final String KMS_KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
-    private static final String CREDENTIAL_KEY_ID =
+    private static final String DID_KEY_ID =
             "did:web:example-credential-issuer.gov.uk#78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
     private static final String EXAMPLE_CREDENTIAL_ISSUER = "https://example-cri-url.gov.uk";
     private static final String DID_KEY =
