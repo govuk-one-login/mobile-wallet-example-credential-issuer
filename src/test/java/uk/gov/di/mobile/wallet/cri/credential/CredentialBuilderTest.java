@@ -83,7 +83,8 @@ class CredentialBuilderTest {
         when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
         when(configurationService.getCredentialTtlInDays()).thenReturn(365L);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KMS_KEY_ID);
-        when(configurationService.getDidController()).thenReturn("example-credential-issuer.gov.uk");
+        when(configurationService.getDidController())
+                .thenReturn("example-credential-issuer.gov.uk");
         socialSecurityCredentialSubject =
                 objectMapper.readValue(
                         "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"Title\",\"value\":\"Miss\"},{\"type\":\"GivenName\",\"value\":\"Sarah\"},{\"type\":\"GivenName\",\"value\":\"Elizabeth\"},{\"type\":\"FamilyName\",\"value\":\"Edwards\"},{\"type\":\"FamilyName\",\"value\":\"Green\"}]}],\"socialSecurityRecord\":[{\"personalNumber\":\"QQ123456C\"}]}",
