@@ -26,17 +26,15 @@ public class CredentialSubjectMapper {
     }
 
     public static SocialSecurityCredentialSubject buildSocialSecurityCredentialSubject(
-            Document document, String id) {
-        final SocialSecurityDocument ninoDocument =
-                objectMapper.convertValue(document.getData(), SocialSecurityDocument.class);
-
+            SocialSecurityDocument socialSecurityDocument, String id) {
         List<Name> name =
                 buildName(
-                        ninoDocument.getGivenName(),
-                        ninoDocument.getFamilyName(),
-                        ninoDocument.getTitle());
+                        socialSecurityDocument.getGivenName(),
+                        socialSecurityDocument.getFamilyName(),
+                        socialSecurityDocument.getTitle());
 
-        List<SocialSecurityRecord> socialSecurityRecord = buildSocialSecurityRecord(ninoDocument);
+        List<SocialSecurityRecord> socialSecurityRecord =
+                buildSocialSecurityRecord(socialSecurityDocument);
 
         return new SocialSecurityCredentialSubjectBuilder()
                 .setName(name)
@@ -46,10 +44,7 @@ public class CredentialSubjectMapper {
     }
 
     public static BasicCheckCredentialSubject buildBasicCheckCredentialSubject(
-            Document document, String id) {
-        final BasicCheckDocument basicCheckDocument =
-                objectMapper.convertValue(document.getData(), BasicCheckDocument.class);
-
+            BasicCheckDocument basicCheckDocument, String id) {
         List<Name> name =
                 buildName(
                         basicCheckDocument.getFirstName(), basicCheckDocument.getLastName(), null);
@@ -88,10 +83,7 @@ public class CredentialSubjectMapper {
     }
 
     public static VeteranCardCredentialSubject buildVeteranCardCredentialSubject(
-            Document document, String id) {
-        final VeteranCardDocument veteranCardDocument =
-                objectMapper.convertValue(document.getData(), VeteranCardDocument.class);
-
+            VeteranCardDocument veteranCardDocument, String id) {
         List<Name> name =
                 buildName(
                         veteranCardDocument.getGivenName(),

@@ -1,64 +1,69 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
-import jakarta.ws.rs.client.Client;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckDocument;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
+import java.util.Objects;
 
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.*;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_CHECK_CREDENTIAL;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
 
 public class CredentialService {
 
-    private final ConfigurationService configurationService;
     private final DataStore dataStore;
     private final AccessTokenService accessTokenService;
     private final ProofJwtService proofJwtService;
-    private final Client httpClient;
+    private final DocumentStoreClient documentStoreClient;
     private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
+    private final MobileDrivingLicenceService mobileDrivingLicenceService;
+
+    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService(
-            ConfigurationService configurationService,
             DataStore dataStore,
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
-            Client httpClient,
-            CredentialBuilder<?> credentialBuilder) {
-        this.configurationService = configurationService;
+            DocumentStoreClient documentStoreClient,
+            CredentialBuilder<?> credentialBuilder,
+            MobileDrivingLicenceService mobileDrivingLicenceService) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
-        this.httpClient = httpClient;
+        this.documentStoreClient = documentStoreClient;
         this.credentialBuilder = credentialBuilder;
+        this.mobileDrivingLicenceService = mobileDrivingLicenceService;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
                     ProofJwtValidationException,
-                    SigningException,
                     AccessTokenValidationException,
-                    NoSuchAlgorithmException,
-                    URISyntaxException,
                     CredentialServiceException,
-                    CredentialOfferException {
-
+                    CredentialOfferException,
+                    DocumentStoreException {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
 
@@ -81,7 +86,7 @@ public class CredentialService {
         }
 
         String documentId = credentialOffer.getDocumentId();
-        Document document = getDocument(documentId);
+        Document document = documentStoreClient.getDocument(documentId);
 
         LOGGER.info(
                 "{} retrieved - credentialOfferId: {}, documentId: {}",
@@ -89,28 +94,43 @@ public class CredentialService {
                 credentialOfferId,
                 documentId);
 
-        credentialOffer.setRedeemed(true); // mark credential offer as redeemed to prevent replay
+        credentialOffer.setRedeemed(true); // Mark credential offer as redeemed to prevent replay
         dataStore.updateCredentialOffer(credentialOffer);
 
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
-
-        String notificationId = credentialOffer.getNotificationId();
         String credential;
-        if (vcType.equals(SOCIAL_SECURITY_CREDENTIAL.getType())) {
-            credential = getSocialSecurityCredential(document, sub);
-
-        } else if (vcType.equals(BASIC_CHECK_CREDENTIAL.getType())) {
-            credential = getBasicCheckCredential(document, sub);
-
-        } else if (vcType.equals(DIGITAL_VETERAN_CARD.getType())) {
-            credential = getDigitalVeteranCard(document, sub);
-
-        } else {
+        try {
+            if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
+                credential =
+                        getSocialSecurityCredential(
+                                mapper.convertValue(
+                                        document.getData(), SocialSecurityDocument.class),
+                                sub);
+            } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
+                credential =
+                        getBasicCheckCredential(
+                                mapper.convertValue(document.getData(), BasicCheckDocument.class),
+                                sub);
+            } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
+                credential =
+                        getDigitalVeteranCard(
+                                mapper.convertValue(document.getData(), VeteranCardDocument.class),
+                                sub);
+            } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
+                credential =
+                        getMobileDrivingLicence(
+                                mapper.convertValue(
+                                        document.getData(), DrivingLicenceDocument.class));
+            } else {
+                throw new CredentialServiceException(
+                        String.format("Invalid verifiable credential type %s", vcType));
+            }
+            return new CredentialResponse(credential, credentialOffer.getNotificationId());
+        } catch (NoSuchAlgorithmException | SigningException | MDLException exception) {
             throw new CredentialServiceException(
-                    String.format("Invalid verifiable credential type %s", vcType));
+                    "Failed to issue credential due to an internal error", exception);
         }
-        return new CredentialResponse(credential, notificationId);
     }
 
     private boolean isValidCredentialOffer(
@@ -120,48 +140,32 @@ public class CredentialService {
         if (credentialOffer == null) {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
-        } else if (credentialOffer.getRedeemed()) {
+        } else if (Boolean.TRUE.equals(credentialOffer.getRedeemed())) {
             getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
             return false;
         } else if (now > credentialOffer.getExpiry()) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }
-
         return true;
     }
 
-    private Document getDocument(String documentId)
-            throws URISyntaxException, CredentialServiceException {
-        String credentialStoreUrl = configurationService.getCredentialStoreUrl();
-        String documentEndpoint = configurationService.getDocumentEndpoint();
-        URI uri = new URI(credentialStoreUrl + documentEndpoint + documentId);
-
-        Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
-
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new CredentialServiceException(
-                    String.format(
-                            "Request to fetch document %s failed with status code %s",
-                            documentId, response.getStatus()));
-        }
-        return response.readEntity(Document.class);
-    }
-
     @SuppressWarnings("unchecked")
-    private String getSocialSecurityCredential(Document document, String sub)
+    private String getSocialSecurityCredential(
+            SocialSecurityDocument socialSecurityDocument, String sub)
             throws SigningException, NoSuchAlgorithmException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
-                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
+                        socialSecurityDocument, sub);
         return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
                 .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
     }
 
     @SuppressWarnings("unchecked")
-    private String getBasicCheckCredential(Document document, String sub)
+    private String getBasicCheckCredential(BasicCheckDocument basicCheckDocument, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
-                CredentialSubjectMapper.buildBasicCheckCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildBasicCheckCredentialSubject(basicCheckDocument, sub);
 
         return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
                 .buildCredential(
@@ -171,15 +175,20 @@ public class CredentialService {
     }
 
     @SuppressWarnings("unchecked")
-    private String getDigitalVeteranCard(Document document, String sub)
+    private String getDigitalVeteranCard(VeteranCardDocument veteranCardDocument, String sub)
             throws SigningException, NoSuchAlgorithmException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
-                CredentialSubjectMapper.buildVeteranCardCredentialSubject(document, sub);
+                CredentialSubjectMapper.buildVeteranCardCredentialSubject(veteranCardDocument, sub);
         return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         veteranCardCredentialSubject,
                         DIGITAL_VETERAN_CARD,
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
+    }
+
+    private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
+            throws MDLException {
+        return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 
     protected Logger getLogger() {

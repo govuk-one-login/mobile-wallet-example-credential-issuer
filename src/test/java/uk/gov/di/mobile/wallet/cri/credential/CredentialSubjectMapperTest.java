@@ -2,24 +2,25 @@ package uk.gov.di.mobile.wallet.cri.credential;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckDocument;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static testUtils.MockDocuments.*;
 
 class CredentialSubjectMapperTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
-    private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
 
     @Test
-    void Should_Map_Document_Into_SocialSecurityCredentialSubject() {
-        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, null);
+    void Should_ReturnSocialSecurityCredentialSubject() {
+        SocialSecurityDocument testSocialSecurityDocument = createTestSocialSecurityDocument();
 
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
-                        document, WALLET_SUBJECT_ID);
+                        testSocialSecurityDocument, WALLET_SUBJECT_ID);
 
         assertEquals(WALLET_SUBJECT_ID, socialSecurityCredentialSubject.getId());
         assertEquals(
@@ -55,12 +56,12 @@ class CredentialSubjectMapperTest {
     }
 
     @Test
-    void Should_Map_Document_Into_VeteranCardCredentialSubject() {
-        Document document = getMockVeteranCardDocument(DOCUMENT_ID);
+    void Should_ReturnVeteranCardCredentialSubject() {
+        VeteranCardDocument veteranCardDocument = createTestVeteranCardDocument();
 
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(
-                        document, WALLET_SUBJECT_ID);
+                        veteranCardDocument, WALLET_SUBJECT_ID);
 
         assertEquals(WALLET_SUBJECT_ID, veteranCardCredentialSubject.getId());
         assertEquals("1970-12-05", veteranCardCredentialSubject.getBirthDate().get(0).getValue());
@@ -90,12 +91,12 @@ class CredentialSubjectMapperTest {
     }
 
     @Test
-    void Should_Map_Document_Into_BasicCheckCredentialSubject() {
-        Document document = getMockBasicCheckDocument(DOCUMENT_ID);
+    void Should_ReturnBasicCheckCredentialSubject() {
+        BasicCheckDocument basicCheckDocument = createTestBasicCheckDocument();
 
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(
-                        document, WALLET_SUBJECT_ID);
+                        basicCheckDocument, WALLET_SUBJECT_ID);
 
         assertEquals(WALLET_SUBJECT_ID, basicCheckCredentialSubject.getId());
         assertEquals("1970-12-05", basicCheckCredentialSubject.getBirthDate().get(0).getValue());
@@ -141,12 +142,13 @@ class CredentialSubjectMapperTest {
     }
 
     @Test
-    void Should_Allow_Empty_Given_Name() {
-        Document document = getMockSocialSecurityDocument(DOCUMENT_ID, "");
+    void Should_AllowEmptyGivenName() {
+        SocialSecurityDocument testSocialSecurityDocument =
+                createTestSocialSecurityDocumentWithEmptyGivenName();
 
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
-                        document, WALLET_SUBJECT_ID);
+                        testSocialSecurityDocument, WALLET_SUBJECT_ID);
 
         assertEquals(WALLET_SUBJECT_ID, socialSecurityCredentialSubject.getId());
         assertEquals(
@@ -173,5 +175,66 @@ class CredentialSubjectMapperTest {
                         .getSocialSecurityRecord()
                         .get(0)
                         .getPersonalNumber());
+    }
+
+    public static SocialSecurityDocument createTestSocialSecurityDocument() {
+        SocialSecurityDocument document = new SocialSecurityDocument();
+        document.setTitle("Miss");
+        document.setGivenName("Sarah Elizabeth");
+        document.setFamilyName("Edwards");
+        document.setNino("QQ123456C");
+        return document;
+    }
+
+    public static SocialSecurityDocument createTestSocialSecurityDocumentWithEmptyGivenName() {
+        SocialSecurityDocument document = new SocialSecurityDocument();
+        document.setTitle("Miss");
+        document.setGivenName("");
+        document.setFamilyName("Edwards");
+        document.setNino("QQ123456C");
+        return document;
+    }
+
+    public static VeteranCardDocument createTestVeteranCardDocument() {
+        VeteranCardDocument document = new VeteranCardDocument();
+        document.setGivenName("Bonnie");
+        document.setFamilyName("Blue");
+        document.setDateOfBirthDay("05");
+        document.setDateOfBirthMonth("12");
+        document.setDateOfBirthYear("1970");
+        document.setCardExpiryDateDay("11");
+        document.setCardExpiryDateMonth("07");
+        document.setCardExpiryDateYear("2000");
+        document.setServiceNumber("25057386");
+        document.setServiceBranch("HM Naval Service");
+        document.setPhoto("base64EncodedPhoto");
+        return document;
+    }
+
+    public static BasicCheckDocument createTestBasicCheckDocument() {
+        BasicCheckDocument document = new BasicCheckDocument();
+        document.setIssuanceDay("11");
+        document.setIssuanceMonth("07");
+        document.setIssuanceYear("2024");
+        document.setExpirationDay("11");
+        document.setExpirationMonth("07");
+        document.setExpirationYear("2025");
+        document.setBirthDay("05");
+        document.setBirthMonth("12");
+        document.setBirthYear("1970");
+        document.setFirstName("Bonnie");
+        document.setLastName("Blue");
+        document.setSubBuildingName("Flat 11");
+        document.setBuildingName("Blashford");
+        document.setStreetName("Adelaide Road");
+        document.setAddressLocality("London");
+        document.setAddressCountry("GB");
+        document.setPostalCode("NW3 3RX");
+        document.setCertificateNumber("009878863");
+        document.setApplicationNumber("E0023455534");
+        document.setCertificateType("basic");
+        document.setOutcome("Result clear");
+        document.setPoliceRecordsCheck("Clear");
+        return document;
     }
 }
