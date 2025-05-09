@@ -50,14 +50,14 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     public String buildCredential(
-            T credentialSubject, CredentialType credentialType, String validUntil)
+            T credentialSubject, CredentialType credentialType, String validUntil, long credentialTtlMinutes)
             throws SigningException, NoSuchAlgorithmException {
         // keyId is the hashed key ID. This value must be appended to the string
         // "did:web:example-credential-issuer.mobile.build.account.gov.uk#" in this ticket:
         // https://govukverify.atlassian.net/browse/DCMAW-11424
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId);
-        var encodedClaims = getEncodedClaims(credentialSubject, credentialType, validUntil);
+        var encodedClaims = getEncodedClaims(credentialSubject, credentialType, validUntil, credentialTtlMinutes);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -82,11 +82,12 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     private Base64URL getEncodedClaims(
-            T credentialSubject, CredentialType credentialType, String validUntil) {
+            T credentialSubject, CredentialType credentialType, String validUntil, long credentialTtlMinutes) {
         Instant now = clock.instant();
         Date nowDate = Date.from(now);
-        Date expiryDate =
-                Date.from(now.plus(configurationService.getCredentialTtlInDays(), ChronoUnit.DAYS));
+
+        Date expiryEpoch = Date.from(now.plus(credentialTtlMinutes, ChronoUnit.MINUTES));
+
         String validFromISO =
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
                         .format(now.atZone(ZoneOffset.UTC));
@@ -97,7 +98,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .subject(credentialSubject.getId())
                         .issueTime(nowDate)
                         .notBeforeTime(nowDate)
-                        .expirationTime(expiryDate)
+                        .expirationTime(expiryEpoch)
                         .claim("@context", new String[] {"https://www.w3.org/ns/credentials/v2"})
                         .claim(
                                 "type",
