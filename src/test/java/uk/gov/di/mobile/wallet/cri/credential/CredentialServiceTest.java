@@ -202,7 +202,7 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), any()))
+        when(mockCredentialBuilder.buildCredential(any(), any(), any(), any()))
                 .thenThrow(new NoSuchAlgorithmException("Some algorithm error"));
 
         CredentialServiceException exception =
@@ -225,7 +225,7 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), any()))
+        when(mockCredentialBuilder.buildCredential(any(), any(), any(),any()))
                 .thenThrow(new SigningException("Some signing error", new RuntimeException()));
 
         CredentialServiceException exception =
@@ -252,7 +252,7 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), any()))
+        when(mockCredentialBuilder.buildCredential(any(), any(), any(), any()))
                 .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -261,7 +261,8 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
-                        eq(null));
+                        eq(null),
+                        eq(525600));
     }
 
     @Test
@@ -278,7 +279,7 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockBasicCheckDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), anyString()))
+        when(mockCredentialBuilder.buildCredential(any(), any(), anyString(), any()))
                 .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -287,7 +288,8 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(CredentialType.BASIC_CHECK_CREDENTIAL),
-                        eq("2025-07-11"));
+                        eq("2025-07-11"),
+                        eq(525600));
     }
 
     @Test
@@ -304,7 +306,7 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockVeteranCardDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), anyString()))
+        when(mockCredentialBuilder.buildCredential(any(), any(), anyString(), any()))
                 .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
@@ -313,7 +315,8 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(CredentialType.DIGITAL_VETERAN_CARD),
-                        eq("2000-07-11"));
+                        eq("2000-07-11"),
+                        eq(525600));
     }
 
     @Test
@@ -368,7 +371,7 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), any()))
+        when(mockCredentialBuilder.buildCredential(any(), any(), any(), any()))
                 .thenReturn(mockCredentialJwt);
 
         CredentialResponse credentialServiceReturnValue =
@@ -385,7 +388,8 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
-                        eq(null));
+                        eq(null),
+                        eq(525600));
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(

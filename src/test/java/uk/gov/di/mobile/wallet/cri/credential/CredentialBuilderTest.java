@@ -108,7 +108,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null);
+                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null, 1);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -130,7 +130,8 @@ class CredentialBuilderTest {
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
                                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                                        null));
+                                        null,
+                                        1));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
@@ -146,7 +147,8 @@ class CredentialBuilderTest {
                         credentialBuilderSocialSecurity.buildCredential(
                                 socialSecurityCredentialSubject,
                                 CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                                null));
+                                null,
+                                525600));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -199,7 +201,8 @@ class CredentialBuilderTest {
                         credentialBuilderBasicCheck.buildCredential(
                                 basicCheckCredentialSubject,
                                 CredentialType.BASIC_CHECK_CREDENTIAL,
-                                "2025-07-11"));
+                                "2025-07-11",
+                                525600));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -255,7 +258,8 @@ class CredentialBuilderTest {
                         credentialBuilderVeteranCard.buildCredential(
                                 veteranCardCredentialSubject,
                                 CredentialType.DIGITAL_VETERAN_CARD,
-                                "2000-07-11"));
+                                "2000-07-11",
+                                525600));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
