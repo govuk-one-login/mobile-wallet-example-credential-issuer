@@ -158,7 +158,7 @@ public class CredentialService {
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         socialSecurityDocument, sub);
         return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
-                .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null);
+                .buildCredential(socialSecurityCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, null, 1);
     }
 
     @SuppressWarnings("unchecked")
@@ -171,7 +171,7 @@ public class CredentialService {
                 .buildCredential(
                         basicCheckCredentialSubject,
                         BASIC_CHECK_CREDENTIAL,
-                        basicCheckCredentialSubject.getExpirationDate());
+                        basicCheckCredentialSubject.getExpirationDate(),1);
     }
 
     @SuppressWarnings("unchecked")
@@ -183,7 +183,8 @@ public class CredentialService {
                 .buildCredential(
                         veteranCardCredentialSubject,
                         DIGITAL_VETERAN_CARD,
-                        veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate());
+                        veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate(),
+                        veteranCardDocument.getCredentialTtlMinutes());
     }
 
     private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)

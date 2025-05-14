@@ -31,5 +31,6 @@ public class VeteranCardDocument {
 
     private String serviceNumber;
     private String serviceBranch;
+    private long credentialTtlMinutes;
     private String photo;
 }
