@@ -48,6 +48,9 @@ public class DrivingLicenceDocument {
     @JsonProperty("resident_city")
     private String residentCity;
 
+    @JsonProperty("un_distinguishing_sign")
+    private String unDistinguishingSign;
+
     public void setBirthDate(String birthDate) {
         this.birthDate = parseDate(birthDate);
     }
