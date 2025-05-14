@@ -46,7 +46,7 @@ public class NamespaceFactory {
         List<byte[]> issuerSignedItems = new ArrayList<>();
         for (Field field : input.getClass().getDeclaredFields()) {
             String fieldName = field.getName();
-            // The elementIdentifier within an IssuerSignedItem must be in snake case String
+            // The elementIdentifier within an IssuerSignedItem must be in snake case
             String asSnakeCase = getAsSnakeCase(fieldName);
             field.setAccessible(true);
             Object fieldValue;
@@ -57,6 +57,11 @@ public class NamespaceFactory {
                         "Filed to access Driving Licence properties to build IssuerSignedItem",
                         exception);
             }
+
+            if (fieldValue == null) {
+                continue;
+            }
+
             IssuerSignedItem issuerSignedItem =
                     issuerSignedItemFactory.build(asSnakeCase, fieldValue);
             byte[] issuerSignedItemBytes = cborEncoder.encode(issuerSignedItem);
