@@ -2,7 +2,9 @@
 
 ## Overview
 
-A credential Issuer following the [OpenID for Verifiable Credential Issuance v1.0; pre-authorized code flow](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-pre-authorized-code-flow) to issue credentials into the GOV.UK wallet.
+A reference implementation credential issuer following the [OpenID for Verifiable Credential Issuance v1.0; pre-authorized code flow](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0.html#name-pre-authorized-code-flow) to issue credentials into the GOV.UK Wallet.
+
+This is not production code but a reference implementation to help understand the integrations with GOV.UK Wallet.
 
 ## Pre-requisites
 
