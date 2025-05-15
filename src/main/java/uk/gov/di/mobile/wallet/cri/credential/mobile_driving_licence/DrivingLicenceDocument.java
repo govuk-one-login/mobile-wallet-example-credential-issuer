@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 
 @Setter
 @Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DrivingLicenceDocument {
     @JsonProperty("family_name")
     private String familyName;
@@ -47,6 +49,9 @@ public class DrivingLicenceDocument {
 
     @JsonProperty("resident_city")
     private String residentCity;
+
+    @JsonProperty("un_distinguishing_sign")
+    private String unDistinguishingSign;
 
     public void setBirthDate(String birthDate) {
         this.birthDate = parseDate(birthDate);

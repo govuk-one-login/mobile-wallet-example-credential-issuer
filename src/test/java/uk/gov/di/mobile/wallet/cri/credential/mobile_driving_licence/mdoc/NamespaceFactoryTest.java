@@ -38,7 +38,7 @@ class NamespaceFactoryTest {
         List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence);
 
         assertEquals(
-                13,
+                14,
                 issuerSignedItems.size(),
                 "Should create one IssuerSignedItem per attribute in the driving licence document");
     }
@@ -50,7 +50,7 @@ class NamespaceFactoryTest {
         namespaceFactory.build(drivingLicence);
 
         // Capture all calls to mockIssuerSignedItemFactory build method
-        verify(mockIssuerSignedItemFactory, times(13))
+        verify(mockIssuerSignedItemFactory, times(14))
                 .build(elementIdentifierCaptor.capture(), ArgumentMatchers.any());
         List<String> capturedIdentifiers = elementIdentifierCaptor.getAllValues();
 
@@ -68,6 +68,7 @@ class NamespaceFactoryTest {
         assertTrue(capturedIdentifiers.contains("resident_address"));
         assertTrue(capturedIdentifiers.contains("resident_postal_code"));
         assertTrue(capturedIdentifiers.contains("resident_city"));
+        assertTrue(capturedIdentifiers.contains("un_distinguishing_sign"));
     }
 
     private DrivingLicenceDocument createTestDrivingLicenceDocument() {
@@ -80,12 +81,13 @@ class NamespaceFactoryTest {
         drivingLicence.setIssueDate("10-01-2020");
         drivingLicence.setExpiryDate("09-01-2025");
         drivingLicence.setIssuingAuthority("DVLA");
-        drivingLicence.setIssuingCountry("GBR");
-        drivingLicence.setDocumentNumber("123456789");
+        drivingLicence.setIssuingCountry("GB");
+        drivingLicence.setDocumentNumber("HALL9655293DH5RO");
         String[] address = {"123 Main St", "Apt 4B"};
         drivingLicence.setResidentAddress(address);
         drivingLicence.setResidentPostalCode("SW1A 2AA");
         drivingLicence.setResidentCity("London");
+        drivingLicence.setUnDistinguishingSign("UK");
         return drivingLicence;
     }
 }
