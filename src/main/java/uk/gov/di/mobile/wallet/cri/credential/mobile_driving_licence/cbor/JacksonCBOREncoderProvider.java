@@ -19,13 +19,13 @@ public final class JacksonCBOREncoderProvider {
 
     public static CBORMapper configuredCBORMapper() {
         CBORMapper mapper = new CBORMapper();
-        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
-                .registerModule(new Jdk8Module());
         SimpleModule simpleModule =
                 new SimpleModule()
                         .addSerializer(LocalDate.class, new LocalDateCBORSerializer())
                         .addSerializer(IssuerSigned.class, new IssuerSignedCBORSerializer());
-        mapper.registerModule(simpleModule);
+        mapper.registerModule(simpleModule)
+                .registerModule(new Jdk8Module())
+                .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
         return mapper;
     }
 }
