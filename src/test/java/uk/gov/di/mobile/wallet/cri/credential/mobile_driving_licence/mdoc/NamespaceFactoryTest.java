@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
@@ -72,21 +73,24 @@ class NamespaceFactoryTest {
     }
 
     private DrivingLicenceDocument createTestDrivingLicenceDocument() {
-        DrivingLicenceDocument drivingLicence = new DrivingLicenceDocument();
-        drivingLicence.setFamilyName("Doe");
-        drivingLicence.setGivenName("John");
-        drivingLicence.setPortrait("base64EncodedPortraitString");
-        drivingLicence.setBirthDate("24-05-1985");
-        drivingLicence.setBirthPlace("London");
-        drivingLicence.setIssueDate("10-01-2020");
-        drivingLicence.setExpiryDate("09-01-2025");
-        drivingLicence.setIssuingAuthority("DVLA");
-        drivingLicence.setIssuingCountry("GBR");
-        drivingLicence.setDocumentNumber("123456789");
         String[] address = {"123 Main St", "Apt 4B"};
-        drivingLicence.setResidentAddress(address);
-        drivingLicence.setResidentPostalCode("SW1A 2AA");
-        drivingLicence.setResidentCity("London");
-        return drivingLicence;
+        DrivingPrivilege[] drivingPrivileges = {new DrivingPrivilege("B", null, null)};
+
+        return new DrivingLicenceDocument(
+                "Doe", // family_name
+                "John", // given_name
+                "base64EncodedPortraitString", // portrait
+                "24-05-1985", // birth_date
+                "London", // birth_place
+                "10-01-2020", // issue_date
+                "09-01-2025", // expiry_date
+                "DVLA", // issuing_authority
+                "GBR", // issuing_country
+                "123456789", // document_number
+                address, // resident_address
+                "SW1A 2AA", // resident_postal_code
+                "London", // resident_city
+                drivingPrivileges // driving_privileges
+                );
     }
 }

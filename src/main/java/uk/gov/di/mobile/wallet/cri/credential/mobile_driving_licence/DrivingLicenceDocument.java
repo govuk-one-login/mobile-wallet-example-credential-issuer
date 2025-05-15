@@ -1,74 +1,72 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
-@Setter
 @Getter
+@Setter
 public class DrivingLicenceDocument {
-    @JsonProperty("family_name")
-    private String familyName;
 
-    @JsonProperty("given_name")
-    private String givenName;
+    private final String familyName;
+    private final String givenName;
+    private final String portrait;
+    private final LocalDate birthDate;
+    private final String birthPlace;
+    private final LocalDate issueDate;
+    private final LocalDate expiryDate;
+    private final String issuingAuthority;
+    private final String issuingCountry;
+    private final String documentNumber;
+    private final String residentAddress;
+    private final String residentPostalCode;
+    private final String residentCity;
+    private final DrivingPrivilege[] drivingPrivileges;
 
-    private String portrait;
-
-    @JsonProperty("birth_date")
-    private LocalDate birthDate;
-
-    @JsonProperty("birth_place")
-    private String birthPlace;
-
-    @JsonProperty("issue_date")
-    private LocalDate issueDate;
-
-    @JsonProperty("expiry_date")
-    private LocalDate expiryDate;
-
-    @JsonProperty("issuing_authority")
-    private String issuingAuthority;
-
-    @JsonProperty("issuing_country")
-    private String issuingCountry;
-
-    @JsonProperty("document_number")
-    private String documentNumber;
-
-    @JsonProperty("resident_address")
-    private String residentAddress;
-
-    @JsonProperty("resident_postal_code")
-    private String residentPostalCode;
-
-    @JsonProperty("resident_city")
-    private String residentCity;
-
-    @JsonProperty("driving_privileges")
-    private DrivingPrivilege[] drivingPrivileges;
-
-    public void setBirthDate(String birthDate) {
-        this.birthDate = parseDate(birthDate);
-    }
-
-    public void setIssueDate(String issueDate) {
-        this.issueDate = parseDate(issueDate);
-    }
-
-    public void setExpiryDate(String expiryDate) {
-        this.expiryDate = parseDate(expiryDate);
+    @JsonCreator
+    public DrivingLicenceDocument(
+            @JsonProperty("family_name") String familyName,
+            @JsonProperty("given_name") String givenName,
+            @JsonProperty("portrait") String portrait,
+            @JsonProperty("birth_date") String birthDate,
+            @JsonProperty("birth_place") String birthPlace,
+            @JsonProperty("issue_date") String issueDate,
+            @JsonProperty("expiry_date") String expiryDate,
+            @JsonProperty("issuing_authority") String issuingAuthority,
+            @JsonProperty("issuing_country") String issuingCountry,
+            @JsonProperty("document_number") String documentNumber,
+            @JsonProperty("resident_address") String[] residentAddress,
+            @JsonProperty("resident_postal_code") String residentPostalCode,
+            @JsonProperty("resident_city") String residentCity,
+            @JsonProperty("driving_privileges") DrivingPrivilege[] drivingPrivileges) {
+        this.familyName = Objects.requireNonNull(familyName, "family_name is required");
+        this.givenName = Objects.requireNonNull(givenName, "given_name is required");
+        this.portrait = Objects.requireNonNull(portrait, "portrait is required");
+        this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
+        this.birthPlace = Objects.requireNonNull(birthPlace, "birth_place is required");
+        this.issueDate = parseDate(Objects.requireNonNull(issueDate, "issue_date is required"));
+        this.expiryDate = parseDate(Objects.requireNonNull(expiryDate, "expiry_date is required"));
+        this.issuingAuthority =
+                Objects.requireNonNull(issuingAuthority, "issuing_authority is required");
+        this.issuingCountry = Objects.requireNonNull(issuingCountry, "issuing_country is required");
+        this.documentNumber = Objects.requireNonNull(documentNumber, "document_number is required");
+        this.residentAddress =
+                String.join(
+                        ", ",
+                        Objects.requireNonNull(residentAddress, "resident_address is required"));
+        this.residentPostalCode =
+                Objects.requireNonNull(residentPostalCode, "resident_postal_code is required");
+        this.residentCity = Objects.requireNonNull(residentCity, "resident_city is required");
+        this.drivingPrivileges = drivingPrivileges;
     }
 
     private LocalDate parseDate(String dateString) {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return LocalDate.parse(dateString, dateFormat);
-    }
-
-    public void setResidentAddress(String[] residentAddress) {
-        this.residentAddress = String.join(", ", residentAddress);
     }
 }
