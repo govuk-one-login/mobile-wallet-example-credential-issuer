@@ -77,20 +77,19 @@ class NamespaceFactoryTest {
         DrivingPrivilege[] drivingPrivileges = {new DrivingPrivilege("B", null, null)};
 
         return new DrivingLicenceDocument(
-                "Doe", // family_name
-                "John", // given_name
-                "base64EncodedPortraitString", // portrait
-                "24-05-1985", // birth_date
-                "London", // birth_place
-                "10-01-2020", // issue_date
-                "09-01-2025", // expiry_date
-                "DVLA", // issuing_authority
-                "GBR", // issuing_country
-                "123456789", // document_number
-                address, // resident_address
-                "SW1A 2AA", // resident_postal_code
-                "London", // resident_city
-                drivingPrivileges // driving_privileges
-                );
+                "Doe",
+                "John",
+                "base64EncodedPortraitString",
+                "24-05-1985",
+                "London",
+                "10-01-2020",
+                "09-01-2025",
+                "DVLA",
+                "GB",
+                "HALL9655293DH5RO",
+                address,
+                "SW1A 2AA",
+                "London",
+                drivingPrivileges);
     }
 }
