@@ -62,7 +62,8 @@ public class DrivingLicenceDocument {
         this.residentPostalCode =
                 Objects.requireNonNull(residentPostalCode, "resident_postal_code is required");
         this.residentCity = Objects.requireNonNull(residentCity, "resident_city is required");
-        this.drivingPrivileges = drivingPrivileges;
+        this.drivingPrivileges =
+                Objects.requireNonNull(drivingPrivileges, "driving_privileges is required");
     }
 
     private LocalDate parseDate(String dateString) {
