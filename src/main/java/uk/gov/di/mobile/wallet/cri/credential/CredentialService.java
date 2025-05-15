@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
@@ -39,7 +40,10 @@ public class CredentialService {
     private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
     private final MobileDrivingLicenceService mobileDrivingLicenceService;
 
-    private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final ObjectMapper mapper =
+            new ObjectMapper()
+                    .registerModule(new JavaTimeModule())
+                    .registerModule(new Jdk8Module());
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
     public CredentialService(

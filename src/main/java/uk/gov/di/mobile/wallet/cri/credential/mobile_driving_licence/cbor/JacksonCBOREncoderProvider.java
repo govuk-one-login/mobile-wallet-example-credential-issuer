@@ -1,7 +1,9 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 
@@ -17,6 +19,8 @@ public final class JacksonCBOREncoderProvider {
 
     public static CBORMapper configuredCBORMapper() {
         CBORMapper mapper = new CBORMapper();
+        mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .registerModule(new Jdk8Module());
         SimpleModule simpleModule =
                 new SimpleModule()
                         .addSerializer(LocalDate.class, new LocalDateCBORSerializer())
