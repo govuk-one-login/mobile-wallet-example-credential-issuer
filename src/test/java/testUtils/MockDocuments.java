@@ -13,6 +13,7 @@ public class MockDocuments {
         data.put("givenName", "Sarah Elizabeth");
         data.put("nino", "QQ123456C");
         data.put("title", "Miss");
+        data.put("credentialTtlMinutes", "525600");
         return new Document(documentId, data, "SocialSecurityCredential");
     }
 
@@ -40,6 +41,7 @@ public class MockDocuments {
         data.put("certificateType", "basic");
         data.put("outcome", "Result clear");
         data.put("policeRecordsCheck", "Clear");
+        data.put("credentialTtlMinutes", "525600");
         return new Document(documentId, data, "BasicCheckCredential");
     }
 
@@ -56,6 +58,7 @@ public class MockDocuments {
         data.put("serviceNumber", "25057386");
         data.put("serviceBranch", "HM Naval Service");
         data.put("photo", "base64EncodedPhoto");
+        data.put("credentialTtlMinutes", "525600");
         return new Document(documentId, data, "digitalVeteranCard");
     }
 

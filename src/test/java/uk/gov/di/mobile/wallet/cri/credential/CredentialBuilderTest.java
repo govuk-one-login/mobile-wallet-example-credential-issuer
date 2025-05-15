@@ -108,7 +108,10 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, null, 1);
+                socialSecurityCredentialSubject,
+                CredentialType.SOCIAL_SECURITY_CREDENTIAL,
+                null,
+                1);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
