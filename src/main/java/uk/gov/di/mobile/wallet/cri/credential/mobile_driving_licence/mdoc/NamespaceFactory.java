@@ -58,10 +58,6 @@ public class NamespaceFactory {
                         exception);
             }
 
-            if (fieldValue == null) {
-                continue;
-            }
-
             IssuerSignedItem issuerSignedItem =
                     issuerSignedItemFactory.build(asSnakeCase, fieldValue);
             byte[] issuerSignedItemBytes = cborEncoder.encode(issuerSignedItem);
