@@ -24,7 +24,7 @@ public class DrivingPrivilege {
     private Optional<LocalDate> issueDate;
     private Optional<LocalDate> expiryDate;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DrivingPrivilege.class);
 
     @JsonCreator
     public DrivingPrivilege(
