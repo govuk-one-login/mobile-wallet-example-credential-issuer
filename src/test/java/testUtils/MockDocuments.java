@@ -3,7 +3,10 @@ package testUtils;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class MockDocuments {
 
@@ -60,6 +63,11 @@ public class MockDocuments {
     }
 
     public static @NotNull Document getMockMobileDrivingLicence(String documentId) {
+        List<Map<String, String>> drivingPrivileges = new ArrayList<>();
+        Map<String, String> drivingPrivilege = new HashMap<>();
+        drivingPrivilege.put("vehicle_category_code", "A");
+        drivingPrivileges.add(drivingPrivilege);
+
         HashMap<String, Object> data = new HashMap<>();
         data.put("family_name", "Edwards");
         data.put("given_name", "Sarah Ann");
@@ -69,11 +77,13 @@ public class MockDocuments {
         data.put("issue_date", "08-04-2020");
         data.put("expiry_date", "08-04-2025");
         data.put("issuing_authority", "TEST");
-        data.put("issuing_country", "UK");
+        data.put("issuing_country", "GB");
         data.put("document_number", "123456789");
         data.put("resident_address", new String[] {"Flat 2a", "64 Berry Street"});
         data.put("resident_postal_code", "N1 7FN");
         data.put("resident_city", "London");
+        data.put("driving_privileges", drivingPrivileges);
+        data.put("un_distinguishing_sign", "UK");
 
         return new Document(documentId, data, "mobileDrivingLicence");
     }

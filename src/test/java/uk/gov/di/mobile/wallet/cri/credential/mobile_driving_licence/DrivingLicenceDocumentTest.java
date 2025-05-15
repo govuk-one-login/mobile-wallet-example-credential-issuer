@@ -28,6 +28,7 @@ class DrivingLicenceDocumentTest {
     private static final DrivingPrivilege[] DRIVING_PRIVILEGES = {
         mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
     };
+    private static final String UN_DISTINGUISHING_SIGN = "UK";
 
     @Test
     void Should_CreateInstance_When_DateIsValid() {
@@ -46,15 +47,16 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_ADDRESS,
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
-                        DRIVING_PRIVILEGES);
+                        DRIVING_PRIVILEGES,
+                        UN_DISTINGUISHING_SIGN);
 
         assertEquals(FAMILY_NAME, document.getFamilyName());
         assertEquals(GIVEN_NAME, document.getGivenName());
         assertEquals(PORTRAIT, document.getPortrait());
-        assertEquals(LocalDate.of(1990, 1, 1), document.getBirthDate());
+        assertEquals(LocalDate.of(1985, 5, 24), document.getBirthDate());
         assertEquals(BIRTH_PLACE, document.getBirthPlace());
-        assertEquals(LocalDate.of(2020, 1, 1), document.getIssueDate());
-        assertEquals(LocalDate.of(2030, 1, 1), document.getExpiryDate());
+        assertEquals(LocalDate.of(2020, 1, 10), document.getIssueDate());
+        assertEquals(LocalDate.of(2030, 1, 9), document.getExpiryDate());
         assertEquals(ISSUING_AUTHORITY, document.getIssuingAuthority());
         assertEquals(ISSUING_COUNTRY, document.getIssuingCountry());
         assertEquals(DOCUMENT_NUMBER, document.getDocumentNumber());
@@ -83,7 +85,8 @@ class DrivingLicenceDocumentTest {
                         singleLineAddress,
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
-                        DRIVING_PRIVILEGES);
+                        DRIVING_PRIVILEGES,
+                        UN_DISTINGUISHING_SIGN);
 
         assertEquals("123 Main St", document.getResidentAddress());
     }
@@ -107,7 +110,8 @@ class DrivingLicenceDocumentTest {
                         multiLineAddress,
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
-                        DRIVING_PRIVILEGES);
+                        DRIVING_PRIVILEGES,
+                        UN_DISTINGUISHING_SIGN);
 
         assertEquals("123 Main St, Floor 2, Suite 301", document.getResidentAddress());
     }
@@ -131,7 +135,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_ADDRESS,
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
-                                DRIVING_PRIVILEGES));
+                                DRIVING_PRIVILEGES,
+                                UN_DISTINGUISHING_SIGN));
     }
 
     @ParameterizedTest
@@ -154,7 +159,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_ADDRESS,
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
-                                DRIVING_PRIVILEGES));
+                                DRIVING_PRIVILEGES,
+                                UN_DISTINGUISHING_SIGN));
     }
 
     @ParameterizedTest
@@ -177,7 +183,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_ADDRESS,
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
-                                DRIVING_PRIVILEGES));
+                                DRIVING_PRIVILEGES,
+                                UN_DISTINGUISHING_SIGN));
     }
 
     @ParameterizedTest
@@ -200,6 +207,7 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_ADDRESS,
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
-                                DRIVING_PRIVILEGES));
+                                DRIVING_PRIVILEGES,
+                                UN_DISTINGUISHING_SIGN));
     }
 }
