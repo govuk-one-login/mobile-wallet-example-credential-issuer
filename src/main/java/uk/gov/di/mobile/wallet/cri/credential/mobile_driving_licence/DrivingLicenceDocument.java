@@ -9,8 +9,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-@Getter
 @Setter
+@Getter
 public class DrivingLicenceDocument {
 
     private final String familyName;
@@ -27,6 +27,7 @@ public class DrivingLicenceDocument {
     private final String residentPostalCode;
     private final String residentCity;
     private final DrivingPrivilege[] drivingPrivileges;
+    private final String unDistinguishingSign;
 
     @JsonCreator
     public DrivingLicenceDocument(
@@ -43,7 +44,8 @@ public class DrivingLicenceDocument {
             @JsonProperty("resident_address") String[] residentAddress,
             @JsonProperty("resident_postal_code") String residentPostalCode,
             @JsonProperty("resident_city") String residentCity,
-            @JsonProperty("driving_privileges") DrivingPrivilege[] drivingPrivileges) {
+            @JsonProperty("driving_privileges") DrivingPrivilege[] drivingPrivileges,
+            @JsonProperty("un_distinguishing_sign") String unDistinguishingSign) {
         this.familyName = Objects.requireNonNull(familyName, "family_name is required");
         this.givenName = Objects.requireNonNull(givenName, "given_name is required");
         this.portrait = Objects.requireNonNull(portrait, "portrait is required");
@@ -64,6 +66,8 @@ public class DrivingLicenceDocument {
         this.residentCity = Objects.requireNonNull(residentCity, "resident_city is required");
         this.drivingPrivileges =
                 Objects.requireNonNull(drivingPrivileges, "driving_privileges is required");
+        this.unDistinguishingSign =
+                Objects.requireNonNull(unDistinguishingSign, "un_distinguishing_sign is required");
     }
 
     private LocalDate parseDate(String dateString) {

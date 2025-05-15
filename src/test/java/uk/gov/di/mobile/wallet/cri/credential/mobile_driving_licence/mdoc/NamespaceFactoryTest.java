@@ -70,6 +70,7 @@ class NamespaceFactoryTest {
         assertTrue(capturedIdentifiers.contains("resident_postal_code"));
         assertTrue(capturedIdentifiers.contains("resident_city"));
         assertTrue(capturedIdentifiers.contains("driving_privileges"));
+        assertTrue(capturedIdentifiers.contains("un_distinguishing_sign"));
     }
 
     private DrivingLicenceDocument createTestDrivingLicenceDocument() {
@@ -90,6 +91,7 @@ class NamespaceFactoryTest {
                 address,
                 "SW1A 2AA",
                 "London",
-                drivingPrivileges);
+                drivingPrivileges,
+                "UK");
     }
 }
