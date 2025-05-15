@@ -38,7 +38,7 @@ class NamespaceFactoryTest {
         List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence);
 
         assertEquals(
-                13,
+                14,
                 issuerSignedItems.size(),
                 "Should create one IssuerSignedItem per attribute in the driving licence document");
     }
@@ -50,7 +50,7 @@ class NamespaceFactoryTest {
         namespaceFactory.build(drivingLicence);
 
         // Capture all calls to mockIssuerSignedItemFactory build method
-        verify(mockIssuerSignedItemFactory, times(13))
+        verify(mockIssuerSignedItemFactory, times(14))
                 .build(elementIdentifierCaptor.capture(), ArgumentMatchers.any());
         List<String> capturedIdentifiers = elementIdentifierCaptor.getAllValues();
 
@@ -68,6 +68,7 @@ class NamespaceFactoryTest {
         assertTrue(capturedIdentifiers.contains("resident_address"));
         assertTrue(capturedIdentifiers.contains("resident_postal_code"));
         assertTrue(capturedIdentifiers.contains("resident_city"));
+        assertTrue(capturedIdentifiers.contains("driving_privileges"));
     }
 
     private DrivingLicenceDocument createTestDrivingLicenceDocument() {
