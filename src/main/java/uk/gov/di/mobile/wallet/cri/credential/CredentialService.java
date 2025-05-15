@@ -190,7 +190,6 @@ public class CredentialService {
                         DIGITAL_VETERAN_CARD,
                         veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate(),
                         veteranCardDocument.getCredentialTtlMinutes());
-
     }
 
     private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
