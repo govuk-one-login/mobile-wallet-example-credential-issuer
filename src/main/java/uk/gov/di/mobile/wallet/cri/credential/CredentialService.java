@@ -161,7 +161,6 @@ public class CredentialService {
                 .buildCredential(
                         socialSecurityCredentialSubject,
                         SOCIAL_SECURITY_CREDENTIAL,
-                        null,
                         socialSecurityDocument.getCredentialTtlMinutes());
     }
 
@@ -175,7 +174,6 @@ public class CredentialService {
                 .buildCredential(
                         basicCheckCredentialSubject,
                         BASIC_CHECK_CREDENTIAL,
-                        basicCheckCredentialSubject.getExpirationDate(),
                         basicCheckDocument.getCredentialTtlMinutes());
     }
 
@@ -188,7 +186,6 @@ public class CredentialService {
                 .buildCredential(
                         veteranCardCredentialSubject,
                         DIGITAL_VETERAN_CARD,
-                        veteranCardCredentialSubject.getVeteranCard().get(0).getExpiryDate(),
                         veteranCardDocument.getCredentialTtlMinutes());
     }
 

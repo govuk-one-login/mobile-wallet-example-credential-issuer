@@ -30,6 +30,8 @@ import java.text.ParseException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
@@ -56,6 +58,7 @@ class CredentialBuilderTest {
 
     private static Instant fixedInstant;
     private static ObjectMapper objectMapper;
+    Instant expectedValidUntil = fixedInstant.plus(525600, ChronoUnit.MINUTES);
 
     private static final String KMS_KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String DID_KEY_ID =
@@ -108,10 +111,7 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject,
-                CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                null,
-                1);
+                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, 1);
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -133,7 +133,6 @@ class CredentialBuilderTest {
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
                                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                                        null,
                                         1));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
@@ -150,7 +149,6 @@ class CredentialBuilderTest {
                         credentialBuilderSocialSecurity.buildCredential(
                                 socialSecurityCredentialSubject,
                                 CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                                null,
                                 525600));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -187,6 +185,11 @@ class CredentialBuilderTest {
                 credential.getJWTClaimsSet().getClaim("validFrom").toString(),
                 equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
         assertThat(
+                credential.getJWTClaimsSet().getClaim("validUntil").toString(),
+                equalTo(
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                .format(expectedValidUntil.atZone(ZoneOffset.UTC))));
+        assertThat(
                 credential.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
                         "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, name=[{nameParts=[{type=Title, value=Miss}, {type=GivenName, value=Sarah}, {type=GivenName, value=Elizabeth}, {type=FamilyName, value=Edwards}, {type=FamilyName, value=Green}]}], socialSecurityRecord=[{personalNumber=QQ123456C}]}"));
@@ -204,7 +207,6 @@ class CredentialBuilderTest {
                         credentialBuilderBasicCheck.buildCredential(
                                 basicCheckCredentialSubject,
                                 CredentialType.BASIC_CHECK_CREDENTIAL,
-                                "2025-07-11",
                                 525600));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -240,8 +242,10 @@ class CredentialBuilderTest {
                 credential.getJWTClaimsSet().getClaim("validFrom").toString(),
                 equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
         assertThat(
-                credential.getJWTClaimsSet().getClaim("validUntil"),
-                equalTo("2025-07-11T22:59:59Z"));
+                credential.getJWTClaimsSet().getClaim("validUntil").toString(),
+                equalTo(
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                .format(expectedValidUntil.atZone(ZoneOffset.UTC))));
         assertThat(
                 credential.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
@@ -261,7 +265,6 @@ class CredentialBuilderTest {
                         credentialBuilderVeteranCard.buildCredential(
                                 veteranCardCredentialSubject,
                                 CredentialType.DIGITAL_VETERAN_CARD,
-                                "2000-07-11",
                                 525600));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -298,8 +301,10 @@ class CredentialBuilderTest {
                 credential.getJWTClaimsSet().getClaim("validFrom").toString(),
                 equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS).toString()));
         assertThat(
-                credential.getJWTClaimsSet().getClaim("validUntil"),
-                equalTo("2000-07-11T22:59:59Z"));
+                credential.getJWTClaimsSet().getClaim("validUntil").toString(),
+                equalTo(
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                .format(expectedValidUntil.atZone(ZoneOffset.UTC))));
         assertThat(
                 credential.getJWTClaimsSet().getClaim("credentialSubject").toString(),
                 equalTo(
