@@ -10,14 +10,11 @@ import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
 import testUtils.MockProofBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckDocument;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -53,10 +50,6 @@ class CredentialServiceTest {
     private final AccessTokenService mockAccessTokenService = mock(AccessTokenService.class);
     private final ProofJwtService mockProofJwtService = mock(ProofJwtService.class);
     private final DocumentStoreClient mockDocumentStoreClient = mock(DocumentStoreClient.class);
-    private final SocialSecurityDocument mockSocialSecurityDocument =
-            mock(SocialSecurityDocument.class);
-    private final BasicCheckDocument mockBasicCheckDocument = mock(BasicCheckDocument.class);
-    private final VeteranCardDocument mockVeteranCardDocument = mock(VeteranCardDocument.class);
 
     private CredentialService credentialService;
     private CachedCredentialOffer mockCachedCredentialOffer;
