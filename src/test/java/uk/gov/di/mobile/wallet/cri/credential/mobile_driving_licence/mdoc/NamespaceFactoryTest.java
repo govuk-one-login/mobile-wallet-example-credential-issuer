@@ -35,7 +35,7 @@ class NamespaceFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
-        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence);
+        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence, "iso");
 
         assertEquals(
                 14,
@@ -44,10 +44,32 @@ class NamespaceFactoryTest {
     }
 
     @Test
+    void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace() throws MDLException {
+        DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
+        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence, "iso");
+
+        assertEquals(
+                14,
+                issuerSignedItems.size(),
+                "Should create one IssuerSignedItem per attribute in the driving licence document");
+    }
+
+    @Test
+    void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace() throws MDLException {
+        DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
+        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence, "uk");
+
+        assertEquals(
+                1,
+                issuerSignedItems.size(),
+                "Should create one IssuerSignedItem per attribute in the driving licence document");
+    }
+
+    @Test
     void Should_CorrectlyConvertFieldNamesToSnakeCase() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
 
-        namespaceFactory.build(drivingLicence);
+        namespaceFactory.build(drivingLicence, "iso");
 
         // Capture all calls to mockIssuerSignedItemFactory build method
         verify(mockIssuerSignedItemFactory, times(14))

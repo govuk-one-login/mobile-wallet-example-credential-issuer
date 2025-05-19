@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,46 +13,64 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DrivingLicenceDocument {
+    @Namespace("iso")
     @JsonProperty("family_name")
     private String familyName;
 
+    @Namespace("iso")
     @JsonProperty("given_name")
     private String givenName;
 
+    @Namespace("iso")
     private String portrait;
 
+    @Namespace("iso")
     @JsonProperty("birth_date")
     private LocalDate birthDate;
 
+    @Namespace("iso")
     @JsonProperty("birth_place")
     private String birthPlace;
 
+    @Namespace("iso")
     @JsonProperty("issue_date")
     private LocalDate issueDate;
 
+    @Namespace("iso")
     @JsonProperty("expiry_date")
     private LocalDate expiryDate;
 
+    @Namespace("iso")
     @JsonProperty("issuing_authority")
     private String issuingAuthority;
 
+    @Namespace("iso")
     @JsonProperty("issuing_country")
     private String issuingCountry;
 
+    @Namespace("iso")
     @JsonProperty("document_number")
     private String documentNumber;
 
+    @Namespace("iso")
     @JsonProperty("resident_address")
     private String residentAddress;
 
+    @Namespace("iso")
     @JsonProperty("resident_postal_code")
     private String residentPostalCode;
 
+    @Namespace("iso")
     @JsonProperty("resident_city")
     private String residentCity;
 
+    @Namespace("iso")
     @JsonProperty("un_distinguishing_sign")
     private String unDistinguishingSign;
+
+    @Namespace("uk")
+    @JsonProperty("title")
+    private String title;
 
     public void setBirthDate(String birthDate) {
         this.birthDate = parseDate(birthDate);

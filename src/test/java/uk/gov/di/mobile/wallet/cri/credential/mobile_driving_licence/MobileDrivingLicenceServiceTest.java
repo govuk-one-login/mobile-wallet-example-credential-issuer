@@ -53,7 +53,7 @@ class MobileDrivingLicenceServiceTest {
         List<byte[]> mockIssuerSignedItems = List.of(new byte[] {1, 2, 3}, new byte[] {4, 5, 6});
         byte[] mockCborEncoding = new byte[] {10, 20, 30, 40, 50};
         String expectedHexString = HexFormat.of().formatHex(mockCborEncoding);
-        when(namespaceFactory.build(mockDrivingLicenceDocument)).thenReturn(mockIssuerSignedItems);
+        when(namespaceFactory.build(mockDrivingLicenceDocument, "targetNamespace")).thenReturn(mockIssuerSignedItems);
         when(documentFactory.build(any())).thenReturn(mockDocument);
         when(cborEncoder.encode(mockDocument)).thenReturn(mockCborEncoding);
 
@@ -84,7 +84,7 @@ class MobileDrivingLicenceServiceTest {
     void Should_PropagateException_When_NameSpaceFactoryThrowsMDLException() throws MDLException {
         MDLException expectedException =
                 new MDLException("Some NamespaceFactory error", new RuntimeException());
-        when(namespaceFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
+        when(namespaceFactory.build(mockDrivingLicenceDocument, "targetNamespace")).thenThrow(expectedException);
 
         MDLException thrownException =
                 assertThrows(
@@ -102,7 +102,7 @@ class MobileDrivingLicenceServiceTest {
         List<byte[]> mockIssuerSignedItems = new ArrayList<>();
         MDLException expectedException =
                 new MDLException("Some CBOREncoder error", new RuntimeException());
-        when(namespaceFactory.build(mockDrivingLicenceDocument)).thenReturn(mockIssuerSignedItems);
+        when(namespaceFactory.build(mockDrivingLicenceDocument, "targetNamespace")).thenReturn(mockIssuerSignedItems);
         when(documentFactory.build(any())).thenReturn(mockDocument);
         when(cborEncoder.encode(mockDocument)).thenThrow(expectedException);
 
