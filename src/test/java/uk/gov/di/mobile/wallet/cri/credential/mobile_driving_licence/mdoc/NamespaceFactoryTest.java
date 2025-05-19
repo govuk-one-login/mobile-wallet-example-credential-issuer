@@ -9,6 +9,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.Namespaces;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
@@ -46,7 +47,7 @@ class NamespaceFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
-        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence, "iso");
+        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence, Namespaces.ISO);
 
         assertEquals(
                 14,
@@ -57,10 +58,10 @@ class NamespaceFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace() throws MDLException {
         DrivingLicenceDocument drivingLicence = createTestDrivingLicenceDocument();
-        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence, "uk");
+        List<byte[]> issuerSignedItems = namespaceFactory.build(drivingLicence, Namespaces.UK);
 
         assertEquals(
-                1,
+                2,
                 issuerSignedItems.size(),
                 "Should create one IssuerSignedItem per attribute in the driving licence document");
     }

@@ -13,64 +13,68 @@ import java.time.format.DateTimeFormatter;
 @Getter
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DrivingLicenceDocument {
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("family_name")
     private String familyName;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("given_name")
     private String givenName;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     private String portrait;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("birth_date")
     private LocalDate birthDate;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("birth_place")
     private String birthPlace;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("issue_date")
     private LocalDate issueDate;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("expiry_date")
     private LocalDate expiryDate;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("issuing_authority")
     private String issuingAuthority;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("issuing_country")
     private String issuingCountry;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("document_number")
     private String documentNumber;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("resident_address")
     private String residentAddress;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("resident_postal_code")
     private String residentPostalCode;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("resident_city")
     private String residentCity;
 
-    @Namespace("iso")
+    @Namespace(Namespaces.ISO)
     @JsonProperty("un_distinguishing_sign")
     private String unDistinguishingSign;
 
-    @Namespace("uk")
+    @Namespace(Namespaces.UK)
     @JsonProperty("title")
     private String title;
+
+    @Namespace(Namespaces.UK)
+    @JsonProperty("welsh_licence")
+    private boolean welshLicence;
 
     public void setBirthDate(String birthDate) {
         this.birthDate = parseDate(birthDate);

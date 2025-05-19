@@ -19,12 +19,6 @@ import java.util.Map;
  * proper namespace structure required by the standard.
  */
 public class MobileDrivingLicenceService {
-
-    /** The standard namespace for Mobile Driving Licence documents as defined by ISO 18013-5. */
-    private static final String MOBILE_DRIVING_LICENCE_ISO_NAMESPACE = "org.iso.18013.5.1";
-    private static final String MOBILE_DRIVING_LICENCE_UK_NAMESPACE = "org.iso.18013.5.1.UK";
-
-
     /** Encoder used to convert document objects into CBOR byte representation. */
     private final CBOREncoder cborEncoder;
 
@@ -63,11 +57,11 @@ public class MobileDrivingLicenceService {
             throws MDLException {
         Map<String, List<byte[]>> namespaces = new LinkedHashMap<>();
 
-        List<byte[]> isoNamespace = namespaceFactory.build(drivingLicenceDocument, "iso");
-        List<byte[]> ukNamespace = namespaceFactory.build(drivingLicenceDocument, "uk");
+        List<byte[]> isoNamespace = namespaceFactory.build(drivingLicenceDocument, Namespaces.ISO);
+        List<byte[]> ukNamespace = namespaceFactory.build(drivingLicenceDocument, Namespaces.UK);
 
-        namespaces.put(MOBILE_DRIVING_LICENCE_ISO_NAMESPACE, isoNamespace);
-        namespaces.put(MOBILE_DRIVING_LICENCE_UK_NAMESPACE, ukNamespace);
+        namespaces.put(Namespaces.ISO, isoNamespace);
+        namespaces.put(Namespaces.UK, ukNamespace);
 
         Document mdoc = documentFactory.build(namespaces);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
