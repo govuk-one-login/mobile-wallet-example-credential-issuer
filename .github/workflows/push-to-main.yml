@@ -27,7 +27,7 @@ jobs:
           use-installer: true
 
       - name: Set up AWS creds
-        uses: aws-actions/configure-aws-credentials@f24d7193d98baebaeacc7e2227925dd47cc267f5 # pin@v4
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # pin@v4
         with:
           role-to-assume: ${{ secrets.GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
@@ -67,7 +67,7 @@ jobs:
           sam build --cached
 
       - name: Deploy SAM app
-        uses: govuk-one-login/devplatform-upload-action@f6188fc96fe860179f87bfc5bdeebc17eb3e1e4f # pin@v3.9.3
+        uses: govuk-one-login/devplatform-upload-action@4aea54e8885223b8d92b23b3dbf3bf5ee7f44003 # pin@v3.9.3
         with:
           artifact-bucket-name: ${{ secrets.BUILD_ENV_ARTIFACT_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.SIGNING_PROFILE_NAME }}
