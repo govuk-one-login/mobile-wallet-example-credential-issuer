@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -29,9 +30,12 @@ class DrivingLicenceDocumentTest {
         mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
     };
     private static final String UN_DISTINGUISHING_SIGN = "UK";
+    private static final DrivingPrivilege[] PROVISIONAL_DRIVING_PRIVILEGES = {
+        mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
+    };
 
     @Test
-    void Should_CreateInstance_When_DateIsValid() {
+    void Should_CreateInstance_When_DataIsValid() {
         DrivingLicenceDocument document =
                 new DrivingLicenceDocument(
                         FAMILY_NAME,
@@ -48,7 +52,8 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
-                        UN_DISTINGUISHING_SIGN);
+                        UN_DISTINGUISHING_SIGN,
+                        PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals(FAMILY_NAME, document.getFamilyName());
         assertEquals(GIVEN_NAME, document.getGivenName());
@@ -67,7 +72,7 @@ class DrivingLicenceDocumentTest {
     }
 
     @Test
-    void Should_CreateInstance_With_SingleLineAddress() {
+    void Should_CreateInstanceWithSingleLineAddress() {
         String[] singleLineAddress = {"123 Main St"};
 
         DrivingLicenceDocument document =
@@ -86,13 +91,14 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
-                        UN_DISTINGUISHING_SIGN);
+                        UN_DISTINGUISHING_SIGN,
+                        PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals("123 Main St", document.getResidentAddress());
     }
 
     @Test
-    void Should_CreateInstance_With_MultiLineAddress() {
+    void Should_CreateInstanceWithMultiLineAddress() {
         String[] multiLineAddress = {"123 Main St", "Floor 2", "Suite 301"};
 
         DrivingLicenceDocument document =
@@ -111,9 +117,36 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
-                        UN_DISTINGUISHING_SIGN);
+                        UN_DISTINGUISHING_SIGN,
+                        PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals("123 Main St, Floor 2, Suite 301", document.getResidentAddress());
+    }
+
+    @Test
+    void Should_CreateInstanceWithEmptyProvisionalDrivingPrivileges_When_IsNull() {
+        DrivingPrivilege[] provisionalDrivingPrivileges = null;
+
+        DrivingLicenceDocument document =
+                new DrivingLicenceDocument(
+                        FAMILY_NAME,
+                        GIVEN_NAME,
+                        PORTRAIT,
+                        BIRTH_DATE,
+                        BIRTH_PLACE,
+                        ISSUE_DATE,
+                        EXPIRY_DATE,
+                        ISSUING_AUTHORITY,
+                        ISSUING_COUNTRY,
+                        DOCUMENT_NUMBER,
+                        RESIDENT_ADDRESS,
+                        RESIDENT_POSTAL_CODE,
+                        RESIDENT_CITY,
+                        DRIVING_PRIVILEGES,
+                        UN_DISTINGUISHING_SIGN,
+                        provisionalDrivingPrivileges);
+
+        assertEquals(Optional.empty(), document.getProvisionalDrivingPrivileges());
     }
 
     @Test
@@ -136,7 +169,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
     @ParameterizedTest
@@ -160,7 +194,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
     @ParameterizedTest
@@ -184,7 +219,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
     @ParameterizedTest
@@ -208,6 +244,7 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 }
