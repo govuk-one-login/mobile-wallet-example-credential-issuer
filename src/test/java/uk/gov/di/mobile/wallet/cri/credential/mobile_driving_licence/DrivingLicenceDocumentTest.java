@@ -72,7 +72,7 @@ class DrivingLicenceDocumentTest {
     }
 
     @Test
-    void Should_CreateInstanceWithSingleLineAddress() {
+    void Should_CreateInstance_When_ResidentAddressIsSingleLine() {
         String[] singleLineAddress = {"123 Main St"};
 
         DrivingLicenceDocument document =
@@ -98,7 +98,7 @@ class DrivingLicenceDocumentTest {
     }
 
     @Test
-    void Should_CreateInstanceWithMultiLineAddress() {
+    void Should_CreateInstance_When_ResidentAddressIsMultiLine() {
         String[] multiLineAddress = {"123 Main St", "Floor 2", "Suite 301"};
 
         DrivingLicenceDocument document =
@@ -124,7 +124,7 @@ class DrivingLicenceDocumentTest {
     }
 
     @Test
-    void Should_CreateInstanceWithEmptyProvisionalDrivingPrivileges_When_IsNull() {
+    void Should_CreateInstance_When_ProvisionalDrivingPrivilegesIsNull() {
         DrivingPrivilege[] provisionalDrivingPrivileges = null;
 
         DrivingLicenceDocument document =
