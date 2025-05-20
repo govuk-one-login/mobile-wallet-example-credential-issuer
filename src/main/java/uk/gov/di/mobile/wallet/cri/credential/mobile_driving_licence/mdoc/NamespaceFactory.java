@@ -61,12 +61,14 @@ public class NamespaceFactory {
             List<byte[]> issuerSignedItems = new ArrayList<>();
             for (Field field : entry.getValue()) {
                 String fieldName = field.getName();
-                // The elementIdentifier within an IssuerSignedItem must be in snake case String
                 String asSnakeCase = getAsSnakeCase(fieldName);
                 field.setAccessible(true);
                 Object fieldValue;
                 try {
                     fieldValue = field.get(document);
+                    if (fieldValue == Optional.empty()) {
+                        continue;
+                    }
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
                             "Failed to access Driving Licence properties to build IssuerSignedItem",
