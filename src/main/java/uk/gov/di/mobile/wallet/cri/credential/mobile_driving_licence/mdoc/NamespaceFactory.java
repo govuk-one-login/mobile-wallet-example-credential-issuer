@@ -10,10 +10,9 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * Factory for constructing CBOR-encoded issuer-signed items grouped by namespace from a
- * DrivingLicenceDocument.
+ * Factory for constructing CBOR-encoded issuer-signed items grouped by their respective namespace.
  *
- * <p>This class uses reflection to extract annotated fields from the document, builds
+ * <p>This class uses reflection to extract annotated fields from a document, builds
  * IssuerSignedItem objects, encodes them to CBOR, and organizes them by their namespace.
  */
 public class NamespaceFactory {
