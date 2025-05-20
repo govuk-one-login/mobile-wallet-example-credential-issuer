@@ -33,6 +33,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
     private final Clock clock;
+    private static final DateTimeFormatter ISO_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC);
 
     @ExcludeFromGeneratedCoverageReport
     public CredentialBuilder(ConfigurationService configurationService, KeyProvider keyProvider) {
@@ -82,17 +84,13 @@ public class CredentialBuilder<T extends CredentialSubject> {
     private Base64URL getEncodedClaims(
             T credentialSubject, CredentialType credentialType, long credentialTtlMinutes) {
         Instant now = clock.instant();
+        Instant expiry = now.plus(credentialTtlMinutes, ChronoUnit.MINUTES);
+
         Date nowDate = Date.from(now);
+        Date expiryDate = Date.from(expiry);
 
-        Date expiryEpoch = Date.from(now.plus(credentialTtlMinutes, ChronoUnit.MINUTES));
-
-        String validFromISO =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                        .format(now.atZone(ZoneOffset.UTC));
-        Instant expiryInstant = now.plus(credentialTtlMinutes, ChronoUnit.MINUTES);
-        String validUntilISO =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                        .format(expiryInstant.atZone(ZoneOffset.UTC));
+        String validFromISO = ISO_FORMATTER.format(now);
+        String validUntilISO = ISO_FORMATTER.format(expiry);
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
@@ -100,7 +98,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .subject(credentialSubject.getId())
                         .issueTime(nowDate)
                         .notBeforeTime(nowDate)
-                        .expirationTime(expiryEpoch)
+                        .expirationTime(expiryDate)
                         .claim("@context", new String[] {"https://www.w3.org/ns/credentials/v2"})
                         .claim(
                                 "type",
