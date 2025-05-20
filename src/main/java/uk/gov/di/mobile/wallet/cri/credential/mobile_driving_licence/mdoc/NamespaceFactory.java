@@ -106,11 +106,8 @@ public class NamespaceFactory {
             Namespace namespace = field.getAnnotation(Namespace.class);
             if (namespace != null) {
                 String namespaceValue = namespace.value();
-                List<Field> fields = namespaceFields.get(namespaceValue);
-                if (fields == null) {
-                    fields = new ArrayList<>();
-                    namespaceFields.put(namespaceValue, fields);
-                }
+                List<Field> fields =
+                        namespaceFields.computeIfAbsent(namespaceValue, k -> new ArrayList<>());
                 fields.add(field);
             }
         }
