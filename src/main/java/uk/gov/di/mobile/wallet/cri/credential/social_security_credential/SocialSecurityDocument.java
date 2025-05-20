@@ -10,4 +10,5 @@ public class SocialSecurityDocument {
     private String givenName;
     private String familyName;
     private String nino;
+    private long credentialTtlMinutes;
 }

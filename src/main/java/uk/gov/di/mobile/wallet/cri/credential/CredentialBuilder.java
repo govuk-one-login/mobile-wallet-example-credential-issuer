@@ -33,6 +33,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
     private final Clock clock;
+    private static final DateTimeFormatter ISO_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'").withZone(ZoneOffset.UTC);
 
     @ExcludeFromGeneratedCoverageReport
     public CredentialBuilder(ConfigurationService configurationService, KeyProvider keyProvider) {
@@ -50,14 +52,12 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     public String buildCredential(
-            T credentialSubject, CredentialType credentialType, String validUntil)
+            T credentialSubject, CredentialType credentialType, long credentialTtlMinutes)
             throws SigningException, NoSuchAlgorithmException {
-        // keyId is the hashed key ID. This value must be appended to the string
-        // "did:web:example-credential-issuer.mobile.build.account.gov.uk#" in this ticket:
-        // https://govukverify.atlassian.net/browse/DCMAW-11424
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId);
-        var encodedClaims = getEncodedClaims(credentialSubject, credentialType, validUntil);
+        var encodedClaims =
+                getEncodedClaims(credentialSubject, credentialType, credentialTtlMinutes);
         var message = encodedHeader + "." + encodedClaims;
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -82,14 +82,15 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     private Base64URL getEncodedClaims(
-            T credentialSubject, CredentialType credentialType, String validUntil) {
+            T credentialSubject, CredentialType credentialType, long credentialTtlMinutes) {
         Instant now = clock.instant();
+        Instant expiry = now.plus(credentialTtlMinutes, ChronoUnit.MINUTES);
+
         Date nowDate = Date.from(now);
-        Date expiryDate =
-                Date.from(now.plus(configurationService.getCredentialTtlInDays(), ChronoUnit.DAYS));
-        String validFromISO =
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
-                        .format(now.atZone(ZoneOffset.UTC));
+        Date expiryDate = Date.from(expiry);
+
+        String validFromISO = ISO_FORMATTER.format(now);
+        String validUntilISO = ISO_FORMATTER.format(expiry);
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
@@ -106,16 +107,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .claim("name", credentialType.getName())
                         .claim("description", credentialType.getName())
                         .claim("validFrom", validFromISO)
+                        .claim("validUntil", validUntilISO)
                         .claim("credentialSubject", credentialSubject);
-
-        if (validUntil != null) {
-            // Formatting validUntil with the DateTimeFormatter is not possible as its value
-            // may not be a valid date; therefore, we append "T22:59:59Z" to validUntil
-            // so that we can "convert" it to ISO format. This allows mocking up an invalid date and
-            // testing how the wallet handles such scenarios.
-            String validUntilISO = String.format("%s%s", validUntil, "T22:59:59Z");
-            claimsBuilder.claim("validUntil", validUntilISO);
-        }
 
         return Base64URL.encode(claimsBuilder.build().toString());
     }
