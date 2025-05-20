@@ -14,7 +14,6 @@ import java.util.Optional;
 
 @Setter
 @Getter
-@JsonInclude(JsonInclude.Include.NON_ABSENT)
 public class DrivingLicenceDocument {
 
     @Namespace(Namespaces.ISO)
