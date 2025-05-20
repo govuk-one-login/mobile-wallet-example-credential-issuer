@@ -7,7 +7,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Docume
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespaceFactory;
 
 import java.util.HexFormat;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -55,13 +54,8 @@ public class MobileDrivingLicenceService {
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws MDLException {
-        Map<String, List<byte[]>> namespaces = new LinkedHashMap<>();
-
-        List<byte[]> isoNamespace = namespaceFactory.build(drivingLicenceDocument, Namespaces.ISO);
-        List<byte[]> ukNamespace = namespaceFactory.build(drivingLicenceDocument, Namespaces.UK);
-
-        namespaces.put(Namespaces.ISO, isoNamespace);
-        namespaces.put(Namespaces.UK, ukNamespace);
+        Map<String, List<byte[]>> namespaces =
+                namespaceFactory.buildAllNamespaces(drivingLicenceDocument);
 
         Document mdoc = documentFactory.build(namespaces);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);

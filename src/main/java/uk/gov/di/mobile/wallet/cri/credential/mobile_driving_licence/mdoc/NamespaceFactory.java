@@ -2,17 +2,19 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import com.google.common.base.CaseFormat;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
- * Factory class for creating a list of serialized IssuerSignedItems from an input object. This
- * class uses reflection to iterate through the fields of an input object, converts each field's
- * name to snake_case, and creates an IssuerSignedItem for each field.
+ * Factory for constructing CBOR-encoded issuer-signed items grouped by namespace from a
+ * DrivingLicenceDocument.
+ *
+ * <p>This class uses reflection to extract annotated fields from the document, builds
+ * IssuerSignedItem objects, encodes them to CBOR, and organizes them by their namespace.
  */
 public class NamespaceFactory {
     /** Factory for creating IssuerSignedItem objects from field names and values */
@@ -33,54 +35,51 @@ public class NamespaceFactory {
         this.cborEncoder = cborEncoder;
     }
 
-    public static List<Field> getFieldsByNamespace(Class<?> clazz, String targetNamespace) {
-        List<Field> result = new ArrayList<>();
-        for (Field field : clazz.getDeclaredFields()) {
-            Namespace ns = field.getAnnotation(Namespace.class);
-            if (ns != null && ns.value().equals(targetNamespace)) {
-                result.add(field);
-            }
-        }
-        return result;
-    }
-
     /**
-     * Builds a list of serialized IssuerSignedItems from the input object's fields. Uses reflection
-     * to access each field, converts field names to snake_case, then creates and serializes an
-     * IssuerSignedItem for each field.
+     * Builds all namespaces for a given {@link DrivingLicenceDocument}.
      *
-     * @param input The object whose fields will be processed
-     * @return A list of byte arrays, each representing a serialized IssuerSignedItem
-     * @throws MDLException If there's an error accessing fields or serializing items
+     * <p>For each field in the document annotated with {@link Namespace}, this method:
+     *
+     * <ul>
+     *   <li>Groups fields by namespace value.
+     *   <li>Converts field names to snake_case.
+     *   <li>Builds an {@link IssuerSignedItem} for each field and encodes it to CBOR.
+     *   <li>Returns a map where each key is a namespace and each value is a list of CBOR-encoded
+     *       field items belonging to that namespace.
+     * </ul>
+     *
+     * @param document The driving licence document to process/extract fields from.
+     * @return Map from namespace names to lists of CBOR-encoded issuer-signed items.
+     * @throws MDLException If reflection fails or encoding fails.
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
-    public List<byte[]> build(Object input, String targetNamespace) throws MDLException {
-        List<byte[]> issuerSignedItems = new ArrayList<>();
-        for (Field field : input.getClass().getDeclaredFields()) {
-            Namespace namespace = field.getAnnotation(Namespace.class);
-            if (namespace != null && !namespace.value().equals(targetNamespace)) {
-                continue;
+    public Map<String, List<byte[]>> buildAllNamespaces(DrivingLicenceDocument document)
+            throws MDLException {
+        Map<String, List<byte[]>> namespaces = new LinkedHashMap<>();
+        Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
+        for (Map.Entry<String, List<Field>> entry : fieldsByNamespace.entrySet()) {
+            List<byte[]> issuerSignedItems = new ArrayList<>();
+            for (Field field : entry.getValue()) {
+                String fieldName = field.getName();
+                // The elementIdentifier within an IssuerSignedItem must be in snake case String
+                String asSnakeCase = getAsSnakeCase(fieldName);
+                field.setAccessible(true);
+                Object fieldValue;
+                try {
+                    fieldValue = field.get(document);
+                } catch (IllegalAccessException exception) {
+                    throw new MDLException(
+                            "Failed to access Driving Licence properties to build IssuerSignedItem",
+                            exception);
+                }
+                IssuerSignedItem issuerSignedItem =
+                        issuerSignedItemFactory.build(asSnakeCase, fieldValue);
+                byte[] issuerSignedItemBytes = cborEncoder.encode(issuerSignedItem);
+                issuerSignedItems.add(issuerSignedItemBytes);
             }
-
-            String fieldName = field.getName();
-            // The elementIdentifier within an IssuerSignedItem must be in snake case
-            String asSnakeCase = getAsSnakeCase(fieldName);
-            field.setAccessible(true);
-            Object fieldValue;
-            try {
-                fieldValue = field.get(input);
-            } catch (IllegalAccessException exception) {
-                throw new MDLException(
-                        "Filed to access Driving Licence properties to build IssuerSignedItem",
-                        exception);
-            }
-
-            IssuerSignedItem issuerSignedItem =
-                    issuerSignedItemFactory.build(asSnakeCase, fieldValue);
-            byte[] issuerSignedItemBytes = cborEncoder.encode(issuerSignedItem);
-            issuerSignedItems.add(issuerSignedItemBytes);
+            namespaces.put(entry.getKey(), issuerSignedItems);
         }
-        return issuerSignedItems;
+        return namespaces;
     }
 
     /**
@@ -91,5 +90,28 @@ public class NamespaceFactory {
      */
     private static String getAsSnakeCase(String fieldName) {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+    }
+
+    /**
+     * Groups the declared fields of a class by their {@link Namespace} annotation value.
+     *
+     * @param clazz The class to inspect.
+     * @return Map from namespace value to list of fields.
+     */
+    public static Map<String, List<Field>> getFieldsByNamespace(Class<?> clazz) {
+        Map<String, List<Field>> namespaceFields = new HashMap<>();
+        for (Field field : clazz.getDeclaredFields()) {
+            Namespace namespace = field.getAnnotation(Namespace.class);
+            if (namespace != null) {
+                String namespaceValue = namespace.value();
+                List<Field> fields = namespaceFields.get(namespaceValue);
+                if (fields == null) {
+                    fields = new ArrayList<>();
+                    namespaceFields.put(namespaceValue, fields);
+                }
+                fields.add(field);
+            }
+        }
+        return namespaceFields;
     }
 }
