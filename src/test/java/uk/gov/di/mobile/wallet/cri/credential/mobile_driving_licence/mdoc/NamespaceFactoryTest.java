@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -23,6 +22,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class NamespaceFactoryTest {
 
+    private static final int EXPECTED_ISO_FIELDS = 15;
+    private static final int EXPECTED_UK_FIELDS = 1;
+    private static final byte[] MOCK_CBOR_BYTES = {0x01, 0x02};
+
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
     @Mock private CBOREncoder mockCborEncoder;
     @Captor private ArgumentCaptor<String> elementIdentifierCaptor;
@@ -32,10 +35,9 @@ class NamespaceFactoryTest {
 
     @BeforeEach
     void setUp() throws MDLException {
-        // Mock IssuerSignedItem and CBOR encoding
         IssuerSignedItem dummyItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(dummyItem);
-        when(mockCborEncoder.encode(any())).thenReturn(new byte[] {0x01, 0x02});
+        when(mockCborEncoder.encode(any())).thenReturn(MOCK_CBOR_BYTES);
 
         namespaceFactory = new NamespaceFactory(mockIssuerSignedItemFactory, mockCborEncoder);
         drivingLicence = createTestDrivingLicenceDocument();
@@ -46,8 +48,10 @@ class NamespaceFactoryTest {
         Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
 
         assertEquals(2, namespaces.size());
-        assertEquals(15, namespaces.get(Namespaces.ISO).size());
-        assertEquals(1, namespaces.get(Namespaces.UK).size());
+        assertTrue(namespaces.containsKey(Namespaces.ISO), "Should contain ISO namespace");
+        assertTrue(namespaces.containsKey(Namespaces.UK), "Should contain UK namespace");
+        assertEquals(EXPECTED_ISO_FIELDS, namespaces.get(Namespaces.ISO).size());
+        assertEquals(EXPECTED_UK_FIELDS, namespaces.get(Namespaces.UK).size());
     }
 
     @Test
@@ -57,10 +61,10 @@ class NamespaceFactoryTest {
         List<byte[]> isoNamespace = namespaces.get(Namespaces.ISO);
 
         assertEquals(
-                15,
+                EXPECTED_ISO_FIELDS,
                 isoNamespace.size(),
-                "Should create one IssuerSignedItem per attribute in the driving licence document annotated with ISO namespace");
-        isoNamespace.forEach(bytes -> assertArrayEquals(new byte[] {0x01, 0x02}, bytes));
+                "Should create one IssuerSignedItem per ISO namespace attribute");
+        isoNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
     }
 
     @Test
@@ -70,38 +74,42 @@ class NamespaceFactoryTest {
         List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
 
         assertEquals(
-                1,
+                EXPECTED_UK_FIELDS,
                 ukNamespace.size(),
-                "Should create one IssuerSignedItem per attribute in the driving licence document annotated with UK namespace");
-        ukNamespace.forEach(bytes -> assertArrayEquals(new byte[] {0x01, 0x02}, bytes));
+                "Should create one IssuerSignedItem per UK namespace attribute");
+        ukNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
     }
 
     @Test
     void Should_CorrectlyConvertFieldNamesToSnakeCase() throws MDLException {
         namespaceFactory.buildAllNamespaces(drivingLicence);
 
-        // Capture all calls to mockIssuerSignedItemFactory build method
-        verify(mockIssuerSignedItemFactory, times(16))
-                .build(elementIdentifierCaptor.capture(), ArgumentMatchers.any());
+        verify(mockIssuerSignedItemFactory, times(EXPECTED_ISO_FIELDS + EXPECTED_UK_FIELDS))
+                .build(elementIdentifierCaptor.capture(), any());
         List<String> capturedIdentifiers = elementIdentifierCaptor.getAllValues();
 
-        // Verify that field names were properly converted to snake_case
-        assertTrue(capturedIdentifiers.contains("family_name"));
-        assertTrue(capturedIdentifiers.contains("given_name"));
-        assertTrue(capturedIdentifiers.contains("portrait"));
-        assertTrue(capturedIdentifiers.contains("birth_date"));
-        assertTrue(capturedIdentifiers.contains("birth_place"));
-        assertTrue(capturedIdentifiers.contains("issue_date"));
-        assertTrue(capturedIdentifiers.contains("expiry_date"));
-        assertTrue(capturedIdentifiers.contains("issuing_authority"));
-        assertTrue(capturedIdentifiers.contains("issuing_country"));
-        assertTrue(capturedIdentifiers.contains("document_number"));
-        assertTrue(capturedIdentifiers.contains("resident_address"));
-        assertTrue(capturedIdentifiers.contains("resident_postal_code"));
-        assertTrue(capturedIdentifiers.contains("resident_city"));
-        assertTrue(capturedIdentifiers.contains("driving_privileges"));
-        assertTrue(capturedIdentifiers.contains("un_distinguishing_sign"));
-        assertTrue(capturedIdentifiers.contains("provisional_driving_privileges"));
+        List<String> expectedIdentifiers =
+                List.of(
+                        "family_name",
+                        "given_name",
+                        "portrait",
+                        "birth_date",
+                        "birth_place",
+                        "issue_date",
+                        "expiry_date",
+                        "issuing_authority",
+                        "issuing_country",
+                        "document_number",
+                        "resident_address",
+                        "resident_postal_code",
+                        "resident_city",
+                        "driving_privileges",
+                        "un_distinguishing_sign",
+                        "provisional_driving_privileges");
+
+        assertTrue(
+                capturedIdentifiers.containsAll(expectedIdentifiers),
+                "All expected snake_case identifiers should be present");
     }
 
     private DrivingLicenceDocument createTestDrivingLicenceDocument() {
