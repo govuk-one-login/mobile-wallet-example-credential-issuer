@@ -99,7 +99,7 @@ public class NamespaceFactory {
      * @param clazz The class to inspect.
      * @return Map from namespace value to list of fields.
      */
-    public static Map<String, List<Field>> getFieldsByNamespace(Class<?> clazz) {
+    private static Map<String, List<Field>> getFieldsByNamespace(Class<?> clazz) {
         Map<String, List<Field>> namespaceFields = new HashMap<>();
         for (Field field : clazz.getDeclaredFields()) {
             Namespace namespace = field.getAnnotation(Namespace.class);
