@@ -64,8 +64,8 @@ class NamespaceFactoryTest {
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
             throws MDLException {
         Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
-        List<byte[]> isoNamespace = namespaces.get(Namespaces.ISO);
 
+        List<byte[]> isoNamespace = namespaces.get(Namespaces.ISO);
         assertEquals(
                 EXPECTED_ISO_FIELDS,
                 isoNamespace.size(),
@@ -92,8 +92,8 @@ class NamespaceFactoryTest {
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace()
             throws MDLException {
         Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
-        List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
 
+        List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
         assertEquals(
                 EXPECTED_UK_FIELDS,
                 ukNamespace.size(),
@@ -107,11 +107,13 @@ class NamespaceFactoryTest {
     void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_When_ItsValueIsNull()
             throws MDLException {
         DrivingPrivilege[] provisionDrivingPrivileges = null;
-        DrivingLicenceDocument drivingLicence =
+        DrivingLicenceDocument drivingLicenceWithProvisionalNull =
                 createTestDrivingLicenceDocument(provisionDrivingPrivileges);
-        Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
-        List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
 
+        Map<String, List<byte[]>> namespaces =
+                namespaceFactory.buildAllNamespaces(drivingLicenceWithProvisionalNull);
+
+        List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
         assertEquals(
                 EXPECTED_UK_FIELDS - 1,
                 ukNamespace.size(),
@@ -154,7 +156,6 @@ class NamespaceFactoryTest {
     private DrivingLicenceDocument createTestDrivingLicenceDocument(
             DrivingPrivilege[] provisionalDrivingPrivileges) {
         String[] address = {"123 Main St", "Apt 4B"};
-
         return new DrivingLicenceDocument(
                 "Doe",
                 "John",
