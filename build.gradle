@@ -15,7 +15,7 @@ repositories {
 }
 
 ext {
-	awsSdkVersion = "2.31.45"
+	awsSdkVersion = "2.31.49"
 	dropwizardVersion = "4.0.13"
 	jacksonVersion = "2.19.0"
 	lombokVersion = "1.18.38"
@@ -33,7 +33,7 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-core"
 	implementation "io.dropwizard:dropwizard-json-logging"
 
-	implementation "com.nimbusds:oauth2-oidc-sdk:11.24"
+	implementation "com.nimbusds:oauth2-oidc-sdk:11.25"
 	implementation "org.bouncycastle:bcpkix-jdk18on:1.80"
 
 	implementation "org.jetbrains:annotations:26.0.2"
@@ -49,7 +49,7 @@ dependencies {
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "org.jetbrains:annotations:26.0.2"
 	testImplementation "org.junit.jupiter:junit-jupiter-api:5.12.2"
-	testImplementation "org.mockito:mockito-junit-jupiter:5.17.0"
+	testImplementation "org.mockito:mockito-junit-jupiter:5.18.0"
 	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.8"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
 }
