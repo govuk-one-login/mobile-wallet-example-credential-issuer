@@ -71,26 +71,21 @@ class NamespaceFactoryTest {
                 isoNamespace.size(),
                 "Should create one IssuerSignedItem per ISO namespace attribute");
         isoNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
-        verify(mockIssuerSignedItemFactory).build(eq("family_name"), eq("Doe"));
-        verify(mockIssuerSignedItemFactory).build(eq("given_name"), eq("John"));
-        verify(mockIssuerSignedItemFactory)
-                .build(eq("portrait"), eq("base64EncodedPortraitString"));
-        verify(mockIssuerSignedItemFactory)
-                .build(eq("birth_date"), eq(LocalDate.parse("1985-05-24")));
-        verify(mockIssuerSignedItemFactory).build(eq("birth_place"), eq("London"));
-        verify(mockIssuerSignedItemFactory)
-                .build(eq("issue_date"), eq(LocalDate.parse("2020-01-10")));
-        verify(mockIssuerSignedItemFactory)
-                .build(eq("expiry_date"), eq(LocalDate.parse("2025-01-09")));
-        verify(mockIssuerSignedItemFactory).build(eq("issuing_authority"), eq("DVLA"));
-        verify(mockIssuerSignedItemFactory).build(eq("issuing_country"), eq("GB"));
-        verify(mockIssuerSignedItemFactory).build(eq("document_number"), eq("HALL9655293DH5RO"));
-        verify(mockIssuerSignedItemFactory)
-                .build(eq("resident_address"), eq("123 Main St, Apt 4B"));
-        verify(mockIssuerSignedItemFactory).build(eq("resident_postal_code"), eq("SW1A 2AA"));
-        verify(mockIssuerSignedItemFactory).build(eq("resident_city"), eq("London"));
-        verify(mockIssuerSignedItemFactory).build(eq("driving_privileges"), eq(DRIVING_PRIVILEGES));
-        verify(mockIssuerSignedItemFactory).build(eq("un_distinguishing_sign"), eq("UK"));
+        verify(mockIssuerSignedItemFactory).build("family_name", "Doe");
+        verify(mockIssuerSignedItemFactory).build("given_name", "John");
+        verify(mockIssuerSignedItemFactory).build("portrait", "base64EncodedPortraitString");
+        verify(mockIssuerSignedItemFactory).build("birth_date", LocalDate.parse("1985-05-24"));
+        verify(mockIssuerSignedItemFactory).build("birth_place", "London");
+        verify(mockIssuerSignedItemFactory).build("issue_date", LocalDate.parse("2020-01-10"));
+        verify(mockIssuerSignedItemFactory).build("expiry_date", LocalDate.parse("2025-01-09"));
+        verify(mockIssuerSignedItemFactory).build("issuing_authority", "DVLA");
+        verify(mockIssuerSignedItemFactory).build("issuing_country", "GB");
+        verify(mockIssuerSignedItemFactory).build("document_number", "HALL9655293DH5RO");
+        verify(mockIssuerSignedItemFactory).build("resident_address", "123 Main St, Apt 4B");
+        verify(mockIssuerSignedItemFactory).build("resident_postal_code", "SW1A 2AA");
+        verify(mockIssuerSignedItemFactory).build("resident_city", "London");
+        verify(mockIssuerSignedItemFactory).build("driving_privileges", DRIVING_PRIVILEGES);
+        verify(mockIssuerSignedItemFactory).build("un_distinguishing_sign", "UK");
     }
 
     @Test
@@ -105,9 +100,7 @@ class NamespaceFactoryTest {
                 "Should create one IssuerSignedItem per UK namespace attribute");
         ukNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
         verify(mockIssuerSignedItemFactory)
-                .build(
-                        eq("provisional_driving_privileges"),
-                        eq(Optional.ofNullable(DRIVING_PRIVILEGES)));
+                .build("provisional_driving_privileges", Optional.ofNullable(DRIVING_PRIVILEGES));
     }
 
     @Test
@@ -124,7 +117,7 @@ class NamespaceFactoryTest {
                 ukNamespace.size(),
                 "Should not create an IssuerSignedItem for provisional driving privileges when its value is null");
         verify(mockIssuerSignedItemFactory, never())
-                .build(eq("provisional_driving_privileges"), eq(Optional.empty()));
+                .build("provisional_driving_privileges", Optional.empty());
     }
 
     @Test
