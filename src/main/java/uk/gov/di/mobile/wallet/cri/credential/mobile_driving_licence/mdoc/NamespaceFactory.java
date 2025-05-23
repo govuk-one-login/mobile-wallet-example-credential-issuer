@@ -8,6 +8,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLExc
 
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Factory for constructing CBOR-encoded issuer-signed items grouped by their respective namespace.
@@ -100,16 +101,10 @@ public class NamespaceFactory {
      * @return Map from namespace value to list of fields.
      */
     private static Map<String, List<Field>> getFieldsByNamespace(Class<?> clazz) {
-        Map<String, List<Field>> namespaceFields = new HashMap<>();
-        for (Field field : clazz.getDeclaredFields()) {
-            Namespace namespace = field.getAnnotation(Namespace.class);
-            if (namespace != null) {
-                String namespaceValue = namespace.value();
-                List<Field> fields =
-                        namespaceFields.computeIfAbsent(namespaceValue, k -> new ArrayList<>());
-                fields.add(field);
-            }
-        }
-        return namespaceFields;
+        return Arrays.stream(clazz.getDeclaredFields())
+                .filter(field -> field.getAnnotation(Namespace.class) != null)
+                .collect(
+                        Collectors.groupingBy(
+                                field -> field.getAnnotation(Namespace.class).value()));
     }
 }
