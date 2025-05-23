@@ -13,10 +13,13 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.Namespaces;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +28,9 @@ class NamespaceFactoryTest {
     private static final int EXPECTED_ISO_FIELDS = 15;
     private static final int EXPECTED_UK_FIELDS = 1;
     private static final byte[] MOCK_CBOR_BYTES = {0x01, 0x02};
+    private static final DrivingPrivilege[] DRIVING_PRIVILEGES = {
+        new DrivingPrivilege("B", null, null)
+    };
 
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
     @Mock private CBOREncoder mockCborEncoder;
@@ -40,7 +46,7 @@ class NamespaceFactoryTest {
         when(mockCborEncoder.encode(any())).thenReturn(MOCK_CBOR_BYTES);
 
         namespaceFactory = new NamespaceFactory(mockIssuerSignedItemFactory, mockCborEncoder);
-        drivingLicence = createTestDrivingLicenceDocument();
+        drivingLicence = createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
     }
 
     @Test
@@ -65,6 +71,26 @@ class NamespaceFactoryTest {
                 isoNamespace.size(),
                 "Should create one IssuerSignedItem per ISO namespace attribute");
         isoNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
+        verify(mockIssuerSignedItemFactory).build(eq("family_name"), eq("Doe"));
+        verify(mockIssuerSignedItemFactory).build(eq("given_name"), eq("John"));
+        verify(mockIssuerSignedItemFactory)
+                .build(eq("portrait"), eq("base64EncodedPortraitString"));
+        verify(mockIssuerSignedItemFactory)
+                .build(eq("birth_date"), eq(LocalDate.parse("1985-05-24")));
+        verify(mockIssuerSignedItemFactory).build(eq("birth_place"), eq("London"));
+        verify(mockIssuerSignedItemFactory)
+                .build(eq("issue_date"), eq(LocalDate.parse("2020-01-10")));
+        verify(mockIssuerSignedItemFactory)
+                .build(eq("expiry_date"), eq(LocalDate.parse("2025-01-09")));
+        verify(mockIssuerSignedItemFactory).build(eq("issuing_authority"), eq("DVLA"));
+        verify(mockIssuerSignedItemFactory).build(eq("issuing_country"), eq("GB"));
+        verify(mockIssuerSignedItemFactory).build(eq("document_number"), eq("HALL9655293DH5RO"));
+        verify(mockIssuerSignedItemFactory)
+                .build(eq("resident_address"), eq("123 Main St, Apt 4B"));
+        verify(mockIssuerSignedItemFactory).build(eq("resident_postal_code"), eq("SW1A 2AA"));
+        verify(mockIssuerSignedItemFactory).build(eq("resident_city"), eq("London"));
+        verify(mockIssuerSignedItemFactory).build(eq("driving_privileges"), eq(DRIVING_PRIVILEGES));
+        verify(mockIssuerSignedItemFactory).build(eq("un_distinguishing_sign"), eq("UK"));
     }
 
     @Test
@@ -78,6 +104,27 @@ class NamespaceFactoryTest {
                 ukNamespace.size(),
                 "Should create one IssuerSignedItem per UK namespace attribute");
         ukNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
+        verify(mockIssuerSignedItemFactory)
+                .build(
+                        eq("provisional_driving_privileges"),
+                        eq(Optional.ofNullable(DRIVING_PRIVILEGES)));
+    }
+
+    @Test
+    void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_When_ItsValueIsNull()
+            throws MDLException {
+        DrivingPrivilege[] provisionDrivingPrivileges = null;
+        DrivingLicenceDocument drivingLicence =
+                createTestDrivingLicenceDocument(provisionDrivingPrivileges);
+        Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
+        List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
+
+        assertEquals(
+                EXPECTED_UK_FIELDS - 1,
+                ukNamespace.size(),
+                "Should not create an IssuerSignedItem for provisional driving privileges when its value is null");
+        verify(mockIssuerSignedItemFactory, never())
+                .build(eq("provisional_driving_privileges"), eq(Optional.empty()));
     }
 
     @Test
@@ -87,7 +134,6 @@ class NamespaceFactoryTest {
         verify(mockIssuerSignedItemFactory, times(EXPECTED_ISO_FIELDS + EXPECTED_UK_FIELDS))
                 .build(elementIdentifierCaptor.capture(), any());
         List<String> capturedIdentifiers = elementIdentifierCaptor.getAllValues();
-
         List<String> expectedIdentifiers =
                 List.of(
                         "family_name",
@@ -112,9 +158,9 @@ class NamespaceFactoryTest {
                 "All expected snake_case identifiers should be present");
     }
 
-    private DrivingLicenceDocument createTestDrivingLicenceDocument() {
+    private DrivingLicenceDocument createTestDrivingLicenceDocument(
+            DrivingPrivilege[] provisionalDrivingPrivileges) {
         String[] address = {"123 Main St", "Apt 4B"};
-        DrivingPrivilege[] drivingPrivileges = {new DrivingPrivilege("B", null, null)};
 
         return new DrivingLicenceDocument(
                 "Doe",
@@ -130,8 +176,8 @@ class NamespaceFactoryTest {
                 address,
                 "SW1A 2AA",
                 "London",
-                drivingPrivileges,
+                DRIVING_PRIVILEGES,
                 "UK",
-                drivingPrivileges);
+                provisionalDrivingPrivileges);
     }
 }
