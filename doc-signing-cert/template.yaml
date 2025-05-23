@@ -1,0 +1,244 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Document Signing Certificate Issuer
+
+Parameters:
+  CodeSigningConfigArn:
+    Description: |
+      The ARN of the Code Signing Config to use, provided by the deployment pipeline
+    Type: String
+    Default: none
+
+  Environment:
+    Description: The environment type
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - build
+
+  PermissionsBoundary:
+    Description: |
+      The ARN of the permissions boundary to apply to any role created by the template
+    Type: String
+    Default: none
+
+  VpcStackName:
+    Description: |
+      The stack name of the VPC where Issue Document Signing Certificate Lambda will be deployed
+    Type: String
+    Default: platform-vpc
+
+Conditions:
+  UsePermissionsBoundary: !Not
+    - !Equals
+      - !Ref PermissionsBoundary
+      - none
+
+  UseCodeSigning: !Not
+    - !Equals
+      - !Ref CodeSigningConfigArn
+      - none
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      DocumentSigningKeyParameterPrefix: "/iaca/"
+      DocumentSigningKeyCommonName: "Example Issuer DSC (DEV)"
+      DocumentSigningKeyCountryName: "UK"
+      PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
+      PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
+      CloudwatchLogRetentionDays: 3
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: DEBUG
+      CertificateValidityPeriodInDays: 458  # 366 (1 year) + 92 (3 months), worse case
+      CertificateRetentionPeriodInDays: 488  # validity period + 30 days
+    build:
+      DocumentSigningKeyParameterPrefix: "/iaca/"
+      DocumentSigningKeyCommonName: "Example Issuer DSC (BUILD)"
+      DocumentSigningKeyCountryName: "UK"
+      PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
+      PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
+      CloudwatchLogRetentionDays: 3650  # 10 years, since the underlying CA root will likely have a 9 year lifecycle
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: INFO
+      CertificateValidityPeriodInDays: 458  # 366 (1 year) + 92 (3 months), worse case
+      CertificateRetentionPeriodInDays: 488  # validity period + 30 days
+
+Globals:
+  Function:
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      SystemLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+    Runtime: nodejs20.x
+    Architectures:
+      - arm64
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    Environment:
+      Variables:
+        DT_CLUSTER_ID: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_BASE_URL: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
+        DT_TENANT: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+    Layers:
+      - !Sub
+        - '{{resolve:secretsmanager:${SecretArn}:SecretString:NODEJS_LAYER}}'
+        - SecretArn: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - DynatraceSecretArn
+
+Resources:
+  IssueDocSigningCertificateFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
+      CodeUri: issue-document-signing-certificate/
+      Handler: issueDocumentSigningCertificate.handler
+      Timeout: 15
+      MemorySize: 512
+      ReservedConcurrentExecutions: 1
+      LoggingConfig:
+        LogGroup: !Ref IssueDocSigningCertificateFunctionLogGroup
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
+          PLATFORM_CA_ARN_PARAMETER: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+          PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+          DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
+          DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
+          DOC_SIGNING_KEY_VALIDITY_PERIOD: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateValidityPeriodInDays]
+          DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
+          DOC_SIGNING_KEY_COUNTRY_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
+      Policies:
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+        - S3CrudPolicy:
+            BucketName: !Ref DocSigningCertificateBucket
+        - Statement:
+            - Sid: KMSAccessDocumentSigningKeyPolicy
+              Effect: Allow
+              Action:
+                - kms:GetPublicKey
+                - kms:Sign
+              Resource: !GetAtt DocumentSigningKey1.Arn
+        - Statement:
+            - Sid: ACMPCAIssueCertificatePolicy
+              Effect: Allow
+              Action:
+                - acm-pca:IssueCertificate
+                - acm-pca:GetCertificate
+              Resource:
+                Fn::Sub:
+                  - "{{resolve:ssm:${ParameterName}}}"
+                  - ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+          - issueDocumentSigningCertificate.ts
+
+  IssueDocSigningCertificateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue-doc-signing-certificate
+      RetentionInDays: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - CloudwatchLogRetentionDays
+
+  DocSigningCertificateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-certificates"
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: RemoveExpiredCertificates
+            Prefix: results/
+            ExpirationInDays: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateRetentionPeriodInDays]
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 14
+            Status: Enabled
+
+  DocumentSigningKey1:
+    Type: AWS::KMS::Key
+    Properties:
+      KeySpec: ECC_NIST_P256
+      KeyUsage: SIGN_VERIFY
+      Description: !Sub "Example Document Signing Key 1 for ${AWS::StackName}"
+      Enabled: true
+      PendingWindowInDays: 7
+
+  DocumentSigningKeyAlias1:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key-1"
+      TargetKeyId: !Ref DocumentSigningKey1
