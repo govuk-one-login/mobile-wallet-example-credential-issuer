@@ -36,7 +36,7 @@ class NamespaceFactoryTest {
     @Mock private CBOREncoder mockCborEncoder;
     @Captor private ArgumentCaptor<String> elementIdentifierCaptor;
 
-    private NamespaceFactory namespaceFactory;
+    private DocumentFactory documentFactory;
     private DrivingLicenceDocument drivingLicence;
 
     @BeforeEach
@@ -45,13 +45,13 @@ class NamespaceFactoryTest {
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(dummyItem);
         when(mockCborEncoder.encode(any())).thenReturn(MOCK_CBOR_BYTES);
 
-        namespaceFactory = new NamespaceFactory(mockIssuerSignedItemFactory, mockCborEncoder);
+        documentFactory = new DocumentFactory(mockIssuerSignedItemFactory, mockCborEncoder);
         drivingLicence = createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
     }
 
     @Test
     void Should_BuildISOAndUKNamespaces() throws Exception {
-        Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
+        Map<String, List<byte[]>> namespaces = documentFactory.buildAllNamespaces(drivingLicence);
 
         assertEquals(2, namespaces.size());
         assertTrue(namespaces.containsKey(Namespaces.ISO), "Should contain ISO namespace");
@@ -63,7 +63,7 @@ class NamespaceFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
             throws MDLException {
-        Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
+        Map<String, List<byte[]>> namespaces = documentFactory.buildAllNamespaces(drivingLicence);
 
         List<byte[]> isoNamespace = namespaces.get(Namespaces.ISO);
         assertEquals(
@@ -91,7 +91,7 @@ class NamespaceFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace()
             throws MDLException {
-        Map<String, List<byte[]>> namespaces = namespaceFactory.buildAllNamespaces(drivingLicence);
+        Map<String, List<byte[]>> namespaces = documentFactory.buildAllNamespaces(drivingLicence);
 
         List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
         assertEquals(
@@ -111,7 +111,7 @@ class NamespaceFactoryTest {
                 createTestDrivingLicenceDocument(provisionDrivingPrivileges);
 
         Map<String, List<byte[]>> namespaces =
-                namespaceFactory.buildAllNamespaces(drivingLicenceWithProvisionalNull);
+                documentFactory.buildAllNamespaces(drivingLicenceWithProvisionalNull);
 
         List<byte[]> ukNamespace = namespaces.get(Namespaces.UK);
         assertEquals(
@@ -124,7 +124,7 @@ class NamespaceFactoryTest {
 
     @Test
     void Should_CorrectlyConvertFieldNamesToSnakeCase() throws MDLException {
-        namespaceFactory.buildAllNamespaces(drivingLicence);
+        documentFactory.buildAllNamespaces(drivingLicence);
 
         verify(mockIssuerSignedItemFactory, times(EXPECTED_ISO_FIELDS + EXPECTED_UK_FIELDS))
                 .build(elementIdentifierCaptor.capture(), any());

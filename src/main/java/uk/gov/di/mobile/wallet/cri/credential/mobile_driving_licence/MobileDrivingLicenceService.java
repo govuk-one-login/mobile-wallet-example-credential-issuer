@@ -4,7 +4,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespaceFactory;
 
 import java.util.HexFormat;
 import java.util.List;
@@ -25,7 +24,7 @@ public class MobileDrivingLicenceService {
     private final DocumentFactory documentFactory;
 
     /** Factory for creating a namespace from driving licence documents. */
-    private final NamespaceFactory namespaceFactory;
+    private final DocumentFactory documentFactory;
 
     /**
      * Constructs a new MobileDrivingLicenceService with all required dependencies.
@@ -38,10 +37,10 @@ public class MobileDrivingLicenceService {
     public MobileDrivingLicenceService(
             CBOREncoder cborEncoder,
             DocumentFactory documentFactory,
-            NamespaceFactory namespaceFactory) {
+            DocumentFactory namespaceFactory) {
         this.cborEncoder = cborEncoder;
         this.documentFactory = documentFactory;
-        this.namespaceFactory = namespaceFactory;
+        this.documentFactory = namespaceFactory;
     }
 
     /**
@@ -55,7 +54,7 @@ public class MobileDrivingLicenceService {
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws MDLException {
         Map<String, List<byte[]>> namespaces =
-                namespaceFactory.buildAllNamespaces(drivingLicenceDocument);
+                documentFactory.buildAllNamespaces(drivingLicenceDocument);
 
         Document mdoc = documentFactory.build(namespaces);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);

@@ -9,7 +9,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespaceFactory;
 
 import java.util.*;
 
@@ -29,7 +28,7 @@ class MobileDrivingLicenceServiceTest {
 
     @Mock private CBOREncoder cborEncoder;
     @Mock private DocumentFactory documentFactory;
-    @Mock private NamespaceFactory namespaceFactory;
+    @Mock private DocumentFactory documentFactory;
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
     @Mock private Document mockMdoc;
 
@@ -38,7 +37,7 @@ class MobileDrivingLicenceServiceTest {
     @BeforeEach
     void setUp() {
         mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(cborEncoder, documentFactory, namespaceFactory);
+                new MobileDrivingLicenceService(cborEncoder, documentFactory, documentFactory);
     }
 
     @Test
@@ -50,7 +49,7 @@ class MobileDrivingLicenceServiceTest {
         byte[] mockCborBytes = new byte[] {(byte) 0xA1, 0x01, 0x02};
 
         when(documentFactory.build(mockNamespaces)).thenReturn(mockMdoc);
-        when(namespaceFactory.buildAllNamespaces(mockDrivingLicenceDocument))
+        when(documentFactory.buildAllNamespaces(mockDrivingLicenceDocument))
                 .thenReturn(mockNamespaces);
         when(cborEncoder.encode(mockMdoc)).thenReturn(mockCborBytes);
 
@@ -59,7 +58,7 @@ class MobileDrivingLicenceServiceTest {
 
         assertEquals(
                 EXPECTED_HEX, result, "The actual hex string should match the expected result");
-        verify(namespaceFactory).buildAllNamespaces(mockDrivingLicenceDocument);
+        verify(documentFactory).buildAllNamespaces(mockDrivingLicenceDocument);
         verify(documentFactory).build(mockNamespaces);
         verify(cborEncoder).encode(mockMdoc);
     }
@@ -67,8 +66,8 @@ class MobileDrivingLicenceServiceTest {
     @Test
     void Should_PropagateException_When_NameSpaceFactoryThrowsMDLException() throws MDLException {
         MDLException expectedException =
-                new MDLException("Some NamespaceFactory error", new RuntimeException());
-        when(namespaceFactory.buildAllNamespaces(mockDrivingLicenceDocument))
+                new MDLException("Some DocumentFactory error", new RuntimeException());
+        when(documentFactory.buildAllNamespaces(mockDrivingLicenceDocument))
                 .thenThrow(expectedException);
 
         MDLException thrown =
@@ -87,8 +86,7 @@ class MobileDrivingLicenceServiceTest {
         Map<String, List<byte[]>> namespaces = Map.of();
         MDLException expectedException =
                 new MDLException("Some CBOREncoder error", new RuntimeException());
-        when(namespaceFactory.buildAllNamespaces(mockDrivingLicenceDocument))
-                .thenReturn(namespaces);
+        when(documentFactory.buildAllNamespaces(mockDrivingLicenceDocument)).thenReturn(namespaces);
         when(documentFactory.build(any())).thenReturn(mockMdoc);
         when(cborEncoder.encode(mockMdoc)).thenThrow(expectedException);
 
