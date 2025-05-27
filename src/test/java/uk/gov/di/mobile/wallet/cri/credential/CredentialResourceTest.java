@@ -74,7 +74,7 @@ class CredentialResourceTest {
     }
 
     @Test
-    void Should_Return400_When_AuthorizationHeaderIsMissing()
+    void Should_Return401_When_AuthorizationHeaderIsMissing()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
@@ -93,14 +93,12 @@ class CredentialResourceTest {
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(400));
-        assertThat(
-                response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\"}"));
+        assertThat(response.getStatus(), is(401));
+        assertThat(response.getHeaderString("WWW-Authenticate"), is("Bearer"));
     }
 
     @Test
-    void Should_Return400_When_AuthorizationHeaderIsNotValidBearerAccessToken()
+    void Should_Return401_When_AuthorizationHeaderIsNotValidBearerAccessToken()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
@@ -122,10 +120,9 @@ class CredentialResourceTest {
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(400));
+        assertThat(response.getStatus(), is(401));
         assertThat(
-                response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\"}"));
+                response.getHeaderString("WWW-Authenticate"), is("Bearer error=\"invalid_token\""));
     }
 
     @Test
