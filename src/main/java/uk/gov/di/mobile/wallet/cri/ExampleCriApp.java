@@ -15,6 +15,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.Jackso
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObjectFactory;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -82,12 +83,13 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
         IssuerSignedItemFactory issuerSignedItemFactory =
                 new IssuerSignedItemFactory(new DigestIDGenerator());
-        DocumentFactory documentFactory = new DocumentFactory();
-        DocumentFactory namespaceFactory =
-                new DocumentFactory(issuerSignedItemFactory, cborEncoder);
+        MobileSecurityObjectFactory mobileSecurityObjectFactory =
+                new MobileSecurityObjectFactory();
+        DocumentFactory documentFactory =
+                new DocumentFactory(issuerSignedItemFactory, mobileSecurityObjectFactory, cborEncoder);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(cborEncoder, documentFactory, namespaceFactory);
+                new MobileDrivingLicenceService(cborEncoder, documentFactory);
 
         DocumentStoreClient documentStoreClient =
                 new DocumentStoreClient(configurationService, httpClient);
