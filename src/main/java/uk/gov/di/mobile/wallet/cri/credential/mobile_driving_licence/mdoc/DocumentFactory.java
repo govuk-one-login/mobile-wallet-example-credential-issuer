@@ -48,9 +48,7 @@ public class DocumentFactory {
 
     public Document build(final DrivingLicenceDocument drivingLicence) throws MDLException {
         Map<String, List<IssuerSignedItem>> nameSpaces = buildAllNamespaces(drivingLicence);
-        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(nameSpaces);
-
-        IssuerSigned issuerSigned = buildIssuerSigned(encodedNamespaces);
+        IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
         return new Document(MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE, issuerSigned);
     }
 
@@ -144,9 +142,12 @@ public class DocumentFactory {
         return encodedNamespaces;
     }
 
-    private IssuerSigned buildIssuerSigned(final Map<String, List<byte[]>> nameSpaces) {
+    private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> nameSpaces)
+            throws MDLException {
         MobileSecurityObject mso = mobileSecurityObjectFactory.build(nameSpaces);
         IssuerAuth issuerAuth = new IssuerAuth(mso);
-        return new IssuerSigned(nameSpaces, issuerAuth);
+        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(nameSpaces);
+
+        return new IssuerSigned(encodedNamespaces, issuerAuth);
     }
 }
