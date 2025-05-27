@@ -61,7 +61,7 @@ public class NamespaceFactory {
             List<byte[]> issuerSignedItems = new ArrayList<>();
             for (Field field : entry.getValue()) {
                 String fieldName = field.getName();
-                String asSnakeCase = getAsSnakeCase(fieldName);
+                String fieldNameAsSnakeCase = getAsSnakeCase(fieldName);
                 field.setAccessible(true);
                 Object fieldValue;
                 try {
