@@ -71,11 +71,13 @@ public class NamespaceFactory {
                     }
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
-                            "Failed to access Driving Licence property {} to build IssuerSignedItem", fieldName,
+                            String.format(
+                                    "Failed to access Driving Licence property %s to build IssuerSignedItem",
+                                    fieldName),
                             exception);
                 }
                 IssuerSignedItem issuerSignedItem =
-                        issuerSignedItemFactory.build(asSnakeCase, fieldValue);
+                        issuerSignedItemFactory.build(fieldNameAsSnakeCase, fieldValue);
                 byte[] issuerSignedItemBytes = cborEncoder.encode(issuerSignedItem);
                 issuerSignedItems.add(issuerSignedItemBytes);
             }
