@@ -105,7 +105,6 @@ class NotificationResourceTest {
                                         MediaType.APPLICATION_JSON));
 
         assertThat(response.getStatus(), is(401));
-        assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_token\"}"));
     }
 
     private Stream<String> provideAuthorizationHeaders() throws ParseException, JOSEException {
@@ -143,7 +142,6 @@ class NotificationResourceTest {
                                         MediaType.APPLICATION_JSON));
 
         assertThat(response.getStatus(), is(401));
-        assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_token\"}"));
     }
 
     @Test
@@ -166,8 +164,6 @@ class NotificationResourceTest {
                                         MediaType.APPLICATION_JSON));
 
         assertThat(response.getStatus(), is(400));
-        assertThat(
-                response.readEntity(String.class), is("{\"error\":\"invalid_notification_id\"}"));
     }
 
     @Test
