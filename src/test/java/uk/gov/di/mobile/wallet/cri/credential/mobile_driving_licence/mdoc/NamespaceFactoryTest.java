@@ -159,6 +159,7 @@ class NamespaceFactoryTest {
         return new DrivingLicenceDocument(
                 "Doe",
                 "John",
+                "Miss",
                 "base64EncodedPortraitString",
                 "24-05-1985",
                 "London",
