@@ -71,7 +71,7 @@ public class NamespaceFactory {
                     }
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
-                            "Failed to access Driving Licence properties to build IssuerSignedItem",
+                            "Failed to access Driving Licence property {} to build IssuerSignedItem", fieldName,
                             exception);
                 }
                 IssuerSignedItem issuerSignedItem =
