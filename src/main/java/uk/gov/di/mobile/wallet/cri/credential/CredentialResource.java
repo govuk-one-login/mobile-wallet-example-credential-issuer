@@ -50,19 +50,15 @@ public class CredentialResource {
             if (exception instanceof AuthorizationHeaderMissingException) {
                 return ResponseUtil.unauthorized();
             }
-
             if (exception instanceof AccessTokenValidationException) {
                 return ResponseUtil.unauthorized("invalid_token");
             }
-
             if (exception instanceof CredentialOfferException) {
                 return ResponseUtil.badRequest(error("invalid_credential_request"));
             }
-
             if (exception instanceof ProofJwtValidationException) {
                 return ResponseUtil.badRequest(error("invalid_proof"));
             }
-
             return ResponseUtil.internalServerError();
         }
     }
