@@ -23,6 +23,8 @@ public class DrivingLicenceDocument {
 
     @Namespace(Namespaces.ISO)
     private final String title;
+
+    @Namespace(Namespaces.ISO)
     private final String portrait;
 
     @Namespace(Namespaces.ISO)

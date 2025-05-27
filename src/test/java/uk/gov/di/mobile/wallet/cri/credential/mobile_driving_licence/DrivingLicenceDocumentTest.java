@@ -136,6 +136,7 @@ class DrivingLicenceDocumentTest {
                 new DrivingLicenceDocument(
                         FAMILY_NAME,
                         GIVEN_NAME,
+                        TITLE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
