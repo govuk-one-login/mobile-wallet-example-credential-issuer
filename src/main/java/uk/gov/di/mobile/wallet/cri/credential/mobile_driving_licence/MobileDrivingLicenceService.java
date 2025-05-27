@@ -6,8 +6,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Docume
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 
 import java.util.HexFormat;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Service responsible for creating Mobile Driving Licence (mDL) documents following the ISO 18013-5
@@ -20,27 +18,18 @@ public class MobileDrivingLicenceService {
     /** Encoder used to convert document objects into CBOR byte representation. */
     private final CBOREncoder cborEncoder;
 
-    /** Factory for creating document objects that will be encoded. */
-    private final DocumentFactory documentFactory;
-
-    /** Factory for creating a namespace from driving licence documents. */
     private final DocumentFactory documentFactory;
 
     /**
      * Constructs a new MobileDrivingLicenceService with all required dependencies.
      *
      * @param cborEncoder The CBOR encoder to use for data serialization
-     * @param documentFactory The document factory to use for document creation
-     * @param namespaceFactory The namespace factory to use for namespace creation - this is an
-     *     array of IssuerSignedItem objects
+     * @param documentFactory The document factory to use for document creation array of
+     *     IssuerSignedItem objects
      */
-    public MobileDrivingLicenceService(
-            CBOREncoder cborEncoder,
-            DocumentFactory documentFactory,
-            DocumentFactory namespaceFactory) {
+    public MobileDrivingLicenceService(CBOREncoder cborEncoder, DocumentFactory documentFactory) {
         this.cborEncoder = cborEncoder;
         this.documentFactory = documentFactory;
-        this.documentFactory = namespaceFactory;
     }
 
     /**
@@ -53,10 +42,7 @@ public class MobileDrivingLicenceService {
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws MDLException {
-        Map<String, List<byte[]>> namespaces =
-                documentFactory.buildAllNamespaces(drivingLicenceDocument);
-
-        Document mdoc = documentFactory.build(namespaces);
+        Document mdoc = documentFactory.build(drivingLicenceDocument);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
         return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);
     }
