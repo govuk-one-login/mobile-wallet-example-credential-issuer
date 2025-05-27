@@ -30,7 +30,6 @@ public class ResponseUtil {
         String headerValue = "Bearer" + (error == null ? "" : " error=\"" + error + "\"");
         return Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, headerValue)
-                .type(MediaType.APPLICATION_JSON)
                 .build();
     }
 
