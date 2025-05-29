@@ -53,10 +53,14 @@ public class ValueDigestsFactory {
      * @return A new {@link ValueDigests} instance containing the calculated digests.
      */
     @SneakyThrows
-    public ValueDigests createFromNameSpaces(Map<String, List<IssuerSignedItem>> namespaces) {
+    public ValueDigests createFromNamespaces(Map<String, List<IssuerSignedItem>> namespaces) {
+        // Map to hold the final result: namespace -> (digestId -> digest bytes)
         final Map<String, Map<Integer, byte[]>> namespaceToValueDigests = new HashMap<>();
 
         for (var entry : namespaces.entrySet()) {
+            // For each namespace, process its list of IssuerSignedItems:
+            // 1. Serialize and digest each item
+            // 2. Collect results into a map from digestId to digest bytes
             Map<Integer, byte[]> digestIdToDigest =
                     entry.getValue().stream()
                             .map(this::serializeAndComputeDigest)
@@ -65,6 +69,7 @@ public class ValueDigestsFactory {
             namespaceToValueDigests.put(entry.getKey(), digestIdToDigest);
         }
 
+        // Return a new ValueDigests record containing all computed digests
         return new ValueDigests(namespaceToValueDigests);
     }
 
@@ -75,11 +80,16 @@ public class ValueDigestsFactory {
      * @return A map entry where the key is the digest ID and the value is the digest byte array.
      * @throws MDLException If serialization or digest calculation fails.
      */
-    private Map.Entry<Integer, byte[]> serializeAndComputeDigest(final IssuerSignedItem issuerSignedItem) throws MDLException {
+    private Map.Entry<Integer, byte[]> serializeAndComputeDigest(
+            final IssuerSignedItem issuerSignedItem) throws MDLException {
         try {
+            // Serialize the IssuerSignedItem to a CBOR byte array
             byte[] serializedIssuerSignedItem = cborMapper.writeValueAsBytes(issuerSignedItem);
+
+            // Compute the digest over the serialized bytes
             byte[] digest = messageDigest.digest(serializedIssuerSignedItem);
 
+            // Return a map entry pairing the digest ID with the computed digest bytes
             return Map.entry(issuerSignedItem.digestId(), digest);
         } catch (IOException e) {
             throw new MDLException("Error when calculating digest over IssuerSignedItem", e);

@@ -46,7 +46,7 @@ public class MobileSecurityObjectFactory {
      */
     public MobileSecurityObject build(Map<String, List<IssuerSignedItem>> nameSpaces)
             throws MDLException {
-        ValueDigests valueDigests = valueDigestsFactory.createFromNameSpaces(nameSpaces);
+        ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         return new MobileSecurityObject(
                 MSO_VERSION, valueDigestsFactory.getDigestAlgorithm(), valueDigests, DOC_TYPE);
     }
