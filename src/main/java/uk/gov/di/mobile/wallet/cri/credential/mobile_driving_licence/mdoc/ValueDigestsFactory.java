@@ -53,7 +53,8 @@ public class ValueDigestsFactory {
      * @return A new {@link ValueDigests} instance containing the calculated digests.
      */
     @SneakyThrows
-    public ValueDigests createFromNamespaces(Map<String, List<IssuerSignedItem>> namespaces) {
+    public ValueDigests createFromNamespaces(Map<String, List<IssuerSignedItem>> namespaces)
+            throws MDLException {
         // Map to hold the final result: namespace -> (digestId -> digest bytes)
         final Map<String, Map<Integer, byte[]>> namespaceToValueDigests = new HashMap<>();
 
@@ -91,8 +92,9 @@ public class ValueDigestsFactory {
 
             // Return a map entry pairing the digest ID with the computed digest bytes
             return Map.entry(issuerSignedItem.digestId(), digest);
-        } catch (IOException e) {
-            throw new MDLException("Error when calculating digest over IssuerSignedItem", e);
+        } catch (IOException exception) {
+            throw new MDLException(
+                    "Error when calculating digest over IssuerSignedItem", exception);
         }
     }
 }
