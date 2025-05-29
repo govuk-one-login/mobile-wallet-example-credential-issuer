@@ -7,6 +7,7 @@ import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,6 +30,15 @@ public class DrivingLicenceDocument {
 
     @Namespace(Namespaces.ISO)
     private final LocalDate birthDate;
+
+    @Namespace(Namespaces.ISO)
+    private final Boolean ageOver18;
+
+    @Namespace(Namespaces.ISO)
+    private final Boolean ageOver21;
+
+    @Namespace(Namespaces.ISO)
+    private final Boolean ageOver25;
 
     @Namespace(Namespaces.ISO)
     private final String birthPlace;
@@ -91,6 +101,9 @@ public class DrivingLicenceDocument {
         this.title = Objects.requireNonNull(title, "title is required");
         this.portrait = Objects.requireNonNull(portrait, "portrait is required");
         this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
+        this.ageOver18 = isAgeOver18(this.birthDate);
+        this.ageOver21 = isAgeOver21(this.birthDate);
+        this.ageOver25 = isAgeOver25(this.birthDate);
         this.birthPlace = Objects.requireNonNull(birthPlace, "birth_place is required");
         this.issueDate = parseDate(Objects.requireNonNull(issueDate, "issue_date is required"));
         this.expiryDate = parseDate(Objects.requireNonNull(expiryDate, "expiry_date is required"));
@@ -115,5 +128,20 @@ public class DrivingLicenceDocument {
     private LocalDate parseDate(String dateString) {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return LocalDate.parse(dateString, dateFormat);
+    }
+
+    @JsonProperty("age_over_18")
+    public Boolean isAgeOver18(LocalDate birthDate) {
+        return Period.between(birthDate, LocalDate.now()).getYears() >= 18;
+    }
+
+    @JsonProperty("age_over_21")
+    public Boolean isAgeOver21(LocalDate birthDate) {
+        return Period.between(birthDate, LocalDate.now()).getYears() >= 21;
+    }
+
+    @JsonProperty("age_over_25")
+    public Boolean isAgeOver25(LocalDate birthDate) {
+        return Period.between(birthDate, LocalDate.now()).getYears() >= 25;
     }
 }
