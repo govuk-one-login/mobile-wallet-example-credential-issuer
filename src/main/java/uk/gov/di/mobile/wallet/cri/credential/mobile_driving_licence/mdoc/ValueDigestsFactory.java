@@ -59,7 +59,7 @@ public class ValueDigestsFactory {
         for (var entry : namespaces.entrySet()) {
             Map<Integer, byte[]> digestIdToDigest =
                     entry.getValue().stream()
-                            .map(this::buildDigestIdToDigest)
+                            .map(this::serializeAndComputeDigest)
                             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
             namespaceToValueDigests.put(entry.getKey(), digestIdToDigest);
@@ -75,8 +75,7 @@ public class ValueDigestsFactory {
      * @return A map entry where the key is the digest ID and the value is the digest byte array.
      * @throws MDLException If serialization or digest calculation fails.
      */
-    private Map.Entry<Integer, byte[]> buildDigestIdToDigest(IssuerSignedItem issuerSignedItem)
-            throws MDLException {
+    private Map.Entry<Integer, byte[]> serializeAndComputeDigest(final IssuerSignedItem issuerSignedItem) throws MDLException {
         try {
             byte[] serializedIssuerSignedItem = cborMapper.writeValueAsBytes(issuerSignedItem);
             byte[] digest = messageDigest.digest(serializedIssuerSignedItem);
