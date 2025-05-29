@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 import com.google.common.base.CaseFormat;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DocType;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
  */
 public class DocumentFactory {
 
-    private static final String MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE = "org.iso.18013.5.1.mDL";
+    private static final String DOC_TYPE = DocType.MDL.getValue();
 
     /** Factory for creating IssuerSignedItem objects from field names and values */
     private final IssuerSignedItemFactory issuerSignedItemFactory;
@@ -49,7 +50,7 @@ public class DocumentFactory {
     public Document build(final DrivingLicenceDocument drivingLicence) throws MDLException {
         Map<String, List<IssuerSignedItem>> nameSpaces = buildAllNamespaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
-        return new Document(MOBILE_DRIVING_LICENCE_DOCUMENT_TYPE, issuerSigned);
+        return new Document(DOC_TYPE, issuerSigned);
     }
 
     /**
