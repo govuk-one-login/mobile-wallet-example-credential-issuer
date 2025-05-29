@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri;
 
+import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
@@ -12,10 +13,7 @@ import uk.gov.di.mobile.wallet.cri.credential.*;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObjectFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -35,6 +33,8 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.net.MalformedURLException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public class ExampleCriApp extends Application<ConfigurationService> {
 
@@ -52,7 +52,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
 
     @Override
     public void run(final ConfigurationService configurationService, final Environment environment)
-            throws MalformedURLException {
+            throws MalformedURLException, NoSuchAlgorithmException {
 
         KmsService kmsService = new KmsService(configurationService);
         PreAuthorizedCodeBuilder preAuthorizedCode =
@@ -79,14 +79,18 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         CredentialBuilder<? extends CredentialSubject> credentialBuilder =
                 new CredentialBuilder<>(configurationService, kmsService);
 
-        CBOREncoder cborEncoder =
-                new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
+        CBORMapper cborMapper = JacksonCBOREncoderProvider.configuredCBORMapper();
+
+        CBOREncoder cborEncoder = new CBOREncoder(cborMapper);
         IssuerSignedItemFactory issuerSignedItemFactory =
                 new IssuerSignedItemFactory(new DigestIDGenerator());
+        ValueDigestsFactory valueDigestsFactory =
+                new ValueDigestsFactory(cborMapper, MessageDigest.getInstance("SHA-256"));
         MobileSecurityObjectFactory mobileSecurityObjectFactory =
-                new MobileSecurityObjectFactory();
+                new MobileSecurityObjectFactory(valueDigestsFactory);
         DocumentFactory documentFactory =
-                new DocumentFactory(issuerSignedItemFactory, mobileSecurityObjectFactory, cborEncoder);
+                new DocumentFactory(
+                        issuerSignedItemFactory, mobileSecurityObjectFactory, cborEncoder);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
                 new MobileDrivingLicenceService(cborEncoder, documentFactory);
