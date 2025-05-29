@@ -74,6 +74,7 @@ public class MockDocuments {
         HashMap<String, Object> data = new HashMap<>();
         data.put("family_name", "Edwards");
         data.put("given_name", "Sarah Ann");
+        data.put("title", "Miss");
         data.put("portrait", "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg==");
         data.put("birth_date", "01-02-2000");
         data.put("birth_place", "London");
