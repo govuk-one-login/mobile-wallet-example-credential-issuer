@@ -7,7 +7,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Docume
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespaceFactory;
 
 import java.util.HexFormat;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +18,6 @@ import java.util.Map;
  * proper namespace structure required by the standard.
  */
 public class MobileDrivingLicenceService {
-
-    /** The standard namespace for Mobile Driving Licence documents as defined by ISO 18013-5. */
-    private static final String MOBILE_DRIVING_LICENCE_NAMESPACE = "org.iso.18013.5.1";
-
     /** Encoder used to convert document objects into CBOR byte representation. */
     private final CBOREncoder cborEncoder;
 
@@ -59,9 +54,8 @@ public class MobileDrivingLicenceService {
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws MDLException {
-        Map<String, List<byte[]>> namespaces = new LinkedHashMap<>();
-        List<byte[]> namespace = namespaceFactory.build(drivingLicenceDocument);
-        namespaces.put(MOBILE_DRIVING_LICENCE_NAMESPACE, namespace);
+        Map<String, List<byte[]>> namespaces =
+                namespaceFactory.buildAllNamespaces(drivingLicenceDocument);
 
         Document mdoc = documentFactory.build(namespaces);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);

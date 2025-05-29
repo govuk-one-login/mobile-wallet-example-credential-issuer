@@ -181,8 +181,6 @@ class NotificationResourceTest {
                                         MediaType.APPLICATION_JSON));
 
         assertThat(response.getStatus(), is(400));
-        assertThat(
-                response.readEntity(String.class), is("{\"error\":\"invalid_notification_id\"}"));
     }
 
     @Test

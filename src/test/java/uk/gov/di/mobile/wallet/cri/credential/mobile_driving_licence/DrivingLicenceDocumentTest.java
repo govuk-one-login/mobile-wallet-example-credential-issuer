@@ -6,6 +6,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -14,6 +15,7 @@ class DrivingLicenceDocumentTest {
 
     private static final String FAMILY_NAME = "Doe";
     private static final String GIVEN_NAME = "John";
+    private static final String TITLE = "Miss";
     private static final String PORTRAIT = "base64EncodedPortraitString";
     private static final String BIRTH_DATE = "24-05-1985";
     private static final String BIRTH_PLACE = "London";
@@ -29,13 +31,17 @@ class DrivingLicenceDocumentTest {
         mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
     };
     private static final String UN_DISTINGUISHING_SIGN = "UK";
+    private static final DrivingPrivilege[] PROVISIONAL_DRIVING_PRIVILEGES = {
+        mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
+    };
 
     @Test
-    void Should_CreateInstance_When_DateIsValid() {
+    void Should_CreateInstance_When_DataIsValid() {
         DrivingLicenceDocument document =
                 new DrivingLicenceDocument(
                         FAMILY_NAME,
                         GIVEN_NAME,
+                        TITLE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
@@ -48,10 +54,12 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
-                        UN_DISTINGUISHING_SIGN);
+                        UN_DISTINGUISHING_SIGN,
+                        PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals(FAMILY_NAME, document.getFamilyName());
         assertEquals(GIVEN_NAME, document.getGivenName());
+        assertEquals(TITLE, document.getTitle());
         assertEquals(PORTRAIT, document.getPortrait());
         assertEquals(LocalDate.of(1985, 5, 24), document.getBirthDate());
         assertEquals(BIRTH_PLACE, document.getBirthPlace());
@@ -67,13 +75,14 @@ class DrivingLicenceDocumentTest {
     }
 
     @Test
-    void Should_CreateInstance_With_SingleLineAddress() {
+    void Should_CreateInstance_When_ResidentAddressIsSingleLine() {
         String[] singleLineAddress = {"123 Main St"};
 
         DrivingLicenceDocument document =
                 new DrivingLicenceDocument(
                         FAMILY_NAME,
                         GIVEN_NAME,
+                        TITLE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
@@ -86,19 +95,21 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
-                        UN_DISTINGUISHING_SIGN);
+                        UN_DISTINGUISHING_SIGN,
+                        PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals("123 Main St", document.getResidentAddress());
     }
 
     @Test
-    void Should_CreateInstance_With_MultiLineAddress() {
+    void Should_CreateInstance_When_ResidentAddressIsMultiLine() {
         String[] multiLineAddress = {"123 Main St", "Floor 2", "Suite 301"};
 
         DrivingLicenceDocument document =
                 new DrivingLicenceDocument(
                         FAMILY_NAME,
                         GIVEN_NAME,
+                        TITLE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
@@ -111,9 +122,37 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_POSTAL_CODE,
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
-                        UN_DISTINGUISHING_SIGN);
+                        UN_DISTINGUISHING_SIGN,
+                        PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals("123 Main St, Floor 2, Suite 301", document.getResidentAddress());
+    }
+
+    @Test
+    void Should_CreateInstance_When_ProvisionalDrivingPrivilegesIsNull() {
+        DrivingPrivilege[] provisionalDrivingPrivileges = null;
+
+        DrivingLicenceDocument document =
+                new DrivingLicenceDocument(
+                        FAMILY_NAME,
+                        GIVEN_NAME,
+                        TITLE,
+                        PORTRAIT,
+                        BIRTH_DATE,
+                        BIRTH_PLACE,
+                        ISSUE_DATE,
+                        EXPIRY_DATE,
+                        ISSUING_AUTHORITY,
+                        ISSUING_COUNTRY,
+                        DOCUMENT_NUMBER,
+                        RESIDENT_ADDRESS,
+                        RESIDENT_POSTAL_CODE,
+                        RESIDENT_CITY,
+                        DRIVING_PRIVILEGES,
+                        UN_DISTINGUISHING_SIGN,
+                        provisionalDrivingPrivileges);
+
+        assertEquals(Optional.empty(), document.getProvisionalDrivingPrivileges());
     }
 
     @Test
@@ -124,6 +163,7 @@ class DrivingLicenceDocumentTest {
                         new DrivingLicenceDocument(
                                 null,
                                 GIVEN_NAME,
+                                TITLE,
                                 PORTRAIT,
                                 ISSUE_DATE,
                                 BIRTH_PLACE,
@@ -136,7 +176,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
     @ParameterizedTest
@@ -148,6 +189,7 @@ class DrivingLicenceDocumentTest {
                         new DrivingLicenceDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
+                                TITLE,
                                 PORTRAIT,
                                 invalidDate,
                                 BIRTH_PLACE,
@@ -160,7 +202,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
     @ParameterizedTest
@@ -172,6 +215,7 @@ class DrivingLicenceDocumentTest {
                         new DrivingLicenceDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
+                                TITLE,
                                 PORTRAIT,
                                 BIRTH_DATE,
                                 BIRTH_PLACE,
@@ -184,7 +228,8 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
     @ParameterizedTest
@@ -196,6 +241,7 @@ class DrivingLicenceDocumentTest {
                         new DrivingLicenceDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
+                                TITLE,
                                 PORTRAIT,
                                 BIRTH_DATE,
                                 BIRTH_PLACE,
@@ -208,6 +254,7 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_POSTAL_CODE,
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
-                                UN_DISTINGUISHING_SIGN));
+                                UN_DISTINGUISHING_SIGN,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
     }
 }
