@@ -93,7 +93,8 @@ public class NamespaceFactory {
      * @return The field name converted to snake_case format
      */
     private static String getAsSnakeCase(String fieldName) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+        String snake = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+        return snake.replaceAll("(?<=[A-Za-z])(?=\\d)", "_");
     }
 
     /**
