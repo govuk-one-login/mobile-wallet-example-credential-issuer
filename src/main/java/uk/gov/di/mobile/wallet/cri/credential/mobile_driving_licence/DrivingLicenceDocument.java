@@ -21,7 +21,7 @@ public class DrivingLicenceDocument {
     @Namespace(Namespaces.ISO)
     private final String givenName;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(Namespaces.UK)
     private final String title;
 
     @Namespace(Namespaces.ISO)
