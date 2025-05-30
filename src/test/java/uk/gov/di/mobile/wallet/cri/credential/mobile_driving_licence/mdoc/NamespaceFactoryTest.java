@@ -101,7 +101,8 @@ class NamespaceFactoryTest {
         ukNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
         verify(mockIssuerSignedItemFactory)
                 .build("provisional_driving_privileges", Optional.ofNullable(DRIVING_PRIVILEGES));
-        verify(mockIssuerSignedItemFactory).build("title", "Miss");;
+        verify(mockIssuerSignedItemFactory).build("title", "Miss");
+        ;
     }
 
     @Test
