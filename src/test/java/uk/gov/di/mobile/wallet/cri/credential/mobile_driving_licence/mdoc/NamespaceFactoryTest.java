@@ -102,7 +102,6 @@ class NamespaceFactoryTest {
         verify(mockIssuerSignedItemFactory)
                 .build("provisional_driving_privileges", Optional.ofNullable(DRIVING_PRIVILEGES));
         verify(mockIssuerSignedItemFactory).build("title", "Miss");
-        ;
     }
 
     @Test
