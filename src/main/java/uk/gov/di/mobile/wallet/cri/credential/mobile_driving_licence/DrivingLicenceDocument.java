@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 
 @Setter
 @Getter
+@NoArgsConstructor(force = true)
 public class DrivingLicenceDocument {
 
     @Namespace(Namespaces.ISO)
