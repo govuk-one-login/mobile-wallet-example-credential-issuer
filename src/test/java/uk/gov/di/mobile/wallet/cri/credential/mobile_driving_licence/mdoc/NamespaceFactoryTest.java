@@ -25,9 +25,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class NamespaceFactoryTest {
 
-
     private static final int EXPECTED_ISO_FIELDS = 19;
-    private static final int EXPECTED_UK_FIELDS = 12;
+    private static final int EXPECTED_UK_FIELDS = 2;
     private static final byte[] MOCK_CBOR_BYTES = {0x01, 0x02};
     private static final DrivingPrivilege[] DRIVING_PRIVILEGES = {
         new DrivingPrivilege("B", null, null)
@@ -74,8 +73,11 @@ class NamespaceFactoryTest {
         isoNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
         verify(mockIssuerSignedItemFactory).build("family_name", "Doe");
         verify(mockIssuerSignedItemFactory).build("given_name", "John");
+        verify(mockIssuerSignedItemFactory).build("title", "Miss");
         verify(mockIssuerSignedItemFactory).build("portrait", "base64EncodedPortraitString");
         verify(mockIssuerSignedItemFactory).build("birth_date", LocalDate.parse("1985-05-24"));
+        verify(mockIssuerSignedItemFactory).build("age_over_18", true);
+        
         verify(mockIssuerSignedItemFactory).build("birth_place", "London");
         verify(mockIssuerSignedItemFactory).build("issue_date", LocalDate.parse("2020-01-10"));
         verify(mockIssuerSignedItemFactory).build("expiry_date", LocalDate.parse("2025-01-09"));
@@ -102,7 +104,6 @@ class NamespaceFactoryTest {
         ukNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
         verify(mockIssuerSignedItemFactory)
                 .build("provisional_driving_privileges", Optional.ofNullable(DRIVING_PRIVILEGES));
-        verify(mockIssuerSignedItemFactory).build("title", "Miss");
     }
 
     @Test
