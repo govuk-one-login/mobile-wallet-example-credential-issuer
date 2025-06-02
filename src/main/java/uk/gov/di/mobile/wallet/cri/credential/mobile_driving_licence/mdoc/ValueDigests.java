@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import java.util.HashMap;
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import java.util.Map;
 
 /**
@@ -14,14 +15,8 @@ import java.util.Map;
  */
 public record ValueDigests(Map<String, Map<Integer, byte[]>> namespaceToValueDigests) {
 
-    /**
-     * Returns a shallow copy of the mapping from namespaces to their digest ID and digest value
-     * maps.
-     *
-     * @return A shallow copy of the namespace to digest mappings.
-     */
-    @Override
-    public Map<String, Map<Integer, byte[]>> namespaceToValueDigests() {
-        return new HashMap<>(namespaceToValueDigests);
+    @JsonValue
+    public Map<String, Map<Integer, byte[]>> value() {
+      return namespaceToValueDigests;
     }
 }

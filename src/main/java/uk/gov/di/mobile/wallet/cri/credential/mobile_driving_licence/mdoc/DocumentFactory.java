@@ -129,6 +129,17 @@ public class DocumentFactory {
         return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
     }
 
+    private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> nameSpaces)
+            throws MDLException {
+        MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(nameSpaces);
+        byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
+
+        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
+        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(nameSpaces);
+
+        return new IssuerSigned(encodedNamespaces, issuerAuth);
+    }
+
     private @NotNull Map<String, List<byte[]>> getEncodedNamespaces(
             Map<String, List<IssuerSignedItem>> nameSpaces) throws MDLException {
         Map<String, List<byte[]>> encodedNamespaces = new LinkedHashMap<>();
@@ -142,17 +153,5 @@ public class DocumentFactory {
             encodedNamespaces.put(entry.getKey(), encodedItems);
         }
         return encodedNamespaces;
-    }
-
-    private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> nameSpaces)
-            throws MDLException {
-        MobileSecurityObject mso = mobileSecurityObjectFactory.build(nameSpaces);
-        byte[] msoBytes = cborEncoder.encode(mso);
-
-
-        IssuerAuth issuerAuth = new IssuerAuth(msoBytes);
-        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(nameSpaces);
-
-        return new IssuerSigned(encodedNamespaces, issuerAuth);
     }
 }
