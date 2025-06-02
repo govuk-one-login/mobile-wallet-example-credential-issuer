@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 class NamespaceFactoryTest {
 
     private static final int EXPECTED_ISO_FIELDS = 15;
-    private static final int EXPECTED_UK_FIELDS = 2;
+    private static final int EXPECTED_UK_FIELDS = 3;
     private static final byte[] MOCK_CBOR_BYTES = {0x01, 0x02};
     private static final DrivingPrivilege[] DRIVING_PRIVILEGES = {
         new DrivingPrivilege("B", null, null)
@@ -102,6 +102,7 @@ class NamespaceFactoryTest {
         verify(mockIssuerSignedItemFactory)
                 .build("provisional_driving_privileges", Optional.ofNullable(DRIVING_PRIVILEGES));
         verify(mockIssuerSignedItemFactory).build("title", "Miss");
+        verify(mockIssuerSignedItemFactory).build("welsh_licence", false);
     }
 
     @Test
@@ -162,6 +163,7 @@ class NamespaceFactoryTest {
                 "Doe",
                 "John",
                 "Miss",
+                false,
                 "base64EncodedPortraitString",
                 "24-05-1985",
                 "London",
