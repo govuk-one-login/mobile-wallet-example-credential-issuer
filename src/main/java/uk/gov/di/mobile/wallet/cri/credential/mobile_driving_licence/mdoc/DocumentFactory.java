@@ -72,7 +72,7 @@ public class DocumentFactory {
      * @throws MDLException If reflection fails or encoding fails.
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
-    public Map<String, List<IssuerSignedItem>> buildAllNamespaces(DrivingLicenceDocument document)
+    private Map<String, List<IssuerSignedItem>> buildAllNamespaces(DrivingLicenceDocument document)
             throws MDLException {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
