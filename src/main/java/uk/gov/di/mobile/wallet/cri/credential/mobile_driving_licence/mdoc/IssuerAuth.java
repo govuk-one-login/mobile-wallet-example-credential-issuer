@@ -1,3 +1,3 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-public record IssuerAuth(MobileSecurityObject mobileSecurityObject) {}
+public record IssuerAuth(byte[] mobileSecurityObject) {}

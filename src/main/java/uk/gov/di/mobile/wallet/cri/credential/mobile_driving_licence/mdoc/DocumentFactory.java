@@ -49,6 +49,7 @@ public class DocumentFactory {
 
     public Document build(final DrivingLicenceDocument drivingLicence) throws MDLException {
         Map<String, List<IssuerSignedItem>> nameSpaces = buildAllNamespaces(drivingLicence);
+
         IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
         return new Document(DOC_TYPE, issuerSigned);
     }
@@ -146,7 +147,10 @@ public class DocumentFactory {
     private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> nameSpaces)
             throws MDLException {
         MobileSecurityObject mso = mobileSecurityObjectFactory.build(nameSpaces);
-        IssuerAuth issuerAuth = new IssuerAuth(mso);
+        byte[] msoBytes = cborEncoder.encode(mso);
+
+
+        IssuerAuth issuerAuth = new IssuerAuth(msoBytes);
         Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(nameSpaces);
 
         return new IssuerSigned(encodedNamespaces, issuerAuth);
