@@ -19,10 +19,10 @@ public record ValueDigests(Map<String, Map<Integer, byte[]>> valueDigests) {
     /**
      * Returns a shallow copy of the mapping from namespaces to their digest ID and digest value
      * maps.
-     * <p>
-     * The {@link JsonValue} annotation ensures that when this object is serialized with Jackson,
+     *
+     * <p>The {@link JsonValue} annotation ensures that when this object is serialized with Jackson,
      * the returned map is used directly, omitting the record's field name from the output.
-     * </p>
+     *
      * @return A shallow copy of the namespace to digest mappings.
      */
     @JsonValue
