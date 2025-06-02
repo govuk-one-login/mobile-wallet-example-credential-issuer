@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import com.google.common.base.CaseFormat;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DocType;
@@ -9,10 +8,15 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.utils.CamelToSnake.camelToSnake;
 
 /**
  * Factory for constructing CBOR-encoded issuer-signed items grouped by their respective namespace.
@@ -24,18 +28,15 @@ public class DocumentFactory {
 
     private static final String DOC_TYPE = DocType.MDL.getValue();
 
-    /** Factory for creating IssuerSignedItem objects from field names and values */
     private final IssuerSignedItemFactory issuerSignedItemFactory;
-
     private final MobileSecurityObjectFactory mobileSecurityObjectFactory;
-
-    /** Encoder for converting IssuerSignedItem objects to CBOR byte arrays */
     private final CBOREncoder cborEncoder;
 
     /**
      * Constructs a DocumentFactory with the necessary dependencies.
      *
      * @param issuerSignedItemFactory Factory to create IssuerSignedItem objects
+     * @param mobileSecurityObjectFactory Factory to create MobileSecurityObject
      * @param cborEncoder Encoder to serialize objects into CBOR format
      */
     public DocumentFactory(
@@ -48,9 +49,8 @@ public class DocumentFactory {
     }
 
     public Document build(final DrivingLicenceDocument drivingLicence) throws MDLException {
-        Map<String, List<IssuerSignedItem>> nameSpaces = buildAllNamespaces(drivingLicence);
-
-        IssuerSigned issuerSigned = buildIssuerSigned(nameSpaces);
+        Map<String, List<IssuerSignedItem>> namespaces = buildNamespaces(drivingLicence);
+        IssuerSigned issuerSigned = buildIssuerSigned(namespaces);
         return new Document(DOC_TYPE, issuerSigned);
     }
 
@@ -62,17 +62,17 @@ public class DocumentFactory {
      * <ul>
      *   <li>Groups fields by namespace value.
      *   <li>Converts field names to snake_case.
-     *   <li>Builds an {@link IssuerSignedItem} for each field and encodes it to CBOR.
-     *   <li>Returns a map where each key is a namespace and each value is a list of CBOR-encoded
-     *       field items belonging to that namespace.
+     *   <li>Builds an {@link IssuerSignedItem} for each field.
+     *   <li>Returns a map where each key is a namespace and each value is a list of {@link
+     *       IssuerSignedItem} objects belonging to that namespace.
      * </ul>
      *
      * @param document The driving licence document to process/extract fields from.
-     * @return Map from namespace names to lists of CBOR-encoded issuer-signed items.
+     * @return Map from namespace names to lists of issuer-signed items.
      * @throws MDLException If reflection fails or encoding fails.
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
-    private Map<String, List<IssuerSignedItem>> buildAllNamespaces(DrivingLicenceDocument document)
+    private Map<String, List<IssuerSignedItem>> buildNamespaces(DrivingLicenceDocument document)
             throws MDLException {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
@@ -81,7 +81,7 @@ public class DocumentFactory {
             List<IssuerSignedItem> issuerSignedItems = new ArrayList<>();
             for (Field field : entry.getValue()) {
                 String fieldName = field.getName();
-                String fieldNameAsSnakeCase = getAsSnakeCase(fieldName);
+                String fieldNameAsSnakeCase = camelToSnake(fieldName);
                 field.setAccessible(true);
                 Object fieldValue;
                 try {
@@ -119,23 +119,13 @@ public class DocumentFactory {
                                 field -> field.getAnnotation(Namespace.class).value()));
     }
 
-    /**
-     * Converts a camelCase string to snake_case.
-     *
-     * @param fieldName The field name in camelCase format
-     * @return The field name converted to snake_case format
-     */
-    private static String getAsSnakeCase(String fieldName) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
-    }
-
-    private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> nameSpaces)
+    private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> namespaces)
             throws MDLException {
-        MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(nameSpaces);
+        MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
         IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
-        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(nameSpaces);
+        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);
 
         return new IssuerSigned(encodedNamespaces, issuerAuth);
     }
