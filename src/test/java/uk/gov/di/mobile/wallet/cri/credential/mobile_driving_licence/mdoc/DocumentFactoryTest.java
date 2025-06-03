@@ -70,7 +70,7 @@ class DocumentFactoryTest {
         assertTrue(namespaces.containsKey(Namespaces.UK), "Should contain UK namespace");
         assertEquals(
                 15, namespaces.get(Namespaces.ISO).size(), "ISO namespace should have 15 fields");
-        assertEquals(2, namespaces.get(Namespaces.UK).size(), "UK namespace should have 2 fields");
+        assertEquals(3, namespaces.get(Namespaces.UK).size(), "UK namespace should have 2 fields");
     }
 
     /**
@@ -122,6 +122,7 @@ class DocumentFactoryTest {
         verify(mockIssuerSignedItemFactory).build("resident_city", "London");
         verify(mockIssuerSignedItemFactory).build("driving_privileges", DRIVING_PRIVILEGES);
         verify(mockIssuerSignedItemFactory).build("un_distinguishing_sign", "UK");
+        verify(mockIssuerSignedItemFactory).build("welsh_licence", false);
     }
 
     /**
@@ -152,7 +153,7 @@ class DocumentFactoryTest {
         // CBOR encoded
         List<byte[]> ukNamespace = result.issuerSigned().nameSpaces().get(Namespaces.UK);
         assertEquals(
-                2,
+                3,
                 ukNamespace.size(),
                 "Should create one IssuerSignedItem per UK namespace attribute");
         ukNamespace.forEach(bytes -> assertArrayEquals(expectedCbor, bytes));
@@ -192,7 +193,7 @@ class DocumentFactoryTest {
         // Assert: Check that UK namespace has only 1 field (i.e. not provisional privileges)
         List<byte[]> ukNamespace = result.issuerSigned().nameSpaces().get(Namespaces.UK);
         assertEquals(
-                1,
+                2,
                 ukNamespace.size(),
                 "Should not create an IssuerSignedItem for provisional driving privileges when its value is null");
         // Assert: Verify that the factory was NOT called for provisional privileges with null
@@ -271,9 +272,9 @@ class DocumentFactoryTest {
                 "issuerAuth should contain the expected CBOR-encoded MobileSecurityObject");
 
         // Assert: Verify that mocks were called the expected number of times
-        verify(mockIssuerSignedItemFactory, times(17)).build(any(), any());
+        verify(mockIssuerSignedItemFactory, times(18)).build(any(), any());
         verify(mockMobileSecurityObjectFactory).build(any());
-        verify(mockCborEncoder, times(17)).encode(issuerSignedItem);
+        verify(mockCborEncoder, times(18)).encode(issuerSignedItem);
         verify(mockCborEncoder).encode(expectedMso);
     }
 
@@ -296,6 +297,7 @@ class DocumentFactoryTest {
                 "Doe",
                 "John",
                 "Miss",
+                false,
                 "base64EncodedPortraitString",
                 "24-05-1985",
                 "London",

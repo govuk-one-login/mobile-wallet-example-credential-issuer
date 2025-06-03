@@ -75,6 +75,7 @@ public class MockDocuments {
         data.put("family_name", "Edwards");
         data.put("given_name", "Sarah Ann");
         data.put("title", "Miss");
+        data.put("welsh_licence", false);
         data.put("portrait", "VGhpcyBpcyBhIHRlc3Qgc3RyaW5nLg==");
         data.put("birth_date", "01-02-2000");
         data.put("birth_place", "London");
