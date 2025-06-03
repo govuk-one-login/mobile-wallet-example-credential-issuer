@@ -3,7 +3,6 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 
@@ -15,7 +14,6 @@ import java.util.Optional;
 
 @Setter
 @Getter
-@NoArgsConstructor(force = true)
 public class DrivingLicenceDocument {
 
     @Namespace(Namespaces.ISO)
@@ -103,9 +101,9 @@ public class DrivingLicenceDocument {
         this.title = Objects.requireNonNull(title, "title is required");
         this.portrait = Objects.requireNonNull(portrait, "portrait is required");
         this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
-        this.ageOver18 = isAgeOver18(this.birthDate);
-        this.ageOver21 = isAgeOver21(this.birthDate);
-        this.ageOver25 = isAgeOver25(this.birthDate);
+        this.ageOver18 = isAgeOver(this.birthDate);
+        this.ageOver21 = isAgeOver(this.birthDate);
+        this.ageOver25 = isAgeOver(this.birthDate);
         this.birthPlace = Objects.requireNonNull(birthPlace, "birth_place is required");
         this.issueDate = parseDate(Objects.requireNonNull(issueDate, "issue_date is required"));
         this.expiryDate = parseDate(Objects.requireNonNull(expiryDate, "expiry_date is required"));
@@ -132,18 +130,10 @@ public class DrivingLicenceDocument {
         return LocalDate.parse(dateString, dateFormat);
     }
 
-    @JsonProperty("age_over_18")
-    public Boolean isAgeOver18(LocalDate birthDate) {
-        return Period.between(birthDate, LocalDate.now()).getYears() >= 18;
-    }
-
-    @JsonProperty("age_over_21")
-    public Boolean isAgeOver21(LocalDate birthDate) {
-        return Period.between(birthDate, LocalDate.now()).getYears() >= 21;
-    }
-
-    @JsonProperty("age_over_25")
-    public Boolean isAgeOver25(LocalDate birthDate) {
-        return Period.between(birthDate, LocalDate.now()).getYears() >= 25;
+    private boolean isAgeOver(LocalDate birthDate) {
+        int age = Period.between(birthDate, LocalDate.now()).getYears();
+        if (age >= 18 && age < 21) return true;
+        if (age >= 21 && age < 25) return true;
+        return age >= 25;
     }
 }

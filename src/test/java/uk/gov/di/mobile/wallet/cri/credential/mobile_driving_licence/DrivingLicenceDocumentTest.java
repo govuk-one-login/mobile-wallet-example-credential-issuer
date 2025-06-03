@@ -34,7 +34,6 @@ class DrivingLicenceDocumentTest {
     private static final DrivingPrivilege[] PROVISIONAL_DRIVING_PRIVILEGES = {
         mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
     };
-    private final DrivingLicenceDocument subject = new DrivingLicenceDocument();
 
     @Test
     void Should_CreateInstance_When_DataIsValid() {
@@ -268,18 +267,18 @@ class DrivingLicenceDocumentTest {
     @Test
     void should_returnTrue_When_AgeIsExactly18() {
         LocalDate birthDate = LocalDate.now().minusYears(18);
-        assertTrue(subject.isAgeOver18(birthDate));
+        assertTrue(subject.isAgeOver(birthDate));
     }
 
     @Test
     void should_returnFalse_When_AgeIsNotOver21() {
         LocalDate birthDate = LocalDate.now().minusYears(20);
-        assertFalse(subject.isAgeOver21(birthDate));
+        assertFalse(subject.isAgeOver(birthDate));
     }
 
     @Test
     void should_returnTrue_When_AgeIsOneDayOver25() {
         LocalDate birthDate = LocalDate.now().minusYears(25).minusDays(1);
-        assertTrue(subject.isAgeOver25(birthDate));
+        assertTrue(subject.isAgeOver(birthDate));
     }
 }
