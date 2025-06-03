@@ -308,6 +308,7 @@ class DrivingLicenceDocumentTest {
                 FAMILY_NAME,
                 GIVEN_NAME,
                 TITLE,
+                WELSH_LICENSE,
                 PORTRAIT,
                 birthDate,
                 BIRTH_PLACE,

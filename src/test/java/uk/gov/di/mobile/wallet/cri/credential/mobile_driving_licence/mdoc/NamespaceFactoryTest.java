@@ -25,7 +25,6 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class NamespaceFactoryTest {
 
-
     private static final int EXPECTED_ISO_FIELDS = 18;
     private static final int EXPECTED_UK_FIELDS = 3;
 
