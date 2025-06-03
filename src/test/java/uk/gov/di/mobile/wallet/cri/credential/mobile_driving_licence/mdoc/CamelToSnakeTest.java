@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.utils.CamelToSnake.camelToSnake;
 
-public class CamelToSnakeTest {
+class CamelToSnakeTest {
     @Test
     void Should_ReturnEmptyString_When_InputIsEmptyString() {
         assertEquals("", camelToSnake(""));

@@ -145,15 +145,13 @@ class IssuerSignedCBORSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         // Act & Assert: Attempting to serialize with a regular (non-CBOR) generator should fail
+        IssuerSignedCBORSerializer issuerSignedCBORSerializer = new IssuerSignedCBORSerializer();
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new IssuerSignedCBORSerializer()
-                                        .serialize(
-                                                issuerSigned,
-                                                regularGenerator,
-                                                serializerProvider));
+                                issuerSignedCBORSerializer.serialize(
+                                        issuerSigned, regularGenerator, serializerProvider));
         assertEquals("This serializer only supports CBORGenerator", exception.getMessage());
     }
 }
