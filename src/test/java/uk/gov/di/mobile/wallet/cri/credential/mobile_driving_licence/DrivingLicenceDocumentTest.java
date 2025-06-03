@@ -17,6 +17,7 @@ class DrivingLicenceDocumentTest {
     private static final String FAMILY_NAME = "Doe";
     private static final String GIVEN_NAME = "John";
     private static final String TITLE = "Miss";
+    private static final boolean WELSH_LICENSE = false;
     private static final String PORTRAIT = "base64EncodedPortraitString";
     private static final String BIRTH_DATE = "24-05-1985";
     private static final String BIRTH_PLACE = "London";
@@ -43,6 +44,7 @@ class DrivingLicenceDocumentTest {
                         FAMILY_NAME,
                         GIVEN_NAME,
                         TITLE,
+                        WELSH_LICENSE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
@@ -64,6 +66,7 @@ class DrivingLicenceDocumentTest {
         assertEquals(FAMILY_NAME, document.getFamilyName());
         assertEquals(GIVEN_NAME, document.getGivenName());
         assertEquals(TITLE, document.getTitle());
+        assertEquals(WELSH_LICENSE, document.isWelshLicence());
         assertEquals(PORTRAIT, document.getPortrait());
         assertEquals(LocalDate.of(1985, 5, 24), document.getBirthDate());
         assertEquals(age >= 18, document.getAgeOver18());
@@ -90,6 +93,7 @@ class DrivingLicenceDocumentTest {
                         FAMILY_NAME,
                         GIVEN_NAME,
                         TITLE,
+                        WELSH_LICENSE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
@@ -117,6 +121,7 @@ class DrivingLicenceDocumentTest {
                         FAMILY_NAME,
                         GIVEN_NAME,
                         TITLE,
+                        WELSH_LICENSE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
@@ -144,6 +149,7 @@ class DrivingLicenceDocumentTest {
                         FAMILY_NAME,
                         GIVEN_NAME,
                         TITLE,
+                        WELSH_LICENSE,
                         PORTRAIT,
                         BIRTH_DATE,
                         BIRTH_PLACE,
@@ -171,6 +177,7 @@ class DrivingLicenceDocumentTest {
                                 null,
                                 GIVEN_NAME,
                                 TITLE,
+                                WELSH_LICENSE,
                                 PORTRAIT,
                                 ISSUE_DATE,
                                 BIRTH_PLACE,
@@ -197,6 +204,7 @@ class DrivingLicenceDocumentTest {
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 TITLE,
+                                WELSH_LICENSE,
                                 PORTRAIT,
                                 invalidDate,
                                 BIRTH_PLACE,
@@ -223,6 +231,7 @@ class DrivingLicenceDocumentTest {
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 TITLE,
+                                WELSH_LICENSE,
                                 PORTRAIT,
                                 BIRTH_DATE,
                                 BIRTH_PLACE,
@@ -249,6 +258,7 @@ class DrivingLicenceDocumentTest {
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 TITLE,
+                                WELSH_LICENSE,
                                 PORTRAIT,
                                 BIRTH_DATE,
                                 BIRTH_PLACE,
