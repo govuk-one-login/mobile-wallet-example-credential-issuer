@@ -101,9 +101,9 @@ public class DrivingLicenceDocument {
         this.title = Objects.requireNonNull(title, "title is required");
         this.portrait = Objects.requireNonNull(portrait, "portrait is required");
         this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
-        this.ageOver18 = isAgeOver(this.birthDate);
-        this.ageOver21 = isAgeOver(this.birthDate);
-        this.ageOver25 = isAgeOver(this.birthDate);
+        this.ageOver18 = getAge(this.birthDate) >= 18;
+        this.ageOver21 = getAge(this.birthDate) >= 21;
+        this.ageOver25 = getAge(this.birthDate) >= 25;
         this.birthPlace = Objects.requireNonNull(birthPlace, "birth_place is required");
         this.issueDate = parseDate(Objects.requireNonNull(issueDate, "issue_date is required"));
         this.expiryDate = parseDate(Objects.requireNonNull(expiryDate, "expiry_date is required"));
@@ -130,10 +130,7 @@ public class DrivingLicenceDocument {
         return LocalDate.parse(dateString, dateFormat);
     }
 
-    private boolean isAgeOver(LocalDate birthDate) {
-        int age = Period.between(birthDate, LocalDate.now()).getYears();
-        if (age >= 18 && age < 21) return true;
-        if (age >= 21 && age < 25) return true;
-        return age >= 25;
+    private int getAge(LocalDate birthDate) {
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
 }
