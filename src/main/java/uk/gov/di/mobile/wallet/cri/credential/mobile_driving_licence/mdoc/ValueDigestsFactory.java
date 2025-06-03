@@ -1,10 +1,10 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import lombok.SneakyThrows;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.util.HashMap;
 import java.util.List;
@@ -92,7 +92,7 @@ public class ValueDigestsFactory {
 
             // Return a map entry pairing the digest ID with the computed digest bytes
             return Map.entry(issuerSignedItem.digestId(), digest);
-        } catch (IOException exception) {
+        } catch (JsonProcessingException exception) {
             throw new MDLException(
                     "Error when calculating digest over IssuerSignedItem", exception);
         }
