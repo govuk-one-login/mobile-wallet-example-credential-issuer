@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -18,74 +17,96 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentFactoryTest {
 
-    private static final int EXPECTED_ISO_FIELDS = 15;
-    private static final int EXPECTED_UK_FIELDS = 2;
-    private static final byte[] MOCK_CBOR_BYTES = {0x01, 0x02};
+    // Test data: a single driving privilege for use in the driving licence document
     private static final DrivingPrivilege[] DRIVING_PRIVILEGES = {
         new DrivingPrivilege("B", null, null)
     };
 
+    // Mocked dependencies for DocumentFactory
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
     @Mock private MobileSecurityObjectFactory mockMobileSecurityObjectFactory;
     @Mock private CBOREncoder mockCborEncoder;
+    @Mock private ValueDigests mockValueDigests;
 
-    private DrivingLicenceDocument drivingLicenceDocument;
-    private DocumentFactory documentFactory;
-
-    @BeforeEach
-    void setUp() {
-        IssuerSignedItem dummyItem = mock(IssuerSignedItem.class);
-        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(dummyItem);
-        when(mockCborEncoder.encode(any())).thenReturn(MOCK_CBOR_BYTES);
-
-        documentFactory =
+    /**
+     * Test that the DocumentFactory creates both ISO and UK namespaces, and that the correct number
+     * of fields are present in each.
+     */
+    @Test
+    void Should_BuildISOAndUKNamespaces() {
+        // Arrange: Set up DocumentFactory and test DrivingLicenceDocument
+        DocumentFactory documentFactory =
                 new DocumentFactory(
                         mockIssuerSignedItemFactory,
                         mockMobileSecurityObjectFactory,
                         mockCborEncoder);
-        drivingLicenceDocument = createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
-    }
+        DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
 
-    @Test
-    void Should_BuildDocument() {
+        // Arrange: Configure mocks to return a dummy IssuerSignedItem and CBOR bytes
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        byte[] expectedCbor = "testCbor".getBytes();
+        when(mockCborEncoder.encode(any())).thenReturn(expectedCbor);
+
+        // Act: Build the document
         Document result = documentFactory.build(drivingLicenceDocument);
 
-        assertEquals("org.iso.18013.5.1.mDL", result.docType());
-        assertNotNull(result.issuerSigned());
-    }
-
-    @Test
-    void Should_BuildISOAndUKNamespaces() {
-        Document result = documentFactory.build(drivingLicenceDocument);
-
+        // Assert: Check that both namespaces exist and have the expected number of fields
         Map<String, List<byte[]>> namespaces = result.issuerSigned().nameSpaces();
-        assertEquals(2, namespaces.size());
+        assertEquals(2, namespaces.size(), "Should have 2 namespaces (ISO and UK)");
         assertTrue(namespaces.containsKey(Namespaces.ISO), "Should contain ISO namespace");
         assertTrue(namespaces.containsKey(Namespaces.UK), "Should contain UK namespace");
-        assertEquals(EXPECTED_ISO_FIELDS, namespaces.get(Namespaces.ISO).size());
-        assertEquals(EXPECTED_UK_FIELDS, namespaces.get(Namespaces.UK).size());
+        assertEquals(
+                15, namespaces.get(Namespaces.ISO).size(), "ISO namespace should have 15 fields");
+        assertEquals(2, namespaces.get(Namespaces.UK).size(), "UK namespace should have 2 fields");
     }
 
+    /**
+     * Test that the DocumentFactory builds an IssuerSignedItem for each ISO namespace field. Also
+     * verifies that the correct values are passed to the IssuerSignedItemFactory for each field.
+     */
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
             throws MDLException {
+        // Arrange: Set up DocumentFactory and test DrivingLicenceDocument
+        DocumentFactory documentFactory =
+                new DocumentFactory(
+                        mockIssuerSignedItemFactory,
+                        mockMobileSecurityObjectFactory,
+                        mockCborEncoder);
+        DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
+
+        // Arrange: Configure mocks to return a dummy IssuerSignedItem and CBOR bytes
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        byte[] expectedCbor = "testCbor".getBytes();
+        when(mockCborEncoder.encode(any())).thenReturn(expectedCbor);
+
+        // Act: Build the document
         Document result = documentFactory.build(drivingLicenceDocument);
 
+        // Assert: Check that ISO namespace has correct number of fields and that each field has
+        // been CBOR encoded
         List<byte[]> isoNamespace = result.issuerSigned().nameSpaces().get(Namespaces.ISO);
         assertEquals(
-                EXPECTED_ISO_FIELDS,
+                15,
                 isoNamespace.size(),
                 "Should create one IssuerSignedItem per ISO namespace attribute");
-        isoNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
+        isoNamespace.forEach(bytes -> assertArrayEquals(expectedCbor, bytes));
+
+        // Assert: Verify that the factory was called with the expected ISO fields and values
         verify(mockIssuerSignedItemFactory).build("family_name", "Doe");
         verify(mockIssuerSignedItemFactory).build("given_name", "John");
         verify(mockIssuerSignedItemFactory).build("portrait", "base64EncodedPortraitString");
@@ -103,68 +124,171 @@ class DocumentFactoryTest {
         verify(mockIssuerSignedItemFactory).build("un_distinguishing_sign", "UK");
     }
 
+    /**
+     * Test that the DocumentFactory builds an IssuerSignedItem for each UK namespace field. Also
+     * verifies that the correct values are passed to the IssuerSignedItemFactory for each field.
+     */
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace()
             throws MDLException {
+        // Arrange: Set up DocumentFactory and test DrivingLicenceDocument
+        DocumentFactory documentFactory =
+                new DocumentFactory(
+                        mockIssuerSignedItemFactory,
+                        mockMobileSecurityObjectFactory,
+                        mockCborEncoder);
+        DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
+
+        // Arrange: Configure mocks to return a dummy IssuerSignedItem and CBOR bytes
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        byte[] expectedCbor = "testCbor".getBytes();
+        when(mockCborEncoder.encode(any())).thenReturn(expectedCbor);
+
+        // Act: Build the document
         Document result = documentFactory.build(drivingLicenceDocument);
 
+        // Assert: Check that UK namespace has correct number of fields and that each field has been
+        // CBOR encoded
         List<byte[]> ukNamespace = result.issuerSigned().nameSpaces().get(Namespaces.UK);
         assertEquals(
-                EXPECTED_UK_FIELDS,
+                2,
                 ukNamespace.size(),
                 "Should create one IssuerSignedItem per UK namespace attribute");
-        ukNamespace.forEach(bytes -> assertArrayEquals(MOCK_CBOR_BYTES, bytes));
+        ukNamespace.forEach(bytes -> assertArrayEquals(expectedCbor, bytes));
+
+        // Assert: Verify that the factory was called with all expected UK fields and values
         verify(mockIssuerSignedItemFactory)
                 .build("provisional_driving_privileges", Optional.ofNullable(DRIVING_PRIVILEGES));
         verify(mockIssuerSignedItemFactory).build("title", "Miss");
     }
 
+    /**
+     * Test that the DocumentFactory does not build an IssuerSignedItem for provisional driving
+     * privileges if its value is null.
+     */
     @Test
     void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_When_ItsValueIsNull()
             throws MDLException {
-        DrivingPrivilege[] provisionDrivingPrivileges = null;
+        // Arrange: Set up DocumentFactory and a DrivingLicenceDocument with null provisional
+        // privileges
+        DocumentFactory documentFactory =
+                new DocumentFactory(
+                        mockIssuerSignedItemFactory,
+                        mockMobileSecurityObjectFactory,
+                        mockCborEncoder);
         DrivingLicenceDocument drivingLicenceWithProvisionalNull =
-                createTestDrivingLicenceDocument(provisionDrivingPrivileges);
+                createTestDrivingLicenceDocument(null);
 
+        // Arrange: Configure mocks to return a dummy IssuerSignedItem and CBOR bytes
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        byte[] expectedCbor = "testCbor".getBytes();
+        when(mockCborEncoder.encode(any())).thenReturn(expectedCbor);
+
+        // Act: Build the document
         Document result = documentFactory.build(drivingLicenceWithProvisionalNull);
 
+        // Assert: Check that UK namespace has only 1 field (i.e. not provisional privileges)
         List<byte[]> ukNamespace = result.issuerSigned().nameSpaces().get(Namespaces.UK);
         assertEquals(
-                EXPECTED_UK_FIELDS - 1,
+                1,
                 ukNamespace.size(),
                 "Should not create an IssuerSignedItem for provisional driving privileges when its value is null");
+        // Assert: Verify that the factory was NOT called for provisional privileges with null
         verify(mockIssuerSignedItemFactory, never())
                 .build("provisional_driving_privileges", Optional.empty());
     }
 
-    //    @Test
-    //    void Should_ReturnIssuerSignedWithCorrectNamespacesAndIssuerAuth() throws Exception {
-    //        MobileSecurityObject mockMso = mock(MobileSecurityObject.class);
-    //        when(mockMobileSecurityObjectFactory.build(any(Map.class))).thenReturn(mockMso);
-    //
-    //        byte[] mockMsoBytes = {1,2,3};
-    //        when(mockCborEncoder.encode(mockMso)).thenReturn(mockMsoBytes);
-    //
-    //        // Act
-    //        Document result = documentFactory.build(drivingLicenceDocument);
-    //
-    //        assertNotNull(result);
-    //        Map<String, List<byte[]>> encodedNamespaces = result.issuerSigned().nameSpaces();
-    //        assertEquals(2, encodedNamespaces.size());
-    //
-    //        IssuerAuth issuerAuth = result.issuerSigned().issuerAuth();
-    //        assertNotNull(issuerAuth);
-    //        assertArrayEquals(mockMsoBytes, issuerAuth.mobileSecurityObjectBytes());
-    //    }
+    /**
+     * Test that the DocumentFactory returns a Document containing the expected docType and the
+     * expected IssuerSigned, and that all mocks are called as expected.
+     */
+    @Test
+    void Should_ReturnIssuerSignedWithExpectedNamespacesAndIssuerAuth() {
+        // Arrange: Set up DocumentFactory and test DrivingLicenceDocument
+        DocumentFactory documentFactory =
+                new DocumentFactory(
+                        mockIssuerSignedItemFactory,
+                        mockMobileSecurityObjectFactory,
+                        mockCborEncoder);
+        DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
 
-    //    @Test
-    //    void Should_BuildDocumentWithIssuerAuthInIssuerSigned() {
-    //        Document document = documentFactory.build(drivingLicenceDocument);
-    //
-    //        IssuerSigned issuerSigned = document.issuerSigned();
-    //        assertNotNull(issuerSigned.issuerAuth(), "IssuerAuth should not be null");
-    //    }
+        // Arrange: Prepare a specific IssuerSignedItem to be returned by the factory
+        IssuerSignedItem issuerSignedItem =
+                new IssuerSignedItem(1, new byte[] {1, 2, 3}, "elementIdentifier", "elementValue");
+        when(mockIssuerSignedItemFactory.build(any(), any())).thenReturn(issuerSignedItem);
 
+        // Arrange: Prepare a specific MobileSecurityObject to be returned by the factory
+        MobileSecurityObject expectedMso =
+                new MobileSecurityObject(
+                        "1.0", "SHA-256", mockValueDigests, "org.iso.18013.5.1.mDL");
+        when(mockMobileSecurityObjectFactory.build(any())).thenReturn(expectedMso);
+
+        // Arrange: Set up CBOR encoding for both the IssuerSignedItem and the MobileSecurityObject
+        byte[] expectIssuerSignedItemCbor = "expectIssuerSignedItemCbor".getBytes();
+        when(mockCborEncoder.encode(issuerSignedItem)).thenReturn(expectIssuerSignedItemCbor);
+
+        byte[] expectedMsoCbor = "expectedMsoCbor".getBytes();
+        when(mockCborEncoder.encode(expectedMso)).thenReturn(expectedMsoCbor);
+
+        // Act: Build the document
+        Document result = documentFactory.build(drivingLicenceDocument);
+
+        // Assert: Check that docType is correct
+        assertEquals(
+                "org.iso.18013.5.1.mDL",
+                result.docType(),
+                "Document type should be \"org.iso.18013.5.1.mDL\"");
+
+        // Assert: Check that both namespaces exist and contain CBOR encoded values
+        Map<String, List<byte[]>> encodedNamespaces = result.issuerSigned().nameSpaces();
+        assertEquals(2, encodedNamespaces.size(), "Should have 2 namespaces (ISO and UK)");
+        assertTrue(encodedNamespaces.containsKey(Namespaces.UK), "Should contain UK namespace");
+        assertTrue(encodedNamespaces.containsKey(Namespaces.ISO), "Should contain ISO namespace");
+        encodedNamespaces
+                .get(Namespaces.UK)
+                .forEach(
+                        item ->
+                                assertArrayEquals(
+                                        expectIssuerSignedItemCbor,
+                                        item,
+                                        "All UK namespace items should match the expected CBOR-encoded IssuerSignedItem"));
+        encodedNamespaces
+                .get(Namespaces.ISO)
+                .forEach(
+                        item ->
+                                assertArrayEquals(
+                                        expectIssuerSignedItemCbor,
+                                        item,
+                                        "All ISO namespace items should match the expected CBOR-encoded IssuerSignedItem"));
+
+        // Assert: Check that issuerAuth contains the expected MobileSecurityObject CBOR bytes
+        IssuerAuth issuerAuth = result.issuerSigned().issuerAuth();
+        assertArrayEquals(
+                expectedMsoCbor,
+                issuerAuth.mobileSecurityObjectBytes(),
+                "issuerAuth should contain the expected CBOR-encoded MobileSecurityObject");
+
+        // Assert: Verify that mocks were called the expected number of times
+        verify(mockIssuerSignedItemFactory, times(17)).build(any(), any());
+        verify(mockMobileSecurityObjectFactory).build(any());
+        verify(mockCborEncoder, times(17)).encode(issuerSignedItem);
+        verify(mockCborEncoder).encode(expectedMso);
+    }
+
+    /**
+     * Creates a DrivingLicenceDocument using the default DRIVING_PRIVILEGES for both
+     * drivingPrivileges and provisionalDrivingPrivileges.
+     */
+    private DrivingLicenceDocument createTestDrivingLicenceDocument() {
+        return createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
+    }
+
+    /**
+     * Creates a DrivingLicenceDocument with the given provisionalDrivingPrivileges. The main
+     * drivingPrivileges field always uses the default DRIVING_PRIVILEGES.
+     */
     private DrivingLicenceDocument createTestDrivingLicenceDocument(
             DrivingPrivilege[] provisionalDrivingPrivileges) {
         String[] address = {"123 Main St", "Apt 4B"};
