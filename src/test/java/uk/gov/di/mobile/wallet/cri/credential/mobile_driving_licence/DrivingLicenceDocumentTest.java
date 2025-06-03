@@ -60,7 +60,7 @@ class DrivingLicenceDocumentTest {
                         UN_DISTINGUISHING_SIGN,
                         PROVISIONAL_DRIVING_PRIVILEGES);
 
-        LocalDate birthDate = LocalDate.of(1985, 5, 24);  // Use consistent date parsing
+        LocalDate birthDate = LocalDate.of(1985, 5, 24);
         int age = Period.between(birthDate, LocalDate.now()).getYears();
 
         assertEquals(FAMILY_NAME, document.getFamilyName());
@@ -301,21 +301,26 @@ class DrivingLicenceDocumentTest {
         assertTrue(documentOver25.getAgeOver18());
         assertTrue(documentOver25.getAgeOver21());
         assertTrue(documentOver25.getAgeOver25());
-
     }
-
-
-
-
 
     private DrivingLicenceDocument createDocumentWithBirthDate(String birthDate) {
         return new DrivingLicenceDocument(
-                FAMILY_NAME, GIVEN_NAME, TITLE, PORTRAIT, birthDate, BIRTH_PLACE,
-                ISSUE_DATE, EXPIRY_DATE, ISSUING_AUTHORITY, ISSUING_COUNTRY,
-                DOCUMENT_NUMBER, RESIDENT_ADDRESS, RESIDENT_POSTAL_CODE, RESIDENT_CITY,
-                DRIVING_PRIVILEGES, UN_DISTINGUISHING_SIGN, PROVISIONAL_DRIVING_PRIVILEGES
-        );
+                FAMILY_NAME,
+                GIVEN_NAME,
+                TITLE,
+                PORTRAIT,
+                birthDate,
+                BIRTH_PLACE,
+                ISSUE_DATE,
+                EXPIRY_DATE,
+                ISSUING_AUTHORITY,
+                ISSUING_COUNTRY,
+                DOCUMENT_NUMBER,
+                RESIDENT_ADDRESS,
+                RESIDENT_POSTAL_CODE,
+                RESIDENT_CITY,
+                DRIVING_PRIVILEGES,
+                UN_DISTINGUISHING_SIGN,
+                PROVISIONAL_DRIVING_PRIVILEGES);
     }
-
-
 }

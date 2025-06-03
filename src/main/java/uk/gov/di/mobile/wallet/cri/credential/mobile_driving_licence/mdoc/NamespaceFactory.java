@@ -87,8 +87,7 @@ public class NamespaceFactory {
     }
 
     /**
-     * Converts a camelCase string to snake_case.
-     * Regex add underscore if there is numeric values,
+     * Converts a camelCase string to snake_case. Regex add underscore if there is numeric values,
      * without it converts to age_over18
      *
      * @param fieldName The field name in camelCase format
