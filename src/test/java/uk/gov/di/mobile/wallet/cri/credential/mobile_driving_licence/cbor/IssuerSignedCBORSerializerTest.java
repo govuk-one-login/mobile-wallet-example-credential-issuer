@@ -9,6 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerAuth;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 
 import java.io.IOException;
@@ -19,7 +20,6 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,6 +48,10 @@ class IssuerSignedCBORSerializerTest {
         nameSpaces.put("namespace1", Arrays.asList(issuerSignedItemBytes1, issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
+        byte[] mobileSecurityObjectBytes = new byte[] {9, 9, 9};
+        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
+        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
+
         serializer.serialize(issuerSigned, cborGenerator, serializerProvider);
 
         // Verify correct sequence of method calls
@@ -70,7 +74,17 @@ class IssuerSignedCBORSerializerTest {
 
         // Close the array and objects
         inOrder.verify(cborGenerator).writeEndArray();
-        inOrder.verify(cborGenerator, times(2)).writeEndObject();
+        inOrder.verify(cborGenerator).writeEndObject();
+
+        // IssuerAuth serialization
+        inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
+        inOrder.verify(cborGenerator).writeStartArray();
+        inOrder.verify(cborGenerator).writeTag(24);
+        inOrder.verify(cborGenerator).writeObject(mobileSecurityObjectBytes);
+        inOrder.verify(cborGenerator).writeEndArray();
+
+        // End the outer object
+        inOrder.verify(cborGenerator).writeEndObject();
     }
 
     @Test
@@ -80,6 +94,10 @@ class IssuerSignedCBORSerializerTest {
         nameSpaces.put("namespace1", List.of(issuerSignedItemBytes1));
         nameSpaces.put("namespace2", List.of(issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
+
+        byte[] mobileSecurityObjectBytes = new byte[] {9, 9, 9};
+        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
+        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
 
         serializer.serialize(issuerSigned, cborGenerator, serializerProvider);
 
@@ -105,8 +123,18 @@ class IssuerSignedCBORSerializerTest {
         inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes2);
         inOrder.verify(cborGenerator).writeEndArray();
 
-        // Close objects
-        inOrder.verify(cborGenerator, times(2)).writeEndObject();
+        // Close nameSpaces object
+        inOrder.verify(cborGenerator).writeEndObject();
+
+        // IssuerAuth serialization
+        inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
+        inOrder.verify(cborGenerator).writeStartArray();
+        inOrder.verify(cborGenerator).writeTag(24);
+        inOrder.verify(cborGenerator).writeObject(mobileSecurityObjectBytes);
+        inOrder.verify(cborGenerator).writeEndArray();
+
+        // End the outer object
+        inOrder.verify(cborGenerator).writeEndObject();
     }
 
     @Test
