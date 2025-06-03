@@ -15,7 +15,6 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,7 +43,7 @@ class ValueDigestsFactoryTest {
         byte[] expectedCbor = "testCbor1".getBytes();
         when(mockCborMapper.writeValueAsBytes(issuerSignedItem)).thenReturn(expectedCbor);
         byte[] expectedDigest = "testDigest1".getBytes();
-        when(mockMessageDigest.digest(eq(expectedCbor))).thenReturn(expectedDigest);
+        when(mockMessageDigest.digest(expectedCbor)).thenReturn(expectedDigest);
 
         Map<String, List<IssuerSignedItem>> namespaces =
                 Map.of("namespace", List.of(issuerSignedItem));
@@ -73,9 +72,9 @@ class ValueDigestsFactoryTest {
         byte[] expectedCbor2 = "testCbor2".getBytes();
         when(mockCborMapper.writeValueAsBytes(issuerSignedItem2)).thenReturn(expectedCbor2);
         byte[] expectedDigest1 = "testDigest1".getBytes();
-        when(mockMessageDigest.digest(eq(expectedCbor1))).thenReturn(expectedDigest1);
+        when(mockMessageDigest.digest(expectedCbor1)).thenReturn(expectedDigest1);
         byte[] expectedDigest2 = "testDigest2".getBytes();
-        when(mockMessageDigest.digest(eq(expectedCbor2))).thenReturn(expectedDigest2);
+        when(mockMessageDigest.digest(expectedCbor2)).thenReturn(expectedDigest2);
 
         Map<String, List<IssuerSignedItem>> namespaces =
                 Map.of(
@@ -117,11 +116,11 @@ class ValueDigestsFactoryTest {
         byte[] expectedCbor3 = "testCbor3".getBytes();
         when(mockCborMapper.writeValueAsBytes(issuerSignedItem3)).thenReturn(expectedCbor3);
         byte[] expectedDigest1 = "testDigest1".getBytes();
-        when(mockMessageDigest.digest(eq(expectedCbor1))).thenReturn(expectedDigest1);
+        when(mockMessageDigest.digest(expectedCbor1)).thenReturn(expectedDigest1);
         byte[] expectedDigest2 = "testDigest2".getBytes();
-        when(mockMessageDigest.digest(eq(expectedCbor2))).thenReturn(expectedDigest2);
+        when(mockMessageDigest.digest(expectedCbor2)).thenReturn(expectedDigest2);
         byte[] expectedDigest3 = "testDigest3".getBytes();
-        when(mockMessageDigest.digest(eq(expectedCbor3))).thenReturn(expectedDigest3);
+        when(mockMessageDigest.digest(expectedCbor3)).thenReturn(expectedDigest3);
 
         Map<String, List<IssuerSignedItem>> namespaces =
                 Map.of(
@@ -162,10 +161,10 @@ class ValueDigestsFactoryTest {
         Map<String, List<IssuerSignedItem>> namespaces =
                 Map.of("namespace", List.of(issuerSignedItem));
 
+        ValueDigestsFactory valueDigestsFactory =
+                new ValueDigestsFactory(mockCborMapper, mockMessageDigest);
+
         assertThrows(
-                MDLException.class,
-                () ->
-                        new ValueDigestsFactory(mockCborMapper, mockMessageDigest)
-                                .createFromNamespaces(namespaces));
+                MDLException.class, () -> valueDigestsFactory.createFromNamespaces(namespaces));
     }
 }
