@@ -24,6 +24,9 @@ public class DrivingLicenceDocument {
     @Namespace(Namespaces.UK)
     private final String title;
 
+    @Namespace(Namespaces.UK)
+    private final boolean welshLicence;
+
     @Namespace(Namespaces.ISO)
     private final String portrait;
 
@@ -71,6 +74,7 @@ public class DrivingLicenceDocument {
             @JsonProperty("family_name") String familyName,
             @JsonProperty("given_name") String givenName,
             @JsonProperty("title") String title,
+            @JsonProperty("welsh_licence") boolean welshLicence,
             @JsonProperty("portrait") String portrait,
             @JsonProperty("birth_date") String birthDate,
             @JsonProperty("birth_place") String birthPlace,
@@ -89,6 +93,7 @@ public class DrivingLicenceDocument {
         this.familyName = Objects.requireNonNull(familyName, "family_name is required");
         this.givenName = Objects.requireNonNull(givenName, "given_name is required");
         this.title = Objects.requireNonNull(title, "title is required");
+        this.welshLicence = welshLicence;
         this.portrait = Objects.requireNonNull(portrait, "portrait is required");
         this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
         this.birthPlace = Objects.requireNonNull(birthPlace, "birth_place is required");
