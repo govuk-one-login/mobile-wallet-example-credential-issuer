@@ -87,13 +87,15 @@ public class NamespaceFactory {
     }
 
     /**
-     * Converts a camelCase string to snake_case.
+     * Converts a camelCase string to snake_case. Regex add underscore if there is numeric values,
+     * without it converts to age_over18
      *
      * @param fieldName The field name in camelCase format
      * @return The field name converted to snake_case format
      */
     private static String getAsSnakeCase(String fieldName) {
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+        String snake = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, fieldName);
+        return snake.replaceAll("(?<=[A-Za-z])(?=\\d)", "_");
     }
 
     /**

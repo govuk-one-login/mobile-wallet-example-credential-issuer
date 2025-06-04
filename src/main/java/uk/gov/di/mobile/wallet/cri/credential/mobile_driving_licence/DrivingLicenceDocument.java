@@ -7,6 +7,7 @@ import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,6 +33,15 @@ public class DrivingLicenceDocument {
 
     @Namespace(Namespaces.ISO)
     private final LocalDate birthDate;
+
+    @Namespace(Namespaces.ISO)
+    private final Boolean ageOver18;
+
+    @Namespace(Namespaces.ISO)
+    private final Boolean ageOver21;
+
+    @Namespace(Namespaces.ISO)
+    private final Boolean ageOver25;
 
     @Namespace(Namespaces.ISO)
     private final String birthPlace;
@@ -96,6 +106,9 @@ public class DrivingLicenceDocument {
         this.welshLicence = welshLicence;
         this.portrait = Objects.requireNonNull(portrait, "portrait is required");
         this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
+        this.ageOver18 = getAge(this.birthDate) >= 18;
+        this.ageOver21 = getAge(this.birthDate) >= 21;
+        this.ageOver25 = getAge(this.birthDate) >= 25;
         this.birthPlace = Objects.requireNonNull(birthPlace, "birth_place is required");
         this.issueDate = parseDate(Objects.requireNonNull(issueDate, "issue_date is required"));
         this.expiryDate = parseDate(Objects.requireNonNull(expiryDate, "expiry_date is required"));
@@ -120,5 +133,9 @@ public class DrivingLicenceDocument {
     private LocalDate parseDate(String dateString) {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd-MM-yyyy");
         return LocalDate.parse(dateString, dateFormat);
+    }
+
+    private int getAge(LocalDate birthDate) {
+        return Period.between(birthDate, LocalDate.now()).getYears();
     }
 }
