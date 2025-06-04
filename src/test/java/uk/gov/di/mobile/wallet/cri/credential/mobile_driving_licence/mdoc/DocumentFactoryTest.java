@@ -69,8 +69,8 @@ class DocumentFactoryTest {
         assertTrue(namespaces.containsKey(Namespaces.ISO), "Should contain ISO namespace");
         assertTrue(namespaces.containsKey(Namespaces.UK), "Should contain UK namespace");
         assertEquals(
-                15, namespaces.get(Namespaces.ISO).size(), "ISO namespace should have 15 fields");
-        assertEquals(3, namespaces.get(Namespaces.UK).size(), "UK namespace should have 2 fields");
+                18, namespaces.get(Namespaces.ISO).size(), "ISO namespace should have 18 fields");
+        assertEquals(3, namespaces.get(Namespaces.UK).size(), "UK namespace should have 3 fields");
     }
 
     /**
@@ -101,7 +101,7 @@ class DocumentFactoryTest {
         // been CBOR encoded
         List<byte[]> isoNamespace = result.issuerSigned().nameSpaces().get(Namespaces.ISO);
         assertEquals(
-                15,
+                18,
                 isoNamespace.size(),
                 "Should create one IssuerSignedItem per ISO namespace attribute");
         isoNamespace.forEach(bytes -> assertArrayEquals(expectedCbor, bytes));
@@ -272,9 +272,9 @@ class DocumentFactoryTest {
                 "issuerAuth should contain the expected CBOR-encoded MobileSecurityObject");
 
         // Assert: Verify that mocks were called the expected number of times
-        verify(mockIssuerSignedItemFactory, times(18)).build(any(), any());
+        verify(mockIssuerSignedItemFactory, times(21)).build(any(), any());
         verify(mockMobileSecurityObjectFactory).build(any());
-        verify(mockCborEncoder, times(18)).encode(issuerSignedItem);
+        verify(mockCborEncoder, times(21)).encode(issuerSignedItem);
         verify(mockCborEncoder).encode(expectedMso);
     }
 

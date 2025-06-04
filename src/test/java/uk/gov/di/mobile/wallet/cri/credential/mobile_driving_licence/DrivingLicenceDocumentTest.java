@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
@@ -59,12 +60,18 @@ class DrivingLicenceDocumentTest {
                         UN_DISTINGUISHING_SIGN,
                         PROVISIONAL_DRIVING_PRIVILEGES);
 
+        LocalDate birthDate = LocalDate.of(1985, 5, 24);
+        int age = Period.between(birthDate, LocalDate.now()).getYears();
+
         assertEquals(FAMILY_NAME, document.getFamilyName());
         assertEquals(GIVEN_NAME, document.getGivenName());
         assertEquals(TITLE, document.getTitle());
         assertEquals(WELSH_LICENSE, document.isWelshLicence());
         assertEquals(PORTRAIT, document.getPortrait());
         assertEquals(LocalDate.of(1985, 5, 24), document.getBirthDate());
+        assertEquals(age >= 18, document.getAgeOver18());
+        assertEquals(age >= 21, document.getAgeOver21());
+        assertEquals(age >= 25, document.getAgeOver25());
         assertEquals(BIRTH_PLACE, document.getBirthPlace());
         assertEquals(LocalDate.of(2020, 1, 10), document.getIssueDate());
         assertEquals(LocalDate.of(2030, 1, 9), document.getExpiryDate());
@@ -266,5 +273,55 @@ class DrivingLicenceDocumentTest {
                                 DRIVING_PRIVILEGES,
                                 UN_DISTINGUISHING_SIGN,
                                 PROVISIONAL_DRIVING_PRIVILEGES));
+    }
+
+    @Test
+    void Should_CorrectlyCalculateAgeOverValues_When_BirthDateIsProvided() {
+        String birthDateUnder18 = "01-06-2010";
+        String birthDateOver18 = "01-06-2006";
+        String birthDateOver21 = "01-06-2002";
+        String birthDateOver25 = "01-06-1999";
+
+        DrivingLicenceDocument documentUnder18 = createDocumentWithBirthDate(birthDateUnder18);
+        assertFalse(documentUnder18.getAgeOver18());
+        assertFalse(documentUnder18.getAgeOver21());
+        assertFalse(documentUnder18.getAgeOver25());
+
+        DrivingLicenceDocument documentOver18 = createDocumentWithBirthDate(birthDateOver18);
+        assertTrue(documentOver18.getAgeOver18());
+        assertFalse(documentOver18.getAgeOver21());
+        assertFalse(documentOver18.getAgeOver25());
+
+        DrivingLicenceDocument documentOver21 = createDocumentWithBirthDate(birthDateOver21);
+        assertTrue(documentOver21.getAgeOver18());
+        assertTrue(documentOver21.getAgeOver21());
+        assertFalse(documentOver21.getAgeOver25());
+
+        DrivingLicenceDocument documentOver25 = createDocumentWithBirthDate(birthDateOver25);
+        assertTrue(documentOver25.getAgeOver18());
+        assertTrue(documentOver25.getAgeOver21());
+        assertTrue(documentOver25.getAgeOver25());
+    }
+
+    private DrivingLicenceDocument createDocumentWithBirthDate(String birthDate) {
+        return new DrivingLicenceDocument(
+                FAMILY_NAME,
+                GIVEN_NAME,
+                TITLE,
+                WELSH_LICENSE,
+                PORTRAIT,
+                birthDate,
+                BIRTH_PLACE,
+                ISSUE_DATE,
+                EXPIRY_DATE,
+                ISSUING_AUTHORITY,
+                ISSUING_COUNTRY,
+                DOCUMENT_NUMBER,
+                RESIDENT_ADDRESS,
+                RESIDENT_POSTAL_CODE,
+                RESIDENT_CITY,
+                DRIVING_PRIVILEGES,
+                UN_DISTINGUISHING_SIGN,
+                PROVISIONAL_DRIVING_PRIVILEGES);
     }
 }

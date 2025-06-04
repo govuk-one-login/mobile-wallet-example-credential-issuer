@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import lombok.SneakyThrows;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.security.MessageDigest;
@@ -18,18 +18,18 @@ import java.util.stream.Collectors;
  * digests.
  */
 public class ValueDigestsFactory {
-    private final CBORMapper cborMapper;
+    private final CBOREncoder cborEncoder;
     private final MessageDigest messageDigest;
 
     /**
      * Constructs a new instance using the given {@link CBORMapper} for serialization and {@link
      * MessageDigest} for digest calculation.
      *
-     * @param cborMapper Used to serialize {@link IssuerSignedItem} instances.
+     * @param cborEncoder Used to serialize {@link IssuerSignedItem} instances.
      * @param messageDigest Used to calculate the digest.
      */
-    public ValueDigestsFactory(CBORMapper cborMapper, MessageDigest messageDigest) {
-        this.cborMapper = cborMapper;
+    public ValueDigestsFactory(CBOREncoder cborEncoder, MessageDigest messageDigest) {
+        this.cborEncoder = cborEncoder;
         this.messageDigest = messageDigest;
     }
 
@@ -83,18 +83,13 @@ public class ValueDigestsFactory {
      */
     private Map.Entry<Integer, byte[]> serializeAndComputeDigest(
             final IssuerSignedItem issuerSignedItem) throws MDLException {
-        try {
-            // Serialize the IssuerSignedItem to a CBOR byte array
-            byte[] serializedIssuerSignedItem = cborMapper.writeValueAsBytes(issuerSignedItem);
+        // Serialize the IssuerSignedItem to a CBOR byte array
+        byte[] serializedIssuerSignedItem = cborEncoder.encode(issuerSignedItem);
 
-            // Compute the digest over the serialized bytes
-            byte[] digest = messageDigest.digest(serializedIssuerSignedItem);
+        // Compute the digest over the serialized bytes
+        byte[] digest = messageDigest.digest(serializedIssuerSignedItem);
 
-            // Return a map entry pairing the digest ID with the computed digest bytes
-            return Map.entry(issuerSignedItem.digestId(), digest);
-        } catch (JsonProcessingException exception) {
-            throw new MDLException(
-                    "Error when calculating digest over IssuerSignedItem", exception);
-        }
+        // Return a map entry pairing the digest ID with the computed digest bytes
+        return Map.entry(issuerSignedItem.digestId(), digest);
     }
 }
