@@ -17,8 +17,8 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
  *
  * <p>Use the {@link Builder} to construct instances.
  */
-@Getter
 @ExcludeFromGeneratedCoverageReport
+@Getter
 public class Services {
     private final KmsService kmsService;
     private final PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
