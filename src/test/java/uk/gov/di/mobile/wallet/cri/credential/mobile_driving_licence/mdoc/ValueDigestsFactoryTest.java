@@ -34,7 +34,7 @@ class ValueDigestsFactoryTest {
 
     /** Verifies correct digest generation for a single namespace with a single item. */
     @Test
-    void Should_AddSingleNameSpaceWithSingleDigest() throws JsonProcessingException {
+    void Should_AddSingleNameSpaceWithSingleDigest() {
         IssuerSignedItem issuerSignedItem =
                 new IssuerSignedItem(1, new byte[] {1, 2, 3}, "elementIdentifier", "elementValue");
         byte[] expectedCbor = "testCbor1".getBytes();
@@ -57,7 +57,7 @@ class ValueDigestsFactoryTest {
 
     /** Verifies correct digest generation for multiple namespaces, each with a single item. */
     @Test
-    void Should_AddMultipleNameSpacesWithSingleDigest() throws JsonProcessingException {
+    void Should_AddMultipleNameSpacesWithSingleDigest() {
         IssuerSignedItem issuerSignedItem1 =
                 new IssuerSignedItem(
                         1, new byte[] {1, 2, 3}, "elementIdentifier1", "elementValue1");
@@ -96,7 +96,7 @@ class ValueDigestsFactoryTest {
 
     /** Verifies correct digest generation for multiple namespaces with multiple items. */
     @Test
-    void Should_AddMultipleNameSpacesWithMultipleDigests() throws JsonProcessingException {
+    void Should_AddMultipleNameSpacesWithMultipleDigests() {
         IssuerSignedItem issuerSignedItem1 =
                 new IssuerSignedItem(
                         1, new byte[] {1, 2, 3}, "elementIdentifier1", "elementValue1");
