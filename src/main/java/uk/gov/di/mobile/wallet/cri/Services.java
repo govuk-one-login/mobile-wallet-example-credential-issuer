@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri;
 
 import lombok.Getter;
-import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -17,7 +16,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
  *
  * <p>Use the {@link Builder} to construct instances.
  */
-@ExcludeFromGeneratedCoverageReport
 @Getter
 public class Services {
     private final KmsService kmsService;
