@@ -23,7 +23,11 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.net.MalformedURLException;
 
-/** Factory for creating and wiring all application services. */
+/**
+ * Factory for creating and wiring all application services.
+ *
+ * <p>Example usage: {@code Services services = ServicesFactory.create(configService, environment);}
+ */
 @ExcludeFromGeneratedCoverageReport
 public class ServicesFactory {
 
@@ -31,6 +35,14 @@ public class ServicesFactory {
         // Should never be instantiated
     }
 
+    /**
+     * Creates and configures all application services.
+     *
+     * @param configurationService The application's configuration.
+     * @param environment The application's environment.
+     * @return A {@link Services} instance containing all initialized services.
+     * @throws MalformedURLException If a URL used in service initialization is malformed.
+     */
     public static Services create(
             ConfigurationService configurationService, Environment environment)
             throws MalformedURLException {

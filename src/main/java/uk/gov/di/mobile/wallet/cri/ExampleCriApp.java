@@ -18,6 +18,12 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.MalformedURLException;
 
+/**
+ * Main application class for the Example CRI.
+ *
+ * <p>Initializes and runs the Dropwizard application, configuring services and registering
+ * resources.
+ */
 @ExcludeFromGeneratedCoverageReport
 public class ExampleCriApp extends Application<ConfigurationService> {
 
@@ -33,13 +39,19 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                         new EnvironmentVariableSubstitutor(false)));
     }
 
+    /**
+     * Runs the application, creating and registering all services and resources.
+     *
+     * @param configurationService The application's configuration.
+     * @param environment The Dropwizard environment.
+     * @throws MalformedURLException If a URL used in service initialization is malformed.
+     */
     @Override
     public void run(final ConfigurationService configurationService, final Environment environment)
             throws MalformedURLException {
 
         Services services = ServicesFactory.create(configurationService, environment);
 
-        // Register resources
         environment.healthChecks().register("ping", new Ping());
         environment.jersey().register(new HealthCheckResource(environment));
         environment
