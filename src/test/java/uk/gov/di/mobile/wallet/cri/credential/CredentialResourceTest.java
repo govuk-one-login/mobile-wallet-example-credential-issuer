@@ -53,7 +53,7 @@ class CredentialResourceTest {
                 "{\"proof\":{\"proof_type\":\"somethingElse\", \"jwt\": \"testJwt\"}}", // "'proof_type' param is not 'jwt'"
                 "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"testJwt\"}}" // JWT is invalid
             })
-    void should_Return_400_And_Invalid_Proof_When_ProofJwt_Is_Invalid(String arg)
+    void Should_Return400AndInvalidProof_When_ProofIsInvalid(String arg)
             throws DataStoreException,
                     AccessTokenValidationException,
                     CredentialServiceException,
@@ -74,7 +74,7 @@ class CredentialResourceTest {
     }
 
     @Test
-    void Should_Return400_When_AuthorizationHeaderIsMissing()
+    void Should_Return401_When_AuthorizationHeaderIsMissing()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
@@ -93,14 +93,12 @@ class CredentialResourceTest {
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(400));
-        assertThat(
-                response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\"}"));
+        assertThat(response.getStatus(), is(401));
+        assertThat(response.getHeaderString("WWW-Authenticate"), is("Bearer"));
     }
 
     @Test
-    void Should_Return400_When_AuthorizationHeaderIsNotValidBearerAccessToken()
+    void Should_Return401_When_AuthorizationHeaderIsNotValidBearerAccessToken()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
@@ -118,14 +116,45 @@ class CredentialResourceTest {
                         .request()
                         .header(
                                 "Authorization",
-                                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                                "NotBearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
-        assertThat(response.getStatus(), is(400));
+        assertThat(response.getStatus(), is(401));
         assertThat(
-                response.readEntity(String.class),
-                is("{\"error\":\"invalid_credential_request\"}"));
+                response.getHeaderString("WWW-Authenticate"), is("Bearer error=\"invalid_token\""));
+    }
+
+    @Test
+    void Should_Return401_When_CredentialServiceThrowsCredentialOfferException()
+            throws DataStoreException,
+                    AccessTokenValidationException,
+                    ProofJwtValidationException,
+                    JsonProcessingException,
+                    CredentialServiceException,
+                    CredentialOfferException,
+                    DocumentStoreException {
+        JsonNode requestBody =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+        doThrow(new CredentialOfferException("Some credential offer error"))
+                .when(credentialService)
+                .getCredential(any(), any());
+
+        final Response response =
+                resource.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(401));
+        assertThat(
+                response.getHeaderString("WWW-Authenticate"), is("Bearer error=\"invalid_token\""));
+        reset(credentialService);
     }
 
     @Test

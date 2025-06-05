@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.util;
 
+import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
@@ -21,8 +22,15 @@ public class ResponseUtil {
         return jsonBuilder(Response.Status.BAD_REQUEST, entity).build();
     }
 
-    public static Response unauthorized(String entity) {
-        return jsonBuilder(Response.Status.UNAUTHORIZED, entity).build();
+    public static Response unauthorized() {
+        return unauthorized(null);
+    }
+
+    public static Response unauthorized(String error) {
+        String headerValue = "Bearer" + (error == null ? "" : " error=\"" + error + "\"");
+        return Response.status(Response.Status.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, headerValue)
+                .build();
     }
 
     public static Response internalServerError() {
