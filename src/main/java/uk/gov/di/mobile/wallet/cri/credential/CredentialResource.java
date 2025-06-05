@@ -17,6 +17,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
+import uk.gov.di.mobile.wallet.cri.services.authentication.AuthorizationHeaderMissingException;
 import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.Objects;
@@ -46,21 +47,25 @@ public class CredentialResource {
             return ResponseUtil.ok(credential);
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
+            if (exception instanceof AuthorizationHeaderMissingException) {
+                return ResponseUtil.unauthorized();
+            }
             if (exception instanceof AccessTokenValidationException
                     || exception instanceof CredentialOfferException) {
-                return ResponseUtil.badRequest(error("invalid_credential_request"));
+                return ResponseUtil.unauthorized("invalid_token");
             }
-
             if (exception instanceof ProofJwtValidationException) {
                 return ResponseUtil.badRequest(error("invalid_proof"));
             }
-
             return ResponseUtil.internalServerError();
         }
     }
 
     private SignedJWT parseAuthorizationHeader(String authorizationHeader)
-            throws AccessTokenValidationException {
+            throws AccessTokenValidationException, AuthorizationHeaderMissingException {
+        if (authorizationHeader == null || authorizationHeader.isEmpty()) {
+            throw new AuthorizationHeaderMissingException();
+        }
         try {
             BearerAccessToken bearerAccessToken = BearerAccessToken.parse(authorizationHeader);
             return SignedJWT.parse(bearerAccessToken.getValue());

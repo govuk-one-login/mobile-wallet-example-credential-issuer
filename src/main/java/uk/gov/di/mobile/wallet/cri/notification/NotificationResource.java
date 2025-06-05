@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
+import uk.gov.di.mobile.wallet.cri.services.authentication.AuthorizationHeaderMissingException;
 import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.UUID;
@@ -41,9 +42,12 @@ public class NotificationResource {
         } catch (Exception exception) {
             LOGGER.error(
                     "An error happened trying to process the notification request: ", exception);
+            if (exception instanceof AuthorizationHeaderMissingException) {
+                return ResponseUtil.unauthorized();
+            }
             if (exception instanceof AccessTokenValidationException
                     || exception instanceof CredentialOfferException) {
-                return ResponseUtil.unauthorized(error("invalid_token"));
+                return ResponseUtil.unauthorized("invalid_token");
             }
             if (exception instanceof InvalidNotificationIdException) {
                 return ResponseUtil.badRequest(error("invalid_notification_id"));
@@ -57,7 +61,10 @@ public class NotificationResource {
     }
 
     private SignedJWT parseAuthorizationHeader(String authorizationHeader)
-            throws AccessTokenValidationException {
+            throws AccessTokenValidationException, AuthorizationHeaderMissingException {
+        if (authorizationHeader == null || authorizationHeader.isEmpty()) {
+            throw new AuthorizationHeaderMissingException();
+        }
         try {
             BearerAccessToken bearerAccessToken = BearerAccessToken.parse(authorizationHeader);
             return SignedJWT.parse(bearerAccessToken.getValue());

@@ -92,6 +92,20 @@ class NotificationResourceTest {
                 is("{\"error\":\"invalid_notification_request\"}"));
     }
 
+    @Test
+    void Should_Return401_When_AuthorizationHeaderIsMissing() {
+        final Response response =
+                resource.target("/notification")
+                        .request()
+                        .post(
+                                Entity.entity(
+                                        "{\"notification_id\":\"77368ca6-877b-4208-a397-99f1df890400\",\"event\":\"credential_accepted\",\"event_description\":\"Credential stored\"}",
+                                        MediaType.APPLICATION_JSON));
+
+        assertThat(response.getStatus(), is(401));
+        assertThat(response.getHeaderString("WWW-Authenticate"), is("Bearer"));
+    }
+
     @ParameterizedTest
     @MethodSource("provideAuthorizationHeaders")
     void Should_Return401_When_AuthorizationHeaderIsInvalid(String authorizationHeader) {
@@ -105,6 +119,8 @@ class NotificationResourceTest {
                                         MediaType.APPLICATION_JSON));
 
         assertThat(response.getStatus(), is(401));
+        assertThat(
+                response.getHeaderString("WWW-Authenticate"), is("Bearer error=\"invalid_token\""));
     }
 
     private Stream<String> provideAuthorizationHeaders() throws ParseException, JOSEException {
@@ -113,7 +129,6 @@ class NotificationResourceTest {
         mockAccessToken.sign(ecSigner);
 
         return Stream.of(
-                "", // empty authorization header
                 "Bearer"
                         + this.mockAccessToken
                                 .serialize(), // no space between 'Bearer' and access token
@@ -142,6 +157,8 @@ class NotificationResourceTest {
                                         MediaType.APPLICATION_JSON));
 
         assertThat(response.getStatus(), is(401));
+        assertThat(
+                response.getHeaderString("WWW-Authenticate"), is("Bearer error=\"invalid_token\""));
     }
 
     @Test
