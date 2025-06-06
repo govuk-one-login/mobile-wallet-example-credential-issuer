@@ -11,6 +11,7 @@ import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
 import uk.gov.di.mobile.wallet.cri.healthcheck.HealthCheckResource;
 import uk.gov.di.mobile.wallet.cri.healthcheck.Ping;
+import uk.gov.di.mobile.wallet.cri.iacas.IacasResource;
 import uk.gov.di.mobile.wallet.cri.jwks.JwksResource;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationResource;
@@ -69,5 +70,6 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new DidDocumentResource(services.getDidDocumentService()));
         environment.jersey().register(new JwksResource(services.getJwksService()));
         environment.jersey().register(new NotificationResource(services.getNotificationService()));
+        environment.jersey().register(new IacasResource());
     }
 }
