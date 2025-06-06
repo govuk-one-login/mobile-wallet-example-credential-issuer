@@ -6,6 +6,7 @@ import lombok.Getter;
 
 @Getter
 public class Credential {
+    @JsonProperty("credential")
     private final String credentialObj;
 
     @JsonCreator

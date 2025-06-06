@@ -12,6 +12,7 @@ import java.util.List;
 public class CredentialResponse {
     private final String credential;
     private final ArrayList<Credential> credentials;
+    @JsonProperty("notification_id")
     private final String notificationId;
 
     @JsonCreator
