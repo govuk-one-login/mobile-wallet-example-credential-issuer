@@ -57,7 +57,7 @@ class CredentialOfferServiceTest {
                         "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "TestCredentialType");
 
         assertEquals(TEST_CREDENTIAL_ISSUER, credentialOffer.getCredentialIssuer());
-        assertArrayEquals(new String[] {"TestCredentialType"}, credentialOffer.getCredentials());
+        assertArrayEquals(new String[] {"TestCredentialType"}, credentialOffer.getCredentialConfigurationIds());
         assertThat(credentialOffer, hasProperty("grants"));
         assertEquals(
                 credentialOffer
