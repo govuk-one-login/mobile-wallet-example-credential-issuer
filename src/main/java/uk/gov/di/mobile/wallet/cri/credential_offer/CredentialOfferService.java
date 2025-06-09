@@ -38,7 +38,8 @@ public class CredentialOfferService {
      *
      * @param credentialIdentifier Unique identifier for the credential being offered.
      * @param credentialType The type/format of the credential (e.g., "VerifiableCredential").
-     * @return A CredentialOffer containing the issuer URL, credential type, and pre-authorized code.
+     * @return A CredentialOffer containing the issuer URL, credential type, and pre-authorized
+     *     code.
      * @throws SigningException If there's an error signing the pre-authorized code JWT.
      * @throws NoSuchAlgorithmException If the required cryptographic algorithm is not available.
      */
