@@ -18,7 +18,8 @@ public class CredentialOffer {
     private final String credentialIssuer;
 
     /** Array of credential types being offered */
-    private final String[] credentials;
+    @JsonProperty("credential_configuration_ids")
+    private final String[] credentialConfigurationIds;
 
     /** Map of authorization grants with their parameters */
     private final Map<String, Map<String, String>> grants;
@@ -35,7 +36,7 @@ public class CredentialOffer {
             String credentialType,
             Map<String, Map<String, String>> grants) {
         this.credentialIssuer = credentialIssuer;
-        this.credentials = new String[] {credentialType};
+        this.credentialConfigurationIds = new String[] {credentialType};
         this.grants = grants;
     }
 }
