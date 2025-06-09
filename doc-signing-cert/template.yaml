@@ -48,6 +48,7 @@ Mappings:
       DocumentSigningKeyCountryName: "UK"
       PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
       PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
+      RootCertificate: "/platform-ca/iaca/root-certificate"
       CloudwatchLogRetentionDays: 3
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: DEBUG
@@ -59,6 +60,7 @@ Mappings:
       DocumentSigningKeyCountryName: "UK"
       PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
       PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
+      RootCertificate: "/platform-ca/iaca/root-certificate"
       CloudwatchLogRetentionDays: 3650  # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
@@ -152,6 +154,7 @@ Resources:
           DOC_SIGNING_KEY_VALIDITY_PERIOD: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateValidityPeriodInDays]
           DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
           DOC_SIGNING_KEY_COUNTRY_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
+          ROOT_CERTIFICATE: !FindInMap [ EnvironmentVariables, !Ref Environment, RootCertificate ]
       Policies:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
