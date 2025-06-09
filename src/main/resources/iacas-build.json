@@ -1,0 +1,23 @@
+{
+  "data": [
+    {
+      "id": "80334954-bf3b-4e15-bbeb-ce801c4e36fa",
+      "active": true,
+      "certificatePem": "-----BEGIN CERTIFICATE-----MIIB+TCCAZ6gAwIBAgIRAMnlFFLquSAw0bZeocBfYNAwCgYIKoZIzj0EAwIwQTELMAkGA1UEBhMCVUsxMjAwBgNVBAMMKW1ETCBFeGFtcGxlIElBQ0EgUm9vdCAtIEJVSUxEIGVudmlyb25tZW50MB4XDTI1MDQxNTEyMzAzNFoXDTM0MDQxNjEzMzAzNFowQTELMAkGA1UEBhMCVUsxMjAwBgNVBAMMKW1ETCBFeGFtcGxlIElBQ0EgUm9vdCAtIEJVSUxEIGVudmlyb25tZW50MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEmesdUgEV3ug3ypAOfxpPmMpufhhyY0gU4GSYyqCNtzSesUrW4rKg1MAF+3ms9abxJi3WUg93+9lgoyjwIlIc3qN3MHUwEgYDVR0TAQH/BAgwBgEB/wIBADAdBgNVHQ4EFgQUtVaLskxvqtFP0jzJzfGdhUXWOXkwDwYDVR0PAQH/BAUDAwcGADAvBgNVHRIEKDAmhiRodHRwczovL21vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ay8wCgYIKoZIzj0EAwIDSQAwRgIhAIRqET364AqFM+EeVglL6ger9zYxRW8vsRhrOSKBt5ihAiEAmUBttXh7AiJCnt2dUJzmCX8VpI5cBB4WqIp91MtyhV8=-----END CERTIFICATE-----",
+      "certificateData": {
+        "notAfter": "2034-04-16T13:30:34Z",
+        "notBefore": "2025-04-15T13:30:30Z",
+        "country": "UK",
+        "commonName": "mDL Example IACA Root - BUILD environment"
+      },
+      "certificateFingerprint": "98ac4831d69161bd3a532241c153d80699a5ab696333008eb22873e5be0715b3",
+      "publicKeyJwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "mesdUgEV3ug3ypAOfxpPmMpufhhyY0gU4GSYyqCNtzQ",
+        "y": "nrFK1uKyoNTABft5rPWm8SYt1lIPd_vZYKMo8CJSHN4",
+        "alg": "ES256"
+      }
+    }
+  ]
+}
