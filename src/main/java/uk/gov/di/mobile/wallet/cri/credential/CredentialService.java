@@ -26,10 +26,10 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Objects;
 
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_CHECK_CREDENTIAL;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.VETERAN_CARD_CREDENTIAL;
 
 public class CredentialService {
 
@@ -111,12 +111,12 @@ public class CredentialService {
                                 mapper.convertValue(
                                         document.getData(), SocialSecurityDocument.class),
                                 sub);
-            } else if (Objects.equals(vcType, BASIC_CHECK_CREDENTIAL.getType())) {
+            } else if (Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType())) {
                 credential =
                         getBasicCheckCredential(
                                 mapper.convertValue(document.getData(), BasicCheckDocument.class),
                                 sub);
-            } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
+            } else if (Objects.equals(vcType, VETERAN_CARD_CREDENTIAL.getType())) {
                 credential =
                         getDigitalVeteranCard(
                                 mapper.convertValue(document.getData(), VeteranCardDocument.class),
@@ -177,7 +177,7 @@ public class CredentialService {
         return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         basicCheckCredentialSubject,
-                        BASIC_CHECK_CREDENTIAL,
+                        BASIC_DISCLOSURE_CREDENTIAL,
                         basicCheckDocument.getCredentialTtlMinutes());
     }
 
@@ -189,7 +189,7 @@ public class CredentialService {
         return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         veteranCardCredentialSubject,
-                        DIGITAL_VETERAN_CARD,
+                        VETERAN_CARD_CREDENTIAL,
                         veteranCardDocument.getCredentialTtlMinutes());
     }
 

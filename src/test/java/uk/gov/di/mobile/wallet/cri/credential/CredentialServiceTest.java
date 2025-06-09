@@ -285,7 +285,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
-                        eq(CredentialType.BASIC_CHECK_CREDENTIAL),
+                        eq(CredentialType.BASIC_DISCLOSURE_CREDENTIAL),
                         eq(525600L));
     }
 
@@ -311,7 +311,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
-                        eq(CredentialType.DIGITAL_VETERAN_CARD),
+                        eq(CredentialType.VETERAN_CARD_CREDENTIAL),
                         eq(525600L));
     }
 
