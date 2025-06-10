@@ -36,7 +36,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: .nvmrc
+          node-version-file: doc-signing-cert/issue-document-signing-certificate/.nvmrc
 
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # pin@v2
