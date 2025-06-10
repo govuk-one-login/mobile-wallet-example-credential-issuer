@@ -1,5 +1,5 @@
 ---
-name: "Verify & Publish to Dev"
+name: "Example CRI - Verify & Publish to Dev"
 
 on:
   workflow_dispatch:
