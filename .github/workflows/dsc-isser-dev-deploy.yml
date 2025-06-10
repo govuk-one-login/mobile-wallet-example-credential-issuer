@@ -1,5 +1,5 @@
 ---
-name: "DSC Issuer - Verify & Publish to Dev"
+name: "Verify & Publish to Dev"
 
 on:
   workflow_dispatch:
@@ -62,7 +62,6 @@ jobs:
         working-directory: ./doc-signing-cert
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          cd ${GITHUB_WORKSPACE}/deploy || exit 1
           sam validate
           sam build --cached
 
