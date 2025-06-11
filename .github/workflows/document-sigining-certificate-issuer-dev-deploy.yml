@@ -1,4 +1,4 @@
-name: "DSC Issuer - Verify & Publish to Dev"
+name: "Document Signing Certificate Issuer - Verify & Publish to Dev"
 
 on:
   workflow_dispatch:
