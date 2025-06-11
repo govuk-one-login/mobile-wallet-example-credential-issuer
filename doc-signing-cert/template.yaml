@@ -160,6 +160,8 @@ Resources:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [ EnvironmentVariables, !Ref Environment, RootCertificate ]
         - S3CrudPolicy:
             BucketName: !Ref DocSigningCertificateBucket
         - Statement:
