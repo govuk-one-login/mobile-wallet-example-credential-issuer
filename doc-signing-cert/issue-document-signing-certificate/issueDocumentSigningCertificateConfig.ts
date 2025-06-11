@@ -9,6 +9,7 @@ const REQUIRED_ENVIRONMENT_VARIABLES = [
   'DOC_SIGNING_KEY_VALIDITY_PERIOD',
   'DOC_SIGNING_KEY_COMMON_NAME',
   'DOC_SIGNING_KEY_COUNTRY_NAME',
+  'ROOT_CERTIFICATE',
 ] as const;
 
 export type IssueDocumentSigningCertificateConfig = Config<(typeof REQUIRED_ENVIRONMENT_VARIABLES)[number]>;
