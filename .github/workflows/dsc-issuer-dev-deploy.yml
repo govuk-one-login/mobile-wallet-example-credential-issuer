@@ -1,16 +1,8 @@
----
-name: "Verify & Publish to Dev"
+name: "DSC Issuer - Verify & Publish to Dev"
 
 on:
   workflow_dispatch:
     inputs:
-      refType:
-        type: choice
-        description: "Find branch name or commit SHA?"
-        options:
-          - Branch name
-          - Commit SHA
-        default: Branch name
       gitRef:
         description: "Input branch name or commit SHA"
         required: true
@@ -22,21 +14,31 @@ permissions:
   contents: read
 
 jobs:
-
   deploy_artifacts:
     name: "Deploy Template to Dev"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      - name: Check out repository code
+      # Checkout the specified branch or commit
+      - name: Checkout Repository
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # pin@v3
         with:
           ref: ${{ inputs.gitRef }}
+
+      # Set GIT_REF_SHA to the checked-out commit SHA
+      - name: Set GIT_REF_SHA
+        run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: doc-signing-cert/issue-document-signing-certificate/.nvmrc
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # pin@v1-node16
+        with:
+          role-to-assume: ${{ secrets.DEV_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
 
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # pin@v2
@@ -44,40 +46,18 @@ jobs:
           version: 1.131.0
           use-installer: true
 
-      - name: Fetch Commit SHA
-        id: gitRefSHA
-        if: ${{ github.event.inputs.choice }} == "Commit SHA"
-        run: echo GIT_REF_SHA=${{ inputs.gitRef }} >> $GITHUB_ENV
-
-      - name: Fetch Commit SHA by Branch name
-        id: gitRefBranch
-        if: ${{ github.event.inputs.choice }} == "Branch name"
-        run: echo GIT_REF_SHA=$(git log -1 ${{ inputs.gitRef }} --pretty=format:%H) >> $GITHUB_ENV
-
-      - name: Set tag
-        id: vars
-        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-
-      - name: Set up AWS creds
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # pin@v1-node16
-        with:
-          role-to-assume: ${{ secrets.DEV_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
-          aws-region: eu-west-2
-
-      - name: Sam Build & Validate
+      - name: Build & Validate SAM Template
         working-directory: ./doc-signing-cert
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
           sam validate
           sam build --cached
 
-      - name: Deploy SAM app
+      # Deploy the SAM application using the devplatform-upload-action
+      - name: Deploy SAM Application
         uses: govuk-one-login/devplatform-upload-action@dc8158079d3976d613515180e543930cdbe73f5f # pin@v3.9.1
         with:
           artifact-bucket-name: ${{ secrets.DEV_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}
           working-directory: ./doc-signing-cert
           template-file: .aws-sam/build/template.yaml
-
-      - name: "Delegated Deployment via AWS CodeDeploy"
-        run: echo "Deployment has been delegated to AWS CodeDeploy"
