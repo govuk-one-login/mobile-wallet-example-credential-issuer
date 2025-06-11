@@ -32,5 +32,4 @@ At the point where no more documents should be issued signed by a key the associ
 ## Output
 
 The resulting certificates are stored in an S3 bucket with the key `<keyId>/certificate.pem` where `<keyId>` is the KMS key ID (in the form of a UUIDv4 string).
-A decoded version of the certificate in JSON format is stored in the same S3 bucket with the key `<keyId>/certificate-metadata.json`.
-While both formats are provided, `certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation.
+`certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation.
