@@ -17,8 +17,6 @@ import {
 import { getSsmParameter } from '../../adapters/aws/ssmAdapter';
 import { getPublicKey } from '../../adapters/aws/kmsAdapter';
 
-/* eslint @typescript-eslint/no-dynamic-delete: 0 */
-
 jest.mock('../../adapters/aws/ssmAdapter');
 jest.mock('../../adapters/aws/s3Adapter');
 jest.mock('../../adapters/aws/kmsAdapter');
@@ -52,7 +50,7 @@ const LAMBDA_CONTEXT = {
   succeed: function (): void {},
 };
 
-function getMockClientAttestationConfig(): IssueDocumentSigningCertificateConfig {
+function getIssueDocumentSigningCertificateConfig(): IssueDocumentSigningCertificateConfig {
   return {
     DOC_SIGNING_KEY_COMMON_NAME: 'commonName',
     DOC_SIGNING_KEY_COUNTRY_NAME: 'UK',
@@ -61,6 +59,7 @@ function getMockClientAttestationConfig(): IssueDocumentSigningCertificateConfig
     PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: 'altNameInAsn1',
     DOC_SIGNING_KEY_ID: 'keyId',
     DOC_SIGNING_KEY_BUCKET: 'bucket',
+    ROOT_CERTIFICATE: 'root-certificate',
   };
 }
 
@@ -72,10 +71,13 @@ let dependencies: IssueDocumentSigningCertificateDependencies;
 describe('issueDocumentSigningCertificate handler', () => {
   beforeEach(() => {
     dependencies = {
-      env: getMockClientAttestationConfig(),
+      env: getIssueDocumentSigningCertificateConfig(),
     };
-
-    jest.mocked(getSsmParameter).mockResolvedValue('VALUE');
+    jest
+      .mocked(getSsmParameter)
+      .mockResolvedValueOnce('CA_ARN')
+      .mockResolvedValueOnce('CA_ISSUER_ALTERNATIVE_NAME')
+      .mockResolvedValueOnce('ROOT_CERTIFICATE');
     jest.mocked(headObject).mockResolvedValue(false);
     jest.mocked(getPublicKey).mockResolvedValue(Buffer.from('PUBLIC_KEY'));
     jest.mocked(retrieveIssuedCertificate).mockResolvedValue('CERTIFICATE');
@@ -90,15 +92,16 @@ describe('issueDocumentSigningCertificate handler', () => {
 
       // ASSERT
       expect(logger.info).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
-      expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
+      expect(putObject).toHaveBeenNthCalledWith(1, 'bucket', 'CA_ARN/certificate.pem', 'ROOT_CERTIFICATE');
+      expect(putObject).toHaveBeenNthCalledWith(2, 'bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
       expect(createCertificateRequestFromEs256KmsKey).toHaveBeenCalledWith('commonName', 'UK', 'keyId');
       expect(issueMdlDocSigningCertificateUsingSha256WithEcdsa).toBeCalledWith(
-        'VALUE',
-        'VALUE',
+        'CA_ISSUER_ALTERNATIVE_NAME',
+        'CA_ARN',
         Buffer.from('CSR'),
         100,
       );
-      expect(retrieveIssuedCertificate).toHaveBeenCalledWith('CERT_ARN', 'VALUE');
+      expect(retrieveIssuedCertificate).toHaveBeenCalledWith('CERT_ARN', 'CA_ARN');
     });
 
     it('adds context, service, correlation ID and function version to log attributes', async () => {
@@ -137,9 +140,21 @@ describe('issueDocumentSigningCertificate handler', () => {
       expect(logger.error).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_FAILED);
     });
 
-    it('should emit an error and reject if the certificate has already been issued for this key', async () => {
+    it('should log and continue when the root certificate already exists', async () => {
       // ARRANGE
       jest.mocked(headObject).mockResolvedValueOnce(true);
+
+      // ACT & ASSERT
+      await expect(lambdaHandlerConstructor(dependencies)(requestEvent, context)).resolves.not.toThrow();
+
+      // ASSERT
+      expect(logger.info).toHaveBeenNthCalledWith(3, LogMessage.ROOT_CERTIFICATE_ALREADY_EXISTS);
+    });
+
+    it('should emit an error and reject if the certificate has already been issued for this key', async () => {
+      // ARRANGE
+      jest.mocked(headObject).mockResolvedValueOnce(true); // root certificate
+      jest.mocked(headObject).mockResolvedValueOnce(true); // document signing certificate
 
       // ACT
       const promise = lambdaHandlerConstructor(dependencies)(requestEvent, context);
