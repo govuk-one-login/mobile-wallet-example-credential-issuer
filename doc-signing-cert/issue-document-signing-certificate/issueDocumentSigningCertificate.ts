@@ -42,6 +42,7 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
     } else {
       const rootCertificate = await getSsmParameter(config.ROOT_CERTIFICATE);
       await putObject(config.DOC_SIGNING_KEY_BUCKET, certificateAuthorityId + '/certificate.pem', rootCertificate);
+      logger.info(LogMessage.ROOT_CERTIFICATE_UPLOADED);
     }
 
     if (await headObject(config.DOC_SIGNING_KEY_BUCKET, config.DOC_SIGNING_KEY_ID + '/certificate.pem')) {

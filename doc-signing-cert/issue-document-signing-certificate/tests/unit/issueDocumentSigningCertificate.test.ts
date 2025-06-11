@@ -140,8 +140,8 @@ describe('issueDocumentSigningCertificate handler', () => {
       expect(logger.error).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_FAILED);
     });
 
-    it('should log and continue when the root certificate already exists', async () => {
-      // ARRANGE
+    it('should log a message and continue when the root certificate already exists', async () => {
+      // ARRANGE: Root certificate exists in bucket
       jest.mocked(headObject).mockResolvedValueOnce(true);
 
       // ACT & ASSERT
@@ -149,6 +149,19 @@ describe('issueDocumentSigningCertificate handler', () => {
 
       // ASSERT
       expect(logger.info).toHaveBeenNthCalledWith(3, LogMessage.ROOT_CERTIFICATE_ALREADY_EXISTS);
+      expect(putObject).toHaveBeenCalledTimes(1);
+    });
+
+    it("should log a message and upload root certificate when it doesn't exist", async () => {
+      // ARRANGE: Root certificate does not exist in bucket
+      jest.mocked(headObject).mockResolvedValueOnce(false);
+
+      // ACT
+      await lambdaHandlerConstructor(dependencies)(requestEvent, context);
+
+      // ASSERT
+      expect(logger.info).toHaveBeenNthCalledWith(3, LogMessage.ROOT_CERTIFICATE_UPLOADED);
+      expect(putObject).toHaveBeenCalledTimes(2);
     });
 
     it('should emit an error and reject if the certificate has already been issued for this key', async () => {
