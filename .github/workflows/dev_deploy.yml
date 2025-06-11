@@ -61,7 +61,7 @@ jobs:
       - name: Set up AWS creds
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # pin@v1-node16
         with:
-          role-to-assume: ${{ secrets.DEV_GH_ACTIONS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.DEV_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
 
       - name: Sam Build & Validate
@@ -74,7 +74,7 @@ jobs:
       - name: Deploy SAM app
         uses: govuk-one-login/devplatform-upload-action@dc8158079d3976d613515180e543930cdbe73f5f # pin@v3.9.1
         with:
-          artifact-bucket-name: ${{ secrets.DEV_ARTIFACT_SOURCE_BUCKET_NAME }}
+          artifact-bucket-name: ${{ secrets.DEV_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}
           working-directory: ./doc-signing-cert
           template-file: .aws-sam/build/template.yaml
