@@ -11,6 +11,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;
@@ -25,6 +27,7 @@ public class ProofJwtService {
     public static final String NONCE = "nonce";
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
     private static final String EXPECTED_ISSUER = "urn:fdc:gov:uk:wallet";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProofJwtService.class);
 
     private final ConfigurationService configurationService;
 
