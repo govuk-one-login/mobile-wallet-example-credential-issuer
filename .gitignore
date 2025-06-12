@@ -1,0 +1,10 @@
+# Intellij
+*.iml
+
+# Mac
+.DS_Store
+dist
+.idea
+*.toml
+.vscode/
+bin/
