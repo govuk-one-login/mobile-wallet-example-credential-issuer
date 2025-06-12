@@ -76,7 +76,7 @@ public class ProofJwtService {
             throw new ProofJwtValidationException("JWT type header claim is missing");
         }
         if (!"openid4vci-proof+jwt".equals(typ.toString())) {
-            throw new ProofJwtValidationException("JWT typ header claim is invalid");
+            throw new ProofJwtValidationException("JWT type header claim is invalid");
         }
     }
 
