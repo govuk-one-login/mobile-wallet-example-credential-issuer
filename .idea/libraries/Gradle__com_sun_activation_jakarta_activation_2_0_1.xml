@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.sun.activation:jakarta.activation:2.0.1" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.sun.activation" artifactId="jakarta.activation" version="2.0.1" baseVersion="2.0.1" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.sun.activation/jakarta.activation/2.0.1/828b80e886a52bb09fe41ff410b10b342f533ce1/jakarta.activation-2.0.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

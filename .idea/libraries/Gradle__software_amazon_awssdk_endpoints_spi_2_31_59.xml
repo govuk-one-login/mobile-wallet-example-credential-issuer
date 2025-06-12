@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: software.amazon.awssdk:endpoints-spi:2.31.59" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="software.amazon.awssdk" artifactId="endpoints-spi" version="2.31.59" baseVersion="2.31.59" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/software.amazon.awssdk/endpoints-spi/2.31.59/22311aecf9c669f2bd819c4f0ab808881f5df807/endpoints-spi-2.31.59.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

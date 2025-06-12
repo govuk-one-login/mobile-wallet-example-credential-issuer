@@ -1,7 +1,7 @@
 # Log file
 *.log
 
-# Package Files #
+# Package files
 *.jar
 !gradle/wrapper/gradle-wrapper.jar
 *.war

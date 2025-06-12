@@ -135,7 +135,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
-      CodeUri: issue-document-signing-certificate/
+      CodeUri: src/
       Handler: issueDocumentSigningCertificate.handler
       Timeout: 15
       MemorySize: 512

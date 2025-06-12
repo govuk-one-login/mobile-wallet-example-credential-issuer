@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: software.amazon.awssdk:dynamodb-enhanced:2.31.59" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="software.amazon.awssdk" artifactId="dynamodb-enhanced" version="2.31.59" baseVersion="2.31.59" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/software.amazon.awssdk/dynamodb-enhanced/2.31.59/33d5906378cc1deeaa5e639548a8396d4d4723b7/dynamodb-enhanced-2.31.59.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

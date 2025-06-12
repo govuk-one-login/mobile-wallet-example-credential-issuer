@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: com.google.guava:failureaccess:1.0.3" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="com.google.guava" artifactId="failureaccess" version="1.0.3" baseVersion="1.0.3" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.google.guava/failureaccess/1.0.3/aeaffd00d57023a2c947393ed251f0354f0985fc/failureaccess-1.0.3.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

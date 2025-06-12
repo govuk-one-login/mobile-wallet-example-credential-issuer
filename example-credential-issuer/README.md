@@ -1,4 +1,4 @@
-# mobile-wallet-example-credential-issuer
+# Example Credential Issuer
 
 ## Overview
 

@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="Gradle: org.eclipse.jetty.toolchain.setuid:jetty-setuid-java:1.0.4" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="org.eclipse.jetty.toolchain.setuid" artifactId="jetty-setuid-java" version="1.0.4" baseVersion="1.0.4" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.eclipse.jetty.toolchain.setuid/jetty-setuid-java/1.0.4/4798bb61795d1e82ac5230fb97fde486b22efcf7/jetty-setuid-java-1.0.4.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

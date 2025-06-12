@@ -1,6 +1,6 @@
 # mDL - Document Signing Certificate Issuer
 
-## Introduction
+## Overview
 
 The template.yaml in this project deploys the following AWS resources:
 
