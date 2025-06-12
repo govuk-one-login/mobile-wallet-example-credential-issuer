@@ -1,133 +1,644 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Transform:
-  - AWS::Serverless-2016-10-31
-Description: >-
+Description: |-
   Wallet Stub BE
+  Document Signing Certificate Issuer
+
 Parameters:
-  Environment:
-    Description: "The environment type"
-    Type: "String"
-    Default: dev
-    AllowedValues:
-      - "dev"
-      - "build"
-      - "staging"
-  VpcStackName:
-    Description: >
-      The name of the stack that defines the VPC in which this container will run.
+  CodeSigningConfigArn:
+    Description: |
+      The ARN of the Code Signing Config to use, provided by the deployment pipeline
     Type: String
-    Default: platform-vpc
-  PermissionsBoundary:
-    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
-    Type: String
-    Default: "none"
+    Default: none
+
   ContainerPort:
-    Description: >
+    Description: |
       The port on which the container is running
     Type: Number
     Default: 8080
+
   DocumentBuilderStackName:
     Description: The cloudformation stack name of the document builder
     Type: String
-    Default: "wallet-doc-builder-fe"
+    Default: wallet-doc-builder-fe
 
-Conditions:
-  StackNameIsWalletCredIssuerBE: !Equals [!Ref "AWS::StackName", wallet-cred-issuer-be]
+  Environment:
+    Description: The environment type
+    Type: String
+    AllowedValues:
+      - dev
+      - build
+      - staging
+    Default: dev
 
-  IsBuildOrStaging: !Or
-    - !Equals [!Ref Environment, build]
-    - !Equals [!Ref Environment, staging]
+  PermissionsBoundary:
+    Description: The ARN of the permissions boundary to apply when creating IAM roles
+    Type: String
+    Default: none
 
-  UsePermissionsBoundary:
-    Fn::Not:
-      - Fn::Equals:
-          - !Ref PermissionsBoundary
-          - "none"
+  VpcStackName:
+    Description: |
+      The name of the stack that defines the VPC in which this container will run.
+    Type: String
+    Default: platform-vpc
 
 Mappings:
-  EnvironmentVariables:
-    dev:
-      SelfUrl: "example-credential-issuer.mobile.dev.account.gov.uk"
-      CredentialStoreUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
-      AuthServerUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
-      WalletAppDeepLinkUrl: "mobile.dev.account.gov.uk/wallet"
-      BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
-    build:
-      SelfUrl: "example-credential-issuer.mobile.build.account.gov.uk"
-      CredentialStoreUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
-      AuthServerUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
-      WalletAppDeepLinkUrl: "mobile.build.account.gov.uk/wallet"
-      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
-    staging:
-      SelfUrl: "example-credential-issuer.mobile.staging.account.gov.uk"
-      CredentialStoreUrl: "stub-credential-issuer.mobile.staging.account.gov.uk"
-      AuthServerUrl: "token.staging.account.gov.uk"
-      WalletAppDeepLinkUrl: "mobile.staging.account.gov.uk/wallet"
-      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
   ElasticLoadBalancerAccountIds:
     eu-west-2:
       AccountId: 652711504416
 
+  EnvironmentVariables:
+    build:
+      AuthServerUrl: stub-credential-issuer.mobile.build.account.gov.uk
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+      CertificateRetentionPeriodInDays: 488
+      CertificateValidityPeriodInDays: 458
+      CloudwatchLogRetentionDays: 3650
+      CredentialStoreUrl: stub-credential-issuer.mobile.build.account.gov.uk
+      DocumentSigningKeyCommonName: Example Issuer DSC (BUILD)
+      DocumentSigningKeyCountryName: UK
+      DocumentSigningKeyParameterPrefix: /iaca/
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: INFO
+      PlatformCaArnParameter: /platform-ca/iaca/certificate-authority-arn
+      PlatformCaIssuerAlternativeName: /platform-ca/iaca/issuer-alternative-name
+      SelfUrl: example-credential-issuer.mobile.build.account.gov.uk
+      WalletAppDeepLinkUrl: mobile.build.account.gov.uk/wallet
+    dev:
+      AuthServerUrl: stub-credential-issuer.mobile.dev.account.gov.uk
+      BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
+      CertificateRetentionPeriodInDays: 488
+      CertificateValidityPeriodInDays: 458
+      CloudwatchLogRetentionDays: 3
+      CredentialStoreUrl: stub-credential-issuer.mobile.dev.account.gov.uk
+      DocumentSigningKeyCommonName: Example Issuer DSC (DEV)
+      DocumentSigningKeyCountryName: UK
+      DocumentSigningKeyParameterPrefix: /iaca/
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: DEBUG
+      PlatformCaArnParameter: /platform-ca/iaca/certificate-authority-arn
+      PlatformCaIssuerAlternativeName: /platform-ca/iaca/issuer-alternative-name
+      SelfUrl: example-credential-issuer.mobile.dev.account.gov.uk
+      WalletAppDeepLinkUrl: mobile.dev.account.gov.uk/wallet
+    staging:
+      AuthServerUrl: token.staging.account.gov.uk
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+      CertificateRetentionPeriodInDays: 488
+      CertificateValidityPeriodInDays: 458
+      CloudwatchLogRetentionDays: 3650
+      CredentialStoreUrl: stub-credential-issuer.mobile.staging.account.gov.uk
+      DocumentSigningKeyCommonName: Example Issuer DSC (BUILD)
+      DocumentSigningKeyCountryName: UK
+      DocumentSigningKeyParameterPrefix: /iaca/
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: INFO
+      PlatformCaArnParameter: /platform-ca/iaca/certificate-authority-arn
+      PlatformCaIssuerAlternativeName: /platform-ca/iaca/issuer-alternative-name
+      SelfUrl: example-credential-issuer.mobile.staging.account.gov.uk
+      WalletAppDeepLinkUrl: mobile.staging.account.gov.uk/wallet
+
+Conditions:
+  IsBuildOrStaging: !Or
+    - !Equals
+      - !Ref Environment
+      - build
+    - !Equals
+      - !Ref Environment
+      - staging
+
+  StackNameIsWalletCredIssuerBE: !Equals
+    - !Ref AWS::StackName
+    - wallet-cred-issuer-be
+
+  UseCodeSigning: !Not
+    - !Equals
+      - !Ref CodeSigningConfigArn
+      - none
+
+  UsePermissionsBoundary: !Not
+    - !Equals
+      - !Ref PermissionsBoundary
+      - none
+
+Transform:
+  - AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Architectures:
+      - arm64
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    Environment:
+      Variables:
+        DT_CLUSTER_ID: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_BASE_URL: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
+        DT_TENANT: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+    Layers:
+      - !Sub
+        - '{{resolve:secretsmanager:${SecretArn}:SecretString:NODEJS_LAYER}}'
+        - SecretArn: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - DynatraceSecretArn
+    LoggingConfig:
+      ApplicationLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      LogFormat: JSON
+      SystemLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+    Runtime: nodejs20.x
+
 Resources:
-
-  # SECURITY GROUPS
-
-  WalletBELoadBalancerSG:
-    Type: 'AWS::EC2::SecurityGroup'
+  CRICacheDatabase:
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Type: AWS::DynamoDB::Table
     Properties:
-      GroupDescription: >-
-        Wallet Stub BE LoadBalancer Security Group
-      SecurityGroupIngress:
-        - CidrIp: 0.0.0.0/0
-          Description: Allow from anyone on port 80
-          FromPort: 80
-          IpProtocol: tcp
-          ToPort: 80
-      VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+      AttributeDefinitions:
+        - AttributeName: credentialIdentifier
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      KeySchema:
+        - AttributeName: credentialIdentifier
+          KeyType: HASH
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        KMSMasterKeyId: !GetAtt CRICacheDatabaseKmsKey.Arn
+        SSEEnabled: true
+        SSEType: KMS
+      TableName: !Sub ${AWS::StackName}-credential_offer_cache
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Mobile Wallet
+        - Key: Owner
+          Value: Mobile Wallet Team
+        - Key: Environment
+          Value: !Ref Environment
+      TimeToLiveSpecification:
+        AttributeName: timeToLive
+        Enabled: true
 
-  WalletBELoadBalancerSGEgressToECSSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroupEgress'
+  CRICacheDatabaseKmsKey:
+    Type: AWS::KMS::Key
     Properties:
-      GroupId: !GetAtt WalletBELoadBalancerSG.GroupId
-      IpProtocol: tcp
-      Description: >-
-        Egress between the Wallet Stub BE load balancer and the Wallet Stub BE ECS security group
-      DestinationSecurityGroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
-      FromPort: !Ref ContainerPort
-      ToPort: !Ref ContainerPort
+      EnableKeyRotation: true
+      KeyPolicy:
+        Statement:
+          - Action:
+              - kms:*
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Resource:
+              - '*'
+        Version: "2012-10-17"
 
-  WalletBEECSSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+  CRICacheDatabaseKmsKeyAlias:
+    Type: AWS::KMS::Alias
     Properties:
-      GroupDescription: >-
-        Wallet Stub BE ECS Security Group permitting outbound to anywhere.
-      SecurityGroupEgress:
-        - CidrIp: 0.0.0.0/0
-          Description: Allow all outbound traffic by default
-          IpProtocol: '-1'
-      VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+      AliasName: !Sub alias/${AWS::StackName}/${Environment}/CRICacheDatabaseKmsKey
+      TargetKeyId: !Ref CRICacheDatabaseKmsKey
 
-  WalletBEECSSecurityGroupIngressFromLoadBalancer:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+  CredentialIssuerSigningKey:
+    Type: AWS::KMS::Key
     Properties:
-      IpProtocol: tcp
-      Description: >-
-        Wallet Stub BE ECS permits inbound from the Wallet Stub BE load balancer.
-      FromPort: !Ref ContainerPort
-      ToPort: !Ref ContainerPort
-      GroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
-      SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSG.GroupId
+      Description: Asymmetric key for signing tokens
+      EnableKeyRotation: false
+      Enabled: true
+      KeyPolicy:
+        Statement:
+          - Action:
+              - kms:*
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Resource:
+              - '*'
+          - Action:
+              - kms:Sign
+              - kms:GetPublicKey
+              - kms:DescribeKey
+            Effect: Allow
+            Principal:
+              AWS: !GetAtt WalletBEECSTaskRole.Arn
+            Resource:
+              - '*'
+        Version: "2012-10-17"
+      KeySpec: ECC_NIST_P256
+      KeyUsage: SIGN_VERIFY
+      MultiRegion: false
 
-  # ACCESS LOGS
+  CredentialIssuerSigningKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/credential-signing-key-${AWS::StackName}
+      TargetKeyId: !Ref CredentialIssuerSigningKey
+
+  DocSigningCertificateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-certificates
+      LifecycleConfiguration:
+        Rules:
+          - ExpirationInDays: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - CertificateRetentionPeriodInDays
+            Id: RemoveExpiredCertificates
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 14
+            Prefix: results/
+            Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  DocumentSigningKey1:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: !Sub Example Document Signing Key 1 for ${AWS::StackName}
+      Enabled: true
+      KeySpec: ECC_NIST_P256
+      KeyUsage: SIGN_VERIFY
+      PendingWindowInDays: 7
+
+  DocumentSigningKeyAlias1:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub alias/${AWS::StackName}-doc-signing-key-1
+      TargetKeyId: !Ref DocumentSigningKey1
+
+  ExampleCredIssuerLowContainerTaskCountAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: false
+      AlarmDescription: Trigger a warning if the running container task count drops below 1
+      AlarmName: !Sub ${AWS::StackName}-EgCredIssuerLowContainerTaskCountAlarm
+      ComparisonOperator: LessThanThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      InsufficientDataActions: []
+      Metrics:
+        - Id: containerTaskCount
+          MetricStat:
+            Metric:
+              Dimensions:
+                - Name: ClusterName
+                  Value: !Ref WalletBECluster
+                - Name: ServiceName
+                  Value: !GetAtt WalletBEECSService.Name
+              MetricName: RunningTaskCount
+              Namespace: ECS/ContainerInsights
+            Period: 60
+            Stat: Minimum
+          ReturnData: true
+      Threshold: 1
+      TreatMissingData: breaching
+    Condition: IsBuildOrStaging
+
+  FE4XXErrorAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      ActionsEnabled: false
+      AlarmDescription: Trigger the alarm if errorThreshold exceeds 50% with a minimum of 5 invocations in the last 30 minutes
+      AlarmName: !Sub ${AWS::StackName}-FE4XXErrorAlarm
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      DatapointsToAlarm: 1
+      EvaluationPeriods: 1
+      InsufficientDataActions: []
+      Metrics:
+        - Expression: IF(invocations<5,0,errorPercentage)
+          Id: errorThreshold
+          Label: errorThreshold
+          ReturnData: true
+        - Id: invocations
+          MetricStat:
+            Metric:
+              Dimensions:
+                - Name: ApiId
+                  Value: !Ref WalletBEApiGwHttpEndpoint
+              MetricName: Count
+              Namespace: AWS/ApiGateway
+            Period: 1800
+            Stat: Sum
+          ReturnData: false
+        - Id: error
+          MetricStat:
+            Metric:
+              Dimensions:
+                - Name: ApiId
+                  Value: !Ref WalletBEApiGwHttpEndpoint
+              MetricName: 4xx
+              Namespace: AWS/ApiGateway
+            Period: 1800
+            Stat: Sum
+          ReturnData: false
+        - Expression: (error/invocations) * 100
+          Id: errorPercentage
+          Label: errorPercentage
+          ReturnData: false
+      Threshold: 50
+      TreatMissingData: notBreaching
+    Condition: IsBuildOrStaging
+
+  IssueDocSigningCertificateFunction:
+    Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - issueDocumentSigningCertificate.ts
+        Minify: true
+        Target: es2020
+    Properties:
+      CodeUri: ../doc-signing-cert/issue-document-signing-certificate/
+      Environment:
+        Variables:
+          DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
+          DOC_SIGNING_KEY_COMMON_NAME: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - DocumentSigningKeyCommonName
+          DOC_SIGNING_KEY_COUNTRY_NAME: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - DocumentSigningKeyCountryName
+          DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
+          DOC_SIGNING_KEY_VALIDITY_PERIOD: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - CertificateValidityPeriodInDays
+          PLATFORM_CA_ARN_PARAMETER: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - PlatformCaArnParameter
+          PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - PlatformCaIssuerAlternativeName
+          POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
+      FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
+      Handler: issueDocumentSigningCertificate.handler
+      LoggingConfig:
+        LogGroup: !Ref IssueDocSigningCertificateFunctionLogGroup
+      MemorySize: 512
+      Policies:
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - PlatformCaArnParameter
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - PlatformCaIssuerAlternativeName
+        - S3CrudPolicy:
+            BucketName: !Ref DocSigningCertificateBucket
+        - Statement:
+            - Action:
+                - kms:GetPublicKey
+                - kms:Sign
+              Effect: Allow
+              Resource: !GetAtt DocumentSigningKey1.Arn
+              Sid: KMSAccessDocumentSigningKeyPolicy
+        - Statement:
+            - Action:
+                - acm-pca:IssueCertificate
+                - acm-pca:GetCertificate
+              Effect: Allow
+              Resource: !Sub
+                - '{{resolve:ssm:${ParameterName}}}'
+                - ParameterName: !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - PlatformCaArnParameter
+              Sid: ACMPCAIssueCertificatePolicy
+      ReservedConcurrentExecutions: 1
+      Timeout: 15
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+
+  IssueDocSigningCertificateFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue-doc-signing-certificate
+      RetentionInDays: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - CloudwatchLogRetentionDays
 
   WalletBEAPIGWAccessLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-WalletBE-API-GW-AccessLogs
       RetentionInDays: 14
+
+  WalletBEAPIGWRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      RouteKey: ANY /{proxy+}
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref WalletBEApiGwHttpEndpointIntegration
+
+  WalletBEAPIStageDefault:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      AccessLogSettings:
+        DestinationArn: !GetAtt WalletBEAPIGWAccessLogsGroup.Arn
+        Format: '{ "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "path": "$context.path", "routeKey":"$context.routeKey", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }'
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      AutoDeploy: true
+      DefaultRouteSettings:
+        DataTraceEnabled: false
+        DetailedMetricsEnabled: true
+        ThrottlingBurstLimit: 400
+        ThrottlingRateLimit: 1200
+      StageName: $default
+
+  WalletBEAccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      BucketName: !Sub wallet-stub-back-${AWS::StackName}-${Environment}-access-logs
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+
+  WalletBEAccessLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WalletBEAccessLogsBucket
+      PolicyDocument:
+        Statement:
+          - Action:
+              - s3:PutObject
+            Effect: Allow
+            Principal:
+              AWS: !Sub
+                - arn:aws:iam::${ElbAccountId}:root
+                - ElbAccountId: !FindInMap
+                    - ElasticLoadBalancerAccountIds
+                    - !Ref AWS::Region
+                    - AccountId
+            Resource:
+              - !Sub arn:aws:s3:::${WalletBEAccessLogsBucket}/wallet-stub-back-${Environment}/AWSLogs/${AWS::AccountId}/*
+          - Action: '*'
+            Condition:
+              Bool:
+                aws:SecureTransport: false
+            Effect: Deny
+            Principal:
+              AWS: '*'
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref WalletBEAccessLogsBucket
+        Version: "2012-10-17"
+
+  WalletBEApiGwHttpEndpoint:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Description: !Sub Wallet Stub Backend API. ${AWS::StackName}
+      Name: !Sub wallet-stub-Back-${Environment}-${AWS::StackName}
+      ProtocolType: HTTP
+
+  WalletBEApiGwHttpEndpointIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      ConnectionId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcLinkId
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationType: HTTP_PROXY
+      IntegrationUri: !Ref WalletBELoadBalancerListener
+      PayloadFormatVersion: "1.0"
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+
+  WalletBEApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      DomainName: !Ref WalletBECustomDomain
+      Stage: !Ref WalletBEAPIStageDefault
+
+  WalletBEApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      AliasTarget:
+        DNSName: !GetAtt WalletBECustomDomain.RegionalDomainName
+        EvaluateTargetHealth: false
+        HostedZoneId: !GetAtt WalletBECustomDomain.RegionalHostedZoneId
+      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
+      Name: !Ref WalletBECustomDomain
+      Type: A
+
+  WalletBECluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Name
+          Value: !Sub ${AWS::StackName}-WalletECSCluster
+        - Key: Product
+          Value: GOV.UK sign in
+        - Key: System
+          Value: Wallet Stub BE
+        - Key: Environment
+          Value: !Sub ${Environment}
+
+  WalletBECustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !If
+        - StackNameIsWalletCredIssuerBE
+        - !FindInMap
+          - EnvironmentVariables
+          - !Ref Environment
+          - SelfUrl
+        - !Sub
+          - ${AWS::StackName}-${SelfUrl}
+          - SelfUrl: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - SelfUrl
+      DomainNameConfigurations:
+        - CertificateArn: !Sub '{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}'
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
 
   WalletBEECSAccessLogsGroup:
     Type: AWS::Logs::LogGroup
@@ -137,217 +648,43 @@ Resources:
 
   WalletBEECSAccessLogsGroupSubscriptionFilter:
     Type: AWS::Logs::SubscriptionFilter
-    Condition: IsBuildOrStaging
     Properties:
       DestinationArn: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython-2
       FilterPattern: ""
       LogGroupName: !Ref WalletBEECSAccessLogsGroup
+    Condition: IsBuildOrStaging
 
-  WalletBEAccessLogsBucket:
-    Type: AWS::S3::Bucket
+  WalletBEECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      BucketName: !Sub wallet-stub-back-${AWS::StackName}-${Environment}-access-logs
-      VersioningConfiguration:
-        Status: "Enabled"
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
+      GroupDescription: Wallet Stub BE ECS Security Group permitting outbound to anywhere.
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: "-1"
+      VpcId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcId
 
-  WalletBEAccessLogsBucketPolicy:
-    Type: AWS::S3::BucketPolicy
+  WalletBEECSSecurityGroupIngressFromLoadBalancer:
+    Type: AWS::EC2::SecurityGroupIngress
     Properties:
-      Bucket: !Ref WalletBEAccessLogsBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub
-                - "arn:aws:iam::${ElbAccountId}:root"
-                - ElbAccountId: !FindInMap [ElasticLoadBalancerAccountIds, !Ref 'AWS::Region', AccountId]
-            Action:
-              - s3:PutObject
-            Resource:
-              - !Sub arn:aws:s3:::${WalletBEAccessLogsBucket}/wallet-stub-back-${Environment}/AWSLogs/${AWS::AccountId}/*
-          - Effect: Deny
-            Principal:
-              AWS: "*"
-            Action: "*"
-            Resource: !Sub
-              - arn:aws:s3:::${bucketName}/*
-              - bucketName: !Ref WalletBEAccessLogsBucket
-            Condition:
-              Bool:
-                "aws:SecureTransport": false
-
-  # LOADBALANCER RESOURCES
-
-  WalletBELoadBalancer:
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-    Properties:
-      Scheme: internal
-      SecurityGroups:
-        - !GetAtt WalletBELoadBalancerSG.GroupId
-      Subnets:
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
-      Type: application
-      LoadBalancerAttributes:
-        - Key: access_logs.s3.enabled
-          Value: true
-        - Key: access_logs.s3.bucket
-          Value: !Ref WalletBEAccessLogsBucket
-        - Key: access_logs.s3.prefix
-          Value: !Sub wallet-stub-back-${Environment}
-        - Key: idle_timeout.timeout_seconds
-          Value: 60 # N.B, this is 1 second less than the nodeJS app is configured in server.ts
-
-  WalletBELoadBalancerListenerTargetGroupECS:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
-    Properties:
-      HealthCheckEnabled: TRUE
-      HealthCheckProtocol: HTTP
-      HealthCheckPath: "/healthcheck"
-      HealthCheckTimeoutSeconds: 2
-      HealthCheckIntervalSeconds: 60
-      HealthyThresholdCount: 2
-      Matcher:
-        HttpCode: 200-499
-      Port: 80
-      Protocol: HTTP
-      TargetType: ip
-      VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
-      TargetGroupAttributes:
-        - Key: deregistration_delay.timeout_seconds
-          Value: 60
-
-  WalletBELoadBalancerListener:
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
-    Properties:
-      DefaultActions:
-        - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
-          Type: forward
-      LoadBalancerArn: !Ref WalletBELoadBalancer
-      Port: 80
-      Protocol: HTTP
-
-  # APIGW RESOURCES
-
-  WalletBEApiGwHttpEndpoint:
-    Type: 'AWS::ApiGatewayV2::Api'
-    Properties:
-      Name: !Sub wallet-stub-Back-${Environment}-${AWS::StackName}
-      Description: !Sub "Wallet Stub Backend API. ${AWS::StackName}"
-      ProtocolType: HTTP
-
-  WalletBEApiGwHttpEndpointIntegration:
-    Type: 'AWS::ApiGatewayV2::Integration'
-    Properties:
-      ApiId: !Ref WalletBEApiGwHttpEndpoint
-      IntegrationType: HTTP_PROXY
-      ConnectionId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
-      ConnectionType: VPC_LINK
-      IntegrationMethod: ANY
-      IntegrationUri: !Ref WalletBELoadBalancerListener
-      PayloadFormatVersion: '1.0'
-      RequestParameters:
-        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
-
-  WalletBEAPIGWRoute:
-    Type: 'AWS::ApiGatewayV2::Route'
-    Properties:
-      ApiId: !Ref WalletBEApiGwHttpEndpoint
-      RouteKey: 'ANY /{proxy+}'
-      Target: !Join
-        - /
-        - - integrations
-          - !Ref WalletBEApiGwHttpEndpointIntegration
-
-  WalletBEAPIStageDefault:
-    Type: 'AWS::ApiGatewayV2::Stage'
-    Properties:
-      ApiId: !Ref WalletBEApiGwHttpEndpoint
-      StageName: $default
-      AutoDeploy: true
-      DefaultRouteSettings:
-        DataTraceEnabled: false
-        DetailedMetricsEnabled: true
-        ThrottlingBurstLimit: 400
-        ThrottlingRateLimit: 1200
-      AccessLogSettings:
-        DestinationArn: !GetAtt WalletBEAPIGWAccessLogsGroup.Arn
-        Format: >-
-          { "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "path": "$context.path", "routeKey":"$context.routeKey", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }
-
-  WalletBECustomDomain:
-    Type: AWS::ApiGatewayV2::DomainName
-    Properties:
-      DomainName: !If
-        - StackNameIsWalletCredIssuerBE
-        - !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
-        - !Sub
-          - "${AWS::StackName}-${SelfUrl}"
-          - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
-      DomainNameConfigurations:
-        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
-          EndpointType: REGIONAL
-          SecurityPolicy: TLS_1_2
-
-  WalletBEApiRecord:
-    Type: AWS::Route53::RecordSet
-    Properties:
-      Name: !Ref WalletBECustomDomain
-      Type: A
-      HostedZoneId: !Sub "{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}"
-      AliasTarget:
-        DNSName: !GetAtt WalletBECustomDomain.RegionalDomainName
-        HostedZoneId: !GetAtt WalletBECustomDomain.RegionalHostedZoneId
-        EvaluateTargetHealth: false
-
-  WalletBEApiMapping:
-    Type: AWS::ApiGatewayV2::ApiMapping
-    Properties:
-      DomainName: !Ref WalletBECustomDomain
-      ApiId: !Ref WalletBEApiGwHttpEndpoint
-      Stage: !Ref WalletBEAPIStageDefault
-
-  # ECS RESOURCES
-
-  WalletBECluster:
-    Type: 'AWS::ECS::Cluster'
-    Properties:
-      ClusterSettings:
-        - Name: containerInsights
-          Value: enabled
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-WalletECSCluster"
-        - Key: Product
-          Value: "GOV.UK sign in"
-        - Key: System
-          Value: "Wallet Stub BE"
-        - Key: Environment
-          Value: !Sub "${Environment}"
+      Description: Wallet Stub BE ECS permits inbound from the Wallet Stub BE load balancer.
+      FromPort: !Ref ContainerPort
+      GroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
+      IpProtocol: tcp
+      SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSG.GroupId
+      ToPort: !Ref ContainerPort
 
   WalletBEECSService:
+    Type: AWS::ECS::Service
     DependsOn:
       - WalletBELoadBalancerListener
-    Type: 'AWS::ECS::Service'
     Properties:
       Cluster: !Ref WalletBECluster
       DeploymentConfiguration:
         DeploymentCircuitBreaker:
-          Enable: TRUE
-          Rollback: TRUE
+          Enable: true
+          Rollback: true
       EnableECSManagedTags: false
       HealthCheckGracePeriodSeconds: 60
       LaunchType: FARGATE
@@ -361,354 +698,279 @@ Resources:
           SecurityGroups:
             - !GetAtt WalletBEECSSecurityGroup.GroupId
           Subnets:
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
-      TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
+            - !ImportValue
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
       Tags:
         - Key: Name
-          Value: !Sub "${AWS::StackName}-WalletECS"
+          Value: !Sub ${AWS::StackName}-WalletECS
         - Key: Product
-          Value: "GOV.UK sign in"
+          Value: GOV.UK sign in
         - Key: System
-          Value: "Wallet BE Stub"
+          Value: Wallet BE Stub
         - Key: Environment
-          Value: !Sub "${Environment}"
-
-  #  The ECR container for overriding in development, if you want to target a specific version/tag
-  #  for development use, change the value of the 'Image' property value to:
-  #  "671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:<image_tag>"
-  #  To deploy the latest version of the image, use the git sha from the most recent commit, as the <image tag>, found using ‘git log’
+          Value: !Sub ${Environment}
+      TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
 
   WalletBEECSServiceTaskDefinition:
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: AWS::ECS::TaskDefinition
     Properties:
       ContainerDefinitions:
-        - Essential: true
-          Image: CONTAINER-IMAGE-PLACEHOLDER
-          Name: app
-          Environment:
+        - Environment:
             - Name: SIGNING_KEY_ALIAS
               Value: !Ref CredentialIssuerSigningKeyAlias
             - Name: AWS_REGION
-              Value: !Sub "${AWS::Region}"
+              Value: !Sub ${AWS::Region}
             - Name: ENVIRONMENT
-              Value: !Sub "${Environment}"
+              Value: !Sub ${Environment}
             - Name: SELF_URL
               Value: !If
                 - StackNameIsWalletCredIssuerBE
                 - !Sub
-                  - "https://${SelfUrl}"
-                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+                  - https://${SelfUrl}
+                  - SelfUrl: !FindInMap
+                      - EnvironmentVariables
+                      - !Ref Environment
+                      - SelfUrl
                 - !Sub
-                  - "https://${AWS::StackName}-${SelfUrl}"
-                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+                  - https://${AWS::StackName}-${SelfUrl}
+                  - SelfUrl: !FindInMap
+                      - EnvironmentVariables
+                      - !Ref Environment
+                      - SelfUrl
             - Name: DID_CONTROLLER
               Value: !If
                 - StackNameIsWalletCredIssuerBE
-                - !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+                - !FindInMap
+                  - EnvironmentVariables
+                  - !Ref Environment
+                  - SelfUrl
                 - !Sub
-                  - "${AWS::StackName}-${SelfUrl}"
-                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+                  - ${AWS::StackName}-${SelfUrl}
+                  - SelfUrl: !FindInMap
+                      - EnvironmentVariables
+                      - !Ref Environment
+                      - SelfUrl
             - Name: OIDC_CLIENT_ID
-              Value: !Sub "{{resolve:ssm:/${DocumentBuilderStackName}/Config/OIDC/Client/Id}}"
+              Value: !Sub '{{resolve:ssm:/${DocumentBuilderStackName}/Config/OIDC/Client/Id}}'
             - Name: CREDENTIAL_STORE_URL
               Value: !Sub
-                - "https://${CredentialStoreUrl}"
-                - CredentialStoreUrl: !FindInMap [EnvironmentVariables, !Ref Environment, CredentialStoreUrl]
+                - https://${CredentialStoreUrl}
+                - CredentialStoreUrl: !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - CredentialStoreUrl
             - Name: WALLET_APP_DEEP_LINK_URL
               Value: !Sub
-                - "https://${WalletAppDeepLinkUrl}"
-                - WalletAppDeepLinkUrl: !FindInMap [EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl]
+                - https://${WalletAppDeepLinkUrl}
+                - WalletAppDeepLinkUrl: !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - WalletAppDeepLinkUrl
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub
-                - "https://${AuthServerUrl}"
-                - AuthServerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, AuthServerUrl]
-          PortMappings:
-            - ContainerPort: !Ref ContainerPort
-              Protocol: tcp
+                - https://${AuthServerUrl}
+                - AuthServerUrl: !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - AuthServerUrl
+          Essential: true
+          Image: CONTAINER-IMAGE-PLACEHOLDER
           LogConfiguration:
             LogDriver: awslogs
             Options:
               awslogs-group: !Ref WalletBEECSAccessLogsGroup
               awslogs-region: !Sub ${AWS::Region}
               awslogs-stream-prefix: !Sub wallet-stub-back-${Environment}
-      Cpu: '1024' # Increased to use 1 CPU unit
+          Name: app
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+      Cpu: "1024"
       ExecutionRoleArn: !GetAtt WalletBEECSTaskExecutionRole.Arn
-      Memory: '2048' # Upgraded memory value to match with increased CPU
+      Memory: "2048"
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
-      TaskRoleArn: !GetAtt WalletBEECSTaskRole.Arn
       Tags:
         - Key: Name
-          Value: !Sub "${AWS::StackName}-WalletTaskDefinition"
+          Value: !Sub ${AWS::StackName}-WalletTaskDefinition
         - Key: Product
-          Value: "GOV.UK sign in"
+          Value: GOV.UK sign in
         - Key: System
-          Value: "Wallet Stub BE"
+          Value: Wallet Stub BE
         - Key: Environment
-          Value: !Sub "${Environment}"
+          Value: !Sub ${Environment}
+      TaskRoleArn: !GetAtt WalletBEECSTaskRole.Arn
 
   WalletBEECSTaskExecutionRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: 'sts:AssumeRole'
+          - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-        Version: 2012-10-17
-      Policies:
-        - PolicyName: PullWalletBackImage
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - "ecr:BatchGetImage"
-                  - "ecr:GetDownloadUrlForLayer"
-                  - "ecr:BatchCheckLayerAvailability"
-                Resource:
-                  - !FindInMap [EnvironmentVariables, !Ref Environment, BackImageRepository]
-              - Effect: Allow
-                Action:
-                  - "ecr:GetAuthorizationToken"
-                Resource:
-                  - "*"
-              - Effect: Allow
-                Action:
-                  - "logs:CreateLogStream"
-                  - "logs:PutLogEvents"
-                Resource:
-                  - !GetAtt "WalletBEECSAccessLogsGroup.Arn"
-                  - !Sub "${WalletBEECSAccessLogsGroup.Arn}:*"
+        Version: "2012-10-17"
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - ecr:BatchGetImage
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchCheckLayerAvailability
+                Effect: Allow
+                Resource:
+                  - !FindInMap
+                    - EnvironmentVariables
+                    - !Ref Environment
+                    - BackImageRepository
+              - Action:
+                  - ecr:GetAuthorizationToken
+                Effect: Allow
+                Resource:
+                  - '*'
+              - Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Effect: Allow
+                Resource:
+                  - !GetAtt WalletBEECSAccessLogsGroup.Arn
+                  - !Sub ${WalletBEECSAccessLogsGroup.Arn}:*
+            Version: "2012-10-17"
+          PolicyName: PullWalletBackImage
 
   WalletBEECSTaskRole:
-    Type: 'AWS::IAM::Role'
+    Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: 'sts:AssumeRole'
+          - Action: sts:AssumeRole
             Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
-        Version: 2012-10-17
-      Policies:
-        - PolicyName: AccessDynamoDb
-          PolicyDocument:
-            Version: "2012-10-17"
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'dynamodb:PutItem'
-                  - 'dynamodb:GetItem'
-                  - 'dynamodb:UpdateItem'
-                Resource: !GetAtt CRICacheDatabase.Arn
-              - Effect: Allow
-                Action:
-                  - 'kms:Decrypt'
-                  - 'kms:Encrypt'
-                  - 'kms:GenerateDataKey'
-                Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
+        Version: "2012-10-17"
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
+      Policies:
+        - PolicyDocument:
+            Statement:
+              - Action:
+                  - dynamodb:PutItem
+                  - dynamodb:GetItem
+                  - dynamodb:UpdateItem
+                Effect: Allow
+                Resource: !GetAtt CRICacheDatabase.Arn
+              - Action:
+                  - kms:Decrypt
+                  - kms:Encrypt
+                  - kms:GenerateDataKey
+                Effect: Allow
+                Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
+            Version: "2012-10-17"
+          PolicyName: AccessDynamoDb
 
-  # KMS RESOURCES
-
-  CredentialIssuerSigningKey:
-    Type: AWS::KMS::Key
+  WalletBELoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Description: Asymmetric key for signing tokens
-      Enabled: true
-      EnableKeyRotation: false
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
-            Action:
-              - "kms:*"
-            Resource:
-              - "*"
-          - Effect: Allow
-            Principal:
-              AWS: !GetAtt WalletBEECSTaskRole.Arn
-            Action:
-              - "kms:Sign"
-              - "kms:GetPublicKey"
-              - "kms:DescribeKey"
-            Resource:
-              - "*"
-      KeySpec: ECC_NIST_P256
-      KeyUsage: SIGN_VERIFY
-      MultiRegion: false
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: true
+        - Key: access_logs.s3.bucket
+          Value: !Ref WalletBEAccessLogsBucket
+        - Key: access_logs.s3.prefix
+          Value: !Sub wallet-stub-back-${Environment}
+        - Key: idle_timeout.timeout_seconds
+          Value: 60
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt WalletBELoadBalancerSG.GroupId
+      Subnets:
+        - !ImportValue
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+        - !ImportValue
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+        - !ImportValue
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+      Type: application
 
-  CredentialIssuerSigningKeyAlias:
-    Type: AWS::KMS::Alias
+  WalletBELoadBalancerListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
-      AliasName: !Sub "alias/credential-signing-key-${AWS::StackName}"
-      TargetKeyId: !Ref CredentialIssuerSigningKey
+      DefaultActions:
+        - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
+          Type: forward
+      LoadBalancerArn: !Ref WalletBELoadBalancer
+      Port: 80
+      Protocol: HTTP
 
-  CRICacheDatabaseKmsKey:
-    Type: AWS::KMS::Key
+  WalletBELoadBalancerListenerTargetGroupECS:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action:
-              - kms:*
-            Resource:
-              - "*"
+      HealthCheckEnabled: true
+      HealthCheckIntervalSeconds: 60
+      HealthCheckPath: /healthcheck
+      HealthCheckProtocol: HTTP
+      HealthCheckTimeoutSeconds: 2
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-499
+      Port: 80
+      Protocol: HTTP
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+      TargetType: ip
+      VpcId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcId
 
-  CRICacheDatabaseKmsKeyAlias:
-    Type: AWS::KMS::Alias
+  WalletBELoadBalancerSG:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/CRICacheDatabaseKmsKey"
-      TargetKeyId: !Ref CRICacheDatabaseKmsKey
+      GroupDescription: Wallet Stub BE LoadBalancer Security Group
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 80
+          FromPort: 80
+          IpProtocol: tcp
+          ToPort: 80
+      VpcId: !ImportValue
+        Fn::Sub: ${VpcStackName}-VpcId
 
-  # DYNAMODB RESOURCES
-
-  CRICacheDatabase:
-    Type: AWS::DynamoDB::Table
-    DeletionPolicy: Delete
-    UpdateReplacePolicy: Delete
+  WalletBELoadBalancerSGEgressToECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroupEgress
     Properties:
-      AttributeDefinitions:
-        - AttributeName: credentialIdentifier
-          AttributeType: S
-      BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "${AWS::StackName}-credential_offer_cache"
-      KeySchema:
-        - AttributeName: credentialIdentifier
-          KeyType: HASH
-      TimeToLiveSpecification:
-        AttributeName: timeToLive
-        Enabled: true
-      PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: true
-      SSESpecification:
-        SSEEnabled: true
-        SSEType: KMS
-        KMSMasterKeyId: !GetAtt CRICacheDatabaseKmsKey.Arn
-      Tags:
-        - Key: Product
-          Value: GOV.UK Sign In
-        - Key: System
-          Value: Mobile Wallet
-        - Key: Owner
-          Value: Mobile Wallet Team
-        - Key: Environment
-          Value: !Ref "Environment"
-
-  # ALARMS
-
-  ExampleCredIssuerLowContainerTaskCountAlarm:
-    Condition: IsBuildOrStaging
-    DependsOn:
-      - WalletBECluster
-      - WalletBEECSService
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub "${AWS::StackName}-EgCredIssuerLowContainerTaskCountAlarm"
-      AlarmDescription: Trigger a warning if the running container task count drops below 1
-      ActionsEnabled: false
-      # OKActions: - commented until we create sns topics for wallet alarms
-      #   - !ImportValue platform-alarm-topic-critical-alert
-      # AlarmActions:
-      #   - !ImportValue platform-alarm-topic-critical-alert
-      InsufficientDataActions: []
-      Dimensions: []
-      EvaluationPeriods: 1
-      DatapointsToAlarm: 1
-      Threshold: 1
-      ComparisonOperator: LessThanThreshold
-      TreatMissingData: breaching
-      Metrics:
-        - Id: containerTaskCount
-          ReturnData: true
-          MetricStat:
-            Metric:
-              Namespace: ECS/ContainerInsights
-              MetricName: RunningTaskCount
-              Dimensions:
-                - Name: ClusterName
-                  Value: !Ref WalletBECluster
-                - Name: ServiceName
-                  Value: !GetAtt WalletBEECSService.Name
-            Period: 60
-            Stat: Minimum
-
-  FE4XXErrorAlarm:
-    Condition: IsBuildOrStaging
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub "${AWS::StackName}-FE4XXErrorAlarm"
-      AlarmDescription: Trigger the alarm if errorThreshold exceeds 50% with a minimum of 5 invocations in the last 30 minutes
-      ActionsEnabled: false
-      # OKActions:
-      #   - !ImportValue platform-alarm-topic-slack-warning-alert
-      # AlarmActions:
-      #   - !ImportValue platform-alarm-topic-slack-warning-alert
-      InsufficientDataActions: []
-      Dimensions: []
-      EvaluationPeriods: 1
-      DatapointsToAlarm: 1
-      Threshold: 50
-      ComparisonOperator: GreaterThanOrEqualToThreshold
-      TreatMissingData: notBreaching
-      Metrics:
-        - Id: errorThreshold
-          Label: errorThreshold
-          ReturnData: true
-          Expression: IF(invocations<5,0,errorPercentage)
-        - Id: invocations
-          ReturnData: false
-          MetricStat:
-            Metric:
-              Namespace: AWS/ApiGateway
-              MetricName: Count
-              Dimensions:
-                - Name: ApiId
-                  Value: !Ref WalletBEApiGwHttpEndpoint
-            Period: 1800
-            Stat: Sum
-        - Id: error
-          ReturnData: false
-          MetricStat:
-            Metric:
-              Namespace: AWS/ApiGateway
-              MetricName: 4xx
-              Dimensions:
-                - Name: ApiId
-                  Value: !Ref WalletBEApiGwHttpEndpoint
-            Period: 1800
-            Stat: Sum
-        - Id: errorPercentage
-          Label: errorPercentage
-          ReturnData: false
-          Expression: (error/invocations) * 100
+      Description: Egress between the Wallet Stub BE load balancer and the Wallet Stub BE ECS security group
+      DestinationSecurityGroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
+      FromPort: !Ref ContainerPort
+      GroupId: !GetAtt WalletBELoadBalancerSG.GroupId
+      IpProtocol: tcp
+      ToPort: !Ref ContainerPort
 
 Outputs:
   CredIssuerFriendlyUrl:
     Description: Friendly URL for the deployed credential issuer service
     Value: !If
       - StackNameIsWalletCredIssuerBE
-      - !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+      - !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - SelfUrl
       - !Sub
-        - "${AWS::StackName}-${SelfUrl}"
-        - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+        - ${AWS::StackName}-${SelfUrl}
+        - SelfUrl: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - SelfUrl
