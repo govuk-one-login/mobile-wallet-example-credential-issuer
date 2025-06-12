@@ -10,6 +10,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;
@@ -18,8 +20,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProofJwtService {
 
@@ -75,7 +75,6 @@ public class ProofJwtService {
 
         // Logging the ProofJWT Header
         LOGGER.info("*** ProofJWT HEADER: {}", proofJwt.getHeader().toJSONObject());
-
     }
 
     /**
