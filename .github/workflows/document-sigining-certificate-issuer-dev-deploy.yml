@@ -52,7 +52,6 @@ jobs:
       - name: Build & Validate SAM Template
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          cd deploy || exit 1 
           sam validate
           sam build --cached
 
