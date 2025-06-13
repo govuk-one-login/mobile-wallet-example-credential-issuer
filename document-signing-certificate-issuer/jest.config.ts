@@ -12,5 +12,6 @@ export default {
   coverageDirectory: 'coverage',
   coverageProvider: 'v8',
   testMatch: ['**/*.test.ts'],
-  collectCoverageFrom: ['**/*.ts', '!**/node_modules/**', '!**/*.test.ts', '!jest.config.ts', '!**/tests/**'],
+  collectCoverageFrom: ['src/**'],
+  coveragePathIgnorePatterns: ['/types/'],
 };
