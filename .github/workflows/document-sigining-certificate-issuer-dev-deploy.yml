@@ -52,7 +52,7 @@ jobs:
       - name: Build & Validate SAM Template
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          cd /deploy || exit 1 
+          cd document-signing-certificate-issuer/deploy || exit 1 
           sam validate
           sam build --cached
 
@@ -62,5 +62,5 @@ jobs:
         with:
           artifact-bucket-name: ${{ secrets.DEV_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}
-          working-directory: ./doc-signing-cert
+          working-directory: ./document-signing-certificate-issuer
           template-file: .aws-sam/build/template.yaml
