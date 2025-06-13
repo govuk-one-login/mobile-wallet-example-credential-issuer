@@ -53,4 +53,4 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          scanMetadataReportFile: document-signing-certificate-issuerbuild/sonar/report-task.txt
+          scanMetadataReportFile: document-signing-certificate-issuer/build/sonar/report-task.txt
