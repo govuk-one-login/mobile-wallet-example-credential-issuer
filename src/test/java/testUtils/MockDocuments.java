@@ -45,7 +45,7 @@ public class MockDocuments {
         data.put("outcome", "Result clear");
         data.put("policeRecordsCheck", "Clear");
         data.put("credentialTtlMinutes", "525600");
-        return new Document(documentId, data, "BasicCheckCredential");
+        return new Document(documentId, data, "BasicDisclosureCredential");
     }
 
     public static @NotNull Document getMockVeteranCardDocument(String documentId) {
@@ -62,7 +62,7 @@ public class MockDocuments {
         data.put("serviceBranch", "HM Naval Service");
         data.put("photo", "base64EncodedPhoto");
         data.put("credentialTtlMinutes", "525600");
-        return new Document(documentId, data, "digitalVeteranCard");
+        return new Document(documentId, data, "DigitalVeteranCard");
     }
 
     public static @NotNull Document getMockMobileDrivingLicence(String documentId) {
@@ -90,7 +90,7 @@ public class MockDocuments {
         data.put("driving_privileges", drivingPrivileges);
         data.put("un_distinguishing_sign", "UK");
 
-        return new Document(documentId, data, "mobileDrivingLicence");
+        return new Document(documentId, data, "org.iso.18013.5.1.mDL");
     }
 
     public static @NotNull Document getMockDocumentWithInvalidVcType(String documentId) {
