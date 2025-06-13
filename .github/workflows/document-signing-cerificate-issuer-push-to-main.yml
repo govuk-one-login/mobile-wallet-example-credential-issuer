@@ -16,12 +16,12 @@ jobs:
     timeout-minutes: 60
     steps:
       # Check out the repository at the specified branch, tag, or commit
-      - name: Check out repository
+      - name: Check out repository code
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # pin@v3
         with:
           ref: ${{ inputs.gitRef }}
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: document-signing-certificate-issuer/.nvmrc
@@ -32,7 +32,7 @@ jobs:
           role-to-assume: ${{ secrets.DEV_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
 
-      - name: Setup SAM CLI
+      - name: Set up SAM CLI
         uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # pin@v2
         with:
           version: 1.131.0

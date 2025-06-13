@@ -1,10 +1,10 @@
-name: "Document Signing Certificate Issuer - Verify & Publish to Dev"
+name: DSC Issuer - Deploy to Dev
 
 on:
   workflow_dispatch:
     inputs:
       gitRef:
-        description: "Input branch name or commit SHA"
+        description: Input branch name or commit SHA
         required: true
         type: string
         default: main
@@ -15,46 +15,41 @@ permissions:
 
 jobs:
   deploy_artifacts:
-    name: "Deploy Template to Dev"
+    name: Deploy Template to Dev
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
-      # Checkout the specified branch or commit
-      - name: Checkout Repository
+      # Check out the repository at the specified branch, tag, or commit
+      - name: Check out repository code
         uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # pin@v3
         with:
           ref: ${{ inputs.gitRef }}
 
-      # Set GIT_REF_SHA to the checked-out commit SHA
-      - name: Set GIT_REF_SHA
-        run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: document-signing-certificate-issuer/.nvmrc
 
-      - name: Configure AWS Credentials
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # pin@v1-node16
         with:
           role-to-assume: ${{ secrets.DEV_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
 
-      - name: Setup SAM CLI
+      - name: Set up SAM CLI
         uses: aws-actions/setup-sam@819220f63fb333a9a394dd0a5cab2d8303fd17e2 # pin@v2
         with:
           version: 1.131.0
           use-installer: true
 
-      - name: Build & Validate SAM Template
-        working-directory: ./document-signing-certificate-issuer
-        run: |
-          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          sam validate
-          sam build --cached
+      - name: Run SAM validate
+        run: sam validate
 
-      # Deploy the SAM application using the devplatform-upload-action
-      - name: Deploy SAM Application
+      - name: Run SAM build
+        run: sam build --cached
+
+      # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
+      - name: Upload artifacts
         uses: govuk-one-login/devplatform-upload-action@dc8158079d3976d613515180e543930cdbe73f5f # pin@v3.9.1
         with:
           artifact-bucket-name: ${{ secrets.DEV_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
