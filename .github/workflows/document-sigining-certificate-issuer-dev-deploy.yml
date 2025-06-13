@@ -18,6 +18,9 @@ jobs:
     name: Deploy Template to Dev
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: ./document-signing-certificate-issuer
     steps:
       # Check out the repository at the specified branch, tag, or commit
       - name: Check out repository code
