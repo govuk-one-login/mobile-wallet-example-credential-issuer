@@ -1,10 +1,15 @@
 {
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "nodenext",
+    "target": "es2020",
     "strict": true,
-    "moduleResolution": "nodenext",
+    "preserveConstEnums": true,
+    "noEmit": true,
+    "sourceMap": true,
+    "module": "es2015",
+    "moduleResolution": "node",
     "esModuleInterop": true,
-    "resolveJsonModule": true
-  }
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "exclude": ["node_modules"]
 }
