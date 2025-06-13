@@ -1,4 +1,4 @@
-name: DCS Issuer - Pull Request Checks
+name: DSC Issuer - Pull Request Checks
 
 on:
   pull_request:
