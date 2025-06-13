@@ -50,9 +50,9 @@ jobs:
           use-installer: true
 
       - name: Build & Validate SAM Template
-        working-directory: ./doc-signing-cert
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          cd /deploy || exit 1 
           sam validate
           sam build --cached
 
