@@ -1,4 +1,4 @@
-name: Document Signing Certificate Issuer - Pull Request Checks
+name: DCMAW-13823-restructure-repository Issuer - Pull Request Checks
 
 on:
   pull_request:
