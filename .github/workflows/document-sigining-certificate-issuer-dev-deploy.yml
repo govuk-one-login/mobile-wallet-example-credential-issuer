@@ -18,10 +18,9 @@ jobs:
     name: Deploy Template to Dev
     runs-on: ubuntu-24.04
     timeout-minutes: 60
-    defaults:
-      run:
-        shell: bash
-        working-directory: document-signing-certificate-issuer
+#    defaults:
+#      run:
+#        working-directory: document-signing-certificate-issuer
     steps:
       # Check out the repository at the specified branch, tag, or commit
       - name: Check out repository code
@@ -47,9 +46,11 @@ jobs:
           use-installer: true
 
       - name: Run SAM validate
+        working-directory: ./document-signing-certificate-issuer
         run: sam validate
 
       - name: Run SAM build
+        working-directory: ./document-signing-certificate-issuer
         run: sam build --cached
 
       # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
