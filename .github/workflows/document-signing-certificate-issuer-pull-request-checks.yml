@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 30
     defaults:
       run:
-        working-directory: ./document-signing-certificate-issuer
+        working-directory: document-signing-certificate-issuer
     permissions:
       contents: read
       packages: read
