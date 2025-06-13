@@ -8,52 +8,51 @@ on:
       - ready_for_review
       - synchronize
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  code-analysis:
-    name: Verify code base when pull request is published/updated
-    runs-on: ubuntu-latest
+  run-code-analysis:
+    name: Run Code Analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: ./document-signing-certificate-issuer
     permissions:
-      # Set permissions for ${{ secrets.GITHUB_TOKEN }}
-      # https://docs.github.com/en/actions/security-guides/automatic-token-authentication
       contents: read
       packages: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          java-version: 17
-          distribution: 'corretto'
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.gradle/caches
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
-          restore-keys: ${{ runner.os }}-gradle
-      - name: Build and analyze
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: ./gradlew --no-daemon test jacocoTestReport sonar -x spotlessApply spotlessCheck
+          node-version-file: .nvmrc
+      - name: Install dependencies
+        run: npm ci
+      - name: Build source code
+        run: npm run build
+      - name: Run the linter
+        run: npm run lint
+      - name: Generate coverage report
+        run: npm run test:cov
 
-      # Check the Quality Gate status.
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v5.2.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectBaseDir: ./
       - name: SonarQube Quality Gate check
         id: sonarqube-quality-gate-check
         uses: sonarsource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # pin@v1.2.0
-        # Force to fail step after specific time.
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
-          scanMetadataReportFile: ${{ github.workspace }}/build/sonar/report-task.txt
+          scanMetadataReportFile: document-signing-certificate-issuerbuild/sonar/report-task.txt
