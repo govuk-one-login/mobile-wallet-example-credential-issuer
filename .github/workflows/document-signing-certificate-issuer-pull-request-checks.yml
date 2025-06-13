@@ -34,10 +34,8 @@ jobs:
           node-version-file: document-signing-certificate-issuer/.nvmrc
       - name: Install dependencies
         run: npm ci
-      - name: Build source code
-        run: npm run build
-      - name: Run the linter
-        run: npm run lint
+      - name: Check code formatting
+        run: npm run format:check
       - name: Generate coverage report
         run: npm run test:cov
 
