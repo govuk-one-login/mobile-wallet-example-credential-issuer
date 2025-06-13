@@ -1,10 +1,10 @@
-name: DSC Issuer - Verify & Publish to Dev
+name: DSC Issuer - Verify & Deploy to Dev
 
 on:
   workflow_dispatch:
     inputs:
       gitRef:
-        description: "Input branch name or commit SHA"
+        description: Input branch name or commit SHA
         required: true
         type: string
         default: main
@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   deploy_artifacts:
-    name: "Deploy Template to Dev"
+    name: Deploy Template to Dev
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     defaults:
