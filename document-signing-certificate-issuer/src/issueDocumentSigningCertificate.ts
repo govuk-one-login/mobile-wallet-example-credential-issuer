@@ -25,8 +25,6 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
     logger.addContext(context);
     logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_STARTED);
 
-    console.log('test');
-
     const configResult = getConfigFromEnvironment(dependencies.env);
     if (configResult.isError) {
       logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_FAILED);
