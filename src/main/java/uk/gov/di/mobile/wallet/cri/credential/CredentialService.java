@@ -27,9 +27,9 @@ import java.time.Instant;
 import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.VETERAN_CARD_CREDENTIAL;
 
 public class CredentialService {
 
@@ -116,7 +116,7 @@ public class CredentialService {
                         getBasicCheckCredential(
                                 mapper.convertValue(document.getData(), BasicCheckDocument.class),
                                 sub);
-            } else if (Objects.equals(vcType, VETERAN_CARD_CREDENTIAL.getType())) {
+            } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
                 credential =
                         getDigitalVeteranCard(
                                 mapper.convertValue(document.getData(), VeteranCardDocument.class),
@@ -189,7 +189,7 @@ public class CredentialService {
         return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         veteranCardCredentialSubject,
-                        VETERAN_CARD_CREDENTIAL,
+                        DIGITAL_VETERAN_CARD,
                         veteranCardDocument.getCredentialTtlMinutes());
     }
 

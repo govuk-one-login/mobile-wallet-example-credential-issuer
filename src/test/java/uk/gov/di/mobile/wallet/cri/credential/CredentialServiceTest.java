@@ -311,7 +311,7 @@ class CredentialServiceTest {
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
-                        eq(CredentialType.VETERAN_CARD_CREDENTIAL),
+                        eq(CredentialType.DIGITAL_VETERAN_CARD),
                         eq(525600L));
     }
 

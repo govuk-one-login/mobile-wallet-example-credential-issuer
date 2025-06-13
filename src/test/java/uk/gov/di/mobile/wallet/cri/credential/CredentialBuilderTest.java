@@ -264,7 +264,7 @@ class CredentialBuilderTest {
                 SignedJWT.parse(
                         credentialBuilderVeteranCard.buildCredential(
                                 veteranCardCredentialSubject,
-                                CredentialType.VETERAN_CARD_CREDENTIAL,
+                                CredentialType.DIGITAL_VETERAN_CARD,
                                 525600));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
@@ -287,7 +287,7 @@ class CredentialBuilderTest {
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
         assertThat(
                 credential.getJWTClaimsSet().getListClaim("type"),
-                equalTo(List.of("VerifiableCredential", "VeteranCardCredential")));
+                equalTo(List.of("VerifiableCredential", "DigitalVeteranCard")));
         assertThat(
                 credential.getJWTClaimsSet().getClaim("issuer"),
                 equalTo(EXAMPLE_CREDENTIAL_ISSUER));

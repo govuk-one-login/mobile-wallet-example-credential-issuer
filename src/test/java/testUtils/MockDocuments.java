@@ -62,7 +62,7 @@ public class MockDocuments {
         data.put("serviceBranch", "HM Naval Service");
         data.put("photo", "base64EncodedPhoto");
         data.put("credentialTtlMinutes", "525600");
-        return new Document(documentId, data, "VeteranCardCredential");
+        return new Document(documentId, data, "DigitalVeteranCard");
     }
 
     public static @NotNull Document getMockMobileDrivingLicence(String documentId) {
