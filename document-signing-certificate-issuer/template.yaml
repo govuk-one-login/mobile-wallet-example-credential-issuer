@@ -135,7 +135,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
-      CodeUri: src/
       Handler: issueDocumentSigningCertificate.handler
       Timeout: 15
       MemorySize: 512
@@ -196,7 +195,7 @@ Resources:
         Minify: true
         Target: es2020
         EntryPoints:
-          - issueDocumentSigningCertificate.ts
+          - src/issueDocumentSigningCertificate.ts
 
   IssueDocSigningCertificateFunctionLogGroup:
     Type: AWS::Logs::LogGroup
