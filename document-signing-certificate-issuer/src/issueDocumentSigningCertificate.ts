@@ -30,7 +30,6 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_FAILED);
       throw new Error('Invalid configuration');
     }
-    console.log("test");
     const config = configResult.value;
     logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_SUCCESS, { config });
 

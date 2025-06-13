@@ -38,14 +38,14 @@ jobs:
         run: npm run format:check
       - name: Generate coverage report
         run: npm run test:cov
-      - name: SonarQube Scan
+      - name: SonarQube scan
         uses: sonarsource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v5.2.0
         with:
           projectBaseDir: ./document-signing-certificate-issuer
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: SonarQube Quality Gate check
+      - name: Check SonarQube Quality Gate
         id: sonarqube-quality-gate-check
         uses: sonarsource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # pin@v1.2.0
         timeout-minutes: 5
