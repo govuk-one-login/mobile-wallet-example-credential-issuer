@@ -1,6 +1,6 @@
 name: DSC Issuer - Push to Main
 
-'on':
+on:
   workflow_dispatch:
   push:
     branches: [ main ]
@@ -11,13 +11,9 @@ permissions:
 
 jobs:
   deploy_artifacts:
-    name: Deploy Template
+    name: Deploy
     runs-on: ubuntu-24.04
     timeout-minutes: 60
-    defaults:
-      run:
-        shell: bash
-        working-directory: document-signing-certificate-issuer
     steps:
       # Check out the repository at the specified branch, tag, or commit
       - name: Check out repository code
@@ -43,10 +39,12 @@ jobs:
           use-installer: true
 
       - name: Run SAM validate
-        run: sam validate --lint
+        working-directory: ./document-signing-certificate-issuer
+        run: sam validate
 
       - name: Run SAM build
-        run: sam build --parallel
+        working-directory: ./document-signing-certificate-issuer
+        run: sam build --cached
 
       # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
       - name: Upload artifacts
