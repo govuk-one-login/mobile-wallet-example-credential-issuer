@@ -21,6 +21,9 @@ jobs:
     name: Run Code Analysis
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: ./document-signing-certificate-issuer
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
