@@ -55,8 +55,6 @@ jobs:
           cd deploy || exit 1 
           sam validate
           sam build --cached
-        with:
-          working-directory: ./document-signing-certificate-issuer
 
       # Deploy the SAM application using the devplatform-upload-action
       - name: Deploy SAM Application
