@@ -19,7 +19,7 @@ The required input parameters for the issue certificate lambda are specified in 
 The issue certificate Lambda can be invoked through the AWS Console or via the AWS CLI using the following command in a shell which has active AWS credentials available:
 
 ```bash
-% aws lambda invoke --function-name YOUR_STACK_NAME-issue-doc-signing-certificate output.txt
+% aws lambda invoke --function-name YOUR_STACK_NAME-issue-doc-signing-certificate output.txt 
 ```
 
 ## Lifecycle

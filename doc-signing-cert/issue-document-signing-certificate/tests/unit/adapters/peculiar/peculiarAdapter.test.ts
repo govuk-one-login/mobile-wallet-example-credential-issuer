@@ -1,9 +1,9 @@
-import { createCertificateRequestFromEs256KmsKey } from '../../../../src/adapters/peculiar/peculiarAdapter';
-import { getPublicKey, signWithEcdsaSha256 } from '../../../../src/adapters/aws/kmsAdapter';
+import { createCertificateRequestFromEs256KmsKey } from '../../../../adapters/peculiar/peculiarAdapter';
+import { getPublicKey, signWithEcdsaSha256 } from '../../../../adapters/aws/kmsAdapter';
 import { mockEs256Csr, mockPublicKey, mockSignature, commonName, countryName } from '../../data/mockEs256Csr';
 import { AsnEcSignatureFormatter } from '@peculiar/x509';
 
-jest.mock('.../../../../src/adapters/aws/kmsAdapter');
+jest.mock('../../../../adapters/aws/kmsAdapter');
 
 describe('createCertificateRequestFromEs256KmsKey', () => {
   beforeEach(() => {
