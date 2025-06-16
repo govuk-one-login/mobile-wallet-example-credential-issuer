@@ -1,5 +1,6 @@
 package testUtils;
 
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -21,11 +22,17 @@ public class MockProofBuilder {
     public MockProofBuilder(String algorithm) {
         this.headerBuilder =
                 new JWSHeader.Builder(JWSAlgorithm.parse(algorithm))
-                        .keyID("did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf");
+                        .keyID("did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf")
+                        .type(new JOSEObjectType("openid4vci-proof+jwt"));
     }
 
     public MockProofBuilder withKid(String kid) {
         headerBuilder.keyID(kid);
+        return this;
+    }
+
+    public MockProofBuilder withType(JOSEObjectType typ) {
+        headerBuilder.type(typ);
         return this;
     }
 

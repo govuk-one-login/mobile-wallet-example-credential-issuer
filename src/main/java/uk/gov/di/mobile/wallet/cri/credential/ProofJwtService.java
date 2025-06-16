@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
@@ -10,8 +11,6 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;
@@ -26,7 +25,6 @@ public class ProofJwtService {
     public static final String NONCE = "nonce";
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
     private static final String EXPECTED_ISSUER = "urn:fdc:gov:uk:wallet";
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProofJwtService.class);
 
     private final ConfigurationService configurationService;
 
@@ -73,8 +71,13 @@ public class ProofJwtService {
             throw new ProofJwtValidationException("JWT kid header claim is null");
         }
 
-        // Logging the ProofJWT Header
-        LOGGER.info("*** ProofJWT HEADER: {}", proofJwt.getHeader().toJSONObject());
+        JOSEObjectType typ = proofJwt.getHeader().getType();
+        if (typ == null) {
+            throw new ProofJwtValidationException("JWT type header claim is null");
+        }
+        if (!"openid4vci-proof+jwt".equals(typ.toString())) {
+            throw new ProofJwtValidationException("JWT type header claim is invalid");
+        }
     }
 
     /**
