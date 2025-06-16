@@ -143,8 +143,6 @@ Resources:
       Timeout: 15
       MemorySize: 512
       ReservedConcurrentExecutions: 1
-      LoggingConfig:
-        LogGroup: !Ref IssueDocSigningCertificateFunctionLogGroup
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
