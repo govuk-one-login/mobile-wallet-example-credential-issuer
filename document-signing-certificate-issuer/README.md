@@ -31,5 +31,6 @@ At the point where no more documents should be issued signed by a key the associ
 
 ## Output
 
-The resulting certificates are stored in an S3 bucket with the key `<keyId>/certificate.pem` where `<keyId>` is the KMS key ID (in the form of a UUIDv4 string).`certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation.
-The root certificate is uploaded to the same bucket with the key `<keyId>/certificate.pem` where `<keyId>` is the root certificate ID (in the form of a UUIDv4 string).
+The resulting certificates are stored in an S3 bucket with the key `<keyId>/certificate.pem`, where `<keyId>` is the KMS key ID in the form of a UUIDv4 string.
+`certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation.
+The root certificate is uploaded to the same bucket with the key `<keyId>/certificate.pem` where `<keyId>` is the certificate authority ID (in the form of a UUIDv4 string).
