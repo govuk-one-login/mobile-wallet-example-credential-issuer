@@ -36,6 +36,11 @@ export class LogMessage implements LogAttributes {
     'Root certificate already in S3 bucket',
     'N/A',
   );
+  static readonly ROOT_CERTIFICATE_UPLOADED = new LogMessage(
+    'ROOT_CERTIFICATE_ALREADY_EXISTS',
+    'Root certificate was uploaded to S3 bucket',
+    'N/A',
+  );
   private constructor(
     public readonly messageCode: string,
     public readonly message: string,

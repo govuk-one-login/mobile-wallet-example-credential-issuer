@@ -1,31 +1,29 @@
 import { expect } from '@jest/globals';
 import '../utils/matchers';
 import { Context } from 'aws-lambda';
-import {
-  IssueDocumentSigningCertificateDependencies,
-  lambdaHandlerConstructor,
-} from '../../issueDocumentSigningCertificate';
-import { IssueDocumentSigningCertificateConfig } from '../../issueDocumentSigningCertificateConfig';
-import { logger } from '../../logging/logger';
-import { headObject, putObject } from '../../adapters/aws/s3Adapter';
-import { LogMessage } from '../../logging/LogMessages';
-import { createCertificateRequestFromEs256KmsKey } from '../../adapters/peculiar/peculiarAdapter';
+import { IssueDocumentSigningCertificateConfig } from '../../src/issueDocumentSigningCertificateConfig';
+import { logger } from '../../src/logging/logger';
+import { headObject, putObject } from '../../src/adapters/aws/s3Adapter';
+import { LogMessage } from '../../src/logging/LogMessages';
+import { createCertificateRequestFromEs256KmsKey } from '../../src/adapters/peculiar/peculiarAdapter';
 import {
   issueMdlDocSigningCertificateUsingSha256WithEcdsa,
   retrieveIssuedCertificate,
-} from '../../adapters/aws/acmPcaAdapter';
-import { getSsmParameter } from '../../adapters/aws/ssmAdapter';
-import { getPublicKey } from '../../adapters/aws/kmsAdapter';
+} from '../../src/adapters/aws/acmPcaAdapter';
+import { getSsmParameter } from '../../src/adapters/aws/ssmAdapter';
+import { getPublicKey } from '../../src/adapters/aws/kmsAdapter';
+import {
+  IssueDocumentSigningCertificateDependencies,
+  lambdaHandlerConstructor,
+} from '../../src/issueDocumentSigningCertificate';
 
-/* eslint @typescript-eslint/no-dynamic-delete: 0 */
+jest.mock('../../src/adapters/aws/ssmAdapter');
+jest.mock('../../src/adapters/aws/s3Adapter');
+jest.mock('../../src/adapters/aws/kmsAdapter');
+jest.mock('../../src/adapters/aws/acmPcaAdapter');
+jest.mock('../../src/adapters/peculiar/peculiarAdapter');
 
-jest.mock('../../adapters/aws/ssmAdapter');
-jest.mock('../../adapters/aws/s3Adapter');
-jest.mock('../../adapters/aws/kmsAdapter');
-jest.mock('../../adapters/aws/acmPcaAdapter');
-jest.mock('../../adapters/peculiar/peculiarAdapter');
-
-jest.mock('../../logging/logger', () => {
+jest.mock('../../src/logging/logger', () => {
   return {
     logger: {
       addContext: jest.fn(),
@@ -52,7 +50,7 @@ const LAMBDA_CONTEXT = {
   succeed: function (): void {},
 };
 
-function getMockClientAttestationConfig(): IssueDocumentSigningCertificateConfig {
+function getIssueDocumentSigningCertificateConfig(): IssueDocumentSigningCertificateConfig {
   return {
     DOC_SIGNING_KEY_COMMON_NAME: 'commonName',
     DOC_SIGNING_KEY_COUNTRY_NAME: 'UK',
@@ -61,6 +59,7 @@ function getMockClientAttestationConfig(): IssueDocumentSigningCertificateConfig
     PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: 'altNameInAsn1',
     DOC_SIGNING_KEY_ID: 'keyId',
     DOC_SIGNING_KEY_BUCKET: 'bucket',
+    ROOT_CERTIFICATE: 'root-certificate',
   };
 }
 
@@ -72,10 +71,13 @@ let dependencies: IssueDocumentSigningCertificateDependencies;
 describe('issueDocumentSigningCertificate handler', () => {
   beforeEach(() => {
     dependencies = {
-      env: getMockClientAttestationConfig(),
+      env: getIssueDocumentSigningCertificateConfig(),
     };
-
-    jest.mocked(getSsmParameter).mockResolvedValue('VALUE');
+    jest
+      .mocked(getSsmParameter)
+      .mockResolvedValueOnce('CA_ARN')
+      .mockResolvedValueOnce('CA_ISSUER_ALTERNATIVE_NAME')
+      .mockResolvedValueOnce('ROOT_CERTIFICATE');
     jest.mocked(headObject).mockResolvedValue(false);
     jest.mocked(getPublicKey).mockResolvedValue(Buffer.from('PUBLIC_KEY'));
     jest.mocked(retrieveIssuedCertificate).mockResolvedValue('CERTIFICATE');
@@ -90,15 +92,16 @@ describe('issueDocumentSigningCertificate handler', () => {
 
       // ASSERT
       expect(logger.info).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
-      expect(putObject).toHaveBeenCalledWith('bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
+      expect(putObject).toHaveBeenNthCalledWith(1, 'bucket', 'CA_ARN/certificate.pem', 'ROOT_CERTIFICATE');
+      expect(putObject).toHaveBeenNthCalledWith(2, 'bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
       expect(createCertificateRequestFromEs256KmsKey).toHaveBeenCalledWith('commonName', 'UK', 'keyId');
       expect(issueMdlDocSigningCertificateUsingSha256WithEcdsa).toBeCalledWith(
-        'VALUE',
-        'VALUE',
+        'CA_ISSUER_ALTERNATIVE_NAME',
+        'CA_ARN',
         Buffer.from('CSR'),
         100,
       );
-      expect(retrieveIssuedCertificate).toHaveBeenCalledWith('CERT_ARN', 'VALUE');
+      expect(retrieveIssuedCertificate).toHaveBeenCalledWith('CERT_ARN', 'CA_ARN');
     });
 
     it('adds context, service, correlation ID and function version to log attributes', async () => {
@@ -137,9 +140,34 @@ describe('issueDocumentSigningCertificate handler', () => {
       expect(logger.error).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CONFIGURATION_FAILED);
     });
 
+    it('should log a message and continue when the root certificate already exists', async () => {
+      // ARRANGE: Root certificate exists in bucket
+      jest.mocked(headObject).mockResolvedValueOnce(true);
+
+      // ACT & ASSERT
+      await expect(lambdaHandlerConstructor(dependencies)(requestEvent, context)).resolves.not.toThrow();
+
+      // ASSERT
+      expect(logger.info).toHaveBeenNthCalledWith(3, LogMessage.ROOT_CERTIFICATE_ALREADY_EXISTS);
+      expect(putObject).toHaveBeenCalledTimes(1);
+    });
+
+    it("should log a message and upload root certificate when it doesn't exist", async () => {
+      // ARRANGE: Root certificate does not exist in bucket
+      jest.mocked(headObject).mockResolvedValueOnce(false);
+
+      // ACT
+      await lambdaHandlerConstructor(dependencies)(requestEvent, context);
+
+      // ASSERT
+      expect(logger.info).toHaveBeenNthCalledWith(3, LogMessage.ROOT_CERTIFICATE_UPLOADED);
+      expect(putObject).toHaveBeenCalledTimes(2);
+    });
+
     it('should emit an error and reject if the certificate has already been issued for this key', async () => {
       // ARRANGE
-      jest.mocked(headObject).mockResolvedValueOnce(true);
+      jest.mocked(headObject).mockResolvedValueOnce(true); // root certificate
+      jest.mocked(headObject).mockResolvedValueOnce(true); // document signing certificate
 
       // ACT
       const promise = lambdaHandlerConstructor(dependencies)(requestEvent, context);

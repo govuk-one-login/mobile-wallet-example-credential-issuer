@@ -1,4 +1,4 @@
-import { failure, success } from '../../../utils/results';
+import { failure, success } from '../../../src/utils/results';
 
 describe('success', () => {
   it('Returns a success object with argument as value', () => {
