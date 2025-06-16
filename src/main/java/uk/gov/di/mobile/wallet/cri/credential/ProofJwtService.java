@@ -73,7 +73,7 @@ public class ProofJwtService {
 
         JOSEObjectType typ = proofJwt.getHeader().getType();
         if (typ == null) {
-            throw new ProofJwtValidationException("JWT type header claim is missing");
+            throw new ProofJwtValidationException("JWT type header claim is null");
         }
         if (!"openid4vci-proof+jwt".equals(typ.toString())) {
             throw new ProofJwtValidationException("JWT type header claim is invalid");

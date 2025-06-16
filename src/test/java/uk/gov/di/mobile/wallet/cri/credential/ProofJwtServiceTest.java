@@ -71,7 +71,7 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(mockProof));
 
-        assertEquals("JWT type header claim is missing", exception.getMessage());
+        assertEquals("JWT type header claim is null", exception.getMessage());
     }
 
     @Test
