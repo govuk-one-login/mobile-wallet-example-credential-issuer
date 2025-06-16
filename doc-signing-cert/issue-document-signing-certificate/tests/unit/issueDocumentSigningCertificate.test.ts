@@ -1,31 +1,31 @@
 import { expect } from '@jest/globals';
 import '../utils/matchers';
 import { Context } from 'aws-lambda';
-import { IssueDocumentSigningCertificateConfig } from '../../src/issueDocumentSigningCertificateConfig';
-import { logger } from '../../src/logging/logger';
-import { headObject, putObject } from '../../src/adapters/aws/s3Adapter';
-import { LogMessage } from '../../src/logging/LogMessages';
-import { createCertificateRequestFromEs256KmsKey } from '../../src/adapters/peculiar/peculiarAdapter';
-import {
-  issueMdlDocSigningCertificateUsingSha256WithEcdsa,
-  retrieveIssuedCertificate,
-} from '../../src/adapters/aws/acmPcaAdapter';
-import { getSsmParameter } from '../../src/adapters/aws/ssmAdapter';
-import { getPublicKey } from '../../src/adapters/aws/kmsAdapter';
 import {
   IssueDocumentSigningCertificateDependencies,
   lambdaHandlerConstructor,
-} from '../../src/issueDocumentSigningCertificate';
+} from '../../issueDocumentSigningCertificate';
+import { IssueDocumentSigningCertificateConfig } from '../../issueDocumentSigningCertificateConfig';
+import { logger } from '../../logging/logger';
+import { headObject, putObject } from '../../adapters/aws/s3Adapter';
+import { LogMessage } from '../../logging/LogMessages';
+import { createCertificateRequestFromEs256KmsKey } from '../../adapters/peculiar/peculiarAdapter';
+import {
+  issueMdlDocSigningCertificateUsingSha256WithEcdsa,
+  retrieveIssuedCertificate,
+} from '../../adapters/aws/acmPcaAdapter';
+import { getSsmParameter } from '../../adapters/aws/ssmAdapter';
+import { getPublicKey } from '../../adapters/aws/kmsAdapter';
 
 /* eslint @typescript-eslint/no-dynamic-delete: 0 */
 
-jest.mock('../../src/adapters/aws/ssmAdapter');
-jest.mock('../../src/adapters/aws/s3Adapter');
-jest.mock('../../src/adapters/aws/kmsAdapter');
-jest.mock('../../src/adapters/aws/acmPcaAdapter');
-jest.mock('../../src/adapters/peculiar/peculiarAdapter');
+jest.mock('../../adapters/aws/ssmAdapter');
+jest.mock('../../adapters/aws/s3Adapter');
+jest.mock('../../adapters/aws/kmsAdapter');
+jest.mock('../../adapters/aws/acmPcaAdapter');
+jest.mock('../../adapters/peculiar/peculiarAdapter');
 
-jest.mock('../../src/logging/logger', () => {
+jest.mock('../../logging/logger', () => {
   return {
     logger: {
       addContext: jest.fn(),
