@@ -13,6 +13,34 @@ The template.yaml in this project deploys the following AWS resources:
 This stack can only be deployed into an account which already has the `mobile-platform-infra/platform-ca` CloudFormation stack deployed.
 The dependency provides the AWS Private CA resource, root certificate and references to it as SSM parameters.
 
+## Deploy
+
+### Deploy via GitHub Actions
+
+You can deploy directly using the "DSC Issuer - Deploy to Dev" GitHub Action workflow:
+
+1. Navigate to the workflow [DSC Issuer - Deploy to Dev](https://github.com/govuk-one-login/mobile-wallet-example-credential-issuer/actions/workflows/document-sigining-certificate-issuer-dev-deploy.yml).
+
+2. Choose the branch you wish to deploy from the dropdown.
+
+3. Click "Run workflow" to trigger the deployment.
+
+### Deploy with the AWS SAM CLI
+
+Before deploying with the AWS SAM CLI, you must authenticate with AWS. Once authenticated, run the following commands:
+
+1. Build the application:
+
+```bash
+sam build
+```
+
+2. Deploy to AWS:
+
+```bash
+sam deploy --guided --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
+```
+
 ## Invocation
 
 The required input parameters for the issue certificate lambda are specified in environment variables and are deployed as part of this stack.
