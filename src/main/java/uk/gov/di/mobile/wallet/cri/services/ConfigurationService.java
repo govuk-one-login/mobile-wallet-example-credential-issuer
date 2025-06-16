@@ -45,6 +45,14 @@ public class ConfigurationService extends Configuration {
         return System.getenv().getOrDefault("OIDC_CLIENT_ID", "TEST_CLIENT_ID");
     }
 
+    public String getCertificatesBucketName() {
+        return System.getenv().getOrDefault("CERTIFICATES_BUCKET_NAME", "certificates");
+    }
+
+    public String getCertificateAuthorityArn() {
+        return System.getenv().getOrDefault("CERTIFICATE_AUTHORITY_ARN", "12345");
+    }
+
     public String getLocalstackEndpoint() {
         return "http://localhost:4560";
     }
