@@ -9,7 +9,7 @@ import 'aws-sdk-client-mock-jest';
 import {
   issueMdlDocSigningCertificateUsingSha256WithEcdsa,
   retrieveIssuedCertificate,
-} from '../../../../adapters/aws/acmPcaAdapter';
+} from '../../../../src/adapters/aws/acmPcaAdapter';
 
 const mockAcmPcaClient = mockClient(ACMPCAClient);
 

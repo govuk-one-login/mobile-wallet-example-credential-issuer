@@ -1,6 +1,6 @@
 import { mockClient } from 'aws-sdk-client-mock';
 import { HeadObjectCommand, NotFound, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { headObject, putObject } from '../../../../adapters/aws/s3Adapter';
+import { headObject, putObject } from '../../../../src/adapters/aws/s3Adapter';
 import 'aws-sdk-client-mock-jest';
 
 const mockS3Client = mockClient(S3Client);

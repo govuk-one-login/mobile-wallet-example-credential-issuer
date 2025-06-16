@@ -1,7 +1,7 @@
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { GetPublicKeyCommand, KMSClient, SignCommand } from '@aws-sdk/client-kms';
-import { getPublicKey, signWithEcdsaSha256 } from '../../../../adapters/aws/kmsAdapter';
+import { getPublicKey, signWithEcdsaSha256 } from '../../../../src/adapters/aws/kmsAdapter';
 
 const mockKmsClient = mockClient(KMSClient);
 
