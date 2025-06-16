@@ -26,6 +26,7 @@ dependencies {
 	implementation "software.amazon.awssdk:arns"
 	implementation "software.amazon.awssdk:dynamodb-enhanced"
 	implementation "software.amazon.awssdk:kms"
+	implementation "software.amazon.awssdk:s3"
 	implementation "software.amazon.awssdk:url-connection-client"
 
 	implementation platform("io.dropwizard:dropwizard-bom:${dropwizardVersion}")

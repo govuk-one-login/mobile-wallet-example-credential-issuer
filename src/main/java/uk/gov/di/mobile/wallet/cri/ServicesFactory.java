@@ -19,6 +19,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.net.MalformedURLException;
@@ -102,11 +103,14 @@ public class ServicesFactory {
         NotificationService notificationService =
                 new NotificationService(dynamoDbService, accessTokenService);
 
+        S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
+
         return new Services.Builder()
                 .kmsService(kmsService)
+                .dynamoDbService(dynamoDbService)
+                .s3Service(s3Service)
                 .preAuthorizedCodeBuilder(preAuthorizedCodeBuilder)
                 .credentialOfferService(credentialOfferService)
-                .dynamoDbService(dynamoDbService)
                 .metadataBuilder(metadataBuilder)
                 .credentialService(credentialService)
                 .didDocumentService(didDocumentService)
