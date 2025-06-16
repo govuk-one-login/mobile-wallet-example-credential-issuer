@@ -6,12 +6,40 @@ The template.yaml in this project deploys the following AWS resources:
 
 - a Lambda function to issue an X.509 Document Signing Certificate using an AWS Private CA instance deployed by the `mobile-platform-infra/platform-ca` CloudFormation stack in the account.
 - an asymmetric ECC_NIST_P256 KMS key to act as the Document Signing Key and securely manage the key material and signing function
-- an S3 bucket to store the issued certificates both in PEM and in a decoded JSON format so they can be accessed by the Example Credential Issuer as required
+- an S3 bucket to store the root certificate and the issued document signing certificates in PEM format so they can be accessed by the Example Credential Issuer as required
 
 ## Pre-requisites
 
 This stack can only be deployed into an account which already has the `mobile-platform-infra/platform-ca` CloudFormation stack deployed.
 The dependency provides the AWS Private CA resource, root certificate and references to it as SSM parameters.
+
+## Deploy
+
+### Deploy via GitHub Actions
+
+You can deploy directly using the "DSC Issuer - Deploy to Dev" GitHub Action workflow:
+
+1. Navigate to the workflow [DSC Issuer - Deploy to Dev](https://github.com/govuk-one-login/mobile-wallet-example-credential-issuer/actions/workflows/document-sigining-certificate-issuer-dev-deploy.yml).
+
+2. Choose the branch you wish to deploy from the dropdown.
+
+3. Click "Run workflow" to trigger the deployment.
+
+### Deploy with the AWS SAM CLI
+
+Before deploying with the AWS SAM CLI, you must authenticate with AWS. Once authenticated, run the following commands:
+
+1. Build the application:
+
+```bash
+sam build
+```
+
+2. Deploy to AWS:
+
+```bash
+sam deploy --guided --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
+```
 
 ## Invocation
 
@@ -31,6 +59,6 @@ At the point where no more documents should be issued signed by a key the associ
 
 ## Output
 
-The resulting certificates are stored in an S3 bucket with the key `<keyId>/certificate.pem` where `<keyId>` is the KMS key ID (in the form of a UUIDv4 string).
-A decoded version of the certificate in JSON format is stored in the same S3 bucket with the key `<keyId>/certificate-metadata.json`.
-While both formats are provided, `certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation.
+The resulting certificates are stored in an S3 bucket with the key `<keyId>/certificate.pem`, where `<keyId>` is the KMS key ID in the form of a UUIDv4 string.
+`certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation.
+The root certificate is uploaded to the same bucket with the key `<keyId>/certificate.pem` where `<keyId>` is the certificate authority ID (in the form of a UUIDv4 string).
