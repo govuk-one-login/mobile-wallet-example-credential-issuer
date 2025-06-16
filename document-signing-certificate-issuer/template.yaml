@@ -43,27 +43,27 @@ Conditions:
 Mappings:
   EnvironmentVariables:
     dev:
-      DocumentSigningKeyParameterPrefix: "/iaca/"
-      DocumentSigningKeyCommonName: "Example Issuer DSC (DEV)"
-      DocumentSigningKeyCountryName: "UK"
-      PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
-      PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
+      DocumentSigningKeyParameterPrefix: '/iaca/'
+      DocumentSigningKeyCommonName: 'Example Issuer DSC (DEV)'
+      DocumentSigningKeyCountryName: 'UK'
+      PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
+      PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
       CloudwatchLogRetentionDays: 3
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: DEBUG
-      CertificateValidityPeriodInDays: 458  # 366 (1 year) + 92 (3 months), worse case
-      CertificateRetentionPeriodInDays: 488  # validity period + 30 days
+      CertificateValidityPeriodInDays: 458 # 366 (1 year) + 92 (3 months), worse case
+      CertificateRetentionPeriodInDays: 488 # validity period + 30 days
     build:
-      DocumentSigningKeyParameterPrefix: "/iaca/"
-      DocumentSigningKeyCommonName: "Example Issuer DSC (BUILD)"
-      DocumentSigningKeyCountryName: "UK"
-      PlatformCaArnParameter: "/platform-ca/iaca/certificate-authority-arn"
-      PlatformCaIssuerAlternativeName: "/platform-ca/iaca/issuer-alternative-name"
-      CloudwatchLogRetentionDays: 3650  # 10 years, since the underlying CA root will likely have a 9 year lifecycle
+      DocumentSigningKeyParameterPrefix: '/iaca/'
+      DocumentSigningKeyCommonName: 'Example Issuer DSC (BUILD)'
+      DocumentSigningKeyCountryName: 'UK'
+      PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
+      PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
+      CloudwatchLogRetentionDays: 3650 # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
-      CertificateValidityPeriodInDays: 458  # 366 (1 year) + 92 (3 months), worse case
-      CertificateRetentionPeriodInDays: 488  # validity period + 30 days
+      CertificateValidityPeriodInDays: 458 # 366 (1 year) + 92 (3 months), worse case
+      CertificateRetentionPeriodInDays: 488 # validity period + 30 days
 
 Globals:
   Function:
@@ -115,7 +115,7 @@ Globals:
               - EnvironmentVariables
               - !Ref Environment
               - DynatraceSecretArn
-        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: "true"
+        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: 'true'
         DT_TENANT: !Sub
           - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
           - SecretArn: !FindInMap
@@ -135,7 +135,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
-      CodeUri: issue-document-signing-certificate/
       Handler: issueDocumentSigningCertificate.handler
       Timeout: 15
       MemorySize: 512
@@ -146,12 +145,15 @@ Resources:
         Variables:
           POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
           PLATFORM_CA_ARN_PARAMETER: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
-          PLATFORM_CA_ISSUER_ALTERNATIVE_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+          PLATFORM_CA_ISSUER_ALTERNATIVE_NAME:
+            !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
           DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
           DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
-          DOC_SIGNING_KEY_VALIDITY_PERIOD: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateValidityPeriodInDays]
+          DOC_SIGNING_KEY_VALIDITY_PERIOD:
+            !FindInMap [EnvironmentVariables, !Ref Environment, CertificateValidityPeriodInDays]
           DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
-          DOC_SIGNING_KEY_COUNTRY_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
+          DOC_SIGNING_KEY_COUNTRY_NAME:
+            !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
       Policies:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
@@ -174,7 +176,7 @@ Resources:
                 - acm-pca:GetCertificate
               Resource:
                 Fn::Sub:
-                  - "{{resolve:ssm:${ParameterName}}}"
+                  - '{{resolve:ssm:${ParameterName}}}'
                   - ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
       VpcConfig:
         SecurityGroupIds:
@@ -193,7 +195,7 @@ Resources:
         Minify: true
         Target: es2020
         EntryPoints:
-          - issueDocumentSigningCertificate.ts
+          - src/issueDocumentSigningCertificate.ts
 
   IssueDocSigningCertificateFunctionLogGroup:
     Type: AWS::Logs::LogGroup
@@ -207,7 +209,7 @@ Resources:
   DocSigningCertificateBucket:
     Type: AWS::S3::Bucket
     Properties:
-      BucketName: !Sub "${AWS::StackName}-${AWS::AccountId}-certificates"
+      BucketName: !Sub '${AWS::StackName}-${AWS::AccountId}-certificates'
       VersioningConfiguration:
         Status: Enabled
       PublicAccessBlockConfiguration:
@@ -233,12 +235,12 @@ Resources:
     Properties:
       KeySpec: ECC_NIST_P256
       KeyUsage: SIGN_VERIFY
-      Description: !Sub "Example Document Signing Key 1 for ${AWS::StackName}"
+      Description: !Sub 'Example Document Signing Key 1 for ${AWS::StackName}'
       Enabled: true
       PendingWindowInDays: 7
 
   DocumentSigningKeyAlias1:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub "alias/${AWS::StackName}-doc-signing-key-1"
+      AliasName: !Sub 'alias/${AWS::StackName}-doc-signing-key-1'
       TargetKeyId: !Ref DocumentSigningKey1
