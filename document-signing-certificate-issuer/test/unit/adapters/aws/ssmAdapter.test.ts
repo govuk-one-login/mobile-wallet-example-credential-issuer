@@ -1,6 +1,6 @@
 import { GetParameterCommand, SSMClient } from '@aws-sdk/client-ssm';
 import { mockClient } from 'aws-sdk-client-mock';
-import { getSsmParameter } from '../../../../adapters/aws/ssmAdapter';
+import { getSsmParameter } from '../../../../src/adapters/aws/ssmAdapter';
 import 'aws-sdk-client-mock-jest';
 
 const mockSsmClient = mockClient(SSMClient);
