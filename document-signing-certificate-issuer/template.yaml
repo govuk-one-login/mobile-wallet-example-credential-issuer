@@ -48,7 +48,7 @@ Mappings:
       DocumentSigningKeyCountryName: 'UK'
       PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
       PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
-      RootCertificate: "/platform-ca/iaca/root-certificate"
+      RootCertificate: '/platform-ca/iaca/root-certificate'
       CloudwatchLogRetentionDays: 3
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: DEBUG
@@ -60,7 +60,7 @@ Mappings:
       DocumentSigningKeyCountryName: 'UK'
       PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
       PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
-      RootCertificate: "/platform-ca/iaca/root-certificate"
+      RootCertificate: '/platform-ca/iaca/root-certificate'
       CloudwatchLogRetentionDays: 3650 # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
@@ -148,8 +148,8 @@ Resources:
           POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
           PLATFORM_CA_ARN_PARAMETER: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
           PLATFORM_CA_ISSUER_ALTERNATIVE_NAME:
-            !FindInMap [ EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
-          ROOT_CERTIFICATE: !FindInMap [ EnvironmentVariables, !Ref Environment, RootCertificate ]
+            !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+          ROOT_CERTIFICATE: !FindInMap [EnvironmentVariables, !Ref Environment, RootCertificate]
           DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
           DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
           DOC_SIGNING_KEY_VALIDITY_PERIOD:
@@ -163,7 +163,7 @@ Resources:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
         - SSMParameterWithSlashPrefixReadPolicy:
-            ParameterName: !FindInMap [ EnvironmentVariables, !Ref Environment, RootCertificate ]
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, RootCertificate]
         - S3CrudPolicy:
             BucketName: !Ref DocSigningCertificateBucket
         - Statement:
