@@ -135,6 +135,8 @@ Globals:
 Resources:
   IssueDocSigningCertificateFunction:
     Type: AWS::Serverless::Function
+    DependsOn:
+      - IssueDocSigningCertificateFunctionLogGroup
     Properties:
       FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
       Handler: issueDocumentSigningCertificate.handler
