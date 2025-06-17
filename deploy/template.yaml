@@ -28,9 +28,13 @@ Parameters:
     Type: Number
     Default: 8080
   DocumentBuilderStackName:
-    Description: The cloudformation stack name of the document builder
+    Description: The cloudformation stack name of the Document Builder.
     Type: String
     Default: "wallet-doc-builder-fe"
+  DocumentSigningCertificateIssuerStackName:
+    Description: The cloudformation stack name of the Document Signing Certificate Issuer.
+    Type: String
+    Default: "wallet-dsc-issuer"
 
 Conditions:
   StackNameIsWalletCredIssuerBE: !Equals [!Ref "AWS::StackName", wallet-cred-issuer-be]
@@ -429,7 +433,7 @@ Resources:
             - Name: CERTIFICATE_AUTHORITY_ARN
               Value: !Sub "{{resolve:ssm:/platform-ca/iaca/certificate-authority-arn}}"
             - Name: CERTIFICATES_BUCKET_NAME
-              Value: !ImportValue CertificatesBucketNameExport
+              Value: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
