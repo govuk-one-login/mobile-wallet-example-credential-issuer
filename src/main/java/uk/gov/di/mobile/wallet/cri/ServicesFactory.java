@@ -106,8 +106,7 @@ public class ServicesFactory {
 
         S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
 
-        IacasService iacasService =
-                new IacasService(configurationService, s3Service);
+        IacasService iacasService = new IacasService(configurationService, s3Service);
 
         return new Services.Builder()
                 .kmsService(kmsService)

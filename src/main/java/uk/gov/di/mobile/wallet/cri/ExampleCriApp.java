@@ -70,8 +70,6 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new DidDocumentResource(services.getDidDocumentService()));
         environment.jersey().register(new JwksResource(services.getJwksService()));
         environment.jersey().register(new NotificationResource(services.getNotificationService()));
-        environment
-                .jersey()
-                .register(new IacasResource(services.getIacasService()));
+        environment.jersey().register(new IacasResource(services.getIacasService()));
     }
 }

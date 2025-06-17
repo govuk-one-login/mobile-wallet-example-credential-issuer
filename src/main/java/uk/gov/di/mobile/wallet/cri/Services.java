@@ -10,7 +10,6 @@ import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
-import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 /**
