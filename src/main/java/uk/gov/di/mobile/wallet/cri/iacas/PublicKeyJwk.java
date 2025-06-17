@@ -1,9 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.iacas;
 
-import com.nimbusds.jose.Algorithm;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.KeyType;
-import com.nimbusds.jose.util.Base64URL;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,14 +19,10 @@ public class PublicKeyJwk {
     /** The y-coordinate for the EC public key. */
     private String y;
 
-    /** The algorithm used, typically "ES256" for ECDSA with P-256. */
-    private String alg;
-
-    public PublicKeyJwk(String kty, String crv, String x, String y, String alg) {
+    public PublicKeyJwk(String kty, String crv, String x, String y) {
         this.kty = kty;
         this.crv = crv;
         this.x = x;
         this.y = y;
-        this.alg = alg;
     }
 }
