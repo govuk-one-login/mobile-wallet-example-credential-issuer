@@ -76,7 +76,13 @@ public class Iaca {
         }
         CertificateData certificateData = CertificateData.fromCertificate(certificate);
         ECKey ecKey = ECKey.parse(certificate);
-        PublicKeyJwk publicKeyJwk = PublicKeyJwk.fromECKey(ecKey);
+        PublicKeyJwk publicKeyJwk =
+                new PublicKeyJwk(
+                        ecKey.getKeyType(),
+                        ecKey.getCurve(),
+                        ecKey.getX(),
+                        ecKey.getY(),
+                        ecKey.getAlgorithm());
         String fingerprint = getCertificateFingerprint(certificate);
 
         return new Iaca(id, active, certificatePem, certificateData, fingerprint, publicKeyJwk);
