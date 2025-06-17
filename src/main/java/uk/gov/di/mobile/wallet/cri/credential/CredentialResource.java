@@ -39,12 +39,14 @@ public class CredentialResource {
     public Response getCredential(
             @HeaderParam("Authorization") String authorizationHeader, String payload) {
 
+        String cacheControlValue = "no-store";
+
         try {
             SignedJWT accessToken = parseAuthorizationHeader(authorizationHeader);
             SignedJWT proofJwt = parseRequestBody(payload);
 
             CredentialResponse credential = credentialService.getCredential(accessToken, proofJwt);
-            return ResponseUtil.ok(credential, "no-store");
+            return ResponseUtil.ok(credential, cacheControlValue);
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
             if (exception instanceof AuthorizationHeaderMissingException) {
@@ -52,10 +54,10 @@ public class CredentialResource {
             }
             if (exception instanceof AccessTokenValidationException
                     || exception instanceof CredentialOfferException) {
-                return ResponseUtil.unauthorized("invalid_token", "no-store");
+                return ResponseUtil.unauthorized("invalid_token", cacheControlValue);
             }
             if (exception instanceof ProofJwtValidationException) {
-                return ResponseUtil.badRequest(error("invalid_proof"), "no-store");
+                return ResponseUtil.badRequest(error("invalid_proof"), cacheControlValue);
             }
             return ResponseUtil.internalServerError();
         }
