@@ -6,10 +6,13 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.jetbrains.annotations.NotNull;
 
 import java.security.cert.X509Certificate;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 /** Contains metadata about the IACA. */
 @Getter
@@ -43,10 +46,8 @@ public class CertificateData {
      */
     public static CertificateData fromCertificate(X509Certificate certificate)
             throws IllegalArgumentException {
-        Instant notAfter = certificate.getNotAfter().toInstant();
-        Instant notBefore = certificate.getNotBefore().toInstant();
-        String isoNotAfter = DateTimeFormatter.ISO_INSTANT.format(notAfter);
-        String isoNotBefore = DateTimeFormatter.ISO_INSTANT.format(notBefore);
+        String isoNotBefore = getIsoDate(certificate.getNotBefore());
+        String isoNotAfter = getIsoDate(certificate.getNotAfter());
 
         X500Name x500Name = new X500Name(certificate.getSubjectX500Principal().getName());
         String commonName = extractFirstValue(x500Name, BCStyle.CN);
@@ -59,6 +60,14 @@ public class CertificateData {
         }
 
         return new CertificateData(isoNotAfter, isoNotBefore, country, commonName);
+    }
+
+    private static @NotNull String getIsoDate(Date date) {
+        DateTimeFormatter dateTimeFormatter =
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX").withZone(ZoneOffset.UTC);
+
+        Instant instant = date.toInstant();
+        return dateTimeFormatter.format(instant);
     }
 
     private static String extractFirstValue(X500Name x500Name, ASN1ObjectIdentifier objectId) {
