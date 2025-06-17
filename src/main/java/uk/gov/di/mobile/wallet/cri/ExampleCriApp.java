@@ -72,6 +72,6 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new NotificationResource(services.getNotificationService()));
         environment
                 .jersey()
-                .register(new IacasResource(configurationService, services.getS3Service()));
+                .register(new IacasResource(services.getIacasService()));
     }
 }

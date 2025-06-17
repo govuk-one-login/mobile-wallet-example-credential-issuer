@@ -13,6 +13,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
+import uk.gov.di.mobile.wallet.cri.iacas.IacasService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -105,10 +106,12 @@ public class ServicesFactory {
 
         S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
 
+        IacasService iacasService =
+                new IacasService(configurationService, s3Service);
+
         return new Services.Builder()
                 .kmsService(kmsService)
                 .dynamoDbService(dynamoDbService)
-                .s3Service(s3Service)
                 .preAuthorizedCodeBuilder(preAuthorizedCodeBuilder)
                 .credentialOfferService(credentialOfferService)
                 .metadataBuilder(metadataBuilder)
@@ -116,6 +119,7 @@ public class ServicesFactory {
                 .didDocumentService(didDocumentService)
                 .jwksService(jwksService)
                 .notificationService(notificationService)
+                .iacasService(iacasService)
                 .build();
     }
 }

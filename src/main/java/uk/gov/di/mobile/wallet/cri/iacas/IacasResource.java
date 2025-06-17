@@ -35,54 +35,17 @@ import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractCertificateId;
 public class IacasResource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IacasResource.class);
-    private final ConfigurationService configurationService;
-    private final ObjectStore objectStore;
+    private final IacasService iacasService;
 
-    /**
-     * Constructs the resource with the required configuration service.
-     *
-     * @param configurationService Service for resolving the current environment.
-     */
-    public IacasResource(ConfigurationService configurationService, ObjectStore objectStore) {
-        this.configurationService = configurationService;
-        this.objectStore = objectStore;
+    public IacasResource(IacasService iacasService) {
+        this.iacasService = iacasService;
     }
 
-    /**
-     * Handles HTTP GET requests for the IACAs.
-     *
-     * <p>Determines the current environment, attempts to load the corresponding IACAs JSON file,
-     * and returns its contents. If the environment-specific file does not exist or cannot be read,
-     * returns HTTP 500.
-     *
-     * @return HTTP 200 response with the IACAs, or HTTP 500 on error.
-     */
     @GET
     public Response getIacas() {
         try {
-            String bucketName = configurationService.getCertificatesBucketName();
-            String certificateAuthorityArn = configurationService.getCertificateAuthorityArn();
-
-            String rootCertificateId = extractCertificateId(certificateAuthorityArn);
-
-            byte[] pemBytes = objectStore.getObject(bucketName, rootCertificateId);
-            String pem = new String(pemBytes, StandardCharsets.UTF_8);
-
-            System.out.println(pem);
-
-            CertificateFactory factory = CertificateFactory.getInstance("X.509");
-            ByteArrayInputStream is =
-                    new ByteArrayInputStream(pem.getBytes(StandardCharsets.UTF_8));
-            X509Certificate cert = (X509Certificate) factory.generateCertificate(is);
-
-          String string = "Subject: " + cert.getSubjectX500Principal() + "\n" +
-                  "Issuer: " + cert.getIssuerX500Principal() + "\n" +
-                  "Valid From: " + cert.getNotBefore() + "\n" +
-                  "Valid To: " + cert.getNotAfter() + "\n" +
-                  "Public Key: " + cert.getPublicKey() + "\n" +
-                  "Signature Algorithm: " + cert.getSigAlgName() + "\n";
-
-            return ResponseUtil.ok(string);
+            String details = iacasService.getCertificateDetails();
+            return ResponseUtil.ok(details);
         } catch (ObjectStoreException exception) {
             LOGGER.error("Error fetching certificate from S3: ", exception);
             return ResponseUtil.internalServerError();

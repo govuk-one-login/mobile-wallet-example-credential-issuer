@@ -5,6 +5,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
+import uk.gov.di.mobile.wallet.cri.iacas.IacasService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
@@ -21,7 +22,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 public class Services {
     private final KmsService kmsService;
     private final DynamoDbService dynamoDbService;
-    private final S3Service s3Service;
     private final PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
     private final CredentialOfferService credentialOfferService;
     private final MetadataBuilder metadataBuilder;
@@ -29,11 +29,11 @@ public class Services {
     private final DidDocumentService didDocumentService;
     private final JwksService jwksService;
     private final NotificationService notificationService;
+    private final IacasService iacasService;
 
     private Services(Builder builder) {
         this.kmsService = builder.kmsService;
         this.dynamoDbService = builder.dynamoDbService;
-        this.s3Service = builder.s3Service;
         this.preAuthorizedCodeBuilder = builder.preAuthorizedCodeBuilder;
         this.credentialOfferService = builder.credentialOfferService;
         this.metadataBuilder = builder.metadataBuilder;
@@ -41,13 +41,13 @@ public class Services {
         this.didDocumentService = builder.didDocumentService;
         this.jwksService = builder.jwksService;
         this.notificationService = builder.notificationService;
+        this.iacasService = builder.iacasService;
     }
 
     /** Builder for {@link Services}. */
     public static class Builder {
         private KmsService kmsService;
         private DynamoDbService dynamoDbService;
-        private S3Service s3Service;
         private PreAuthorizedCodeBuilder preAuthorizedCodeBuilder;
         private CredentialOfferService credentialOfferService;
         private MetadataBuilder metadataBuilder;
@@ -55,6 +55,7 @@ public class Services {
         private DidDocumentService didDocumentService;
         private JwksService jwksService;
         private NotificationService notificationService;
+        private IacasService iacasService;
 
         public Builder kmsService(KmsService kmsService) {
             this.kmsService = kmsService;
@@ -63,11 +64,6 @@ public class Services {
 
         public Builder dynamoDbService(DynamoDbService dynamoDbService) {
             this.dynamoDbService = dynamoDbService;
-            return this;
-        }
-
-        public Builder s3Service(S3Service s3Service) {
-            this.s3Service = s3Service;
             return this;
         }
 
@@ -103,6 +99,11 @@ public class Services {
 
         public Builder notificationService(NotificationService notificationService) {
             this.notificationService = notificationService;
+            return this;
+        }
+
+        public Builder iacasService(IacasService iacasService) {
+            this.iacasService = iacasService;
             return this;
         }
 
