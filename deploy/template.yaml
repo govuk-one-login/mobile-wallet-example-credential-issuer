@@ -434,7 +434,7 @@ Resources:
               Value: !Sub "{{resolve:ssm:/platform-ca/iaca/certificate-authority-arn}}"
             - Name: CERTIFICATES_BUCKET_NAME
               Value:
-                - Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
+                Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
