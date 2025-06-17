@@ -12,21 +12,21 @@ import lombok.Setter;
 @Setter
 public class PublicKeyJwk {
     /** The key type (e.g., "EC" for Elliptic Curve). */
-    private KeyType kty;
+    private String kty;
 
     /** The curve used for the elliptic curve key (e.g., "P-256"). */
-    private Curve crv;
+    private String crv;
 
     /** The x-coordinate for the EC public key. */
-    private Base64URL x;
+    private String x;
 
     /** The y-coordinate for the EC public key. */
-    private Base64URL y;
+    private String y;
 
     /** The algorithm used, typically "ES256" for ECDSA with P-256. */
-    private Algorithm alg;
+    private String alg;
 
-    public PublicKeyJwk(KeyType kty, Curve crv, Base64URL x, Base64URL y, Algorithm alg) {
+    public PublicKeyJwk(String kty, String crv, String x, String y, String alg) {
         this.kty = kty;
         this.crv = crv;
         this.x = x;
