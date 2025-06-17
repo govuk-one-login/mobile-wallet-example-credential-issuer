@@ -28,6 +28,7 @@ import java.security.interfaces.ECPublicKey;
 
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static com.nimbusds.jose.jwk.Curve.P_256;
+import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractKeyId;
 
 public class KmsService implements KeyProvider {
 
@@ -111,7 +112,7 @@ public class KmsService implements KeyProvider {
     private ECKey createJwk(GetPublicKeyResponse publicKeyResponse)
             throws PEMException, NoSuchAlgorithmException {
         PublicKey publicKey = createPublicKey(publicKeyResponse);
-        String keyId = Arn.fromString(publicKeyResponse.keyId()).resource().resource();
+        String keyId = extractKeyId(publicKeyResponse.keyId());
         String hashedKeyId = KeyHelper.hashKeyId(keyId);
         return new ECKey.Builder(P_256, (ECPublicKey) publicKey)
                 .keyID(hashedKeyId)
