@@ -31,10 +31,6 @@ Parameters:
     Description: The cloudformation stack name of the Document Builder.
     Type: String
     Default: "wallet-doc-builder-fe"
-  DocumentSigningCertificateIssuerStackName:
-    Description: The cloudformation stack name of the Document Signing Certificate Issuer.
-    Type: String
-    Default: "wallet-dsc-issuer"
 
 Conditions:
   StackNameIsWalletCredIssuerBE: !Equals [!Ref "AWS::StackName", wallet-cred-issuer-be]
@@ -433,8 +429,7 @@ Resources:
             - Name: CERTIFICATE_AUTHORITY_ARN
               Value: !Sub "{{resolve:ssm:/platform-ca/iaca/certificate-authority-arn}}"
             - Name: CERTIFICATES_BUCKET_NAME
-              Value:
-                Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
+              Value: !ImportValue "wallet-dsc-issuer-CertificatesBucketName"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
@@ -534,10 +529,10 @@ Resources:
                 Resource:
                   - !Sub
                     - 'arn:aws:s3:::${BucketName}'
-                    - BucketName: !ImportValue "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
+                    - BucketName: !ImportValue "wallet-dsc-issuer-CertificatesBucketName"
                   - !Sub
                     - 'arn:aws:s3:::${BucketName}/*'
-                    - BucketName: !ImportValue "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
+                    - BucketName: !ImportValue "wallet-dsc-issuer-CertificatesBucketName"
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
