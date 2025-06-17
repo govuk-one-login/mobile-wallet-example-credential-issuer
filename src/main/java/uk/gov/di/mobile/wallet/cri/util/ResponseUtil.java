@@ -14,12 +14,24 @@ public class ResponseUtil {
         return jsonBuilder(Response.Status.OK, entity).build();
     }
 
+    public static Response ok(Object entity, String cacheControlValue) {
+        return jsonBuilder(Response.Status.OK, entity)
+                .header(HttpHeaders.CACHE_CONTROL, cacheControlValue)
+                .build();
+    }
+
     public static Response noContent() {
         return Response.status(Response.Status.NO_CONTENT).build();
     }
 
     public static Response badRequest(String entity) {
         return jsonBuilder(Response.Status.BAD_REQUEST, entity).build();
+    }
+
+    public static Response badRequest(String entity, String cacheControlValue) {
+        return jsonBuilder(Response.Status.BAD_REQUEST, entity)
+                .header(HttpHeaders.CACHE_CONTROL, cacheControlValue)
+                .build();
     }
 
     public static Response unauthorized() {
@@ -30,6 +42,14 @@ public class ResponseUtil {
         String headerValue = "Bearer" + (error == null ? "" : " error=\"" + error + "\"");
         return Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, headerValue)
+                .build();
+    }
+
+    public static Response unauthorized(String error, String cacheControlValue) {
+        String headerValue = "Bearer" + (error == null ? "" : " error=\"" + error + "\"");
+        return Response.status(Response.Status.UNAUTHORIZED)
+                .header(HttpHeaders.WWW_AUTHENTICATE, headerValue)
+                .header(HttpHeaders.CACHE_CONTROL, cacheControlValue)
                 .build();
     }
 

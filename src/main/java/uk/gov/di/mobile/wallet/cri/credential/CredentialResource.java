@@ -44,7 +44,7 @@ public class CredentialResource {
             SignedJWT proofJwt = parseRequestBody(payload);
 
             CredentialResponse credential = credentialService.getCredential(accessToken, proofJwt);
-            return ResponseUtil.ok(credential);
+            return ResponseUtil.ok(credential, "no-store");
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
             if (exception instanceof AuthorizationHeaderMissingException) {
@@ -52,10 +52,10 @@ public class CredentialResource {
             }
             if (exception instanceof AccessTokenValidationException
                     || exception instanceof CredentialOfferException) {
-                return ResponseUtil.unauthorized("invalid_token");
+                return ResponseUtil.unauthorized("invalid_token", "no-store");
             }
             if (exception instanceof ProofJwtValidationException) {
-                return ResponseUtil.badRequest(error("invalid_proof"));
+                return ResponseUtil.badRequest(error("invalid_proof"), "no-store");
             }
             return ResponseUtil.internalServerError();
         }
