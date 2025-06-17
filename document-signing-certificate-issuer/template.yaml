@@ -255,3 +255,5 @@ Outputs:
   CertificatesBucketName:
     Description: "The name of the S3 bucket where the certificates are stored"
     Value: !Ref DocSigningCertificateBucket
+    Export:
+      Name: !Sub "${AWS::StackName}-CertificatesBucketName"
