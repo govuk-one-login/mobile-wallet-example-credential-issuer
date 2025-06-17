@@ -9,16 +9,17 @@ import org.bouncycastle.asn1.x500.style.BCStyle;
 
 import java.security.cert.X509Certificate;
 import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 
 /** Contains metadata about the IACA. */
 @Getter
 @Setter
 public class CertificateData {
-    /** The date and time when the certificate expires. */
-    private Instant notAfter;
+    /** The date and time (ISO 8601 format) when the certificate expires. */
+    private String notAfter;
 
-    /** The date and time when the certificate becomes valid. */
-    private Instant notBefore;
+    /** The date and time (ISO 8601 format) when the certificate becomes valid. */
+    private String notBefore;
 
     /** The country code (ISO 3166-1 alpha-2) of the IACA’s issuer country. */
     private String country;
@@ -26,7 +27,7 @@ public class CertificateData {
     /** The IACA's common name. */
     private String commonName;
 
-    public CertificateData(Instant notAfter, Instant notBefore, String country, String commonName) {
+    public CertificateData(String notAfter, String notBefore, String country, String commonName) {
         this.notAfter = notAfter;
         this.notBefore = notBefore;
         this.country = country;
@@ -44,6 +45,8 @@ public class CertificateData {
             throws IllegalArgumentException {
         Instant notAfter = certificate.getNotAfter().toInstant();
         Instant notBefore = certificate.getNotBefore().toInstant();
+        String isoNotAfter = DateTimeFormatter.ISO_INSTANT.format(notAfter);
+        String isoNotBefore = DateTimeFormatter.ISO_INSTANT.format(notBefore);
 
         X500Name x500Name = new X500Name(certificate.getSubjectX500Principal().getName());
         String commonName = extractFirstValue(x500Name, BCStyle.CN);
@@ -55,7 +58,7 @@ public class CertificateData {
             throw new IllegalArgumentException("Certificate missing required C field");
         }
 
-        return new CertificateData(notAfter, notBefore, country, commonName);
+        return new CertificateData(isoNotAfter, isoNotBefore, country, commonName);
     }
 
     private static String extractFirstValue(X500Name x500Name, ASN1ObjectIdentifier objectId) {
