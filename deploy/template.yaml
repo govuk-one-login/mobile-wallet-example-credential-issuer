@@ -426,6 +426,10 @@ Resources:
               Value: !Sub
                 - "https://${AuthServerUrl}"
                 - AuthServerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, AuthServerUrl]
+            - Name: CERTIFICATE_AUTHORITY_ARN
+              Value: !Sub "{{resolve:ssm:/platform-ca/iaca/certificate-authority-arn}}"
+            - Name: CERTIFICATES_BUCKET_NAME
+              Value: !ImportValue CertificatesBucketNameExport
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
