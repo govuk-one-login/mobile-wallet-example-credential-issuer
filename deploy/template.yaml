@@ -527,10 +527,22 @@ Resources:
                   - 'kms:Encrypt'
                   - 'kms:GenerateDataKey'
                 Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
+              - Effect: Allow
+                Action:
+                  - 's3:ListBucket'
+                  - 's3:GetObject'
+                Resource:
+                  - !Sub
+                    - 'arn:aws:s3:::${BucketName}'
+                    - BucketName: !ImportValue "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
+                  - !Sub
+                    - 'arn:aws:s3:::${BucketName}/*'
+                    - BucketName: !ImportValue "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
+
 
   # KMS RESOURCES
 
