@@ -80,8 +80,8 @@ public class Iaca {
                 new PublicKeyJwk(
                         ecKey.getKeyType().getValue(),
                         ecKey.getCurve().getName(),
-                        ecKey.getX().decodeToString(),
-                        ecKey.getY().decodeToString());
+                        ecKey.getX().toString(),
+                        ecKey.getY().toString());
         String fingerprint = getCertificateFingerprint(certificate);
 
         return new Iaca(id, active, certificatePem, certificateData, fingerprint, publicKeyJwk);
