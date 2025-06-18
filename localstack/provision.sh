@@ -22,3 +22,10 @@ aws --endpoint-url=http://localhost:4566 kms create-alias \
     --region eu-west-2 \
     --alias-name alias/localSigningKeyAlias \
     --target-key-id ff275b92-0def-4dfc-b0f6-87c96b26c6c7
+
+aws --endpoint-url=http://localhost:4566 s3api create-bucket \
+    --region eu-west-2 \
+    --bucket certificates
+
+aws --endpoint-url=http://localhost:4566 s3 cp s3://certificates/6bb42872-f4ed-4d55-a937-b8ffb8760de4/certificate.pem ./certificate.pem \
+    --region eu-west-2
