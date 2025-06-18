@@ -3,8 +3,6 @@ package uk.gov.di.mobile.wallet.cri.iacas;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.util.X509CertUtils;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -18,51 +16,34 @@ import java.util.HexFormat;
  * <p>The IACA is an X.509 certificate that serves as the trust anchor (root or top-level CA) for a
  * specific mDoc issuer, and is used to sign Document Signer Certificates, which in turn sign Mobile
  * Security Objects (MSOs).
+ *
+ * @param id Unique identifier for the IACA.
+ * @param active Indicates whether this IACA is currently active and valid for use.
+ * @param certificatePem PEM-encoded X.509 certificate.
+ * @param certificateData Metadata about the IACA.
+ * @param certificateFingerprint The fingerprint (cryptographic hash) of the IACA.
+ * @param publicKeyJwk The public key of the IACA in JWK format.
  */
-@Getter
-@Setter
-public class Iaca {
-    /** Unique identifier for the IACA. */
-    private String id;
-
-    /** Indicates whether this IACA is currently active and valid for use. */
-    private boolean active;
-
-    /** PEM-encoded X.509 certificate. */
-    private String certificatePem;
-
-    /** Metadata about the IACA. */
-    private CertificateData certificateData;
-
-    /** The fingerprint (cryptographic hash) of the IACA. */
-    private String certificateFingerprint;
-
-    /** The public key of the IACA in JWK (JSON Web Key) format. */
-    private PublicKeyJwk publicKeyJwk;
-
-    public Iaca(
-            String id,
-            boolean active,
-            String certificatePem,
-            CertificateData certificateData,
-            String certificateFingerprint,
-            PublicKeyJwk publicKeyJwk) {
-        this.id = id;
-        this.active = active;
-        this.certificatePem = certificatePem;
-        this.certificateData = certificateData;
-        this.certificateFingerprint = certificateFingerprint;
-        this.publicKeyJwk = publicKeyJwk;
-    }
+public record Iaca(
+        String id,
+        boolean active,
+        String certificatePem,
+        CertificateData certificateData,
+        String certificateFingerprint,
+        PublicKeyJwk publicKeyJwk) {
 
     /**
      * Creates an {@code Iaca} instance from a PEM-encoded certificate.
+     *
+     * <p>This method parses the provided PEM certificate, extracts its metadata, computes its
+     * SHA-256 fingerprint, and builds a JWK representation of the public key.
      *
      * @param id The unique identifier for the IACA.
      * @param active Whether the IACA is active.
      * @param certificatePem The PEM-encoded X.509 certificate.
      * @return A new {@code Iaca} instance.
-     * @throws IllegalArgumentException If the certificate cannot be parsed.
+     * @throws IllegalArgumentException If the input certificate string cannot be parsed as a {@code
+     *     X509Certificate}.
      * @throws JOSEException If parsing the certificate and extracting the Elliptic Curve (EC) key
      *     from it fails.
      * @throws CertificateEncodingException If encoding fails.
@@ -74,6 +55,7 @@ public class Iaca {
         if (certificate == null) {
             throw new IllegalArgumentException("Failed to parse PEM certificate");
         }
+
         CertificateData certificateData = CertificateData.fromCertificate(certificate);
         ECKey ecKey = ECKey.parse(certificate);
         PublicKeyJwk publicKeyJwk =
@@ -84,13 +66,15 @@ public class Iaca {
                         ecKey.getY().toString());
         String fingerprint = getCertificateFingerprint(certificate);
 
-        String singleLineCertificatePem = certificatePem.replaceAll("\\n", "");
-        return new Iaca(
-                id, active, singleLineCertificatePem, certificateData, fingerprint, publicKeyJwk);
+        String normalizedPem = normalizePem(certificatePem);
+        return new Iaca(id, active, normalizedPem, certificateData, fingerprint, publicKeyJwk);
     }
 
     /**
      * Computes the SHA-256 fingerprint of the certificate.
+     *
+     * <p>The fingerprint is a cryptographic hash of the certificate's encoded form, represented as
+     * a lowercase hexadecimal string.
      *
      * @param certificate The X.509 certificate.
      * @return The fingerprint as a lowercase hexadecimal string.
@@ -102,5 +86,15 @@ public class Iaca {
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(certificate.getEncoded());
         return HexFormat.of().formatHex(messageDigest.digest());
+    }
+
+    /**
+     * Removes all line breaks from the PEM string to normalize its format.
+     *
+     * @param pem The PEM-encoded certificate string.
+     * @return The normalized PEM string without line breaks.
+     */
+    private static String normalizePem(String pem) {
+        return pem.replaceAll("\\r?\\n", "");
     }
 }
