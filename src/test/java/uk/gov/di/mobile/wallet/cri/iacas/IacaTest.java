@@ -35,7 +35,7 @@ class IacaTest {
 
         Iaca iaca = Iaca.fromCertificate(id, active, TEST_CERTIFICATE_PEM);
 
-        assertEquals("test-id", iaca.id());
+        assertEquals("83c71bc0-6d39-4908-ac9f-216424e0c5c5", iaca.id());
         assertTrue(iaca.active());
         assertNotNull(iaca.certificatePem());
         assertNotNull(iaca.certificateData());
