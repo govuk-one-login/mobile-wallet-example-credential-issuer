@@ -7,6 +7,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
+import uk.gov.di.mobile.wallet.cri.iacas.IacasService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
@@ -31,6 +32,7 @@ class ServicesTest {
         DidDocumentService didDocumentService = mock(DidDocumentService.class);
         JwksService jwksService = mock(JwksService.class);
         NotificationService notificationService = mock(NotificationService.class);
+        IacasService iacasService = mock(IacasService.class);
 
         // Act: Build the Services object
         Services services =
@@ -44,6 +46,7 @@ class ServicesTest {
                         .didDocumentService(didDocumentService)
                         .jwksService(jwksService)
                         .notificationService(notificationService)
+                        .iacasService(iacasService)
                         .build();
 
         // Assert: Each getter returns the correct instance
@@ -56,5 +59,6 @@ class ServicesTest {
         assertSame(didDocumentService, services.getDidDocumentService());
         assertSame(jwksService, services.getJwksService());
         assertSame(notificationService, services.getNotificationService());
+        assertSame(iacasService, services.getIacasService());
     }
 }
