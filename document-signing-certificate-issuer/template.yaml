@@ -250,10 +250,9 @@ Resources:
       AliasName: !Sub 'alias/${AWS::StackName}-doc-signing-key-1'
       TargetKeyId: !Ref DocumentSigningKey1
 
-
 Outputs:
   CertificatesBucketName:
-    Description: "The name of the S3 bucket where the certificates are stored"
+    Description: 'The name of the S3 bucket where the certificates are stored'
     Value: !Ref DocSigningCertificateBucket
     Export:
-      Name: !Sub "${AWS::StackName}-CertificatesBucketName"
+      Name: !Sub '${AWS::StackName}-CertificatesBucketName'
