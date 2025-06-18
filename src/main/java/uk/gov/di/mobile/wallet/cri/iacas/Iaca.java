@@ -85,7 +85,8 @@ public class Iaca {
         String fingerprint = getCertificateFingerprint(certificate);
 
         String singleLineCertificatePem = certificatePem.replaceAll("\\n", "");
-        return new Iaca(id, active, singleLineCertificatePem, certificateData, fingerprint, publicKeyJwk);
+        return new Iaca(
+                id, active, singleLineCertificatePem, certificateData, fingerprint, publicKeyJwk);
     }
 
     /**
