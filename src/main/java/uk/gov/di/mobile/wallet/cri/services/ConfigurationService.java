@@ -50,7 +50,10 @@ public class ConfigurationService extends Configuration {
     }
 
     public String getCertificateAuthorityArn() {
-        return System.getenv().getOrDefault("CERTIFICATE_AUTHORITY_ARN", "12345");
+        return System.getenv()
+                .getOrDefault(
+                        "CERTIFICATE_AUTHORITY_ARN",
+                        "arn:aws:acm-pca:eu-west-2:000000000000:certificate-authority/6bb42872-f4ed-4d55-a937-b8ffb8760de4");
     }
 
     public String getLocalstackEndpoint() {
