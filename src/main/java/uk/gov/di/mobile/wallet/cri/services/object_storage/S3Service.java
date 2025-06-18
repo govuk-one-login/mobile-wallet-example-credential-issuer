@@ -1,6 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.services.object_storage;
 
-import software.amazon.awssdk.core.ResponseBytes;
+import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -19,7 +19,7 @@ public class S3Service implements ObjectStore {
 
     public static S3Client getClient(ConfigurationService configurationService) {
         S3Client client;
-        if ("local".equals(configurationService.getEnvironment())) {
+        if (configurationService.getEnvironment().equals("local")) {
             client = getLocalClient(configurationService);
         } else {
             client =
@@ -34,6 +34,7 @@ public class S3Service implements ObjectStore {
         return S3Client.builder()
                 .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
                 .region(Region.of(configurationService.getAwsRegion()))
+                .forcePathStyle(true)
                 .build();
     }
 
@@ -42,10 +43,10 @@ public class S3Service implements ObjectStore {
         try {
             GetObjectRequest request =
                     GetObjectRequest.builder().bucket(bucketName).key(key).build();
-            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObjectAsBytes(request);
-            return objectBytes.asString(StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            throw new ObjectStoreException("Error fetching object from S3", e);
+            ResponseInputStream<GetObjectResponse> response = s3Client.getObject(request);
+            return new String(response.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (Exception exception) {
+            throw new ObjectStoreException("Error fetching object from S3", exception);
         }
     }
 }
