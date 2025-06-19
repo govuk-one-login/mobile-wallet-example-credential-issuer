@@ -1,8 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.iacas;
 
+import com.nimbusds.jose.JOSEException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStore;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateEncodingException;
 import java.util.List;
 
 import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractCertificateId;
@@ -23,7 +27,11 @@ public class IacasService {
         this.objectStore = objectStore;
     }
 
-    public Iacas getIacas() throws Exception {
+    public Iacas getIacas()
+            throws ObjectStoreException,
+                    CertificateEncodingException,
+                    NoSuchAlgorithmException,
+                    JOSEException {
         String bucketName = configurationService.getCertificatesBucketName();
         String certificateAuthorityArn = configurationService.getCertificateAuthorityArn();
 
