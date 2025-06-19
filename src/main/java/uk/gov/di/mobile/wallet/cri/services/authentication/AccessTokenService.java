@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services.authentication;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
@@ -29,7 +30,7 @@ public class AccessTokenService {
     public static final String CLAIM_C_NONCE = "c_nonce";
 
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
-    private static final String EXPECTED_TYPE = "at+jwt";
+    private static final JOSEObjectType EXPECTED_TYPE = new JOSEObjectType("at+jwt");
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
@@ -93,7 +94,7 @@ public class AccessTokenService {
             throw new AccessTokenValidationException("JWT kid header claim is null");
         }
 
-        String type = header.getType() != null ? header.getType().toString() : null;
+        JOSEObjectType type = header.getType();
         if (!EXPECTED_TYPE.equals(type)) {
             throw new AccessTokenValidationException(
                     String.format(
