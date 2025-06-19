@@ -12,29 +12,32 @@ public class ArnUtil {
     }
 
     /**
-     * Extracts the certificate ID from an ACM Private CA certificate ARN.
+     * Extracts the certificate authority ID (CA ID) from an ACM Private CA certificate authority
+     * ARN.
      *
      * <p>Example ARN format:
      *
      * <pre>
-     * arn:aws:acm-pca:region:account-id:certificate-authority/ca-id/certificate/certificate-id
+     * arn:aws:acm-pca:region:account-id:certificate-authority/ca-id
      * </pre>
      *
-     * This method returns the last segment of the resource part, which is the certificate ID.
+     * This method returns the second segment of the resource part, which is the certificate
+     * authority ID.
      *
-     * @param arnString The ACM PCA certificate ARN.
-     * @return The certificate ID.
+     * @param arnString The ACM PCA certificate authority ARN.
+     * @return The certificate authority ID (CA ID).
      * @throws IllegalArgumentException If the ARN is malformed or does not contain a certificate
-     *     ID.
+     *     authority ID.
      */
-    public static String extractCertificateId(String arnString) {
+    public static String extractCertificateAuthorityId(String arnString) {
         Arn arn = Arn.fromString(arnString);
         String resource = arn.resourceAsString();
         String[] parts = resource.split("/");
-        if (parts.length == 0) {
-            throw new IllegalArgumentException("Invalid ACM PCA certificate ARN: " + arnString);
+        if (parts.length < 2) {
+            throw new IllegalArgumentException(
+                    "Invalid ACM PCA certificate authority ARN: " + arnString);
         }
-        return parts[parts.length - 1];
+        return parts[1];
     }
 
     /**

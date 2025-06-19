@@ -9,7 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.util.List;
 
-import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractCertificateId;
+import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractCertificateAuthorityId;
 
 public class IacasService {
 
@@ -35,11 +35,11 @@ public class IacasService {
         String bucketName = configurationService.getCertificatesBucketName();
         String certificateAuthorityArn = configurationService.getCertificateAuthorityArn();
 
-        String rootCertificateId = extractCertificateId(certificateAuthorityArn);
-        String objectKey = rootCertificateId + "/certificate.pem";
+        String certificateAuthorityId = extractCertificateAuthorityId(certificateAuthorityArn);
+        String objectKey = certificateAuthorityId + "/certificate.pem";
         String certificatePem = objectStore.getObject(bucketName, objectKey);
 
-        Iaca iaca = Iaca.fromCertificate(rootCertificateId, true, certificatePem);
+        Iaca iaca = Iaca.fromCertificate(certificateAuthorityId, true, certificatePem);
 
         return new Iacas(List.of(iaca));
     }
