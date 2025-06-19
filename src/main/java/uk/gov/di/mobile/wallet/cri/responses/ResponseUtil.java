@@ -6,6 +6,8 @@ import jakarta.ws.rs.core.Response;
 
 public class ResponseUtil {
 
+    public static final String NO_STORE = "no-store";
+
     private ResponseUtil() {
         throw new IllegalStateException("Instantiation is not valid for this class.");
     }
@@ -17,7 +19,7 @@ public class ResponseUtil {
     public static Response ok(Object entity, boolean cacheable) {
         Response.ResponseBuilder builder = jsonBuilder(Response.Status.OK, entity);
         if (!cacheable) {
-            builder.header(HttpHeaders.CACHE_CONTROL, "no-store");
+            builder.header(HttpHeaders.CACHE_CONTROL, NO_STORE);
         }
         return builder.build();
     }
@@ -28,7 +30,7 @@ public class ResponseUtil {
 
     public static Response badRequest(String errorMessage) {
         return jsonBuilder(Response.Status.BAD_REQUEST, new ErrorResponse(errorMessage))
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header(HttpHeaders.CACHE_CONTROL, NO_STORE)
                 .build();
     }
 
@@ -40,13 +42,13 @@ public class ResponseUtil {
         String headerValue = "Bearer" + (error == null ? "" : " error=\"" + error + "\"");
         return Response.status(Response.Status.UNAUTHORIZED)
                 .header(HttpHeaders.WWW_AUTHENTICATE, headerValue)
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header(HttpHeaders.CACHE_CONTROL, NO_STORE)
                 .build();
     }
 
     public static Response internalServerError() {
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                .header(HttpHeaders.CACHE_CONTROL, "no-store")
+                .header(HttpHeaders.CACHE_CONTROL, NO_STORE)
                 .build();
     }
 
