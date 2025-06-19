@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.util;
+package uk.gov.di.mobile.wallet.cri.responses;
 
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
