@@ -15,17 +15,22 @@ class IacaTest {
 
     private static final String TEST_CERTIFICATE_PEM =
             "-----BEGIN CERTIFICATE-----\n"
-                    + "MIIB8TCCAZegAwIBAgIQLmndcaaE19g+3lJupyQCojAKBggqhkjOPQQDAjA/MQsw\n"
-                    + "CQYDVQQGEwJVSzEwMC4GA1UEAwwnbURMIEV4YW1wbGUgSUFDQSBSb290IC0gREVW\n"
-                    + "IGVudmlyb25tZW50MB4XDTI1MDQxNTA5MTQyMFoXDTM0MDQxNjEwMTQyMFowPzEL\n"
-                    + "MAkGA1UEBhMCVUsxMDAuBgNVBAMMJ21ETCBFeGFtcGxlIElBQ0EgUm9vdCAtIERF\n"
-                    + "ViBlbnZpcm9ubWVudDBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABBV+UF7RuBa4\n"
-                    + "gu0aVFRRD1plr+Bnu1dsv9eNXbU2ZqGq0FkM4IknCZ12Y/zENDVA8VyM+hNRlkvr\n"
-                    + "SZMoqCSnobejdTBzMBIGA1UdEwEB/wQIMAYBAf8CAQAwHQYDVR0OBBYEFHomsAv2\n"
-                    + "hf6lUS/4necL1PqJLNEJMA8GA1UdDwEB/wQFAwMHBgAwLQYDVR0SBCYwJIYiaHR0\n"
-                    + "cHM6Ly9tb2JpbGUuZGV2LmFjY291bnQuZ292LnVrLzAKBggqhkjOPQQDAgNIADBF\n"
-                    + "AiBFqaelXoq3kySjLkoy6cbnv5mFfUjyFN9emgHyWcy2OgIhAOtizfGVyHNAQ2wD\n"
-                    + "z6mnTX/lWqYiEThH9Gb3xRXKrslN\n"
+                    + "MIICzzCCAnWgAwIBAgIUFBD7/XkDw4D/UTy7/pf1Q7c43/kwCgYIKoZIzj0EAwIw\n"
+                    + "gbwxCzAJBgNVBAYTAlVLMQ8wDQYDVQQIDAZMb25kb24xNDAyBgNVBAoMK21ETCBF\n"
+                    + "eGFtcGxlIElBQ0EgUm9vdCAtIERFTE9DQUwgZW52aXJvbm1lbnQxMjAwBgNVBAsM\n"
+                    + "KW1ETCBFeGFtcGxlIElBQ0EgUm9vdCAtIExPQ0FMIGVudmlyb25tZW50MTIwMAYD\n"
+                    + "VQQDDCltREwgRXhhbXBsZSBJQUNBIFJvb3QgLSBMT0NBTCBlbnZpcm9ubWVudDAe\n"
+                    + "Fw0yNTA2MTkxMTA4NTFaFw0zNTA2MTcxMTA4NTFaMIG8MQswCQYDVQQGEwJVSzEP\n"
+                    + "MA0GA1UECAwGTG9uZG9uMTQwMgYDVQQKDCttREwgRXhhbXBsZSBJQUNBIFJvb3Qg\n"
+                    + "LSBERUxPQ0FMIGVudmlyb25tZW50MTIwMAYDVQQLDCltREwgRXhhbXBsZSBJQUNB\n"
+                    + "IFJvb3QgLSBMT0NBTCBlbnZpcm9ubWVudDEyMDAGA1UEAwwpbURMIEV4YW1wbGUg\n"
+                    + "SUFDQSBSb290IC0gTE9DQUwgZW52aXJvbm1lbnQwWTATBgcqhkjOPQIBBggqhkjO\n"
+                    + "PQMBBwNCAATK8ZrETZ7FQXw3+xj7fLV2yv1vFLOlZE0r2MQ0ysBOa/uZ7dUlOCvR\n"
+                    + "OTt5fpDR9e+Hdq0h9trZwwBY2HODAWVbo1MwUTAdBgNVHQ4EFgQUnelQVCApK3NI\n"
+                    + "xVeQ3X+zUsogQxgwHwYDVR0jBBgwFoAUnelQVCApK3NIxVeQ3X+zUsogQxgwDwYD\n"
+                    + "VR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiBwnpi6jeCSLxZgFeFLSN+z\n"
+                    + "aG3zj9t6QcGFklY521tMtQIhAOF65mV0uski5+50FtKkJcVnS/1EDGrgor5bFeZD\n"
+                    + "vdAI\n"
                     + "-----END CERTIFICATE-----";
 
     @Test
