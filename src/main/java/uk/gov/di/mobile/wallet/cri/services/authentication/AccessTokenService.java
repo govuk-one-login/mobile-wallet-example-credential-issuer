@@ -2,6 +2,7 @@ package uk.gov.di.mobile.wallet.cri.services.authentication;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
@@ -23,6 +24,7 @@ public class AccessTokenService {
     public static final String CREDENTIAL_IDENTIFIERS = "credential_identifiers";
     public static final String C_NONCE = "c_nonce";
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
+    private static final String EXPECTED_HEADER_TYP = "at+jwt";
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
@@ -46,16 +48,26 @@ public class AccessTokenService {
     }
 
     private void verifyTokenHeader(SignedJWT accessToken) throws AccessTokenValidationException {
-        JWSAlgorithm jwtAlgorithm = accessToken.getHeader().getAlgorithm();
-        if (jwtAlgorithm != EXPECTED_SIGNING_ALGORITHM) {
+        JWSHeader header = accessToken.getHeader();
+
+        JWSAlgorithm algorithm = header.getAlgorithm();
+        if (!EXPECTED_SIGNING_ALGORITHM.equals(algorithm)) {
             throw new AccessTokenValidationException(
                     String.format(
                             "JWT alg header claim [%s] does not match client config alg [%s]",
-                            jwtAlgorithm, EXPECTED_SIGNING_ALGORITHM));
+                            algorithm, EXPECTED_SIGNING_ALGORITHM));
         }
 
-        if (accessToken.getHeader().getKeyID() == null) {
+        if (header.getKeyID() == null) {
             throw new AccessTokenValidationException("JWT kid header claim is null");
+        }
+
+        String type = header.getType().toString();
+        if (!EXPECTED_HEADER_TYP.equals(type)) {
+            throw new AccessTokenValidationException(
+                    String.format(
+                            "JWT typ header claim [%s] does not match expected typ [%s]",
+                            algorithm, EXPECTED_HEADER_TYP));
         }
     }
 
