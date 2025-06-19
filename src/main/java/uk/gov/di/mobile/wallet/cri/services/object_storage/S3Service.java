@@ -1,6 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.services.object_storage;
 
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -26,6 +26,7 @@ public class S3Service implements ObjectStore {
             client =
                     S3Client.builder()
                             .region(Region.of(configurationService.getAwsRegion()))
+                            .credentialsProvider(DefaultCredentialsProvider.builder().build())
                             .build();
         }
         return client;
@@ -35,6 +36,7 @@ public class S3Service implements ObjectStore {
         return S3Client.builder()
                 .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
                 .region(Region.of(configurationService.getAwsRegion()))
+                .credentialsProvider(DefaultCredentialsProvider.builder().build())
                 .forcePathStyle(true) // Required for running locally with localstack
                 .build();
     }
