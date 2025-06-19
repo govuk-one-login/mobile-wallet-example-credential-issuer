@@ -15,6 +15,7 @@ public class MetadataResource {
 
     private static final String CREDENTIAL_ENDPOINT = "/credential";
     private static final String NOTIFICATION_ENDPOINT = "/notification";
+    private static final String IACAS_ENDPOINT = "/iacas";
     private static final String CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME =
             "credential_configurations_supported.json";
     private final ConfigurationService configurationService;
@@ -38,6 +39,7 @@ public class MetadataResource {
                             .setAuthorizationServers(
                                     configurationService.getOneLoginAuthServerUrl())
                             .setNotificationEndpoint(selfUrl + NOTIFICATION_ENDPOINT)
+                            .setIacasEndpoint(selfUrl + IACAS_ENDPOINT)
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
                             .build();
