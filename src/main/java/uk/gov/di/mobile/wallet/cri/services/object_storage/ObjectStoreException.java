@@ -5,8 +5,4 @@ public class ObjectStoreException extends Exception {
     public ObjectStoreException(String message, Exception exception) {
         super(message, exception);
     }
-
-    public ObjectStoreException(String message) {
-        super(message);
-    }
 }
