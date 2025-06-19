@@ -22,10 +22,14 @@ import java.util.HashSet;
 /** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
 
-    public static final String CREDENTIAL_IDENTIFIERS = "credential_identifiers";
-    public static final String C_NONCE = "c_nonce";
+    /** Claim name for the credential identifier. */
+    public static final String CLAIM_CREDENTIAL_IDENTIFIERS = "credential_identifiers";
+
+    /** Claim name for the nonce value. */
+    public static final String CLAIM_C_NONCE = "c_nonce";
+
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
-    private static final String EXPECTED_HEADER_TYP = "at+jwt";
+    private static final String EXPECTED_TYPE = "at+jwt";
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
@@ -62,7 +66,7 @@ public class AccessTokenService {
             throws AccessTokenValidationException {
         verifyTokenHeader(accessToken);
         verifyTokenClaims(accessToken);
-        if (!this.verifyTokenSignature(accessToken)) {
+        if (!verifyTokenSignature(accessToken)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
         return extractAccessTokenData(accessToken);
@@ -81,7 +85,7 @@ public class AccessTokenService {
         if (!EXPECTED_SIGNING_ALGORITHM.equals(algorithm)) {
             throw new AccessTokenValidationException(
                     String.format(
-                            "JWT alg header claim [%s] does not match client config alg [%s]",
+                            "JWT alg header claim [%s] does not match expected alg [%s]",
                             algorithm, EXPECTED_SIGNING_ALGORITHM));
         }
 
@@ -89,12 +93,12 @@ public class AccessTokenService {
             throw new AccessTokenValidationException("JWT kid header claim is null");
         }
 
-        String type = header.getType().toString();
-        if (!EXPECTED_HEADER_TYP.equals(type)) {
+        String type = header.getType() != null ? header.getType().toString() : null;
+        if (!EXPECTED_TYPE.equals(type)) {
             throw new AccessTokenValidationException(
                     String.format(
                             "JWT typ header claim [%s] does not match expected typ [%s]",
-                            algorithm, EXPECTED_HEADER_TYP));
+                            type, EXPECTED_TYPE));
         }
     }
 
@@ -113,7 +117,7 @@ public class AccessTokenService {
                         .audience(expectedAudience)
                         .build();
         HashSet<String> requiredClaims =
-                new HashSet<>(Arrays.asList("sub", C_NONCE, CREDENTIAL_IDENTIFIERS));
+                new HashSet<>(Arrays.asList("sub", CLAIM_C_NONCE, CLAIM_CREDENTIAL_IDENTIFIERS));
 
         try {
             JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
@@ -121,7 +125,7 @@ public class AccessTokenService {
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
 
-            if (jwtClaimsSet.getStringListClaim(CREDENTIAL_IDENTIFIERS).isEmpty()) {
+            if (jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).isEmpty()) {
                 throw new InvalidAttributeValueException("Empty credential_identifiers claim");
             }
 
@@ -163,8 +167,8 @@ public class AccessTokenService {
             JWTClaimsSet jwtClaimsSet = token.getJWTClaimsSet();
             return new AccessTokenData(
                     jwtClaimsSet.getSubject(),
-                    jwtClaimsSet.getStringClaim(C_NONCE),
-                    jwtClaimsSet.getListClaim(CREDENTIAL_IDENTIFIERS).get(0).toString());
+                    jwtClaimsSet.getStringClaim(CLAIM_C_NONCE),
+                    jwtClaimsSet.getListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).get(0).toString());
         } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
