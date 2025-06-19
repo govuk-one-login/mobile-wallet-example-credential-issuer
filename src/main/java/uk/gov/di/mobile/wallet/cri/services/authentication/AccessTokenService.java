@@ -146,6 +146,14 @@ public class AccessTokenService {
         String keyId = accessToken.getHeader().getKeyID();
         try {
             JWK jwk = jwksService.retrieveJwkFromURLWithKeyId(keyId);
+
+            if (!EXPECTED_SIGNING_ALGORITHM.equals(jwk.getAlgorithm())) {
+                throw new AccessTokenValidationException(
+                        String.format(
+                                "JWK alg claim [%s] does not match expected alg [%s]",
+                                jwk.getAlgorithm(), EXPECTED_SIGNING_ALGORITHM));
+            }
+
             final ECKey publicKey = new ECKey.Builder(jwk.toECKey()).build();
             ECDSAVerifier verifier = new ECDSAVerifier(publicKey);
             return accessToken.verify(verifier);
