@@ -1,10 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.services.authentication;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JOSEObjectType;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -148,11 +146,25 @@ public class AccessTokenService {
         try {
             JWK jwk = jwksService.retrieveJwkFromURLWithKeyId(keyId);
 
-            if (!EXPECTED_SIGNING_ALGORITHM.equals(jwk.getAlgorithm())) {
+            Algorithm algorithm = jwk.getAlgorithm();
+            // Check that the JWK's algorithm matches expectation, if present
+            if (algorithm != null && !EXPECTED_SIGNING_ALGORITHM.equals(algorithm)) {
                 throw new AccessTokenValidationException(
                         String.format(
                                 "JWK alg claim [%s] does not match expected alg [%s]",
-                                jwk.getAlgorithm(), EXPECTED_SIGNING_ALGORITHM));
+                                algorithm, EXPECTED_SIGNING_ALGORITHM));
+            }
+
+            // If alg is not set, check key type and curve for ES256 compatibility
+            if (algorithm == null) {
+                if (!"EC".equals(jwk.getKeyType().getValue())) {
+                    throw new AccessTokenValidationException("JWK key type is not EC");
+                }
+                ECKey ecKey = (ECKey) jwk;
+                if (!Curve.P_256.equals(ecKey.getCurve())) {
+                    throw new AccessTokenValidationException(
+                            "JWK curve does not match expected curve for ES256");
+                }
             }
 
             final ECKey publicKey = new ECKey.Builder(jwk.toECKey()).build();
