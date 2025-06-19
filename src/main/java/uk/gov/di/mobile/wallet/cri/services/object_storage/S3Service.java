@@ -26,7 +26,6 @@ public class S3Service implements ObjectStore {
             client =
                     S3Client.builder()
                             .region(Region.of(configurationService.getAwsRegion()))
-                            .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                             .build();
         }
         return client;
@@ -36,7 +35,6 @@ public class S3Service implements ObjectStore {
         return S3Client.builder()
                 .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
                 .region(Region.of(configurationService.getAwsRegion()))
-                .credentialsProvider(EnvironmentVariableCredentialsProvider.create())
                 .forcePathStyle(true) // Required for running locally with localstack
                 .build();
     }
