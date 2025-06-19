@@ -16,9 +16,10 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.responses.ErrorMessages;
+import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AuthorizationHeaderMissingException;
-import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.Objects;
 
@@ -39,14 +40,12 @@ public class CredentialResource {
     public Response getCredential(
             @HeaderParam("Authorization") String authorizationHeader, String payload) {
 
-        String cacheControlValue = "no-store";
-
         try {
             SignedJWT accessToken = parseAuthorizationHeader(authorizationHeader);
             SignedJWT proofJwt = parseRequestBody(payload);
 
             CredentialResponse credential = credentialService.getCredential(accessToken, proofJwt);
-            return ResponseUtil.ok(credential, cacheControlValue);
+            return ResponseUtil.ok(credential);
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to create a credential: ", exception);
             if (exception instanceof AuthorizationHeaderMissingException) {
@@ -54,10 +53,10 @@ public class CredentialResource {
             }
             if (exception instanceof AccessTokenValidationException
                     || exception instanceof CredentialOfferException) {
-                return ResponseUtil.unauthorized("invalid_token", cacheControlValue);
+                return ResponseUtil.unauthorized(ErrorMessages.INVALID_TOKEN);
             }
             if (exception instanceof ProofJwtValidationException) {
-                return ResponseUtil.badRequest(error("invalid_proof"), cacheControlValue);
+                return ResponseUtil.badRequest(ErrorMessages.INVALID_PROOF);
             }
             return ResponseUtil.internalServerError();
         }
@@ -100,9 +99,5 @@ public class CredentialResource {
             throw new ProofJwtValidationException(
                     "Failed to parse proof JWT as Signed JWT: ", exception);
         }
-    }
-
-    private String error(String error) {
-        return String.format("{\"error\":\"%s\"}", error);
     }
 }

@@ -6,8 +6,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 @Singleton
 @Path("/.well-known/openid-credential-issuer")
@@ -41,7 +41,7 @@ public class MetadataResource {
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
                             .build();
-            return ResponseUtil.ok(metadata);
+            return ResponseUtil.ok(metadata, true);
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to get the metadata: ", exception);
             return ResponseUtil.internalServerError();
