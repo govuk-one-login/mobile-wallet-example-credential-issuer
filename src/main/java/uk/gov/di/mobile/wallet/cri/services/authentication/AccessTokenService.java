@@ -19,6 +19,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
 
+/** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
 
     public static final String CREDENTIAL_IDENTIFIERS = "credential_identifiers";
@@ -29,14 +30,34 @@ public class AccessTokenService {
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
 
+    /**
+     * Container for access token data.
+     *
+     * @param walletSubjectId The subject identifier from the access token.
+     * @param nonce The nonce value from the access token.
+     * @param credentialIdentifier The first credential identifier from the access token.
+     */
     public record AccessTokenData(
             String walletSubjectId, String nonce, String credentialIdentifier) {}
 
+    /**
+     * Constructs a new AccessTokenService.
+     *
+     * @param jwksService Service to retrieve JWKs for signature validation.
+     * @param configurationService Service providing configuration values.
+     */
     public AccessTokenService(JwksService jwksService, ConfigurationService configurationService) {
         this.jwksService = jwksService;
         this.configurationService = configurationService;
     }
 
+    /**
+     * Verifies the access token's header, claims, and signature, and extracts its data.
+     *
+     * @param accessToken The signed JWT access token.
+     * @return The extracted access token data.
+     * @throws AccessTokenValidationException If the token is invalid.
+     */
     public AccessTokenData verifyAccessToken(SignedJWT accessToken)
             throws AccessTokenValidationException {
         verifyTokenHeader(accessToken);
@@ -47,6 +68,12 @@ public class AccessTokenService {
         return extractAccessTokenData(accessToken);
     }
 
+    /**
+     * Verifies the access token's header.
+     *
+     * @param accessToken The signed JWT access token.
+     * @throws AccessTokenValidationException If the header is invalid.
+     */
     private void verifyTokenHeader(SignedJWT accessToken) throws AccessTokenValidationException {
         JWSHeader header = accessToken.getHeader();
 
@@ -71,6 +98,12 @@ public class AccessTokenService {
         }
     }
 
+    /**
+     * Verifies the access token's claims.
+     *
+     * @param accessToken The signed JWT access token.
+     * @throws AccessTokenValidationException If the claims are invalid.
+     */
     private void verifyTokenClaims(SignedJWT accessToken) throws AccessTokenValidationException {
         String expectedIssuer = configurationService.getOneLoginAuthServerUrl();
         String expectedAudience = configurationService.getSelfUrl();
@@ -97,6 +130,13 @@ public class AccessTokenService {
         }
     }
 
+    /**
+     * Verifies the access token's signature.
+     *
+     * @param accessToken The signed JWT access token.
+     * @return True if the signature is valid.
+     * @throws AccessTokenValidationException If the signature verification fails.
+     */
     private boolean verifyTokenSignature(SignedJWT accessToken)
             throws AccessTokenValidationException {
         String keyId = accessToken.getHeader().getKeyID();
@@ -110,6 +150,13 @@ public class AccessTokenService {
         }
     }
 
+    /**
+     * Extracts data from the access token.
+     *
+     * @param token The signed JWT access token.
+     * @return The extracted access token data.
+     * @throws AccessTokenValidationException If the token data is invalid.
+     */
     private static AccessTokenData extractAccessTokenData(SignedJWT token)
             throws AccessTokenValidationException {
         try {
