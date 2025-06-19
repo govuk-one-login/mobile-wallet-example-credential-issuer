@@ -1,9 +1,15 @@
 package uk.gov.di.mobile.wallet.cri.util;
 
 import software.amazon.awssdk.arns.Arn;
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 
 /** Utility class for extracting resource IDs from AWS ARNs. */
 public class ArnUtil {
+
+    @ExcludeFromGeneratedCoverageReport
+    private ArnUtil() {
+        throw new IllegalStateException("Instantiation is not valid for this class.");
+    }
 
     /**
      * Extracts the certificate ID from an ACM Private CA certificate ARN.
