@@ -37,8 +37,8 @@ public class MockAccessTokenBuilder {
         return this;
     }
 
-    public MockAccessTokenBuilder withType(String typ) {
-        headerBuilder.type(new JOSEObjectType(typ));
+    public MockAccessTokenBuilder withType(JOSEObjectType typ) {
+        headerBuilder.type(typ);
         return this;
     }
 
