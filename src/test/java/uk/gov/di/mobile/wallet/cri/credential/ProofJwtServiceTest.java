@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSASigner;
@@ -62,12 +63,25 @@ class ProofJwtServiceTest {
     }
 
     @Test
+    void Should_ThrowProofJwtValidationException_When_TypeParamIsMissing() {
+        SignedJWT mockProof = new MockProofBuilder("ES256").withType(null).build();
+
+        ProofJwtValidationException exception =
+                assertThrows(
+                        ProofJwtValidationException.class,
+                        () -> proofJwtService.verifyProofJwt(mockProof));
+
+        assertEquals("JWT type header claim is null", exception.getMessage());
+    }
+
+    @Test
     void Should_ThrowProofJwtValidationException_When_RequiredClaimsAreMissing() {
         SignedJWT mockProof =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
                                 .keyID(
                                         "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==")
+                                .type(new JOSEObjectType("openid4vci-proof+jwt"))
                                 .build(),
                         new JWTClaimsSet.Builder().build());
 
@@ -124,6 +138,21 @@ class ProofJwtServiceTest {
     }
 
     @Test
+    void Should_ThrowProofJwtValidationException_When_TypeIsInvalid() {
+        SignedJWT mockProof =
+                new MockProofBuilder("ES256")
+                        .withType(new JOSEObjectType("invalid-proof+jwt"))
+                        .build();
+
+        ProofJwtValidationException exception =
+                assertThrows(
+                        ProofJwtValidationException.class,
+                        () -> proofJwtService.verifyProofJwt(mockProof));
+
+        assertEquals("JWT type header claim is invalid", exception.getMessage());
+    }
+
+    @Test
     void Should_ThrowProofJwtValidationException_When_SignatureVerificationFails()
             throws JOSEException {
         SignedJWT mockProof =
@@ -152,5 +181,6 @@ class ProofJwtServiceTest {
         assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
         assertEquals(
                 "did:key:zDnaeUqPxbNEqiYDMyo6EHt9XxpQcE2arUVgkZyfwA6G5Xacf", response.didKey());
+        assertEquals("openid4vci-proof+jwt", mockProof.getHeader().getType().toString());
     }
 }

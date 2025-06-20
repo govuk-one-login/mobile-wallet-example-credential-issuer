@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "test": "node_modules/.bin/jest",
+    "test:cov": "jest --coverage",
     "lint": "node_modules/.bin/eslint .",
     "format": "node_modules/.bin/prettier --write .",
     "format:check": "node_modules/.bin/prettier --check ."
@@ -40,5 +41,8 @@
     "typescript": "^5.8.2",
     "typescript-eslint": "^8.26.1"
   },
-  "type": "module"
+  "type": "module",
+  "overrides": {
+    "brace-expansion": "2.0.2"
+  }
 }

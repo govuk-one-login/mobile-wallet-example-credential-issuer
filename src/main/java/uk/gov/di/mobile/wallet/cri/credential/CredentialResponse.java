@@ -1,20 +1,27 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import uk.gov.di.mobile.wallet.cri.util.Credential;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 public class CredentialResponse {
     private final String credential;
-    private final String notificationId;
-
-    public CredentialResponse(String credential, String notificationId) {
-        this.credential = credential;
-        this.notificationId = notificationId;
-    }
+    private final ArrayList<Credential> credentials;
 
     @JsonProperty("notification_id")
-    public String getNotificationId() {
-        return notificationId;
+    private final String notificationId;
+
+    @JsonCreator
+    public CredentialResponse(
+            @JsonProperty("credential") String credential,
+            @JsonProperty("notification_id") String notificationId) {
+        this.credential = credential;
+        this.notificationId = notificationId;
+        this.credentials = new ArrayList<>(List.of(new Credential(credential)));
     }
 }

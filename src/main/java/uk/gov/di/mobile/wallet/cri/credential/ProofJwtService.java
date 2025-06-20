@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
@@ -57,6 +58,7 @@ public class ProofJwtService {
      * @throws ProofJwtValidationException On invalid header claims
      */
     private void verifyTokenHeader(SignedJWT proofJwt) throws ProofJwtValidationException {
+
         JWSAlgorithm jwtAlgorithm = proofJwt.getHeader().getAlgorithm();
         if (jwtAlgorithm != EXPECTED_SIGNING_ALGORITHM) {
             throw new ProofJwtValidationException(
@@ -67,6 +69,14 @@ public class ProofJwtService {
 
         if (proofJwt.getHeader().getKeyID() == null) {
             throw new ProofJwtValidationException("JWT kid header claim is null");
+        }
+
+        JOSEObjectType typ = proofJwt.getHeader().getType();
+        if (typ == null) {
+            throw new ProofJwtValidationException("JWT type header claim is null");
+        }
+        if (!"openid4vci-proof+jwt".equals(typ.toString())) {
+            throw new ProofJwtValidationException("JWT type header claim is invalid");
         }
     }
 
