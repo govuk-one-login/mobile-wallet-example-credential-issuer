@@ -1,10 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.impl.ECDSA;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -21,6 +19,8 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+
+import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.toBase64UrlEncodedSignature;
 
 public class PreAuthorizedCodeBuilder {
 
@@ -51,20 +51,12 @@ public class PreAuthorizedCodeBuilder {
 
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
-            String signature = encodedSignature(signResult);
+            String signature = toBase64UrlEncodedSignature(signResult);
             return SignedJWT.parse(message + "." + signature);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing token: %s", exception.getMessage()), exception);
         }
-    }
-
-    private static String encodedSignature(SignResponse signResult) throws JOSEException {
-        return Base64URL.encode(
-                        ECDSA.transcodeSignatureToConcat(
-                                signResult.signature().asByteArray(),
-                                ECDSA.getSignatureByteArrayLength(SIGNING_ALGORITHM)))
-                .toString();
     }
 
     private Base64URL getEncodedClaims(String credentialIdentifier) {

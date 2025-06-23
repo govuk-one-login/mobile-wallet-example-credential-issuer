@@ -1,10 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.impl.ECDSA;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import software.amazon.awssdk.core.SdkBytes;
@@ -26,6 +24,8 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+
+import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.toBase64UrlEncodedSignature;
 
 public class CredentialBuilder<T extends CredentialSubject> {
 
@@ -73,7 +73,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
-            String signature = encodedSignature(signResult);
+            String signature = toBase64UrlEncodedSignature(signResult);
             return message + "." + signature;
         } catch (Exception exception) {
             throw new SigningException(
@@ -123,13 +123,5 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .contentType("vc")
                         .build();
         return jwsHeader.toBase64URL();
-    }
-
-    private static String encodedSignature(SignResponse signResult) throws JOSEException {
-        return Base64URL.encode(
-                        ECDSA.transcodeSignatureToConcat(
-                                signResult.signature().asByteArray(),
-                                ECDSA.getSignatureByteArrayLength(SIGNING_ALGORITHM)))
-                .toString();
     }
 }
