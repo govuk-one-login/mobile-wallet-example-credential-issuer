@@ -23,6 +23,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -131,7 +132,7 @@ public class CredentialService {
                         String.format("Invalid verifiable credential type %s", vcType));
             }
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
-        } catch (NoSuchAlgorithmException | SigningException | MDLException exception) {
+        } catch (NoSuchAlgorithmException | SigningException | MDLException | CertificateException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
@@ -194,7 +195,7 @@ public class CredentialService {
     }
 
     private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
-            throws MDLException {
+            throws MDLException, SigningException, CertificateException, NoSuchAlgorithmException {
         return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 

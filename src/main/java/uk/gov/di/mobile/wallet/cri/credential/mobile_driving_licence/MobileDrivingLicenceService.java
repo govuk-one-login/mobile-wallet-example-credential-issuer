@@ -4,7 +4,10 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.HexFormat;
 
 /**
@@ -41,7 +44,7 @@ public class MobileDrivingLicenceService {
      * @throws MDLException If an error occurs during document creation or encoding
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
-            throws MDLException {
+            throws MDLException, SigningException, CertificateException, NoSuchAlgorithmException {
         Document mdoc = documentFactory.build(drivingLicenceDocument);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
         return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);
