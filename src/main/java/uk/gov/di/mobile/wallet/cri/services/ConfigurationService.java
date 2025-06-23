@@ -79,4 +79,9 @@ public class ConfigurationService extends Configuration {
     public String getJwksEndpoint() {
         return "/.well-known/jwks.json";
     }
+
+    public String getDocumentSigningKey1() {
+        return System.getenv()
+                .getOrDefault("DOCUMENT_SIGNING_KEY_ALIAS_1", "alias/documentSigningKeyAlias1");
+    }
 }
