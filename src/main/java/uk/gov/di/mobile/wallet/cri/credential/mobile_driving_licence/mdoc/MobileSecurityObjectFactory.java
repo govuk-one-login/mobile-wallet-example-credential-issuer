@@ -3,6 +3,9 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DocType;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -21,6 +24,9 @@ public class MobileSecurityObjectFactory {
     /** The factory responsible for creating {@link ValueDigests} instances. */
     private final ValueDigestsFactory valueDigestsFactory;
 
+    /** The source of current time for validity information. */
+    private final Clock clock;
+
     /**
      * Constructs a new {@link MobileSecurityObjectFactory} with the provided {@link
      * ValueDigestsFactory}.
@@ -29,7 +35,20 @@ public class MobileSecurityObjectFactory {
      *     MobileSecurityObject}.
      */
     public MobileSecurityObjectFactory(ValueDigestsFactory valueDigestsFactory) {
+        this(valueDigestsFactory, Clock.systemDefaultZone());
+    }
+
+    /**
+     * Constructs a new {@link MobileSecurityObjectFactory} with the provided {@link
+     * ValueDigestsFactory} and {@link Clock}.
+     *
+     * @param valueDigestsFactory The factory used to create value digests for the {@link
+     *     MobileSecurityObject}.
+     * @param clock The source of current time for validity information.
+     */
+    public MobileSecurityObjectFactory(ValueDigestsFactory valueDigestsFactory, Clock clock) {
         this.valueDigestsFactory = valueDigestsFactory;
+        this.clock = clock;
     }
 
     /**
@@ -47,7 +66,17 @@ public class MobileSecurityObjectFactory {
     public MobileSecurityObject build(Map<String, List<IssuerSignedItem>> nameSpaces)
             throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
+
+        Instant currentTimestamp = clock.instant();
+        Instant validUntil = currentTimestamp.plus(Duration.ofDays(365));
+
+        var validityInfo = new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);
+
         return new MobileSecurityObject(
-                MSO_VERSION, valueDigestsFactory.getDigestAlgorithm(), valueDigests, DOC_TYPE);
+                MSO_VERSION,
+                valueDigestsFactory.getDigestAlgorithm(),
+                valueDigests,
+                DOC_TYPE,
+                validityInfo);
     }
 }

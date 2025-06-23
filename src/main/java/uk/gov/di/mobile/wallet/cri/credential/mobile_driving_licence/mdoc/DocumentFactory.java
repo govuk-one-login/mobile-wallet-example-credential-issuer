@@ -124,6 +124,8 @@ public class DocumentFactory {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
+        // sign mobileSecurityObjectBytes
+
         IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
         Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);
 
