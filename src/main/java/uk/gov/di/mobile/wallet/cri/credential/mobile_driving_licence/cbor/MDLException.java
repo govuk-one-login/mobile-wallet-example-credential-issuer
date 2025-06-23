@@ -1,6 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-public class MDLException extends Exception {
+public class MDLException extends RuntimeException {
 
     public MDLException(String message, Exception exception) {
         super(message, exception);

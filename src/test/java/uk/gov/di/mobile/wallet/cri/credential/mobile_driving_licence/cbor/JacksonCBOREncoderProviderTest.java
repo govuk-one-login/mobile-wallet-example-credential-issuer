@@ -66,8 +66,9 @@ class JacksonCBOREncoderProviderTest {
 
     private IssuerSigned createTestIssuerSigned() {
         byte[] issuerSignedItemBytes = {1, 2, 3, 4};
+        byte[] mobileSecurityObjectBytes = {1, 2, 3, 4};
         Map<String, List<byte[]>> testNameSpaces =
                 Map.of("namespace", List.of(issuerSignedItemBytes));
-        return new IssuerSigned(testNameSpaces, new IssuerAuth());
+        return new IssuerSigned(testNameSpaces, new IssuerAuth(mobileSecurityObjectBytes));
     }
 }

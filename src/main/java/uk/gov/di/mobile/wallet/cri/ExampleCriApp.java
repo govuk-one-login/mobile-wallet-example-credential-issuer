@@ -17,6 +17,7 @@ import uk.gov.di.mobile.wallet.cri.notification.NotificationResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.MalformedURLException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Main application class for the Example CRI.
@@ -48,7 +49,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
      */
     @Override
     public void run(final ConfigurationService configurationService, final Environment environment)
-            throws MalformedURLException {
+            throws MalformedURLException, NoSuchAlgorithmException {
 
         Services services = ServicesFactory.create(configurationService, environment);
 
