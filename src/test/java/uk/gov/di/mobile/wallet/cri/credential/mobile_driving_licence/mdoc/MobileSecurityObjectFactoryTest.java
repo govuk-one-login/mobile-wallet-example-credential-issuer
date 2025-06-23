@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 
@@ -26,13 +27,23 @@ class MobileSecurityObjectFactoryTest {
         ValueDigests valueDigests = new ValueDigests(Map.of("Test", Map.of(5, new byte[] {1})));
         when(mockValueDigestsFactory.createFromNamespaces(anyMap())).thenReturn(valueDigests);
         when(mockValueDigestsFactory.getDigestAlgorithm()).thenReturn("SHA-256");
+        Clock clock = Clock.fixed(Instant.ofEpochSecond(1750677223), ZoneId.systemDefault());
 
         MobileSecurityObject result =
-                new MobileSecurityObjectFactory(mockValueDigestsFactory).build(nameSpaces);
+                new MobileSecurityObjectFactory(mockValueDigestsFactory, clock).build(nameSpaces);
 
+        ValidityInfo expectedValidityInfo =
+                new ValidityInfo(
+                        clock.instant(),
+                        clock.instant(),
+                        clock.instant().plus(Duration.ofDays(365)));
         MobileSecurityObject expectedMso =
-                new MobileSecurityObject("1.0", "SHA-256", valueDigests, "org.iso.18013.5.1.mDL");
-
+                new MobileSecurityObject(
+                        "1.0",
+                        "SHA-256",
+                        valueDigests,
+                        "org.iso.18013.5.1.mDL",
+                        expectedValidityInfo);
         assertEquals(expectedMso, result);
         verify(mockValueDigestsFactory).createFromNamespaces(nameSpaces);
     }

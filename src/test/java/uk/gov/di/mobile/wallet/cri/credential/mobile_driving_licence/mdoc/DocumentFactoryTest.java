@@ -10,7 +10,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.Namespaces;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
-import java.time.LocalDate;
+import java.time.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -221,9 +221,19 @@ class DocumentFactoryTest {
         when(mockIssuerSignedItemFactory.build(any(), any())).thenReturn(issuerSignedItem);
 
         // Arrange: Prepare a specific MobileSecurityObject to be returned by the factory
+        Clock clock = Clock.fixed(Instant.ofEpochSecond(1750677223), ZoneId.systemDefault());
+        ValidityInfo expectedValidityInfo =
+                new ValidityInfo(
+                        clock.instant(),
+                        clock.instant(),
+                        clock.instant().plus(Duration.ofDays(365)));
         MobileSecurityObject expectedMso =
                 new MobileSecurityObject(
-                        "1.0", "SHA-256", mockValueDigests, "org.iso.18013.5.1.mDL");
+                        "1.0",
+                        "SHA-256",
+                        mockValueDigests,
+                        "org.iso.18013.5.1.mDL",
+                        expectedValidityInfo);
         when(mockMobileSecurityObjectFactory.build(any())).thenReturn(expectedMso);
 
         // Arrange: Set up CBOR encoding for both the IssuerSignedItem and the MobileSecurityObject
