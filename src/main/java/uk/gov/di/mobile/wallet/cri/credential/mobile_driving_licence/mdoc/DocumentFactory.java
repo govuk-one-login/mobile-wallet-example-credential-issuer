@@ -1,13 +1,23 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import org.jetbrains.annotations.NotNull;
+import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.kms.model.MessageType;
+import software.amazon.awssdk.services.kms.model.SignRequest;
+import software.amazon.awssdk.services.kms.model.SignResponse;
+import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DocType;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
+import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.lang.reflect.Field;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -31,6 +41,8 @@ public class DocumentFactory {
     private final IssuerSignedItemFactory issuerSignedItemFactory;
     private final MobileSecurityObjectFactory mobileSecurityObjectFactory;
     private final CBOREncoder cborEncoder;
+    private final KeyProvider keyProvider;
+    private final ConfigurationService configurationService;
 
     /**
      * Constructs a DocumentFactory with the necessary dependencies.
@@ -42,13 +54,18 @@ public class DocumentFactory {
     public DocumentFactory(
             IssuerSignedItemFactory issuerSignedItemFactory,
             MobileSecurityObjectFactory mobileSecurityObjectFactory,
-            CBOREncoder cborEncoder) {
+            CBOREncoder cborEncoder,
+            KeyProvider keyProvider,
+            ConfigurationService configurationService) {
         this.issuerSignedItemFactory = issuerSignedItemFactory;
         this.mobileSecurityObjectFactory = mobileSecurityObjectFactory;
         this.cborEncoder = cborEncoder;
+        this.keyProvider = keyProvider;
+        this.configurationService = configurationService;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence) throws MDLException {
+    public Document build(final DrivingLicenceDocument drivingLicence)
+            throws MDLException, SigningException, NoSuchAlgorithmException {
         Map<String, List<IssuerSignedItem>> namespaces = buildNamespaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(namespaces);
         return new Document(DOC_TYPE, issuerSigned);
@@ -120,11 +137,28 @@ public class DocumentFactory {
     }
 
     private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> namespaces)
-            throws MDLException {
+            throws MDLException, NoSuchAlgorithmException, SigningException {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
-        // sign mobileSecurityObjectBytes
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        byte[] encodedHash = digest.digest(mobileSecurityObjectBytes);
+
+        String keyId = keyProvider.getKeyId(configurationService.getDocumentSigningKey1());
+        var signRequest =
+                SignRequest.builder()
+                        .message(SdkBytes.fromByteArray(encodedHash))
+                        .messageType(MessageType.DIGEST)
+                        .keyId(keyId)
+                        .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
+                        .build();
+
+        try {
+            SignResponse signResult = keyProvider.sign(signRequest);
+        } catch (Exception exception) {
+            throw new SigningException(
+                    String.format("Error signing MSO: %s", exception.getMessage()), exception);
+        }
 
         IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
         Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);
