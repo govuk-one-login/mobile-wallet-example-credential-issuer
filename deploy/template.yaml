@@ -426,6 +426,8 @@ Resources:
               Value: !Sub
                 - "https://${AuthServerUrl}"
                 - AuthServerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, AuthServerUrl]
+            - Name: DOCUMENT_SIGNING_KEY_ALIAS_1
+              Value: !ImportValue "wallet-dsc-issuer-DocumentSigningKeyAlias1"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
