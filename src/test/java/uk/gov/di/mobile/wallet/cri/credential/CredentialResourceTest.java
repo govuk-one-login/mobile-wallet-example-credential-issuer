@@ -70,6 +70,7 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
+        assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_proof\"}"));
     }
 
@@ -121,6 +122,7 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(401));
+        assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(
                 response.getHeaderString("WWW-Authenticate"), is("Bearer error=\"invalid_token\""));
     }
@@ -152,6 +154,7 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(401));
+        assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(
                 response.getHeaderString("WWW-Authenticate"), is("Bearer error=\"invalid_token\""));
         reset(credentialService);
@@ -218,6 +221,7 @@ class CredentialResourceTest {
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(200));
+        assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
 
         assertThat(
                 new ObjectMapper().writeValueAsString(credentialResponse),
