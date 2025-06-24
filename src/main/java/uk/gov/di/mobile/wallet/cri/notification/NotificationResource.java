@@ -15,9 +15,10 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
+import uk.gov.di.mobile.wallet.cri.responses.ErrorMessages;
+import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AuthorizationHeaderMissingException;
-import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.util.UUID;
 
@@ -47,13 +48,13 @@ public class NotificationResource {
             }
             if (exception instanceof AccessTokenValidationException
                     || exception instanceof CredentialOfferException) {
-                return ResponseUtil.unauthorized("invalid_token");
+                return ResponseUtil.unauthorized(ErrorMessages.INVALID_TOKEN);
             }
             if (exception instanceof InvalidNotificationIdException) {
-                return ResponseUtil.badRequest(error("invalid_notification_id"));
+                return ResponseUtil.badRequest(ErrorMessages.INVALID_NOTIFICATION_ID);
             }
             if (exception instanceof InvalidNotificationRequestException) {
-                return ResponseUtil.badRequest(error("invalid_notification_request"));
+                return ResponseUtil.badRequest(ErrorMessages.INVALID_NOTIFICATION_REQUEST);
             }
             return ResponseUtil.internalServerError();
         }
@@ -103,9 +104,5 @@ public class NotificationResource {
                     "Invalid event_description: must contain only ASCII characters");
         }
         return requestBody;
-    }
-
-    private String error(String error) {
-        return String.format("{\"error\":\"%s\"}", error);
     }
 }

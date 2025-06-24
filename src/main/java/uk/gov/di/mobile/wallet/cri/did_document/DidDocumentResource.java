@@ -7,8 +7,8 @@ import jakarta.ws.rs.core.Response;
 import org.bouncycastle.openssl.PEMException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
-import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -27,7 +27,7 @@ public class DidDocumentResource {
     public Response getDidDocument() {
         try {
             DidDocument didDocument = didDocumentService.generateDidDocument();
-            return ResponseUtil.ok(didDocument);
+            return ResponseUtil.ok(didDocument, true);
         } catch (IllegalArgumentException
                 | PEMException
                 | NoSuchAlgorithmException

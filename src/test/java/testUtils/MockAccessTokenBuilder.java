@@ -1,5 +1,6 @@
 package testUtils;
 
+import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -27,11 +28,17 @@ public class MockAccessTokenBuilder {
     public MockAccessTokenBuilder(String algorithm) {
         this.headerBuilder =
                 new JWSHeader.Builder(JWSAlgorithm.parse(algorithm))
-                        .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91");
+                        .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
+                        .type(new JOSEObjectType("at+jwt"));
     }
 
     public MockAccessTokenBuilder withKid(String kid) {
         headerBuilder.keyID(kid);
+        return this;
+    }
+
+    public MockAccessTokenBuilder withType(JOSEObjectType typ) {
+        headerBuilder.type(typ);
         return this;
     }
 
