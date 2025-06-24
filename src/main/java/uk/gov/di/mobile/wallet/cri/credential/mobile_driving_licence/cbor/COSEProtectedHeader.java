@@ -1,9 +1,13 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-public class COSEProtectedHeader {
-    private COSEAlgorithms alg;
+import lombok.Getter;
 
-    public COSEProtectedHeader(COSEAlgorithms alg) {
-        this.alg = alg;
+@Getter
+public class COSEProtectedHeader {
+    private final byte[] cborBytes;
+
+    public COSEProtectedHeader(byte[] cborBytes) {
+        this.cborBytes = cborBytes;
     }
+
 }
