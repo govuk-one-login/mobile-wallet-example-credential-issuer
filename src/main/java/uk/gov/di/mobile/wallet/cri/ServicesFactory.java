@@ -85,7 +85,11 @@ public class ServicesFactory {
                 new MobileSecurityObjectFactory(valueDigestsFactory);
         DocumentFactory documentFactory =
                 new DocumentFactory(
-                        issuerSignedItemFactory, mobileSecurityObjectFactory, cborEncoder, kmsService, configurationService);
+                        issuerSignedItemFactory,
+                        mobileSecurityObjectFactory,
+                        cborEncoder,
+                        kmsService,
+                        configurationService);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
                 new MobileDrivingLicenceService(cborEncoder, documentFactory);
