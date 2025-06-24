@@ -42,7 +42,6 @@ dependencies {
 	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
 	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
 
-	implementation 'com.authlete:cbor:1.5'
 
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
 	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"

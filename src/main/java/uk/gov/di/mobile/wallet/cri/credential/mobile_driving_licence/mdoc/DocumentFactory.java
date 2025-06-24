@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import com.authlete.cose.*;
-import com.authlete.cose.constants.COSEAlgorithms;
 import org.jetbrains.annotations.NotNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.MessageType;
@@ -17,19 +15,18 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.utils.CamelToSnake.camelToSnake;
-import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.getSignatureAsBytes;
 
 /**
  * Factory for constructing CBOR-encoded issuer-signed items grouped by their respective namespace.
@@ -68,7 +65,7 @@ public class DocumentFactory {
     }
 
     public Document build(final DrivingLicenceDocument drivingLicence)
-            throws MDLException, SigningException, NoSuchAlgorithmException, CertificateException {
+            throws MDLException, SigningException, NoSuchAlgorithmException {
         Map<String, List<IssuerSignedItem>> namespaces = buildNamespaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(namespaces);
         return new Document(DOC_TYPE, issuerSigned);
@@ -140,9 +137,8 @@ public class DocumentFactory {
     }
 
     private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> namespaces)
-            throws MDLException, NoSuchAlgorithmException, SigningException, CertificateException {
+            throws MDLException, NoSuchAlgorithmException, SigningException {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
-        System.out.println(mobileSecurityObject);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -157,94 +153,12 @@ public class DocumentFactory {
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
                         .build();
 
-        byte[] signature;
         try {
-             SignResponse signResult = keyProvider.sign(signRequest);
-            signature = getSignatureAsBytes(signResult);
+            SignResponse signResult = keyProvider.sign(signRequest);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing MSO: %s", exception.getMessage()), exception);
         }
-
-        // *** TEST CODE ***
-
-        // Certificate for the issuer key in the PEM format.
-        String issuerCertPem =
-                "-----BEGIN CERTIFICATE-----\n"
-                        + "MIIBXzCCAQSgAwIBAgIGAYwpA4/aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNf\n"
-                        + "d1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMx\n"
-                        + "MjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdv\n"
-                        + "MUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYI\n"
-                        + "KoZIzj0DAQcDQgAEQw7367PjIwU17ckX/G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc3\n"
-                        + "3RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEA\n"
-                        + "o4TsuxDl5+3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOO\n"
-                        + "rwnEYRBmmfhaPor2OZCrbP3U6w==\n"
-                        + "-----END CERTIFICATE-----\n";
-
-        // Certificate for the issuer key as X509Certificate.
-        X509Certificate issuerCert =
-                (X509Certificate)
-                        CertificateFactory.getInstance("X.509")
-                                .generateCertificate(
-                                        new ByteArrayInputStream(
-                                                issuerCertPem.getBytes(StandardCharsets.UTF_8)));
-
-        // Certificate Chain for Issuer Key
-        List<X509Certificate> issuerCertChain = List.of(issuerCert);
-
-        // First element: << {1: -7} >>
-        Map<Integer, Integer> innerMap = new LinkedHashMap<>();
-        innerMap.put(1, -7);
-        byte[] innerMapCbor = cborEncoder.encode(innerMap);
-
-        // Second element: {33: h'...'}
-        Map<Integer, byte[]> secondMap = new LinkedHashMap<>();
-        secondMap.put(33, issuerCert.getEncoded());
-
-        // Outer list
-        List<Object> outerList = new ArrayList<>();
-        outerList.add(innerMapCbor); // Will be encoded as CBOR byte string
-        outerList.add(secondMap);    // Will be encoded as CBOR map
-
-        // Encode the list
-        byte[] finalCbor = cborEncoder.encode(outerList);
-
-                System.out.println(HexFormat.of().formatHex(finalCbor));
-
-
-
-
-
-//        Map<Object, Object> innerMap = new LinkedHashMap<>();
-//        innerMap.put(1, -7);
-//
-//        // Step 1: Encode the map as CBOR bytes
-//        byte[] mapBytes = cborEncoder.encode(innerMap);
-//        // Step 2: Wrap the bytes as a CBOR byte string
-//        byte[] outerBytes = cborEncoder.encode(mapBytes);
-//        System.out.println(HexFormat.of().formatHex(outerBytes));
-
-
-        COSEProtectedHeader protectedHeader = new COSEProtectedHeaderBuilder().alg(COSEAlgorithms.ES256).build();
-        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeaderBuilder().x5chain(issuerCertChain).build();
-
-        COSESign1 sign1 =
-                new COSESign1Builder()
-                        // Protected header
-                        .protectedHeader(
-                                // <<{1:-7}>>
-                                protectedHeader)
-                        // Unprotected header
-                        .unprotectedHeader(
-                                unprotectedHeader)
-                        // Payload
-                        .payload(mobileSecurityObjectBytes)
-                        // Signature
-                        .signature(signature)
-                        // Construct a COSESign1 instance.
-                        .build();
-
-        System.out.println(sign1.encodeToHex());
 
         IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
         Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);

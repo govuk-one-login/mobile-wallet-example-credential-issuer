@@ -35,8 +35,7 @@ public class MobileSecurityObjectFactory {
      *     MobileSecurityObject}.
      */
     public MobileSecurityObjectFactory(ValueDigestsFactory valueDigestsFactory) {
-        this.valueDigestsFactory = valueDigestsFactory;
-        this.clock = Clock.systemDefaultZone();
+        this(valueDigestsFactory, Clock.systemDefaultZone());
     }
 
     /**
