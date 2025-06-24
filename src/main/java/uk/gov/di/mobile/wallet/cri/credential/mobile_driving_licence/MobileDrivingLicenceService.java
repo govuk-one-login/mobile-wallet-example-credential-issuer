@@ -41,7 +41,7 @@ public class MobileDrivingLicenceService {
      * @throws MDLException If an error occurs during document creation or encoding
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
-            throws MDLException {
+            throws Exception {
         Document mdoc = documentFactory.build(drivingLicenceDocument);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
         return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);

@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.MessageType;
@@ -9,8 +10,8 @@ import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DocType;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.*;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.*;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -40,6 +41,7 @@ import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.getSignatureAsBy
  * <p>This class uses reflection to extract annotated fields from a document, builds
  * IssuerSignedItem objects, encodes them to CBOR, and organizes them by their namespace.
  */
+@Slf4j
 public class DocumentFactory {
 
     private static final String DOC_TYPE = DocType.MDL.getValue();
@@ -70,8 +72,7 @@ public class DocumentFactory {
         this.configurationService = configurationService;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence)
-            throws MDLException, SigningException, NoSuchAlgorithmException {
+    public Document build(final DrivingLicenceDocument drivingLicence) throws Exception {
         Map<String, List<IssuerSignedItem>> namespaces = buildNamespaces(drivingLicence);
         IssuerSigned issuerSigned = buildIssuerSigned(namespaces);
         return new Document(DOC_TYPE, issuerSigned);
@@ -147,13 +148,30 @@ public class DocumentFactory {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
-        byte[] signature = getSignature(mobileSecurityObjectBytes);
+        System.out.println(
+                "mobileSecurityObjectBytes " + Arrays.toString(mobileSecurityObjectBytes));
+
+        byte[] signature =
+                getSignature(mobileSecurityObjectBytes); // **** I suspect this is wrong ****
         X509Certificate certificate = getCertificate();
 
-        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
+        COSEProtectedHeader protectedHeader =
+                new COSEProtectedHeaderBuilder(cborEncoder).alg(COSEAlgorithms.ES256).build();
+
+        COSEUnprotectedHeader unprotectedHeader =
+                new COSEUnprotectedHeaderBuilder().x5chain(certificate.getEncoded()).build();
+
+        COSESign1 sign1 =
+                new COSESign1Builder()
+                        .protectedHeader(protectedHeader)
+                        .unprotectedHeader(unprotectedHeader)
+                        .payload(mobileSecurityObjectBytes)
+                        .signature(signature)
+                        .build();
+
         Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);
 
-        return new IssuerSigned(encodedNamespaces, issuerAuth);
+        return new IssuerSigned(encodedNamespaces, sign1);
     }
 
     private byte[] getSignature(byte[] mobileSecurityObjectBytes)

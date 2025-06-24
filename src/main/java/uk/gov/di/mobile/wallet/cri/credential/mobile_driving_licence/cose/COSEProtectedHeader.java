@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
 import lombok.Getter;
 
@@ -9,5 +9,4 @@ public class COSEProtectedHeader {
     public COSEProtectedHeader(byte[] cborBytes) {
         this.cborBytes = cborBytes;
     }
-
 }

@@ -1,4 +1,6 @@
-package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
+
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

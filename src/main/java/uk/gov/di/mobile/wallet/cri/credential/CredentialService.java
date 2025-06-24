@@ -12,7 +12,6 @@ import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCr
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
@@ -131,7 +130,7 @@ public class CredentialService {
                         String.format("Invalid verifiable credential type %s", vcType));
             }
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
-        } catch (NoSuchAlgorithmException | SigningException | MDLException exception) {
+        } catch (Exception exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
@@ -194,7 +193,7 @@ public class CredentialService {
     }
 
     private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
-            throws MDLException {
+            throws Exception {
         return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 

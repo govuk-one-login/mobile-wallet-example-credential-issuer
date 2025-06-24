@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerAuth;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 
 import java.io.IOException;
@@ -51,11 +51,13 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
             }
             cborGenerator.writeEndObject();
 
-            IssuerAuth issuerAuth = issuerSigned.issuerAuth();
+            COSESign1 issuerAuth = issuerSigned.issuerAuth();
             cborGenerator.writeFieldName("issuerAuth");
             cborGenerator.writeStartArray();
-            cborGenerator.writeTag(24);
-            cborGenerator.writeObject(issuerAuth.mobileSecurityObjectBytes());
+            cborGenerator.writeBinary(issuerAuth.getProtectedHeader().getCborBytes());
+            cborGenerator.writeObject(issuerAuth.getUnprotectedHeader().getHeaderMap());
+            cborGenerator.writeBinary(issuerAuth.getPayload());
+            cborGenerator.writeBinary(issuerAuth.getSignature());
             cborGenerator.writeEndArray();
 
             cborGenerator.writeEndObject();
