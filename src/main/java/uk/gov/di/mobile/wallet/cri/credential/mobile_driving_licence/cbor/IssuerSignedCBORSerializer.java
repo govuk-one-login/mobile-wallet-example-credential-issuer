@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerAuth;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
             throws IOException {
         if (generator instanceof CBORGenerator cborGenerator) {
             cborGenerator.writeStartObject();
+
             cborGenerator.writeFieldName("nameSpaces");
             cborGenerator.writeStartObject();
             for (Map.Entry<String, List<byte[]>> entry : issuerSigned.nameSpaces().entrySet()) {
@@ -48,6 +50,14 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
                 cborGenerator.writeEndArray();
             }
             cborGenerator.writeEndObject();
+
+            IssuerAuth issuerAuth = issuerSigned.issuerAuth();
+            cborGenerator.writeFieldName("issuerAuth");
+            cborGenerator.writeStartArray();
+            cborGenerator.writeTag(24);
+            cborGenerator.writeObject(issuerAuth.mobileSecurityObjectBytes());
+            cborGenerator.writeEndArray();
+
             cborGenerator.writeEndObject();
         } else {
             throw new IllegalArgumentException("This serializer only supports CBORGenerator");
