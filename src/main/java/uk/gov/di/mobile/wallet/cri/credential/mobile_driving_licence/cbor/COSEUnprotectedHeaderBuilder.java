@@ -1,8 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-import java.security.cert.X509Certificate;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,7 +8,7 @@ import java.util.Map;
  * The unprotected header is a CBOR map.
  */
 public class COSEUnprotectedHeaderBuilder {
-    private List<X509Certificate> x5chain;
+    private final Map<Integer, Object> headerMap = new LinkedHashMap<>();
     private final CBOREncoder cborEncoder;
 
     /**
@@ -21,31 +19,12 @@ public class COSEUnprotectedHeaderBuilder {
         this.cborEncoder = cborEncoder;
     }
 
-    /**
-     * Sets the 'x5chain' parameter for the unprotected header.
-     * @param x5chain The certificate chain (usually a list of X509Certificate).
-     * @return This builder instance.
-     */
-    public COSEUnprotectedHeaderBuilder x5chain(List<X509Certificate> x5chain) {
-        this.x5chain = x5chain;
+    public COSEUnprotectedHeaderBuilder x5chain(Object x5chain) {
+        headerMap.put(33, x5chain);
         return this;
     }
 
-    /**
-     * Builds the COSEUnprotectedHeader according to RFC 8152:
-     * 1. Encodes the header map as CBOR.
-     * @return COSEUnprotectedHeader containing the CBOR map bytes.
-     */
     public COSEUnprotectedHeader build() {
-        // Step 1: Build the header map (e.g., {33: x5chain})
-        Map<Integer, Object> headerMap = new LinkedHashMap<>();
-        headerMap.put(33, x5chain);
-
-
-        // Step 2: Encode the map to CBOR bytes
-        byte[] headerMapCbor = cborEncoder.encode(headerMap);
-
-        // Step 3: Construct the COSEUnprotectedHeader with the final bytes
-        return new COSEUnprotectedHeader(headerMapCbor);
+        return new COSEUnprotectedHeader(new LinkedHashMap<>(headerMap));
     }
 }

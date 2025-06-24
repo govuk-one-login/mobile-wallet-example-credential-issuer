@@ -1,13 +1,20 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class COSESign1Builder {
     private COSEProtectedHeader protectedHeader;
     private COSEUnprotectedHeader unprotectedHeader;
     private byte[] payload;
     private byte[] signature;
+    private final CBOREncoder cborEncoder;
 
+    public COSESign1Builder(CBOREncoder cborEncoder) {
+        this.cborEncoder = cborEncoder;
+    }
     public COSESign1Builder protectedHeader(COSEProtectedHeader header) {
         this.protectedHeader = header;
         return this;
@@ -18,8 +25,8 @@ public class COSESign1Builder {
         return this;
     }
 
-    public COSESign1Builder payload(String payload) {
-        this.payload = payload.getBytes(StandardCharsets.UTF_8);
+    public COSESign1Builder payload(byte[] payload) {
+        this.payload = payload;
         return this;
     }
 
@@ -29,6 +36,22 @@ public class COSESign1Builder {
     }
 
     public COSESign1 build() {
-        return new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
+        byte[] protectedHeaderBytes = protectedHeader.getCborBytes();
+
+        Map<Integer, Object> unprotectedHeaderMap = unprotectedHeader.getHeaderMap();
+
+        byte[] payloadBytes = payload;
+
+        byte[] signatureBytes = signature;
+
+        List<Object> coseSign1Array = new ArrayList<>();
+        coseSign1Array.add(protectedHeaderBytes);
+        coseSign1Array.add(unprotectedHeaderMap);
+        coseSign1Array.add(payloadBytes);
+        coseSign1Array.add(signatureBytes);
+
+        byte[] coseSign1Bytes = cborEncoder.encode(coseSign1Array);
+
+        return new COSESign1(coseSign1Bytes);
     }
 }
