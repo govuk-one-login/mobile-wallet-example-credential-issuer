@@ -15,9 +15,14 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -27,6 +32,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.utils.CamelToSnake.camelToSnake;
+import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.getSignatureAsBytes;
 
 /**
  * Factory for constructing CBOR-encoded issuer-signed items grouped by their respective namespace.
@@ -137,10 +143,21 @@ public class DocumentFactory {
     }
 
     private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> namespaces)
-            throws MDLException, NoSuchAlgorithmException, SigningException {
+            throws MDLException, NoSuchAlgorithmException, SigningException, CertificateException {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
+        byte[] signature = getSignature(mobileSecurityObjectBytes);
+        X509Certificate certificate = getCertificate();
+
+        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
+        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);
+
+        return new IssuerSigned(encodedNamespaces, issuerAuth);
+    }
+
+    private byte[] getSignature(byte[] mobileSecurityObjectBytes)
+            throws NoSuchAlgorithmException, SigningException {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         byte[] encodedHash = digest.digest(mobileSecurityObjectBytes);
 
@@ -155,15 +172,35 @@ public class DocumentFactory {
 
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
+            return getSignatureAsBytes(signResult);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing MSO: %s", exception.getMessage()), exception);
         }
+    }
 
-        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
-        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);
+    private X509Certificate getCertificate() throws CertificateException {
+        // Certificate to be retrieved from S3
 
-        return new IssuerSigned(encodedNamespaces, issuerAuth);
+        // Dummy certificate in PEM format
+        String certificatePem =
+                "-----BEGIN CERTIFICATE-----\n"
+                        + "MIIBXzCCAQSgAwIBAgIGAYwpA4/aMAoGCCqGSM49BAMCMDYxNDAyBgNVBAMMKzNf\n"
+                        + "d1F3Y3Qxd28xQzBST3FfWXRqSTRHdTBqVXRiVTJCQXZteEltQzVqS3MwHhcNMjMx\n"
+                        + "MjAyMDUzMjI4WhcNMjQwOTI3MDUzMjI4WjA2MTQwMgYDVQQDDCszX3dRd2N0MXdv\n"
+                        + "MUMwUk9xX1l0akk0R3UwalV0YlUyQkF2bXhJbUM1aktzMFkwEwYHKoZIzj0CAQYI\n"
+                        + "KoZIzj0DAQcDQgAEQw7367PjIwU17ckX/G4ZqLW2EjPG0efV0cYzhvq2Ujkymrc3\n"
+                        + "3RVkgEE6q9iAAeLhl85IraAzT39SjOBV1EKu3jAKBggqhkjOPQQDAgNJADBGAiEA\n"
+                        + "o4TsuxDl5+3eEp6SHDrBVn1rqOkGGLoOukJhelndGqICIQCpocrjWDwrWexoQZOO\n"
+                        + "rwnEYRBmmfhaPor2OZCrbP3U6w==\n"
+                        + "-----END CERTIFICATE-----\n";
+
+        // Certificate as X509Certificate.
+        return (X509Certificate)
+                CertificateFactory.getInstance("X.509")
+                        .generateCertificate(
+                                new ByteArrayInputStream(
+                                        certificatePem.getBytes(StandardCharsets.UTF_8)));
     }
 
     private @NotNull Map<String, List<byte[]>> getEncodedNamespaces(
