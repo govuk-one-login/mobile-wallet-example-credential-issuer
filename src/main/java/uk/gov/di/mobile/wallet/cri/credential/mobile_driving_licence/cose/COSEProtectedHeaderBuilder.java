@@ -8,8 +8,8 @@ public class COSEProtectedHeaderBuilder {
 
     public COSEProtectedHeaderBuilder() {}
 
-    public COSEProtectedHeaderBuilder alg(COSEAlgorithms alg) {
-        protectedHeader.put(1, alg.getId());
+    public COSEProtectedHeaderBuilder alg(int alg) {
+        protectedHeader.put(1, alg);
         return this;
     }
 

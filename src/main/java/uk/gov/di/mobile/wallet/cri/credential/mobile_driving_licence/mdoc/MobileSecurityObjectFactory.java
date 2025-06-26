@@ -1,13 +1,11 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DocType;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocTypes;
 
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.List;
-import java.util.Map;
 
 /** Factory class for creating MobileSecurityObject instances. */
 public class MobileSecurityObjectFactory {
@@ -19,7 +17,7 @@ public class MobileSecurityObjectFactory {
      * The document type identifier for a mobile driver's license (mDL), as specified by ISO
      * 18013-5.
      */
-    private static final String DOC_TYPE = DocType.MDL.getValue();
+    private static final String DOC_TYPE = DocTypes.MDL;
 
     /** The factory responsible for creating {@link ValueDigests} instances. */
     private final ValueDigestsFactory valueDigestsFactory;
@@ -63,9 +61,8 @@ public class MobileSecurityObjectFactory {
      * @return The constructed {@link MobileSecurityObject} instance.
      * @throws MDLException If an error occurs during the creation of the {@link ValueDigests}.
      */
-    public MobileSecurityObject build(Map<String, List<IssuerSignedItem>> nameSpaces)
-            throws MDLException {
-        ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
+    public MobileSecurityObject build(Namespaces nameSpaces) throws MDLException {
+        ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces.asMap());
 
         Instant currentTimestamp = clock.instant();
         Instant validUntil = currentTimestamp.plus(Duration.ofDays(365));

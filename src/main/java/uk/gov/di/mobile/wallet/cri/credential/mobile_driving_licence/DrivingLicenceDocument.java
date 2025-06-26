@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.Namespaces;
 
 import java.time.LocalDate;
 import java.time.Period;

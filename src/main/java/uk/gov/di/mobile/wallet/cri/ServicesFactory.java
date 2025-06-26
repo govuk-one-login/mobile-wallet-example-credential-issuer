@@ -9,6 +9,8 @@ import uk.gov.di.mobile.wallet.cri.credential.*;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -83,13 +85,15 @@ public class ServicesFactory {
                 new ValueDigestsFactory(cborEncoder, MessageDigest.getInstance("SHA-256"));
         MobileSecurityObjectFactory mobileSecurityObjectFactory =
                 new MobileSecurityObjectFactory(valueDigestsFactory);
+        COSESigner coseSigner = new COSESigner(cborEncoder, kmsService, configurationService);
+        CertificateProvider certificateProvider =
+                new CertificateProvider(); // requires ObjectStore dependency
+        NamespacesFactory namespacesFactory = new NamespacesFactory(issuerSignedItemFactory);
+        IssuerSignedFactory issuerSignedFactory =
+                new IssuerSignedFactory(
+                        mobileSecurityObjectFactory, cborEncoder, coseSigner, certificateProvider);
         DocumentFactory documentFactory =
-                new DocumentFactory(
-                        issuerSignedItemFactory,
-                        mobileSecurityObjectFactory,
-                        cborEncoder,
-                        kmsService,
-                        configurationService);
+                new DocumentFactory(namespacesFactory, issuerSignedFactory);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
                 new MobileDrivingLicenceService(cborEncoder, documentFactory);

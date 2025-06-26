@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants;
 
 public final class Namespaces {
     /** The standard namespace for Mobile Driving Licence documents as defined by ISO 18013-5. */
