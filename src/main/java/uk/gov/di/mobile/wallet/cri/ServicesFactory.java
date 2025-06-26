@@ -24,6 +24,8 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.net.MalformedURLException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Factory for creating and wiring all application services.
@@ -47,7 +49,7 @@ public class ServicesFactory {
      */
     public static Services create(
             ConfigurationService configurationService, Environment environment)
-            throws MalformedURLException {
+            throws MalformedURLException, NoSuchAlgorithmException {
 
         KmsService kmsService = new KmsService(configurationService);
         PreAuthorizedCodeBuilder preAuthorizedCodeBuilder =
@@ -79,12 +81,16 @@ public class ServicesFactory {
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
         IssuerSignedItemFactory issuerSignedItemFactory =
                 new IssuerSignedItemFactory(new DigestIDGenerator());
-        DocumentFactory documentFactory = new DocumentFactory();
-        NamespaceFactory namespaceFactory =
-                new NamespaceFactory(issuerSignedItemFactory, cborEncoder);
+        ValueDigestsFactory valueDigestsFactory =
+                new ValueDigestsFactory(cborEncoder, MessageDigest.getInstance("SHA-256"));
+        MobileSecurityObjectFactory mobileSecurityObjectFactory =
+                new MobileSecurityObjectFactory(valueDigestsFactory);
+        DocumentFactory documentFactory =
+                new DocumentFactory(
+                        issuerSignedItemFactory, mobileSecurityObjectFactory, cborEncoder);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(cborEncoder, documentFactory, namespaceFactory);
+                new MobileDrivingLicenceService(cborEncoder, documentFactory);
 
         DocumentStoreClient documentStoreClient =
                 new DocumentStoreClient(configurationService, httpClient);

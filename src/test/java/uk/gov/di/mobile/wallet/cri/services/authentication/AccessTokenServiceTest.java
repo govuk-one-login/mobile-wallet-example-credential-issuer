@@ -1,9 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.services.authentication;
 
-import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.KeySourceException;
+import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.jwk.JWK;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -50,7 +47,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
-                "JWT alg header claim [RS256] does not match client config alg [ES256]",
+                "JWT alg header claim [RS256] does not match expected alg [ES256]",
                 exception.getMessage());
     }
 
@@ -66,11 +63,39 @@ class AccessTokenServiceTest {
     }
 
     @Test
+    void Should_ThrowAccessTokenValidationException_When_TypeParamIsNull() {
+        SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").withType(null).build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals(
+                "JWT typ header claim [null] does not match expected typ [at+jwt]",
+                exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_TypeValueIsInvalid() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256").withType(JOSEObjectType.JWT).build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals(
+                "JWT typ header claim [JWT] does not match expected typ [at+jwt]",
+                exception.getMessage());
+    }
+
+    @Test
     void Should_ThrowAccessTokenValidationException_When_RequiredClaimsAreMissing() {
         SignedJWT mockAccessToken =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
                                 .keyID("cb5a1a8b-809a-4f32-944d-caae1a57ed91")
+                                .type(new JOSEObjectType("at+jwt"))
                                 .build(),
                         new JWTClaimsSet.Builder().build());
 
@@ -123,6 +148,23 @@ class AccessTokenServiceTest {
         assertEquals(
                 "JWT iss claim has value invalid-issuer, must be https://auth-url.gov.uk",
                 exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_JwkHasWrongType()
+            throws JOSEException, ParseException {
+        JWK publicKey =
+                JWK.parse(
+                        "{\"kty\":\"RSA\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"n\":\"dGVzdFB1YmxpY0tleQ==\",\"e\":\"AQAB\"}");
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
+        SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
+        mockAccessToken.sign(ecSigner);
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals("JWK key type is not EC", exception.getMessage());
     }
 
     @Test
