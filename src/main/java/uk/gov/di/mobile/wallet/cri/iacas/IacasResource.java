@@ -6,7 +6,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.util.ResponseUtil;
+import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 
 /**
  * JAX-RS resource class for serving IACA (Issuing Authority Certificate Authority) certificates.
