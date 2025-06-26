@@ -1,12 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
-import lombok.Getter;
+import java.util.Map;
 
-@Getter
-public class COSEProtectedHeader {
-    private final byte[] cborBytes;
-
-    public COSEProtectedHeader(byte[] cborBytes) {
-        this.cborBytes = cborBytes;
-    }
-}
+public record COSEProtectedHeader(Map<Integer, Object> protectedHeader) {}

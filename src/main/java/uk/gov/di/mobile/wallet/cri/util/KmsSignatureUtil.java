@@ -31,11 +31,8 @@ public final class KmsSignatureUtil {
      *
      * @param signResult The signing result containing the signature bytes.
      * @return The signature as a byte array.
-     * @throws JOSEException If the signature is invalid or the algorithm is not supported.
      */
-    public static byte[] getSignatureAsBytes(SignResponse signResult) throws JOSEException {
-        return ECDSA.transcodeSignatureToConcat(
-                signResult.signature().asByteArray(),
-                ECDSA.getSignatureByteArrayLength(SIGNING_ALGORITHM));
+    public static byte[] getSignatureAsBytes(SignResponse signResult) {
+        return signResult.signature().asByteArray();
     }
 }

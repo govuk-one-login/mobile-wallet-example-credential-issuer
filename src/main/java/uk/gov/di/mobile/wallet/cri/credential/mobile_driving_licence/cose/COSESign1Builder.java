@@ -1,17 +1,19 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
+import java.util.Map;
+
 public class COSESign1Builder {
-    private COSEProtectedHeader protectedHeader;
-    private COSEUnprotectedHeader unprotectedHeader;
+    private byte[] protectedHeader;
+    private Map<Integer, Object> unprotectedHeader;
     private byte[] payload;
     private byte[] signature;
 
-    public COSESign1Builder protectedHeader(COSEProtectedHeader header) {
+    public COSESign1Builder protectedHeader(byte[] header) {
         this.protectedHeader = header;
         return this;
     }
 
-    public COSESign1Builder unprotectedHeader(COSEUnprotectedHeader header) {
+    public COSESign1Builder unprotectedHeader(Map<Integer, Object> header) {
         this.unprotectedHeader = header;
         return this;
     }

@@ -54,10 +54,10 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
             COSESign1 issuerAuth = issuerSigned.issuerAuth();
             cborGenerator.writeFieldName("issuerAuth");
             cborGenerator.writeStartArray();
-            cborGenerator.writeBinary(issuerAuth.getProtectedHeader().getCborBytes());
-            cborGenerator.writeObject(issuerAuth.getUnprotectedHeader().getHeaderMap());
-            cborGenerator.writeBinary(issuerAuth.getPayload());
-            cborGenerator.writeBinary(issuerAuth.getSignature());
+            cborGenerator.writeBinary(issuerAuth.protectedHeader());
+            cborGenerator.writeObject(issuerAuth.unprotectedHeader());
+            cborGenerator.writeBinary(issuerAuth.payload());
+            cborGenerator.writeBinary(issuerAuth.signature());
             cborGenerator.writeEndArray();
 
             cborGenerator.writeEndObject();

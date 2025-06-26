@@ -19,8 +19,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.io.ByteArrayInputStream;
 import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -33,6 +31,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.utils.CamelToSnake.camelToSnake;
+import static uk.gov.di.mobile.wallet.cri.util.HashUtil.getHashSha256;
 import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.getSignatureAsBytes;
 
 /**
@@ -44,6 +43,7 @@ import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.getSignatureAsBy
 @Slf4j
 public class DocumentFactory {
 
+    /** Document type constant for Mobile Driving License as per ISO 18013-5 */
     private static final String DOC_TYPE = DocType.MDL.getValue();
 
     private final IssuerSignedItemFactory issuerSignedItemFactory;
@@ -55,9 +55,11 @@ public class DocumentFactory {
     /**
      * Constructs a DocumentFactory with the necessary dependencies.
      *
-     * @param issuerSignedItemFactory Factory to create IssuerSignedItem objects
-     * @param mobileSecurityObjectFactory Factory to create MobileSecurityObject
-     * @param cborEncoder Encoder to serialize objects into CBOR format
+     * @param issuerSignedItemFactory Factory to create IssuerSignedItem objects from field data.
+     * @param mobileSecurityObjectFactory Factory to create MobileSecurityObject containing digest values.
+     * @param cborEncoder Encoder to serialize objects into CBOR format as per RFC 8949.
+     * @param keyProvider Provider for cryptographic keys and signing operations.
+     * @param configurationService Service providing configuration values including key identifiers.
      */
     public DocumentFactory(
             IssuerSignedItemFactory issuerSignedItemFactory,
@@ -144,27 +146,24 @@ public class DocumentFactory {
     }
 
     private IssuerSigned buildIssuerSigned(final Map<String, List<IssuerSignedItem>> namespaces)
-            throws MDLException, NoSuchAlgorithmException, SigningException, CertificateException {
+            throws MDLException, SigningException, CertificateException {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
-        byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
-
-        System.out.println(
-                "mobileSecurityObjectBytes " + Arrays.toString(mobileSecurityObjectBytes));
-
-        byte[] signature =
-                getSignature(mobileSecurityObjectBytes); // **** I suspect this is wrong ****
         X509Certificate certificate = getCertificate();
-
-        COSEProtectedHeader protectedHeader =
-                new COSEProtectedHeaderBuilder(cborEncoder).alg(COSEAlgorithms.ES256).build();
-
         COSEUnprotectedHeader unprotectedHeader =
                 new COSEUnprotectedHeaderBuilder().x5chain(certificate.getEncoded()).build();
+        COSEProtectedHeader protectedHeader =
+                new COSEProtectedHeaderBuilder().alg(COSEAlgorithms.ES256).build();
+        byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader.protectedHeader());
+
+        byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
+        byte[] toBeSigned = createSigStructure(protectedHeaderEncoded, mobileSecurityObjectBytes);
+
+        byte[] signature = sign(toBeSigned);
 
         COSESign1 sign1 =
                 new COSESign1Builder()
-                        .protectedHeader(protectedHeader)
-                        .unprotectedHeader(unprotectedHeader)
+                        .protectedHeader(protectedHeaderEncoded)
+                        .unprotectedHeader(unprotectedHeader.unprotectedHeader())
                         .payload(mobileSecurityObjectBytes)
                         .signature(signature)
                         .build();
@@ -174,15 +173,24 @@ public class DocumentFactory {
         return new IssuerSigned(encodedNamespaces, sign1);
     }
 
-    private byte[] getSignature(byte[] mobileSecurityObjectBytes)
-            throws NoSuchAlgorithmException, SigningException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] encodedHash = digest.digest(mobileSecurityObjectBytes);
+    private byte[] createSigStructure(byte[] protectedHeaders, byte[] payload)
+            throws RuntimeException {
+        Object[] sigStructure = new Object[4];
+        sigStructure[0] = "Signature1"; // context
+        sigStructure[1] = protectedHeaders; // body_protected
+        sigStructure[2] = new byte[0]; // external_aad (empty)
+        sigStructure[3] = payload; // payload
 
+        return cborEncoder.encode(sigStructure); // ToBeSigned
+    }
+
+    private byte[] sign(byte[] mobileSecurityObjectBytes) throws SigningException {
+
+        byte[] hash = getHashSha256(mobileSecurityObjectBytes);
         String keyId = keyProvider.getKeyId(configurationService.getDocumentSigningKey1());
         var signRequest =
                 SignRequest.builder()
-                        .message(SdkBytes.fromByteArray(encodedHash))
+                        .message(SdkBytes.fromByteArray(hash))
                         .messageType(MessageType.DIGEST)
                         .keyId(keyId)
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)

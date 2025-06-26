@@ -1,25 +1,19 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class COSEProtectedHeaderBuilder {
-    private final Map<Integer, Object> headerMap = new LinkedHashMap<>();
-    private final CBOREncoder cborEncoder;
+    private final Map<Integer, Object> protectedHeader = new LinkedHashMap<>();
 
-    public COSEProtectedHeaderBuilder(CBOREncoder cborEncoder) {
-        this.cborEncoder = cborEncoder;
-    }
+    public COSEProtectedHeaderBuilder() {}
 
     public COSEProtectedHeaderBuilder alg(COSEAlgorithms alg) {
-        headerMap.put(1, alg.getId());
+        protectedHeader.put(1, alg.getId());
         return this;
     }
 
     public COSEProtectedHeader build() {
-        byte[] protectedHeaderCbor = cborEncoder.encode(headerMap);
-        return new COSEProtectedHeader(protectedHeaderCbor);
+        return new COSEProtectedHeader(protectedHeader);
     }
 }
