@@ -16,7 +16,7 @@ import java.util.Date;
  *
  * <p>This record holds the certificate's validity period and issuer details.
  *
- * @param notAfter The date and time (ISO 8601 format) when the certificate expires).
+ * @param notAfter The date and time (ISO 8601 format) when the certificate expires.
  * @param notBefore The date and time (ISO 8601 format) when the certificate becomes valid.
  * @param country The country code (ISO 3166-1 alpha-2) of the IACA's issuer country.
  * @param commonName The IACA's issuer common name (CN).
