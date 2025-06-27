@@ -8,14 +8,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerAuth;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -41,9 +38,14 @@ class IssuerSignedCBORSerializerTest {
         nameSpaces.put("namespace1", Arrays.asList(issuerSignedItemBytes1, issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
-        // Arrange: Prepare an issuerAuth object
-        byte[] mobileSecurityObjectBytes = new byte[] {9, 9, 9};
-        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
+        // Arrange: Prepare an CoseSign1 object
+        byte[] protectedHeaderBytes = {1, 2, 3, 4};
+        Map<Integer, Object> unprotectedHeader = new HashMap<>();
+        byte[] payloadBytes = {5, 6, 7, 8};
+        byte[] signatureBytes = {9, 10, 11, 12};
+        COSESign1 issuerAuth =
+                new COSESign1(
+                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes);
         when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
 
         // Act: Serialize the IssuerSigned object
@@ -74,10 +76,11 @@ class IssuerSignedCBORSerializerTest {
         // Write the issuerAuth field and start the array for its items
         inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
         inOrder.verify(cborGenerator).writeStartArray();
-
-        // Write tag 24 then the mobileSecurityObjectBytes and close the array
-        inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(mobileSecurityObjectBytes);
+        // Write issuerAuth (COSE_Sign1) items
+        inOrder.verify(cborGenerator).writeBinary(protectedHeaderBytes);
+        inOrder.verify(cborGenerator).writeObject(unprotectedHeader);
+        inOrder.verify(cborGenerator).writeBinary(payloadBytes);
+        inOrder.verify(cborGenerator).writeBinary(signatureBytes);
         inOrder.verify(cborGenerator).writeEndArray();
 
         // End the outer object
@@ -95,9 +98,14 @@ class IssuerSignedCBORSerializerTest {
         nameSpaces.put("namespace2", List.of(issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
-        // Arrange: Prepare an issuerAuth object
-        byte[] mobileSecurityObjectBytes = new byte[] {9, 9, 9};
-        IssuerAuth issuerAuth = new IssuerAuth(mobileSecurityObjectBytes);
+        // Arrange: Prepare an CoseSign1 object
+        byte[] protectedHeaderBytes = {1, 2, 3, 4};
+        Map<Integer, Object> unprotectedHeader = new HashMap<>();
+        byte[] payloadBytes = {5, 6, 7, 8};
+        byte[] signatureBytes = {9, 10, 11, 12};
+        COSESign1 issuerAuth =
+                new COSESign1(
+                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes);
         when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
 
         // Act: Serialize the IssuerSigned object
@@ -131,10 +139,11 @@ class IssuerSignedCBORSerializerTest {
         // Write the issuerAuth field and start the array for its items
         inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
         inOrder.verify(cborGenerator).writeStartArray();
-
-        // Write tag 24 then the mobileSecurityObjectBytes and close the array
-        inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(mobileSecurityObjectBytes);
+        // Write issuerAuth (COSE_Sign1) items
+        inOrder.verify(cborGenerator).writeBinary(protectedHeaderBytes);
+        inOrder.verify(cborGenerator).writeObject(unprotectedHeader);
+        inOrder.verify(cborGenerator).writeBinary(payloadBytes);
+        inOrder.verify(cborGenerator).writeBinary(signatureBytes);
         inOrder.verify(cborGenerator).writeEndArray();
 
         // End the outer object
