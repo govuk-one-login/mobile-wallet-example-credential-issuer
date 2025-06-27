@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.did_key;
 
 public enum Multicodec {
     P256_PUB("1200", 33);

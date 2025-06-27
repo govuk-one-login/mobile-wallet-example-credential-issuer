@@ -1,7 +1,9 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.did_key;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.credential.AddressFormatException;
+import uk.gov.di.mobile.wallet.cri.credential.did_key.Base58;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

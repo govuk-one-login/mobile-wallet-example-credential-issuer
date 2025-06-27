@@ -1,8 +1,12 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.did_key;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.credential.AddressFormatException;
+import uk.gov.di.mobile.wallet.cri.credential.did_key.DidKeyResolver;
+import uk.gov.di.mobile.wallet.cri.credential.did_key.InvalidDidKeyException;
+import uk.gov.di.mobile.wallet.cri.credential.did_key.Multicodec;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

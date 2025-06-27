@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.did_key;
 
 public class InvalidDidKeyException extends Exception {
 

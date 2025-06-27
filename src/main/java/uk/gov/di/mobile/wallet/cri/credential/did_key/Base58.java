@@ -15,7 +15,9 @@
  * limitations under the License.
  */
 
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.did_key;
+
+import uk.gov.di.mobile.wallet.cri.credential.AddressFormatException;
 
 import java.util.Arrays;
 
