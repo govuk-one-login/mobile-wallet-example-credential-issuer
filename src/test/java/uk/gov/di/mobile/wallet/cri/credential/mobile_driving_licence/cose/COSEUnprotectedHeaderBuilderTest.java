@@ -1,25 +1,39 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-class COSEUnprotectedHeaderBuilderTest {
+public class COSEUnprotectedHeaderBuilderTest {
 
-    @Test
-    void Should_BuildHeaderWithX5Chain_When_X5ChainSet() {
-        Object x5chainValue = "dummy-certificate-chain";
-        COSEUnprotectedHeaderBuilder builder = new COSEUnprotectedHeaderBuilder();
-        builder.x5chain(x5chainValue);
+  private COSEUnprotectedHeaderBuilder builder;
 
-        COSEUnprotectedHeader header = builder.build();
+  @BeforeEach
+  void setUp() {
+    builder = new COSEUnprotectedHeaderBuilder();
+  }
 
-        assertNotNull(header);
-        Map<Integer, Object> map = header.unprotectedHeader();
-        assertEquals(1, map.size());
-        assertEquals(x5chainValue, map.get(33));
-    }
+  @Test
+  void Should_BuildCOSEUnprotectedHeader() {
+    byte[] x5chain = new byte[] {1, 2, 3};
+
+    COSEUnprotectedHeader header = builder.x5chain(x5chain).build();
+
+    assertNotNull(header);
+    assertEquals(x5chain, header.unprotectedHeader().get(33));
+  }
+
+  @Test
+  void Should_ThrowIllegalArgumentException_When_X5chainIsNull() {
+    assertThrows(IllegalArgumentException.class, () -> builder.x5chain(null));
+  }
+
+  @Test
+  void Should_ThrowIllegalArgumentException_When_X5chainIsNotSet() {
+    IllegalStateException exception = assertThrows(IllegalStateException.class,
+            () -> builder.build());
+    assertEquals("x5chain must be set", exception.getMessage());
+  }
 }
