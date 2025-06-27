@@ -19,9 +19,7 @@ public class InstantCBORSerializer extends JsonSerializer<Instant> {
             throws IOException {
         if (generator instanceof CBORGenerator cborGenerator) {
             String formatted =
-                    Instant.now()
-                            .truncatedTo(ChronoUnit.SECONDS)
-                            .toString(); // "2026-06-24T16:05:21Z"
+                    instant.truncatedTo(ChronoUnit.SECONDS).toString(); // "2026-06-24T16:05:21Z"
             // '1000' is a tag indicating that the CBOR value should be interpreted as a date-time
             cborGenerator.writeTag(1000);
             generator.writeString(formatted);
