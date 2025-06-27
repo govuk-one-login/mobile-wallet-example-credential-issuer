@@ -15,8 +15,8 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
-import static uk.gov.di.mobile.wallet.cri.util.HashUtil.getHashSha256;
 import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.getSignatureAsBytes;
+import static uk.gov.di.mobile.wallet.cri.util.HashUtil.getHashSha256;
 
 public class COSESigner {
     private final CBOREncoder cborEncoder;

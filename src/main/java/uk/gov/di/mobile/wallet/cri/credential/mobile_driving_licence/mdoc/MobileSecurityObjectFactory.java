@@ -59,7 +59,8 @@ public class MobileSecurityObjectFactory {
      *     {@link IssuerSignedItem} objects belonging to that namespace. This map provides the data
      *     used to generate the value digests for the {@link MobileSecurityObject}.
      * @return The constructed {@link MobileSecurityObject} instance.
-     * @throws DrivingPrivilege.MDLException If an error occurs during the creation of the {@link ValueDigests}.
+     * @throws DrivingPrivilege.MDLException If an error occurs during the creation of the {@link
+     *     ValueDigests}.
      */
     public MobileSecurityObject build(Namespaces nameSpaces) throws DrivingPrivilege.MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces.asMap());

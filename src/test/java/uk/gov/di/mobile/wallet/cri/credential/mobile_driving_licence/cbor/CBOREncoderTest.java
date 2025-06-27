@@ -25,7 +25,8 @@ class CBOREncoderTest {
     }
 
     @Test
-    void Should_ReturnEncodedBytes_When_EncodingDocument() throws IOException, DrivingPrivilege.MDLException {
+    void Should_ReturnEncodedBytes_When_EncodingDocument()
+            throws IOException, DrivingPrivilege.MDLException {
         Document document = mock(Document.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
         when(mockMapper.writeValueAsBytes(document)).thenReturn(expectedEncodedBytes);

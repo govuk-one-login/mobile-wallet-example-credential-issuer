@@ -54,10 +54,10 @@ public class DrivingPrivilege {
         return LOGGER;
     }
 
-  public static class MDLException extends RuntimeException {
+    public static class MDLException extends RuntimeException {
 
-      public MDLException(String message, Exception exception) {
-          super(message, exception);
-      }
-  }
+        public MDLException(String message, Exception exception) {
+            super(message, exception);
+        }
+    }
 }
