@@ -53,7 +53,8 @@ public record Iaca(
             throws JOSEException, CertificateEncodingException, NoSuchAlgorithmException {
         X509Certificate certificate = X509CertUtils.parse(certificatePem);
         if (certificate == null) {
-            throw new IllegalArgumentException("Failed to parse PEM certificate");
+            throw new IllegalArgumentException(
+                    "Failed to parse PEM certificate: parsing returned null");
         }
 
         CertificateData certificateData = CertificateData.fromCertificate(certificate);

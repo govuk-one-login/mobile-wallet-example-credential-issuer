@@ -63,7 +63,8 @@ class IacaTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> Iaca.fromCertificate(id, active, invalidPem));
-        assertTrue(exception.getMessage().contains("Failed to parse PEM certificate"));
+        assertEquals(
+                "Failed to parse PEM certificate: parsing returned null", exception.getMessage());
     }
 
     @Test
