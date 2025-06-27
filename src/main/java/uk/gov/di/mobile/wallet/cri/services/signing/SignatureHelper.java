@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.util;
+package uk.gov.di.mobile.wallet.cri.services.signing;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
@@ -7,7 +7,7 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 
 import java.util.Base64;
 
-public final class KmsSignatureUtil {
+public final class SignatureHelper {
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
 
     /**

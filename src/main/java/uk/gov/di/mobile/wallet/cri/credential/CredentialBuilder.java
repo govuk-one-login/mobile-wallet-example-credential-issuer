@@ -25,7 +25,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-import static uk.gov.di.mobile.wallet.cri.util.KmsSignatureUtil.toBase64UrlEncodedSignature;
+import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.toBase64UrlEncodedSignature;
 
 public class CredentialBuilder<T extends CredentialSubject> {
 
