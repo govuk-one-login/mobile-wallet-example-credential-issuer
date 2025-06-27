@@ -8,7 +8,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLice
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.Namespaces;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.time.*;
 import java.util.List;
@@ -79,7 +78,7 @@ class DocumentFactoryTest {
      */
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
-            throws MDLException {
+            throws DrivingPrivilege.MDLException {
         // Arrange: Set up DocumentFactory and test DrivingLicenceDocument
         DocumentFactory documentFactory =
                 new DocumentFactory(
@@ -131,7 +130,7 @@ class DocumentFactoryTest {
      */
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace()
-            throws MDLException {
+            throws DrivingPrivilege.MDLException {
         // Arrange: Set up DocumentFactory and test DrivingLicenceDocument
         DocumentFactory documentFactory =
                 new DocumentFactory(
@@ -170,7 +169,7 @@ class DocumentFactoryTest {
      */
     @Test
     void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_When_ItsValueIsNull()
-            throws MDLException {
+            throws DrivingPrivilege.MDLException {
         // Arrange: Set up DocumentFactory and a DrivingLicenceDocument with null provisional
         // privileges
         DocumentFactory documentFactory =

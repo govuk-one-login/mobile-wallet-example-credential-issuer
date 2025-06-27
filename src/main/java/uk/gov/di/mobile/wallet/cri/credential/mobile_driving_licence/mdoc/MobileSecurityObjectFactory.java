@@ -1,6 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocTypes;
 
 import java.time.Clock;
@@ -59,9 +59,9 @@ public class MobileSecurityObjectFactory {
      *     {@link IssuerSignedItem} objects belonging to that namespace. This map provides the data
      *     used to generate the value digests for the {@link MobileSecurityObject}.
      * @return The constructed {@link MobileSecurityObject} instance.
-     * @throws MDLException If an error occurs during the creation of the {@link ValueDigests}.
+     * @throws DrivingPrivilege.MDLException If an error occurs during the creation of the {@link ValueDigests}.
      */
-    public MobileSecurityObject build(Namespaces nameSpaces) throws MDLException {
+    public MobileSecurityObject build(Namespaces nameSpaces) throws DrivingPrivilege.MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces.asMap());
 
         Instant currentTimestamp = clock.instant();

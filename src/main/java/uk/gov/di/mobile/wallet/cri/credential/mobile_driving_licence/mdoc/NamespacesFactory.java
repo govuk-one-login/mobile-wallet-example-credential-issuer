@@ -2,7 +2,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -32,10 +32,10 @@ public class NamespacesFactory {
      *
      * @param document The driving licence document to process/extract fields from.
      * @return Map from namespace names to lists of issuer-signed items.
-     * @throws MDLException If reflection fails or encoding fails.
+     * @throws DrivingPrivilege.MDLException If reflection fails or encoding fails.
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
-    public Namespaces build(DrivingLicenceDocument document) throws MDLException {
+    public Namespaces build(DrivingLicenceDocument document) throws DrivingPrivilege.MDLException {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
 
@@ -52,7 +52,7 @@ public class NamespacesFactory {
                         continue;
                     }
                 } catch (IllegalAccessException exception) {
-                    throw new MDLException(
+                    throw new DrivingPrivilege.MDLException(
                             String.format(
                                     "Failed to access Driving Licence property %s to build IssuerSignedItem",
                                     fieldName),

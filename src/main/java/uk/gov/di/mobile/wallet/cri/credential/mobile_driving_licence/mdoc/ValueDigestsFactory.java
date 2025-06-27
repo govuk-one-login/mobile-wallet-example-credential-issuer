@@ -2,8 +2,8 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import lombok.SneakyThrows;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 
 import java.security.MessageDigest;
 import java.util.HashMap;
@@ -54,7 +54,7 @@ public class ValueDigestsFactory {
      */
     @SneakyThrows
     public ValueDigests createFromNamespaces(Map<String, List<IssuerSignedItem>> namespaces)
-            throws MDLException {
+            throws DrivingPrivilege.MDLException {
         // Map to hold the final result: namespace -> (digestId -> digest bytes)
         final Map<String, Map<Integer, byte[]>> namespaceToValueDigests = new HashMap<>();
 
@@ -79,10 +79,10 @@ public class ValueDigestsFactory {
      *
      * @param issuerSignedItem The item to digest.
      * @return A map entry where the key is the digest ID and the value is the digest byte array.
-     * @throws MDLException If serialization or digest calculation fails.
+     * @throws DrivingPrivilege.MDLException If serialization or digest calculation fails.
      */
     private Map.Entry<Integer, byte[]> serializeAndComputeDigest(
-            final IssuerSignedItem issuerSignedItem) throws MDLException {
+            final IssuerSignedItem issuerSignedItem) throws DrivingPrivilege.MDLException {
         // Serialize the IssuerSignedItem to a CBOR byte array
         byte[] serializedIssuerSignedItem = cborEncoder.encode(issuerSignedItem);
 

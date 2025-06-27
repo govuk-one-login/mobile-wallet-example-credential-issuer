@@ -5,8 +5,8 @@ import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEAlgorithms;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
@@ -33,7 +33,7 @@ public class COSESigner {
     }
 
     public COSESign1 sign(byte[] payload, X509Certificate certificate)
-            throws SigningException, MDLException, CertificateEncodingException {
+            throws SigningException, DrivingPrivilege.MDLException, CertificateEncodingException {
         COSEUnprotectedHeader unprotectedHeader =
                 new COSEUnprotectedHeaderBuilder().x5chain(certificate.getEncoded()).build();
         COSEProtectedHeader protectedHeader =
