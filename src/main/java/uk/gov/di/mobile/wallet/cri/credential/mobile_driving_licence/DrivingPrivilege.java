@@ -53,11 +53,4 @@ public class DrivingPrivilege {
     protected Logger getLogger() {
         return LOGGER;
     }
-
-    public static class MDLException extends RuntimeException {
-
-        public MDLException(String message, Exception exception) {
-            super(message, exception);
-        }
-    }
 }

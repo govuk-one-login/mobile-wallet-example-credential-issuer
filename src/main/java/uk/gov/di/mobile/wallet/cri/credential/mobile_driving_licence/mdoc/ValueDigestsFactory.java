@@ -2,12 +2,11 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import lombok.SneakyThrows;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 
 import java.security.MessageDigest;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -53,12 +52,11 @@ public class ValueDigestsFactory {
      * @return A new {@link ValueDigests} instance containing the calculated digests.
      */
     @SneakyThrows
-    public ValueDigests createFromNamespaces(Map<String, List<IssuerSignedItem>> namespaces)
-            throws DrivingPrivilege.MDLException {
+    public ValueDigests createFromNamespaces(Namespaces namespaces) throws MDLException {
         // Map to hold the final result: namespace -> (digestId -> digest bytes)
         final Map<String, Map<Integer, byte[]>> namespaceToValueDigests = new HashMap<>();
 
-        for (var entry : namespaces.entrySet()) {
+        for (var entry : namespaces.asMap().entrySet()) {
             // For each namespace, process its list of IssuerSignedItems:
             // 1. Serialize and digest each item
             // 2. Collect results into a map from digestId to digest bytes
@@ -79,10 +77,10 @@ public class ValueDigestsFactory {
      *
      * @param issuerSignedItem The item to digest.
      * @return A map entry where the key is the digest ID and the value is the digest byte array.
-     * @throws DrivingPrivilege.MDLException If serialization or digest calculation fails.
+     * @throws MDLException If serialization or digest calculation fails.
      */
     private Map.Entry<Integer, byte[]> serializeAndComputeDigest(
-            final IssuerSignedItem issuerSignedItem) throws DrivingPrivilege.MDLException {
+            final IssuerSignedItem issuerSignedItem) throws MDLException {
         // Serialize the IssuerSignedItem to a CBOR byte array
         byte[] serializedIssuerSignedItem = cborEncoder.encode(issuerSignedItem);
 

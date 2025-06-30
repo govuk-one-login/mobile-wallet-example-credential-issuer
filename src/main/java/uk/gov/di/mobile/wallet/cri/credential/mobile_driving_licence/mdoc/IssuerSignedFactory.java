@@ -1,7 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import org.jetbrains.annotations.NotNull;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
@@ -33,7 +33,7 @@ public class IssuerSignedFactory {
     }
 
     public IssuerSigned build(Namespaces namespaces)
-            throws DrivingPrivilege.MDLException, SigningException, CertificateException {
+            throws MDLException, SigningException, CertificateException {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
@@ -46,7 +46,7 @@ public class IssuerSignedFactory {
     }
 
     private @NotNull Map<String, List<byte[]>> getEncodedNamespaces(Namespaces nameSpaces)
-            throws DrivingPrivilege.MDLException {
+            throws MDLException {
         Map<String, List<byte[]>> encodedNamespaces = new LinkedHashMap<>();
 
         for (Map.Entry<String, List<IssuerSignedItem>> entry : nameSpaces.asMap().entrySet()) {

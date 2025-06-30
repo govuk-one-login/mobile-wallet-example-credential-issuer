@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
@@ -25,8 +25,7 @@ class CBOREncoderTest {
     }
 
     @Test
-    void Should_ReturnEncodedBytes_When_EncodingDocument()
-            throws IOException, DrivingPrivilege.MDLException {
+    void Should_ReturnEncodedBytes_When_EncodingDocument() throws IOException, MDLException {
         Document document = mock(Document.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
         when(mockMapper.writeValueAsBytes(document)).thenReturn(expectedEncodedBytes);
@@ -38,7 +37,7 @@ class CBOREncoderTest {
 
     @Test
     void Should_ReturnEncodedBytes_When_EncodingIssuerSignedItem()
-            throws IOException, DrivingPrivilege.MDLException {
+            throws IOException, MDLException {
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
         when(mockMapper.writeValueAsBytes(issuerSignedItem)).thenReturn(expectedEncodedBytes);

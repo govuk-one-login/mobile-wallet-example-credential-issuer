@@ -12,7 +12,6 @@ import testUtils.MockProofBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
@@ -316,14 +315,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_BuildMobileDrivingLicenceCredential()
-            throws AccessTokenValidationException,
-                    ProofJwtValidationException,
-                    DataStoreException,
-                    CredentialServiceException,
-                    CredentialOfferException,
-            DrivingPrivilege.MDLException,
-                    DocumentStoreException {
+    void Should_BuildMobileDrivingLicenceCredential() throws Exception {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))

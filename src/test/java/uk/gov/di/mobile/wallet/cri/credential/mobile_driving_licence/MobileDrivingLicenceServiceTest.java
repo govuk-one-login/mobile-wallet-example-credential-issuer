@@ -32,7 +32,7 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_CreateMobileDrivingLicence() throws DrivingPrivilege.MDLException {
+    void Should_CreateMobileDrivingLicence() throws Exception {
         String expectedHex = "a10102";
         byte[] mockCborBytes = new byte[] {(byte) 0xA1, 0x01, 0x02};
         when(documentFactory.build(mockDrivingLicenceDocument)).thenReturn(mockDocument);
@@ -47,14 +47,14 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_PropagateException_When_DocumentFactoryThrows() throws DrivingPrivilege.MDLException {
-        DrivingPrivilege.MDLException expectedException =
-                new DrivingPrivilege.MDLException("Some DocumentFactory error", new RuntimeException());
+    void Should_PropagateException_When_DocumentFactoryThrows() throws Exception {
+        MDLException expectedException =
+                new MDLException("Some DocumentFactory error", new RuntimeException());
         when(documentFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
 
-        DrivingPrivilege.MDLException thrown =
+        MDLException thrown =
                 assertThrows(
-                        DrivingPrivilege.MDLException.class,
+                        MDLException.class,
                         () ->
                                 mobileDrivingLicenceService.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument));
@@ -63,15 +63,15 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_PropagateException_When_CBOREncoderThrows() throws DrivingPrivilege.MDLException {
-        DrivingPrivilege.MDLException expectedException =
-                new DrivingPrivilege.MDLException("Some CBOREncoder error", new RuntimeException());
+    void Should_PropagateException_When_CBOREncoderThrows() throws Exception {
+        MDLException expectedException =
+                new MDLException("Some CBOREncoder error", new RuntimeException());
         when(documentFactory.build(any())).thenReturn(mockDocument);
         when(cborEncoder.encode(mockDocument)).thenThrow(expectedException);
 
-        DrivingPrivilege.MDLException thrown =
+        MDLException thrown =
                 assertThrows(
-                        DrivingPrivilege.MDLException.class,
+                        MDLException.class,
                         () ->
                                 mobileDrivingLicenceService.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument));
