@@ -15,7 +15,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
@@ -52,7 +51,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
     public String buildCredential(
             T credentialSubject, CredentialType credentialType, long credentialTtlMinutes)
-            throws SigningException, NoSuchAlgorithmException {
+            throws SigningException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId);
         var encodedClaims =

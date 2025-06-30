@@ -14,7 +14,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -35,8 +34,7 @@ public class PreAuthorizedCodeBuilder {
         this.keyProvider = keyProvider;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier)
-            throws SigningException, NoSuchAlgorithmException {
+    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         String hashedKeyId = sha256Hex(keyId);
         var encodedHeader = getEncodedHeader(hashedKeyId);
