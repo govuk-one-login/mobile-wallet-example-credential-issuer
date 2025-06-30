@@ -21,7 +21,6 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -190,35 +189,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void
-            Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsNoSuchAlgorithmException()
-                    throws DataStoreException,
-                            SigningException,
-                            NoSuchAlgorithmException,
-                            DocumentStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString()))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
-                .thenThrow(new NoSuchAlgorithmException("Some algorithm error"));
-
-        CredentialServiceException exception =
-                assertThrows(
-                        CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
-        assertThat(
-                exception.getMessage(),
-                containsString("Failed to issue credential due to an internal error"));
-    }
-
-    @Test
     void Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsSigningException()
-            throws DataStoreException,
-                    SigningException,
-                    NoSuchAlgorithmException,
-                    DocumentStoreException {
+            throws DataStoreException, SigningException, DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
@@ -244,7 +216,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
@@ -270,7 +241,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
@@ -296,7 +266,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
@@ -353,7 +322,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
