@@ -5,7 +5,7 @@ services:
     ports:
       - "4560:4566"
     environment:
-      - SERVICES=dynamodb,kms
+      - SERVICES=dynamodb,kms,s3
       - AWS_ACCESS_KEY_ID=na
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
