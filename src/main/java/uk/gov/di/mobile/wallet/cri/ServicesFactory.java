@@ -10,7 +10,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivi
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
@@ -21,6 +20,7 @@ import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
+import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
@@ -119,7 +119,7 @@ public class ServicesFactory {
         NotificationService notificationService =
                 new NotificationService(dynamoDbService, accessTokenService);
 
-        IacasService iacasService = new IacasService(configurationService, s3Service);
+        IacasService iacasService = new IacasService(configurationService, certificateProvider);
 
         return new Services.Builder()
                 .kmsService(kmsService)

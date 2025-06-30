@@ -2,7 +2,7 @@ package uk.gov.di.mobile.wallet.cri.iacas;
 
 import com.nimbusds.jose.JOSEException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStore;
+import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 
 import java.security.NoSuchAlgorithmException;
@@ -14,17 +14,18 @@ import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractCertificateAuthori
 public class IacasService {
 
     private final ConfigurationService configurationService;
-    private final ObjectStore objectStore;
+    private final CertificateProvider certificateProvider;
 
     /**
      * Constructs the IacasService with required dependencies.
      *
      * @param configurationService Provides configuration values.
-     * @param objectStore Provides access to the object storage.
+     * @param certificateProvider Provides access to the object storage.
      */
-    public IacasService(ConfigurationService configurationService, ObjectStore objectStore) {
+    public IacasService(
+            ConfigurationService configurationService, CertificateProvider certificateProvider) {
         this.configurationService = configurationService;
-        this.objectStore = objectStore;
+        this.certificateProvider = certificateProvider;
     }
 
     public Iacas getIacas()
@@ -32,12 +33,9 @@ public class IacasService {
                     CertificateEncodingException,
                     NoSuchAlgorithmException,
                     JOSEException {
-        String bucketName = configurationService.getCertificatesBucketName();
         String certificateAuthorityArn = configurationService.getCertificateAuthorityArn();
-
         String certificateAuthorityId = extractCertificateAuthorityId(certificateAuthorityArn);
-        String objectKey = certificateAuthorityId + "/certificate.pem";
-        String certificatePem = objectStore.getObject(bucketName, objectKey);
+        String certificatePem = certificateProvider.getCertificateAsString();
 
         Iaca iaca = Iaca.fromCertificate(certificateAuthorityId, true, certificatePem);
 

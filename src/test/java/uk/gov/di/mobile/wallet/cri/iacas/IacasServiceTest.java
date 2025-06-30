@@ -3,17 +3,21 @@ package uk.gov.di.mobile.wallet.cri.iacas;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStore;
+import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class IacasServiceTest {
 
     private ConfigurationService configurationService;
-    private ObjectStore objectStore;
+    private CertificateProvider certificateProvider;
     private IacasService iacasService;
 
     private static final String TEST_CERTIFICATE_PEM =
@@ -41,39 +45,8 @@ class IacasServiceTest {
     @BeforeEach
     void setUp() {
         configurationService = mock(ConfigurationService.class);
-        objectStore = mock(ObjectStore.class);
-        iacasService = new IacasService(configurationService, objectStore);
-    }
-
-    @Test
-    void Should_CallConfigurationServiceToGetBucketNameAndCertificateArn() throws Exception {
-        String bucketName = "test-bucket";
-        String certificateAuthorityArn =
-                "arn:aws:acm-pca:region:account:certificate-authority/1234abcd";
-        when(configurationService.getCertificatesBucketName()).thenReturn(bucketName);
-        when(configurationService.getCertificateAuthorityArn()).thenReturn(certificateAuthorityArn);
-        when(objectStore.getObject(anyString(), anyString())).thenReturn(TEST_CERTIFICATE_PEM);
-
-        iacasService.getIacas();
-
-        verify(configurationService).getCertificatesBucketName();
-        verify(configurationService).getCertificateAuthorityArn();
-    }
-
-    @Test
-    void Should_CallObjectStoreWithCorrectArguments() throws Exception {
-        String bucketName = "test-bucket";
-        String certificateAuthorityArn =
-                "arn:aws:acm-pca:region:account:certificate-authority/1234abcd";
-        String rootCertificateId = "1234abcd";
-        String objectKey = rootCertificateId + "/certificate.pem";
-        when(configurationService.getCertificatesBucketName()).thenReturn(bucketName);
-        when(configurationService.getCertificateAuthorityArn()).thenReturn(certificateAuthorityArn);
-        when(objectStore.getObject(anyString(), anyString())).thenReturn(TEST_CERTIFICATE_PEM);
-
-        iacasService.getIacas();
-
-        verify(objectStore).getObject(bucketName, objectKey);
+        certificateProvider = mock(CertificateProvider.class);
+        iacasService = new IacasService(configurationService, certificateProvider);
     }
 
     @Test
@@ -81,16 +54,14 @@ class IacasServiceTest {
         String bucketName = "test-bucket";
         String certificateAuthorityArn =
                 "arn:aws:acm-pca:region:account:certificate-authority/1234abcd";
-        String rootCertificateId = "1234abcd";
-        String objectKey = rootCertificateId + "/certificate.pem";
         when(configurationService.getCertificatesBucketName()).thenReturn(bucketName);
         when(configurationService.getCertificateAuthorityArn()).thenReturn(certificateAuthorityArn);
-        when(objectStore.getObject(bucketName, objectKey))
-                .thenThrow(new RuntimeException("Object not found"));
+        when(certificateProvider.getCertificateAsString())
+                .thenThrow(new RuntimeException("Failed to get certificate"));
 
         Exception exception = assertThrows(RuntimeException.class, () -> iacasService.getIacas());
 
-        assertEquals("Object not found", exception.getMessage());
+        assertEquals("Failed to get certificate", exception.getMessage());
     }
 
     @Test
@@ -99,10 +70,9 @@ class IacasServiceTest {
         String certificateAuthorityArn =
                 "arn:aws:acm-pca:region:account:certificate-authority/1234abcd";
         String rootCertificateId = "1234abcd";
-        String objectKey = rootCertificateId + "/certificate.pem";
         when(configurationService.getCertificatesBucketName()).thenReturn(bucketName);
         when(configurationService.getCertificateAuthorityArn()).thenReturn(certificateAuthorityArn);
-        when(objectStore.getObject(bucketName, objectKey)).thenReturn(TEST_CERTIFICATE_PEM);
+        when(certificateProvider.getCertificateAsString()).thenReturn(TEST_CERTIFICATE_PEM);
 
         Iacas result = iacasService.getIacas();
 

@@ -12,7 +12,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.io.ByteArrayInputStream;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.any;
@@ -81,17 +80,17 @@ class S3ServiceTest {
 
     @Test
     void Should_SuccessfullyGetObject() throws Exception {
-        String expectedContent = "test content";
+        byte[] expectedContent = {1, 2, 3, 4, 5};
         ResponseInputStream<GetObjectResponse> mockResponse =
                 new ResponseInputStream<>(
                         GetObjectResponse.builder().build(),
-                        new ByteArrayInputStream(expectedContent.getBytes(StandardCharsets.UTF_8)));
+                        new ByteArrayInputStream(expectedContent));
 
         when(mockS3Client.getObject(any(GetObjectRequest.class))).thenReturn(mockResponse);
 
-        String result = s3Service.getObject("bucket", "key");
+        byte[] result = s3Service.getObject("bucket", "key");
 
-        assertEquals(expectedContent, result);
+        assertArrayEquals(expectedContent, result);
         ArgumentCaptor<GetObjectRequest> captor = ArgumentCaptor.forClass(GetObjectRequest.class);
         verify(mockS3Client).getObject(captor.capture());
         assertEquals("bucket", captor.getValue().bucket());

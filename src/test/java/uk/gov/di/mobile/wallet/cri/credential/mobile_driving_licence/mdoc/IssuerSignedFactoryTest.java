@@ -9,7 +9,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLExceptio
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.CertificateProvider;
+import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
