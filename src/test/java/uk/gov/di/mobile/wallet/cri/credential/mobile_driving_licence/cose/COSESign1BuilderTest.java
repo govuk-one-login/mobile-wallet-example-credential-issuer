@@ -64,56 +64,46 @@ class COSESign1BuilderTest {
 
     @Test
     void Should_ThrowIllegalArgumentException_When_ProtectedHeaderIsNotSet() {
+        builder.unprotectedHeader(testUnprotectedHeader)
+                .payload(testPayload)
+                .signature(testSignature);
+
         IllegalStateException exception =
-                assertThrows(
-                        IllegalStateException.class,
-                        () ->
-                                builder.unprotectedHeader(testUnprotectedHeader)
-                                        .payload(testPayload)
-                                        .signature(testSignature)
-                                        .build());
+                assertThrows(IllegalStateException.class, () -> builder.build());
 
         assertEquals("All fields must be set and non-null", exception.getMessage());
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_UnprotectedHeaderIsNotSet() {
+        builder.protectedHeader(testProtectedHeader).payload(testPayload).signature(testSignature);
+
         IllegalStateException exception =
-                assertThrows(
-                        IllegalStateException.class,
-                        () ->
-                                builder.protectedHeader(testProtectedHeader)
-                                        .payload(testPayload)
-                                        .signature(testSignature)
-                                        .build());
+                assertThrows(IllegalStateException.class, () -> builder.build());
 
         assertEquals("All fields must be set and non-null", exception.getMessage());
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_PayloadIsNotSet() {
+        builder.protectedHeader(testProtectedHeader)
+                .unprotectedHeader(testUnprotectedHeader)
+                .signature(testSignature);
+
         IllegalStateException exception =
-                assertThrows(
-                        IllegalStateException.class,
-                        () ->
-                                builder.protectedHeader(testProtectedHeader)
-                                        .unprotectedHeader(testUnprotectedHeader)
-                                        .signature(testSignature)
-                                        .build());
+                assertThrows(IllegalStateException.class, () -> builder.build());
 
         assertEquals("All fields must be set and non-null", exception.getMessage());
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_SignatureIsNotSet() {
+        builder.protectedHeader(testProtectedHeader)
+                .unprotectedHeader(testUnprotectedHeader)
+                .payload(testPayload);
+
         IllegalStateException exception =
-                assertThrows(
-                        IllegalStateException.class,
-                        () ->
-                                builder.protectedHeader(testProtectedHeader)
-                                        .unprotectedHeader(testUnprotectedHeader)
-                                        .payload(testPayload)
-                                        .build());
+                assertThrows(IllegalStateException.class, () -> builder.build());
 
         assertEquals("All fields must be set and non-null", exception.getMessage());
     }
