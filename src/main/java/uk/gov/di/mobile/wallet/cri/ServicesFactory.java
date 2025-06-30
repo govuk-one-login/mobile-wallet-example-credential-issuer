@@ -88,8 +88,9 @@ public class ServicesFactory {
         MobileSecurityObjectFactory mobileSecurityObjectFactory =
                 new MobileSecurityObjectFactory(valueDigestsFactory);
         COSESigner coseSigner = new COSESigner(cborEncoder, kmsService, configurationService);
+        S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
         CertificateProvider certificateProvider =
-                new CertificateProvider(); // requires ObjectStore dependency
+                new CertificateProvider(s3Service, configurationService);
         NamespacesFactory namespacesFactory = new NamespacesFactory(issuerSignedItemFactory);
         IssuerSignedFactory issuerSignedFactory =
                 new IssuerSignedFactory(
@@ -117,8 +118,6 @@ public class ServicesFactory {
 
         NotificationService notificationService =
                 new NotificationService(dynamoDbService, accessTokenService);
-
-        S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
 
         IacasService iacasService = new IacasService(configurationService, s3Service);
 

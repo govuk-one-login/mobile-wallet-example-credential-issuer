@@ -6,6 +6,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.CertificateProvider;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
@@ -33,7 +34,7 @@ public class IssuerSignedFactory {
     }
 
     public IssuerSigned build(Namespaces namespaces)
-            throws MDLException, SigningException, CertificateException {
+            throws MDLException, SigningException, CertificateException, ObjectStoreException {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 

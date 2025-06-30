@@ -10,6 +10,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.CertificateProvider;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
@@ -58,7 +59,7 @@ class IssuerSignedFactoryTest {
 
     @Test
     void Should_ReturnIssuerSigned_When_ValidNamespacesProvided()
-            throws MDLException, SigningException, CertificateException {
+            throws MDLException, SigningException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
         byte[] item1Bytes = "item1-bytes".getBytes();
@@ -125,7 +126,7 @@ class IssuerSignedFactoryTest {
 
     @Test
     void Should_ThrowCertificateException_When_CertificateProviderThrows()
-            throws MDLException, CertificateException {
+            throws MDLException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
         CertificateException expectedException = new CertificateException("Certificate error");
@@ -148,7 +149,7 @@ class IssuerSignedFactoryTest {
 
     @Test
     void Should_ThrowSigningException_When_COSESignerThrows()
-            throws MDLException, SigningException, CertificateException {
+            throws MDLException, SigningException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
         SigningException expectedException =
@@ -171,7 +172,7 @@ class IssuerSignedFactoryTest {
 
     @Test
     void Should_ThrowMDLException_When_CBOREncodingNamespaceItemsFails()
-            throws MDLException, SigningException, CertificateException {
+            throws MDLException, SigningException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
         MDLException expectedException = new MDLException("Item encoding failed", new Exception());
