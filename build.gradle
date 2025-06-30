@@ -15,7 +15,7 @@ repositories {
 }
 
 ext {
-	awsSdkVersion = "2.31.68"
+	awsSdkVersion = "2.31.73"
 	dropwizardVersion = "4.0.14"
 	jacksonVersion = "2.19.1"
 	lombokVersion = "1.18.38"
@@ -48,7 +48,7 @@ dependencies {
 
 	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
 	testImplementation "org.jetbrains:annotations:26.0.2"
-	testImplementation "org.junit.jupiter:junit-jupiter-api:5.13.1"
+	testImplementation "org.junit.jupiter:junit-jupiter-api:5.13.2"
 	testImplementation "org.mockito:mockito-junit-jupiter:5.18.0"
 	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.8"
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
