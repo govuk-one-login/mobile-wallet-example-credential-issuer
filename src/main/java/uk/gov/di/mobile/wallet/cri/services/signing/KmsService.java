@@ -7,7 +7,6 @@ import org.bouncycastle.openssl.PEMException;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import software.amazon.awssdk.arns.Arn;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.kms.KmsClient;
@@ -28,6 +27,7 @@ import java.security.interfaces.ECPublicKey;
 
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static com.nimbusds.jose.jwk.Curve.P_256;
+import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractKeyId;
 
 public class KmsService implements KeyProvider {
 
@@ -111,7 +111,7 @@ public class KmsService implements KeyProvider {
     private ECKey createJwk(GetPublicKeyResponse publicKeyResponse)
             throws PEMException, NoSuchAlgorithmException {
         PublicKey publicKey = createPublicKey(publicKeyResponse);
-        String keyId = Arn.fromString(publicKeyResponse.keyId()).resource().resource();
+        String keyId = extractKeyId(publicKeyResponse.keyId());
         String hashedKeyId = KeyHelper.hashKeyId(keyId);
         return new ECKey.Builder(P_256, (ECPublicKey) publicKey)
                 .keyID(hashedKeyId)

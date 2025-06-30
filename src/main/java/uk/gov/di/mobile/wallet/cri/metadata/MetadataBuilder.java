@@ -12,6 +12,7 @@ public class MetadataBuilder {
     String authorizationServers;
     String credentialEndpoint;
     String notificationEndpoint;
+    String iacasEndpoint;
     Object credentialConfigurationsSupported;
 
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
@@ -50,6 +51,14 @@ public class MetadataBuilder {
         return this;
     }
 
+    public MetadataBuilder setIacasEndpoint(String iacasEndpoint) throws IllegalArgumentException {
+        if (iacasEndpoint == null) {
+            throw new IllegalArgumentException("iacasEndpoint must not be null");
+        }
+        this.iacasEndpoint = iacasEndpoint;
+        return this;
+    }
+
     public MetadataBuilder setCredentialConfigurationsSupported(String fileName)
             throws IOException, IllegalArgumentException {
         if (fileName == null) {
@@ -69,6 +78,7 @@ public class MetadataBuilder {
                 authorizationServers,
                 credentialEndpoint,
                 notificationEndpoint,
+                iacasEndpoint,
                 credentialConfigurationsSupported);
     }
 }

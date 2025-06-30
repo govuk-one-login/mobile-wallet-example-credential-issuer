@@ -13,12 +13,14 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
+import uk.gov.di.mobile.wallet.cri.iacas.IacasService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.net.MalformedURLException;
@@ -108,16 +110,21 @@ public class ServicesFactory {
         NotificationService notificationService =
                 new NotificationService(dynamoDbService, accessTokenService);
 
+        S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
+
+        IacasService iacasService = new IacasService(configurationService, s3Service);
+
         return new Services.Builder()
                 .kmsService(kmsService)
+                .dynamoDbService(dynamoDbService)
                 .preAuthorizedCodeBuilder(preAuthorizedCodeBuilder)
                 .credentialOfferService(credentialOfferService)
-                .dynamoDbService(dynamoDbService)
                 .metadataBuilder(metadataBuilder)
                 .credentialService(credentialService)
                 .didDocumentService(didDocumentService)
                 .jwksService(jwksService)
                 .notificationService(notificationService)
+                .iacasService(iacasService)
                 .build();
     }
 }

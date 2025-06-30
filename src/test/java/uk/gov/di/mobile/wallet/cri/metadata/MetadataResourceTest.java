@@ -75,6 +75,7 @@ class MetadataResourceTest {
                 "https://test-authorization-server.gov.uk",
                 "https://test-credential-issuer.gov.uk/credential",
                 "https://test-credential-issuer.gov.uk/notification",
+                "https://test-credential-issuer.gov.uk/iacas",
                 credentialConfigurationsSupported);
     }
 }

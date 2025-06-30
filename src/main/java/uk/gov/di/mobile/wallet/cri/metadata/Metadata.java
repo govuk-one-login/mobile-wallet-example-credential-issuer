@@ -9,11 +9,14 @@ public class Metadata {
             String authorizationServers,
             String credentialEndpoint,
             String notificationEndpoint,
+            String iacasEndpoint,
             Object credentialConfigurationsSupported) {
         this.credentialIssuer = credentialIssuer;
         this.authorizationServers = new String[] {authorizationServers};
         this.credentialEndpoint = credentialEndpoint;
+        this.iacasEndpoint = iacasEndpoint;
         this.notificationEndpoint = notificationEndpoint;
+
         this.credentialConfigurationsSupported = credentialConfigurationsSupported;
     }
 
@@ -21,6 +24,7 @@ public class Metadata {
     String[] authorizationServers;
     String credentialEndpoint;
     String notificationEndpoint;
+    String iacasEndpoint;
     Object credentialConfigurationsSupported;
 
     @JsonProperty("credential_issuer")
@@ -41,6 +45,11 @@ public class Metadata {
     @JsonProperty("notification_endpoint")
     public String getNotificationEndpoint() {
         return notificationEndpoint;
+    }
+
+    @JsonProperty("mdoc_iacas_uri")
+    public String getIacasEndpoint() {
+        return iacasEndpoint;
     }
 
     @JsonProperty("credential_configurations_supported")

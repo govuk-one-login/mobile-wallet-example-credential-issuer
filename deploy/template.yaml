@@ -28,9 +28,14 @@ Parameters:
     Type: Number
     Default: 8080
   DocumentBuilderStackName:
-    Description: The cloudformation stack name of the document builder
+    Description: The cloudformation stack name of the Document Builder.
     Type: String
     Default: "wallet-doc-builder-fe"
+  DocumentSigningCertificateIssuerStackName:
+    Type: String
+    Description: >
+      The stack name of the Document Signing Certificate Issuer.
+    Default: "wallet-dsc-issuer"
 
 Conditions:
   StackNameIsWalletCredIssuerBE: !Equals [!Ref "AWS::StackName", wallet-cred-issuer-be]
@@ -426,6 +431,11 @@ Resources:
               Value: !Sub
                 - "https://${AuthServerUrl}"
                 - AuthServerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, AuthServerUrl]
+            - Name: CERTIFICATE_AUTHORITY_ARN
+              Value: !Sub "{{resolve:ssm:/platform-ca/iaca/certificate-authority-arn}}"
+            - Name: CERTIFICATES_BUCKET_NAME
+              Value:
+                Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
@@ -518,10 +528,23 @@ Resources:
                   - 'kms:Encrypt'
                   - 'kms:GenerateDataKey'
                 Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                Resource:
+                  - !Sub
+                    - 'arn:aws:s3:::${BucketName}'
+                    - BucketName:
+                        Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
+                  - !Sub
+                    - 'arn:aws:s3:::${BucketName}/*'
+                    - BucketName:
+                        Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
+
 
   # KMS RESOURCES
 
