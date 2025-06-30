@@ -17,14 +17,16 @@
 
 package uk.gov.di.mobile.wallet.cri.credential.did_key;
 
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.AddressFormatException;
 
 import java.util.Arrays;
 
 public class Base58 {
 
+    @ExcludeFromGeneratedCoverageReport
     private Base58() {
-        // Should never be instantiated
+        throw new IllegalStateException("Instantiation is not valid for this class.");
     }
 
     private static final char[] ALPHABET =
@@ -46,7 +48,7 @@ public class Base58 {
      * @throws ≈ if the given string is not a valid base58 string
      */
     public static byte[] decode(String input) throws AddressFormatException {
-        if (input.length() == 0) {
+        if (input.isEmpty()) {
             return new byte[0];
         }
         // Convert the base58-encoded ASCII chars to a base58 byte sequence (base58 digits).
@@ -67,12 +69,14 @@ public class Base58 {
         // Convert base-58 digits to base-256 digits.
         byte[] decoded = new byte[input.length()];
         int outputStart = decoded.length;
-        for (int inputStart = zeros; inputStart < input58.length; ) {
+        int inputStart = zeros;
+        while (inputStart < input58.length) {
             decoded[--outputStart] = divmod(input58, inputStart, 58, 256);
             if (input58[inputStart] == 0) {
                 ++inputStart; // optimization - skip leading zeros
             }
         }
+
         // Ignore extra leading zeroes that were added during the calculation.
         while (outputStart < decoded.length && decoded[outputStart] == 0) {
             ++outputStart;
