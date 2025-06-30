@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -23,14 +22,14 @@ class MobileSecurityObjectFactoryTest {
     void Should_CreateMobileSecurityObject() {
         IssuerSignedItem issuerSignedItem =
                 new IssuerSignedItem(5, new byte[] {1, 2, 3}, "ID", "Test");
-        Map<String, List<IssuerSignedItem>> nameSpaces = Map.of("Test", List.of(issuerSignedItem));
+        Namespaces namespaces = new Namespaces(Map.of("Test", List.of(issuerSignedItem)));
         ValueDigests valueDigests = new ValueDigests(Map.of("Test", Map.of(5, new byte[] {1})));
-        when(mockValueDigestsFactory.createFromNamespaces(anyMap())).thenReturn(valueDigests);
+        when(mockValueDigestsFactory.createFromNamespaces(namespaces)).thenReturn(valueDigests);
         when(mockValueDigestsFactory.getDigestAlgorithm()).thenReturn("SHA-256");
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1750677223), ZoneId.systemDefault());
 
         MobileSecurityObject result =
-                new MobileSecurityObjectFactory(mockValueDigestsFactory, clock).build(nameSpaces);
+                new MobileSecurityObjectFactory(mockValueDigestsFactory, clock).build(namespaces);
 
         ValidityInfo expectedValidityInfo =
                 new ValidityInfo(
@@ -45,6 +44,6 @@ class MobileSecurityObjectFactoryTest {
                         "org.iso.18013.5.1.mDL",
                         expectedValidityInfo);
         assertEquals(expectedMso, result);
-        verify(mockValueDigestsFactory).createFromNamespaces(nameSpaces);
+        verify(mockValueDigestsFactory).createFromNamespaces(namespaces);
     }
 }

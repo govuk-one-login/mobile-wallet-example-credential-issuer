@@ -40,9 +40,7 @@ class ValueDigestsFactoryTest {
         when(cborEncoder.encode(issuerSignedItem)).thenReturn(expectedCbor);
         byte[] expectedDigest = "testDigest1".getBytes();
         when(mockMessageDigest.digest(expectedCbor)).thenReturn(expectedDigest);
-
-        Map<String, List<IssuerSignedItem>> namespaces =
-                Map.of("namespace", List.of(issuerSignedItem));
+        Namespaces namespaces = new Namespaces(Map.of("namespace", List.of(issuerSignedItem)));
         ValueDigests result =
                 new ValueDigestsFactory(cborEncoder, mockMessageDigest)
                         .createFromNamespaces(namespaces);
@@ -72,12 +70,13 @@ class ValueDigestsFactoryTest {
         byte[] expectedDigest2 = "testDigest2".getBytes();
         when(mockMessageDigest.digest(expectedCbor2)).thenReturn(expectedDigest2);
 
-        Map<String, List<IssuerSignedItem>> namespaces =
-                Map.of(
-                        "namespace1",
-                        List.of(issuerSignedItem1),
-                        "namespace2",
-                        List.of(issuerSignedItem2));
+        Namespaces namespaces =
+                new Namespaces(
+                        Map.of(
+                                "namespace1",
+                                List.of(issuerSignedItem1),
+                                "namespace2",
+                                List.of(issuerSignedItem2)));
         ValueDigests result =
                 new ValueDigestsFactory(cborEncoder, mockMessageDigest)
                         .createFromNamespaces(namespaces);
@@ -118,12 +117,13 @@ class ValueDigestsFactoryTest {
         byte[] expectedDigest3 = "testDigest3".getBytes();
         when(mockMessageDigest.digest(expectedCbor3)).thenReturn(expectedDigest3);
 
-        Map<String, List<IssuerSignedItem>> namespaces =
-                Map.of(
-                        "namespace1",
-                        List.of(issuerSignedItem1),
-                        "namespace2",
-                        List.of(issuerSignedItem2, issuerSignedItem3));
+        Namespaces namespaces =
+                new Namespaces(
+                        Map.of(
+                                "namespace1",
+                                List.of(issuerSignedItem1),
+                                "namespace2",
+                                List.of(issuerSignedItem2, issuerSignedItem3)));
         ValueDigests result =
                 new ValueDigestsFactory(cborEncoder, mockMessageDigest)
                         .createFromNamespaces(namespaces);
