@@ -1,7 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocTypes;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocumentTypes;
 
 import java.time.Clock;
 import java.time.Duration;
@@ -17,7 +17,7 @@ public class MobileSecurityObjectFactory {
      * The document type identifier for a mobile driver's license (mDL), as specified by ISO
      * 18013-5.
      */
-    private static final String DOC_TYPE = DocTypes.MDL;
+    private static final String DOC_TYPE = DocumentTypes.MDL;
 
     /** The factory responsible for creating {@link ValueDigests} instances. */
     private final ValueDigestsFactory valueDigestsFactory;

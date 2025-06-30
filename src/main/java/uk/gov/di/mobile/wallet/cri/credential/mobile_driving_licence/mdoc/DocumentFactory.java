@@ -1,10 +1,10 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocTypes;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocumentTypes;
 
 public class DocumentFactory {
-    private static final String DOC_TYPE = DocTypes.MDL;
+    private static final String DOC_TYPE = DocumentTypes.MDL;
 
     private final NamespacesFactory namespacesFactory;
     private final IssuerSignedFactory issuerSignedFactory;
