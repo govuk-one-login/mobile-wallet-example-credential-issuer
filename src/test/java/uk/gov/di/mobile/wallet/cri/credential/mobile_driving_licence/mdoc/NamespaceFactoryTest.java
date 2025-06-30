@@ -169,7 +169,7 @@ class NamespacesFactoryTest {
     }
 
     /**
-     * // * Creates a DrivingLicenceDocument using the default DRIVING_PRIVILEGES for both // *
+     * Creates a DrivingLicenceDocument using the default DRIVING_PRIVILEGES for both // *
      * drivingPrivileges and provisionalDrivingPrivileges. //
      */
     private DrivingLicenceDocument createTestDrivingLicenceDocument() {
