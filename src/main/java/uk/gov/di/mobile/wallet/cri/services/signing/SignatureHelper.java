@@ -8,6 +8,11 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 import java.util.Base64;
 
 public final class SignatureHelper {
+
+    private SignatureHelper() {
+        // Should never be instantiated
+    }
+
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
 
     /**
