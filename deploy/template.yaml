@@ -543,6 +543,13 @@ Resources:
                     - 'arn:aws:s3:::${BucketName}/*'
                     - BucketName:
                         Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
+              - Effect: Allow
+                Action:
+                  - 'kms:Sign'
+                  - 'kms:DescribeKey'
+                Resource:
+                  Fn::ImportValue:
+                    !Sub "${DocumentSigningCertificateIssuerStackName}-DocumentSigningKeyArn1"
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
