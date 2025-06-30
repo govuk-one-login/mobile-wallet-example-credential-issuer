@@ -2,6 +2,10 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocumentTypes;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+
+import java.security.cert.CertificateException;
 
 public class DocumentFactory {
     private static final String DOC_TYPE = DocumentTypes.MDL;
@@ -15,7 +19,8 @@ public class DocumentFactory {
         this.issuerSignedFactory = issuerSignedFactory;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence) throws Exception {
+    public Document build(final DrivingLicenceDocument drivingLicence)
+            throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicence);
         IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces);
         return new Document(DOC_TYPE, issuerSigned);

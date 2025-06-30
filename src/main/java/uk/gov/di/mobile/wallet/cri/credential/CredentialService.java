@@ -11,6 +11,7 @@ import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckD
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
@@ -19,9 +20,11 @@ import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -130,7 +133,11 @@ public class CredentialService {
                         String.format("Invalid verifiable credential type %s", vcType));
             }
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
-        } catch (Exception exception) {
+        } catch (NoSuchAlgorithmException
+                | SigningException
+                | MDLException
+                | ObjectStoreException
+                | CertificateException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
@@ -193,7 +200,7 @@ public class CredentialService {
     }
 
     private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
-            throws Exception {
+            throws ObjectStoreException, SigningException, CertificateException {
         return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
     }
 
