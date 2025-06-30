@@ -146,9 +146,7 @@ class NamespacesFactoryTest {
     @Test
     void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_When_ItsValueIsNull()
             throws MDLException {
-        // Arrange: Set up test DrivingLicenceDocument with null provisional
-        // privileges
-        NamespacesFactory namespacesFactory = new NamespacesFactory(mockIssuerSignedItemFactory);
+        // Arrange: Set up test DrivingLicenceDocument with null provisional privileges
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument(null);
         // Arrange: Configure mock to return a dummy IssuerSignedItem
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
