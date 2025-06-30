@@ -437,7 +437,8 @@ Resources:
               Value:
                 Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
             - Name: DOCUMENT_SIGNING_KEY_ALIAS_1
-              Value: !ImportValue "${DocumentSigningCertificateIssuerStackName}-DocumentSigningKeyAlias1"
+              Value:
+                Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-DocumentSigningKeyAlias1"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
