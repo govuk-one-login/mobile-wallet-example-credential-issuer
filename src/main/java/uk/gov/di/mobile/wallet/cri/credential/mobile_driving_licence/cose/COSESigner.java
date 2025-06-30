@@ -16,7 +16,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.getSignatureAsBytes;
-import static uk.gov.di.mobile.wallet.cri.util.HashUtil.getHashSha256;
+import static uk.gov.di.mobile.wallet.cri.util.HashUtil.sha256;
 
 public class COSESigner {
     private final CBOREncoder cborEncoder;
@@ -61,7 +61,7 @@ public class COSESigner {
     }
 
     private byte[] signPayload(byte[] toBeSigned) throws SigningException {
-        byte[] hash = getHashSha256(toBeSigned);
+        byte[] hash = sha256(toBeSigned);
         String keyId = keyProvider.getKeyId(configurationService.getDocumentSigningKey1());
         var signRequest =
                 SignRequest.builder()

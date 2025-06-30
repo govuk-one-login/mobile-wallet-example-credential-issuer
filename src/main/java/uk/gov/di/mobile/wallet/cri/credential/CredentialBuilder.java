@@ -12,11 +12,9 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
@@ -26,6 +24,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
 import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.toBase64UrlEncodedSignature;
+import static uk.gov.di.mobile.wallet.cri.util.HashUtil.*;
 
 public class CredentialBuilder<T extends CredentialSubject> {
 
@@ -60,8 +59,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
                 getEncodedClaims(credentialSubject, credentialType, credentialTtlMinutes);
         var message = encodedHeader + "." + encodedClaims;
 
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
-        byte[] encodedHash = digest.digest(message.getBytes());
+        byte[] encodedHash = sha256(message);
 
         var signRequest =
                 SignRequest.builder()
@@ -113,8 +111,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
         return Base64URL.encode(claimsBuilder.build().toString());
     }
 
-    private Base64URL getEncodedHeader(String keyId) throws NoSuchAlgorithmException {
-        String hashedKeyId = KeyHelper.hashKeyId(keyId);
+    private Base64URL getEncodedHeader(String keyId) {
+        String hashedKeyId = sha256Hex(keyId);
         String didKeyId = "did:web:" + configurationService.getDidController() + "#" + hashedKeyId;
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
