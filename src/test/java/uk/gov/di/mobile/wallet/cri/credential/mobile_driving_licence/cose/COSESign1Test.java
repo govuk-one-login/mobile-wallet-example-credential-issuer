@@ -18,12 +18,12 @@ class COSESign1Test {
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
-        COSESign1 record = new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
+        COSESign1 result = new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
 
-        assertArrayEquals(protectedHeader, record.protectedHeader());
-        assertEquals(unprotectedHeader, record.unprotectedHeader());
-        assertArrayEquals(payload, record.payload());
-        assertArrayEquals(signature, record.signature());
+        assertArrayEquals(protectedHeader, result.protectedHeader());
+        assertEquals(unprotectedHeader, result.unprotectedHeader());
+        assertArrayEquals(payload, result.payload());
+        assertArrayEquals(signature, result.signature());
     }
 
     @Test
@@ -36,12 +36,12 @@ class COSESign1Test {
         byte[] signature1 = {7, 8, 9};
         byte[] signature2 = {7, 8, 9};
 
-        COSESign1 record1 =
+        COSESign1 result1 =
                 new COSESign1(protectedHeader1, unprotectedHeader, payload1, signature1);
-        COSESign1 record2 =
+        COSESign1 result2 =
                 new COSESign1(protectedHeader2, unprotectedHeader, payload2, signature2);
 
-        assertEquals(record1, record2);
+        assertEquals(result1, result2);
     }
 
     @Test
@@ -52,10 +52,10 @@ class COSESign1Test {
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
-        COSESign1 record1 = new COSESign1(protectedHeader1, unprotectedHeader, payload, signature);
-        COSESign1 record2 = new COSESign1(protectedHeader2, unprotectedHeader, payload, signature);
+        COSESign1 result1 = new COSESign1(protectedHeader1, unprotectedHeader, payload, signature);
+        COSESign1 result2 = new COSESign1(protectedHeader2, unprotectedHeader, payload, signature);
 
-        assertNotEquals(record1, record2);
+        assertNotEquals(result1, result2);
     }
 
     @Test
@@ -66,10 +66,10 @@ class COSESign1Test {
         byte[] payload2 = {4, 5, 7};
         byte[] signature = {7, 8, 9};
 
-        COSESign1 record1 = new COSESign1(protectedHeader, unprotectedHeader, payload1, signature);
-        COSESign1 record2 = new COSESign1(protectedHeader, unprotectedHeader, payload2, signature);
+        COSESign1 result1 = new COSESign1(protectedHeader, unprotectedHeader, payload1, signature);
+        COSESign1 result2 = new COSESign1(protectedHeader, unprotectedHeader, payload2, signature);
 
-        assertNotEquals(record1, record2);
+        assertNotEquals(result1, result2);
     }
 
     @Test
@@ -80,10 +80,10 @@ class COSESign1Test {
         byte[] signature1 = {7, 8, 9};
         byte[] signature2 = {7, 8, 10};
 
-        COSESign1 record1 = new COSESign1(protectedHeader, unprotectedHeader, payload, signature1);
-        COSESign1 record2 = new COSESign1(protectedHeader, unprotectedHeader, payload, signature2);
+        COSESign1 result1 = new COSESign1(protectedHeader, unprotectedHeader, payload, signature1);
+        COSESign1 result2 = new COSESign1(protectedHeader, unprotectedHeader, payload, signature2);
 
-        assertNotEquals(record1, record2);
+        assertNotEquals(result1, result2);
     }
 
     @Test
@@ -94,10 +94,10 @@ class COSESign1Test {
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
-        COSESign1 record1 = new COSESign1(protectedHeader, unprotectedHeader1, payload, signature);
-        COSESign1 record2 = new COSESign1(protectedHeader, unprotectedHeader2, payload, signature);
+        COSESign1 result1 = new COSESign1(protectedHeader, unprotectedHeader1, payload, signature);
+        COSESign1 result2 = new COSESign1(protectedHeader, unprotectedHeader2, payload, signature);
 
-        assertNotEquals(record1, record2);
+        assertNotEquals(result1, result2);
     }
 
     @Test
@@ -110,12 +110,12 @@ class COSESign1Test {
         byte[] signature1 = {7, 8, 9};
         byte[] signature2 = {7, 8, 9};
 
-        COSESign1 record1 =
+        COSESign1 result1 =
                 new COSESign1(protectedHeader1, unprotectedHeader, payload1, signature1);
-        COSESign1 record2 =
+        COSESign1 result2 =
                 new COSESign1(protectedHeader2, unprotectedHeader, payload2, signature2);
 
-        assertEquals(record1.hashCode(), record2.hashCode());
+        assertEquals(result1.hashCode(), result2.hashCode());
     }
 
     @Test
@@ -125,8 +125,8 @@ class COSESign1Test {
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
-        COSESign1 record = new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
-        String toString = record.toString();
+        COSESign1 result = new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
+        String toString = result.toString();
 
         assertTrue(toString.contains("[1, 2, 3]"));
         assertTrue(toString.contains("[4, 5, 6]"));
