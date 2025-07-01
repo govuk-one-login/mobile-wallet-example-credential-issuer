@@ -189,7 +189,7 @@ public class CredentialService {
 
     @SuppressWarnings("unchecked")
     private String getDigitalVeteranCard(VeteranCardDocument veteranCardDocument, String sub)
-            throws SigningException, NoSuchAlgorithmException {
+            throws SigningException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(veteranCardDocument, sub);
         return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
