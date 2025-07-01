@@ -18,13 +18,15 @@ public class LocalDateCBORSerializer extends JsonSerializer<LocalDate> {
             final JsonGenerator generator,
             final SerializerProvider serializers)
             throws IOException {
-        if (generator instanceof CBORGenerator cborGenerator) {
-            String dateString = localDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
-            // '1004' is a tag indicating that the CBOR value should be interpreted as a date
-            cborGenerator.writeTag(1004);
-            generator.writeString(dateString);
-        } else {
-            throw new IllegalArgumentException("This serializer only supports CBORGenerator");
+        if (!(generator instanceof CBORGenerator cborGenerator)) {
+            throw new IllegalArgumentException(
+                    "LocalDateCBORSerializer requires CBORGenerator but received: "
+                            + generator.getClass().getSimpleName());
         }
+
+        String dateString = localDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        // '1004' is a tag indicating that the CBOR value should be interpreted as a date
+        cborGenerator.writeTag(1004);
+        generator.writeString(dateString);
     }
 }

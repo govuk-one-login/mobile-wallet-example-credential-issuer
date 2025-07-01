@@ -18,8 +18,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -78,6 +77,9 @@ class MobileSecurityObjectSerializerTest {
                         () ->
                                 serializer.serialize(
                                         testObject, regularGenerator, serializerProvider));
-        assertEquals("This serializer only supports CBORGenerator", exception.getMessage());
+        assertTrue(
+                exception
+                        .getMessage()
+                        .contains("MobileSecurityObjectSerializer requires CBORGenerator"));
     }
 }

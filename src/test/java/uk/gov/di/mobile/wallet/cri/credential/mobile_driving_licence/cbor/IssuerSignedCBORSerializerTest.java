@@ -14,8 +14,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 import java.io.IOException;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
@@ -38,7 +37,7 @@ class IssuerSignedCBORSerializerTest {
         nameSpaces.put("namespace1", Arrays.asList(issuerSignedItemBytes1, issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
-        // Arrange: Prepare an CoseSign1 object
+        // Arrange: Prepare a CoseSign1 object
         byte[] protectedHeaderBytes = {1, 2, 3, 4};
         Map<Integer, Object> unprotectedHeader = new HashMap<>();
         byte[] payloadBytes = {5, 6, 7, 8};
@@ -98,7 +97,7 @@ class IssuerSignedCBORSerializerTest {
         nameSpaces.put("namespace2", List.of(issuerSignedItemBytes2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
-        // Arrange: Prepare an CoseSign1 object
+        // Arrange: Prepare a CoseSign1 object
         byte[] protectedHeaderBytes = {1, 2, 3, 4};
         Map<Integer, Object> unprotectedHeader = new HashMap<>();
         byte[] payloadBytes = {5, 6, 7, 8};
@@ -161,6 +160,9 @@ class IssuerSignedCBORSerializerTest {
                         () ->
                                 issuerSignedCBORSerializer.serialize(
                                         issuerSigned, regularGenerator, serializerProvider));
-        assertEquals("This serializer only supports CBORGenerator", exception.getMessage());
+        assertTrue(
+                exception
+                        .getMessage()
+                        .contains("IssuerSignedCBORSerializer requires CBORGenerator"));
     }
 }

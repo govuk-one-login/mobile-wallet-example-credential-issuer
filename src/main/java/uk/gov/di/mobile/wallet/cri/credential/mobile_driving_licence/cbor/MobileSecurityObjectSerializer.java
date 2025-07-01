@@ -19,19 +19,21 @@ public class MobileSecurityObjectSerializer extends JsonSerializer<MobileSecurit
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
-        if (generator instanceof CBORGenerator cborGenerator) {
-            CBORMapper mapper = new CBORMapper();
-            mapper.registerModule(new JavaTimeModule());
-            SimpleModule simpleModule =
-                    new SimpleModule().addSerializer(Instant.class, new InstantCBORSerializer());
-            mapper.registerModule(simpleModule);
-
-            byte[] mobileSecurityObjectBytes = mapper.writeValueAsBytes(mobileSecurityObject);
-
-            cborGenerator.writeTag(24);
-            cborGenerator.writeBinary(mobileSecurityObjectBytes);
-        } else {
-            throw new IllegalArgumentException("This serializer only supports CBORGenerator");
+        if (!(generator instanceof CBORGenerator cborGenerator)) {
+            throw new IllegalArgumentException(
+                    "MobileSecurityObjectSerializer requires CBORGenerator but received: "
+                            + generator.getClass().getSimpleName());
         }
+
+        CBORMapper mapper = new CBORMapper();
+        mapper.registerModule(new JavaTimeModule());
+        SimpleModule simpleModule =
+                new SimpleModule().addSerializer(Instant.class, new InstantCBORSerializer());
+        mapper.registerModule(simpleModule);
+
+        byte[] mobileSecurityObjectBytes = mapper.writeValueAsBytes(mobileSecurityObject);
+
+        cborGenerator.writeTag(24);
+        cborGenerator.writeBinary(mobileSecurityObjectBytes);
     }
 }

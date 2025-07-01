@@ -13,8 +13,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +49,7 @@ class LocalDateCBORSerializerTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> serializer.serialize(testDate, regularGenerator, serializerProvider));
-        assertEquals("This serializer only supports CBORGenerator", exception.getMessage());
+        assertTrue(
+                exception.getMessage().contains("LocalDateCBORSerializer requires CBORGenerator"));
     }
 }

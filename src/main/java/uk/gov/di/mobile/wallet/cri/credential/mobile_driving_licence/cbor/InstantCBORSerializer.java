@@ -17,14 +17,15 @@ public class InstantCBORSerializer extends JsonSerializer<Instant> {
             final JsonGenerator generator,
             final SerializerProvider serializers)
             throws IOException {
-        if (generator instanceof CBORGenerator cborGenerator) {
-            String formatted =
-                    instant.truncatedTo(ChronoUnit.SECONDS).toString(); // "2026-06-24T16:05:21Z"
-            // '1000' is a tag indicating that the CBOR value should be interpreted as a date-time
-            cborGenerator.writeTag(1000);
-            generator.writeString(formatted);
-        } else {
-            throw new IllegalArgumentException("This serializer only supports CBORGenerator");
+        if (!(generator instanceof CBORGenerator cborGenerator)) {
+            throw new IllegalArgumentException(
+                    "InstantCBORSerializer requires CBORGenerator but received: "
+                            + generator.getClass().getSimpleName());
         }
+        String formatted =
+                instant.truncatedTo(ChronoUnit.SECONDS).toString(); // "2026-06-24T16:05:21Z"
+        // '1000' is a tag indicating that the CBOR value should be interpreted as a date-time
+        cborGenerator.writeTag(1000);
+        generator.writeString(formatted);
     }
 }

@@ -33,36 +33,38 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
-        if (generator instanceof CBORGenerator cborGenerator) {
-            cborGenerator.writeStartObject();
-
-            cborGenerator.writeFieldName("nameSpaces");
-            cborGenerator.writeStartObject();
-            for (Map.Entry<String, List<byte[]>> entry : issuerSigned.nameSpaces().entrySet()) {
-                cborGenerator.writeFieldName(entry.getKey());
-                cborGenerator.writeStartArray();
-                for (byte[] issuerSignedItemBytes : entry.getValue()) {
-                    // '24' is a tag that represents encoded CBOR data items. It's used when
-                    // embedding CBOR data within CBOR.
-                    cborGenerator.writeTag(24);
-                    cborGenerator.writeObject(issuerSignedItemBytes);
-                }
-                cborGenerator.writeEndArray();
-            }
-            cborGenerator.writeEndObject();
-
-            COSESign1 issuerAuth = issuerSigned.issuerAuth();
-            cborGenerator.writeFieldName("issuerAuth");
-            cborGenerator.writeStartArray();
-            cborGenerator.writeBinary(issuerAuth.protectedHeader());
-            cborGenerator.writeObject(issuerAuth.unprotectedHeader());
-            cborGenerator.writeBinary(issuerAuth.payload());
-            cborGenerator.writeBinary(issuerAuth.signature());
-            cborGenerator.writeEndArray();
-
-            cborGenerator.writeEndObject();
-        } else {
-            throw new IllegalArgumentException("This serializer only supports CBORGenerator");
+        if (!(generator instanceof CBORGenerator cborGenerator)) {
+            throw new IllegalArgumentException(
+                    "IssuerSignedCBORSerializer requires CBORGenerator but received: "
+                            + generator.getClass().getSimpleName());
         }
+
+        cborGenerator.writeStartObject();
+
+        cborGenerator.writeFieldName("nameSpaces");
+        cborGenerator.writeStartObject();
+        for (Map.Entry<String, List<byte[]>> entry : issuerSigned.nameSpaces().entrySet()) {
+            cborGenerator.writeFieldName(entry.getKey());
+            cborGenerator.writeStartArray();
+            for (byte[] issuerSignedItemBytes : entry.getValue()) {
+                // '24' is a tag that represents encoded CBOR data items. It's used when
+                // embedding CBOR data within CBOR.
+                cborGenerator.writeTag(24);
+                cborGenerator.writeObject(issuerSignedItemBytes);
+            }
+            cborGenerator.writeEndArray();
+        }
+        cborGenerator.writeEndObject();
+
+        COSESign1 issuerAuth = issuerSigned.issuerAuth();
+        cborGenerator.writeFieldName("issuerAuth");
+        cborGenerator.writeStartArray();
+        cborGenerator.writeBinary(issuerAuth.protectedHeader());
+        cborGenerator.writeObject(issuerAuth.unprotectedHeader());
+        cborGenerator.writeBinary(issuerAuth.payload());
+        cborGenerator.writeBinary(issuerAuth.signature());
+        cborGenerator.writeEndArray();
+
+        cborGenerator.writeEndObject();
     }
 }
