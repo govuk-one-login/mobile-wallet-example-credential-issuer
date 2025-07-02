@@ -46,7 +46,7 @@ class DidDocumentServiceTest {
     private static final String TEST_CONTROLLER = "did:web:test-example-credential-issuer.gov.uk";
     private static final String TEST_DID_ID = TEST_CONTROLLER + "#" + TEST_KEY_ID;
     private static final List<String> TEST_CONTEXT =
-            List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
+            List.of("https://www.w3.org/ns/did/v1", "https://w3id.org/security/suites/jws-2020/v1");
     private static final String TEST_DID_TYPE = "JsonWebKey2020";
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
 

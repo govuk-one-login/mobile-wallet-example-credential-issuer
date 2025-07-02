@@ -15,7 +15,7 @@ public class DidDocumentService {
     private static final String VERIFICATION_METHOD_TYPE = "JsonWebKey2020";
     private static final String CONTROLLER_PREFIX = "did:web:";
     private static final List<String> CONTEXT =
-            List.of("https://www.w3.org/ns/did/v1", "https://www.w3.org/ns/security/jwk/v1");
+            List.of("https://www.w3.org/ns/did/v1", "https://w3id.org/security/suites/jws-2020/v1");
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
 
