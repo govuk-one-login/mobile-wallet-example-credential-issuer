@@ -261,3 +261,13 @@ Outputs:
     Value: !GetAtt DocumentSigningKey1.Arn
     Export:
       Name: !Sub '${AWS::StackName}-DocumentSigningKey1Arn'
+  DocumentSigningKeyAlias1:
+    Description: 'The alias of the Document Signing Key 1 - temporary'
+    Value: !Ref DocumentSigningKeyAlias1
+    Export:
+      Name: !Sub '${AWS::StackName}-DocumentSigningKeyAlias1'
+  DocumentSigningKeyArn1:
+    Description: 'The ARN of the Document Signing Key 1 - temporary'
+    Value: !GetAtt DocumentSigningKey1.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-DocumentSigningKeyArn1'
