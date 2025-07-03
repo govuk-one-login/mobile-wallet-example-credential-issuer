@@ -256,11 +256,6 @@ Outputs:
     Value: !Ref DocSigningCertificateBucket
     Export:
       Name: !Sub '${AWS::StackName}-CertificatesBucketName'
-  DocumentSigningKeyAlias1:
-    Description: 'The alias of the Document Signing Key 1'
-    Value: !Ref DocumentSigningKeyAlias1
-    Export:
-      Name: !Sub '${AWS::StackName}-DocumentSigningKeyAlias1'
   DocumentSigningKeyArn1:
     Description: 'The ARN of the Document Signing Key 1'
     Value: !GetAtt DocumentSigningKey1.Arn
