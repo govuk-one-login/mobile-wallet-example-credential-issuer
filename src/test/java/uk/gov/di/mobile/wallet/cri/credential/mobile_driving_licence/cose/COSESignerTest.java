@@ -13,7 +13,6 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -36,7 +35,6 @@ class COSESignerTest {
 
     @Mock private CBOREncoder cborEncoder;
     @Mock private KeyProvider keyProvider;
-    @Mock private ConfigurationService configurationService;
     @Mock private X509Certificate certificate;
     @Mock private SignResponse signResponse;
 
@@ -48,7 +46,6 @@ class COSESignerTest {
     private static final byte[] TEST_SIG_STRUCTURE = "sig structure".getBytes();
     private static final byte[] TEST_SIGNATURE = "signature".getBytes();
     private static final String TEST_KEY_ARN = "test-key-arn";
-    private static final String TEST_SIGNING_KEY = "test-signing-key";
 
     @BeforeEach
     void setUp() {
