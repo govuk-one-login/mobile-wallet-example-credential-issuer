@@ -97,14 +97,21 @@ public class ServicesFactory {
                 new ValueDigestsFactory(cborEncoder, MessageDigest.getInstance("SHA-256"));
         MobileSecurityObjectFactory mobileSecurityObjectFactory =
                 new MobileSecurityObjectFactory(valueDigestsFactory);
-        COSESigner coseSigner = new COSESigner(cborEncoder, kmsService, configurationService);
+        COSESigner coseSigner =
+                new COSESigner(
+                        cborEncoder, kmsService, configurationService.getDocumentSigningKey1Arn());
         S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
         CertificateProvider certificateProvider =
-                new CertificateProvider(s3Service, configurationService);
+                new CertificateProvider(
+                        s3Service, configurationService.getCertificatesBucketName());
         NamespacesFactory namespacesFactory = new NamespacesFactory(issuerSignedItemFactory);
         IssuerSignedFactory issuerSignedFactory =
                 new IssuerSignedFactory(
-                        mobileSecurityObjectFactory, cborEncoder, coseSigner, certificateProvider);
+                        mobileSecurityObjectFactory,
+                        cborEncoder,
+                        coseSigner,
+                        certificateProvider,
+                        configurationService.getDocumentSigningKey1Arn());
         DocumentFactory documentFactory =
                 new DocumentFactory(namespacesFactory, issuerSignedFactory);
 
@@ -129,7 +136,9 @@ public class ServicesFactory {
         NotificationService notificationService =
                 new NotificationService(dynamoDbService, accessTokenService);
 
-        IacasService iacasService = new IacasService(configurationService, certificateProvider);
+        IacasService iacasService =
+                new IacasService(
+                        certificateProvider, configurationService.getCertificateAuthorityArn());
 
         return new Services.Builder()
                 .kmsService(kmsService)

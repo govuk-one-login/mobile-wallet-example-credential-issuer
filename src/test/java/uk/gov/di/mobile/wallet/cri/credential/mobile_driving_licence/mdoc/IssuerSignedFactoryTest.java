@@ -47,6 +47,10 @@ class IssuerSignedFactoryTest {
 
     private IssuerSignedFactory issuerSignedFactory;
 
+    private static final String TEST_KMS_KEY_ARN =
+            "arn:aws:kms:eu-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+    private static final String TEST_CERTIFICATE_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
+
     @BeforeEach
     void setUp() {
         issuerSignedFactory =
@@ -54,7 +58,8 @@ class IssuerSignedFactoryTest {
                         mockMobileSecurityObjectFactory,
                         mockCborEncoder,
                         mockCoseSigner,
-                        mockCertificateProvider);
+                        mockCertificateProvider,
+                        TEST_KMS_KEY_ARN);
     }
 
     @Test
@@ -76,7 +81,8 @@ class IssuerSignedFactoryTest {
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
         when(mockCborEncoder.encode(mockIssuerSignedItem1)).thenReturn(item1Bytes);
         when(mockCborEncoder.encode(mockIssuerSignedItem2)).thenReturn(item2Bytes);
-        when(mockCertificateProvider.getCertificate()).thenReturn(mockCertificate);
+        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
+                .thenReturn(mockCertificate);
         when(mockCoseSigner.sign(msoBytes, mockCertificate)).thenReturn(mockCoseSign1);
 
         // Act
@@ -86,7 +92,7 @@ class IssuerSignedFactoryTest {
         assertNotNull(result);
         verify(mockMobileSecurityObjectFactory).build(mockNamespaces);
         verify(mockCborEncoder).encode(mockMobileSecurityObject);
-        verify(mockCertificateProvider).getCertificate();
+        verify(mockCertificateProvider).getCertificate(TEST_CERTIFICATE_ID);
         verify(mockCoseSigner).sign(msoBytes, mockCertificate);
         verify(mockCborEncoder, times(3)).encode(any(IssuerSignedItem.class));
     }
@@ -134,7 +140,8 @@ class IssuerSignedFactoryTest {
         when(mockMobileSecurityObjectFactory.build(mockNamespaces))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCertificateProvider.getCertificate()).thenThrow(expectedException);
+        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
+                .thenThrow(expectedException);
 
         // Act & Assert
         CertificateException exception =
@@ -143,7 +150,7 @@ class IssuerSignedFactoryTest {
                         () -> issuerSignedFactory.build(mockNamespaces));
         assertEquals("Certificate error", exception.getMessage());
 
-        verify(mockCertificateProvider).getCertificate();
+        verify(mockCertificateProvider).getCertificate(TEST_CERTIFICATE_ID);
         verifyNoInteractions(mockCoseSigner);
     }
 
@@ -158,7 +165,8 @@ class IssuerSignedFactoryTest {
         when(mockMobileSecurityObjectFactory.build(mockNamespaces))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCertificateProvider.getCertificate()).thenReturn(mockCertificate);
+        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
+                .thenReturn(mockCertificate);
         when(mockCoseSigner.sign(msoBytes, mockCertificate)).thenThrow(expectedException);
 
         // Act & Assert
@@ -184,7 +192,8 @@ class IssuerSignedFactoryTest {
         when(mockMobileSecurityObjectFactory.build(mockNamespaces))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCertificateProvider.getCertificate()).thenReturn(mockCertificate);
+        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
+                .thenReturn(mockCertificate);
         when(mockCoseSigner.sign(msoBytes, mockCertificate)).thenReturn(mockCoseSign1);
         when(mockCborEncoder.encode(mockIssuerSignedItem1)).thenThrow(expectedException);
 

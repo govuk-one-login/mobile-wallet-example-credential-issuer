@@ -2,7 +2,6 @@ package uk.gov.di.mobile.wallet.cri.services.certificate;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStore;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 
@@ -20,14 +19,11 @@ import static org.mockito.Mockito.when;
 class CertificateProviderTest {
 
     private ObjectStore objectStore;
-    private ConfigurationService configurationService;
     private CertificateProvider certificateProvider;
 
     private static final String BUCKET_NAME = "test-bucket";
-    private static final String CERTIFICATE_AUTHORITY_ARN =
-            "arn:aws:acm-pca:region:account:certificate-authority/1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String CERTIFICATE_AUTHORITY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String OBJECT_KEY = CERTIFICATE_AUTHORITY_ID + "/certificate.pem";
+    private static final String CERTIFICATE_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
+    private static final String OBJECT_KEY = CERTIFICATE_ID + "/certificate.pem";
     private static final String CERTIFICATE_PEM =
             """
           -----BEGIN CERTIFICATE-----
@@ -55,18 +51,14 @@ class CertificateProviderTest {
     @BeforeEach
     void setUp() {
         objectStore = mock(ObjectStore.class);
-        configurationService = mock(ConfigurationService.class);
-        certificateProvider = new CertificateProvider(objectStore, configurationService);
+        certificateProvider = new CertificateProvider(objectStore, BUCKET_NAME);
     }
 
     @Test
     void Should_ReturnReturnCertificateString() throws Exception {
-        when(configurationService.getCertificatesBucketName()).thenReturn(BUCKET_NAME);
-        when(configurationService.getCertificateAuthorityArn())
-                .thenReturn(CERTIFICATE_AUTHORITY_ARN);
         when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
 
-        String result = certificateProvider.getCertificateAsString();
+        String result = certificateProvider.getCertificateAsString(CERTIFICATE_ID);
 
         assertEquals(CERTIFICATE_PEM, result);
         verify(objectStore).getObject(BUCKET_NAME, OBJECT_KEY);
@@ -74,12 +66,9 @@ class CertificateProviderTest {
 
     @Test
     void Should_ReturnX509Certificate() throws Exception {
-        when(configurationService.getCertificatesBucketName()).thenReturn(BUCKET_NAME);
-        when(configurationService.getCertificateAuthorityArn())
-                .thenReturn(CERTIFICATE_AUTHORITY_ARN);
         when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
 
-        X509Certificate result = certificateProvider.getCertificate();
+        X509Certificate result = certificateProvider.getCertificate(CERTIFICATE_ID);
 
         assertNotNull(result);
         assertEquals("X.509", result.getType());
@@ -87,23 +76,21 @@ class CertificateProviderTest {
 
     @Test
     void Should_PropagateExceptionThrownByObjectStore() throws Exception {
-        when(configurationService.getCertificatesBucketName()).thenReturn(BUCKET_NAME);
-        when(configurationService.getCertificateAuthorityArn())
-                .thenReturn(CERTIFICATE_AUTHORITY_ARN);
         when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY))
                 .thenThrow(new ObjectStoreException("Not found", new RuntimeException()));
 
-        assertThrows(ObjectStoreException.class, () -> certificateProvider.getCertificate());
+        assertThrows(
+                ObjectStoreException.class,
+                () -> certificateProvider.getCertificate(CERTIFICATE_ID));
     }
 
     @Test
     void Should_ThrowsCertificateException_When_CertificateIsInvalid() throws Exception {
-        when(configurationService.getCertificatesBucketName()).thenReturn(BUCKET_NAME);
-        when(configurationService.getCertificateAuthorityArn())
-                .thenReturn(CERTIFICATE_AUTHORITY_ARN);
         when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY))
                 .thenReturn("not a cert".getBytes(StandardCharsets.UTF_8));
 
-        assertThrows(CertificateException.class, () -> certificateProvider.getCertificate());
+        assertThrows(
+                CertificateException.class,
+                () -> certificateProvider.getCertificate(CERTIFICATE_ID));
     }
 }

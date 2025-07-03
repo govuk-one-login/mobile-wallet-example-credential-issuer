@@ -8,7 +8,6 @@ import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEAlgorithms;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -21,15 +20,13 @@ import static uk.gov.di.mobile.wallet.cri.util.HashUtil.sha256;
 public class COSESigner {
     private final CBOREncoder cborEncoder;
     private final KeyProvider keyProvider;
-    private final ConfigurationService configurationService;
+    private final String documentSigningKeyArn;
 
     public COSESigner(
-            CBOREncoder cborEncoder,
-            KeyProvider keyProvider,
-            ConfigurationService configurationService) {
+            CBOREncoder cborEncoder, KeyProvider keyProvider, String documentSigningKeyArn) {
         this.cborEncoder = cborEncoder;
         this.keyProvider = keyProvider;
-        this.configurationService = configurationService;
+        this.documentSigningKeyArn = documentSigningKeyArn;
     }
 
     public COSESign1 sign(byte[] payload, X509Certificate certificate)
@@ -62,12 +59,11 @@ public class COSESigner {
 
     private byte[] signPayload(byte[] toBeSigned) throws SigningException {
         byte[] hash = sha256(toBeSigned);
-        String keyId = keyProvider.getKeyId(configurationService.getDocumentSigningKey1());
         var signRequest =
                 SignRequest.builder()
                         .message(SdkBytes.fromByteArray(hash))
                         .messageType(MessageType.DIGEST)
-                        .keyId(keyId)
+                        .keyId(documentSigningKeyArn)
                         .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
                         .build();
 

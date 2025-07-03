@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.services.certificate;
 
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStore;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 
@@ -10,34 +9,29 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 
-import static uk.gov.di.mobile.wallet.cri.util.ArnUtil.extractCertificateAuthorityId;
-
 public class CertificateProvider {
 
     private final ObjectStore objectStore;
-    private final ConfigurationService configurationService;
+    private final String bucketName;
 
-    public CertificateProvider(ObjectStore objectStore, ConfigurationService configurationService) {
+    public CertificateProvider(ObjectStore objectStore, String bucketName) {
         this.objectStore = objectStore;
-        this.configurationService = configurationService;
+        this.bucketName = bucketName;
     }
 
-    public X509Certificate getCertificate() throws CertificateException, ObjectStoreException {
-        byte[] certificateBytes = getCertificateBytes();
+    public X509Certificate getCertificate(String certificateId)
+            throws CertificateException, ObjectStoreException {
+        byte[] certificateBytes = getCertificateBytes(certificateId);
         return parseX509Certificate(certificateBytes);
     }
 
-    public String getCertificateAsString() throws ObjectStoreException {
-        byte[] certificateBytes = getCertificateBytes();
+    public String getCertificateAsString(String certificateId) throws ObjectStoreException {
+        byte[] certificateBytes = getCertificateBytes(certificateId);
         return new String(certificateBytes, StandardCharsets.UTF_8);
     }
 
-    private byte[] getCertificateBytes() throws ObjectStoreException {
-        String bucketName = configurationService.getCertificatesBucketName();
-        String certificateAuthorityArn = configurationService.getCertificateAuthorityArn();
-
-        String certificateAuthorityId = extractCertificateAuthorityId(certificateAuthorityArn);
-        String objectKey = certificateAuthorityId + "/certificate.pem";
+    private byte[] getCertificateBytes(String certificateId) throws ObjectStoreException {
+        String objectKey = certificateId + "/certificate.pem";
 
         return objectStore.getObject(bucketName, objectKey);
     }

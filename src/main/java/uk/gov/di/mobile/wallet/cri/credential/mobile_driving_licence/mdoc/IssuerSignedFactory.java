@@ -8,6 +8,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESi
 import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+import uk.gov.di.mobile.wallet.cri.util.ArnUtil;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -21,16 +22,19 @@ public class IssuerSignedFactory {
     private final CBOREncoder cborEncoder;
     private final COSESigner coseSigner;
     private final CertificateProvider certificateProvider;
+    private final String documentSigningKey1Arn;
 
     public IssuerSignedFactory(
             MobileSecurityObjectFactory mobileSecurityObjectFactory,
             CBOREncoder cborEncoder,
             COSESigner coseSigner,
-            CertificateProvider certificateProvider) {
+            CertificateProvider certificateProvider,
+            String documentSigningKey1Arn) {
         this.mobileSecurityObjectFactory = mobileSecurityObjectFactory;
         this.cborEncoder = cborEncoder;
         this.coseSigner = coseSigner;
         this.certificateProvider = certificateProvider;
+        this.documentSigningKey1Arn = documentSigningKey1Arn;
     }
 
     public IssuerSigned build(Namespaces namespaces)
@@ -38,7 +42,9 @@ public class IssuerSignedFactory {
         MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
-        X509Certificate certificate = certificateProvider.getCertificate();
+        String certificateId = ArnUtil.extractKeyId(documentSigningKey1Arn);
+
+        X509Certificate certificate = certificateProvider.getCertificate(certificateId);
         COSESign1 sign1 = coseSigner.sign(mobileSecurityObjectBytes, certificate);
 
         Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);

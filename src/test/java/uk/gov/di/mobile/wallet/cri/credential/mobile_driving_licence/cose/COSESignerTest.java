@@ -47,12 +47,12 @@ class COSESignerTest {
     private static final byte[] TEST_PROTECTED_HEADER_ENCODED = "protected header".getBytes();
     private static final byte[] TEST_SIG_STRUCTURE = "sig structure".getBytes();
     private static final byte[] TEST_SIGNATURE = "signature".getBytes();
-    private static final String TEST_KEY_ID = "test-key-id";
+    private static final String TEST_KEY_ARN = "test-key-arn";
     private static final String TEST_SIGNING_KEY = "test-signing-key";
 
     @BeforeEach
     void setUp() {
-        coseSigner = new COSESigner(cborEncoder, keyProvider, configurationService);
+        coseSigner = new COSESigner(cborEncoder, keyProvider, TEST_KEY_ARN);
     }
 
     @Test
@@ -61,8 +61,6 @@ class COSESignerTest {
         when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
         when(cborEncoder.encode(any()))
                 .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
-        when(configurationService.getDocumentSigningKey1Arn()).thenReturn(TEST_SIGNING_KEY);
-        when(keyProvider.getKeyId(TEST_SIGNING_KEY)).thenReturn(TEST_KEY_ID);
         when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
         when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_SIGNATURE));
 
@@ -78,8 +76,6 @@ class COSESignerTest {
         verify(certificate).getEncoded();
         verify(cborEncoder, times(2))
                 .encode(any()); // Once for protected header, once for sig structure
-        verify(configurationService).getDocumentSigningKey1Arn();
-        verify(keyProvider).getKeyId(TEST_SIGNING_KEY);
         verify(keyProvider).sign(any(SignRequest.class));
     }
 
@@ -89,8 +85,6 @@ class COSESignerTest {
         when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
         when(cborEncoder.encode(any()))
                 .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
-        when(configurationService.getDocumentSigningKey1Arn()).thenReturn(TEST_SIGNING_KEY);
-        when(keyProvider.getKeyId(TEST_SIGNING_KEY)).thenReturn(TEST_KEY_ID);
         when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
         when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_SIGNATURE));
 
@@ -125,8 +119,6 @@ class COSESignerTest {
         when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
         when(cborEncoder.encode(any()))
                 .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
-        when(configurationService.getDocumentSigningKey1Arn()).thenReturn(TEST_SIGNING_KEY);
-        when(keyProvider.getKeyId(TEST_SIGNING_KEY)).thenReturn(TEST_KEY_ID);
         when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
         when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_SIGNATURE));
 
@@ -139,7 +131,7 @@ class COSESignerTest {
                 .sign(
                         argThat(
                                 signRequest ->
-                                        signRequest.keyId().equals(TEST_KEY_ID) // Correct key ID
+                                        signRequest.keyId().equals(TEST_KEY_ARN) // Correct key ID
                                                 && signRequest.messageType()
                                                         == MessageType
                                                                 .DIGEST // Signing a hash digest
@@ -167,8 +159,6 @@ class COSESignerTest {
         when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
         when(cborEncoder.encode(any()))
                 .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
-        when(configurationService.getDocumentSigningKey1Arn()).thenReturn(TEST_SIGNING_KEY);
-        when(keyProvider.getKeyId(TEST_SIGNING_KEY)).thenReturn(TEST_KEY_ID);
         // Make the signing operation fail
         when(keyProvider.sign(any(SignRequest.class)))
                 .thenThrow(new RuntimeException("KMS signing failed"));
@@ -189,25 +179,5 @@ class COSESignerTest {
 
         // Act & Assert: Execute and verify MDLException is thrown
         assertThrows(RuntimeException.class, () -> coseSigner.sign(TEST_PAYLOAD, certificate));
-    }
-
-    @Test
-    void Should_UseConfigurationServiceForSigningKey() throws Exception {
-        // Arrange: Setup mocks for successful signing
-        when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
-        when(cborEncoder.encode(any()))
-                .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
-        when(configurationService.getDocumentSigningKey1Arn()).thenReturn(TEST_SIGNING_KEY);
-        when(keyProvider.getKeyId(TEST_SIGNING_KEY)).thenReturn(TEST_KEY_ID);
-        when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
-        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_SIGNATURE));
-
-        // Act: Execute the sign method
-        coseSigner.sign(TEST_PAYLOAD, certificate);
-
-        // Assert: Verify the configuration service is used to get the signing key
-        // and that key is used to get the key ID from the key provider
-        verify(configurationService).getDocumentSigningKey1Arn();
-        verify(keyProvider).getKeyId(TEST_SIGNING_KEY);
     }
 }

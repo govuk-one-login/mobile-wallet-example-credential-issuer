@@ -2,7 +2,6 @@ package uk.gov.di.mobile.wallet.cri.iacas;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 
 import java.util.List;
@@ -16,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 class IacasServiceTest {
 
-    private ConfigurationService configurationService;
     private CertificateProvider certificateProvider;
     private IacasService iacasService;
 
@@ -41,22 +39,20 @@ class IacasServiceTest {
             vdAI
             -----END CERTIFICATE-----
             """;
+    private static final String TEST_CERTIFICATE_AUTHORITY_ARN =
+            "arn:aws:acm-pca:region:account:certificate-authority/1234abcd-12ab-34cd-56ef-1234567890ab";
+    private static final String TEST_CERTIFICATE_AUTHORITY_ID =
+            "1234abcd-12ab-34cd-56ef-1234567890ab";
 
     @BeforeEach
     void setUp() {
-        configurationService = mock(ConfigurationService.class);
         certificateProvider = mock(CertificateProvider.class);
-        iacasService = new IacasService(configurationService, certificateProvider);
+        iacasService = new IacasService(certificateProvider, TEST_CERTIFICATE_AUTHORITY_ARN);
     }
 
     @Test
     void Should_PropagatesException_When_ObjectStoreThrowsException() throws Exception {
-        String bucketName = "test-bucket";
-        String certificateAuthorityArn =
-                "arn:aws:acm-pca:region:account:certificate-authority/1234abcd";
-        when(configurationService.getCertificatesBucketName()).thenReturn(bucketName);
-        when(configurationService.getCertificateAuthorityArn()).thenReturn(certificateAuthorityArn);
-        when(certificateProvider.getCertificateAsString())
+        when(certificateProvider.getCertificateAsString(TEST_CERTIFICATE_AUTHORITY_ID))
                 .thenThrow(new RuntimeException("Failed to get certificate"));
 
         Exception exception = assertThrows(RuntimeException.class, () -> iacasService.getIacas());
@@ -66,20 +62,18 @@ class IacasServiceTest {
 
     @Test
     void Should_ReturnIacasWithExpectedValues() throws Exception {
-        String bucketName = "test-bucket";
-        String certificateAuthorityArn =
-                "arn:aws:acm-pca:region:account:certificate-authority/1234abcd";
-        String rootCertificateId = "1234abcd";
-        when(configurationService.getCertificatesBucketName()).thenReturn(bucketName);
-        when(configurationService.getCertificateAuthorityArn()).thenReturn(certificateAuthorityArn);
-        when(certificateProvider.getCertificateAsString()).thenReturn(TEST_CERTIFICATE_PEM);
+        when(certificateProvider.getCertificateAsString(TEST_CERTIFICATE_AUTHORITY_ID))
+                .thenReturn(TEST_CERTIFICATE_PEM);
 
         Iacas result = iacasService.getIacas();
 
         List<Iaca> iacaList = result.data();
         assertEquals(1, iacaList.size(), "Iacas contain exactly one certificate");
         Iaca iaca = iacaList.get(0);
-        assertEquals(rootCertificateId, iaca.id(), "Certificate ID should match expected value");
+        assertEquals(
+                TEST_CERTIFICATE_AUTHORITY_ID,
+                iaca.id(),
+                "Certificate ID should match expected value");
         assertTrue(iaca.active(), "Certificate should be active");
         assertEquals(
                 "-----BEGIN CERTIFICATE-----MIICzzCCAnWgAwIBAgIUFBD7/XkDw4D/UTy7/pf1Q7c43/kwCgYIKoZIzj0EAwIwgbwxCzAJBgNVBAYTAlVLMQ8wDQYDVQQIDAZMb25kb24xNDAyBgNVBAoMK21ETCBFeGFtcGxlIElBQ0EgUm9vdCAtIERFTE9DQUwgZW52aXJvbm1lbnQxMjAwBgNVBAsMKW1ETCBFeGFtcGxlIElBQ0EgUm9vdCAtIExPQ0FMIGVudmlyb25tZW50MTIwMAYDVQQDDCltREwgRXhhbXBsZSBJQUNBIFJvb3QgLSBMT0NBTCBlbnZpcm9ubWVudDAeFw0yNTA2MTkxMTA4NTFaFw0zNTA2MTcxMTA4NTFaMIG8MQswCQYDVQQGEwJVSzEPMA0GA1UECAwGTG9uZG9uMTQwMgYDVQQKDCttREwgRXhhbXBsZSBJQUNBIFJvb3QgLSBERUxPQ0FMIGVudmlyb25tZW50MTIwMAYDVQQLDCltREwgRXhhbXBsZSBJQUNBIFJvb3QgLSBMT0NBTCBlbnZpcm9ubWVudDEyMDAGA1UEAwwpbURMIEV4YW1wbGUgSUFDQSBSb290IC0gTE9DQUwgZW52aXJvbm1lbnQwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAATK8ZrETZ7FQXw3+xj7fLV2yv1vFLOlZE0r2MQ0ysBOa/uZ7dUlOCvROTt5fpDR9e+Hdq0h9trZwwBY2HODAWVbo1MwUTAdBgNVHQ4EFgQUnelQVCApK3NIxVeQ3X+zUsogQxgwHwYDVR0jBBgwFoAUnelQVCApK3NIxVeQ3X+zUsogQxgwDwYDVR0TAQH/BAUwAwEB/zAKBggqhkjOPQQDAgNIADBFAiBwnpi6jeCSLxZgFeFLSN+zaG3zj9t6QcGFklY521tMtQIhAOF65mV0uski5+50FtKkJcVnS/1EDGrgor5bFeZDvdAI-----END CERTIFICATE-----",
