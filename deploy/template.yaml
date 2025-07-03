@@ -436,9 +436,9 @@ Resources:
             - Name: CERTIFICATES_BUCKET_NAME
               Value:
                 Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-CertificatesBucketName"
-            - Name: DOCUMENT_SIGNING_KEY_ALIAS_1
+            - Name: DOCUMENT_SIGNING_KEY_1_ARN
               Value:
-                Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-DocumentSigningKeyAlias1"
+                Fn::ImportValue: !Sub "${DocumentSigningCertificateIssuerStackName}-DocumentSigningKey1Arn"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
@@ -549,7 +549,7 @@ Resources:
                   - 'kms:DescribeKey'
                 Resource:
                   Fn::ImportValue:
-                    !Sub "${DocumentSigningCertificateIssuerStackName}-DocumentSigningKeyArn1"
+                    !Sub "${DocumentSigningCertificateIssuerStackName}-DocumentSigningKey1Arn"
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary

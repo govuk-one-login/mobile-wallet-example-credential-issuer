@@ -91,8 +91,8 @@ public class ConfigurationService extends Configuration {
         return "/.well-known/jwks.json";
     }
 
-    public String getDocumentSigningKey1() {
+    public String getDocumentSigningKey1Arn() {
         return System.getenv()
-                .getOrDefault("DOCUMENT_SIGNING_KEY_ALIAS_1", "alias/documentSigningKeyAlias1");
+                .getOrDefault("DOCUMENT_SIGNING_KEY_1_ARN", "alias/documentSigningKeyAlias1");
     }
 }
