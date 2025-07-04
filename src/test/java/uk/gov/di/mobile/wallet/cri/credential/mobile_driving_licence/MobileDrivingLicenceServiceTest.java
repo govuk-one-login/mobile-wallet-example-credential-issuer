@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 
@@ -33,7 +32,7 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_CreateMobileDrivingLicence() throws MDLException {
+    void Should_CreateMobileDrivingLicence() throws Exception {
         String expectedHex = "a10102";
         byte[] mockCborBytes = new byte[] {(byte) 0xA1, 0x01, 0x02};
         when(documentFactory.build(mockDrivingLicenceDocument)).thenReturn(mockDocument);
@@ -48,7 +47,7 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_PropagateException_When_DocumentFactoryThrows() throws MDLException {
+    void Should_PropagateException_When_DocumentFactoryThrows() throws Exception {
         MDLException expectedException =
                 new MDLException("Some DocumentFactory error", new RuntimeException());
         when(documentFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
@@ -64,7 +63,7 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_PropagateException_When_CBOREncoderThrows() throws MDLException {
+    void Should_PropagateException_When_CBOREncoderThrows() throws Exception {
         MDLException expectedException =
                 new MDLException("Some CBOREncoder error", new RuntimeException());
         when(documentFactory.build(any())).thenReturn(mockDocument);

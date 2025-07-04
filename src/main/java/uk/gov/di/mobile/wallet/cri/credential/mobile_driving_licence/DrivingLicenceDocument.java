@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes;
 
 import java.time.LocalDate;
 import java.time.Period;
@@ -16,67 +17,67 @@ import java.util.Optional;
 @Getter
 public class DrivingLicenceDocument {
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String familyName;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String givenName;
 
-    @Namespace(Namespaces.UK)
+    @Namespace(NamespaceTypes.UK)
     private final String title;
 
-    @Namespace(Namespaces.UK)
+    @Namespace(NamespaceTypes.UK)
     private final boolean welshLicence;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String portrait;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final LocalDate birthDate;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final Boolean ageOver18;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final Boolean ageOver21;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final Boolean ageOver25;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String birthPlace;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final LocalDate issueDate;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final LocalDate expiryDate;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String issuingAuthority;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String issuingCountry;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String documentNumber;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String residentAddress;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String residentPostalCode;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String residentCity;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final DrivingPrivilege[] drivingPrivileges;
 
-    @Namespace(Namespaces.ISO)
+    @Namespace(NamespaceTypes.ISO)
     private final String unDistinguishingSign;
 
-    @Namespace(Namespaces.UK)
+    @Namespace(NamespaceTypes.UK)
     private final Optional<DrivingPrivilege[]> provisionalDrivingPrivileges;
 
     @JsonCreator

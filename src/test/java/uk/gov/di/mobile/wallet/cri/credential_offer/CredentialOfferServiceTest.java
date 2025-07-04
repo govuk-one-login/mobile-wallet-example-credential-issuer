@@ -15,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
@@ -93,28 +92,6 @@ class CredentialOfferServiceTest {
                 "Some signing error",
                 exception.getMessage(),
                 "Exception message should match the expected signing error message");
-        verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER);
-        verifyNoInteractions(configurationService);
-    }
-
-    @Test
-    void Should_PropagateNoSuchAlgorithmException() throws Exception {
-        NoSuchAlgorithmException expectedError =
-                new NoSuchAlgorithmException("ES256 not available");
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER))
-                .thenThrow(expectedError);
-
-        Exception exception =
-                assertThrows(
-                        NoSuchAlgorithmException.class,
-                        () ->
-                                credentialOfferService.buildCredentialOffer(
-                                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE),
-                        "Should throw NoSuchAlgorithmException when algorithm is unavailable");
-        assertEquals(
-                "ES256 not available",
-                exception.getMessage(),
-                "Exception message should match the expected error message");
         verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER);
         verifyNoInteractions(configurationService);
     }

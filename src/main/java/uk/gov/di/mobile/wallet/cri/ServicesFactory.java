@@ -5,11 +5,22 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
-import uk.gov.di.mobile.wallet.cri.credential.*;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
+import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.*;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObjectFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigestsFactory;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
@@ -19,6 +30,7 @@ import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
+import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
@@ -85,9 +97,23 @@ public class ServicesFactory {
                 new ValueDigestsFactory(cborEncoder, MessageDigest.getInstance("SHA-256"));
         MobileSecurityObjectFactory mobileSecurityObjectFactory =
                 new MobileSecurityObjectFactory(valueDigestsFactory);
+        COSESigner coseSigner =
+                new COSESigner(
+                        cborEncoder, kmsService, configurationService.getDocumentSigningKey1Arn());
+        S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
+        CertificateProvider certificateProvider =
+                new CertificateProvider(
+                        s3Service, configurationService.getCertificatesBucketName());
+        NamespacesFactory namespacesFactory = new NamespacesFactory(issuerSignedItemFactory);
+        IssuerSignedFactory issuerSignedFactory =
+                new IssuerSignedFactory(
+                        mobileSecurityObjectFactory,
+                        cborEncoder,
+                        coseSigner,
+                        certificateProvider,
+                        configurationService.getDocumentSigningKey1Arn());
         DocumentFactory documentFactory =
-                new DocumentFactory(
-                        issuerSignedItemFactory, mobileSecurityObjectFactory, cborEncoder);
+                new DocumentFactory(namespacesFactory, issuerSignedFactory);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
                 new MobileDrivingLicenceService(cborEncoder, documentFactory);
@@ -110,9 +136,9 @@ public class ServicesFactory {
         NotificationService notificationService =
                 new NotificationService(dynamoDbService, accessTokenService);
 
-        S3Service s3Service = new S3Service(S3Service.getClient(configurationService));
-
-        IacasService iacasService = new IacasService(configurationService, s3Service);
+        IacasService iacasService =
+                new IacasService(
+                        certificateProvider, configurationService.getCertificateAuthorityArn());
 
         return new Services.Builder()
                 .kmsService(kmsService)

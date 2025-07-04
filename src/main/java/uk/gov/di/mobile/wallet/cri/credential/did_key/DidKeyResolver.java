@@ -1,10 +1,11 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.did_key;
 
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.ECPointUtil;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 import org.jetbrains.annotations.NotNull;
+import uk.gov.di.mobile.wallet.cri.credential.AddressFormatException;
 
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;

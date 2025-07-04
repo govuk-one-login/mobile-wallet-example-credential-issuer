@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerAuth;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 
 import java.time.LocalDate;
@@ -66,9 +66,17 @@ class JacksonCBOREncoderProviderTest {
 
     private IssuerSigned createTestIssuerSigned() {
         byte[] issuerSignedItemBytes = {1, 2, 3, 4};
-        byte[] mobileSecurityObjectBytes = {1, 2, 3, 4};
+
+        byte[] protectedHeaderBytes = {1, 2, 3, 4};
+        Map<Integer, Object> unprotectedHeader = new HashMap<>();
+        byte[] payloadBytes = {1, 2, 3, 4};
+        byte[] signatureBytes = {1, 2, 3, 4};
+
         Map<String, List<byte[]>> testNameSpaces =
                 Map.of("namespace", List.of(issuerSignedItemBytes));
-        return new IssuerSigned(testNameSpaces, new IssuerAuth(mobileSecurityObjectBytes));
+        return new IssuerSigned(
+                testNameSpaces,
+                new COSESign1(
+                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes));
     }
 }

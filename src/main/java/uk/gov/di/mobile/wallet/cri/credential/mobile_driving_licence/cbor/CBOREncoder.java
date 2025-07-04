@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 
 import java.io.IOException;
 

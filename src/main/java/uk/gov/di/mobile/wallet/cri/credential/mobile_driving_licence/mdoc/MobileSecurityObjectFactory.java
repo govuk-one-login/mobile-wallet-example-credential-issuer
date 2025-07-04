@@ -1,10 +1,11 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DocType;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocumentTypes;
 
-import java.util.List;
-import java.util.Map;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 
 /** Factory class for creating MobileSecurityObject instances. */
 public class MobileSecurityObjectFactory {
@@ -16,10 +17,13 @@ public class MobileSecurityObjectFactory {
      * The document type identifier for a mobile driver's license (mDL), as specified by ISO
      * 18013-5.
      */
-    private static final String DOC_TYPE = DocType.MDL.getValue();
+    private static final String DOC_TYPE = DocumentTypes.MDL;
 
     /** The factory responsible for creating {@link ValueDigests} instances. */
     private final ValueDigestsFactory valueDigestsFactory;
+
+    /** The source of current time for validity information. */
+    private final Clock clock;
 
     /**
      * Constructs a new {@link MobileSecurityObjectFactory} with the provided {@link
@@ -29,7 +33,20 @@ public class MobileSecurityObjectFactory {
      *     MobileSecurityObject}.
      */
     public MobileSecurityObjectFactory(ValueDigestsFactory valueDigestsFactory) {
+        this(valueDigestsFactory, Clock.systemDefaultZone());
+    }
+
+    /**
+     * Constructs a new {@link MobileSecurityObjectFactory} with the provided {@link
+     * ValueDigestsFactory} and {@link Clock}.
+     *
+     * @param valueDigestsFactory The factory used to create value digests for the {@link
+     *     MobileSecurityObject}.
+     * @param clock The source of current time for validity information.
+     */
+    public MobileSecurityObjectFactory(ValueDigestsFactory valueDigestsFactory, Clock clock) {
         this.valueDigestsFactory = valueDigestsFactory;
+        this.clock = clock;
     }
 
     /**
@@ -44,10 +61,19 @@ public class MobileSecurityObjectFactory {
      * @return The constructed {@link MobileSecurityObject} instance.
      * @throws MDLException If an error occurs during the creation of the {@link ValueDigests}.
      */
-    public MobileSecurityObject build(Map<String, List<IssuerSignedItem>> nameSpaces)
-            throws MDLException {
+    public MobileSecurityObject build(Namespaces nameSpaces) throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
+
+        Instant currentTimestamp = clock.instant();
+        Instant validUntil = currentTimestamp.plus(Duration.ofDays(365));
+
+        var validityInfo = new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);
+
         return new MobileSecurityObject(
-                MSO_VERSION, valueDigestsFactory.getDigestAlgorithm(), valueDigests, DOC_TYPE);
+                MSO_VERSION,
+                valueDigestsFactory.getDigestAlgorithm(),
+                valueDigests,
+                DOC_TYPE,
+                validityInfo);
     }
 }

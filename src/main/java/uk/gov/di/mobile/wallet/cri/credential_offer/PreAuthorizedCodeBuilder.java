@@ -1,10 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential_offer;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.crypto.impl.ECDSA;
 import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
@@ -13,14 +11,15 @@ import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.KeyHelper;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+
+import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.toBase64UrlEncodedSignature;
+import static uk.gov.di.mobile.wallet.cri.util.HashUtil.sha256Hex;
 
 public class PreAuthorizedCodeBuilder {
 
@@ -35,10 +34,9 @@ public class PreAuthorizedCodeBuilder {
         this.keyProvider = keyProvider;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier)
-            throws SigningException, NoSuchAlgorithmException {
+    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        String hashedKeyId = KeyHelper.hashKeyId(keyId);
+        String hashedKeyId = sha256Hex(keyId);
         var encodedHeader = getEncodedHeader(hashedKeyId);
         var encodedClaims = getEncodedClaims(credentialIdentifier);
         var message = encodedHeader + "." + encodedClaims;
@@ -51,20 +49,12 @@ public class PreAuthorizedCodeBuilder {
 
         try {
             SignResponse signResult = keyProvider.sign(signRequest);
-            String signature = encodedSignature(signResult);
+            String signature = toBase64UrlEncodedSignature(signResult);
             return SignedJWT.parse(message + "." + signature);
         } catch (Exception exception) {
             throw new SigningException(
                     String.format("Error signing token: %s", exception.getMessage()), exception);
         }
-    }
-
-    private static String encodedSignature(SignResponse signResult) throws JOSEException {
-        return Base64URL.encode(
-                        ECDSA.transcodeSignatureToConcat(
-                                signResult.signature().asByteArray(),
-                                ECDSA.getSignatureByteArrayLength(SIGNING_ALGORITHM)))
-                .toString();
     }
 
     private Base64URL getEncodedClaims(String credentialIdentifier) {

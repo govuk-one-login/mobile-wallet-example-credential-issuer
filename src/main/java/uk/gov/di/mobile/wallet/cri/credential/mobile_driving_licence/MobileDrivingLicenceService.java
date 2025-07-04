@@ -1,10 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.cert.CertificateException;
 import java.util.HexFormat;
 
 /**
@@ -38,10 +40,9 @@ public class MobileDrivingLicenceService {
      *
      * @param drivingLicenceDocument The driving licence document containing user information
      * @return A hexadecimal string representation of the CBOR-encoded mobile driving licence
-     * @throws MDLException If an error occurs during document creation or encoding
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
-            throws MDLException {
+            throws ObjectStoreException, SigningException, CertificateException {
         Document mdoc = documentFactory.build(drivingLicenceDocument);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
         return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);

@@ -1,4 +1,6 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.did_key;
+
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -6,8 +8,9 @@ import java.util.List;
 
 public class HexUtils {
 
+    @ExcludeFromGeneratedCoverageReport
     private HexUtils() {
-        // Should never be instantiated
+        throw new IllegalStateException("Instantiation is not valid for this class.");
     }
 
     /**

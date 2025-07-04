@@ -9,7 +9,6 @@ import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 
 public class S3Service implements ObjectStore {
     private final S3Client s3Client;
@@ -42,12 +41,12 @@ public class S3Service implements ObjectStore {
     }
 
     @Override
-    public String getObject(String bucketName, String key) throws ObjectStoreException {
+    public byte[] getObject(String bucketName, String key) throws ObjectStoreException {
         try {
             GetObjectRequest request =
                     GetObjectRequest.builder().bucket(bucketName).key(key).build();
             ResponseInputStream<GetObjectResponse> response = s3Client.getObject(request);
-            return new String(response.readAllBytes(), StandardCharsets.UTF_8);
+            return response.readAllBytes();
         } catch (Exception exception) {
             throw new ObjectStoreException("Error fetching object from S3", exception);
         }

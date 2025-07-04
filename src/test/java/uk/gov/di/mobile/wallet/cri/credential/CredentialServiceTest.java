@@ -13,7 +13,6 @@ import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckC
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -22,20 +21,25 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static testUtils.MockDocuments.*;
+import static testUtils.MockDocuments.getMockBasicCheckDocument;
+import static testUtils.MockDocuments.getMockDocumentWithInvalidVcType;
+import static testUtils.MockDocuments.getMockMobileDrivingLicence;
+import static testUtils.MockDocuments.getMockSocialSecurityDocument;
+import static testUtils.MockDocuments.getMockVeteranCardDocument;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
@@ -191,35 +195,8 @@ class CredentialServiceTest {
     }
 
     @Test
-    void
-            Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsNoSuchAlgorithmException()
-                    throws DataStoreException,
-                            SigningException,
-                            NoSuchAlgorithmException,
-                            DocumentStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString()))
-                .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
-        when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
-                .thenThrow(new NoSuchAlgorithmException("Some algorithm error"));
-
-        CredentialServiceException exception =
-                assertThrows(
-                        CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
-        assertThat(
-                exception.getMessage(),
-                containsString("Failed to issue credential due to an internal error"));
-    }
-
-    @Test
     void Should_Throw_CredentialServiceException_When_CredentialBuilderThrowsSigningException()
-            throws DataStoreException,
-                    SigningException,
-                    NoSuchAlgorithmException,
-                    DocumentStoreException {
+            throws DataStoreException, SigningException, DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
@@ -245,7 +222,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
@@ -271,7 +247,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
@@ -297,7 +272,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
@@ -316,14 +290,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_BuildMobileDrivingLicenceCredential()
-            throws AccessTokenValidationException,
-                    ProofJwtValidationException,
-                    DataStoreException,
-                    CredentialServiceException,
-                    CredentialOfferException,
-                    MDLException,
-                    DocumentStoreException {
+    void Should_BuildMobileDrivingLicenceCredential() throws Exception {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
@@ -361,7 +328,6 @@ class CredentialServiceTest {
                     CredentialServiceException,
                     CredentialOfferException,
                     SigningException,
-                    NoSuchAlgorithmException,
                     DocumentStoreException {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
