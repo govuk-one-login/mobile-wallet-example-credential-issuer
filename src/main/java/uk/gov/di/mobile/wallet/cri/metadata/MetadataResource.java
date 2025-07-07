@@ -32,6 +32,20 @@ public class MetadataResource {
     public Response getMetadata() {
         try {
             String selfUrl = configurationService.getSelfUrl();
+            String iacasEndpoint;
+            // The Private Certificate Authority is not deployed to the staging environment,
+            // only to dev and build environments. When running in staging, the Example CRI points
+            // to the
+            // build instance of the Private Certificate Authority, hence the IACAs endpoint must
+            // point to build as well.
+            if (isStaging()) {
+                iacasEndpoint =
+                        "https://example-credential-issuer.mobile.build.account.gov.uk"
+                                + IACAS_ENDPOINT;
+            } else {
+                iacasEndpoint = selfUrl + IACAS_ENDPOINT;
+            }
+
             Metadata metadata =
                     metadataBuilder
                             .setCredentialIssuer(selfUrl)
@@ -39,7 +53,7 @@ public class MetadataResource {
                             .setAuthorizationServers(
                                     configurationService.getOneLoginAuthServerUrl())
                             .setNotificationEndpoint(selfUrl + NOTIFICATION_ENDPOINT)
-                            .setIacasEndpoint(selfUrl + IACAS_ENDPOINT)
+                            .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
                             .build();
@@ -48,5 +62,17 @@ public class MetadataResource {
             LOGGER.error("An error happened trying to get the metadata: ", exception);
             return ResponseUtil.internalServerError();
         }
+    }
+
+    /**
+     * Determines if the application is running in the staging environment. This is used to handle
+     * the case where the Private Certificate Authority is not deployed to staging and the Example
+     * CRI must point to the build instance instead.
+     *
+     * @return true if running in staging environment, false otherwise
+     */
+    private boolean isStaging() {
+        String environment = configurationService.getEnvironment();
+        return "staging".equals(environment);
     }
 }
