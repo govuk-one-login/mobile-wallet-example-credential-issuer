@@ -66,10 +66,10 @@ public class CredentialService {
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     AccessTokenValidationException,
                     CredentialServiceException,
                     CredentialOfferException,
-                    NonceValidationException,
                     DocumentStoreException {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
