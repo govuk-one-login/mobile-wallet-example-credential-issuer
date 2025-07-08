@@ -4,6 +4,7 @@ import jakarta.inject.Singleton;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
@@ -13,6 +14,8 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 @Path("/.well-known/openid-credential-issuer")
 public class MetadataResource {
 
+    private static final String STAGING = "staging";
+    private static final String BUILD = "build";
     private static final String CREDENTIAL_ENDPOINT = "/credential";
     private static final String NOTIFICATION_ENDPOINT = "/notification";
     private static final String IACAS_ENDPOINT = "/iacas";
@@ -32,19 +35,7 @@ public class MetadataResource {
     public Response getMetadata() {
         try {
             String selfUrl = configurationService.getSelfUrl();
-            String iacasEndpoint;
-            // The Private Certificate Authority is not deployed to the staging environment,
-            // only to dev and build environments. When running in staging, the Example CRI points
-            // to the
-            // build instance of the Private Certificate Authority, hence the IACAs endpoint must
-            // point to build as well.
-            if (isStaging()) {
-                iacasEndpoint =
-                        "https://example-credential-issuer.mobile.build.account.gov.uk"
-                                + IACAS_ENDPOINT;
-            } else {
-                iacasEndpoint = selfUrl + IACAS_ENDPOINT;
-            }
+            String iacasEndpoint = getIacasEndpoint(selfUrl);
 
             Metadata metadata =
                     metadataBuilder
@@ -62,6 +53,21 @@ public class MetadataResource {
             LOGGER.error("An error happened trying to get the metadata: ", exception);
             return ResponseUtil.internalServerError();
         }
+    }
+
+    private @NotNull String getIacasEndpoint(String selfUrl) {
+        String iacasEndpoint;
+        // The Private Certificate Authority is not deployed to the staging environment,
+        // only to dev and build environments. When running in staging, the Example CRI points
+        // to the build instance of the Private Certificate Authority, hence the IACAs endpoint
+        // must point to build as well.
+        if (isStaging() && selfUrl.contains(STAGING)) {
+            String buildUrl = selfUrl.replace(STAGING, BUILD);
+            iacasEndpoint = buildUrl + IACAS_ENDPOINT;
+        } else {
+            iacasEndpoint = selfUrl + IACAS_ENDPOINT;
+        }
+        return iacasEndpoint;
     }
 
     /**
