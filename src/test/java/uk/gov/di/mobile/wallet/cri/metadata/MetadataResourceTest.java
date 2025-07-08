@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.metadata;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -9,73 +8,140 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.io.IOException;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.RETURNS_SELF;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(DropwizardExtensionsSupport.class)
 @ExtendWith(MockitoExtension.class)
 class MetadataResourceTest {
 
+    private static final String SELF_URL = "https://credential-issuer.test.gov.uk";
+    private static final String AUTH_SERVER_URL = "https://authorization-server.test.gov.uk";
+    private static final String OPENID_CREDENTIAL_ISSUER_PATH =
+            "/.well-known/openid-credential-issuer";
+
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
+    private final Metadata metadata = mock(Metadata.class);
     private final ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(new MetadataResource(configurationService, metadataBuilder))
                     .build();
 
+    private ObjectMapper objectMapper;
+
     @BeforeEach
     void setUp() {
-        when(configurationService.getOneLoginAuthServerUrl())
-                .thenReturn("https://test-authorization-server.gov.uk");
-        when(configurationService.getSelfUrl()).thenReturn("https://test-credential-issuer.gov.uk");
+        objectMapper = new ObjectMapper();
+
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        when(configurationService.getSelfUrl()).thenReturn(SELF_URL);
+        when(configurationService.getEnvironment()).thenReturn("test");
+        when(metadataBuilder.build()).thenReturn(metadata);
     }
 
     @Test
     void Should_Return200AndMetadata() throws IOException {
-        Metadata mockCriMetadata = getMockCRIMetadata();
-        when(metadataBuilder.build()).thenReturn(mockCriMetadata);
+        final Response response = resource.target(OPENID_CREDENTIAL_ISSUER_PATH).request().get();
 
-        final Response response =
-                resource.target("/.well-known/openid-credential-issuer").request().get();
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode expectedResponseBody =
-                objectMapper.readTree(objectMapper.writeValueAsString(mockCriMetadata));
-        JsonNode actualResponseBody = objectMapper.readTree(response.readEntity(String.class));
         assertEquals(200, response.getStatus());
-        assertEquals(expectedResponseBody, actualResponseBody);
+        assertEquals(parseJson(metadata), parseJsonResponse(response));
     }
 
     @Test
-    void Should_Return500_When_MetadataBuilderThrowsIllegalArgumentException() {
-        when(metadataBuilder.build()).thenThrow(IllegalArgumentException.class);
+    void Should_CallAllBuilderMethods() throws IOException {
+        resource.target(OPENID_CREDENTIAL_ISSUER_PATH).request().get();
 
-        final Response response =
-                resource.target("/.well-known/openid-credential-issuer").request().get();
+        verify(metadataBuilder).setCredentialIssuer(SELF_URL);
+        verify(metadataBuilder).setCredentialEndpoint(SELF_URL + "/credential");
+        verify(metadataBuilder).setAuthorizationServers(AUTH_SERVER_URL);
+        verify(metadataBuilder).setNotificationEndpoint(SELF_URL + "/notification");
+        verify(metadataBuilder)
+                .setCredentialConfigurationsSupported("credential_configurations_supported.json");
+        verify(metadataBuilder).build();
+    }
+
+    @Test
+    void Should_Return500_When_ConfigurationServiceThrowsRuntimeException() {
+        when(configurationService.getSelfUrl())
+                .thenThrow(new RuntimeException("Configuration error"));
+
+        final Response response = resource.target(OPENID_CREDENTIAL_ISSUER_PATH).request().get();
 
         assertEquals(500, response.getStatus());
     }
 
-    private static Metadata getMockCRIMetadata() throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
+    @Test
+    void Should_Return500_When_MetadataBuilderThrowsIllegalArgumentException() {
+        when(metadataBuilder.build())
+                .thenThrow(new IllegalArgumentException("Invalid configuration"));
 
-        Object credentialConfigurationsSupported =
-                objectMapper.readValue(
-                        "{\"SocialSecurityCredential\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"types\":[\"VerifiableCredential\",\"SocialSecurityCredential\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}},\"BasicDisclosureCredential\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"types\":[\"VerifiableCredential\",\"BasicDisclosureCredential\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}},\"DigitalVeteranCard\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"type\":[\"VerifiableCredential\",\"DigitalVeteranCard\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}},\"org.iso.18013.5.1.mDL\": {\"format\": \"mso_mdoc\",\"doctype\": \"org.iso.18013.5.1.mDL\",\"cryptographic_binding_methods_supported\": [\"cose_key\"],\"credential_signing_alg_values_supported\": [\"ES256\"]}}",
-                        Object.class);
-        return new Metadata(
-                "https://test-credential-issuer.gov.uk",
-                "https://test-authorization-server.gov.uk",
-                "https://test-credential-issuer.gov.uk/credential",
-                "https://test-credential-issuer.gov.uk/notification",
-                "https://test-credential-issuer.gov.uk/iacas",
-                credentialConfigurationsSupported);
+        final Response response = resource.target(OPENID_CREDENTIAL_ISSUER_PATH).request().get();
+
+        assertEquals(500, response.getStatus());
+    }
+
+    @Test
+    void Should_Return500_When_MetadataBuilderThrowsRuntimeException() {
+        when(metadataBuilder.build()).thenThrow(new RuntimeException("Unexpected error"));
+
+        final Response response = resource.target(OPENID_CREDENTIAL_ISSUER_PATH).request().get();
+
+        assertEquals(500, response.getStatus());
+    }
+
+    @ParameterizedTest(name = "{3}")
+    @MethodSource("iacasEndpointScenarios")
+    void Should_UseCorrectIacasEndpoint(
+            String environment, String selfUrl, String expectedIacasEndpoint, String testName) {
+        when(configurationService.getEnvironment()).thenReturn(environment);
+        when(configurationService.getSelfUrl()).thenReturn(selfUrl);
+
+        final Response response = resource.target(OPENID_CREDENTIAL_ISSUER_PATH).request().get();
+
+        assertEquals(200, response.getStatus());
+        verify(metadataBuilder).setIacasEndpoint(expectedIacasEndpoint);
+    }
+
+    private static Stream<Arguments> iacasEndpointScenarios() {
+        return Stream.of(
+                Arguments.of(
+                        "staging", // environment
+                        "https://credential-issuer.staging.gov.uk", // selfUrl
+                        "https://credential-issuer.build.gov.uk/iacas", // expected IACAs endpoint
+                        "Should_UseBuildEndpoint_When_StagingEnvironmentAndStagingUrl" // test name
+                        ),
+                Arguments.of(
+                        "staging", // environment
+                        "https://credential-issuer.test.gov.uk", // selfUrl
+                        "https://credential-issuer.test.gov.uk/iacas", // expected IACAs endpoint
+                        "Should_UseSelfUrl_When_StagingEnvironmentAndNonStagingUrl" // test name
+                        ),
+                Arguments.of(
+                        "test", // environment
+                        "https://credential-issuer.dev.gov.uk", // selfUrl
+                        "https://credential-issuer.dev.gov.uk/iacas", // expected IACAs endpoint
+                        "Should_UseSelfUrl_When_NonStagingEnvironment" // test name
+                        ));
+    }
+
+    private JsonNode parseJsonResponse(Response response) throws IOException {
+        return objectMapper.readTree(response.readEntity(String.class));
+    }
+
+    private JsonNode parseJson(Object object) throws IOException {
+        return objectMapper.readTree(objectMapper.writeValueAsString(object));
     }
 }
