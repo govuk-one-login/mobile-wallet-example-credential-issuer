@@ -58,7 +58,7 @@ Mappings:
       AuthServerUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.dev.account.gov.uk/wallet"
       BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
-      CertificatesBucketName: wallet-dsc-issuer-671524980203-certificates
+      CertificatesBucketName: "wallet-dsc-issuer-671524980203-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:671524980203:key/72b0ed1b-9fa6-43ae-ba8f-14693868ce72
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/1c589b25-0433-45e0-b7d9-911fe33a9c1a
     build:
@@ -67,7 +67,7 @@ Mappings:
       AuthServerUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.build.account.gov.uk/wallet"
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
-      CertificatesBucketName: wallet-dsc-issuer-497065468681-certificates
+      CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/80334954-bf3b-4e15-bbeb-ce801c4e36fa
     staging:
@@ -76,7 +76,7 @@ Mappings:
       AuthServerUrl: "token.staging.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.staging.account.gov.uk/wallet"
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
-      CertificatesBucketName: wallet-dsc-issuer-497065468681-certificates
+      CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/80334954-bf3b-4e15-bbeb-ce801c4e36fa
   ElasticLoadBalancerAccountIds:
