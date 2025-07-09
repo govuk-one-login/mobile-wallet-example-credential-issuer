@@ -37,7 +37,7 @@ public class DocumentStoreClient {
     }
 
     private URI buildDocumentUri(String documentId) throws URISyntaxException {
-        String credentialStoreUrl = configurationService.getCredentialStoreUrl();
+        URI credentialStoreUrl = configurationService.getCredentialStoreUrl();
         String documentEndpoint = configurationService.getDocumentEndpoint();
         return new URI(credentialStoreUrl + documentEndpoint + documentId);
     }

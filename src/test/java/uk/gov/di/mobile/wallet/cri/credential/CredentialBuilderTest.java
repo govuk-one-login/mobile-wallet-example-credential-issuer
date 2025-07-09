@@ -84,7 +84,7 @@ class CredentialBuilderTest {
                 new CredentialBuilder<>(configurationService, kmsService, nowClock);
         when(configurationService.getSigningKeyAlias()).thenReturn("mock-signing-key-alias");
         when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
-        when(configurationService.getCredentialTtlInDays()).thenReturn(365L);
+        when(configurationService.getCredentialTtlInDays()).thenReturn(365);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KMS_KEY_ID);
         when(configurationService.getDidController())
                 .thenReturn("example-credential-issuer.gov.uk");
