@@ -58,6 +58,10 @@ public class CredentialResource {
             if (exception instanceof ProofJwtValidationException) {
                 return ResponseUtil.badRequest(ErrorMessages.INVALID_PROOF);
             }
+
+            if (exception instanceof NonceValidationException) {
+                return ResponseUtil.badRequest(ErrorMessages.INVALID_NONCE);
+            }
             return ResponseUtil.internalServerError();
         }
     }

@@ -66,6 +66,7 @@ public class CredentialService {
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     AccessTokenValidationException,
                     CredentialServiceException,
                     CredentialOfferException,
@@ -76,7 +77,7 @@ public class CredentialService {
         ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
 
         if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
-            throw new ProofJwtValidationException(
+            throw new NonceValidationException(
                     "Access token c_nonce claim does not match Proof JWT nonce claim");
         }
 

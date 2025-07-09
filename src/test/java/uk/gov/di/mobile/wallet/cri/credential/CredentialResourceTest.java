@@ -58,6 +58,7 @@ class CredentialResourceTest {
                     AccessTokenValidationException,
                     CredentialServiceException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     CredentialOfferException,
                     DocumentStoreException {
         final Response response =
@@ -75,11 +76,43 @@ class CredentialResourceTest {
     }
 
     @Test
+    void Should_Return400AndInvalidNonce_When_NonceIsInvalid()
+            throws DataStoreException,
+                    AccessTokenValidationException,
+                    ProofJwtValidationException,
+                    NonceValidationException,
+                    JsonProcessingException,
+                    CredentialServiceException,
+                    CredentialOfferException,
+                    DocumentStoreException {
+        JsonNode requestBody =
+                new ObjectMapper()
+                        .readTree(
+                                "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
+        doThrow(new NonceValidationException("Some nonce validation error"))
+                .when(credentialService)
+                .getCredential(any(), any());
+        final Response response =
+                resource.target("/credential")
+                        .request()
+                        .header(
+                                "Authorization",
+                                "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+        verify(credentialService, Mockito.times(1)).getCredential(any(), any());
+        assertThat(response.getStatus(), is(400));
+        assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
+        assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_nonce\"}"));
+        reset(credentialService);
+    }
+
+    @Test
     void Should_Return401_When_AuthorizationHeaderIsMissing()
             throws JsonProcessingException,
                     DataStoreException,
                     AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     CredentialServiceException,
                     CredentialOfferException,
                     DocumentStoreException {
@@ -104,6 +137,7 @@ class CredentialResourceTest {
                     DataStoreException,
                     AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     CredentialServiceException,
                     CredentialOfferException,
                     DocumentStoreException {
@@ -132,6 +166,7 @@ class CredentialResourceTest {
             throws DataStoreException,
                     AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
                     CredentialOfferException,
@@ -165,6 +200,7 @@ class CredentialResourceTest {
             throws DataStoreException,
                     AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
                     CredentialOfferException,
@@ -195,6 +231,7 @@ class CredentialResourceTest {
             throws DataStoreException,
                     AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     JsonProcessingException,
                     CredentialServiceException,
                     CredentialOfferException,

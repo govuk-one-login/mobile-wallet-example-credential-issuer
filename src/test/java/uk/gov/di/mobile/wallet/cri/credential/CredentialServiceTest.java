@@ -99,14 +99,14 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ThrowProofJwtValidationException_When_NonceValuesDontMatch()
+    void Should_ThrowNonceValidationException_When_NonceValuesDontMatch()
             throws ProofJwtValidationException {
         mockAccessProofJwtData = getMockProofJwtData("not_the_same_nonce");
         when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
 
-        ProofJwtValidationException exception =
+        NonceValidationException exception =
                 assertThrows(
-                        ProofJwtValidationException.class,
+                        NonceValidationException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
 
         assertEquals(
@@ -218,6 +218,7 @@ class CredentialServiceTest {
     void Should_BuildSocialSecurityCredentialSubject()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     DataStoreException,
                     CredentialServiceException,
                     CredentialOfferException,
@@ -243,6 +244,7 @@ class CredentialServiceTest {
     void Should_BuildBasicCheckCredentialSubject()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     DataStoreException,
                     CredentialServiceException,
                     CredentialOfferException,
@@ -268,6 +270,7 @@ class CredentialServiceTest {
     void Should_BuildVeteranCardCredentialSubject()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     DataStoreException,
                     CredentialServiceException,
                     CredentialOfferException,
@@ -324,6 +327,7 @@ class CredentialServiceTest {
     void Should_ReturnCredentialResponse()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
+                    NonceValidationException,
                     DataStoreException,
                     CredentialServiceException,
                     CredentialOfferException,
