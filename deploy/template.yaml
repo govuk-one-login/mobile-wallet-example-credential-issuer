@@ -545,12 +545,10 @@ Resources:
                 Resource:
                   - !Sub
                     - 'arn:aws:s3:::${BucketName}'
-                    - BucketName:
-                        - !FindInMap [EnvironmentVariables, !Ref Environment, CertificatesBucketName]
+                    - BucketName: !FindInMap [EnvironmentVariables, !Ref Environment, CertificatesBucketName]
                   - !Sub
                     - 'arn:aws:s3:::${BucketName}/*'
-                    - BucketName:
-                        - !FindInMap [EnvironmentVariables, !Ref Environment, CertificatesBucketName]
+                    - BucketName: !FindInMap [EnvironmentVariables, !Ref Environment, CertificatesBucketName]
               - Effect: Allow
                 Action:
                   - 'kms:Sign'
