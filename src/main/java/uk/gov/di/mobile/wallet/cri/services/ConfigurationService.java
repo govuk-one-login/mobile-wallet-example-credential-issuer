@@ -93,6 +93,8 @@ public class ConfigurationService extends Configuration {
 
     public String getDocumentSigningKey1Arn() {
         return System.getenv()
-                .getOrDefault("DOCUMENT_SIGNING_KEY_1_ARN", "alias/documentSigningKeyAlias1");
+                .getOrDefault(
+                        "DOCUMENT_SIGNING_KEY_1_ARN",
+                        "arn:aws:kms:eu-west-2:000000000000:key/1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4");
     }
 }
