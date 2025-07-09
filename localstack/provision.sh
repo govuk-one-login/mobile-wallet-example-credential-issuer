@@ -57,4 +57,6 @@ vdAI
 -----END CERTIFICATE-----
 EOF
 
-aws --endpoint-url=http://localhost:4566 s3 cp certificate.pem s3://certificates/6bb42872-f4ed-4d55-a937-b8ffb8760de4/ --region eu-west-2
+aws --endpoint-url=http://localhost:4566 s3 cp certificate.pem s3://certificates/6bb42872-f4ed-4d55-a937-b8ffb8760de4/ --region eu-west-2 # root certificate
+
+aws --endpoint-url=http://localhost:4566 s3 cp certificate.pem s3://certificates/1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4/ --region eu-west-2 # document signing certificate
