@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocumentTypes;
 
+import java.security.interfaces.ECPublicKey;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -61,7 +62,8 @@ public class MobileSecurityObjectFactory {
      * @return The constructed {@link MobileSecurityObject} instance.
      * @throws MDLException If an error occurs during the creation of the {@link ValueDigests}.
      */
-    public MobileSecurityObject build(Namespaces nameSpaces) throws MDLException {
+    public MobileSecurityObject build(Namespaces nameSpaces, ECPublicKey publicKey)
+            throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
 
         Instant currentTimestamp = clock.instant();

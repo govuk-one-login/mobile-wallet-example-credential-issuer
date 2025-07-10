@@ -6,6 +6,7 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
 
 public class DocumentFactory {
     private static final String DOC_TYPE = DocumentTypes.MDL;
@@ -19,10 +20,10 @@ public class DocumentFactory {
         this.issuerSignedFactory = issuerSignedFactory;
     }
 
-    public Document build(final DrivingLicenceDocument drivingLicence)
+    public Document build(final DrivingLicenceDocument drivingLicence, ECPublicKey publicKey)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicence);
-        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces);
+        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey);
         return new Document(DOC_TYPE, issuerSigned);
     }
 }

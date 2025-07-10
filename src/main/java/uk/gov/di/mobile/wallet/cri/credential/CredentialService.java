@@ -25,6 +25,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -128,7 +129,8 @@ public class CredentialService {
                 credential =
                         getMobileDrivingLicence(
                                 mapper.convertValue(
-                                        document.getData(), DrivingLicenceDocument.class));
+                                        document.getData(), DrivingLicenceDocument.class),
+                                proofJwtData.publicKey());
             } else {
                 throw new CredentialServiceException(
                         String.format("Invalid verifiable credential type %s", vcType));
@@ -200,9 +202,11 @@ public class CredentialService {
                         veteranCardDocument.getCredentialTtlMinutes());
     }
 
-    private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
+    private String getMobileDrivingLicence(
+            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
             throws ObjectStoreException, SigningException, CertificateException {
-        return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
+        return mobileDrivingLicenceService.createMobileDrivingLicence(
+                drivingLicenceDocument, publicKey);
     }
 
     protected Logger getLogger() {
