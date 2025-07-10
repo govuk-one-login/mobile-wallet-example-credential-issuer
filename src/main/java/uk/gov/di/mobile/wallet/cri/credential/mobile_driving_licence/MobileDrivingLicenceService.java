@@ -7,6 +7,7 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
 import java.util.HexFormat;
 
 /**
@@ -41,9 +42,10 @@ public class MobileDrivingLicenceService {
      * @param drivingLicenceDocument The driving licence document containing user information
      * @return A hexadecimal string representation of the CBOR-encoded mobile driving licence
      */
-    public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
+    public String createMobileDrivingLicence(
+            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
             throws ObjectStoreException, SigningException, CertificateException {
-        Document mdoc = documentFactory.build(drivingLicenceDocument);
+        Document mdoc = documentFactory.build(drivingLicenceDocument, publicKey);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
         return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);
     }

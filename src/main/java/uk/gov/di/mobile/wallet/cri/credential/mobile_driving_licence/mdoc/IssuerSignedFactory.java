@@ -12,6 +12,7 @@ import uk.gov.di.mobile.wallet.cri.util.ArnUtil;
 
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -37,9 +38,10 @@ public class IssuerSignedFactory {
         this.documentSigningKey1Arn = documentSigningKey1Arn;
     }
 
-    public IssuerSigned build(Namespaces namespaces)
+    public IssuerSigned build(Namespaces namespaces, ECPublicKey publicKey)
             throws MDLException, SigningException, CertificateException, ObjectStoreException {
-        MobileSecurityObject mobileSecurityObject = mobileSecurityObjectFactory.build(namespaces);
+        MobileSecurityObject mobileSecurityObject =
+                mobileSecurityObjectFactory.build(namespaces, publicKey);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
         String certificateId = ArnUtil.extractKeyId(documentSigningKey1Arn);
