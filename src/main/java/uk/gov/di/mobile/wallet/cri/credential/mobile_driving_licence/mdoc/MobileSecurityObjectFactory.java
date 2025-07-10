@@ -1,9 +1,16 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEKeyTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocumentTypes;
 
+import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;
+import java.security.spec.ECParameterSpec;
+import java.security.spec.ECPoint;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -68,8 +75,22 @@ public class MobileSecurityObjectFactory {
 
         Instant currentTimestamp = clock.instant();
         Instant validUntil = currentTimestamp.plus(Duration.ofDays(365));
-
         var validityInfo = new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);
+
+        // Determine the curve is P-256
+        ECParameterSpec params = publicKey.getParams();
+        int keySize = getKeySize(params);
+
+        // Extract coordinates
+        ECPoint point = publicKey.getW();
+        BigInteger x = point.getAffineX();
+        BigInteger y = point.getAffineY();
+
+//        // Convert to byte arrays
+//        byte[] xBytes =
+//        byte[] yBytes =
+
+        COSEKey coseKey = new COSEKeyBuilder().keyType(COSEKeyTypes.EC2).curve(COSEEllipticCurves.P256).build();
 
         return new MobileSecurityObject(
                 MSO_VERSION,
@@ -77,5 +98,16 @@ public class MobileSecurityObjectFactory {
                 valueDigests,
                 DOC_TYPE,
                 validityInfo);
+    }
+
+    private static int getKeySize(ECParameterSpec params) {
+        int fieldSize = params.getCurve().getField().getFieldSize();
+
+        switch (fieldSize) {
+            case 256:
+                return 32; // 256 bits = 32 bytes
+            default:
+                throw new IllegalArgumentException("Unsupported curve with field size: " + fieldSize);
+        }
     }
 }
