@@ -25,7 +25,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Clock;
 import java.time.Instant;
@@ -84,7 +83,6 @@ class CredentialBuilderTest {
                 new CredentialBuilder<>(configurationService, kmsService, nowClock);
         when(configurationService.getSigningKeyAlias()).thenReturn("mock-signing-key-alias");
         when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
-        when(configurationService.getCredentialTtlInDays()).thenReturn(365L);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KMS_KEY_ID);
         when(configurationService.getDidController())
                 .thenReturn("example-credential-issuer.gov.uk");
@@ -103,8 +101,7 @@ class CredentialBuilderTest {
     }
 
     @Test
-    void Should_Call_KmsSign_With_Correct_Parameters()
-            throws SigningException, JOSEException, NoSuchAlgorithmException {
+    void Should_Call_KmsSign_With_Correct_Parameters() throws SigningException, JOSEException {
         ArgumentCaptor<SignRequest> signRequestArgumentCaptor =
                 ArgumentCaptor.forClass(SignRequest.class);
         SignResponse mockSignResponse = getMockKmsSignResponse();
@@ -140,7 +137,7 @@ class CredentialBuilderTest {
 
     @Test
     void Should_Return_Social_Security_Credential()
-            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
+            throws SigningException, JOSEException, ParseException {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
@@ -198,7 +195,7 @@ class CredentialBuilderTest {
 
     @Test
     void Should_Return_Basic_Check_Credential()
-            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
+            throws SigningException, JOSEException, ParseException {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
@@ -256,7 +253,7 @@ class CredentialBuilderTest {
 
     @Test
     void Should_Return_Digital_Veteran_Card()
-            throws SigningException, JOSEException, NoSuchAlgorithmException, ParseException {
+            throws SigningException, JOSEException, ParseException {
         SignResponse mockSignResponse = getMockKmsSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 

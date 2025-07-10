@@ -40,7 +40,7 @@ class DocumentStoreClientTest {
     void Should_ReturnDocument_When_DocumentAPIReturns200()
             throws URISyntaxException, DocumentStoreException {
         String documentId = "672ca5d0-818a-46b6-946a-f9481023e803";
-        String credentialStoreUrl = "https://test-example-cri.com";
+        URI credentialStoreUrl = new URI("https://test-example-cri.com");
         String documentEndpoint = "/documents/";
         URI expectedUri = new URI(credentialStoreUrl + documentEndpoint + documentId);
         when(mockConfigurationService.getCredentialStoreUrl()).thenReturn(credentialStoreUrl);
@@ -58,9 +58,9 @@ class DocumentStoreClientTest {
     }
 
     @Test
-    void Should_ThrowDocumentStoreException_When_DocumentAPIReturns500() {
+    void Should_ThrowDocumentStoreException_When_DocumentAPIReturns500() throws URISyntaxException {
         String documentId = "672ca5d0-818a-46b6-946a-f9481023e803";
-        String credentialStoreUrl = "https://test-example-cri.com";
+        URI credentialStoreUrl = new URI("https://test-example-cri.com");
         String documentEndpoint = "/documents/";
         when(mockConfigurationService.getCredentialStoreUrl()).thenReturn(credentialStoreUrl);
         when(mockConfigurationService.getDocumentEndpoint()).thenReturn(documentEndpoint);
@@ -76,7 +76,7 @@ class DocumentStoreClientTest {
     @Test
     void Should_ThrowDocumentStoreException_When_URLConstructionFails() {
         String documentId = "672ca5d0-818a-46b6-946a-f9481023e803";
-        when(mockConfigurationService.getCredentialStoreUrl()).thenReturn("invalid-url");
+        when(mockConfigurationService.getDocumentEndpoint()).thenReturn(null);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
