@@ -101,8 +101,7 @@ class CredentialBuilderTest {
     }
 
     @Test
-    void Should_Call_KmsSign_With_Correct_Parameters()
-            throws SigningException, JOSEException {
+    void Should_Call_KmsSign_With_Correct_Parameters() throws SigningException, JOSEException {
         ArgumentCaptor<SignRequest> signRequestArgumentCaptor =
                 ArgumentCaptor.forClass(SignRequest.class);
         SignResponse mockSignResponse = getMockKmsSignResponse();
