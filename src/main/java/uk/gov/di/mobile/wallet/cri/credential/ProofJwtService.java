@@ -22,16 +22,35 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
 
+/**
+ * Service for verifying OpenID4VCI Proof JWTs.
+ *
+ * <p>This service handles the verification of Proof JWTs used in OpenID4VCI flows, including header
+ * validation, payload claims verification, and signature verification using DID key resolution.
+ */
 public class ProofJwtService {
 
     public static final String NONCE = "nonce";
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
-    private static final String EXPECTED_ISSUER = "urn:fdc:gov:uk:wallet";
+    private static final String EXPECTED_ISSUER = "test";
+    private static final String EXPECTED_JWT_TYPE = "openid4vci-proof+jwt";
 
     private final ConfigurationService configurationService;
 
+    /**
+     * Data container for verified Proof JWT information.
+     *
+     * @param didKey The did:key from the JWT header
+     * @param nonce The nonce value from the JWT payload
+     * @param publicKey The resolved EC public key from the did:key
+     */
     public record ProofJwtData(String didKey, String nonce, ECPublicKey publicKey) {}
 
+    /**
+     * Constructs a new ProofJwtService with the specified configuration service.
+     *
+     * @param configurationService The configuration service for retrieving application settings
+     */
     public ProofJwtService(ConfigurationService configurationService) {
         this.configurationService = configurationService;
     }
@@ -40,15 +59,17 @@ public class ProofJwtService {
      * Verifies the Proof JWT header and payload claims and its signature.
      *
      * @param proofJwt The Proof JWT to verify
-     * @return ProofJwtData
+     * @return ProofJwtData containing the did:key, nonce, and public key
      * @throws ProofJwtValidationException On any error verifying the token claims and signature
      */
     public ProofJwtData verifyProofJwt(SignedJWT proofJwt) throws ProofJwtValidationException {
         verifyTokenHeader(proofJwt);
         verifyTokenClaims(proofJwt);
 
-        ECPublicKey publicKey = getPublicKey(proofJwt.getHeader().getKeyID());
-        if (!this.verifyTokenSignature(proofJwt, publicKey)) {
+        String didKey = proofJwt.getHeader().getKeyID();
+        ECPublicKey publicKey = getPublicKey(didKey);
+
+        if (!verifyTokenSignature(proofJwt, publicKey)) {
             throw new ProofJwtValidationException("Proof JWT signature verification failed");
         }
 
@@ -56,36 +77,40 @@ public class ProofJwtService {
     }
 
     /**
-     * Verifies that the required header claims are present and/or match an expected value.
+     * Verifies that the required header claims are present and match expected values.
      *
      * @param proofJwt The Proof JWT to validate
      * @throws ProofJwtValidationException On invalid header claims
      */
     private void verifyTokenHeader(SignedJWT proofJwt) throws ProofJwtValidationException {
+        JWSHeader header = proofJwt.getHeader();
 
-        JWSAlgorithm jwtAlgorithm = proofJwt.getHeader().getAlgorithm();
-        if (jwtAlgorithm != EXPECTED_SIGNING_ALGORITHM) {
+        JWSAlgorithm jwtAlgorithm = header.getAlgorithm();
+        if (!EXPECTED_SIGNING_ALGORITHM.equals(jwtAlgorithm)) {
             throw new ProofJwtValidationException(
                     String.format(
-                            "JWT alg header claim [%s] does not match client config alg [%s]",
+                            "JWT alg header claim [%s] does not match expected algorithm [%s]",
                             jwtAlgorithm, EXPECTED_SIGNING_ALGORITHM));
         }
 
-        if (proofJwt.getHeader().getKeyID() == null) {
+        if (header.getKeyID() == null) {
             throw new ProofJwtValidationException("JWT kid header claim is null");
         }
 
-        JOSEObjectType typ = proofJwt.getHeader().getType();
+        JOSEObjectType typ = header.getType();
         if (typ == null) {
             throw new ProofJwtValidationException("JWT type header claim is null");
         }
-        if (!"openid4vci-proof+jwt".equals(typ.toString())) {
-            throw new ProofJwtValidationException("JWT type header claim is invalid");
+        if (!EXPECTED_JWT_TYPE.equals(typ.toString())) {
+            throw new ProofJwtValidationException(
+                    String.format(
+                            "JWT type header claim [%s] does not match expected type [%s]",
+                            typ, EXPECTED_JWT_TYPE));
         }
     }
 
     /**
-     * Verifies that the required payload claims are present and/or match an expected value.
+     * Verifies that the required payload claims are present and match expected values.
      *
      * @param proofJwt The Proof JWT to validate
      * @throws ProofJwtValidationException On invalid payload claims
@@ -105,10 +130,20 @@ public class ProofJwtService {
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
         } catch (BadJWTException | ParseException exception) {
-            throw new ProofJwtValidationException(exception.getMessage(), exception);
+            throw new ProofJwtValidationException(
+                    String.format("JWT claims verification failed: %s", exception.getMessage()),
+                    exception);
         }
     }
 
+    /**
+     * Extracts the EC public key from the did:key.
+     *
+     * @param didKey The did:key to resolve
+     * @return The EC public key
+     * @throws ProofJwtValidationException On error resolving the did:key or generating the public
+     *     key
+     */
     private ECPublicKey getPublicKey(String didKey) throws ProofJwtValidationException {
         try {
             DidKeyResolver didKeyResolver = new DidKeyResolver();
@@ -121,17 +156,21 @@ public class ProofJwtService {
                 | InvalidDidKeyException exception) {
             throw new ProofJwtValidationException(
                     String.format(
-                            "Error getting public key from did:key: %s", exception.getMessage()),
+                            "Error getting public key from did:key [%s]: %s",
+                            didKey, exception.getMessage()),
                     exception);
         }
     }
 
     /**
-     * Verifies the Proof JWT signature with the public key extracted from the did:key included in
-     * the token's "kid" header claim.
+     * Verifies the Proof JWT signature using the provided public key.
+     *
+     * <p>Creates an ECDSA verifier with the P-256 curve and verifies the JWT signature.
      *
      * @param proofJwt The Proof JWT to verify
-     * @throws ProofJwtValidationException On error verifying the token signature
+     * @param publicKey The EC public key to use for signature verification
+     * @return true if the signature is valid, false otherwise
+     * @throws ProofJwtValidationException On error during signature verification
      */
     private boolean verifyTokenSignature(SignedJWT proofJwt, ECPublicKey publicKey)
             throws ProofJwtValidationException {
@@ -146,6 +185,17 @@ public class ProofJwtService {
         }
     }
 
+    /**
+     * Extracts data from the verified Proof JWT.
+     *
+     * <p>This method is called after successful verification to extract the relevant information
+     * from the JWT into a structured object.
+     *
+     * @param proofJwt The verified Proof JWT
+     * @param publicKey The public key
+     * @return ProofJwtData containing the extracted information
+     * @throws ProofJwtValidationException On error parsing the JWT claims
+     */
     private static ProofJwtData extractProofJwtData(SignedJWT proofJwt, ECPublicKey publicKey)
             throws ProofJwtValidationException {
         try {
@@ -153,7 +203,9 @@ public class ProofJwtService {
             JWTClaimsSet claimsSet = proofJwt.getJWTClaimsSet();
             return new ProofJwtData(header.getKeyID(), claimsSet.getStringClaim(NONCE), publicKey);
         } catch (ParseException exception) {
-            throw new ProofJwtValidationException(exception.getMessage(), exception);
+            throw new ProofJwtValidationException(
+                    String.format("Error extracting Proof JWT data: %s", exception.getMessage()),
+                    exception);
         }
     }
 }
