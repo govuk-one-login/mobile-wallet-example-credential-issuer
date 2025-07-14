@@ -101,8 +101,7 @@ public class MobileSecurityObjectFactory {
                         .yCoordinate(yBytes)
                         .build();
 
-        Set<String> keys = nameSpaces.asMap().keySet();
-        AuthorizedNameSpaces authorizedNameSpaces = new AuthorizedNameSpaces(keys);
+        Set<String> authorizedNameSpaces = nameSpaces.asMap().keySet();
         KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
 
         return new MobileSecurityObject(
