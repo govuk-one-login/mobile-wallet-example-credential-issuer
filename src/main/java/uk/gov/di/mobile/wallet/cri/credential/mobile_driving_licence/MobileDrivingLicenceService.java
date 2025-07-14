@@ -40,6 +40,7 @@ public class MobileDrivingLicenceService {
      * document and returns it as a hexadecimal string.
      *
      * @param drivingLicenceDocument The driving licence document containing user information
+     * @param publicKey The public key from the proof's did:key
      * @return A hexadecimal string representation of the CBOR-encoded mobile driving licence
      */
     public String createMobileDrivingLicence(

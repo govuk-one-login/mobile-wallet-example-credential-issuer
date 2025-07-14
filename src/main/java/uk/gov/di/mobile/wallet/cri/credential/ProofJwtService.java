@@ -189,7 +189,7 @@ public class ProofJwtService {
      * from the JWT into a structured object.
      *
      * @param proofJwt The verified Proof JWT
-     * @param publicKey The public key
+     * @param publicKey The public key from the did:key
      * @return ProofJwtData containing the extracted information
      * @throws ProofJwtValidationException On error parsing the JWT claims
      */
