@@ -79,7 +79,7 @@ public class MobileSecurityObjectFactory {
     public MobileSecurityObject build(Namespaces nameSpaces, ECPublicKey publicKey)
             throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
-        ValidityInfo validityInfo = validityInfoFactory.createOneYearValidity();
+        ValidityInfo validityInfo = validityInfoFactory.build();
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
 
         Set<String> authorizedNameSpaces = nameSpaces.asMap().keySet();
