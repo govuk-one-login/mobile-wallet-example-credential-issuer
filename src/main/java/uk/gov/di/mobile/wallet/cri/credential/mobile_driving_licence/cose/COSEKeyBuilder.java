@@ -11,18 +11,18 @@ public class COSEKeyBuilder {
         return this;
     }
 
-    public COSEKeyBuilder curve(int kid) {
-        coseKey.put(-1, kid);
+    public COSEKeyBuilder curve(int crv) {
+        coseKey.put(-1, crv);
         return this;
     }
 
-    public COSEKeyBuilder xCoordinate(byte[] alg) {
-        coseKey.put(-2, alg);
+    public COSEKeyBuilder xCoordinate(byte[] x) {
+        coseKey.put(-2, x);
         return this;
     }
 
-    public COSEKeyBuilder yCoordinate(byte[] alg) {
-        coseKey.put(-3, alg);
+    public COSEKeyBuilder yCoordinate(byte[] y) {
+        coseKey.put(-3, y);
         return this;
     }
 
