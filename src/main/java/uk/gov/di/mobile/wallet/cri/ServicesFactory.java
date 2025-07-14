@@ -13,6 +13,7 @@ import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
@@ -97,8 +98,10 @@ public class ServicesFactory {
         ValueDigestsFactory valueDigestsFactory =
                 new ValueDigestsFactory(cborEncoder, MessageDigest.getInstance("SHA-256"));
         ValidityInfoFactory validityInfoFactory = new ValidityInfoFactory();
+        COSEKeyFactory coseKeyFactory = new COSEKeyFactory();
         MobileSecurityObjectFactory mobileSecurityObjectFactory =
-                new MobileSecurityObjectFactory(valueDigestsFactory, validityInfoFactory);
+                new MobileSecurityObjectFactory(
+                        valueDigestsFactory, validityInfoFactory, coseKeyFactory);
         COSESigner coseSigner =
                 new COSESigner(
                         cborEncoder, kmsService, configurationService.getDocumentSigningKey1Arn());

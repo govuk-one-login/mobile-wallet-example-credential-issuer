@@ -2,7 +2,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyConverter;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.DocumentTypes;
 
 import java.security.interfaces.ECPublicKey;
@@ -31,6 +31,9 @@ public class MobileSecurityObjectFactory {
     /** The factory responsible for creating {@link ValidityInfo} instances. */
     private final ValidityInfoFactory validityInfoFactory;
 
+    /** The factory responsible for creating {@link COSEKeyFactory} instances. */
+    private final COSEKeyFactory coseKeyFactory;
+
     /**
      * Constructs a new {@link MobileSecurityObjectFactory} with the provided factories.
      *
@@ -38,11 +41,16 @@ public class MobileSecurityObjectFactory {
      *     MobileSecurityObject}.
      * @param validityInfoFactory The factory used to create validity information for the {@link
      *     MobileSecurityObject}.
+     * @param coseKeyFactory The factory used to create the COSE key for the {@link
+     *     MobileSecurityObject}.
      */
     public MobileSecurityObjectFactory(
-            ValueDigestsFactory valueDigestsFactory, ValidityInfoFactory validityInfoFactory) {
+            ValueDigestsFactory valueDigestsFactory,
+            ValidityInfoFactory validityInfoFactory,
+            COSEKeyFactory coseKeyFactory) {
         this.valueDigestsFactory = valueDigestsFactory;
         this.validityInfoFactory = validityInfoFactory;
+        this.coseKeyFactory = coseKeyFactory;
     }
 
     /**
@@ -72,7 +80,7 @@ public class MobileSecurityObjectFactory {
             throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         ValidityInfo validityInfo = validityInfoFactory.createOneYearValidity();
-        COSEKey coseKey = COSEKeyConverter.fromECPublicKey(publicKey);
+        COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
 
         Set<String> authorizedNameSpaces = nameSpaces.asMap().keySet();
         KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
