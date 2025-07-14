@@ -38,7 +38,7 @@ public class ValidityInfoFactory {
      * @return A {@link ValidityInfo} object with current time as signed/valid from and current time
      *     plus 365 days as valid until.
      */
-    public ValidityInfo createOneYearValidity() {
+    public ValidityInfo build() {
         Instant currentTimestamp = clock.instant();
         Instant validUntil = currentTimestamp.plus(Duration.ofDays(365));
         return new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);

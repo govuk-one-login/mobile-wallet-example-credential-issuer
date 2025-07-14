@@ -45,7 +45,7 @@ class MobileSecurityObjectFactoryTest {
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1750677223), ZoneId.systemDefault());
         Instant now = clock.instant();
         ValidityInfo validityInfo = new ValidityInfo(now, now, now.plus(Duration.ofDays(365)));
-        when(mockValidityInfoFactory.createOneYearValidity()).thenReturn(validityInfo);
+        when(mockValidityInfoFactory.build()).thenReturn(validityInfo);
 
         // Arrange: Prepare COSEKey
         Map<Integer, Object> coseKeyParams = new HashMap<>();
@@ -77,7 +77,7 @@ class MobileSecurityObjectFactoryTest {
         assertEquals(expectedMso, result, "MobileSecurityObject should be constructed as expected");
         verify(mockValueDigestsFactory).createFromNamespaces(namespaces);
         verify(mockValueDigestsFactory).getDigestAlgorithm();
-        verify(mockValidityInfoFactory).createOneYearValidity();
+        verify(mockValidityInfoFactory).build();
         verify(mockCoseKeyFactory).fromECPublicKey(mockEcPublicKey);
     }
 }
