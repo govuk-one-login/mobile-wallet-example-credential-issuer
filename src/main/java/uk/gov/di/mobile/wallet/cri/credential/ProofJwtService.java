@@ -148,8 +148,7 @@ public class ProofJwtService {
             DidKeyResolver.DecodedKeyData resolvedDidKey = didKeyResolver.decodeDidKey(didKey);
             byte[] rawPublicKeyBytes = resolvedDidKey.rawPublicKeyBytes();
             return didKeyResolver.generatePublicKeyFromBytes(rawPublicKeyBytes);
-        } catch (IllegalArgumentException
-                | NoSuchAlgorithmException
+        } catch (NoSuchAlgorithmException
                 | InvalidKeySpecException
                 | InvalidDidKeyException exception) {
             throw new ProofJwtValidationException(
@@ -176,7 +175,7 @@ public class ProofJwtService {
             ECKey ecKey = new ECKey.Builder(Curve.P_256, publicKey).build();
             ECDSAVerifier verifier = new ECDSAVerifier(ecKey);
             return proofJwt.verify(verifier);
-        } catch (JOSEException | IllegalArgumentException exception) {
+        } catch (JOSEException exception) {
             throw new ProofJwtValidationException(
                     String.format("Error verifying signature: %s", exception.getMessage()),
                     exception);
