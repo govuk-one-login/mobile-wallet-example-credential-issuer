@@ -16,6 +16,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes.ISO;
@@ -39,24 +40,24 @@ class DocumentFactoryTest {
                 new DocumentFactory(mockNamespacesFactory, mockIssuerSignedFactory);
         DrivingLicenceDocument mockDrivingLicenceDocument = mock(DrivingLicenceDocument.class);
 
-        // Arrange: Create dummy namespaces map
-        Map<String, List<IssuerSignedItem>> dummyNamespacesMap = new HashMap<>();
-        dummyNamespacesMap.put(ISO, createDummyIssuerSignedItemList(18));
-        dummyNamespacesMap.put(UK, createDummyIssuerSignedItemList(3));
-        Namespaces dummyNamespaces = new Namespaces(dummyNamespacesMap);
+        // Arrange: Create test namespaces map
+        Map<String, List<IssuerSignedItem>> testNamespacesMap = new HashMap<>();
+        testNamespacesMap.put(ISO, createTestIssuerSignedItemList(18));
+        testNamespacesMap.put(UK, createTestIssuerSignedItemList(3));
+        Namespaces testNamespaces = new Namespaces(testNamespacesMap);
 
-        // Arrange: Mock NamespacesFactory to return dummy NamespaceTypes
+        // Arrange: Mock NamespacesFactory to return test Namespaces
         when(mockNamespacesFactory.build(any(DrivingLicenceDocument.class)))
-                .thenReturn(dummyNamespaces);
+                .thenReturn(testNamespaces);
 
-        // Arrange: Mock IssuerSignedFactory to return dummy IssuerSigned
+        // Arrange: Mock IssuerSignedFactory to return mock IssuerSigned
         IssuerSigned mockIssuerSigned = mock(IssuerSigned.class);
         // Simulate IssuerSigned.nameSpaces() returning a map of String -> List<byte[]>
-        Map<String, List<byte[]>> dummyEncodedNamespaces = new HashMap<>();
-        dummyEncodedNamespaces.put(ISO, Collections.nCopies(18, "testCbor".getBytes()));
-        dummyEncodedNamespaces.put(UK, Collections.nCopies(3, "testCbor".getBytes()));
-        when(mockIssuerSigned.nameSpaces()).thenReturn(dummyEncodedNamespaces);
-        when(mockIssuerSignedFactory.build(any(Namespaces.class), mockEcPublicKey))
+        Map<String, List<byte[]>> testEncodedNamespaces = new HashMap<>();
+        testEncodedNamespaces.put(ISO, Collections.nCopies(18, "testCbor".getBytes()));
+        testEncodedNamespaces.put(UK, Collections.nCopies(3, "testCbor".getBytes()));
+        when(mockIssuerSigned.nameSpaces()).thenReturn(testEncodedNamespaces);
+        when(mockIssuerSignedFactory.build(any(Namespaces.class), eq(mockEcPublicKey)))
                 .thenReturn(mockIssuerSigned);
 
         // Act: Build the document
@@ -71,7 +72,7 @@ class DocumentFactoryTest {
         assertEquals(3, namespaces.get(UK).size(), "UK namespace should have 3 fields");
     }
 
-    private List<IssuerSignedItem> createDummyIssuerSignedItemList(int count) {
+    private List<IssuerSignedItem> createTestIssuerSignedItemList(int count) {
         List<IssuerSignedItem> list = new ArrayList<>();
         for (int i = 0; i < count; i++) {
             list.add(mock(IssuerSignedItem.class));
