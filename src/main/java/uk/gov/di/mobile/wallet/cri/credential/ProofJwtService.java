@@ -130,9 +130,7 @@ public class ProofJwtService {
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
             verifier.verify(jwtClaimsSet, null);
         } catch (BadJWTException | ParseException exception) {
-            throw new ProofJwtValidationException(
-                    String.format("JWT claims verification failed: %s", exception.getMessage()),
-                    exception);
+            throw new ProofJwtValidationException(exception.getMessage(), exception);
         }
     }
 
