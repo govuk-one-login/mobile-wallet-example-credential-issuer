@@ -6,6 +6,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 
+import java.security.interfaces.ECPublicKey;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,9 +24,9 @@ import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc
 @ExtendWith(MockitoExtension.class)
 class DocumentFactoryTest {
 
-    // Mocked dependencies for DocumentFactory
     @Mock private NamespacesFactory mockNamespacesFactory;
     @Mock private IssuerSignedFactory mockIssuerSignedFactory;
+    @Mock private ECPublicKey mockEcPublicKey;
 
     /**
      * Test that the DocumentFactory creates both ISO and UK namespaces, and that the correct number
@@ -55,10 +56,11 @@ class DocumentFactoryTest {
         dummyEncodedNamespaces.put(ISO, Collections.nCopies(18, "testCbor".getBytes()));
         dummyEncodedNamespaces.put(UK, Collections.nCopies(3, "testCbor".getBytes()));
         when(mockIssuerSigned.nameSpaces()).thenReturn(dummyEncodedNamespaces);
-        when(mockIssuerSignedFactory.build(any(Namespaces.class))).thenReturn(mockIssuerSigned);
+        when(mockIssuerSignedFactory.build(any(Namespaces.class), mockEcPublicKey))
+                .thenReturn(mockIssuerSigned);
 
         // Act: Build the document
-        Document result = documentFactory.build(mockDrivingLicenceDocument);
+        Document result = documentFactory.build(mockDrivingLicenceDocument, mockEcPublicKey);
 
         // Assert: Check that both namespaces exist and have the expected number of fields
         Map<String, List<byte[]>> namespaces = result.issuerSigned().nameSpaces();
