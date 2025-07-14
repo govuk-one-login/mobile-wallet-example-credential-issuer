@@ -14,6 +14,7 @@ import java.security.spec.ECPoint;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Set;
 
 /** Factory class for creating MobileSecurityObject instances. */
 public class MobileSecurityObjectFactory {
@@ -100,10 +101,14 @@ public class MobileSecurityObjectFactory {
                         .yCoordinate(yBytes)
                         .build();
 
+        Set<String> keys = nameSpaces.asMap().keySet();
+        AuthorizedNameSpaces authorizedNameSpaces = new AuthorizedNameSpaces(keys);
+        KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
+
         return new MobileSecurityObject(
                 MSO_VERSION,
                 valueDigestsFactory.getDigestAlgorithm(),
-                new DeviceKeyInfo(coseKey, new KeyAuthorizations(new AuthorizedNameSpaces())),
+                new DeviceKeyInfo(coseKey, keyAuthorizations),
                 valueDigests,
                 DOC_TYPE,
                 validityInfo);
