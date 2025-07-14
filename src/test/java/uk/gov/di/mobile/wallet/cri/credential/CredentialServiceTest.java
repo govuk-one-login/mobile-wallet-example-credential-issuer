@@ -21,6 +21,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,8 +48,8 @@ class CredentialServiceTest {
 
     @Mock private CredentialBuilder<?> mockCredentialBuilder;
     @Mock private MobileDrivingLicenceService mockMobileDrivingLicenceService;
-
     @Mock private Logger mockLogger;
+    @Mock private ECPublicKey mockEcPublicKey;
 
     private final DynamoDbService mockDynamoDbService = mock(DynamoDbService.class);
     private final AccessTokenService mockAccessTokenService = mock(AccessTokenService.class);
@@ -92,6 +93,7 @@ class CredentialServiceTest {
                 };
         mockAccessProofJwtData = getMockProofJwtData(NONCE);
         when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
+
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
 
         mockCredentialJwt =
@@ -302,7 +304,7 @@ class CredentialServiceTest {
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         verify(mockMobileDrivingLicenceService, times(1))
-                .createMobileDrivingLicence(any(DrivingLicenceDocument.class));
+                .createMobileDrivingLicence(any(DrivingLicenceDocument.class), eq(mockEcPublicKey));
     }
 
     @Test
@@ -379,6 +381,7 @@ class CredentialServiceTest {
     }
 
     private ProofJwtService.ProofJwtData getMockProofJwtData(String nonce) {
-        return new ProofJwtService.ProofJwtData(CredentialServiceTest.DID_KEY, nonce);
+        return new ProofJwtService.ProofJwtData(
+                CredentialServiceTest.DID_KEY, nonce, mockEcPublicKey);
     }
 }
