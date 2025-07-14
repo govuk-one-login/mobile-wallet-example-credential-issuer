@@ -4,6 +4,10 @@ import java.math.BigInteger;
 
 public class BigIntegerToFixedBytes {
 
+    private BigIntegerToFixedBytes() {
+        // Can't be instantiated
+    }
+
     /**
      * Converts a BigInteger to a fixed-length byte array using truncation/padding approach.
      *
