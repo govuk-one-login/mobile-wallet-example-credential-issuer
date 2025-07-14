@@ -7,28 +7,32 @@ import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.BigIntegerToFixedBytes.bigIntegerToFixedBytes;
 
 /**
- * Utility class for converting EC public keys to COSE key format.
+ * Factory for creating {@link COSEKey} instance from EC public keys.
  *
- * <p>This class provides methods to convert Java's {@link ECPublicKey} objects into COSE_Key (CBOR
- * Object Signing and Encryption key) format, which is required for mobile security objects.
+ * <p>This factory encapsulates the logic for converting a Java {@link ECPublicKey} (specifically on
+ * the P-256 curve) into a COSE_Key (CBOR Object Signing and Encryption key) format, as required for
+ * mobile security objects.
  */
-public class COSEKeyConverter {
+public class COSEKeyFactory {
 
     /**
-     * Converts an EC public key to COSE key format.
+     * Creates a {@link COSEKey} from the given EC public key.
      *
-     * <p>This method validates that the provided key uses the P-256 curve and extracts the x and y
-     * coordinates to create a COSE key.
+     * <p>This method validates that the provided key uses the P-256 curve, extracts the x and y
+     * coordinates, and encodes them as fixed-length byte arrays to construct the {@link COSEKey}
+     * object.
      *
-     * @param publicKey The EC public key to convert. Must use the P-256 curve.
-     * @return A {@link COSEKey} object representing the public key in COSE_Key format.
+     * @param publicKey the EC public key to convert.
+     * @return The {@link COSEKey} representation of the public key.
      * @throws IllegalArgumentException If the key does not use the P-256 curve.
      */
-    public static COSEKey fromECPublicKey(ECPublicKey publicKey) {
+    public COSEKey fromECPublicKey(ECPublicKey publicKey) {
         // Validate curve is P-256
         ECParameterSpec params = publicKey.getParams();
         int curveSizeBits = params.getCurve().getField().getFieldSize();
@@ -41,15 +45,17 @@ public class COSEKeyConverter {
         BigInteger x = point.getAffineX();
         BigInteger y = point.getAffineY();
 
-        // Convert to bytes
+        // Convert BigInteger to fixed-length byte array
         byte[] xBytes = bigIntegerToFixedBytes(x, curveSizeBits);
         byte[] yBytes = bigIntegerToFixedBytes(y, curveSizeBits);
 
-        return new COSEKeyBuilder()
-                .keyType(COSEKeyTypes.EC2)
-                .curve(COSEEllipticCurves.P256)
-                .xCoordinate(xBytes)
-                .yCoordinate(yBytes)
-                .build();
+        // Build the COSE key map
+        Map<Integer, Object> coseKeyMap = new LinkedHashMap<>();
+        coseKeyMap.put(1, COSEKeyTypes.EC2); // Key type: EC2
+        coseKeyMap.put(-1, COSEEllipticCurves.P256); // Curve: P-256
+        coseKeyMap.put(-2, xBytes); // x-coordinate
+        coseKeyMap.put(-3, yBytes); // y-coordinate
+
+        return new COSEKey(coseKeyMap);
     }
 }
