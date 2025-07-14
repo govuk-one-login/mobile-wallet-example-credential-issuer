@@ -9,6 +9,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceKeyInfo;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.KeyAuthorizations;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigests;
@@ -17,6 +20,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +43,15 @@ class MobileSecurityObjectSerializerTest {
 
     @Test
     void Should_SerializeMobileSecurityObjectWithCBORGenerator() throws IOException {
+        // Arrange: Prepare DeviceKeyInfo
+        Map<Integer, Object> parameterMap = new HashMap<>();
+        parameterMap.put(1, "testParameterValue");
+        parameterMap.put(-1, 2);
+        COSEKey coseKey = new COSEKey(parameterMap);
+        KeyAuthorizations keyAuthorizations =
+                new KeyAuthorizations(Set.of("testNamespace1", "testNamespace2"));
+        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
+
         // Arrange: Prepare ValueDigests
         Map<Integer, byte[]> digestMap = new HashMap<>();
         digestMap.put(1, new byte[] {0x01, 0x02, 0x03});
@@ -56,7 +69,12 @@ class MobileSecurityObjectSerializerTest {
         // Arrange: Create the test object
         MobileSecurityObject testObject =
                 new MobileSecurityObject(
-                        "1.0", "SHA-256", valueDigests, "org.iso.18013.5.1.mDL", validityInfo);
+                        "1.0",
+                        "SHA-256",
+                        deviceKeyInfo,
+                        valueDigests,
+                        "org.iso.18013.5.1.mDL",
+                        validityInfo);
 
         // Act: Serialize the object
         serializer.serialize(testObject, cborGenerator, serializerProvider);
