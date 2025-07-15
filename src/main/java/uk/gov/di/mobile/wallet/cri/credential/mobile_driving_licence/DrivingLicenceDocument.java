@@ -7,10 +7,10 @@ import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -106,7 +106,8 @@ public class DrivingLicenceDocument {
         this.givenName = Objects.requireNonNull(givenName, "given_name is required");
         this.title = Objects.requireNonNull(title, "title is required");
         this.welshLicence = welshLicence;
-        this.portrait = getBytes(Objects.requireNonNull(portrait, "portrait is required"));
+        this.portrait =
+                getBytesFromBase64(Objects.requireNonNull(portrait, "portrait is required"));
         this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
         this.ageOver18 = getAge(this.birthDate) >= 18;
         this.ageOver21 = getAge(this.birthDate) >= 21;
@@ -141,7 +142,7 @@ public class DrivingLicenceDocument {
         return Period.between(birthDate, LocalDate.now()).getYears();
     }
 
-    private byte[] getBytes(String base64Portrait) {
-        return base64Portrait.getBytes(StandardCharsets.UTF_8);
+    private byte[] getBytesFromBase64(String base64String) {
+        return Base64.getDecoder().decode(base64String);
     }
 }

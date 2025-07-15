@@ -10,8 +10,8 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPriv
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -97,9 +97,7 @@ class NamespacesFactoryTest {
         verify(mockIssuerSignedItemFactory).build("family_name", "Doe");
         verify(mockIssuerSignedItemFactory).build("given_name", "John");
         verify(mockIssuerSignedItemFactory)
-                .build(
-                        "portrait",
-                        ("base64EncodedPortraitString").getBytes(StandardCharsets.UTF_8));
+                .build("portrait", Base64.getDecoder().decode("base64EncodedPortraitString"));
         verify(mockIssuerSignedItemFactory).build("birth_date", LocalDate.parse("1985-05-24"));
         verify(mockIssuerSignedItemFactory).build("birth_place", "London");
         verify(mockIssuerSignedItemFactory).build("issue_date", LocalDate.parse("2020-01-10"));
