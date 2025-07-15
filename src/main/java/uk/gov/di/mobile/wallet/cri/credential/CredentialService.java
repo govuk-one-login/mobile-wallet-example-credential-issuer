@@ -23,7 +23,6 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Objects;
@@ -134,8 +133,7 @@ public class CredentialService {
                         String.format("Invalid verifiable credential type %s", vcType));
             }
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
-        } catch (NoSuchAlgorithmException
-                | SigningException
+        } catch (SigningException
                 | MDLException
                 | ObjectStoreException
                 | CertificateException exception) {
@@ -163,8 +161,7 @@ public class CredentialService {
 
     @SuppressWarnings("unchecked")
     private String getSocialSecurityCredential(
-            SocialSecurityDocument socialSecurityDocument, String sub)
-            throws SigningException, NoSuchAlgorithmException {
+            SocialSecurityDocument socialSecurityDocument, String sub) throws SigningException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         socialSecurityDocument, sub);
@@ -177,7 +174,7 @@ public class CredentialService {
 
     @SuppressWarnings("unchecked")
     private String getBasicCheckCredential(BasicCheckDocument basicCheckDocument, String sub)
-            throws SigningException, NoSuchAlgorithmException {
+            throws SigningException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(basicCheckDocument, sub);
 
