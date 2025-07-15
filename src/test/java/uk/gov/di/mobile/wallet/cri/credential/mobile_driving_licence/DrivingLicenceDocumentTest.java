@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeParseException;
@@ -71,7 +72,7 @@ class DrivingLicenceDocumentTest {
         assertEquals(GIVEN_NAME, document.getGivenName());
         assertEquals(TITLE, document.getTitle());
         assertEquals(WELSH_LICENSE, document.isWelshLicence());
-        assertEquals(PORTRAIT, document.getPortrait());
+        assertArrayEquals(PORTRAIT.getBytes(StandardCharsets.UTF_8), document.getPortrait());
         assertEquals(LocalDate.of(1985, 5, 24), document.getBirthDate());
         assertEquals(age >= 18, document.getAgeOver18());
         assertEquals(age >= 21, document.getAgeOver21());
