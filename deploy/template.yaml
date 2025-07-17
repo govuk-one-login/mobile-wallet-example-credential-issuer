@@ -652,6 +652,38 @@ Resources:
         - Key: Environment
           Value: !Ref "Environment"
 
+  CRICredentialDatabase:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: credentialIdentifier
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Sub "${AWS::StackName}-credential_store"
+      KeySchema:
+        - AttributeName: credentialIdentifier
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: timeToLive
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt CRICredentialDatabaseKmsKey.Arn
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Mobile Wallet
+        - Key: Owner
+          Value: Mobile Wallet Team
+        - Key: Environment
+          Value: !Ref "Environment"
+
   # ALARMS
 
   ExampleCredIssuerLowContainerTaskCountAlarm:
