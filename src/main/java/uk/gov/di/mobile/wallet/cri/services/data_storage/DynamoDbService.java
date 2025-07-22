@@ -22,7 +22,8 @@ public class DynamoDbService implements DataStore {
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
     }
 
-    DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable = getTable(CachedCredentialOffer.class);
+    DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable =
+            getTable(CachedCredentialOffer.class);
     DynamoDbTable<StoredCredential> storedCredentialTable = getTable(StoredCredential.class);
 
     public static DynamoDbEnhancedClient getClient(ConfigurationService configurationService) {
@@ -97,9 +98,9 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public StoredCredential deleteCredential(String partitionValue) throws DataStoreException {
+    public void deleteCredential(String partitionValue) throws DataStoreException {
         try {
-            return deleteStoredCredential(Key.builder().partitionValue(partitionValue).build());
+            deleteStoredCredential(Key.builder().partitionValue(partitionValue).build());
         } catch (Exception exception) {
             throw new DataStoreException("Error deleting credential", exception);
         }
