@@ -16,6 +16,6 @@ public interface DataStore {
 
     StoredCredential getCredential(String credentialId) throws DataStoreException;
 
-    void updateCredential(StoredCredential storedCredential) throws DataStoreException;
+    StoredCredential deleteCredential(String credentialId) throws DataStoreException;
 
 }
