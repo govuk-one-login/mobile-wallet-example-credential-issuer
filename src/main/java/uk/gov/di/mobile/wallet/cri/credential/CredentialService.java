@@ -27,6 +27,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.text.ParseException;
+import java.time.Clock;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
@@ -44,6 +45,7 @@ public class CredentialService {
     private final DocumentStoreClient documentStoreClient;
     private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
     private final MobileDrivingLicenceService mobileDrivingLicenceService;
+    Clock clock;
 
     private final ObjectMapper mapper =
             new ObjectMapper()
@@ -141,21 +143,27 @@ public class CredentialService {
             Date expDate = parsed.getJWTClaimsSet().getExpirationTime();
             long expiryEpoch = expDate.toInstant().getEpochSecond();
 
-            StoredCredential storedCredential = new StoredCredential(
-                    credentialOffer.getCredentialIdentifier(),
-                    credentialOffer.getNotificationId(),
-                    expiryEpoch);
+            StoredCredential storedCredential =
+                    new StoredCredential(
+                            credentialOffer.getCredentialIdentifier(),
+                            credentialOffer.getNotificationId(),
+                            expiryEpoch);
 
             dataStore.saveCredential(storedCredential);
+
+            long nowEpoch = clock.instant().getEpochSecond();
+            if (storedCredential.getTimeToLive() < nowEpoch) {
+                dataStore.deleteCredential(storedCredential.getCredentialIdentifier());
+            }
 
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
 
         } catch (NoSuchAlgorithmException
-                 | SigningException
-                 | MDLException
-                 | ObjectStoreException
-                 | ParseException
-                 | CertificateException exception) {
+                | SigningException
+                | MDLException
+                | ObjectStoreException
+                | ParseException
+                | CertificateException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
