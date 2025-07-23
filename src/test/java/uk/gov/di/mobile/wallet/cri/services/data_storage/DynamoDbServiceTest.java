@@ -51,7 +51,7 @@ class DynamoDbServiceTest {
                         EXPIRY,
                         TTL);
 
-        dynamoDbService = new DynamoDbService(mockDynamoDbEnhancedClient, "test-cache-cri-table");
+        dynamoDbService = new DynamoDbService(mockDynamoDbEnhancedClient, "test-cache-cri-table", "test-credential-store-table");
     }
 
     @Test

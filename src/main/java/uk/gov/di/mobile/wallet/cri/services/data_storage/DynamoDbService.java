@@ -14,17 +14,27 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import java.net.URI;
 
 public class DynamoDbService implements DataStore {
-    private final String tableName;
+    private final String cachedCredentialOfferTableName;
+    private final String storedCredentialTableName;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
 
-    public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient, String tableName) {
-        this.tableName = tableName;
+    private final DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable;
+    private final DynamoDbTable<StoredCredential> storedCredentialTable;
+
+    public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient,
+                           String cachedCredentialOfferTableName,
+                           String storedCredentialTableName) {
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
+        this.cachedCredentialOfferTableName = cachedCredentialOfferTableName;
+        this.storedCredentialTableName = storedCredentialTableName;
+
+        this.cachedCredentialOfferTable = getTable(CachedCredentialOffer.class, cachedCredentialOfferTableName);
+        this.storedCredentialTable = getTable(StoredCredential.class, storedCredentialTableName);
     }
 
-    DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable =
-            getTable(CachedCredentialOffer.class);
-    DynamoDbTable<StoredCredential> storedCredentialTable = getTable(StoredCredential.class);
+    private <T> DynamoDbTable<T> getTable(Class<T> beanClass, String tableName) {
+        return dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(beanClass));
+    }
 
     public static DynamoDbEnhancedClient getClient(ConfigurationService configurationService) {
         DynamoDbClient client;
@@ -42,11 +52,6 @@ public class DynamoDbService implements DataStore {
                 .httpClient(UrlConnectionHttpClient.create())
                 .region(Region.of(configurationService.getAwsRegion()))
                 .build();
-    }
-
-    private <T> DynamoDbTable<T> getTable(Class<T> dataModel) {
-        assert dynamoDbEnhancedClient != null;
-        return dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(dataModel));
     }
 
     @Override
@@ -89,9 +94,9 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public StoredCredential getCredential(String partitionValue) throws DataStoreException {
+    public StoredCredential getStoredCredential(String partitionValue) throws DataStoreException {
         try {
-            return getStoredCredential(Key.builder().partitionValue(partitionValue).build());
+            return getStoredCredentialByKey(Key.builder().partitionValue(partitionValue).build());
         } catch (Exception exception) {
             throw new DataStoreException("Error fetching credential", exception);
         }
@@ -110,7 +115,7 @@ public class DynamoDbService implements DataStore {
         return cachedCredentialOfferTable.getItem(key);
     }
 
-    private StoredCredential getStoredCredential(Key key) {
+    private StoredCredential getStoredCredentialByKey(Key key) {
         return storedCredentialTable.getItem(key);
     }
 
