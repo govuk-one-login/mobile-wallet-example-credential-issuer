@@ -14,22 +14,16 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import java.net.URI;
 
 public class DynamoDbService implements DataStore {
-    private final String cachedCredentialOfferTableName;
-    private final String storedCredentialTableName;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
-
     private final DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable;
     private final DynamoDbTable<StoredCredential> storedCredentialTable;
 
     public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient,
-                           String cachedCredentialOfferTableName,
-                           String storedCredentialTableName) {
+                           String cachedCredentialOfferTable,
+                           String storedCredentialTable) {
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
-        this.cachedCredentialOfferTableName = cachedCredentialOfferTableName;
-        this.storedCredentialTableName = storedCredentialTableName;
-
-        this.cachedCredentialOfferTable = getTable(CachedCredentialOffer.class, cachedCredentialOfferTableName);
-        this.storedCredentialTable = getTable(StoredCredential.class, storedCredentialTableName);
+        this.cachedCredentialOfferTable = getTable(CachedCredentialOffer.class, cachedCredentialOfferTable);
+        this.storedCredentialTable = getTable(StoredCredential.class, storedCredentialTable);
     }
 
     private <T> DynamoDbTable<T> getTable(Class<T> beanClass, String tableName) {
