@@ -139,24 +139,26 @@ public class CredentialService {
                         String.format("Invalid verifiable credential type %s", vcType));
             }
 
-            SignedJWT parsed = SignedJWT.parse(credential);
-            Date expDate = parsed.getJWTClaimsSet().getExpirationTime();
+            CredentialResponse credentialResponse = new CredentialResponse(credential, credentialOffer.getNotificationId());
+
+            SignedJWT parsedCredential = SignedJWT.parse(credential);
+            Date expDate = parsedCredential.getJWTClaimsSet().getExpirationTime();
             long expiryEpoch = expDate.toInstant().getEpochSecond();
 
             StoredCredential storedCredential =
                     new StoredCredential(
                             credentialOffer.getCredentialIdentifier(),
-                            credentialOffer.getNotificationId(),
+                            credentialResponse.getNotificationId(),
                             expiryEpoch);
 
-            dataStore.saveCredential(storedCredential);
+            dataStore.saveSoredCredential(storedCredential);
 
             long nowEpoch = clock.instant().getEpochSecond();
             if (storedCredential.getTimeToLive() < nowEpoch) {
-                dataStore.deleteCredential(storedCredential.getCredentialIdentifier());
+                dataStore.deleteSoredCredential(storedCredential.getCredentialIdentifier());
             }
 
-            return new CredentialResponse(credential, credentialOffer.getNotificationId());
+            return credentialResponse;
 
         } catch (NoSuchAlgorithmException
                 | SigningException

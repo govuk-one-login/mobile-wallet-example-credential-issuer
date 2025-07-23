@@ -79,7 +79,7 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public void saveCredential(StoredCredential storedCredential) throws DataStoreException {
+    public void saveSoredCredential(StoredCredential storedCredential) throws DataStoreException {
         try {
             storedCredentialTable.putItem(storedCredential);
         } catch (Exception exception) {
@@ -97,9 +97,9 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public void deleteCredential(String partitionValue) throws DataStoreException {
+    public void deleteSoredCredential(String partitionValue) throws DataStoreException {
         try {
-            deleteStoredCredential(Key.builder().partitionValue(partitionValue).build());
+            deleteStoredCredentialByKey(Key.builder().partitionValue(partitionValue).build());
         } catch (Exception exception) {
             throw new DataStoreException("Error deleting credential", exception);
         }
@@ -113,7 +113,7 @@ public class DynamoDbService implements DataStore {
         return storedCredentialTable.getItem(key);
     }
 
-    private StoredCredential deleteStoredCredential(Key key) {
+    private StoredCredential deleteStoredCredentialByKey(Key key) {
         return storedCredentialTable.deleteItem(key);
     }
 }
