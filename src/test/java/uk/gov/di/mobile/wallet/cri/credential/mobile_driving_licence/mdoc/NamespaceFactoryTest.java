@@ -61,13 +61,13 @@ class NamespacesFactoryTest {
         Map<String, List<IssuerSignedItem>> namespaces = result.asMap();
         assertEquals(2, namespaces.size(), "Should have 2 namespaces (ISO and UK)");
         assertTrue(namespaces.containsKey(NamespaceTypes.ISO), "Should contain ISO namespace");
-        assertTrue(namespaces.containsKey(NamespaceTypes.UK), "Should contain UK namespace");
+        assertTrue(namespaces.containsKey(NamespaceTypes.GB), "Should contain UK namespace");
         assertEquals(
                 18,
                 namespaces.get(NamespaceTypes.ISO).size(),
                 "ISO namespace should have 18 fields");
         assertEquals(
-                3, namespaces.get(NamespaceTypes.UK).size(), "UK namespace should have 3 fields");
+                3, namespaces.get(NamespaceTypes.GB).size(), "UK namespace should have 3 fields");
     }
 
     /**
@@ -128,7 +128,7 @@ class NamespacesFactoryTest {
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
         // Assert: Check that UK namespace has correct number of fields
-        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.UK);
+        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
         assertEquals(
                 3,
                 ukNamespace.size(),
@@ -156,7 +156,7 @@ class NamespacesFactoryTest {
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
         // Assert: Check that UK namespace has only 1 field (i.e. not provisional privileges)
-        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.UK);
+        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
         assertEquals(
                 2,
                 ukNamespace.size(),

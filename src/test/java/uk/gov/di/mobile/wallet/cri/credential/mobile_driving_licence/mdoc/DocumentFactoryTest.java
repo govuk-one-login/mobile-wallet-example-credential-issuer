@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes.GB;
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes.ISO;
-import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes.UK;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentFactoryTest {
@@ -41,7 +41,7 @@ class DocumentFactoryTest {
         // Arrange: Create dummy namespaces map
         Map<String, List<IssuerSignedItem>> dummyNamespacesMap = new HashMap<>();
         dummyNamespacesMap.put(ISO, createDummyIssuerSignedItemList(18));
-        dummyNamespacesMap.put(UK, createDummyIssuerSignedItemList(3));
+        dummyNamespacesMap.put(GB, createDummyIssuerSignedItemList(3));
         Namespaces dummyNamespaces = new Namespaces(dummyNamespacesMap);
 
         // Arrange: Mock NamespacesFactory to return dummy NamespaceTypes
@@ -53,7 +53,7 @@ class DocumentFactoryTest {
         // Simulate IssuerSigned.nameSpaces() returning a map of String -> List<byte[]>
         Map<String, List<byte[]>> dummyEncodedNamespaces = new HashMap<>();
         dummyEncodedNamespaces.put(ISO, Collections.nCopies(18, "testCbor".getBytes()));
-        dummyEncodedNamespaces.put(UK, Collections.nCopies(3, "testCbor".getBytes()));
+        dummyEncodedNamespaces.put(GB, Collections.nCopies(3, "testCbor".getBytes()));
         when(mockIssuerSigned.nameSpaces()).thenReturn(dummyEncodedNamespaces);
         when(mockIssuerSignedFactory.build(any(Namespaces.class))).thenReturn(mockIssuerSigned);
 
@@ -64,9 +64,9 @@ class DocumentFactoryTest {
         Map<String, List<byte[]>> namespaces = result.issuerSigned().nameSpaces();
         assertEquals(2, namespaces.size(), "Should have 2 namespaces (ISO and UK)");
         assertTrue(namespaces.containsKey(ISO), "Should contain ISO namespace");
-        assertTrue(namespaces.containsKey(UK), "Should contain UK namespace");
+        assertTrue(namespaces.containsKey(GB), "Should contain UK namespace");
         assertEquals(18, namespaces.get(ISO).size(), "ISO namespace should have 18 fields");
-        assertEquals(3, namespaces.get(UK).size(), "UK namespace should have 3 fields");
+        assertEquals(3, namespaces.get(GB).size(), "UK namespace should have 3 fields");
     }
 
     private List<IssuerSignedItem> createDummyIssuerSignedItemList(int count) {
