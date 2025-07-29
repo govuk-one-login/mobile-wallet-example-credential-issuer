@@ -22,7 +22,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -62,8 +61,7 @@ class PreAuthorizedCodeBuilderTest {
     @Test
     @DisplayName(
             "Should build the pre-authorized code with the correct claims and sign it with KMS")
-    void test_It_Returns_SignedJwt()
-            throws SigningException, ParseException, JOSEException, NoSuchAlgorithmException {
+    void test_It_Returns_SignedJwt() throws SigningException, ParseException, JOSEException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
         when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);

@@ -189,8 +189,7 @@ public class CredentialService {
 
     @SuppressWarnings("unchecked")
     private CredentialResult getSocialSecurityCredential(
-            SocialSecurityDocument socialSecurityDocument, String sub)
-            throws SigningException, NoSuchAlgorithmException {
+            SocialSecurityDocument socialSecurityDocument, String sub) throws SigningException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         socialSecurityDocument, sub);
