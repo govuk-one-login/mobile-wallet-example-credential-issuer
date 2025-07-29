@@ -673,7 +673,7 @@ Resources:
       SSESpecification:
         SSEEnabled: true
         SSEType: KMS
-        KMSMasterKeyId: !GetAtt CRICredentialDatabaseKmsKey.Arn
+        KMSMasterKeyId: !GetAtt CRICacheDatabaseKmsKey.Arn
       Tags:
         - Key: Product
           Value: GOV.UK Sign In
