@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.iacas;
 
 import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.ECKey;
 import com.nimbusds.jose.util.X509CertUtils;
 
@@ -32,6 +33,8 @@ public record Iaca(
         String certificateFingerprint,
         PublicKeyJwk publicKeyJwk) {
 
+    private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
+
     /**
      * Creates an {@code Iaca} instance from a PEM-encoded certificate.
      *
@@ -58,13 +61,15 @@ public record Iaca(
         }
 
         CertificateData certificateData = CertificateData.fromCertificate(certificate);
+
         ECKey ecKey = ECKey.parse(certificate);
         PublicKeyJwk publicKeyJwk =
                 new PublicKeyJwk(
                         ecKey.getKeyType().getValue(),
                         ecKey.getCurve().getName(),
                         ecKey.getX().toString(),
-                        ecKey.getY().toString());
+                        ecKey.getY().toString(),
+                        SIGNING_ALGORITHM.toString());
         String fingerprint = getCertificateFingerprint(certificate);
 
         String normalizedPem = normalizePem(certificatePem);
