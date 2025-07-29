@@ -51,8 +51,6 @@ class NotificationServiceTest {
     private SignedJWT accessToken;
     private NotificationRequestBody requestBody;
 
-    //    private StoredCredential mockStoredCredential;
-
     @BeforeEach
     void setUp()
             throws ParseException,
@@ -83,7 +81,6 @@ class NotificationServiceTest {
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
 
         mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID);
-        //        mockStoredCredential = getMockStoredCredentialItem();
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
     }
@@ -180,9 +177,4 @@ class NotificationServiceTest {
                 expiry,
                 ttl);
     }
-
-    //    private StoredCredential getMockStoredCredentialItem() {
-    //        return new StoredCredential(
-    //                CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, 525600L);
-    //    }
 }

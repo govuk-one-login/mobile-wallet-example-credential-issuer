@@ -152,22 +152,15 @@ public class CredentialService {
                             credentialResponse.getNotificationId(),
                             expiryEpoch);
 
-            try {
-                dataStore.saveStoredCredential(storedCredential);
-                LOGGER.info(
-                        "Credential {} was saved successfully",
-                        storedCredential.getCredentialIdentifier());
-            } catch (DataStoreException exception) {
-                LOGGER.error(
-                        "Failed to save Credential {}",
-                        storedCredential.getCredentialIdentifier(),
-                        exception);
-                throw new DataStoreException("Failed to save Credential", exception);
-            }
+            dataStore.saveStoredCredential(storedCredential);
+            LOGGER.info(
+                    "Credential {} was saved successfully",
+                    storedCredential.getCredentialIdentifier());
 
             return credentialResponse;
 
         } catch (NoSuchAlgorithmException
+                | DataStoreException
                 | SigningException
                 | MDLException
                 | ObjectStoreException
