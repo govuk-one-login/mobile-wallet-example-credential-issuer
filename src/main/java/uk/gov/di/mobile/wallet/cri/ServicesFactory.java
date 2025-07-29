@@ -38,6 +38,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
 
 /**
  * Factory for creating and wiring all application services.
@@ -77,6 +78,8 @@ public class ServicesFactory {
                         configurationService.getCredentialStoreTableName());
 
         MetadataBuilder metadataBuilder = new MetadataBuilder();
+
+        Clock clock = Clock.systemUTC();
 
         Client httpClient =
                 new JerseyClientBuilder(environment)
@@ -129,7 +132,8 @@ public class ServicesFactory {
                         proofJwtService,
                         documentStoreClient,
                         credentialBuilder,
-                        mobileDrivingLicenceService);
+                        mobileDrivingLicenceService,
+                        clock);
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
