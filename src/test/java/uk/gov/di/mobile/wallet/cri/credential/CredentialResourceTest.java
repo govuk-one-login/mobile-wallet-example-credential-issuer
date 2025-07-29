@@ -20,7 +20,6 @@ import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidation
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
 import java.util.Date;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
@@ -257,7 +256,6 @@ class CredentialResourceTest {
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
         CredentialResponse credentialResponse = response.readEntity(CredentialResponse.class);
-
         CredentialResult credentialResult = credentialResponse.getCredential();
 
         verify(credentialService, Mockito.times(1)).getCredential(any(), any());

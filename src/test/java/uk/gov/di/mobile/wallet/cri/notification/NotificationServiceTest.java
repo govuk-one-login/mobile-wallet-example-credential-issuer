@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
@@ -28,9 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static testUtils.EcKeyHelper.getEcKey;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -51,6 +50,8 @@ class NotificationServiceTest {
     private NotificationService notificationService;
     private SignedJWT accessToken;
     private NotificationRequestBody requestBody;
+
+    //    private StoredCredential mockStoredCredential;
 
     @BeforeEach
     void setUp()
@@ -82,6 +83,7 @@ class NotificationServiceTest {
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
 
         mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID);
+        //        mockStoredCredential = getMockStoredCredentialItem();
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
     }
@@ -122,8 +124,10 @@ class NotificationServiceTest {
     @Test
     void Should_ThrowInvalidNotificationIdException_When_NotificationIDsDoNotMatch()
             throws DataStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
+
+        StoredCredential mockStoredCredential =
+                new StoredCredential(CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, 525600L);
+        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
                 new NotificationRequestBody(
@@ -147,6 +151,9 @@ class NotificationServiceTest {
                     AccessTokenValidationException,
                     InvalidNotificationIdException,
                     CredentialOfferException {
+        StoredCredential mockStoredCredential =
+                new StoredCredential(CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, 525600L);
+        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
         notificationService.processNotification(accessToken, requestBody);
 
         verify(mockLogger)
@@ -158,6 +165,7 @@ class NotificationServiceTest {
 
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
+        verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(String walletSubjectId) {
@@ -172,4 +180,9 @@ class NotificationServiceTest {
                 expiry,
                 ttl);
     }
+
+    //    private StoredCredential getMockStoredCredentialItem() {
+    //        return new StoredCredential(
+    //                CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, 525600L);
+    //    }
 }
