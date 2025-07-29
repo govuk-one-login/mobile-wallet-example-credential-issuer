@@ -23,10 +23,10 @@ public class DrivingLicenceDocument {
     @Namespace(NamespaceTypes.ISO)
     private final String givenName;
 
-    @Namespace(NamespaceTypes.UK)
+    @Namespace(NamespaceTypes.GB)
     private final String title;
 
-    @Namespace(NamespaceTypes.UK)
+    @Namespace(NamespaceTypes.GB)
     private final boolean welshLicence;
 
     @Namespace(NamespaceTypes.ISO)
@@ -77,7 +77,7 @@ public class DrivingLicenceDocument {
     @Namespace(NamespaceTypes.ISO)
     private final String unDistinguishingSign;
 
-    @Namespace(NamespaceTypes.UK)
+    @Namespace(NamespaceTypes.GB)
     private final Optional<DrivingPrivilege[]> provisionalDrivingPrivileges;
 
     @JsonCreator
