@@ -12,10 +12,7 @@ public interface DataStore {
     void updateCredentialOffer(CachedCredentialOffer cachedCredentialOffer)
             throws DataStoreException;
 
-    void saveSoredCredential(StoredCredential storedCredential) throws DataStoreException;
+    void saveStoredCredential(StoredCredential storedCredential) throws DataStoreException;
 
     StoredCredential getStoredCredential(String credentialId) throws DataStoreException;
-
-    void deleteSoredCredential(String credentialId) throws DataStoreException;
 }
-

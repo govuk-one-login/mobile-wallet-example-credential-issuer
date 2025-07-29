@@ -18,11 +18,13 @@ public class DynamoDbService implements DataStore {
     private final DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable;
     private final DynamoDbTable<StoredCredential> storedCredentialTable;
 
-    public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient,
-                           String cachedCredentialOfferTable,
-                           String storedCredentialTable) {
+    public DynamoDbService(
+            DynamoDbEnhancedClient dynamoDbEnhancedClient,
+            String cachedCredentialOfferTable,
+            String storedCredentialTable) {
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
-        this.cachedCredentialOfferTable = getTable(CachedCredentialOffer.class, cachedCredentialOfferTable);
+        this.cachedCredentialOfferTable =
+                getTable(CachedCredentialOffer.class, cachedCredentialOfferTable);
         this.storedCredentialTable = getTable(StoredCredential.class, storedCredentialTable);
     }
 
@@ -79,7 +81,7 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public void saveSoredCredential(StoredCredential storedCredential) throws DataStoreException {
+    public void saveStoredCredential(StoredCredential storedCredential) throws DataStoreException {
         try {
             storedCredentialTable.putItem(storedCredential);
         } catch (Exception exception) {
@@ -96,24 +98,11 @@ public class DynamoDbService implements DataStore {
         }
     }
 
-    @Override
-    public void deleteSoredCredential(String partitionValue) throws DataStoreException {
-        try {
-            deleteStoredCredentialByKey(Key.builder().partitionValue(partitionValue).build());
-        } catch (Exception exception) {
-            throw new DataStoreException("Error deleting credential", exception);
-        }
-    }
-
     private CachedCredentialOffer getItemByKey(Key key) {
         return cachedCredentialOfferTable.getItem(key);
     }
 
     private StoredCredential getStoredCredentialByKey(Key key) {
         return storedCredentialTable.getItem(key);
-    }
-
-    private StoredCredential deleteStoredCredentialByKey(Key key) {
-        return storedCredentialTable.deleteItem(key);
     }
 }
