@@ -45,13 +45,16 @@ public class NotificationService {
                     "Access token 'sub' does not match cached 'walletSubjectId'");
         }
 
-        StoredCredential storedCredential = dataStore.getStoredCredential(credentialOffer.getCredentialIdentifier());
+        StoredCredential storedCredential =
+                dataStore.getStoredCredential(credentialOffer.getCredentialIdentifier());
 
         if (storedCredential == null) {
             throw new InvalidNotificationIdException(
-                    "No stored credential was found"
-            );
+                    String.format(
+                            "Stored credential for credentialOfferId '%s' not found.",
+                            credentialOfferId));
         }
+
         if (!storedCredential
                 .getNotificationId()
                 .equals(notificationRequestBody.getNotificationId())) {
@@ -62,7 +65,7 @@ public class NotificationService {
         getLogger()
                 .info(
                         "Notification received - notification_id: {}, event: {}, event_description: {}",
-                        notificationRequestBody.getNotificationId(),
+                        storedCredential.getNotificationId(),
                         notificationRequestBody.getEvent(),
                         notificationRequestBody.getEventDescription());
     }
