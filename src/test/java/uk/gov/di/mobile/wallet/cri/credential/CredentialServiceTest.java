@@ -15,26 +15,26 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLice
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static testUtils.MockDocuments.getMockBasicCheckDocument;
 import static testUtils.MockDocuments.getMockDocumentWithInvalidVcType;
 import static testUtils.MockDocuments.getMockMobileDrivingLicence;
@@ -61,6 +61,7 @@ class CredentialServiceTest {
     private SignedJWT mockAccessToken;
     private ProofJwtService.ProofJwtData mockAccessProofJwtData;
     private String mockCredentialJwt;
+    private final Clock clock = Clock.fixed(Instant.now(), ZoneOffset.UTC);
 
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
     private static final String NOTIFICATION_ID = "3fwe98js";
@@ -70,6 +71,7 @@ class CredentialServiceTest {
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String DID_KEY =
             "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==";
+    private static final long TTL_SECONDS = 525600L;
 
     @BeforeEach
     void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
@@ -84,7 +86,8 @@ class CredentialServiceTest {
                         mockProofJwtService,
                         mockDocumentStoreClient,
                         mockCredentialBuilder,
-                        mockMobileDrivingLicenceService) {
+                        mockMobileDrivingLicenceService,
+                        clock) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
@@ -215,7 +218,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_BuildSocialSecurityCredentialSubject()
+    void Should_BuildSocialSecurityCredentialSubject_And_SaveStoredCredential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     NonceValidationException,
@@ -231,17 +234,28 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
-        credentialService.getCredential(mockAccessToken, mockProofJwt);
+        Instant now = clock.instant();
+        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
+        Date expirationTime = Date.from(expiry);
+
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
+        assertEquals(
+                expirationTime,
+                credentialService
+                        .getCredential(mockAccessToken, mockProofJwt)
+                        .getCredential()
+                        .expirationTime());
 
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
-    void Should_BuildBasicCheckCredentialSubject()
+    void Should_BuildBasicCheckCredentialSubject_And_SaveStoredCredential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     NonceValidationException,
@@ -257,17 +271,29 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
-        credentialService.getCredential(mockAccessToken, mockProofJwt);
+        Instant now = clock.instant();
+        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
+        Date expirationTime = Date.from(expiry);
+
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
+        assertEquals(
+                expirationTime,
+                credentialService
+                        .getCredential(mockAccessToken, mockProofJwt)
+                        .getCredential()
+                        .expirationTime());
 
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(CredentialType.BASIC_DISCLOSURE_CREDENTIAL),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
+
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
-    void Should_BuildVeteranCardCredentialSubject()
+    void Should_BuildVeteranCardCredentialSubject_And_SaveStoredCredential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     NonceValidationException,
@@ -283,13 +309,24 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
-        credentialService.getCredential(mockAccessToken, mockProofJwt);
+        Instant now = clock.instant();
+        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
+        Date expirationTime = Date.from(expiry);
+
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
+        assertEquals(
+                expirationTime,
+                credentialService
+                        .getCredential(mockAccessToken, mockProofJwt)
+                        .getCredential()
+                        .expirationTime());
 
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(CredentialType.DIGITAL_VETERAN_CARD),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
@@ -298,11 +335,13 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockMobileDrivingLicence(DOCUMENT_ID));
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         verify(mockMobileDrivingLicenceService, times(1))
                 .createMobileDrivingLicence(any(DrivingLicenceDocument.class));
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
@@ -340,10 +379,15 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
+        Instant now = clock.instant();
+        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
+        Date expirationTime = Date.from(expiry);
+
         CredentialResponse credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-        assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
+        assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential().credential());
+        assertEquals(expirationTime, credentialServiceReturnValue.getCredential().expirationTime());
         assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
 
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
@@ -354,7 +398,7 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(
