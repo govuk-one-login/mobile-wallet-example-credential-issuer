@@ -436,6 +436,8 @@ Resources:
                 - WalletAppDeepLinkUrl: !FindInMap [EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl]
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
+            - Name: CREDENTIAL_STORE
+              Value: !Ref CRICredentialDatabase
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub
                 - "https://${AuthServerUrl}"
@@ -533,6 +535,11 @@ Resources:
                   - 'dynamodb:GetItem'
                   - 'dynamodb:UpdateItem'
                 Resource: !GetAtt CRICacheDatabase.Arn
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:GetItem'
+              - Resource: !GetAtt CRICredentialDatabase.Arn
               - Effect: Allow
                 Action:
                   - 'kms:Decrypt'
