@@ -539,7 +539,7 @@ Resources:
                 Action:
                   - 'dynamodb:PutItem'
                   - 'dynamodb:GetItem'
-              - Resource: !GetAtt CRICredentialDatabase.Arn
+                Resource: !GetAtt CRICredentialDatabase.Arn
               - Effect: Allow
                 Action:
                   - 'kms:Decrypt'
