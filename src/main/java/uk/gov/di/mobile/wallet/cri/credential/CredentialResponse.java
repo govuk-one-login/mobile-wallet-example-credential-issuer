@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 public class CredentialResponse {
-    private final CredentialResult credential;
+    private final String credential;
     private final ArrayList<Credential> credentials;
 
     @JsonProperty("notification_id")
@@ -17,7 +17,7 @@ public class CredentialResponse {
 
     @JsonCreator
     public CredentialResponse(
-            @JsonProperty("credential") CredentialResult credential,
+            @JsonProperty("credential") String credential,
             @JsonProperty("notification_id") String notificationId) {
         this.credential = credential;
         this.notificationId = notificationId;

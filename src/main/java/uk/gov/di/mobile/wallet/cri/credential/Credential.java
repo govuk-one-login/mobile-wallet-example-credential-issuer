@@ -7,10 +7,10 @@ import lombok.Getter;
 @Getter
 public class Credential {
     @JsonProperty("credential")
-    private final CredentialResult credentialObj;
+    private final String credentialObj;
 
     @JsonCreator
-    public Credential(@JsonProperty("credential") CredentialResult credential) {
+    public Credential(@JsonProperty("credential") String credential) {
         this.credentialObj = credential;
     }
 }
