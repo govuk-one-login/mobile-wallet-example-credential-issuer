@@ -25,8 +25,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -61,7 +59,6 @@ class CredentialServiceTest {
     private SignedJWT mockAccessToken;
     private ProofJwtService.ProofJwtData mockAccessProofJwtData;
     private String mockCredentialJwt;
-    private final Clock clock = Clock.fixed(Instant.now(), ZoneOffset.UTC);
 
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
     private static final String NOTIFICATION_ID = "3fwe98js";
@@ -97,7 +94,7 @@ class CredentialServiceTest {
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
 
         mockCredentialJwt =
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+                "eyJraWQiOiJkaWQ6d2ViOmV4YW1wbGUtY3JlZGVudGlhbC1pc3N1ZXIubW9iaWxlLmJ1aWxkLmFjY291bnQuZ292LnVrIzVkY2JlZTg2M2I1ZDdjYzMwYzliYTFmNzM5M2RhY2M2YzE2NjEwNzgyZTRiNmExOTFmOTRhN2U4YjFlMTUxMGYiLCJjdHkiOiJ2YyIsInR5cCI6InZjK2p3dCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJkaWQ6a2V5OnpEbmFlU0dmU1FNWXZuTGJMV0V1YmhoR0RQb3E3cEE5TU1OdnVtdmJzbU1DWm92VVIiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDprZXk6ekRuYWVTR2ZTUU1Zdm5MYkxXRXViaGhHRFBvcTdwQTlNTU52dW12YnNtTUNab3ZVUiIsIm5hbWUiOlt7Im5hbWVQYXJ0cyI6W3sidHlwZSI6IlRpdGxlIiwidmFsdWUiOiJNciJ9LHsidHlwZSI6IkdpdmVuTmFtZSIsInZhbHVlIjoiU2FyYWgifSx7InR5cGUiOiJHaXZlbk5hbWUiLCJ2YWx1ZSI6IkVsaXphYmV0aCJ9LHsidHlwZSI6IkZhbWlseU5hbWUiLCJ2YWx1ZSI6IkVkd2FyZHMifV19XSwic29jaWFsU2VjdXJpdHlSZWNvcmQiOlt7InBlcnNvbmFsTnVtYmVyIjoiUVExMjM0NTZDIn1dfSwiaXNzIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsImRlc2NyaXB0aW9uIjoiTmF0aW9uYWwgSW5zdXJhbmNlIG51bWJlciIsInZhbGlkRnJvbSI6IjIwMjUtMDctMzFUMTU6MzM6MDBaIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIlNvY2lhbFNlY3VyaXR5Q3JlZGVudGlhbCJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsIm5iZiI6MTc1Mzk3NTk4MCwibmFtZSI6Ik5hdGlvbmFsIEluc3VyYW5jZSBudW1iZXIiLCJ2YWxpZFVudGlsIjoiMjAyNi0wNy0zMVQxNTozMzowMFoiLCJleHAiOjE3ODU1MTE5ODAsImlhdCI6MTc1Mzk3NTk4MH0.pxcRhjMZA6bCzHsyXVyygGpw0xk3VCVGS15LmTPM-TaUtBnSfG99rZylYcbDvojQJkzUqY66cr5mHx3lHpenkw";
     }
 
     @Test
@@ -233,17 +230,8 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
-        Instant now = clock.instant();
-        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
-        Date expirationTime = Date.from(expiry);
-
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
         doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
-//        assertEquals(
-//                expirationTime,
-//                credentialService
-//                        .getCredential(mockAccessToken, mockProofJwt)
-//                        .getCredential()
-//                        .expirationTime());
 
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
@@ -270,17 +258,8 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
-        Instant now = clock.instant();
-        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
-        Date expirationTime = Date.from(expiry);
-
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
         doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
-//        assertEquals(
-//                expirationTime,
-//                credentialService
-//                        .getCredential(mockAccessToken, mockProofJwt)
-//                        .getCredential()
-//                        .expirationTime());
 
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
@@ -308,17 +287,8 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
-        Instant now = clock.instant();
-        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
-        Date expirationTime = Date.from(expiry);
-
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
         doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
-//        assertEquals(
-//                expirationTime,
-//                credentialService
-//                        .getCredential(mockAccessToken, mockProofJwt)
-//                        .getCredential()
-//                        .expirationTime());
 
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
@@ -329,7 +299,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_BuildMobileDrivingLicenceCredential() throws Exception {
+    void Should_BuildMobileDrivingLicenceCredential_And_SaveStoredCredential() throws Exception {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
@@ -378,15 +348,10 @@ class CredentialServiceTest {
         when(mockCredentialBuilder.buildCredential(any(), any(), anyLong()))
                 .thenReturn(mockCredentialJwt);
 
-        Instant now = clock.instant();
-        Instant expiry = now.plus(TTL_SECONDS, ChronoUnit.MINUTES);
-        Date expirationTime = Date.from(expiry);
-
         CredentialResponse credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-//        assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential().credential());
-//        assertEquals(expirationTime, credentialServiceReturnValue.getCredential().expirationTime());
+        assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
         assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
 
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
