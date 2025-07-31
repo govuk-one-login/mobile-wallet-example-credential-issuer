@@ -1,0 +1,130 @@
+plugins {
+	id "application"
+	id "java"
+	id "com.diffplug.spotless" version "7.2.1"
+	id "org.sonarqube" version "6.2.0.5505"
+	id "jacoco"
+}
+
+defaultTasks "clean", "spotlessApply", "build"
+
+repositories {
+	maven {
+		url "https://gds.jfrog.io/artifactory/di-allowed-repos"
+	}
+}
+
+ext {
+	awsSdkVersion = "2.32.9"
+	dropwizardVersion = "4.0.15"
+	jacksonVersion = "2.19.2"
+	lombokVersion = "1.18.38"
+}
+
+dependencies {
+	implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
+	implementation "software.amazon.awssdk:arns"
+	implementation "software.amazon.awssdk:dynamodb-enhanced"
+	implementation "software.amazon.awssdk:kms"
+	implementation "software.amazon.awssdk:s3"
+	implementation "software.amazon.awssdk:url-connection-client"
+
+	implementation platform("io.dropwizard:dropwizard-bom:${dropwizardVersion}")
+	implementation "io.dropwizard:dropwizard-client"
+	implementation "io.dropwizard:dropwizard-core"
+	implementation "io.dropwizard:dropwizard-json-logging"
+
+	implementation "com.nimbusds:oauth2-oidc-sdk:11.26.1"
+	implementation "org.bouncycastle:bcpkix-jdk18on:1.81"
+
+	implementation "org.jetbrains:annotations:26.0.2"
+
+	implementation "com.fasterxml.jackson.dataformat:jackson-dataformat-cbor:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}"
+	implementation "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}"
+
+
+	compileOnly "org.projectlombok:lombok:${lombokVersion}"
+	annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
+
+	testImplementation "io.dropwizard:dropwizard-testing:${dropwizardVersion}"
+	testImplementation "org.jetbrains:annotations:26.0.2"
+	testImplementation "org.junit.jupiter:junit-jupiter-api:5.13.4"
+	testImplementation "org.mockito:mockito-junit-jupiter:5.18.0"
+	testImplementation "uk.org.webcompere:system-stubs-jupiter:2.1.8"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
+
+application {
+	mainClass = "uk.gov.di.mobile.wallet.cri.ExampleCriApp"
+}
+
+jar {
+	manifest {
+		attributes(
+				"Main-Class": "uk.gov.di.mobile.wallet.cri.ExampleCriApp",
+				"Implementation-Title": project.name,
+				"Implementation-Version": project.version
+				)
+	}
+
+	from {
+		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+}
+
+run {
+	args = ["server", "config.yml"]
+}
+
+java {
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
+}
+
+sonar {
+	properties {
+		property "sonar.projectKey", "govuk-one-login_mobile-wallet-example-credential-issuer"
+		property "sonar.organization", "govuk-one-login"
+		property "sonar.host.url", "https://sonarcloud.io"
+		property "sonar.coverage.exclusions", "**/src/test/**"
+		property "sonar.coverage.jacoco.xmlReportPath", layout.buildDirectory.file("reports/jacoco/reports/reports.xml")
+	}
+}
+
+spotless {
+	java {
+		target "**/src/**/*.java"
+		googleJavaFormat("1.18.0").aosp()
+		importOrder "", "javax", "java", "\\#"
+		endWithNewline()
+		removeUnusedImports()
+	}
+
+	groovyGradle {
+		target "**/*.gradle"
+		greclipse()
+		trimTrailingWhitespace()
+		endWithNewline()
+	}
+}
+
+jacocoTestReport {
+	dependsOn test
+	reports {
+		xml.required.set(true)
+	}
+}
+
+tasks.withType(Test).configureEach {
+	testLogging {
+		exceptionFormat "full"
+		events "skipped", "passed", "failed"
+	}
+
+	useJUnitPlatform()
+	jvmArgs "-Xshare:off"
+	finalizedBy jacocoTestReport
+}

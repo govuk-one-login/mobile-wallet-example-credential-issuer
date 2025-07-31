@@ -1,0 +1,413 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Document Signing Certificate Issuer
+
+Parameters:
+  CodeSigningConfigArn:
+    Description: |
+      The ARN of the Code Signing Config to use, provided by the deployment pipeline
+    Type: String
+    Default: none
+
+  Environment:
+    Description: The environment type
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - build
+
+  PermissionsBoundary:
+    Description: |
+      The ARN of the permissions boundary to apply to any role created by the template
+    Type: String
+    Default: none
+
+  VpcStackName:
+    Description: |
+      The stack name of the VPC where the lambdas will be deployed
+    Type: String
+    Default: platform-vpc
+
+Conditions:
+  UsePermissionsBoundary: !Not
+    - !Equals
+      - !Ref PermissionsBoundary
+      - none
+
+  UseCodeSigning: !Not
+    - !Equals
+      - !Ref CodeSigningConfigArn
+      - none
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      CloudwatchLogRetentionDays: 3
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: DEBUG
+    build:
+      CloudwatchLogRetentionDays: 3
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: INFO
+
+Globals:
+  Function:
+    LoggingConfig:
+      LogFormat: JSON
+      ApplicationLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+      SystemLogLevel: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - LambdaLogLevel
+    Runtime: nodejs20.x
+    Architectures:
+      - arm64
+    PermissionsBoundary: !If
+      - UsePermissionsBoundary
+      - !Ref PermissionsBoundary
+      - !Ref AWS::NoValue
+    AutoPublishAlias: live
+    CodeSigningConfigArn: !If
+      - UseCodeSigning
+      - !Ref CodeSigningConfigArn
+      - !Ref AWS::NoValue
+    Environment:
+      Variables:
+        DT_CLUSTER_ID: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CLUSTER_ID}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_CONNECTION_BASE_URL: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_CONNECTION_BASE_URL}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_LOG_COLLECTION_AUTH_TOKEN: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_LOG_COLLECTION_AUTH_TOKEN}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+        DT_OPEN_TELEMETRY_ENABLE_INTEGRATION: 'true'
+        DT_TENANT: !Sub
+          - '{{resolve:secretsmanager:${SecretArn}:SecretString:DT_TENANT}}'
+          - SecretArn: !FindInMap
+              - EnvironmentVariables
+              - !Ref Environment
+              - DynatraceSecretArn
+    Layers:
+      - !Sub
+        - '{{resolve:secretsmanager:${SecretArn}:SecretString:NODEJS_LAYER}}'
+        - SecretArn: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - DynatraceSecretArn
+
+Resources:
+  IssueFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - IssueStatusListEntryLogGroup
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - src/functions/issueHandelr.ts
+    Properties:
+      #APIGw integration
+      Events:
+        IssueIndex:
+          Type: Api
+          Properties:
+            Path: /issue
+            Method: post
+            RestApiId: !Ref PrivateApi
+      FunctionName: !Sub ${AWS::StackName}-issue-
+      Handler: src/functions/issueHandler.handler
+      Role: !GetAtt IssueFunctionLambdaRole.Arn
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Issue
+          STATUS_LIST_BUCKET: !Ref StatusListBucket
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+
+  IssueFunctionLambdaRole:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: !Sub ${AWS::StackName}-issue-lambda-role
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+        Policies:
+          - PolicyName: IssueFunctionLoggingPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: arn:aws:logs:*:*:*
+          - PolicyName: VpcPolicy
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - ec2:DescribeNetworkInterfaces
+                    - ec2:CreateNetworkInterface
+                    - ec2:DeleteNetworkInterface
+                  Resource: '*'
+          - PolicyName: S3BucketReadAccess
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - s3:PutObject
+                  Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-BUCKET/*
+        PermissionsBoundary: !If
+          - UsePermissionsBoundary
+          - !Ref PermissionsBoundary
+          - !Ref AWS::NoValue
+  IssueStatusListEntryLogGroup:
+      Type: AWS::Logs::LogGroup
+      Properties:
+        LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue
+        RetentionInDays: !FindInMap
+          - LogRetention
+          - !Ref Environment
+          - RetentionPeriod
+
+  RevokeFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - RevokeLogGroup
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2022
+        EntryPoints:
+          - src/functions/revokeHandler.ts
+    Properties:
+      DeploymentPreference:
+        Alarms: !If
+          - UseCanaryDeployment
+          - - !Ref RevokeErrorsWarningAlarm
+            - !Ref RevokeLowCompletionAlarm
+          - - !Ref AWS::NoValue
+        Enabled: true
+        Type: !Ref LambdaDeploymentPreference
+      #APIGw integration
+      Events:
+        IssueIndex:
+          Type: Api
+          Properties:
+            Path: /revoke
+            Method: post
+            RestApiId: !Ref PrivateApi
+      FunctionName: !Sub ${AWS::StackName}-revoke
+      Handler: src/functions/revokeHandler.handler
+      Role: !GetAtt RevokeFunctionLambdaRole.Arn
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: Revoke
+          STATUS_LIST_BUCKET: !Ref StatusListBucket
+
+  RevokeFunctionLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-revoke-lambda-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies:
+        - PolicyName: RevokeFunctionLoggingPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !GetAtt RevokeLogGroup.Arn
+        - PolicyName: S3BucketReadAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:ListBucket
+                Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-client-registry/*
+        - PolicyName: S3BucketUploadAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                Resource: !Sub arn:aws:s3:::${AWS::StackName}-${Environment}-client-registry/*
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  RevokeLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${AWS::StackName}-revoke
+      RetentionInDays: !FindInMap
+        - LogRetention
+        - !Ref Environment
+        - RetentionPeriod
+
+  
+  
+  
+  IssueDocSigningCertificateFunction:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - IssueDocSigningCertificateFunctionLogGroup
+    Properties:
+      FunctionName: !Sub ${AWS::StackName}-issue-doc-signing-certificate
+      Handler: issueDocumentSigningCertificate.issueHandler
+      Timeout: 15
+      MemorySize: 512
+      ReservedConcurrentExecutions: 1
+      Environment:
+        Variables:
+          POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
+          PLATFORM_CA_ARN_PARAMETER: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+          PLATFORM_CA_ISSUER_ALTERNATIVE_NAME:
+            !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+          ROOT_CERTIFICATE: !FindInMap [EnvironmentVariables, !Ref Environment, RootCertificate]
+          DOC_SIGNING_KEY_ID: !Ref DocumentSigningKey1
+          DOC_SIGNING_KEY_BUCKET: !Ref DocSigningCertificateBucket
+          DOC_SIGNING_KEY_VALIDITY_PERIOD:
+            !FindInMap [EnvironmentVariables, !Ref Environment, CertificateValidityPeriodInDays]
+          DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
+          DOC_SIGNING_KEY_COUNTRY_NAME:
+            !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
+      Policies:
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaIssuerAlternativeName]
+        - SSMParameterWithSlashPrefixReadPolicy:
+            ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, RootCertificate]
+        - S3CrudPolicy:
+            BucketName: !Ref DocSigningCertificateBucket
+        - Statement:
+            - Sid: KMSAccessDocumentSigningKeyPolicy
+              Effect: Allow
+              Action:
+                - kms:GetPublicKey
+                - kms:Sign
+              Resource: !GetAtt DocumentSigningKey1.Arn
+        - Statement:
+            - Sid: ACMPCAIssueCertificatePolicy
+              Effect: Allow
+              Action:
+                - acm-pca:IssueCertificate
+                - acm-pca:GetCertificate
+              Resource:
+                Fn::Sub:
+                  - '{{resolve:ssm:${ParameterName}}}'
+                  - ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: es2020
+        EntryPoints:
+          - src/issueHandler.ts
+
+  DocSigningCertificateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-${AWS::AccountId}-certificates'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: RemoveExpiredCertificates
+            Prefix: results/
+            ExpirationInDays: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateRetentionPeriodInDays]
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 14
+            Status: Enabled
+

@@ -1,0 +1,41 @@
+{
+  "name": "status-list-mock",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "test": "node_modules/.bin/jest",
+    "test:cov": "jest --coverage",
+    "lint": "node_modules/.bin/eslint .",
+    "format": "node_modules/.bin/prettier --write .",
+    "format:check": "node_modules/.bin/prettier --check ."
+  },
+  "description": "",
+  "dependencies": {
+    "@aws-lambda-powertools/logger": "^2.16.0",
+    "@aws-sdk/client-s3": "^3.758.0",
+    "esbuild": "^0.25.1"
+  },
+  "engines": {
+    "node": ">=22.0.0 <23.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.22.0",
+    "@types/aws-lambda": "^8.10.109",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.13.10",
+    "aws-sdk-client-mock": "^4.1.0",
+    "aws-sdk-client-mock-jest": "^4.1.0",
+    "eslint": "^9.31.0",
+    "jest": "^29.7.0",
+    "jest-junit": "^16.0.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.2.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.1"
+  },
+  "type": "module",
+  "overrides": {
+    "brace-expansion": "2.0.2"
+  }
+}

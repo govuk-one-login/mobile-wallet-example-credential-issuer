@@ -1,0 +1,67 @@
+version: 2
+updates:
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      gradle-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      docker-updates:
+        patterns:
+          - "*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      github-actions-updates:
+        patterns:
+          - "*"
+  - package-ecosystem: "npm"
+    directories:
+      - /doc-signing-cert
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      nam-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
