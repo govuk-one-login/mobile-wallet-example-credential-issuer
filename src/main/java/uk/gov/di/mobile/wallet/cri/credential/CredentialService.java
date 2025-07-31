@@ -26,8 +26,8 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
+import java.text.ParseException;
 import java.time.*;
-import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
 
@@ -44,7 +44,6 @@ public class CredentialService {
     private final DocumentStoreClient documentStoreClient;
     private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
     private final MobileDrivingLicenceService mobileDrivingLicenceService;
-    private final Clock clock;
 
     private final ObjectMapper mapper =
             new ObjectMapper()
@@ -58,15 +57,13 @@ public class CredentialService {
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
             CredentialBuilder<?> credentialBuilder,
-            MobileDrivingLicenceService mobileDrivingLicenceService,
-            Clock clock) {
+            MobileDrivingLicenceService mobileDrivingLicenceService) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
         this.documentStoreClient = documentStoreClient;
         this.credentialBuilder = credentialBuilder;
         this.mobileDrivingLicenceService = mobileDrivingLicenceService;
-        this.clock = clock;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -112,7 +109,7 @@ public class CredentialService {
 
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
-        CredentialResult credential;
+        String credential;
         try {
             if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
                 credential =
@@ -143,23 +140,12 @@ public class CredentialService {
             CredentialResponse credentialResponse =
                     new CredentialResponse(credential, credentialOffer.getNotificationId());
 
-            Date expirationTime = credential.expirationTime();
-            long expiryEpoch = expirationTime.toInstant().getEpochSecond();
-
-            StoredCredential storedCredential =
-                    new StoredCredential(
-                            credentialOffer.getCredentialIdentifier(),
-                            credentialResponse.getNotificationId(),
-                            expiryEpoch);
-
-            dataStore.saveStoredCredential(storedCredential);
-            LOGGER.info(
-                    "Credential {} was saved successfully",
-                    storedCredential.getCredentialIdentifier());
+            dataStore.saveStoredCredential(storedCredential(credential, credentialOffer.getCredentialIdentifier(), credentialResponse.getNotificationId()));
+            LOGGER.info("Credential was saved successfully");
 
             return credentialResponse;
 
-        } catch (NoSuchAlgorithmException
+        } catch (NoSuchAlgorithmException | ParseException
                 | DataStoreException
                 | SigningException
                 | MDLException
@@ -188,74 +174,59 @@ public class CredentialService {
     }
 
     @SuppressWarnings("unchecked")
-    private CredentialResult getSocialSecurityCredential(
+    private String getSocialSecurityCredential(
             SocialSecurityDocument socialSecurityDocument, String sub) throws SigningException {
         SocialSecurityCredentialSubject socialSecurityCredentialSubject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         socialSecurityDocument, sub);
-        String credential =
-                ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
+        return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
                         .buildCredential(
                                 socialSecurityCredentialSubject,
                                 SOCIAL_SECURITY_CREDENTIAL,
                                 socialSecurityDocument.getCredentialTtlMinutes());
-        Instant now = clock.instant();
-        Instant expiry =
-                now.plus(socialSecurityDocument.getCredentialTtlMinutes(), ChronoUnit.MINUTES);
-        Date expirationTime = Date.from(expiry);
-        return new CredentialResult(credential, expirationTime);
     }
 
     @SuppressWarnings("unchecked")
-    private CredentialResult getBasicCheckCredential(
+    private String getBasicCheckCredential(
             BasicCheckDocument basicCheckDocument, String sub)
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(basicCheckDocument, sub);
 
-        String credential =
-                ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
+        return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
                         .buildCredential(
                                 basicCheckCredentialSubject,
                                 BASIC_DISCLOSURE_CREDENTIAL,
                                 basicCheckDocument.getCredentialTtlMinutes());
-        Instant now = clock.instant();
-        Instant expiry = now.plus(basicCheckDocument.getCredentialTtlMinutes(), ChronoUnit.MINUTES);
-        Date expirationTime = Date.from(expiry);
-        return new CredentialResult(credential, expirationTime);
-    }
+        }
 
     @SuppressWarnings("unchecked")
-    private CredentialResult getDigitalVeteranCard(
+    private String getDigitalVeteranCard(
             VeteranCardDocument veteranCardDocument, String sub) throws SigningException {
         VeteranCardCredentialSubject veteranCardCredentialSubject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(veteranCardDocument, sub);
-        String credential =
-                ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
+        return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
                         .buildCredential(
                                 veteranCardCredentialSubject,
                                 DIGITAL_VETERAN_CARD,
                                 veteranCardDocument.getCredentialTtlMinutes());
-        Instant now = clock.instant();
-        Instant expiry =
-                now.plus(veteranCardDocument.getCredentialTtlMinutes(), ChronoUnit.MINUTES);
-        Date expirationTime = Date.from(expiry);
-        return new CredentialResult(credential, expirationTime);
-    }
+        }
 
-    private CredentialResult getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
+    private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws ObjectStoreException, SigningException, CertificateException {
-        String credential =
-                mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
-        LocalDate expiryDate = drivingLicenceDocument.getExpiryDate();
-        ZonedDateTime zdt = expiryDate.atStartOfDay(ZoneId.systemDefault());
-        Instant expiry = zdt.toInstant();
-        Date expirationTime = Date.from(expiry);
-
-        return new CredentialResult(credential, expirationTime);
-    }
+        return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
+        }
 
     protected Logger getLogger() {
         return LOGGER;
+    }
+
+    private StoredCredential storedCredential(String credential, String credentialIdentifier, String notificationId) throws ParseException {
+
+        SignedJWT parsedCredential = SignedJWT.parse(credential);
+        Date expDate = parsedCredential.getJWTClaimsSet().getIssueTime();
+        long timeToLive = expDate.toInstant().getEpochSecond();
+
+        return new StoredCredential(credentialIdentifier, notificationId, timeToLive);
     }
 }
