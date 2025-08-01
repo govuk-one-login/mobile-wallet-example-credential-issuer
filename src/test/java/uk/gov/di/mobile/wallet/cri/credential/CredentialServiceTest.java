@@ -22,9 +22,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;

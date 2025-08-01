@@ -3,7 +3,6 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.nimbusds.jose.JOSEObject;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,8 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
-import java.text.ParseException;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.Objects;
 
@@ -111,28 +110,51 @@ public class CredentialService {
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
         String credential;
+        Clock clock = Clock.systemUTC();
+        long documentExpiry = 0;
+
         try {
             if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-                credential =
-                        getSocialSecurityCredential(
-                                mapper.convertValue(
-                                        document.getData(), SocialSecurityDocument.class),
-                                sub);
+                SocialSecurityDocument socialSecurityDocument =
+                        mapper.convertValue(document.getData(), SocialSecurityDocument.class);
+                credential = getSocialSecurityCredential(socialSecurityDocument, sub);
+                Instant now = clock.instant();
+                Instant expiry =
+                        now.plus(
+                                socialSecurityDocument.getCredentialTtlMinutes(),
+                                ChronoUnit.MINUTES);
+                documentExpiry = expiry.getEpochSecond();
+
             } else if (Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType())) {
-                credential =
-                        getBasicCheckCredential(
-                                mapper.convertValue(document.getData(), BasicCheckDocument.class),
-                                sub);
+                BasicCheckDocument basicCheckDocument =
+                        mapper.convertValue(document.getData(), BasicCheckDocument.class);
+                credential = getBasicCheckCredential(basicCheckDocument, sub);
+                Instant now = clock.instant();
+                Instant expiry =
+                        now.plus(basicCheckDocument.getCredentialTtlMinutes(), ChronoUnit.MINUTES);
+                documentExpiry = expiry.getEpochSecond();
+
             } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-                credential =
-                        getDigitalVeteranCard(
-                                mapper.convertValue(document.getData(), VeteranCardDocument.class),
-                                sub);
+                VeteranCardDocument veteranCardDocument =
+                        mapper.convertValue(document.getData(), VeteranCardDocument.class);
+                credential = getDigitalVeteranCard(veteranCardDocument, sub);
+                Instant now = clock.instant();
+                Instant expiry =
+                        now.plus(veteranCardDocument.getCredentialTtlMinutes(), ChronoUnit.MINUTES);
+                documentExpiry = expiry.getEpochSecond();
+
             } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-                credential =
-                        getMobileDrivingLicence(
-                                mapper.convertValue(
-                                        document.getData(), DrivingLicenceDocument.class));
+                DrivingLicenceDocument drivingLicenceDocument =
+                        mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+                LocalDate documentExpiryDate = drivingLicenceDocument.getExpiryDate();
+                credential = getMobileDrivingLicence(drivingLicenceDocument);
+                Date expiry =
+                        Date.from(
+                                documentExpiryDate
+                                        .atStartOfDay(ZoneId.systemDefault())
+                                        .toInstant());
+                documentExpiry = expiry.toInstant().getEpochSecond();
+
             } else {
                 throw new CredentialServiceException(
                         String.format("Invalid verifiable credential type %s", vcType));
@@ -141,25 +163,17 @@ public class CredentialService {
             CredentialResponse credentialResponse =
                     new CredentialResponse(credential, credentialOffer.getNotificationId());
 
-            if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-                dataStore.saveStoredCredential(
-                        storedCredentialJOSE(
-                                credential,
-                                credentialOffer.getCredentialIdentifier(),
-                                credentialResponse.getNotificationId()));
-            } else {
-                dataStore.saveStoredCredential(
-                        storedCredentialJWT(
-                                credential,
-                                credentialOffer.getCredentialIdentifier(),
-                                credentialResponse.getNotificationId()));
-            }
+            dataStore.saveStoredCredential(
+                    storedCredential(
+                            credentialOffer.getCredentialIdentifier(),
+                            credentialResponse.getNotificationId(),
+                            documentExpiry));
+
             LOGGER.info("Credential was saved successfully");
 
             return credentialResponse;
 
         } catch (NoSuchAlgorithmException
-                | ParseException
                 | DataStoreException
                 | SigningException
                 | MDLException
@@ -234,25 +248,19 @@ public class CredentialService {
         return LOGGER;
     }
 
-    private StoredCredential storedCredentialJWT(
-            String credential, String credentialIdentifier, String notificationId)
-            throws ParseException {
-
-        SignedJWT parsedCredential = SignedJWT.parse(credential);
-        Date expDate = parsedCredential.getJWTClaimsSet().getExpirationTime();
-        long timeToLive = expDate.toInstant().getEpochSecond();
-
+    private StoredCredential storedCredential(
+            String credentialIdentifier, String notificationId, long timeToLive) {
         return new StoredCredential(credentialIdentifier, notificationId, timeToLive);
     }
 
-    private StoredCredential storedCredentialJOSE(
-            String credential, String credentialIdentifier, String notificationId)
-            throws ParseException {
-
-        JOSEObject parsedCredential =  JOSEObject.parse(credential);
-        Date expDate = parsedCredential.
-        long timeToLive = expDate.toInstant().getEpochSecond();
-
-        return new StoredCredential(credentialIdentifier, notificationId, timeToLive);
-    }
+    //    private StoredCredential storedCredentialJWT(
+    //            String credential, String credentialIdentifier, String notificationId)
+    //            throws ParseException {
+    //
+    //        SignedJWT parsedCredential = SignedJWT.parse(credential);
+    //        Date expDate = parsedCredential.getJWTClaimsSet().getExpirationTime();
+    //        long timeToLive = expDate.toInstant().getEpochSecond();
+    //
+    //        return new StoredCredential(credentialIdentifier, notificationId, timeToLive);
+    //    }
 }
