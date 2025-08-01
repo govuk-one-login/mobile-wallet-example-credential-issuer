@@ -107,32 +107,43 @@ public class CredentialService {
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
         String credential;
+        long documentExpiry; // Local variable to store document expiry
+
         try {
             if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-                credential =
-                        getSocialSecurityCredential(
-                                mapper.convertValue(
-                                        document.getData(), SocialSecurityDocument.class),
-                                sub);
+                SocialSecurityDocument socialSecurityDocument =
+                        mapper.convertValue(document.getData(), SocialSecurityDocument.class);
+                documentExpiry = socialSecurityDocument.getCredentialTtlMinutes();
+                credential = getSocialSecurityCredential(socialSecurityDocument, sub);
+
             } else if (Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType())) {
-                credential =
-                        getBasicCheckCredential(
-                                mapper.convertValue(document.getData(), BasicCheckDocument.class),
-                                sub);
+                BasicCheckDocument basicCheckDocument =
+                        mapper.convertValue(document.getData(), BasicCheckDocument.class);
+                documentExpiry = basicCheckDocument.getCredentialTtlMinutes();
+                credential = getBasicCheckCredential(basicCheckDocument, sub);
+
             } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-                credential =
-                        getDigitalVeteranCard(
-                                mapper.convertValue(document.getData(), VeteranCardDocument.class),
-                                sub);
+                VeteranCardDocument veteranCardDocument =
+                        mapper.convertValue(document.getData(), VeteranCardDocument.class);
+                documentExpiry = veteranCardDocument.getCredentialTtlMinutes();
+                credential = getDigitalVeteranCard(veteranCardDocument, sub);
+
             } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-                credential =
-                        getMobileDrivingLicence(
-                                mapper.convertValue(
-                                        document.getData(), DrivingLicenceDocument.class));
+                DrivingLicenceDocument drivingLicenceDocument =
+                        mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+                documentExpiry =
+                        drivingLicenceDocument
+                                .getExpiryDate(); // convert to the format expected by DynamoDB
+                credential = getMobileDrivingLicence(drivingLicenceDocument);
+
             } else {
                 throw new CredentialServiceException(
                         String.format("Invalid verifiable credential type %s", vcType));
             }
+
+            // Now we have access to both the credential and documentExpiry
+            LOGGER.info("Document expiry: {}", documentExpiry);
+
             return new CredentialResponse(credential, credentialOffer.getNotificationId());
         } catch (NoSuchAlgorithmException
                 | SigningException
@@ -180,7 +191,6 @@ public class CredentialService {
             throws SigningException, NoSuchAlgorithmException {
         BasicCheckCredentialSubject basicCheckCredentialSubject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(basicCheckDocument, sub);
-
         return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
                 .buildCredential(
                         basicCheckCredentialSubject,
