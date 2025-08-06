@@ -11,6 +11,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLExceptio
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes;
 
 import java.time.LocalDate;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -95,7 +96,8 @@ class NamespacesFactoryTest {
         // Assert: Verify that the factory was called with the expected ISO fields and values
         verify(mockIssuerSignedItemFactory).build("family_name", "Doe");
         verify(mockIssuerSignedItemFactory).build("given_name", "John");
-        verify(mockIssuerSignedItemFactory).build("portrait", "base64EncodedPortraitString");
+        verify(mockIssuerSignedItemFactory)
+                .build("portrait", Base64.getDecoder().decode("base64EncodedPortraitString"));
         verify(mockIssuerSignedItemFactory).build("birth_date", LocalDate.parse("1985-05-24"));
         verify(mockIssuerSignedItemFactory).build("birth_place", "London");
         verify(mockIssuerSignedItemFactory).build("issue_date", LocalDate.parse("2020-01-10"));
