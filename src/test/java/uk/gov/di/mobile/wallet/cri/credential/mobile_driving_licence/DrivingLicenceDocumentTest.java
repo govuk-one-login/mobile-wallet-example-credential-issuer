@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeParseException;
+import java.util.Base64;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -71,7 +72,7 @@ class DrivingLicenceDocumentTest {
         assertEquals(GIVEN_NAME, document.getGivenName());
         assertEquals(TITLE, document.getTitle());
         assertEquals(WELSH_LICENSE, document.isWelshLicence());
-        assertEquals(PORTRAIT, document.getPortrait());
+        assertArrayEquals(Base64.getDecoder().decode(PORTRAIT), document.getPortrait());
         assertEquals(LocalDate.of(1985, 5, 24), document.getBirthDate());
         assertEquals(age >= 18, document.getAgeOver18());
         assertEquals(age >= 21, document.getAgeOver21());

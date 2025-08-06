@@ -10,6 +10,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.consta
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class DrivingLicenceDocument {
     private final boolean welshLicence;
 
     @Namespace(NamespaceTypes.ISO)
-    private final String portrait;
+    private final byte[] portrait;
 
     @Namespace(NamespaceTypes.ISO)
     private final LocalDate birthDate;
@@ -105,7 +106,8 @@ public class DrivingLicenceDocument {
         this.givenName = Objects.requireNonNull(givenName, "given_name is required");
         this.title = Objects.requireNonNull(title, "title is required");
         this.welshLicence = welshLicence;
-        this.portrait = Objects.requireNonNull(portrait, "portrait is required");
+        this.portrait =
+                getBytesFromBase64(Objects.requireNonNull(portrait, "portrait is required"));
         this.birthDate = parseDate(Objects.requireNonNull(birthDate, "birth_date is required"));
         this.ageOver18 = getAge(this.birthDate) >= 18;
         this.ageOver21 = getAge(this.birthDate) >= 21;
@@ -138,5 +140,9 @@ public class DrivingLicenceDocument {
 
     private int getAge(LocalDate birthDate) {
         return Period.between(birthDate, LocalDate.now()).getYears();
+    }
+
+    private byte[] getBytesFromBase64(String base64String) {
+        return Base64.getDecoder().decode(base64String);
     }
 }
