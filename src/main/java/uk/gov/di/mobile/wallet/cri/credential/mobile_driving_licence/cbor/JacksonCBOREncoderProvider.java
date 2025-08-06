@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
@@ -29,7 +28,6 @@ public final class JacksonCBOREncoderProvider {
                                 MobileSecurityObject.class, new MobileSecurityObjectSerializer());
         mapper.registerModule(simpleModule)
                 .registerModule(new Jdk8Module())
-                .registerModule(new JavaTimeModule())
                 .setSerializationInclusion(JsonInclude.Include.NON_ABSENT);
         return mapper;
     }
