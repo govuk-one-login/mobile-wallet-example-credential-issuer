@@ -9,20 +9,19 @@ on:
         type: string
         default: main
 
-permissions:
-  id-token: write
-  contents: read
-
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
     steps:
-      # Check out the repository at the specified branch, tag, or commit
       - name: Check out repository code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
+          # Check out the repository at the specific branch, tag, or commit
           ref: ${{ inputs.gitRef }}
 
       - name: Set up Node.js
@@ -31,28 +30,30 @@ jobs:
           node-version-file: document-signing-certificate-issuer/.nvmrc
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@b47578312673ae6fa5b5096b330d9fbac3d116df # v4.2.1
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           role-to-assume: ${{ secrets.DEV_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
 
       - name: Set up SAM CLI
-        uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # pin@v2
+        uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # v2
         with:
           version: 1.131.0
           use-installer: true
 
       - name: Run SAM validate
         working-directory: ./document-signing-certificate-issuer
-        run: sam validate
+        run: | 
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate
 
       - name: Run SAM build
         working-directory: ./document-signing-certificate-issuer
-        run: sam build --cached
+        run: sam build
 
-      # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
-      - name: Upload artifacts
-        uses: govuk-one-login/devplatform-upload-action@720ddb75fba8951db5a648ebb416eb233f1b6bc9 # pin@v3.10.1
+      - name: Deploy SAM app
+        # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
+        uses: govuk-one-login/devplatform-upload-action@720ddb75fba8951db5a648ebb416eb233f1b6bc9 # v3.10.1
         with:
           artifact-bucket-name: ${{ secrets.DEV_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}
