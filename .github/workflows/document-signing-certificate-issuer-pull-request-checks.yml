@@ -7,6 +7,9 @@ on:
       - reopened
       - ready_for_review
       - synchronize
+    paths:
+      - document-signing-certificate-issuer/**
+      - .github/workflows/document-signing-certificate-issuer-pull-request-checks.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}

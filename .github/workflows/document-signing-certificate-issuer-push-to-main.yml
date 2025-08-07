@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    paths:
+      - document-signing-certificate-issuer/**
+      - .github/workflows/document-signing-certificate-issuer-push-to-main.yml
 
 jobs:
   deploy:
