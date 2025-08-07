@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   push:
     branches: [ main ]
+    paths:
+      - document-signing-certificate-issuer/**
+      - .github/workflows/document-signing-certificate-issuer-push-to-main.yml
 
 jobs:
   deploy:
@@ -13,6 +16,9 @@ jobs:
     permissions:
       id-token: write
       contents: read
+    defaults:
+      run:
+        working-directory: ./document-signing-certificate-issuer
     steps:
       - name: Check out repository code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -38,13 +44,11 @@ jobs:
           use-installer: true
 
       - name: Run SAM validate
-        working-directory: ./document-signing-certificate-issuer
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
           sam validate
 
       - name: Run SAM build
-        working-directory: ./document-signing-certificate-issuer
         run: sam build
 
       - name: Deploy SAM app
