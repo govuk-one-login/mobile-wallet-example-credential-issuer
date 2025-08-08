@@ -434,9 +434,9 @@ Resources:
               Value: !Sub
                 - "https://${WalletAppDeepLinkUrl}"
                 - WalletAppDeepLinkUrl: !FindInMap [EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl]
-            - Name: CREDENTIAL_OFFER_CACHE
+            - Name: CREDENTIAL_OFFER_CACHE_2
               Value: !Ref CredentialOfferTable
-            - Name: CREDENTIAL_STORE
+            - Name: CREDENTIAL_STORE_2
               Value: !Ref CredentialTable
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub
@@ -636,7 +636,7 @@ Resources:
         - AttributeName: credentialIdentifier
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "${AWS::StackName}-credential_offer_cache"
+      TableName: !Sub "${AWS::StackName}-credential_offer_cache_2"
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH
@@ -668,7 +668,7 @@ Resources:
         - AttributeName: credentialIdentifier
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "${AWS::StackName}-credential_store"
+      TableName: !Sub "${AWS::StackName}-credential_store_2"
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH

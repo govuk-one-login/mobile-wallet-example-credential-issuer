@@ -47,7 +47,7 @@ public class ConfigurationService extends Configuration {
      * @return The DynamoDB table name
      */
     public String getCredentialOfferCacheTableName() {
-        return getEnvOrDefault("CREDENTIAL_OFFER_CACHE", "credential_offer_cache");
+        return getEnvOrDefault("CREDENTIAL_OFFER_CACHE_2", "credential_offer_cache_2");
     }
 
     /**
@@ -56,7 +56,7 @@ public class ConfigurationService extends Configuration {
      * @return The DynamoDB table name
      */
     public String getCredentialStoreTableName() {
-        return getEnvOrDefault("CREDENTIAL_STORE", "credential_store");
+        return getEnvOrDefault("CREDENTIAL_STORE_2", "credential_store_2");
     }
 
     /**
