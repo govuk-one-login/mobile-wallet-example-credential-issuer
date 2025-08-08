@@ -8,17 +8,28 @@ import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
 
 public class DynamoDbService implements DataStore {
-    private final String tableName;
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
+    private final DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable;
+    private final DynamoDbTable<StoredCredential> storedCredentialTable;
 
-    public DynamoDbService(DynamoDbEnhancedClient dynamoDbEnhancedClient, String tableName) {
-        this.tableName = tableName;
+    public DynamoDbService(
+            DynamoDbEnhancedClient dynamoDbEnhancedClient,
+            String cachedCredentialOfferTable,
+            String storedCredentialTable) {
         this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
+        this.cachedCredentialOfferTable =
+                getTable(CachedCredentialOffer.class, cachedCredentialOfferTable);
+        this.storedCredentialTable = getTable(StoredCredential.class, storedCredentialTable);
+    }
+
+    private <T> DynamoDbTable<T> getTable(Class<T> beanClass, String tableName) {
+        return dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(beanClass));
     }
 
     public static DynamoDbEnhancedClient getClient(ConfigurationService configurationService) {
@@ -43,7 +54,7 @@ public class DynamoDbService implements DataStore {
     public void saveCredentialOffer(CachedCredentialOffer cachedCredentialOffer)
             throws DataStoreException {
         try {
-            getTable().putItem(cachedCredentialOffer);
+            cachedCredentialOfferTable.putItem(cachedCredentialOffer);
         } catch (Exception exception) {
             throw new DataStoreException("Error saving credential offer", exception);
         }
@@ -63,18 +74,35 @@ public class DynamoDbService implements DataStore {
     public void updateCredentialOffer(CachedCredentialOffer cachedCredentialOffer)
             throws DataStoreException {
         try {
-            getTable().updateItem(cachedCredentialOffer);
+            cachedCredentialOfferTable.updateItem(cachedCredentialOffer);
         } catch (Exception exception) {
             throw new DataStoreException("Error updating credential offer", exception);
         }
     }
 
-    private CachedCredentialOffer getItemByKey(Key key) {
-        return getTable().getItem(key);
+    @Override
+    public void saveStoredCredential(StoredCredential storedCredential) throws DataStoreException {
+        try {
+            storedCredentialTable.putItem(storedCredential);
+        } catch (Exception exception) {
+            throw new DataStoreException("Failed to store credential in DynamoDB", exception);
+        }
     }
 
-    private DynamoDbTable<CachedCredentialOffer> getTable() {
-        return dynamoDbEnhancedClient.table(
-                tableName, TableSchema.fromBean(CachedCredentialOffer.class));
+    @Override
+    public StoredCredential getStoredCredential(String partitionValue) throws DataStoreException {
+        try {
+            return getStoredCredentialByKey(Key.builder().partitionValue(partitionValue).build());
+        } catch (Exception exception) {
+            throw new DataStoreException("Error fetching credential", exception);
+        }
+    }
+
+    private CachedCredentialOffer getItemByKey(Key key) {
+        return cachedCredentialOfferTable.getItem(key);
+    }
+
+    private StoredCredential getStoredCredentialByKey(Key key) {
+        return storedCredentialTable.getItem(key);
     }
 }

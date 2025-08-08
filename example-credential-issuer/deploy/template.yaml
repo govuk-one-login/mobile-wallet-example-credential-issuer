@@ -436,6 +436,8 @@ Resources:
                 - WalletAppDeepLinkUrl: !FindInMap [EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl]
             - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CRICacheDatabase
+            - Name: CREDENTIAL_STORE
+              Value: !Ref CRICredentialDatabase
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub
                 - "https://${AuthServerUrl}"
@@ -535,10 +537,15 @@ Resources:
                 Resource: !GetAtt CRICacheDatabase.Arn
               - Effect: Allow
                 Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:GetItem'
+                Resource: !GetAtt CRICredentialDatabase.Arn
+              - Effect: Allow
+                Action:
                   - 'kms:Decrypt'
                   - 'kms:Encrypt'
                   - 'kms:GenerateDataKey'
-                Resource: !GetAtt CRICacheDatabaseKmsKey.Arn
+                Resource: !GetAtt CRIDatabaseKmsKey.Arn
               - Effect: Allow
                 Action:
                   - 's3:GetObject'
@@ -597,7 +604,7 @@ Resources:
       AliasName: !Sub "alias/credential-signing-key-${AWS::StackName}"
       TargetKeyId: !Ref CredentialIssuerSigningKey
 
-  CRICacheDatabaseKmsKey:
+  CRIDatabaseKmsKey:
     Type: AWS::KMS::Key
     Properties:
       EnableKeyRotation: true
@@ -612,11 +619,11 @@ Resources:
             Resource:
               - "*"
 
-  CRICacheDatabaseKmsKeyAlias:
+  CRIDatabaseKmsKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/CRICacheDatabaseKmsKey"
-      TargetKeyId: !Ref CRICacheDatabaseKmsKey
+      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/CRIDatabaseKmsKey"
+      TargetKeyId: !Ref CRIDatabaseKmsKey
 
   # DYNAMODB RESOURCES
 
@@ -641,7 +648,39 @@ Resources:
       SSESpecification:
         SSEEnabled: true
         SSEType: KMS
-        KMSMasterKeyId: !GetAtt CRICacheDatabaseKmsKey.Arn
+        KMSMasterKeyId: !GetAtt CRIDatabaseKmsKey.Arn
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Mobile Wallet
+        - Key: Owner
+          Value: Mobile Wallet Team
+        - Key: Environment
+          Value: !Ref "Environment"
+
+  CRICredentialDatabase:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: credentialIdentifier
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Sub "${AWS::StackName}-credential_store"
+      KeySchema:
+        - AttributeName: credentialIdentifier
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: timeToLive
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt CRIDatabaseKmsKey.Arn
       Tags:
         - Key: Product
           Value: GOV.UK Sign In

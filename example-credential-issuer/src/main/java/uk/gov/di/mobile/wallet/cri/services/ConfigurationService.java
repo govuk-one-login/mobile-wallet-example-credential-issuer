@@ -51,6 +51,15 @@ public class ConfigurationService extends Configuration {
     }
 
     /**
+     * Gets the DynamoDB table name for stored credential.
+     *
+     * @return The DynamoDB table name
+     */
+    public String getCredentialStoreTableName() {
+        return getEnvOrDefault("CREDENTIAL_STORE", "credential_store");
+    }
+
+    /**
      * Gets the alias of the signing key.
      *
      * @return The signing key alias

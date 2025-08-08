@@ -1,6 +1,7 @@
 #!/bin/sh
 
 export TABLE_NAME=credential_offer_cache
+export CREDENTIAL_TABLE_NAME=credential_store
 
 aws --endpoint-url=http://localhost:4566 dynamodb create-table \
     --table-name $TABLE_NAME \
@@ -10,6 +11,16 @@ aws --endpoint-url=http://localhost:4566 dynamodb create-table \
     --region eu-west-2
 
 aws --endpoint-url=http://localhost:4566 dynamodb update-time-to-live --table-name $TABLE_NAME \
+                      --time-to-live-specification Enabled=true,AttributeName=timeToLive
+
+aws --endpoint-url=http://localhost:4566 dynamodb create-table \
+    --table-name $CREDENTIAL_TABLE_NAME \
+    --attribute-definitions AttributeName=credentialIdentifier,AttributeType=S \
+    --key-schema AttributeName=credentialIdentifier,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
+    --region eu-west-2
+
+aws --endpoint-url=http://localhost:4566 dynamodb update-time-to-live --table-name $CREDENTIAL_TABLE_NAME \
                       --time-to-live-specification Enabled=true,AttributeName=timeToLive
 
 aws --endpoint-url=http://localhost:4566 kms create-key \

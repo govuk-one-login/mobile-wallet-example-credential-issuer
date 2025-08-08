@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
@@ -122,8 +123,11 @@ class NotificationServiceTest {
     @Test
     void Should_ThrowInvalidNotificationIdException_When_NotificationIDsDoNotMatch()
             throws DataStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
+
+        StoredCredential mockStoredCredential =
+                new StoredCredential(
+                        CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L);
+        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
                 new NotificationRequestBody(
@@ -147,6 +151,10 @@ class NotificationServiceTest {
                     AccessTokenValidationException,
                     InvalidNotificationIdException,
                     CredentialOfferException {
+        StoredCredential mockStoredCredential =
+                new StoredCredential(
+                        CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L);
+        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
         notificationService.processNotification(accessToken, requestBody);
 
         verify(mockLogger)
@@ -158,6 +166,7 @@ class NotificationServiceTest {
 
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
+        verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(String walletSubjectId) {
