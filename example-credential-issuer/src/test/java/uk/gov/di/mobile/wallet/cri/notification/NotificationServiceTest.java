@@ -105,10 +105,14 @@ class NotificationServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_WalletSubjectIDsDoNotMatch()
             throws DataStoreException {
-        mockCachedCredentialOffer =
-                getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id");
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
+
+        StoredCredential mockStoredCredential =
+                new StoredCredential(
+                        CREDENTIAL_IDENTIFIER,
+                        NOTIFICATION_ID,
+                        "not_the_same_wallet_subject_id",
+                        525600L);
+        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         AccessTokenValidationException exception =
                 assertThrows(
@@ -117,7 +121,8 @@ class NotificationServiceTest {
 
         assertThat(
                 exception.getMessage(),
-                containsString("Access token 'sub' does not match cached 'walletSubjectId'"));
+                containsString(
+                        "Access token 'sub' does not match stored credential 'walletSubjectId'"));
     }
 
     @Test

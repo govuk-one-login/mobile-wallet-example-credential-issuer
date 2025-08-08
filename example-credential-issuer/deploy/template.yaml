@@ -435,9 +435,9 @@ Resources:
                 - "https://${WalletAppDeepLinkUrl}"
                 - WalletAppDeepLinkUrl: !FindInMap [EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl]
             - Name: CREDENTIAL_OFFER_CACHE
-              Value: !Ref CRICacheDatabase
+              Value: !Ref CredentialOfferTable
             - Name: CREDENTIAL_STORE
-              Value: !Ref CRICredentialDatabase
+              Value: !Ref CredentialTable
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub
                 - "https://${AuthServerUrl}"
@@ -534,12 +534,12 @@ Resources:
                   - 'dynamodb:PutItem'
                   - 'dynamodb:GetItem'
                   - 'dynamodb:UpdateItem'
-                Resource: !GetAtt CRICacheDatabase.Arn
+                Resource: !GetAtt CredentialOfferTable.Arn
               - Effect: Allow
                 Action:
                   - 'dynamodb:PutItem'
                   - 'dynamodb:GetItem'
-                Resource: !GetAtt CRICredentialDatabase.Arn
+                Resource: !GetAtt CredentialTable.Arn
               - Effect: Allow
                 Action:
                   - 'kms:Decrypt'
@@ -627,7 +627,7 @@ Resources:
 
   # DYNAMODB RESOURCES
 
-  CRICacheDatabase:
+  CredentialOfferTable:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
@@ -659,7 +659,7 @@ Resources:
         - Key: Environment
           Value: !Ref "Environment"
 
-  CRICredentialDatabase:
+  CredentialTable:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete

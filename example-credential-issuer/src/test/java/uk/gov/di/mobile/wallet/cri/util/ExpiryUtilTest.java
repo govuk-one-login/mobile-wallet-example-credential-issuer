@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ExpiryUtilTest {
+class ExpiryUtilTest {
 
     @Test
     void calculateExpiryTimeFromTtl_positiveTtl() {
