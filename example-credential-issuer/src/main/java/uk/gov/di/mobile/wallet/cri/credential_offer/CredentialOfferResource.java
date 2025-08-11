@@ -83,7 +83,6 @@ public class CredentialOfferResource {
                 credentialOfferId,
                 documentId);
 
-        String notificationId = UUID.randomUUID().toString();
         long credentialOfferTtl =
                 Instant.now()
                         .plusSeconds(configurationService.getCredentialOfferTtlInSecs())
@@ -98,8 +97,6 @@ public class CredentialOfferResource {
                             .credentialIdentifier(credentialOfferId)
                             .documentId(documentId)
                             .walletSubjectId(walletSubjectId)
-                            .notificationId(notificationId)
-                            .redeemed(false)
                             .expiry(credentialOfferTtl)
                             .timeToLive(tableItemTtl)
                             .build();
@@ -116,11 +113,10 @@ public class CredentialOfferResource {
 
         getLogger()
                 .info(
-                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}, notificationId: {}",
+                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}",
                         walletSubjectId,
                         credentialOfferId,
-                        documentId,
-                        notificationId);
+                        documentId);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);

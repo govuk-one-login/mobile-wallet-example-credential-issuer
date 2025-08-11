@@ -54,8 +54,6 @@ class DynamoDbServiceTest {
                         PARTITION_KEY,
                         "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77",
                         "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
-                        "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
-                        false,
                         EXPIRY,
                         TTL);
 
@@ -89,10 +87,6 @@ class DynamoDbServiceTest {
         assertEquals(
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                 credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
-        assertEquals(
-                "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
-                credentialOfferCacheItemArgumentCaptor.getValue().getNotificationId());
-        assertEquals(false, credentialOfferCacheItemArgumentCaptor.getValue().getRedeemed());
         assertEquals(EXPIRY, credentialOfferCacheItemArgumentCaptor.getValue().getExpiry());
         assertEquals(TTL, credentialOfferCacheItemArgumentCaptor.getValue().getTimeToLive());
     }
@@ -160,10 +154,6 @@ class DynamoDbServiceTest {
         assertEquals(
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                 credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
-        assertEquals(
-                "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
-                credentialOfferCacheItemArgumentCaptor.getValue().getNotificationId());
-        assertEquals(false, credentialOfferCacheItemArgumentCaptor.getValue().getRedeemed());
         assertEquals(EXPIRY, credentialOfferCacheItemArgumentCaptor.getValue().getExpiry());
         assertEquals(TTL, credentialOfferCacheItemArgumentCaptor.getValue().getTimeToLive());
     }

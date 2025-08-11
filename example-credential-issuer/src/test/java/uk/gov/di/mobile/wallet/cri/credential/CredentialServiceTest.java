@@ -377,8 +377,6 @@ class CredentialServiceTest {
                 CREDENTIAL_IDENTIFIER,
                 DOCUMENT_ID,
                 walletSubjectId,
-                NOTIFICATION_ID,
-                redeemed,
                 expiry,
                 ttl);
     }

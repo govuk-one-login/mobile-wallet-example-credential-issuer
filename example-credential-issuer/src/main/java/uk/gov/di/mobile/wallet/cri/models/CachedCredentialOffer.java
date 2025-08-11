@@ -13,8 +13,6 @@ public class CachedCredentialOffer {
     String credentialIdentifier;
     String walletSubjectId;
     String documentId;
-    String notificationId;
-    Boolean redeemed;
     Long expiry;
     Long timeToLive;
 
@@ -26,15 +24,11 @@ public class CachedCredentialOffer {
             String credentialIdentifier,
             String documentId,
             String walletSubjectId,
-            String notificationId,
-            Boolean redeemed,
             Long expiry,
             Long timeToLive) {
         this.credentialIdentifier = credentialIdentifier;
         this.documentId = documentId;
         this.walletSubjectId = walletSubjectId;
-        this.notificationId = notificationId;
-        this.redeemed = redeemed;
         this.expiry = expiry;
         this.timeToLive = timeToLive;
     }
