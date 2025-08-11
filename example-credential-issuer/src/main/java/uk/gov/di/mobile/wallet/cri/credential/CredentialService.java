@@ -147,7 +147,7 @@ public class CredentialService {
             }
 
             dataStore.saveStoredCredential(
-                    storedCredentialBuilder(
+                    new StoredCredential(
                             credentialOffer.getCredentialIdentifier(),
                             notificationId,
                             credentialOffer.getWalletSubjectId(),
@@ -229,14 +229,5 @@ public class CredentialService {
 
     protected Logger getLogger() {
         return LOGGER;
-    }
-
-    private StoredCredential storedCredentialBuilder(
-            String credentialIdentifier,
-            String notificationId,
-            String walletSubjectId,
-            long timeToLive) {
-        return new StoredCredential(
-                credentialIdentifier, notificationId, walletSubjectId, timeToLive);
     }
 }
