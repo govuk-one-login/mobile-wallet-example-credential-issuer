@@ -49,11 +49,7 @@ class NotificationServiceTest {
     private NotificationRequestBody requestBody;
 
     @BeforeEach
-    void setUp()
-            throws ParseException,
-                    JOSEException,
-                    AccessTokenValidationException,
-                    DataStoreException {
+    void setUp() throws ParseException, JOSEException, AccessTokenValidationException {
         ECDSASigner ecSigner = new ECDSASigner(getEcKey());
         accessToken = new MockAccessTokenBuilder("ES256").build();
         accessToken.sign(ecSigner);
