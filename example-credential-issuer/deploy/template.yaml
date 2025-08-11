@@ -636,7 +636,7 @@ Resources:
         - AttributeName: credentialIdentifier
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "${AWS::StackName}-credential_offer_cache_2"
+      TableName: !Sub "${AWS::StackName}-credential_offer_cache"
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH
@@ -668,7 +668,7 @@ Resources:
         - AttributeName: credentialIdentifier
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
-      TableName: !Sub "${AWS::StackName}-credential_store_2"
+      TableName: !Sub "${AWS::StackName}-credential_store"
       KeySchema:
         - AttributeName: credentialIdentifier
           KeyType: HASH
