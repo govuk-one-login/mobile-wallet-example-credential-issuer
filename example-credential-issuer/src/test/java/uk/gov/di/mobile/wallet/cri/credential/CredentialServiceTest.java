@@ -15,6 +15,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLice
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
@@ -30,7 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.eq;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -70,6 +72,7 @@ class CredentialServiceTest {
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String DID_KEY =
             "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==";
+    private static final long TTL_SECONDS = 525600L;
 
     @BeforeEach
     void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
@@ -95,7 +98,7 @@ class CredentialServiceTest {
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
 
         mockCredentialJwt =
-                "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+                "eyJraWQiOiJkaWQ6d2ViOmV4YW1wbGUtY3JlZGVudGlhbC1pc3N1ZXIubW9iaWxlLmJ1aWxkLmFjY291bnQuZ292LnVrIzVkY2JlZTg2M2I1ZDdjYzMwYzliYTFmNzM5M2RhY2M2YzE2NjEwNzgyZTRiNmExOTFmOTRhN2U4YjFlMTUxMGYiLCJjdHkiOiJ2YyIsInR5cCI6InZjK2p3dCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJkaWQ6a2V5OnpEbmFlU0dmU1FNWXZuTGJMV0V1YmhoR0RQb3E3cEE5TU1OdnVtdmJzbU1DWm92VVIiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDprZXk6ekRuYWVTR2ZTUU1Zdm5MYkxXRXViaGhHRFBvcTdwQTlNTU52dW12YnNtTUNab3ZVUiIsIm5hbWUiOlt7Im5hbWVQYXJ0cyI6W3sidHlwZSI6IlRpdGxlIiwidmFsdWUiOiJNciJ9LHsidHlwZSI6IkdpdmVuTmFtZSIsInZhbHVlIjoiU2FyYWgifSx7InR5cGUiOiJHaXZlbk5hbWUiLCJ2YWx1ZSI6IkVsaXphYmV0aCJ9LHsidHlwZSI6IkZhbWlseU5hbWUiLCJ2YWx1ZSI6IkVkd2FyZHMifV19XSwic29jaWFsU2VjdXJpdHlSZWNvcmQiOlt7InBlcnNvbmFsTnVtYmVyIjoiUVExMjM0NTZDIn1dfSwiaXNzIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsImRlc2NyaXB0aW9uIjoiTmF0aW9uYWwgSW5zdXJhbmNlIG51bWJlciIsInZhbGlkRnJvbSI6IjIwMjUtMDctMzFUMTU6MzM6MDBaIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIlNvY2lhbFNlY3VyaXR5Q3JlZGVudGlhbCJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsIm5iZiI6MTc1Mzk3NTk4MCwibmFtZSI6Ik5hdGlvbmFsIEluc3VyYW5jZSBudW1iZXIiLCJ2YWxpZFVudGlsIjoiMjAyNi0wNy0zMVQxNTozMzowMFoiLCJleHAiOjE3ODU1MTE5ODAsImlhdCI6MTc1Mzk3NTk4MH0.pxcRhjMZA6bCzHsyXVyygGpw0xk3VCVGS15LmTPM-TaUtBnSfG99rZylYcbDvojQJkzUqY66cr5mHx3lHpenkw";
     }
 
     @Test
@@ -215,7 +218,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_BuildSocialSecurityCredentialSubject()
+    void Should_BuildSocialSecurityCredentialSubject_And_SaveStoredCredential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     NonceValidationException,
@@ -232,16 +235,18 @@ class CredentialServiceTest {
                 .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
 
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
-    void Should_BuildBasicCheckCredentialSubject()
+    void Should_BuildBasicCheckCredentialSubject_And_SaveStoredCredential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     NonceValidationException,
@@ -258,16 +263,19 @@ class CredentialServiceTest {
                 .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
 
         verify((CredentialBuilder<BasicCheckCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(CredentialType.BASIC_DISCLOSURE_CREDENTIAL),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
+
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
-    void Should_BuildVeteranCardCredentialSubject()
+    void Should_BuildVeteranCardCredentialSubject_And_SaveStoredCredential()
             throws AccessTokenValidationException,
                     ProofJwtValidationException,
                     NonceValidationException,
@@ -284,25 +292,29 @@ class CredentialServiceTest {
                 .thenReturn(mockCredentialJwt);
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
 
         verify((CredentialBuilder<VeteranCardCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(CredentialType.DIGITAL_VETERAN_CARD),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
-    void Should_BuildMobileDrivingLicenceCredential() throws Exception {
+    void Should_BuildMobileDrivingLicenceCredential_And_SaveStoredCredential() throws Exception {
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockMobileDrivingLicence(DOCUMENT_ID));
+        doNothing().when(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
 
         credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         verify(mockMobileDrivingLicenceService, times(1))
                 .createMobileDrivingLicence(any(DrivingLicenceDocument.class));
+        verify(mockDynamoDbService).saveStoredCredential(any(StoredCredential.class));
     }
 
     @Test
@@ -354,7 +366,7 @@ class CredentialServiceTest {
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(CredentialType.SOCIAL_SECURITY_CREDENTIAL),
-                        eq(525600L));
+                        eq(TTL_SECONDS));
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(

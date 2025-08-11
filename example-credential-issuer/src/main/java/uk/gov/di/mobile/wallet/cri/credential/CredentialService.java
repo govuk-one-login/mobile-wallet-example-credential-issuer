@@ -16,15 +16,18 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivi
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+import uk.gov.di.mobile.wallet.cri.util.ExpiryUtil;
 
 import java.security.cert.CertificateException;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
@@ -93,6 +96,7 @@ public class CredentialService {
 
         String documentId = credentialOffer.getDocumentId();
         Document document = documentStoreClient.getDocument(documentId);
+        String notificationId = credentialOffer.getNotificationId();
 
         LOGGER.info(
                 "{} retrieved - credentialOfferId: {}, documentId: {}",
@@ -106,34 +110,53 @@ public class CredentialService {
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
         String credential;
+        long documentExpiry;
+
         try {
             if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-                credential =
-                        getSocialSecurityCredential(
-                                mapper.convertValue(
-                                        document.getData(), SocialSecurityDocument.class),
-                                sub);
+                SocialSecurityDocument socialSecurityDocument =
+                        mapper.convertValue(document.getData(), SocialSecurityDocument.class);
+                credential = getSocialSecurityCredential(socialSecurityDocument, sub);
+                long ttl = socialSecurityDocument.getCredentialTtlMinutes();
+                documentExpiry = ExpiryUtil.calculateExpiryTimeFromTtl(ttl);
+
             } else if (Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType())) {
-                credential =
-                        getBasicCheckCredential(
-                                mapper.convertValue(document.getData(), BasicCheckDocument.class),
-                                sub);
+                BasicCheckDocument basicCheckDocument =
+                        mapper.convertValue(document.getData(), BasicCheckDocument.class);
+                credential = getBasicCheckCredential(basicCheckDocument, sub);
+                long ttl = basicCheckDocument.getCredentialTtlMinutes();
+                documentExpiry = ExpiryUtil.calculateExpiryTimeFromTtl(ttl);
+
             } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-                credential =
-                        getDigitalVeteranCard(
-                                mapper.convertValue(document.getData(), VeteranCardDocument.class),
-                                sub);
+                VeteranCardDocument veteranCardDocument =
+                        mapper.convertValue(document.getData(), VeteranCardDocument.class);
+                credential = getDigitalVeteranCard(veteranCardDocument, sub);
+                long ttl = veteranCardDocument.getCredentialTtlMinutes();
+                documentExpiry = ExpiryUtil.calculateExpiryTimeFromTtl(ttl);
+
             } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-                credential =
-                        getMobileDrivingLicence(
-                                mapper.convertValue(
-                                        document.getData(), DrivingLicenceDocument.class));
+                DrivingLicenceDocument drivingLicenceDocument =
+                        mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+                credential = getMobileDrivingLicence(drivingLicenceDocument);
+                LocalDate expiryDate = drivingLicenceDocument.getExpiryDate();
+                documentExpiry = ExpiryUtil.calculateExpiryTimeFromDate(expiryDate);
+
             } else {
                 throw new CredentialServiceException(
                         String.format("Invalid verifiable credential type %s", vcType));
             }
-            return new CredentialResponse(credential, credentialOffer.getNotificationId());
-        } catch (SigningException
+
+            dataStore.saveStoredCredential(
+                    new StoredCredential(
+                            credentialOffer.getCredentialIdentifier(),
+                            notificationId,
+                            credentialOffer.getWalletSubjectId(),
+                            documentExpiry));
+
+            return new CredentialResponse(credential, notificationId);
+
+        } catch (DataStoreException
+                | SigningException
                 | MDLException
                 | ObjectStoreException
                 | CertificateException exception) {
