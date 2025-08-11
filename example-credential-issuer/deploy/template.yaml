@@ -434,9 +434,9 @@ Resources:
               Value: !Sub
                 - "https://${WalletAppDeepLinkUrl}"
                 - WalletAppDeepLinkUrl: !FindInMap [EnvironmentVariables, !Ref Environment, WalletAppDeepLinkUrl]
-            - Name: CREDENTIAL_OFFER_CACHE_2
+            - Name: CREDENTIAL_OFFER_CACHE
               Value: !Ref CredentialOfferTable
-            - Name: CREDENTIAL_STORE_2
+            - Name: CREDENTIAL_STORE
               Value: !Ref CredentialTable
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub

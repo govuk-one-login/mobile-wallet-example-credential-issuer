@@ -3,8 +3,6 @@ package uk.gov.di.mobile.wallet.cri.notification;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
-import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -26,26 +24,17 @@ public class NotificationService {
             SignedJWT accessToken, NotificationRequestBody notificationRequestBody)
             throws DataStoreException,
                     AccessTokenValidationException,
-                    InvalidNotificationIdException,
-                    CredentialOfferException {
+                    InvalidNotificationIdException {
 
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
-        String credentialOfferId = accessTokenData.credentialIdentifier();
+        String credentialIdentifier = accessTokenData.credentialIdentifier();
 
-        CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-
-        if (credentialOffer == null) {
-            throw new CredentialOfferException(
-                    String.format("Credential offer %s was not found", credentialOfferId));
-        }
-
-        StoredCredential storedCredential =
-                dataStore.getStoredCredential(credentialOffer.getCredentialIdentifier());
+        StoredCredential storedCredential = dataStore.getStoredCredential(credentialIdentifier);
 
         if (!storedCredential.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
             throw new AccessTokenValidationException(
-                    "Access token 'sub' does not match stored credential 'walletSubjectId'");
+                    "Access token 'sub' does not match credential 'walletSubjectId'");
         }
 
         if (!storedCredential

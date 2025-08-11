@@ -55,13 +55,12 @@ class ConfigurationServiceTest {
     @Test
     void Should_ReturnCredentialOfferCacheTableNameDefaultValue_When_EnvVarNotSet() {
         assertEquals(
-                "credential_offer_cache_2",
-                configurationService.getCredentialOfferCacheTableName());
+                "credential_offer_cache", configurationService.getCredentialOfferCacheTableName());
     }
 
     @Test
     void Should_ReturnCredentialOfferCacheTableNameEnvVarValue() {
-        environmentVariables.set("CREDENTIAL_OFFER_CACHE_2", "test-table-name");
+        environmentVariables.set("CREDENTIAL_OFFER_CACHE", "test-table-name");
         assertEquals("test-table-name", configurationService.getCredentialOfferCacheTableName());
     }
 

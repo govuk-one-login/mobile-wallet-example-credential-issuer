@@ -153,8 +153,6 @@ public class CredentialService {
                             credentialOffer.getWalletSubjectId(),
                             documentExpiry));
 
-            LOGGER.info("Credential was saved successfully");
-
             return new CredentialResponse(credential, notificationId);
 
         } catch (DataStoreException

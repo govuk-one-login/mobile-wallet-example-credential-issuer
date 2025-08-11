@@ -12,8 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
-import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -21,11 +19,9 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 
 import java.text.ParseException;
-import java.time.Instant;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -48,7 +44,6 @@ class NotificationServiceTest {
     @Mock private AccessTokenService mockAccessTokenService;
     @Mock private Logger mockLogger;
 
-    private CachedCredentialOffer mockCachedCredentialOffer;
     private NotificationService notificationService;
     private SignedJWT accessToken;
     private NotificationRequestBody requestBody;
@@ -81,25 +76,6 @@ class NotificationServiceTest {
                         "134e0c41-a8b4-46d4-aec8-cd547e125589",
                         CREDENTIAL_IDENTIFIER);
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
-
-        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID);
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-    }
-
-    @Test
-    void Should_ThrowCredentialOfferException_When_CredentialOfferNotFound()
-            throws DataStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
-
-        CredentialOfferException exception =
-                assertThrows(
-                        CredentialOfferException.class,
-                        () -> notificationService.processNotification(accessToken, requestBody));
-
-        assertEquals(
-                "Credential offer efb52887-48d6-43b7-b14c-da7896fbf54d was not found",
-                exception.getMessage());
     }
 
     @Test
@@ -121,8 +97,7 @@ class NotificationServiceTest {
 
         assertThat(
                 exception.getMessage(),
-                containsString(
-                        "Access token 'sub' does not match stored credential 'walletSubjectId'"));
+                containsString("Access token 'sub' does not match credential 'walletSubjectId'"));
     }
 
     @Test
@@ -154,8 +129,7 @@ class NotificationServiceTest {
     void Should_LogNotification_When_RequestIsValid()
             throws DataStoreException,
                     AccessTokenValidationException,
-                    InvalidNotificationIdException,
-                    CredentialOfferException {
+                    InvalidNotificationIdException {
         StoredCredential mockStoredCredential =
                 new StoredCredential(
                         CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L);
@@ -170,20 +144,6 @@ class NotificationServiceTest {
                         "Credential stored");
 
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
-        verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
         verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
-    }
-
-    private CachedCredentialOffer getMockCredentialOfferCacheItem(String walletSubjectId) {
-        Long expiry = Instant.now().plusSeconds(300).getEpochSecond();
-        Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
-        return new CachedCredentialOffer(
-                CREDENTIAL_IDENTIFIER,
-                "de9cbf02-2fbc-4d61-a627-f97851f6840b",
-                walletSubjectId,
-                NOTIFICATION_ID,
-                false,
-                expiry,
-                ttl);
     }
 }

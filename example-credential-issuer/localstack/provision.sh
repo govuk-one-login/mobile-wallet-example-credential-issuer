@@ -1,7 +1,7 @@
 #!/bin/sh
 
-export CREDENTIAL_OFFER_TABLE_NAME=credential_offer_cache_2
-export CREDENTIAL_TABLE_NAME=credential_store_2
+export CREDENTIAL_OFFER_TABLE_NAME=credential_offer_cache
+export CREDENTIAL_TABLE_NAME=credential_store
 
 aws --endpoint-url=http://localhost:4566 dynamodb create-table \
     --table-name $CREDENTIAL_OFFER_TABLE_NAME \
