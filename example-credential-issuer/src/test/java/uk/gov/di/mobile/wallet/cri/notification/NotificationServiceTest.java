@@ -97,6 +97,22 @@ class NotificationServiceTest {
     }
 
     @Test
+    void Should_ThrowAccessTokenValidationException_When_CredentialNotFound()
+            throws DataStoreException {
+
+        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(null);
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> notificationService.processNotification(accessToken, requestBody));
+
+        assertThat(
+                exception.getMessage(),
+                containsString("Credential efb52887-48d6-43b7-b14c-da7896fbf54d was not found"));
+    }
+
+    @Test
     void Should_ThrowInvalidNotificationIdException_When_NotificationIDsDoNotMatch()
             throws DataStoreException {
 

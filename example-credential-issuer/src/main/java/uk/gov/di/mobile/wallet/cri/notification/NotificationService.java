@@ -32,6 +32,11 @@ public class NotificationService {
 
         StoredCredential storedCredential = dataStore.getStoredCredential(credentialIdentifier);
 
+        if (storedCredential == null) {
+            throw new AccessTokenValidationException(
+                    String.format("Credential %s was not found", credentialIdentifier));
+        }
+
         if (!storedCredential.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
             throw new AccessTokenValidationException(
                     "Access token 'sub' does not match credential 'walletSubjectId'");
