@@ -87,18 +87,13 @@ public class CredentialOfferResource {
                 Instant.now()
                         .plusSeconds(configurationService.getCredentialOfferTtlInSecs())
                         .getEpochSecond();
-        long tableItemTtl =
-                Instant.now()
-                        .plus(configurationService.getTableItemTtlInDays(), ChronoUnit.DAYS)
-                        .getEpochSecond();
         try {
             CachedCredentialOffer cachedCredentialOffer =
                     new CredentialOfferCacheItemBuilder()
                             .credentialIdentifier(credentialOfferId)
                             .documentId(documentId)
                             .walletSubjectId(walletSubjectId)
-                            .expiry(credentialOfferTtl)
-                            .timeToLive(tableItemTtl)
+                            .timeToLive(credentialOfferTtl)
                             .build();
 
             dataStore.saveCredentialOffer(cachedCredentialOffer);

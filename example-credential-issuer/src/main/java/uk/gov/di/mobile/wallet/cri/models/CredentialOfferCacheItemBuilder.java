@@ -4,7 +4,6 @@ public class CredentialOfferCacheItemBuilder {
     private String credentialIdentifier;
     private String documentId;
     private String walletSubjectId;
-    private Long expiry;
     private Long timeToLive;
 
     public CredentialOfferCacheItemBuilder credentialIdentifier(String credentialIdentifier) {
@@ -22,12 +21,6 @@ public class CredentialOfferCacheItemBuilder {
         return this;
     }
 
-
-    public CredentialOfferCacheItemBuilder expiry(Long expiry) {
-        this.expiry = expiry;
-        return this;
-    }
-
     public CredentialOfferCacheItemBuilder timeToLive(Long timeToLive) {
         this.timeToLive = timeToLive;
         return this;
@@ -38,7 +31,6 @@ public class CredentialOfferCacheItemBuilder {
                 credentialIdentifier,
                 documentId,
                 walletSubjectId,
-                expiry,
                 timeToLive);
     }
 }
