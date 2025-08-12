@@ -28,9 +28,6 @@ public class CredentialOfferCacheItemBuilder {
 
     public CachedCredentialOffer build() {
         return new CachedCredentialOffer(
-                credentialIdentifier,
-                documentId,
-                walletSubjectId,
-                timeToLive);
+                credentialIdentifier, documentId, walletSubjectId, timeToLive);
     }
 }
