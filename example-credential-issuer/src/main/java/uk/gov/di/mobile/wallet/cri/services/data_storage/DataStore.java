@@ -9,8 +9,7 @@ public interface DataStore {
 
     CachedCredentialOffer getCredentialOffer(String credentialOfferId) throws DataStoreException;
 
-    void updateCredentialOffer(CachedCredentialOffer cachedCredentialOffer)
-            throws DataStoreException;
+    void deleteCredentialOffer(String credentialOfferId) throws DataStoreException;
 
     void saveStoredCredential(StoredCredential storedCredential) throws DataStoreException;
 
