@@ -76,8 +76,7 @@ class CredentialServiceTest {
 
     @BeforeEach
     void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
-        mockCachedCredentialOffer =
-                getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "300");
+        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "300");
         mockProofJwt = new MockProofBuilder("ES256").build();
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         credentialService =
@@ -149,7 +148,7 @@ class CredentialServiceTest {
     void Should_ThrowAccessTokenValidationException_When_WalletSubjectIDsDontMatch()
             throws DataStoreException {
         mockCachedCredentialOffer =
-                getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id", false, "300");
+                getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id", "300");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
 
@@ -166,7 +165,7 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialOfferException_When_CredentialOfferIsExpired()
             throws DataStoreException {
-        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, false, "-1");
+        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "-1");
         when(mockDynamoDbService.getCredentialOffer(anyString()))
                 .thenReturn(mockCachedCredentialOffer);
 
@@ -177,24 +176,6 @@ class CredentialServiceTest {
         assertEquals("Credential offer validation failed", exception.getMessage());
         verify(mockLogger)
                 .error("Credential offer {} is expired", "efb52887-48d6-43b7-b14c-da7896fbf54d");
-    }
-
-    @Test
-    void Should_ThrowCredentialOfferException_When_CredentialOfferHasBeenRedeemed()
-            throws DataStoreException {
-        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, true, "300");
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-
-        CredentialOfferException exception =
-                assertThrows(
-                        CredentialOfferException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-        assertEquals("Credential offer validation failed", exception.getMessage());
-        verify(mockLogger)
-                .error(
-                        "Credential offer {} has already been redeemed",
-                        "efb52887-48d6-43b7-b14c-da7896fbf54d");
     }
 
     @Test
@@ -356,12 +337,12 @@ class CredentialServiceTest {
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
         assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
-        assertEquals(NOTIFICATION_ID, credentialServiceReturnValue.getNotificationId());
+        assertEquals(NOTIFICATION_ID, "3fwe98js");
 
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
         verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
         verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
-        verify(mockDynamoDbService, times(1)).updateCredentialOffer(mockCachedCredentialOffer);
+        verify(mockDynamoDbService, times(1)).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
         verify((CredentialBuilder<SocialSecurityCredentialSubject>) mockCredentialBuilder, times(1))
                 .buildCredential(
                         any(SocialSecurityCredentialSubject.class),
@@ -370,15 +351,9 @@ class CredentialServiceTest {
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(
-            String walletSubjectId, Boolean redeemed, String expiresInSeconds) {
-        Long expiry = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
-        Long ttl = Instant.now().plusSeconds(1000).getEpochSecond();
-        return new CachedCredentialOffer(
-                CREDENTIAL_IDENTIFIER,
-                DOCUMENT_ID,
-                walletSubjectId,
-                expiry,
-                ttl);
+            String walletSubjectId, String expiresInSeconds) {
+        Long ttl = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
+        return new CachedCredentialOffer(CREDENTIAL_IDENTIFIER, DOCUMENT_ID, walletSubjectId, ttl);
     }
 
     private AccessTokenService.AccessTokenData getMockAccessTokenData() {

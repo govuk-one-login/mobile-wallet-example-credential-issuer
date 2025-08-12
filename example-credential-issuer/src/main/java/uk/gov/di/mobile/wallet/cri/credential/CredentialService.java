@@ -105,6 +105,9 @@ public class CredentialService {
                 credentialOfferId,
                 documentId);
 
+        dataStore.deleteCredentialOffer(
+                credentialOfferId); // Delete credential offer after being redeemed
+
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
         String credential;
@@ -170,7 +173,7 @@ public class CredentialService {
         if (credentialOffer == null) {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
-        } else if (now > credentialOffer.getExpiry()) {
+        } else if (now > credentialOffer.getTimeToLive()) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }
