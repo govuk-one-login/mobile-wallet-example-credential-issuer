@@ -82,9 +82,8 @@ class CredentialOfferResourceTest {
         when(credentialOfferService.buildCredentialOffer(anyString(), anyString()))
                 .thenReturn(mockCredentialOffer);
         UUID mockCredentialOfferId = UUID.fromString("76bb18c0-86c6-446e-884d-37550247d49d");
-        UUID mockNotificationId = UUID.fromString("1d85fe4e-6fe0-4597-a698-7ff168a3b019");
         MockedStatic<UUID> mockedUUID = Mockito.mockStatic(UUID.class);
-        mockedUUID.when(UUID::randomUUID).thenReturn(mockCredentialOfferId, mockNotificationId);
+        mockedUUID.when(UUID::randomUUID).thenReturn(mockCredentialOfferId);
 
         final Response response =
                 resource.target("/credential_offer")
@@ -101,11 +100,10 @@ class CredentialOfferResourceTest {
         verify(mockDataStore, times(1)).saveCredentialOffer(any());
         verify(mockLogger)
                 .info(
-                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}, notificationId: {}",
+                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}",
                         "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                         "76bb18c0-86c6-446e-884d-37550247d49d",
-                        "f8f7ae46-749a-4882-a426-2659fb81c9d2",
-                        "1d85fe4e-6fe0-4597-a698-7ff168a3b019");
+                        "f8f7ae46-749a-4882-a426-2659fb81c9d2");
         mockedUUID.close();
     }
 
