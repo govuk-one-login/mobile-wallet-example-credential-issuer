@@ -73,7 +73,8 @@ public class ServicesFactory {
         DynamoDbService dynamoDbService =
                 new DynamoDbService(
                         DynamoDbService.getClient(configurationService),
-                        configurationService.getCredentialOfferCacheTableName());
+                        configurationService.getCredentialOfferCacheTableName(),
+                        configurationService.getCredentialStoreTableName());
 
         MetadataBuilder metadataBuilder = new MetadataBuilder();
 
