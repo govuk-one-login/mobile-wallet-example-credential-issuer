@@ -533,7 +533,6 @@ Resources:
                 Action:
                   - 'dynamodb:PutItem'
                   - 'dynamodb:GetItem'
-                  - 'dynamodb:UpdateItem'
                   - 'dynamodb:DeleteItem'
                 Resource: !GetAtt CredentialOfferTable.Arn
               - Effect: Allow

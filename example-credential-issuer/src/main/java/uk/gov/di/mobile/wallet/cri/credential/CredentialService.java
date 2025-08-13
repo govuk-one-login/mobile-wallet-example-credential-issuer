@@ -106,7 +106,7 @@ public class CredentialService {
                 documentId);
 
         dataStore.deleteCredentialOffer(
-                credentialOfferId); // Delete credential offer after being redeemed
+                credentialOfferId); // Delete credential offer after being redeemed to prevent replay
 
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
