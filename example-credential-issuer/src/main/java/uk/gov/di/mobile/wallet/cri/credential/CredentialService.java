@@ -29,6 +29,7 @@ import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
@@ -96,7 +97,7 @@ public class CredentialService {
 
         String documentId = credentialOffer.getDocumentId();
         Document document = documentStoreClient.getDocument(documentId);
-        String notificationId = credentialOffer.getNotificationId();
+        String notificationId = UUID.randomUUID().toString();
 
         LOGGER.info(
                 "{} retrieved - credentialOfferId: {}, documentId: {}",
@@ -104,8 +105,9 @@ public class CredentialService {
                 credentialOfferId,
                 documentId);
 
-        credentialOffer.setRedeemed(true); // Mark credential offer as redeemed to prevent replay
-        dataStore.updateCredentialOffer(credentialOffer);
+        dataStore.deleteCredentialOffer(
+                credentialOfferId); // Delete credential offer after being redeemed to prevent
+        // replay
 
         String sub = proofJwtData.didKey();
         String vcType = document.getVcType();
@@ -172,10 +174,7 @@ public class CredentialService {
         if (credentialOffer == null) {
             getLogger().error("Credential offer {} was not found", credentialOfferId);
             return false;
-        } else if (Boolean.TRUE.equals(credentialOffer.getRedeemed())) {
-            getLogger().error("Credential offer {} has already been redeemed", credentialOfferId);
-            return false;
-        } else if (now > credentialOffer.getExpiry()) {
+        } else if (now > credentialOffer.getTimeToLive()) {
             getLogger().error("Credential offer {} is expired", credentialOfferId);
             return false;
         }

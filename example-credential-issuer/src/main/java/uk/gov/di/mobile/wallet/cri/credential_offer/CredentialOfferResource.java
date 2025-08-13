@@ -25,7 +25,6 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Singleton
@@ -83,14 +82,9 @@ public class CredentialOfferResource {
                 credentialOfferId,
                 documentId);
 
-        String notificationId = UUID.randomUUID().toString();
         long credentialOfferTtl =
                 Instant.now()
                         .plusSeconds(configurationService.getCredentialOfferTtlInSecs())
-                        .getEpochSecond();
-        long tableItemTtl =
-                Instant.now()
-                        .plus(configurationService.getTableItemTtlInDays(), ChronoUnit.DAYS)
                         .getEpochSecond();
         try {
             CachedCredentialOffer cachedCredentialOffer =
@@ -98,10 +92,7 @@ public class CredentialOfferResource {
                             .credentialIdentifier(credentialOfferId)
                             .documentId(documentId)
                             .walletSubjectId(walletSubjectId)
-                            .notificationId(notificationId)
-                            .redeemed(false)
-                            .expiry(credentialOfferTtl)
-                            .timeToLive(tableItemTtl)
+                            .timeToLive(credentialOfferTtl)
                             .build();
 
             dataStore.saveCredentialOffer(cachedCredentialOffer);
@@ -116,11 +107,10 @@ public class CredentialOfferResource {
 
         getLogger()
                 .info(
-                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}, notificationId: {}",
+                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}",
                         walletSubjectId,
                         credentialOfferId,
-                        documentId,
-                        notificationId);
+                        documentId);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);
