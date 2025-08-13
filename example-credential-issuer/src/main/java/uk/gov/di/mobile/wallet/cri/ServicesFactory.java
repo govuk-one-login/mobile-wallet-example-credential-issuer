@@ -15,7 +15,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESigner;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DigestIDGenerator;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObjectFactory;
@@ -113,11 +112,10 @@ public class ServicesFactory {
                         coseSigner,
                         certificateProvider,
                         configurationService.getDocumentSigningKey1Arn());
-        DocumentFactory documentFactory =
-                new DocumentFactory(namespacesFactory, issuerSignedFactory);
 
         MobileDrivingLicenceService mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(cborEncoder, documentFactory);
+                new MobileDrivingLicenceService(
+                        cborEncoder, namespacesFactory, issuerSignedFactory);
 
         DocumentStoreClient documentStoreClient =
                 new DocumentStoreClient(configurationService, httpClient);

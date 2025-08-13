@@ -6,8 +6,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Namespaces;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+
+import java.util.Base64;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,62 +25,97 @@ import static org.mockito.Mockito.when;
 class MobileDrivingLicenceServiceTest {
 
     @Mock private CBOREncoder cborEncoder;
-    @Mock private DocumentFactory documentFactory;
+    @Mock private NamespacesFactory namespacesFactory;
+    @Mock private IssuerSignedFactory issuerSignedFactory;
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
-    @Mock private Document mockDocument;
+    @Mock private Namespaces namespaces;
+    @Mock private IssuerSigned issuerSigned;
 
     private MobileDrivingLicenceService mobileDrivingLicenceService;
 
     @BeforeEach
     void setUp() {
-        mobileDrivingLicenceService = new MobileDrivingLicenceService(cborEncoder, documentFactory);
+        mobileDrivingLicenceService =
+                new MobileDrivingLicenceService(
+                        cborEncoder, namespacesFactory, issuerSignedFactory);
     }
 
     @Test
-    void Should_CreateMobileDrivingLicence() throws Exception {
-        String expectedHex = "a10102";
-        byte[] mockCborBytes = new byte[] {(byte) 0xA1, 0x01, 0x02};
-        when(documentFactory.build(mockDrivingLicenceDocument)).thenReturn(mockDocument);
-        when(cborEncoder.encode(mockDocument)).thenReturn(mockCborBytes);
+    void Should_ReturnBase64EncodedIssuerSigned() throws Exception {
+        byte[] mockCborData = "mock-cbor-data".getBytes();
+        String expectedBase64 = Base64.getUrlEncoder().encodeToString(mockCborData);
+        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
+        when(issuerSignedFactory.build(namespaces)).thenReturn(issuerSigned);
+        when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
 
         String result =
                 mobileDrivingLicenceService.createMobileDrivingLicence(mockDrivingLicenceDocument);
 
-        assertEquals(expectedHex, result, "The actual hex string should match the expected result");
-        verify(documentFactory).build(mockDrivingLicenceDocument);
-        verify(cborEncoder).encode(mockDocument);
+        assertEquals(
+                expectedBase64,
+                result,
+                "The actual base64 string should match the expected result");
+        verify(namespacesFactory).build(mockDrivingLicenceDocument);
+        verify(issuerSignedFactory).build(namespaces);
+        verify(cborEncoder).encode(issuerSigned);
     }
 
     @Test
-    void Should_PropagateException_When_DocumentFactoryThrows() throws Exception {
+    void Should_PropagateMDLException_When_NamespacesFactoryThrows() throws Exception {
         MDLException expectedException =
-                new MDLException("Some DocumentFactory error", new RuntimeException());
-        when(documentFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
+                new MDLException("Some error message", new RuntimeException());
+        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
 
-        MDLException thrown =
+        MDLException actualException =
                 assertThrows(
                         MDLException.class,
                         () ->
                                 mobileDrivingLicenceService.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument));
-        assertEquals(expectedException, thrown);
+
+        assertEquals(expectedException, actualException);
+        verify(namespacesFactory).build(mockDrivingLicenceDocument);
+        verify(issuerSignedFactory, never()).build(any());
         verify(cborEncoder, never()).encode(any());
     }
 
     @Test
-    void Should_PropagateException_When_CBOREncoderThrows() throws Exception {
-        MDLException expectedException =
-                new MDLException("Some CBOREncoder error", new RuntimeException());
-        when(documentFactory.build(any())).thenReturn(mockDocument);
-        when(cborEncoder.encode(mockDocument)).thenThrow(expectedException);
+    void Should_PropagateSigningException_When_IssuerSignedFactoryThrows() throws Exception {
+        SigningException expectedException =
+                new SigningException("Some error message", new RuntimeException());
+        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
+        when(issuerSignedFactory.build(namespaces)).thenThrow(expectedException);
 
-        MDLException thrown =
+        SigningException actualException =
+                assertThrows(
+                        SigningException.class,
+                        () ->
+                                mobileDrivingLicenceService.createMobileDrivingLicence(
+                                        mockDrivingLicenceDocument));
+        assertEquals(expectedException, actualException);
+        verify(namespacesFactory).build(mockDrivingLicenceDocument);
+        verify(issuerSignedFactory).build(namespaces);
+        verify(cborEncoder, never()).encode(any());
+    }
+
+    @Test
+    void Should_PropagatePropagateMDLException_When_CborEncoderThrows() throws Exception {
+        MDLException expectedException =
+                new MDLException("Some error message", new RuntimeException());
+        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
+        when(issuerSignedFactory.build(namespaces)).thenReturn(issuerSigned);
+        when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
+
+        MDLException actualException =
                 assertThrows(
                         MDLException.class,
                         () ->
                                 mobileDrivingLicenceService.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument));
-        assertEquals(expectedException, thrown);
-        verify(cborEncoder).encode(mockDocument);
+
+        assertEquals(expectedException, actualException);
+        verify(namespacesFactory).build(mockDrivingLicenceDocument);
+        verify(issuerSignedFactory).build(namespaces);
+        verify(cborEncoder).encode(issuerSigned);
     }
 }

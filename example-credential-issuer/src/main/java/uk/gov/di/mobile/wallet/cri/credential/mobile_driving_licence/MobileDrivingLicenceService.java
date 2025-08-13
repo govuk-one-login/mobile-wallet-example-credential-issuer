@@ -1,50 +1,54 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Document;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DocumentFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Namespaces;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
-import java.util.HexFormat;
+import java.util.Base64;
 
 /**
- * Service responsible for creating Mobile Driving Licence (mDL) documents following the ISO 18013-5
- * standard.
- *
- * <p>This service encodes driving licence information into CBOR format and organizes it into the
- * proper namespace structure required by the standard.
+ * Service responsible for creating the {@code IssuerSigned} structure of Mobile Driving Licences
+ * (mDLs).
  */
 public class MobileDrivingLicenceService {
-    /** Encoder used to convert document objects into CBOR byte representation. */
-    private final CBOREncoder cborEncoder;
 
-    private final DocumentFactory documentFactory;
+    private final CBOREncoder cborEncoder;
+    private final NamespacesFactory namespacesFactory;
+    private final IssuerSignedFactory issuerSignedFactory;
 
     /**
-     * Constructs a new MobileDrivingLicenceService with all required dependencies.
+     * Constructs a new MobileDrivingLicenceService.
      *
-     * @param cborEncoder The CBOR encoder to use for data serialization
-     * @param documentFactory The document factory to use for document creation array of
-     *     IssuerSignedItem objects
+     * @param cborEncoder CBOR encoder for encoding objects into CBOR binary representation
+     * @param namespacesFactory Factory for creating {@link Namespaces} from a driving licence
+     *     document
+     * @param issuerSignedFactory Factory for creating {@link IssuerSigned}
      */
-    public MobileDrivingLicenceService(CBOREncoder cborEncoder, DocumentFactory documentFactory) {
+    public MobileDrivingLicenceService(
+            CBOREncoder cborEncoder,
+            NamespacesFactory namespacesFactory,
+            IssuerSignedFactory issuerSignedFactory) {
         this.cborEncoder = cborEncoder;
-        this.documentFactory = documentFactory;
+        this.namespacesFactory = namespacesFactory;
+        this.issuerSignedFactory = issuerSignedFactory;
     }
 
     /**
-     * Creates a Mobile Driving Licence document in CBOR format from the provided driving licence
-     * document and returns it as a hexadecimal string.
+     * Creates an {@link IssuerSigned} structure in Base64URL-encoded CBOR format.
      *
-     * @param drivingLicenceDocument The driving licence document containing user information
-     * @return A hexadecimal string representation of the CBOR-encoded mobile driving licence
+     * @param drivingLicenceDocument The driving licence data to serialise and sign
+     * @return A Base64URL-encoded string containing the CBOR-encoded {@code IssuerSigned} structure
      */
     public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
             throws ObjectStoreException, SigningException, CertificateException {
-        Document mdoc = documentFactory.build(drivingLicenceDocument);
-        byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(mdoc);
-        return HexFormat.of().formatHex(cborEncodedMobileDrivingLicence);
+        Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
+        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces);
+        byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
+        return Base64.getUrlEncoder().encodeToString(cborEncodedMobileDrivingLicence);
     }
 }
