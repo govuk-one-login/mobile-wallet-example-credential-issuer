@@ -19,6 +19,7 @@ public final class CamelToSnake {
         if (camelCase == null || camelCase.isEmpty()) {
             return camelCase;
         }
-        return CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, camelCase);
+        String snakeCase = CaseFormat.LOWER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, camelCase);
+        return snakeCase.replaceAll("(?<=[A-Za-z])(?=\\d)","_");
     }
 }
