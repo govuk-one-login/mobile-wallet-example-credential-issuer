@@ -36,4 +36,9 @@ class CamelToSnakeTest {
     void Should_HandleUnderscores() {
         assertEquals("already_has_underscores", camelToSnake("already_has_underscores"));
     }
+
+    @Test
+    void Should_HandleUnderscoresForWordsAndDigits() {
+        assertEquals("age_over_18", camelToSnake("ageOver18"));
+    }
 }
