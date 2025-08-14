@@ -12,9 +12,8 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Namesp
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.util.Base64;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -41,9 +40,14 @@ class MobileDrivingLicenceServiceTest {
     }
 
     @Test
-    void Should_ReturnBase64EncodedIssuerSigned() throws Exception {
-        byte[] mockCborData = "mock-cbor-data".getBytes();
-        String expectedBase64 = Base64.getUrlEncoder().encodeToString(mockCborData);
+    void Should_ReturnBase64UrlEncodedIssuerSigned() throws Exception {
+        byte[] mockCborData =
+                new byte[] {
+                    0x00, 0x01, 0x02, 0x03, 0x04,
+                    0x05, 0x06, 0x07, 0x08, 0x09
+                };
+        ; // 10 bytes length, will yield padding if encoded with standard Base64
+        String expectedBase64 = "AAECAwQFBgcICQ";
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
         when(issuerSignedFactory.build(namespaces)).thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
@@ -54,7 +58,8 @@ class MobileDrivingLicenceServiceTest {
         assertEquals(
                 expectedBase64,
                 result,
-                "The actual base64 string should match the expected result");
+                "The actual base64url encoded string should match the expected result");
+        assertFalse(result.contains("="), "Base64url encoded string should not contain padding");
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
         verify(issuerSignedFactory).build(namespaces);
         verify(cborEncoder).encode(issuerSigned);
