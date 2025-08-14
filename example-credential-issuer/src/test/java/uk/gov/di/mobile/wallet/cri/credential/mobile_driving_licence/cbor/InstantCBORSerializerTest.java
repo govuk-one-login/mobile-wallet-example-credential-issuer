@@ -36,7 +36,7 @@ class InstantCBORSerializerTest {
 
         serializer.serialize(testDate, cborGenerator, serializerProvider);
 
-        verify(cborGenerator).writeTag(1000);
+        verify(cborGenerator).writeTag(0);
         verify(cborGenerator).writeString(expectedDateString);
     }
 

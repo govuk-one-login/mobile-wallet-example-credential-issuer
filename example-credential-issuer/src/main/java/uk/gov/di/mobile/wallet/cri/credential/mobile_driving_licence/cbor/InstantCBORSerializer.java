@@ -24,8 +24,8 @@ public class InstantCBORSerializer extends JsonSerializer<Instant> {
         }
         String formatted =
                 instant.truncatedTo(ChronoUnit.SECONDS).toString(); // "2026-06-24T16:05:21Z"
-        // '1000' is a tag indicating that the CBOR value should be interpreted as a date-time
-        cborGenerator.writeTag(1000);
+        // '0' is a tag indicating that the CBOR value should be interpreted as a date-time
+        cborGenerator.writeTag(0);
         generator.writeString(formatted);
     }
 }
