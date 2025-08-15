@@ -5,6 +5,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLice
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -51,10 +52,17 @@ public class NamespacesFactory {
                     if (fieldValue == Optional.empty()) {
                         continue;
                     }
+
+                    if ("driving_privileges".equals(fieldNameAsSnakeCase)
+                            || "provisional_driving_privileges".equals(fieldNameAsSnakeCase)) {
+
+                        fieldValue = convertDrivingPrivilegesToSnakeCase(fieldValue);
+                    }
+
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
                             String.format(
-                                    "Failed to access Driving Licence property %s to build IssuerSignedItem",
+                                    "Failed to access driving licence property %s to build IssuerSignedItem",
                                     fieldName),
                             exception);
                 }
@@ -65,6 +73,50 @@ public class NamespacesFactory {
             namespaces.put(entry.getKey(), issuerSignedItems);
         }
         return new Namespaces(namespaces);
+    }
+
+    private Object convertDrivingPrivilegesToSnakeCase(Object value) throws IllegalAccessException {
+        if (value instanceof Optional<?> optionalValue) {
+            if (optionalValue.isEmpty()) {
+                return Collections.emptyList();
+            }
+            value = optionalValue.get();
+        }
+
+        if (!(value instanceof List<?> originalList)) {
+            return value;
+        }
+
+        List<Map<String, Object>> convertedList = new ArrayList<>();
+
+        for (Object arrayItem : originalList) {
+            Map<String, Object> convertedMap = new LinkedHashMap<>();
+
+            for (Field field : arrayItem.getClass().getDeclaredFields()) {
+                if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
+                    continue;
+                }
+                field.setAccessible(true);
+                String snakeKey = camelToSnake(field.getName());
+                Object fieldValue = field.get(arrayItem);
+
+                if (fieldValue == null) {
+                    continue;
+                }
+
+                if (fieldValue instanceof Optional<?> opt) {
+                    if (opt.isEmpty()) {
+                        continue;
+                    }
+                    fieldValue = opt.get();
+                }
+
+                convertedMap.put(snakeKey, fieldValue);
+            }
+            convertedList.add(convertedMap);
+        }
+
+        return convertedList;
     }
 
     /**

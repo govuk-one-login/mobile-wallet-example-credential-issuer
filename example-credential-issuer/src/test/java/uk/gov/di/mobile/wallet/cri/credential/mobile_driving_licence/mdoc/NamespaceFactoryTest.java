@@ -11,15 +11,18 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLExceptio
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes;
 
 import java.time.LocalDate;
+import java.util.*;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -28,12 +31,18 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class NamespacesFactoryTest {
 
-    // Test data: a single driving privilege for use in the driving licence document
-    private static final DrivingPrivilege[] DRIVING_PRIVILEGES = {
-        new DrivingPrivilege("B", null, null)
-    };
+    private static final List<DrivingPrivilege> DRIVING_PRIVILEGES =
+            List.of(
+                    new DrivingPrivilege("A", "12-02-2020", "11-02-2030"),
+                    new DrivingPrivilege("B", null, null));
+    private static final List<Map<String, Object>> DRIVING_PRIVILEGES_SNAKE_CASE =
+            List.of(
+                    Map.of(
+                            "vehicle_category_code", "A",
+                            "issue_date", LocalDate.parse("2020-02-12"),
+                            "expiry_date", LocalDate.parse("2030-02-11")),
+                    Map.of("vehicle_category_code", "B"));
 
-    // Mocked dependencies for NamespacesFactory
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
 
     private NamespacesFactory namespacesFactory;
@@ -49,16 +58,12 @@ class NamespacesFactoryTest {
      */
     @Test
     void Should_BuildISOAndUKNamespaces() {
-        // Arrange: Set up test DrivingLicenceDocument
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
-        // Arrange: Configure mock to return a dummy IssuerSignedItem
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
 
-        // Act: Build the namespaces
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        // Assert: Check that both namespaces exist and have the expected number of fields
         Map<String, List<IssuerSignedItem>> namespaces = result.asMap();
         assertEquals(2, namespaces.size(), "Should have 2 namespaces (ISO and UK)");
         assertTrue(namespaces.containsKey(NamespaceTypes.ISO), "Should contain ISO namespace");
@@ -78,22 +83,18 @@ class NamespacesFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
             throws MDLException {
-        // Arrange: Set up test DrivingLicenceDocument
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
-        // Arrange: Configure mock to return a dummy IssuerSignedItem
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
 
-        // Act: Build the namespaces
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        // Assert: Check that ISO namespace has correct number of fields
         List<IssuerSignedItem> isoNamespace = result.asMap().get(NamespaceTypes.ISO);
         assertEquals(
                 18,
                 isoNamespace.size(),
                 "Should create one IssuerSignedItem per ISO namespace attribute");
-        // Assert: Verify that the factory was called with the expected ISO fields and values
+        // Verify that the factory was called with the expected ISO fields and values
         verify(mockIssuerSignedItemFactory).build("family_name", "Doe");
         verify(mockIssuerSignedItemFactory).build("given_name", "John");
         verify(mockIssuerSignedItemFactory)
@@ -108,7 +109,8 @@ class NamespacesFactoryTest {
         verify(mockIssuerSignedItemFactory).build("resident_address", "123 Main St, Apt 4B");
         verify(mockIssuerSignedItemFactory).build("resident_postal_code", "SW1A 2AA");
         verify(mockIssuerSignedItemFactory).build("resident_city", "London");
-        verify(mockIssuerSignedItemFactory).build("driving_privileges", DRIVING_PRIVILEGES);
+        verify(mockIssuerSignedItemFactory)
+                .build("driving_privileges", DRIVING_PRIVILEGES_SNAKE_CASE);
         verify(mockIssuerSignedItemFactory).build("un_distinguishing_sign", "UK");
         verify(mockIssuerSignedItemFactory).build("welsh_licence", false);
     }
@@ -120,24 +122,21 @@ class NamespacesFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace()
             throws MDLException {
-        // Arrange: Set up test DrivingLicenceDocument
-        DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
-        // Arrange: Configure mock to return a dummy IssuerSignedItem
+        DrivingLicenceDocument drivingLicenceDocument =
+                createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
 
-        // Act: Build the namespaces
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        // Assert: Check that UK namespace has correct number of fields
         List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
         assertEquals(
                 3,
                 ukNamespace.size(),
                 "Should create one IssuerSignedItem per UK namespace attribute");
-        // Assert: Verify that the factory was called with all expected UK fields and values
+        // Verify that the factory was called with all expected UK fields and values
         verify(mockIssuerSignedItemFactory)
-                .build("provisional_driving_privileges", Optional.ofNullable(DRIVING_PRIVILEGES));
+                .build("provisional_driving_privileges", DRIVING_PRIVILEGES_SNAKE_CASE);
         verify(mockIssuerSignedItemFactory).build("title", "Miss");
     }
 
@@ -146,26 +145,22 @@ class NamespacesFactoryTest {
      * privileges if its value is null.
      */
     @Test
-    void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_When_ItsValueIsNull()
+    void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_WhenItsValueIsNull()
             throws MDLException {
-        // Arrange: Set up test DrivingLicenceDocument with null provisional privileges
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument(null);
-        // Arrange: Configure mock to return a dummy IssuerSignedItem
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
 
-        // Act: Build the namespaces
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        // Assert: Check that UK namespace has only 1 field (i.e. not provisional privileges)
         List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
         assertEquals(
                 2,
                 ukNamespace.size(),
-                "Should not create an IssuerSignedItem for provisional driving privileges when its value is null");
-        // Assert: Verify that the factory was NOT called for provisional privileges with null
+                "Should not create an IssuerSignedItem for provisional driving privileges when null");
+
         verify(mockIssuerSignedItemFactory, never())
-                .build("provisional_driving_privileges", Optional.empty());
+                .build(eq("provisional_driving_privileges"), any());
     }
 
     /**
@@ -181,7 +176,7 @@ class NamespacesFactoryTest {
      * drivingPrivileges field always uses the default DRIVING_PRIVILEGES.
      */
     private DrivingLicenceDocument createTestDrivingLicenceDocument(
-            DrivingPrivilege[] provisionalDrivingPrivileges) {
+            List<DrivingPrivilege> provisionalDrivingPrivileges) {
         String[] address = {"123 Main St", "Apt 4B"};
         return new DrivingLicenceDocument(
                 "Doe",
