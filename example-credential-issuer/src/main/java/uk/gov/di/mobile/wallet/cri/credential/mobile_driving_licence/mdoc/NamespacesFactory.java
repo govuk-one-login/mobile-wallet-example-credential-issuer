@@ -75,50 +75,6 @@ public class NamespacesFactory {
         return new Namespaces(namespaces);
     }
 
-    private Object convertDrivingPrivilegesToSnakeCase(Object value) throws IllegalAccessException {
-        if (value instanceof Optional<?> optionalValue) {
-            if (optionalValue.isEmpty()) {
-                return Collections.emptyList();
-            }
-            value = optionalValue.get();
-        }
-
-        if (!(value instanceof List<?> originalList)) {
-            return value;
-        }
-
-        List<Map<String, Object>> convertedList = new ArrayList<>();
-
-        for (Object arrayItem : originalList) {
-            Map<String, Object> convertedMap = new LinkedHashMap<>();
-
-            for (Field field : arrayItem.getClass().getDeclaredFields()) {
-                if (Modifier.isStatic(field.getModifiers()) || field.isSynthetic()) {
-                    continue;
-                }
-                field.setAccessible(true);
-                String snakeKey = camelToSnake(field.getName());
-                Object fieldValue = field.get(arrayItem);
-
-                if (fieldValue == null) {
-                    continue;
-                }
-
-                if (fieldValue instanceof Optional<?> opt) {
-                    if (opt.isEmpty()) {
-                        continue;
-                    }
-                    fieldValue = opt.get();
-                }
-
-                convertedMap.put(snakeKey, fieldValue);
-            }
-            convertedList.add(convertedMap);
-        }
-
-        return convertedList;
-    }
-
     /**
      * Groups the declared fields of a class by their {@link Namespace} annotation value.
      *
@@ -131,5 +87,49 @@ public class NamespacesFactory {
                 .collect(
                         Collectors.groupingBy(
                                 field -> field.getAnnotation(Namespace.class).value()));
+    }
+
+    @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
+    private Object convertDrivingPrivilegesToSnakeCase(Object value) throws IllegalAccessException {
+        Object unwrappedValue = unwrapOptional(value);
+        if (!(unwrappedValue instanceof List<?> originalList)) {
+            return unwrappedValue;
+        }
+        List<Map<String, Object>> convertedList = new ArrayList<>();
+        for (Object item : originalList) {
+            Map<String, Object> convertedMap = new LinkedHashMap<>();
+            for (Field field : item.getClass().getDeclaredFields()) {
+                if (shouldSkipField(field)) {
+                    continue;
+                }
+                field.setAccessible(true);
+                String snakeKey = camelToSnake(field.getName());
+                Object fieldValue = extractFieldValue(field, item);
+                if (fieldValue != null) {
+                    convertedMap.put(snakeKey, fieldValue);
+                }
+            }
+            convertedList.add(convertedMap);
+        }
+        return convertedList;
+    }
+
+    private Object unwrapOptional(Object value) {
+        if (value instanceof Optional<?> optionalValue) {
+            return optionalValue.isEmpty() ? Collections.emptyList() : optionalValue.get();
+        }
+        return value;
+    }
+
+    private boolean shouldSkipField(Field field) {
+        return Modifier.isStatic(field.getModifiers()) || field.isSynthetic();
+    }
+
+    private Object extractFieldValue(Field field, Object value) throws IllegalAccessException {
+        Object fieldValue = field.get(value);
+        if (fieldValue instanceof Optional<?> optional) {
+            return optional.orElse(null);
+        }
+        return fieldValue;
     }
 }
