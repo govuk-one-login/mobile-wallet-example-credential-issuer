@@ -11,7 +11,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLExceptio
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.constants.NamespaceTypes;
 
 import java.time.LocalDate;
-import java.util.*;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
