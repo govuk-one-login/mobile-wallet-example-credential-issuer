@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -73,13 +74,13 @@ public class DrivingLicenceDocument {
     private final String residentCity;
 
     @Namespace(NamespaceTypes.ISO)
-    private final DrivingPrivilege[] drivingPrivileges;
+    private final List<DrivingPrivilege> drivingPrivileges;
 
     @Namespace(NamespaceTypes.ISO)
     private final String unDistinguishingSign;
 
     @Namespace(NamespaceTypes.GB)
-    private final Optional<DrivingPrivilege[]> provisionalDrivingPrivileges;
+    private final Optional<List<DrivingPrivilege>> provisionalDrivingPrivileges;
 
     @JsonCreator
     public DrivingLicenceDocument(
@@ -98,10 +99,10 @@ public class DrivingLicenceDocument {
             @JsonProperty("resident_address") String[] residentAddress,
             @JsonProperty("resident_postal_code") String residentPostalCode,
             @JsonProperty("resident_city") String residentCity,
-            @JsonProperty("driving_privileges") DrivingPrivilege[] drivingPrivileges,
+            @JsonProperty("driving_privileges") List<DrivingPrivilege> drivingPrivileges,
             @JsonProperty("un_distinguishing_sign") String unDistinguishingSign,
             @JsonProperty("provisional_driving_privileges")
-                    DrivingPrivilege[] provisionalDrivingPrivileges) {
+                    List<DrivingPrivilege> provisionalDrivingPrivileges) {
         this.familyName = Objects.requireNonNull(familyName, "family_name is required");
         this.givenName = Objects.requireNonNull(givenName, "given_name is required");
         this.title = Objects.requireNonNull(title, "title is required");

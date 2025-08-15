@@ -7,7 +7,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeParseException;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -34,13 +36,11 @@ class DrivingLicenceDocumentTest {
     private static final String[] RESIDENT_ADDRESS = {"123 Main St", "Apt 4B"};
     private static final String RESIDENT_POSTAL_CODE = "SW1A 1AA";
     private static final String RESIDENT_CITY = "London";
-    private static final DrivingPrivilege[] DRIVING_PRIVILEGES = {
-        mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
-    };
+    private static final List<DrivingPrivilege> DRIVING_PRIVILEGES =
+            Arrays.asList(mock(DrivingPrivilege.class), mock(DrivingPrivilege.class));
     private static final String UN_DISTINGUISHING_SIGN = "UK";
-    private static final DrivingPrivilege[] PROVISIONAL_DRIVING_PRIVILEGES = {
-        mock(DrivingPrivilege.class), mock(DrivingPrivilege.class)
-    };
+    private static final List<DrivingPrivilege> PROVISIONAL_DRIVING_PRIVILEGES =
+            Arrays.asList(mock(DrivingPrivilege.class), mock(DrivingPrivilege.class));
 
     @Test
     void Should_CreateInstance_When_DataIsValid() {
@@ -86,7 +86,7 @@ class DrivingLicenceDocumentTest {
         assertEquals("123 Main St, Apt 4B", document.getResidentAddress());
         assertEquals(RESIDENT_POSTAL_CODE, document.getResidentPostalCode());
         assertEquals(RESIDENT_CITY, document.getResidentCity());
-        assertArrayEquals(DRIVING_PRIVILEGES, document.getDrivingPrivileges());
+        assertEquals(DRIVING_PRIVILEGES, document.getDrivingPrivileges());
     }
 
     @Test
@@ -147,7 +147,7 @@ class DrivingLicenceDocumentTest {
 
     @Test
     void Should_CreateInstance_When_ProvisionalDrivingPrivilegesIsNull() {
-        DrivingPrivilege[] provisionalDrivingPrivileges = null;
+        List<DrivingPrivilege> provisionalDrivingPrivileges = null;
 
         DrivingLicenceDocument document =
                 new DrivingLicenceDocument(
