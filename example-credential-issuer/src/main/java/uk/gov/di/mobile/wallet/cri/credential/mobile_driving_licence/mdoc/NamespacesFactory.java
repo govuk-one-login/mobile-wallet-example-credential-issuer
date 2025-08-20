@@ -5,7 +5,14 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLice
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.CamelToSnake.camelToSnake;
@@ -51,10 +58,17 @@ public class NamespacesFactory {
                     if (fieldValue == Optional.empty()) {
                         continue;
                     }
+
+                    if ("driving_privileges".equals(fieldNameAsSnakeCase)
+                            || "provisional_driving_privileges".equals(fieldNameAsSnakeCase)) {
+
+                        fieldValue = convertDrivingPrivilegesToSnakeCase(fieldValue);
+                    }
+
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
                             String.format(
-                                    "Failed to access Driving Licence property %s to build IssuerSignedItem",
+                                    "Failed to access driving licence property %s to build IssuerSignedItem",
                                     fieldName),
                             exception);
                 }
@@ -79,5 +93,49 @@ public class NamespacesFactory {
                 .collect(
                         Collectors.groupingBy(
                                 field -> field.getAnnotation(Namespace.class).value()));
+    }
+
+    @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
+    private Object convertDrivingPrivilegesToSnakeCase(Object value) throws IllegalAccessException {
+        Object unwrappedValue = unwrapOptional(value);
+        if (!(unwrappedValue instanceof List<?> originalList)) {
+            return unwrappedValue;
+        }
+        List<Map<String, Object>> convertedList = new ArrayList<>();
+        for (Object item : originalList) {
+            Map<String, Object> convertedMap = new LinkedHashMap<>();
+            for (Field field : item.getClass().getDeclaredFields()) {
+                if (shouldSkipField(field)) {
+                    continue;
+                }
+                field.setAccessible(true);
+                String snakeKey = camelToSnake(field.getName());
+                Object fieldValue = extractFieldValue(field, item);
+                if (fieldValue != null) {
+                    convertedMap.put(snakeKey, fieldValue);
+                }
+            }
+            convertedList.add(convertedMap);
+        }
+        return convertedList;
+    }
+
+    private Object unwrapOptional(Object value) {
+        if (value instanceof Optional<?> optionalValue) {
+            return optionalValue.isEmpty() ? Collections.emptyList() : optionalValue.get();
+        }
+        return value;
+    }
+
+    private boolean shouldSkipField(Field field) {
+        return Modifier.isStatic(field.getModifiers()) || field.isSynthetic();
+    }
+
+    private Object extractFieldValue(Field field, Object value) throws IllegalAccessException {
+        Object fieldValue = field.get(value);
+        if (fieldValue instanceof Optional<?> optional) {
+            return optional.orElse(null);
+        }
+        return fieldValue;
     }
 }
