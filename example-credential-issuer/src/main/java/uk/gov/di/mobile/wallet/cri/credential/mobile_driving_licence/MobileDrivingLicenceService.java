@@ -9,6 +9,7 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
 import java.util.Base64;
 
 /**
@@ -44,10 +45,11 @@ public class MobileDrivingLicenceService {
      * @param drivingLicenceDocument The driving licence data to serialise and sign
      * @return A Base64URL-encoded string containing the CBOR-encoded {@code IssuerSigned} structure
      */
-    public String createMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
+    public String createMobileDrivingLicence(
+            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
-        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces);
+        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
                 .withoutPadding()

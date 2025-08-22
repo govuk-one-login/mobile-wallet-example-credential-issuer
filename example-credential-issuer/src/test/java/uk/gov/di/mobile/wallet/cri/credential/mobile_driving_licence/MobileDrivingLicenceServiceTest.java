@@ -12,10 +12,13 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Namesp
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.interfaces.ECPublicKey;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,7 +32,7 @@ class MobileDrivingLicenceServiceTest {
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
     @Mock private Namespaces namespaces;
     @Mock private IssuerSigned issuerSigned;
-
+    @Mock private ECPublicKey mockEcPublicKey;
     private MobileDrivingLicenceService mobileDrivingLicenceService;
 
     @BeforeEach
@@ -48,11 +51,12 @@ class MobileDrivingLicenceServiceTest {
                 }; // 10 bytes length, will yield padding if encoded with standard Base64
         String expectedBase64 = "AAECAwQFBgcICQ";
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
-        when(issuerSignedFactory.build(namespaces)).thenReturn(issuerSigned);
+        when(issuerSignedFactory.build(namespaces, mockEcPublicKey)).thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
 
         String result =
-                mobileDrivingLicenceService.createMobileDrivingLicence(mockDrivingLicenceDocument);
+                mobileDrivingLicenceService.createMobileDrivingLicence(
+                        mockDrivingLicenceDocument, mockEcPublicKey);
 
         assertEquals(
                 expectedBase64,
@@ -60,7 +64,7 @@ class MobileDrivingLicenceServiceTest {
                 "The actual base64url encoded string should match the expected result");
         assertFalse(result.contains("="), "Base64url encoded string should not contain padding");
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory).build(namespaces);
+        verify(issuerSignedFactory).build(namespaces, mockEcPublicKey);
         verify(cborEncoder).encode(issuerSigned);
     }
 
@@ -75,11 +79,11 @@ class MobileDrivingLicenceServiceTest {
                         MDLException.class,
                         () ->
                                 mobileDrivingLicenceService.createMobileDrivingLicence(
-                                        mockDrivingLicenceDocument));
+                                        mockDrivingLicenceDocument, mockEcPublicKey));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory, never()).build(any());
+        verify(issuerSignedFactory, never()).build(any(), eq(mockEcPublicKey));
         verify(cborEncoder, never()).encode(any());
     }
 
@@ -88,17 +92,17 @@ class MobileDrivingLicenceServiceTest {
         SigningException expectedException =
                 new SigningException("Some error message", new RuntimeException());
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
-        when(issuerSignedFactory.build(namespaces)).thenThrow(expectedException);
+        when(issuerSignedFactory.build(namespaces, mockEcPublicKey)).thenThrow(expectedException);
 
         SigningException actualException =
                 assertThrows(
                         SigningException.class,
                         () ->
                                 mobileDrivingLicenceService.createMobileDrivingLicence(
-                                        mockDrivingLicenceDocument));
+                                        mockDrivingLicenceDocument, mockEcPublicKey));
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory).build(namespaces);
+        verify(issuerSignedFactory).build(namespaces, mockEcPublicKey);
         verify(cborEncoder, never()).encode(any());
     }
 
@@ -107,7 +111,7 @@ class MobileDrivingLicenceServiceTest {
         MDLException expectedException =
                 new MDLException("Some error message", new RuntimeException());
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
-        when(issuerSignedFactory.build(namespaces)).thenReturn(issuerSigned);
+        when(issuerSignedFactory.build(namespaces, mockEcPublicKey)).thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
 
         MDLException actualException =
@@ -115,11 +119,11 @@ class MobileDrivingLicenceServiceTest {
                         MDLException.class,
                         () ->
                                 mobileDrivingLicenceService.createMobileDrivingLicence(
-                                        mockDrivingLicenceDocument));
+                                        mockDrivingLicenceDocument, mockEcPublicKey));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory).build(namespaces);
+        verify(issuerSignedFactory).build(namespaces, mockEcPublicKey);
         verify(cborEncoder).encode(issuerSigned);
     }
 }
