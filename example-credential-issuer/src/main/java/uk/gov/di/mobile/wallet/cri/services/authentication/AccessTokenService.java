@@ -25,14 +25,17 @@ import java.util.HashSet;
 /** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
 
-    /** Claim name for the credential identifier. */
     public static final String CLAIM_CREDENTIAL_IDENTIFIERS = "credential_identifiers";
-
-    /** Claim name for the nonce value. */
     public static final String CLAIM_C_NONCE = "c_nonce";
+    private static final String CLAIM_SUBJECT = "sub";
+    private static final String CLAIM_EXPIRATION_TIME = "exp";
+    private static final String CLAIM_JWT_ID = "jti";
 
     private static final JWSAlgorithm EXPECTED_SIGNING_ALGORITHM = JWSAlgorithm.parse("ES256");
     private static final JOSEObjectType EXPECTED_TYPE = new JOSEObjectType("at+jwt");
+
+    private static final String REQUIRED_KEY_TYPE = "EC";
+    private static final Curve REQUIRED_CURVE = Curve.P_256;
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
@@ -112,20 +115,27 @@ public class AccessTokenService {
      * @throws AccessTokenValidationException If the claims are invalid.
      */
     private void verifyTokenClaims(SignedJWT accessToken) throws AccessTokenValidationException {
-        String expectedIssuer = configurationService.getOneLoginAuthServerUrl();
-        String expectedAudience = configurationService.getSelfUrl();
-        JWTClaimsSet expectedClaimValues =
-                new JWTClaimsSet.Builder()
-                        .issuer(expectedIssuer)
-                        .audience(expectedAudience)
-                        .build();
-        HashSet<String> requiredClaims =
-                new HashSet<>(Arrays.asList("sub", CLAIM_C_NONCE, CLAIM_CREDENTIAL_IDENTIFIERS));
-
         try {
+
+            String expectedIssuer = configurationService.getOneLoginAuthServerUrl();
+            String expectedAudience = configurationService.getSelfUrl();
+            JWTClaimsSet expectedClaimValues =
+                    new JWTClaimsSet.Builder()
+                            .issuer(expectedIssuer)
+                            .audience(expectedAudience)
+                            .build();
+            HashSet<String> requiredClaims =
+                    new HashSet<>(
+                            Arrays.asList(
+                                    CLAIM_SUBJECT,
+                                    CLAIM_C_NONCE,
+                                    CLAIM_CREDENTIAL_IDENTIFIERS,
+                                    CLAIM_EXPIRATION_TIME,
+                                    CLAIM_JWT_ID));
             JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
+
             verifier.verify(jwtClaimsSet, null);
 
             if (jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).isEmpty()) {
@@ -161,11 +171,11 @@ public class AccessTokenService {
 
             // If alg is not set, check key type and curve for ES256 compatibility
             if (algorithm == null) {
-                if (!"EC".equals(jwk.getKeyType().getValue())) {
+                if (!REQUIRED_KEY_TYPE.equals(jwk.getKeyType().getValue())) {
                     throw new AccessTokenValidationException("JWK key type is not EC");
                 }
                 ECKey ecKey = (ECKey) jwk;
-                if (!Curve.P_256.equals(ecKey.getCurve())) {
+                if (!REQUIRED_CURVE.equals(ecKey.getCurve())) {
                     throw new AccessTokenValidationException(
                             "JWK curve does not match expected curve for ES256");
                 }
