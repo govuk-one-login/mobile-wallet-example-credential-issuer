@@ -15,7 +15,6 @@ public class MockAccessTokenBuilder {
     private final JWSHeader.Builder headerBuilder;
     private final JWTClaimsSet.Builder claimsBuilder =
             new JWTClaimsSet.Builder()
-                    .issueTime(Date.from(Instant.now()))
                     .subject(
                             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i")
                     .audience("https://issuer-url.gov.uk")
