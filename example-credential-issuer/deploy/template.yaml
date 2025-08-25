@@ -60,7 +60,7 @@ Mappings:
       BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
       CertificatesBucketName: "wallet-dsc-issuer-671524980203-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:671524980203:key/72b0ed1b-9fa6-43ae-ba8f-14693868ce72
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/1c589b25-0433-45e0-b7d9-911fe33a9c1a
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/dc8de818-634f-4d96-b3ba-fb865cd3776f
     build:
       SelfUrl: "example-credential-issuer.mobile.build.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
@@ -69,7 +69,7 @@ Mappings:
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
       CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/80334954-bf3b-4e15-bbeb-ce801c4e36fa
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
     staging:
       SelfUrl: "example-credential-issuer.mobile.staging.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.mobile.staging.account.gov.uk"
@@ -78,7 +78,7 @@ Mappings:
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
       CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/80334954-bf3b-4e15-bbeb-ce801c4e36fa
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
   ElasticLoadBalancerAccountIds:
     eu-west-2:
       AccountId: 652711504416
