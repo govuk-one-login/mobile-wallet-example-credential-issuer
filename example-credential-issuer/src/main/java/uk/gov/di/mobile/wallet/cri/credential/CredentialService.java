@@ -26,6 +26,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import uk.gov.di.mobile.wallet.cri.util.ExpiryUtil;
 
 import java.security.cert.CertificateException;
+import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -139,7 +140,8 @@ public class CredentialService {
             } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
                 DrivingLicenceDocument drivingLicenceDocument =
                         mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-                credential = getMobileDrivingLicence(drivingLicenceDocument);
+                credential =
+                        getMobileDrivingLicence(drivingLicenceDocument, proofJwtData.publicKey());
                 LocalDate expiryDate = drivingLicenceDocument.getExpiryDate();
                 documentExpiry = ExpiryUtil.calculateExpiryTimeFromDate(expiryDate);
 
@@ -219,9 +221,11 @@ public class CredentialService {
                         veteranCardDocument.getCredentialTtlMinutes());
     }
 
-    private String getMobileDrivingLicence(DrivingLicenceDocument drivingLicenceDocument)
+    private String getMobileDrivingLicence(
+            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
             throws ObjectStoreException, SigningException, CertificateException {
-        return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument);
+        return mobileDrivingLicenceService.createMobileDrivingLicence(
+                drivingLicenceDocument, publicKey);
     }
 
     protected Logger getLogger() {

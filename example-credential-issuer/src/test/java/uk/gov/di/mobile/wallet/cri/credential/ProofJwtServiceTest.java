@@ -46,7 +46,7 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(mockProof));
         assertEquals(
-                "JWT alg header claim [RS256] does not match client config alg [ES256]",
+                "JWT alg header claim [RS256] does not match expected algorithm [ES256]",
                 exception.getMessage());
     }
 
@@ -134,7 +134,7 @@ class ProofJwtServiceTest {
 
         assertThat(
                 exception.getMessage(),
-                containsString("Error verifying signature: did:key must be base58 encoded"));
+                containsString("Error getting public key from did:key [did:key:notAValidDidKey]"));
     }
 
     @Test
@@ -149,7 +149,9 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(mockProof));
 
-        assertEquals("JWT type header claim is invalid", exception.getMessage());
+        assertEquals(
+                "JWT type header claim [invalid-proof+jwt] does not match expected type [openid4vci-proof+jwt]",
+                exception.getMessage());
     }
 
     @Test
