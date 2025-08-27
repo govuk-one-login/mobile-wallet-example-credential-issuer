@@ -61,7 +61,7 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        Map<String, List<IssuerSignedItem>> namespaces = result.asMap();
+        Map<String, List<IssuerSignedItem>> namespaces = result.namespaces();
         assertEquals(2, namespaces.size(), "Should have 2 nameSpaces (ISO and UK)");
         assertTrue(namespaces.containsKey(NamespaceTypes.ISO), "Should contain ISO namespace");
         assertTrue(namespaces.containsKey(NamespaceTypes.GB), "Should contain UK namespace");
@@ -86,7 +86,7 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem> isoNamespace = result.asMap().get(NamespaceTypes.ISO);
+        List<IssuerSignedItem> isoNamespace = result.namespaces().get(NamespaceTypes.ISO);
         assertEquals(
                 18,
                 isoNamespace.size(),
@@ -126,7 +126,7 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
+        List<IssuerSignedItem> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
         assertEquals(
                 3,
                 ukNamespace.size(),
@@ -150,7 +150,7 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
+        List<IssuerSignedItem> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
         assertEquals(
                 2,
                 ukNamespace.size(),

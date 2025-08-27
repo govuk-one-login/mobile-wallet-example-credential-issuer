@@ -44,6 +44,6 @@ public class IssuerSignedFactory {
         X509Certificate certificate = certificateProvider.getCertificate(certificateId);
         COSESign1 sign1 = coseSigner.sign(mobileSecurityObjectBytes, certificate);
 
-        return new IssuerSigned(namespaces.asMap(), sign1);
+        return new IssuerSigned(namespaces.namespaces(), sign1);
     }
 }

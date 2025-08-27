@@ -75,7 +75,7 @@ class IssuerSignedFactoryTest {
                 "namespace1", Arrays.asList(mockIssuerSignedItem1, mockIssuerSignedItem2));
         namespacesMap.put("namespace2", Arrays.asList(mockIssuerSignedItem1));
 
-        when(mockNamespaces.asMap()).thenReturn(namespacesMap);
+        when(mockNamespaces.namespaces()).thenReturn(namespacesMap);
         when(mockMobileSecurityObjectFactory.build(mockNamespaces, mockEcPublicKey))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
@@ -194,7 +194,7 @@ class IssuerSignedFactoryTest {
         Map<String, List<IssuerSignedItem>> namespacesMap = new LinkedHashMap<>();
         namespacesMap.put("namespace1", Arrays.asList(mockIssuerSignedItem1));
 
-        when(mockNamespaces.asMap()).thenReturn(namespacesMap);
+        when(mockNamespaces.namespaces()).thenReturn(namespacesMap);
         when(mockMobileSecurityObjectFactory.build(mockNamespaces, mockEcPublicKey))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);

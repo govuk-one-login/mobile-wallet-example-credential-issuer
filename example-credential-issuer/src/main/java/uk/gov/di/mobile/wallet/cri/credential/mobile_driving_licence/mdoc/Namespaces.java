@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public record Namespaces(Map<String, List<IssuerSignedItem>> namespaces) {
-    public Map<String, List<IssuerSignedItem>> asMap() {
+    public Map<String, List<IssuerSignedItem>> namespaces() {
         return namespaces;
     }
 }
