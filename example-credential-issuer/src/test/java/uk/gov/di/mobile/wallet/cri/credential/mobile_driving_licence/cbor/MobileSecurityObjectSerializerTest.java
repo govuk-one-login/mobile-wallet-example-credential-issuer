@@ -1,14 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InOrder;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceKeyInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.KeyAuthorizations;
@@ -22,23 +20,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.inOrder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-@ExtendWith(MockitoExtension.class)
 class MobileSecurityObjectSerializerTest {
 
+    private ObjectMapper cborObjectMapper;
     private MobileSecurityObjectSerializer serializer;
-
-    @Mock private CBORGenerator cborGenerator;
-    @Mock private JsonGenerator regularGenerator;
-    @Mock private SerializerProvider serializerProvider;
 
     @BeforeEach
     void setUp() {
+        CBORFactory cborFactory = new CBORFactory();
+        cborObjectMapper = new ObjectMapper(cborFactory);
+        SimpleModule module = new SimpleModule();
         serializer = new MobileSecurityObjectSerializer();
+        module.addSerializer(MobileSecurityObject.class, serializer);
+        cborObjectMapper.registerModule(module).registerModule(new JavaTimeModule());
     }
 
     @Test
@@ -76,28 +74,32 @@ class MobileSecurityObjectSerializerTest {
                         "org.iso.18013.5.1.mDL",
                         validityInfo);
 
-        // Act: Serialize the object
-        serializer.serialize(testObject, cborGenerator, serializerProvider);
+        // Act: Serialize the object using ObjectMapper
+        byte[] result = cborObjectMapper.writeValueAsBytes(testObject);
 
-        // Assert: Verify the correct sequence of CBOR generator calls
-        InOrder inOrder = inOrder(cborGenerator);
-        inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeBinary(any(byte[].class));
+        // Assert: The result should start with CBOR tag 24
+        assertEquals(((byte) 0xD8), result[0]);
+        assertEquals(((byte) 0x18), result[1]);
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
+        // Arrange: Create a regular JSON ObjectMapper
+        ObjectMapper jsonObjectMapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(MobileSecurityObject.class, serializer);
+        jsonObjectMapper.registerModule(module);
+
         MobileSecurityObject testObject = mock(MobileSecurityObject.class);
 
-        IllegalArgumentException exception =
+        // Act & Assert: Expect JsonMappingException which wraps the IllegalArgumentException
+        JsonMappingException exception =
                 assertThrows(
-                        IllegalArgumentException.class,
-                        () ->
-                                serializer.serialize(
-                                        testObject, regularGenerator, serializerProvider));
-        assertTrue(
-                exception
-                        .getMessage()
-                        .contains("MobileSecurityObjectSerializer requires CBORGenerator"));
+                        JsonMappingException.class,
+                        () -> jsonObjectMapper.writeValueAsBytes(testObject));
+
+        // Verify the root cause is IllegalArgumentException with the expected message
+        assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
+        assertEquals("Requires CBORGenerator", exception.getCause().getMessage());
     }
 }
