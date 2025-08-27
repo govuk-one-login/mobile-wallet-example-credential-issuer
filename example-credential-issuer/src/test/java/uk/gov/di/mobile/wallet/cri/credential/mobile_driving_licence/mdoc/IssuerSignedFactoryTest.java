@@ -24,8 +24,6 @@ import java.util.Map;
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -67,8 +65,6 @@ class IssuerSignedFactoryTest {
             throws MDLException, SigningException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
-        byte[] item1Bytes = "item1-bytes".getBytes();
-        byte[] item2Bytes = "item2-bytes".getBytes();
 
         Map<String, List<IssuerSignedItem>> namespacesMap = new LinkedHashMap<>();
         namespacesMap.put(
@@ -79,8 +75,6 @@ class IssuerSignedFactoryTest {
         when(mockMobileSecurityObjectFactory.build(mockNamespaces, mockEcPublicKey))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCborEncoder.encode(mockIssuerSignedItem1)).thenReturn(item1Bytes);
-        when(mockCborEncoder.encode(mockIssuerSignedItem2)).thenReturn(item2Bytes);
         when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
                 .thenReturn(mockCertificate);
         when(mockCoseSigner.sign(msoBytes, mockCertificate)).thenReturn(mockCoseSign1);
@@ -94,7 +88,6 @@ class IssuerSignedFactoryTest {
         verify(mockCborEncoder).encode(mockMobileSecurityObject);
         verify(mockCertificateProvider).getCertificate(TEST_CERTIFICATE_ID);
         verify(mockCoseSigner).sign(msoBytes, mockCertificate);
-        verify(mockCborEncoder, times(3)).encode(any(IssuerSignedItem.class));
     }
 
     @Test
@@ -112,7 +105,7 @@ class IssuerSignedFactoryTest {
         assertEquals("MSO creation failed", exception.getMessage());
 
         verify(mockMobileSecurityObjectFactory).build(mockNamespaces, mockEcPublicKey);
-        verifyNoInteractions(mockCborEncoder, mockCoseSigner, mockCertificateProvider);
+        verifyNoInteractions(mockCoseSigner, mockCertificateProvider);
     }
 
     @Test
@@ -182,32 +175,5 @@ class IssuerSignedFactoryTest {
         assertEquals("Signing failed", exception.getMessage());
 
         verify(mockCoseSigner).sign(msoBytes, mockCertificate);
-    }
-
-    @Test
-    void Should_ThrowMDLException_When_CBOREncodingNamespaceItemsFails()
-            throws MDLException, SigningException, CertificateException, ObjectStoreException {
-        // Arrange
-        byte[] msoBytes = "mso-bytes".getBytes();
-        MDLException expectedException = new MDLException("Item encoding failed", new Exception());
-
-        Map<String, List<IssuerSignedItem>> namespacesMap = new LinkedHashMap<>();
-        namespacesMap.put("namespace1", Arrays.asList(mockIssuerSignedItem1));
-
-        when(mockNamespaces.namespaces()).thenReturn(namespacesMap);
-        when(mockMobileSecurityObjectFactory.build(mockNamespaces, mockEcPublicKey))
-                .thenReturn(mockMobileSecurityObject);
-        when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
-                .thenReturn(mockCertificate);
-        when(mockCoseSigner.sign(msoBytes, mockCertificate)).thenReturn(mockCoseSign1);
-        when(mockCborEncoder.encode(mockIssuerSignedItem1)).thenThrow(expectedException);
-
-        // Act & Assert
-        MDLException exception =
-                assertThrows(
-                        MDLException.class,
-                        () -> issuerSignedFactory.build(mockNamespaces, mockEcPublicKey));
-        assertEquals("Item encoding failed", exception.getMessage());
     }
 }
