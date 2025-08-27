@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
 import java.util.List;
@@ -34,23 +35,25 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
             final SerializerProvider serializer)
             throws IOException {
         if (!(generator instanceof CBORGenerator cborGenerator)) {
-            throw new IllegalArgumentException(
-                    "IssuerSignedCBORSerializer requires CBORGenerator but received: "
-                            + generator.getClass().getSimpleName());
+            throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
         cborGenerator.writeStartObject();
 
         cborGenerator.writeFieldName("nameSpaces");
         cborGenerator.writeStartObject();
-        for (Map.Entry<String, List<byte[]>> entry : issuerSigned.nameSpaces().entrySet()) {
+        for (Map.Entry<String, List<IssuerSignedItem>> entry :
+                issuerSigned.nameSpaces().entrySet()) {
             cborGenerator.writeFieldName(entry.getKey());
             cborGenerator.writeStartArray();
-            for (byte[] issuerSignedItemBytes : entry.getValue()) {
+
+            for (IssuerSignedItem issuerSignedItem : entry.getValue()) {
+                byte[] encodedBytes =
+                        IssuerSignedItemEncoder.encode(issuerSignedItem, generator.getCodec());
                 // '24' is a tag that represents encoded CBOR data items. It's used when
                 // embedding CBOR data within CBOR.
                 cborGenerator.writeTag(24);
-                cborGenerator.writeObject(issuerSignedItemBytes);
+                cborGenerator.writeBinary(encodedBytes);
             }
             cborGenerator.writeEndArray();
         }

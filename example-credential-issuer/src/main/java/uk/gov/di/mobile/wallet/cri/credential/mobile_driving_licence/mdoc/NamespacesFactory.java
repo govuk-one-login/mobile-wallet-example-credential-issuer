@@ -25,7 +25,7 @@ public class NamespacesFactory {
     }
 
     /**
-     * Builds all namespaces for a given {@link DrivingLicenceDocument}.
+     * Builds all nameSpaces for a given {@link DrivingLicenceDocument}.
      *
      * <p>For each field in the document annotated with {@link Namespace}, this method:
      *

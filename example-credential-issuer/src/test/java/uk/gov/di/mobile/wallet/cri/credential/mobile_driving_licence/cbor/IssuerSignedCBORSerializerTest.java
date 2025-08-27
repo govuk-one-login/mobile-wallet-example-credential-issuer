@@ -86,10 +86,10 @@ class IssuerSignedCBORSerializerTest {
         inOrder.verify(cborGenerator).writeEndObject();
     }
 
-    /** Serializes an IssuerSigned object with multiple namespaces. */
+    /** Serializes an IssuerSigned object with multiple nameSpaces. */
     @Test
     void Should_SerializeIssuerSignedWithCBORGenerator_MultipleNameSpaces() throws IOException {
-        // Arrange: Prepare a map with two namespaces, each containing one item
+        // Arrange: Prepare a map with two nameSpaces, each containing one item
         Map<String, List<byte[]>> nameSpaces = new LinkedHashMap<>();
         byte[] issuerSignedItemBytes1 = new byte[] {1, 2, 3};
         byte[] issuerSignedItemBytes2 = new byte[] {4, 5, 6};

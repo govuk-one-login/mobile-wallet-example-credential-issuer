@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Record representing a mapping from namespaces to their digest ID and digest value mappings.
+ * Record representing a mapping from nameSpaces to their digest ID and digest value mappings.
  *
  * <p>Each namespace (a String key) maps to another map where the keys are digest IDs (Integer), and
  * the values are the corresponding digest calculations as serialized byte arrays.
@@ -17,7 +17,7 @@ import java.util.Map;
 public record ValueDigests(Map<String, Map<Integer, byte[]>> valueDigests) {
 
     /**
-     * Returns a shallow copy of the mapping from namespaces to their digest ID and digest value
+     * Returns a shallow copy of the mapping from nameSpaces to their digest ID and digest value
      * maps.
      *
      * <p>The {@link JsonValue} annotation ensures that when this object is serialized with Jackson,

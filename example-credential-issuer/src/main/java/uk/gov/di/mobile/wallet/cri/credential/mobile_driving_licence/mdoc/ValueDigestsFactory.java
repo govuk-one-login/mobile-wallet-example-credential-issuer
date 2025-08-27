@@ -43,7 +43,7 @@ public class ValueDigestsFactory {
 
     /**
      * Creates a {@link ValueDigests} instance by calculating digests for each {@link
-     * IssuerSignedItem} in the provided namespaces.
+     * IssuerSignedItem} in the provided nameSpaces.
      *
      * <p>For each namespace key, serializes each {@link IssuerSignedItem} and computes its digest,
      * building a map of digest IDs to digest byte arrays.

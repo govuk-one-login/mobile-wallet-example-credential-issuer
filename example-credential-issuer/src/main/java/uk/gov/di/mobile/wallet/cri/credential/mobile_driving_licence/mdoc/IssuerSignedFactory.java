@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
@@ -13,10 +12,6 @@ import uk.gov.di.mobile.wallet.cri.util.ArnUtil;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 
 public class IssuerSignedFactory {
     private final MobileSecurityObjectFactory mobileSecurityObjectFactory;
@@ -49,23 +44,6 @@ public class IssuerSignedFactory {
         X509Certificate certificate = certificateProvider.getCertificate(certificateId);
         COSESign1 sign1 = coseSigner.sign(mobileSecurityObjectBytes, certificate);
 
-        Map<String, List<byte[]>> encodedNamespaces = getEncodedNamespaces(namespaces);
-
-        return new IssuerSigned(encodedNamespaces, sign1);
-    }
-
-    private @NotNull Map<String, List<byte[]>> getEncodedNamespaces(Namespaces nameSpaces)
-            throws MDLException {
-        Map<String, List<byte[]>> encodedNamespaces = new LinkedHashMap<>();
-
-        for (Map.Entry<String, List<IssuerSignedItem>> entry : nameSpaces.asMap().entrySet()) {
-            List<byte[]> encodedItems = new ArrayList<>();
-            for (IssuerSignedItem item : entry.getValue()) {
-                byte[] issuerSignedItemBytes = cborEncoder.encode(item);
-                encodedItems.add(issuerSignedItemBytes);
-            }
-            encodedNamespaces.put(entry.getKey(), encodedItems);
-        }
-        return encodedNamespaces;
+        return new IssuerSigned(namespaces.asMap(), sign1);
     }
 }

@@ -19,9 +19,7 @@ public class LocalDateCBORSerializer extends JsonSerializer<LocalDate> {
             final SerializerProvider serializers)
             throws IOException {
         if (!(generator instanceof CBORGenerator cborGenerator)) {
-            throw new IllegalArgumentException(
-                    "LocalDateCBORSerializer requires CBORGenerator but received: "
-                            + generator.getClass().getSimpleName());
+            throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
         String dateString = localDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
