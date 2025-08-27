@@ -10,18 +10,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class IssuerSignedCBORSerializerTest {
 
-    // Mocked dependencies for IssuerSignedCBORSerializer
     @Mock private CBORGenerator cborGenerator;
     @Mock private JsonGenerator regularGenerator;
     @Mock private SerializerProvider serializerProvider;
@@ -31,10 +32,14 @@ class IssuerSignedCBORSerializerTest {
     @Test
     void Should_SerializeIssuerSigned_SingleNameSpaceWithMultipleItems() throws IOException {
         // Arrange: Prepare a map with one namespace containing two items
-        Map<String, List<byte[]>> nameSpaces = new LinkedHashMap<>();
-        byte[] issuerSignedItemBytes1 = new byte[] {1, 2, 3};
-        byte[] issuerSignedItemBytes2 = new byte[] {4, 5, 6};
-        nameSpaces.put("namespace1", Arrays.asList(issuerSignedItemBytes1, issuerSignedItemBytes2));
+        Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
+        byte[] random1 = new byte[] {1, 2, 2};
+        byte[] random2 = new byte[] {1, 2, 4};
+        IssuerSignedItem issuerSignedItem1 =
+                new IssuerSignedItem(1, random1, "testElementIdentifier1", "testElementValue1");
+        IssuerSignedItem issuerSignedItem2 =
+                new IssuerSignedItem(2, random2, "testElementIdentifier2", "testElementValue2");
+        nameSpaces.put("namespace1", Arrays.asList(issuerSignedItem1, issuerSignedItem2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
         // Arrange: Prepare a CoseSign1 object
@@ -64,9 +69,17 @@ class IssuerSignedCBORSerializerTest {
 
         // For each item: write tag 24 then the item value
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes1);
+        byte[] issuerSignedItemBytes1 =
+                HexFormat.of()
+                        .parseHex(
+                                "a4686469676573744944016672616e646f6d4301020271656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572316c656c656d656e7456616c75657174657374456c656d656e7456616c756531");
+        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes1);
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes2);
+        byte[] issuerSignedItemBytes2 =
+                HexFormat.of()
+                        .parseHex(
+                                "a4686469676573744944026672616e646f6d4301020471656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572326c656c656d656e7456616c75657174657374456c656d656e7456616c756532");
+        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes2);
 
         // Close the array and objects
         inOrder.verify(cborGenerator).writeEndArray();
@@ -90,11 +103,15 @@ class IssuerSignedCBORSerializerTest {
     @Test
     void Should_SerializeIssuerSignedWithCBORGenerator_MultipleNameSpaces() throws IOException {
         // Arrange: Prepare a map with two nameSpaces, each containing one item
-        Map<String, List<byte[]>> nameSpaces = new LinkedHashMap<>();
-        byte[] issuerSignedItemBytes1 = new byte[] {1, 2, 3};
-        byte[] issuerSignedItemBytes2 = new byte[] {4, 5, 6};
-        nameSpaces.put("namespace1", List.of(issuerSignedItemBytes1));
-        nameSpaces.put("namespace2", List.of(issuerSignedItemBytes2));
+        Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
+        byte[] random1 = new byte[] {1, 2, 2};
+        byte[] random2 = new byte[] {1, 2, 4};
+        IssuerSignedItem issuerSignedItem1 =
+                new IssuerSignedItem(1, random1, "testElementIdentifier1", "testElementValue1");
+        IssuerSignedItem issuerSignedItem2 =
+                new IssuerSignedItem(2, random2, "testElementIdentifier2", "testElementValue2");
+        nameSpaces.put("namespace1", List.of(issuerSignedItem1));
+        nameSpaces.put("namespace2", List.of(issuerSignedItem2));
         when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
 
         // Arrange: Prepare a CoseSign1 object
@@ -122,14 +139,22 @@ class IssuerSignedCBORSerializerTest {
         inOrder.verify(cborGenerator).writeFieldName("namespace1");
         inOrder.verify(cborGenerator).writeStartArray();
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes1);
+        byte[] issuerSignedItemBytes1 =
+                HexFormat.of()
+                        .parseHex(
+                                "a4686469676573744944016672616e646f6d4301020271656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572316c656c656d656e7456616c75657174657374456c656d656e7456616c756531");
+        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes1);
         inOrder.verify(cborGenerator).writeEndArray();
 
         // Write the second namespace and its item
         inOrder.verify(cborGenerator).writeFieldName("namespace2");
         inOrder.verify(cborGenerator).writeStartArray();
         inOrder.verify(cborGenerator).writeTag(24);
-        inOrder.verify(cborGenerator).writeObject(issuerSignedItemBytes2);
+        byte[] issuerSignedItemBytes2 =
+                HexFormat.of()
+                        .parseHex(
+                                "a4686469676573744944026672616e646f6d4301020471656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572326c656c656d656e7456616c75657174657374456c656d656e7456616c756532");
+        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes2);
         inOrder.verify(cborGenerator).writeEndArray();
 
         // Close nameSpaces object
@@ -160,9 +185,6 @@ class IssuerSignedCBORSerializerTest {
                         () ->
                                 issuerSignedCBORSerializer.serialize(
                                         issuerSigned, regularGenerator, serializerProvider));
-        assertTrue(
-                exception
-                        .getMessage()
-                        .contains("IssuerSignedCBORSerializer requires CBORGenerator"));
+        assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }
