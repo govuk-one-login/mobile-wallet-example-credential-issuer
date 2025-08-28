@@ -16,7 +16,10 @@ public class DefiniteLengthListSerializer extends JsonSerializer<List> {
             throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
-        cborGenerator.writeStartArray(list.size());
+        cborGenerator
+                .writeStartArray( // NOSONAR deprecated method employed intentionally for definite
+                        // length array
+                        list.size());
         for (Object item : list) {
             serializers.defaultSerializeValue(item, generator);
         }
