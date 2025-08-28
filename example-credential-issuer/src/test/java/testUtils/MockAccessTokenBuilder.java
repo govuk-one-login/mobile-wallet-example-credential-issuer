@@ -15,11 +15,12 @@ public class MockAccessTokenBuilder {
     private final JWSHeader.Builder headerBuilder;
     private final JWTClaimsSet.Builder claimsBuilder =
             new JWTClaimsSet.Builder()
-                    .issueTime(Date.from(Instant.now()))
                     .subject(
                             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i")
                     .audience("https://issuer-url.gov.uk")
                     .issuer("https://auth-url.gov.uk")
+                    .jwtID("e75b7cc0-c5ef-4075-ad22-3b239b6db89c")
+                    .expirationTime(Date.from(Instant.now().plusSeconds(180)))
                     .claim("c_nonce", "134e0c41-a8b4-46d4-aec8-cd547e125589")
                     .claim(
                             "credential_identifiers",
@@ -49,6 +50,11 @@ public class MockAccessTokenBuilder {
 
     public MockAccessTokenBuilder withAudience(String audience) {
         claimsBuilder.audience(audience);
+        return this;
+    }
+
+    public MockAccessTokenBuilder withExpirationTime(Date expirationTime) {
+        claimsBuilder.expirationTime(expirationTime);
         return this;
     }
 
