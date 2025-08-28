@@ -40,8 +40,7 @@ class IssuerSignedItemCBORSerializerTest {
     }
 
     @Test
-    void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator()
-            throws IOException {
+    void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         // Arrange: Create a regular JSON ObjectMapper
         ObjectMapper jsonObjectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
