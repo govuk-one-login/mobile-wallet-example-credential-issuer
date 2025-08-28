@@ -8,8 +8,11 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-// Utility class to handle IssuerSignedItem encoding
 public class IssuerSignedItemEncoder {
+
+    private IssuerSignedItemEncoder() {
+        // Can't be instantiated
+    }
 
     /**
      * Encodes an IssuerSignedItem to CBOR bytes.
