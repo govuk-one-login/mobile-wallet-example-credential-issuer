@@ -14,9 +14,12 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
 import java.text.ParseException;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -104,8 +107,24 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
-                "JWT missing required claims: [aud, c_nonce, credential_identifiers, iss, sub]",
+                "JWT missing required claims: [aud, c_nonce, credential_identifiers, exp, iss, jti, sub]",
                 exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_TokenIsExpired() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withExpirationTime(
+                                Date.from(
+                                        Instant.now().minusSeconds(180))) // Expired 180 seconds ago
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals("Expired JWT", exception.getMessage());
     }
 
     @Test
