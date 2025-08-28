@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class MobileSecurityObjectSerializer extends JsonSerializer<MobileSecurityObject> {
-
+    @Override
     public void serialize(
             final MobileSecurityObject mobileSecurityObject,
             final JsonGenerator generator,
