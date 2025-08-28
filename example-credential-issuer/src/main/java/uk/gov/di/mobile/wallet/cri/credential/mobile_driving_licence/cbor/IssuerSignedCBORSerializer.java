@@ -13,9 +13,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A custom serializer for the {@link IssuerSigned} object to CBOR format. This serializer handles
- * the serialization of nested byte arrays within the 'nameSpaces' map, tagging them with the CBOR
- * tag 24 to indicate embedded CBOR data items.
+ * Serializer for {@link IssuerSigned} to CBOR format.
+ *
+ * <p>Serializes the 'nameSpaces' map by encoding each {@link IssuerSignedItem} into a CBOR byte
+ * array, tagging it with CBOR tag 24 to indicate embedded CBOR data. Writes the 'issuerAuth' field
+ * as a CBOR array with its components.
  */
 public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
 

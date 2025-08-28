@@ -8,7 +8,13 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 
 import java.io.IOException;
 
-/** Custom Jackson serializer for CBOR encoding encoded CBOR data items. */
+/**
+ * Custom Jackson serializer for {@link IssuerSignedItem} to CBOR format.
+ *
+ * <p>This serializer encodes the {@link IssuerSignedItem} into a CBOR byte array, then writes it as
+ * a tagged CBOR binary with tag 24. Tag 24 indicates that the following byte string contains a
+ * fully encoded embedded CBOR data item.
+ */
 public class IssuerSignedItemCBORSerializer extends JsonSerializer<IssuerSignedItem> {
     @Override
     public void serialize(
@@ -22,8 +28,6 @@ public class IssuerSignedItemCBORSerializer extends JsonSerializer<IssuerSignedI
 
         byte[] encodedBytes =
                 IssuerSignedItemEncoder.encode(issuerSignedItem, generator.getCodec());
-        // '24' is a tag that represents encoded CBOR data items. It's used when
-        // embedding CBOR data within CBOR.
         cborGenerator.writeTag(24);
         cborGenerator.writeBinary(encodedBytes);
     }

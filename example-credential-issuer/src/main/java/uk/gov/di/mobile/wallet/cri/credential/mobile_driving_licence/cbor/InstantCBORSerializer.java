@@ -9,6 +9,16 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
+/**
+ * Custom Jackson serializer for {@link Instant} to CBOR format.
+ *
+ * <p>Serializes the {@link Instant} as a timestamp string truncated to seconds, tagged with CBOR
+ * tag 0 to indicate a standard date-time string.
+ *
+ * <p>Tag 0 signifies the string follows the date-time format: "YYYY-MM-DDThh:mm:ssZ".
+ *
+ * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}.
+ */
 public class InstantCBORSerializer extends JsonSerializer<Instant> {
     @Override
     public void serialize(
@@ -22,7 +32,6 @@ public class InstantCBORSerializer extends JsonSerializer<Instant> {
 
         String formatted =
                 instant.truncatedTo(ChronoUnit.SECONDS).toString(); // "2026-06-24T16:05:21Z"
-        // '0' is a tag indicating that the CBOR value should be interpreted as a date-time
         cborGenerator.writeTag(0);
         generator.writeString(formatted);
     }
