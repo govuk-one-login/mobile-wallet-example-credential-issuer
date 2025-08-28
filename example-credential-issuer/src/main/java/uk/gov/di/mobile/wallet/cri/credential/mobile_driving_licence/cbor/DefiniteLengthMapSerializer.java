@@ -21,8 +21,8 @@ public class DefiniteLengthMapSerializer<K, V> extends JsonSerializer<Map<K, V>>
             Map.Entry<?, ?> entry = (Map.Entry<?, ?>) entryObj;
             if (entry.getKey() instanceof String) {
                 cborGenerator.writeFieldName((String) entry.getKey());
-            } else {
-                cborGenerator.writeFieldName(String.valueOf(entry.getKey()));
+            } else if (entry.getKey() instanceof Integer) {
+                cborGenerator.writeFieldId((Integer) entry.getKey());
             }
             serializers.defaultSerializeValue(entry.getValue(), generator);
         }
