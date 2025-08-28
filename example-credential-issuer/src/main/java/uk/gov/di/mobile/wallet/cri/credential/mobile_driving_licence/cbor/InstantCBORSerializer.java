@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 public class InstantCBORSerializer extends JsonSerializer<Instant> {
-
     @Override
     public void serialize(
             final Instant instant,

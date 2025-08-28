@@ -11,7 +11,6 @@ import java.time.format.DateTimeFormatter;
 
 /** Custom Jackson serializer for CBOR encoding {@link LocalDate} objects. */
 public class LocalDateCBORSerializer extends JsonSerializer<LocalDate> {
-
     @Override
     public void serialize(
             final LocalDate localDate,
