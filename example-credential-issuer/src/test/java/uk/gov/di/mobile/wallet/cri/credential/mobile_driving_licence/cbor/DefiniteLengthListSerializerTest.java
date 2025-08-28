@@ -38,6 +38,9 @@ class DefiniteLengthListSerializerTest {
 
         byte[] result = cborObjectMapper.writeValueAsBytes(testList);
 
+        // Verify definite length array (3 items should start with 0x83)
+        assertEquals((byte) 0x83, result[0]);
+
         // Parse back the CBOR to verify structure
         CBORFactory cborFactory = new CBORFactory();
         ObjectMapper parser = new ObjectMapper(cborFactory);
