@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
@@ -24,11 +25,16 @@ public final class JacksonCBOREncoderProvider {
         throw new IllegalStateException("Instantiation is not valid for this class.");
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static CBORMapper configuredCBORMapper() {
         SimpleModule simpleModule =
                 new SimpleModule()
-                        .addSerializer(Map.class, new DefiniteLengthMapSerializer())
-                        .addSerializer(List.class, new DefiniteLengthListSerializer())
+                        .addSerializer(
+                                (Class) Map.class,
+                                (JsonSerializer) new DefiniteLengthMapSerializer<>())
+                        .addSerializer(
+                                (Class) List.class,
+                                (JsonSerializer) new DefiniteLengthListSerializer<>())
                         .addSerializer(LocalDate.class, new LocalDateCBORSerializer())
                         .addSerializer(Instant.class, new InstantCBORSerializer())
                         .addSerializer(IssuerSignedItem.class, new IssuerSignedItemCBORSerializer())

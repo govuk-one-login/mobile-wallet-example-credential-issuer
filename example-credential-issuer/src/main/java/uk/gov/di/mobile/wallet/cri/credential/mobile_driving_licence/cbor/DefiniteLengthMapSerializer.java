@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import java.io.IOException;
 import java.util.Map;
 
-public class DefiniteLengthMapSerializer extends JsonSerializer<Map> {
+public class DefiniteLengthMapSerializer<K, V> extends JsonSerializer<Map<K, V>> {
     @Override
     public void serialize(Map map, JsonGenerator generator, SerializerProvider serializers)
             throws IOException {

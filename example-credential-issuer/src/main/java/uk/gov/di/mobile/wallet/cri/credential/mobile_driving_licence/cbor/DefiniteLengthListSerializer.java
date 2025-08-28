@@ -8,7 +8,7 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import java.io.IOException;
 import java.util.List;
 
-public class DefiniteLengthListSerializer extends JsonSerializer<List> {
+public class DefiniteLengthListSerializer<T> extends JsonSerializer<List<T>> {
     @Override
     public void serialize(List list, JsonGenerator generator, SerializerProvider serializers)
             throws IOException {
