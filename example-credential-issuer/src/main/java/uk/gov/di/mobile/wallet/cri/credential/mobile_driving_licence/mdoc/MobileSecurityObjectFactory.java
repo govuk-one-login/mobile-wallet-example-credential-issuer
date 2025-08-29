@@ -54,19 +54,19 @@ public class MobileSecurityObjectFactory {
     }
 
     /**
-     * Builds a {@link MobileSecurityObject} instance from the provided nameSpaces and public key.
+     * Builds a {@link MobileSecurityObject} instance from the provided namespaces and public key.
      *
      * <p>This method creates a mobile security object by:
      *
      * <ul>
-     *   <li>Generating value digests for the provided nameSpaces
+     *   <li>Generating value digests for the provided namespaces
      *   <li>Creating validity information with a one-year validity period
      *   <li>Converting the EC public key to COSE key format
-     *   <li>Setting up key authorizations for all provided nameSpaces
+     *   <li>Setting up key authorizations for all provided namespaces
      * </ul>
      *
      * <p>The validity period is determined by the configured {@link ValidityInfoFactory}. The
-     * created MSO will authorize access to all nameSpaces provided in the input.
+     * created MSO will authorize access to all namespaces provided in the input.
      *
      * @param nameSpaces A map where the key is the namespace string and the value is a list of
      *     {@link IssuerSignedItem} objects belonging to that namespace. This map provides the data

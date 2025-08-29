@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Serializer for {@link IssuerSigned} to CBOR format.
  *
- * <p>Serializes the 'nameSpaces' map by encoding each {@link IssuerSignedItem} into a CBOR byte
+ * <p>Serializes the 'namespaces' map by encoding each {@link IssuerSignedItem} into a CBOR byte
  * array, tagging it with CBOR tag 24 to indicate embedded CBOR data. Writes the 'issuerAuth' field
  * as a CBOR array with its components.
  */
