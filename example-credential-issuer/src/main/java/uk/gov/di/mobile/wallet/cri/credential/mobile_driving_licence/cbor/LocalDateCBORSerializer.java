@@ -9,9 +9,16 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-/** Custom Jackson serializer for CBOR encoding {@link LocalDate} objects. */
+/**
+ * Custom Jackson serializer for {@link LocalDate} to CBOR format.
+ *
+ * <p>Serializes the {@link LocalDate} as a text string formatted according to ISO-8601, tagged with
+ * CBOR tag 1004 to indicate a date without a time.
+ *
+ * <p>Tag 1004 indicates that the tagged string represents a calendar date (YYYY-MM-DD) without time
+ * or timezone information.
+ */
 public class LocalDateCBORSerializer extends JsonSerializer<LocalDate> {
-
     @Override
     public void serialize(
             final LocalDate localDate,
@@ -19,13 +26,10 @@ public class LocalDateCBORSerializer extends JsonSerializer<LocalDate> {
             final SerializerProvider serializers)
             throws IOException {
         if (!(generator instanceof CBORGenerator cborGenerator)) {
-            throw new IllegalArgumentException(
-                    "LocalDateCBORSerializer requires CBORGenerator but received: "
-                            + generator.getClass().getSimpleName());
+            throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
         String dateString = localDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        // '1004' is a tag indicating that the CBOR value should be interpreted as a date
         cborGenerator.writeTag(1004);
         generator.writeString(dateString);
     }

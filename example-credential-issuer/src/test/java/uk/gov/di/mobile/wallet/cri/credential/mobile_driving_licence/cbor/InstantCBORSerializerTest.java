@@ -1,53 +1,70 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@ExtendWith(MockitoExtension.class)
 class InstantCBORSerializerTest {
 
+    private ObjectMapper cborObjectMapper;
     private InstantCBORSerializer serializer;
-
-    @Mock private CBORGenerator cborGenerator;
-    @Mock private JsonGenerator regularGenerator;
-    @Mock private SerializerProvider serializerProvider;
 
     @BeforeEach
     void setUp() {
+        CBORFactory cborFactory = new CBORFactory();
+        cborObjectMapper = new ObjectMapper(cborFactory);
+        SimpleModule module = new SimpleModule();
         serializer = new InstantCBORSerializer();
+        module.addSerializer(Instant.class, serializer);
+        cborObjectMapper.registerModule(module);
     }
 
     @Test
-    void Should_SerializeLocalDateWithCBORGenerator() throws IOException {
+    void Should_SerializeInstantWithCBORGenerator() throws IOException {
         Instant testDate = Instant.parse("2025-06-27T12:42:52.123178Z");
         String expectedDateString = "2025-06-27T12:42:52Z";
 
-        serializer.serialize(testDate, cborGenerator, serializerProvider);
+        byte[] result = cborObjectMapper.writeValueAsBytes(testDate);
 
-        verify(cborGenerator).writeTag(0);
-        verify(cborGenerator).writeString(expectedDateString);
+        // Verify CBOR tag 0 is present at the start of the array of bytes
+        assertEquals((byte) 0xC0, result[0]);
+
+        // Parse back the CBOR to verify the content
+        CBORFactory cborFactory = new CBORFactory();
+        ObjectMapper parser = new ObjectMapper(cborFactory);
+        JsonNode parsedResult = parser.readTree(result);
+
+        assertEquals(expectedDateString, parsedResult.asText());
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
+        // Arrange: Create a regular JSON ObjectMapper
+        ObjectMapper jsonObjectMapper = new ObjectMapper();
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(Instant.class, serializer);
+        jsonObjectMapper.registerModule(module);
+
         Instant testDate = Instant.now();
 
-        IllegalArgumentException exception =
+        // Act & Assert: Expect JsonMappingException which wraps the IllegalArgumentException
+        JsonMappingException exception =
                 assertThrows(
-                        IllegalArgumentException.class,
-                        () -> serializer.serialize(testDate, regularGenerator, serializerProvider));
-        assertTrue(exception.getMessage().contains("InstantCBORSerializer requires CBORGenerator"));
+                        JsonMappingException.class,
+                        () -> jsonObjectMapper.writeValueAsBytes(testDate));
+
+        // Verify the root cause is IllegalArgumentException with the expected message
+        assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
+        assertEquals("Requires CBORGenerator", exception.getCause().getMessage());
     }
 }

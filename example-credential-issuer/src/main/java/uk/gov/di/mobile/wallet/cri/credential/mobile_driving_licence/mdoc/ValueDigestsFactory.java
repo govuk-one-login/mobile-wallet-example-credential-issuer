@@ -56,7 +56,7 @@ public class ValueDigestsFactory {
         // Map to hold the final result: namespace -> (digestId -> digest bytes)
         final Map<String, Map<Integer, byte[]>> namespaceToValueDigests = new HashMap<>();
 
-        for (var entry : namespaces.asMap().entrySet()) {
+        for (var entry : namespaces.namespaces().entrySet()) {
             // For each namespace, process its list of IssuerSignedItems:
             // 1. Serialize and digest each item
             // 2. Collect results into a map from digestId to digest bytes

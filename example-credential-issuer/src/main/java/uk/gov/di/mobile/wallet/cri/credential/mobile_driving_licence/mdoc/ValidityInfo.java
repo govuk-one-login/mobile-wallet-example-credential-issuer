@@ -24,4 +24,4 @@ public record ValidityInfo(
          The instant until which the MobileSecurityObject is considered valid.
          The object should not be used for verification after this time.
         */
-        Instant validTo) {}
+        Instant validUntil) {}

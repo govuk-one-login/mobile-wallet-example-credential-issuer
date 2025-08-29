@@ -3,16 +3,21 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class JacksonCBOREncoderProviderTest {
 
     private CBORMapper mapper;
@@ -65,15 +70,17 @@ class JacksonCBOREncoderProviderTest {
     }
 
     private IssuerSigned createTestIssuerSigned() {
-        byte[] issuerSignedItemBytes = {1, 2, 3, 4};
-
         byte[] protectedHeaderBytes = {1, 2, 3, 4};
         Map<Integer, Object> unprotectedHeader = new HashMap<>();
         byte[] payloadBytes = {1, 2, 3, 4};
         byte[] signatureBytes = {1, 2, 3, 4};
-
-        Map<String, List<byte[]>> testNameSpaces =
-                Map.of("namespace", List.of(issuerSignedItemBytes));
+        byte[] random = {1, 2, 3, 4};
+        Map<String, List<IssuerSignedItem>> testNameSpaces =
+                Map.of(
+                        "namespace",
+                        List.of(
+                                new IssuerSignedItem(
+                                        1, random, "testElementIdentifier", "testElementValue")));
         return new IssuerSigned(
                 testNameSpaces,
                 new COSESign1(
