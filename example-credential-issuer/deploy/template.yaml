@@ -454,7 +454,7 @@ Resources:
             - Name: STATUS_LIST_URL
               Value: !Sub
                 - "https://${StatusListUrl}"
-                - AuthServerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, StatusListUrl]
+                - StatusListUrl: !FindInMap [EnvironmentVariables, !Ref Environment, StatusListUrl]
 
           PortMappings:
             - ContainerPort: !Ref ContainerPort
