@@ -61,6 +61,7 @@ Mappings:
       CertificatesBucketName: "wallet-dsc-issuer-671524980203-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:671524980203:key/72b0ed1b-9fa6-43ae-ba8f-14693868ce72
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/dc8de818-634f-4d96-b3ba-fb865cd3776f
+      StatusListUrl: "status-list-mock.mobile.dev.account.gov.uk"
     build:
       SelfUrl: "example-credential-issuer.mobile.build.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
@@ -70,6 +71,7 @@ Mappings:
       CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
+      StatusListUrl: "status-list-mock.mobile.build.account.gov.uk"
     staging:
       SelfUrl: "example-credential-issuer.mobile.staging.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.mobile.staging.account.gov.uk"
@@ -79,6 +81,7 @@ Mappings:
       CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
+      StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
   ElasticLoadBalancerAccountIds:
     eu-west-2:
       AccountId: 652711504416
@@ -448,6 +451,10 @@ Resources:
               Value: !FindInMap [EnvironmentVariables, !Ref Environment, CertificatesBucketName]
             - Name: DOCUMENT_SIGNING_KEY_1_ARN
               Value: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKey1Arn]
+            - Name: STATUS_LIST_URL
+              Value: !Sub
+                - "https://${StatusListUrl}"
+                - AuthServerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, StatusListUrl]
 
           PortMappings:
             - ContainerPort: !Ref ContainerPort
