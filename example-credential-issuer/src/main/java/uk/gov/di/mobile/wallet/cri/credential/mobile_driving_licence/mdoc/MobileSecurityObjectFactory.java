@@ -82,7 +82,7 @@ public class MobileSecurityObjectFactory {
         ValidityInfo validityInfo = validityInfoFactory.build();
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
 
-        Set<String> authorizedNameSpaces = nameSpaces.asMap().keySet();
+        Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
         KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
 
         return new MobileSecurityObject(

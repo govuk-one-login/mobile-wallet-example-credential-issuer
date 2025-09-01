@@ -52,7 +52,7 @@ class ValueDigestsFactoryTest {
         verify(mockMessageDigest).digest(expectedCbor);
     }
 
-    /** Verifies correct digest generation for multiple namespaces, each with a single item. */
+    /** Verifies correct digest generation for multiple nameSpaces, each with a single item. */
     @Test
     void Should_AddMultipleNameSpacesWithSingleDigest() {
         IssuerSignedItem issuerSignedItem1 =
@@ -92,7 +92,7 @@ class ValueDigestsFactoryTest {
         verify(mockMessageDigest).digest(expectedCbor2);
     }
 
-    /** Verifies correct digest generation for multiple namespaces with multiple items. */
+    /** Verifies correct digest generation for multiple nameSpaces with multiple items. */
     @Test
     void Should_AddMultipleNameSpacesWithMultipleDigests() {
         IssuerSignedItem issuerSignedItem1 =

@@ -50,7 +50,7 @@ class NamespacesFactoryTest {
     }
 
     /**
-     * Test that the NamespacesFactory creates both ISO and UK namespaces, and that the correct
+     * Test that the NamespacesFactory creates both ISO and UK nameSpaces, and that the correct
      * number of fields are present in each.
      */
     @Test
@@ -61,8 +61,8 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        Map<String, List<IssuerSignedItem>> namespaces = result.asMap();
-        assertEquals(2, namespaces.size(), "Should have 2 namespaces (ISO and UK)");
+        Map<String, List<IssuerSignedItem>> namespaces = result.namespaces();
+        assertEquals(2, namespaces.size(), "Should have 2 nameSpaces (ISO and UK)");
         assertTrue(namespaces.containsKey(NamespaceTypes.ISO), "Should contain ISO namespace");
         assertTrue(namespaces.containsKey(NamespaceTypes.GB), "Should contain UK namespace");
         assertEquals(
@@ -86,7 +86,7 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem> isoNamespace = result.asMap().get(NamespaceTypes.ISO);
+        List<IssuerSignedItem> isoNamespace = result.namespaces().get(NamespaceTypes.ISO);
         assertEquals(
                 18,
                 isoNamespace.size(),
@@ -126,7 +126,7 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
+        List<IssuerSignedItem> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
         assertEquals(
                 3,
                 ukNamespace.size(),
@@ -150,7 +150,7 @@ class NamespacesFactoryTest {
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem> ukNamespace = result.asMap().get(NamespaceTypes.GB);
+        List<IssuerSignedItem> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
         assertEquals(
                 2,
                 ukNamespace.size(),

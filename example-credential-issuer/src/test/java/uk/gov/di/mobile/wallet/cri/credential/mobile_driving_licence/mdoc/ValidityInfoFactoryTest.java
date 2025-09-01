@@ -25,8 +25,8 @@ class ValidityInfoFactoryTest {
         assertEquals(FIXED_INSTANT, validityInfo.validFrom(), "validFrom should be current time");
         assertEquals(
                 FIXED_INSTANT.plus(Duration.ofDays(365)),
-                validityInfo.validTo(),
-                "validTo should be 365 days later");
+                validityInfo.validUntil(),
+                "validUntil should be 365 days later");
     }
 
     @Test
@@ -47,7 +47,7 @@ class ValidityInfoFactoryTest {
                         || validityInfo.validFrom().equals(afterCreation));
         // Verify the duration is exactly 365 days
         Duration actualDuration =
-                Duration.between(validityInfo.validFrom(), validityInfo.validTo());
+                Duration.between(validityInfo.validFrom(), validityInfo.validUntil());
 
         assertEquals(Duration.ofDays(365), actualDuration);
     }
