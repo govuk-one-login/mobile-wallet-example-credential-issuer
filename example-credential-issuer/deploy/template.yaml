@@ -567,7 +567,6 @@ Resources:
                 Action:
                   - 'kms:Sign'
                   - 'kms:DescribeKey'
-                  - 's3:ListBucket'
                 Resource:
                   - !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKey1Arn]
       PermissionsBoundary: !If

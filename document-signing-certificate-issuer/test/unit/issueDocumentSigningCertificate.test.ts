@@ -92,10 +92,10 @@ describe('issueDocumentSigningCertificate handler', () => {
 
       // ASSERT
       expect(logger.info).toHaveBeenCalledWith(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
-      expect(putObject).toHaveBeenNthCalledWith(1, 'bucket', 'CA_ARN/certificate.pem', 'ROOT_CERTIFICATE');
-      expect(putObject).toHaveBeenNthCalledWith(2, 'bucket', 'keyId' + '/certificate.pem', 'CERTIFICATE');
+      expect(putObject).toHaveBeenNthCalledWith(1, 'bucket', 'root/CA_ARN/certificate.pem', 'ROOT_CERTIFICATE');
+      expect(putObject).toHaveBeenNthCalledWith(2, 'bucket',  'sign/keyId/certificate.pem', 'CERTIFICATE');
       expect(createCertificateRequestFromEs256KmsKey).toHaveBeenCalledWith('commonName', 'UK', 'keyId');
-      expect(issueMdlDocSigningCertificateUsingSha256WithEcdsa).toBeCalledWith(
+      expect(issueMdlDocSigningCertificateUsingSha256WithEcdsa).toHaveBeenCalledWith(
         'CA_ISSUER_ALTERNATIVE_NAME',
         'CA_ARN',
         Buffer.from('CSR'),
