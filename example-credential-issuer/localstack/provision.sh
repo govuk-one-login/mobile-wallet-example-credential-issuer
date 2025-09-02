@@ -35,7 +35,7 @@ aws --endpoint-url=http://localhost:4566 kms create-alias \
     --alias-name alias/localSigningKeyAlias \
     --target-key-id ff275b92-0def-4dfc-b0f6-87c96b26c6c7
 
-# Create mDoc signing key pair with custom key material - this key material matches that of the document signing certificate below
+# Create mDoc signing key pair with custom key material - this key material matches the key in the document signing certificate below
 aws --endpoint-url=http://localhost:4566 kms create-key \
     --region eu-west-2 \
     --key-usage SIGN_VERIFY \
