@@ -23,7 +23,7 @@ aws --endpoint-url=http://localhost:4566 dynamodb create-table \
 aws --endpoint-url=http://localhost:4566 dynamodb update-time-to-live --table-name $CREDENTIAL_TABLE_NAME \
                       --time-to-live-specification Enabled=true,AttributeName=timeToLive
 
-# Create signing key pair - signs JWTs and JWT-based credentials
+# Create signing key pair to sign JWTs and JWT-based credentials
 aws --endpoint-url=http://localhost:4566 kms create-key \
     --region eu-west-2 \
     --key-usage SIGN_VERIFY \
@@ -35,7 +35,7 @@ aws --endpoint-url=http://localhost:4566 kms create-alias \
     --alias-name alias/localSigningKeyAlias \
     --target-key-id ff275b92-0def-4dfc-b0f6-87c96b26c6c7
 
-# Create document signing certificate key pair with custom key material - signs mdoc credentials
+# Create mDoc signing key pair with custom key material - this key material matches that of the document signing certificate below
 aws --endpoint-url=http://localhost:4566 kms create-key \
     --region eu-west-2 \
     --key-usage SIGN_VERIFY \
@@ -44,6 +44,7 @@ aws --endpoint-url=http://localhost:4566 kms create-key \
 
 aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket certificates --create-bucket-configuration LocationConstraint=eu-west-2 --region eu-west-2
 
+# Root certificate.
 cat <<EOF > root-certificate.pem
 -----BEGIN CERTIFICATE-----
 MIIB1zCCAX2gAwIBAgIUIatAsTQsYXy6Wrb1Cdp8tJ3RLC0wCgYIKoZIzj0EAwIw
@@ -62,6 +63,7 @@ EOF
 # Upload root certificate to S3
 aws --endpoint-url=http://localhost:4566 s3 cp root-certificate.pem s3://certificates/6bb42872-f4ed-4d55-a937-b8ffb8760de4/certificate.pem --region eu-west-2
 
+# Document signing certificate containing the public key from the mDoc signing key pair, signed by the root certificate
 cat <<EOF > document-signing-certificate.pem
 -----BEGIN CERTIFICATE-----
 MIIBtzCCAV2gAwIBAgIUZpfeB6WGkUsUk13SiJX8i6vG1IAwCgYIKoZIzj0EAwIw
