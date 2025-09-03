@@ -30,7 +30,8 @@ public class CertificateProvider {
         return new String(certificateBytes, StandardCharsets.UTF_8);
     }
 
-    private byte[] getCertificateBytes(String certificateId, String prefix) throws ObjectStoreException {
+    private byte[] getCertificateBytes(String certificateId, String prefix)
+            throws ObjectStoreException {
         String objectKey = prefix + certificateId + "/certificate.pem";
 
         return objectStore.getObject(bucketName, objectKey);
