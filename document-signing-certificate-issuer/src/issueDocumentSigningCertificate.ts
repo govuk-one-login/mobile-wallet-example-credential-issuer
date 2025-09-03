@@ -65,7 +65,11 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       );
 
       const issuedCertificate = await retrieveIssuedCertificate(issuedCertificateArn, certificateAuthorityArn);
-      await putObject(config.DOC_SIGNING_KEY_BUCKET, `sign/${config.DOC_SIGNING_KEY_ID}/certificate.pem`, issuedCertificate);
+      await putObject(
+        config.DOC_SIGNING_KEY_BUCKET,
+        `sign/${config.DOC_SIGNING_KEY_ID}/certificate.pem`,
+        issuedCertificate,
+      );
 
       logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
     } catch (error) {
