@@ -37,7 +37,7 @@ public class ArnUtil {
             throw new IllegalArgumentException(
                     "Invalid ACM PCA certificate authority ARN: " + arnString);
         }
-        return parts[1];
+        return parts[2];
     }
 
     /**

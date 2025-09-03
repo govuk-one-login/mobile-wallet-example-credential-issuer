@@ -21,17 +21,17 @@ public class CertificateProvider {
 
     public X509Certificate getCertificate(String certificateId)
             throws CertificateException, ObjectStoreException {
-        byte[] certificateBytes = getCertificateBytes(certificateId);
+        byte[] certificateBytes = getCertificateBytes(certificateId, "sign/");
         return parseX509Certificate(certificateBytes);
     }
 
     public String getCertificateAsString(String certificateId) throws ObjectStoreException {
-        byte[] certificateBytes = getCertificateBytes(certificateId);
+        byte[] certificateBytes = getCertificateBytes(certificateId, "root/");
         return new String(certificateBytes, StandardCharsets.UTF_8);
     }
 
-    private byte[] getCertificateBytes(String certificateId) throws ObjectStoreException {
-        String objectKey = "root/" + certificateId + "/certificate.pem";
+    private byte[] getCertificateBytes(String certificateId, String prefix) throws ObjectStoreException {
+        String objectKey = prefix + certificateId + "/certificate.pem";
 
         return objectStore.getObject(bucketName, objectKey);
     }

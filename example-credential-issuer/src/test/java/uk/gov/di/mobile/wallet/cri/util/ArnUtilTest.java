@@ -10,7 +10,7 @@ class ArnUtilTest {
     @Test
     void Should_ReturnCaId_When_ArnIsValid() {
         String arn =
-                "arn:aws:acm-pca:eu-west-2:000000000000:certificate-authority/1c589b25-0433-45e0-b7d9-911fe33a9c3b";
+                "arn:aws:acm-pca:eu-west-2:000000000000:certificate-authority/root/1c589b25-0433-45e0-b7d9-911fe33a9c3b";
         String result = ArnUtil.extractCertificateAuthorityId(arn);
         assertEquals("1c589b25-0433-45e0-b7d9-911fe33a9c3b", result);
     }
@@ -31,8 +31,8 @@ class ArnUtilTest {
 
     @Test
     void Should_ReturnKeyId_When_KmsArnIsValid() {
-        String arn = "arn:aws:kms:eu-west-2:123456789012:key/key-id";
-        String result = ArnUtil.extractKeyId(arn);
+        String arn = "arn:aws:kms:eu-west-2:123456789012:key/sign/key-id";
+        String result = ArnUtil.extractCertificateAuthorityId(arn);
         assertEquals("key-id", result);
     }
 

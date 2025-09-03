@@ -40,7 +40,7 @@ class IacasServiceTest {
             -----END CERTIFICATE-----
             """;
     private static final String TEST_CERTIFICATE_AUTHORITY_ARN =
-            "arn:aws:acm-pca:region:account:certificate-authority/1234abcd-12ab-34cd-56ef-1234567890ab";
+            "arn:aws:acm-pca:region:account:certificate-authority/root/1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_CERTIFICATE_AUTHORITY_ID =
             "1234abcd-12ab-34cd-56ef-1234567890ab";
 
