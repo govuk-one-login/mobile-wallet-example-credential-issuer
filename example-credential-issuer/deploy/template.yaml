@@ -59,8 +59,8 @@ Mappings:
       WalletAppDeepLinkUrl: "mobile.dev.account.gov.uk/wallet"
       BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
       CertificatesBucketName: "wallet-dsc-issuer-671524980203-certificates"
-      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:671524980203:key/sign/72b0ed1b-9fa6-43ae-ba8f-14693868ce72
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/root/dc8de818-634f-4d96-b3ba-fb865cd3776f
+      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:671524980203:key/72b0ed1b-9fa6-43ae-ba8f-14693868ce72
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/dc8de818-634f-4d96-b3ba-fb865cd3776f
       StatusListUrl: "status-list-mock.mobile.dev.account.gov.uk"
     build:
       SelfUrl: "example-credential-issuer.mobile.build.account.gov.uk"
@@ -69,8 +69,8 @@ Mappings:
       WalletAppDeepLinkUrl: "mobile.build.account.gov.uk/wallet"
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
       CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
-      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/sign/125a9328-f653-4f8a-bf0b-ad53acbfdf78
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/root/f030bd98-ec3d-4ce9-8adf-4106a7028731
+      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
       StatusListUrl: "status-list-mock.mobile.build.account.gov.uk"
     staging:
       SelfUrl: "example-credential-issuer.mobile.staging.account.gov.uk"
@@ -79,8 +79,8 @@ Mappings:
       WalletAppDeepLinkUrl: "mobile.staging.account.gov.uk/wallet"
       BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
       CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
-      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/sign/125a9328-f653-4f8a-bf0b-ad53acbfdf78
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/root/f030bd98-ec3d-4ce9-8adf-4106a7028731
+      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
       StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
   ElasticLoadBalancerAccountIds:
     eu-west-2:
