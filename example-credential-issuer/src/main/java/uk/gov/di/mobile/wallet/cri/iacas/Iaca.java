@@ -72,8 +72,7 @@ public record Iaca(
                         SIGNING_ALGORITHM.toString());
         String fingerprint = getCertificateFingerprint(certificate);
 
-        String normalizedPem = normalizePem(certificatePem);
-        return new Iaca(id, active, normalizedPem, certificateData, fingerprint, publicKeyJwk);
+        return new Iaca(id, active, certificatePem, certificateData, fingerprint, publicKeyJwk);
     }
 
     /**
@@ -92,15 +91,5 @@ public record Iaca(
         MessageDigest messageDigest = MessageDigest.getInstance("SHA-256");
         messageDigest.update(certificate.getEncoded());
         return HexFormat.of().formatHex(messageDigest.digest());
-    }
-
-    /**
-     * Removes all line breaks from the PEM string to normalize its format.
-     *
-     * @param pem The PEM-encoded certificate string.
-     * @return The normalized PEM string without line breaks.
-     */
-    private static String normalizePem(String pem) {
-        return pem.replaceAll("\\r?\\n", "");
     }
 }
