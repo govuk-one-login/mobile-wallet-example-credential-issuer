@@ -23,7 +23,7 @@ class CertificateProviderTest {
 
     private static final String BUCKET_NAME = "test-bucket";
     private static final String CERTIFICATE_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String OBJECT_KEY = CERTIFICATE_ID + "/certificate.pem";
+    private static final String OBJECT_KEY = "root/" + CERTIFICATE_ID + "/certificate.pem";
     private static final String CERTIFICATE_PEM =
             """
           -----BEGIN CERTIFICATE-----

@@ -31,7 +31,7 @@ public class CertificateProvider {
     }
 
     private byte[] getCertificateBytes(String certificateId) throws ObjectStoreException {
-        String objectKey = certificateId + "/certificate.pem";
+        String objectKey = "root/" + certificateId + "/certificate.pem";
 
         return objectStore.getObject(bucketName, objectKey);
     }
