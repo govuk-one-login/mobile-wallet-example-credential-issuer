@@ -13,7 +13,7 @@ public class CertificateProvider {
 
     private static final String SIGN_CERT_PATH = "sign/";
     private static final String ROOT_CERT_PATH = "root/";
-    private static final String CERTIFICATE_FILE_SUFFIX = "/certificate.pem";
+    private static final String CERTIFICATE_FILE_NAME = "/certificate.pem";
     private static final String CERTIFICATE_TYPE = "X.509";
 
     private final ObjectStore objectStore;
@@ -37,7 +37,7 @@ public class CertificateProvider {
 
     private byte[] getCertificateBytes(String certificateId, String path)
             throws ObjectStoreException {
-        String objectKey = path + certificateId + CERTIFICATE_FILE_SUFFIX;
+        String objectKey = path + certificateId + CERTIFICATE_FILE_NAME;
 
         return objectStore.getObject(bucketName, objectKey);
     }
