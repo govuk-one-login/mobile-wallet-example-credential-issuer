@@ -11,6 +11,7 @@ import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import testUtils.MockProofBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.text.ParseException;

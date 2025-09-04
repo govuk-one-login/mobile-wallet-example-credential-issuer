@@ -16,8 +16,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.CredentialServiceException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.DocumentStoreException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.NonceValidationException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
+import uk.gov.di.mobile.wallet.cri.shared.CredentialOfferException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -56,11 +61,11 @@ class CredentialResourceTest {
     void Should_Return400AndInvalidProof_When_ProofIsInvalid(String arg)
             throws DataStoreException,
                     AccessTokenValidationException,
-                    CredentialServiceException,
-                    ProofJwtValidationException,
-                    NonceValidationException,
-                    CredentialOfferException,
-                    DocumentStoreException {
+            CredentialServiceException,
+            ProofJwtValidationException,
+            NonceValidationException,
+            CredentialOfferException,
+            DocumentStoreException {
         final Response response =
                 resource.target("/credential")
                         .request()

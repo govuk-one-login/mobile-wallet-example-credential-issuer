@@ -2,6 +2,8 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.COSEProtectedHeader;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.COSEProtectedHeaderBuilder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

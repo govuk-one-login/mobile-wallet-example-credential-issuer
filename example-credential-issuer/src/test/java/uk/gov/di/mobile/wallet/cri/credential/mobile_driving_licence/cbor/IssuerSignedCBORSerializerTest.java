@@ -8,9 +8,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cbor.IssuerSignedCBORSerializer;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.COSESign1;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
 import java.util.*;

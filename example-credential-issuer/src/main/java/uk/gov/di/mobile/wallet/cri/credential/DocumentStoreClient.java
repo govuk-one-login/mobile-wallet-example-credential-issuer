@@ -3,6 +3,8 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import uk.gov.di.mobile.wallet.cri.credential.domain.Document;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.DocumentStoreException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;

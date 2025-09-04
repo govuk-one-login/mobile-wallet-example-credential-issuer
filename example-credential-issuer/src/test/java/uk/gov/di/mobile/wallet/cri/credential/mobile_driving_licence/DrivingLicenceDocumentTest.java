@@ -3,6 +3,8 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingPrivilege;
 
 import java.time.LocalDate;
 import java.time.Period;

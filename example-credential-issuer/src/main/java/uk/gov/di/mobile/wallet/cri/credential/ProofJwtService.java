@@ -11,8 +11,9 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import uk.gov.di.mobile.wallet.cri.credential.did_key.DidKeyResolver;
-import uk.gov.di.mobile.wallet.cri.credential.did_key.InvalidDidKeyException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.ProofJwtValidationException;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.did_key.DidKeyResolver;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.did_key.exceptions.InvalidDidKeyException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;
