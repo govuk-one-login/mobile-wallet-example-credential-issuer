@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.DigestIDGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.IssuerSignedItem;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.IssuerSignedItemFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

@@ -6,8 +6,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEKeyTypes;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.BigIntegerToFixedBytes;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.COSEKey;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.COSEKeyFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.constants.COSEEllipticCurves;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.constants.COSEKeyTypes;
 
 import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;

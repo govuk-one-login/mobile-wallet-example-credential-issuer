@@ -18,7 +18,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import testUtils.MockAccessTokenBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
+import uk.gov.di.mobile.wallet.cri.shared.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 

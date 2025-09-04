@@ -1,6 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.ValidityInfo;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.ValidityInfoFactory;
 
 import java.time.Clock;
 import java.time.Duration;

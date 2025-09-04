@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingPrivilege;
 
 import java.time.LocalDate;
 

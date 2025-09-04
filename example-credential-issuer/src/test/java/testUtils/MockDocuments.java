@@ -1,7 +1,7 @@
 package testUtils;
 
 import org.jetbrains.annotations.NotNull;
-import uk.gov.di.mobile.wallet.cri.credential.Document;
+import uk.gov.di.mobile.wallet.cri.credential.domain.Document;
 
 import java.util.ArrayList;
 import java.util.HashMap;

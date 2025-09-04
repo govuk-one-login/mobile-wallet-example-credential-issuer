@@ -6,15 +6,22 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckDocument;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
+import uk.gov.di.mobile.wallet.cri.credential.domain.CredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.CredentialServiceException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.DocumentStoreException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.NonceValidationException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.ProofJwtValidationException;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.domain.BasicCheckDocument;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.domain.VeteranCardDocument;
+import uk.gov.di.mobile.wallet.cri.credential.domain.Document;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceService;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.domain.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -23,6 +30,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+import uk.gov.di.mobile.wallet.cri.shared.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.util.ExpiryUtil;
 
 import java.security.cert.CertificateException;
@@ -32,10 +40,10 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.UUID;
 
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
+import static uk.gov.di.mobile.wallet.cri.credential.domain.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
+import static uk.gov.di.mobile.wallet.cri.credential.domain.CredentialType.DIGITAL_VETERAN_CARD;
+import static uk.gov.di.mobile.wallet.cri.credential.domain.CredentialType.MOBILE_DRIVING_LICENCE;
+import static uk.gov.di.mobile.wallet.cri.credential.domain.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
 
 public class CredentialService {
 
@@ -69,12 +77,12 @@ public class CredentialService {
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws DataStoreException,
-                    ProofJwtValidationException,
-                    NonceValidationException,
+            ProofJwtValidationException,
+            NonceValidationException,
                     AccessTokenValidationException,
-                    CredentialServiceException,
-                    CredentialOfferException,
-                    DocumentStoreException {
+            CredentialServiceException,
+            CredentialOfferException,
+            DocumentStoreException {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
 

@@ -2,6 +2,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.DigestIDGenerator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

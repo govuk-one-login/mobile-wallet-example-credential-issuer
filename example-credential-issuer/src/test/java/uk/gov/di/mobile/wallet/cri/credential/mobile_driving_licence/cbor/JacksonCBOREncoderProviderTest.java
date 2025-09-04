@@ -5,9 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cose.COSESign1;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.time.LocalDate;
 import java.util.HashMap;

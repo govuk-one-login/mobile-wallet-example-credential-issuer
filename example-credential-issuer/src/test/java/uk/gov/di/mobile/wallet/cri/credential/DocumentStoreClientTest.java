@@ -10,6 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.domain.Document;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.DocumentStoreException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
@@ -27,7 +29,8 @@ class DocumentStoreClientTest {
     @Mock private WebTarget mockWebTarget;
     @Mock private Invocation.Builder mockInvocationBuilder;
     @Mock private Response mockResponse;
-    @Mock Document mockDocument;
+    @Mock
+    Document mockDocument;
     @Mock private ConfigurationService mockConfigurationService;
     private DocumentStoreClient documentStoreClient;
 

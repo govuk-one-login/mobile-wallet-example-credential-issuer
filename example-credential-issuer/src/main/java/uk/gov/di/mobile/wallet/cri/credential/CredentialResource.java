@@ -16,10 +16,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.domain.RequestBody;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.NonceValidationException;
+import uk.gov.di.mobile.wallet.cri.credential.exceptions.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.responses.ErrorMessages;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AuthorizationHeaderMissingException;
+import uk.gov.di.mobile.wallet.cri.shared.CredentialOfferException;
 
 import java.util.Objects;
 

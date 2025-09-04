@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.cbor.LocalDateCBORSerializer;
 
 import java.io.IOException;
 import java.time.LocalDate;
