@@ -75,7 +75,7 @@ class IssuerSignedFactoryTest {
         when(mockMobileSecurityObjectFactory.build(mockNamespaces, mockEcPublicKey))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
+        when(mockCertificateProvider.getSigningCertificate(TEST_CERTIFICATE_ID))
                 .thenReturn(mockCertificate);
         when(mockCoseSigner.sign(msoBytes, mockCertificate)).thenReturn(mockCoseSign1);
 
@@ -86,7 +86,7 @@ class IssuerSignedFactoryTest {
         assertNotNull(result);
         verify(mockMobileSecurityObjectFactory).build(mockNamespaces, mockEcPublicKey);
         verify(mockCborEncoder).encode(mockMobileSecurityObject);
-        verify(mockCertificateProvider).getCertificate(TEST_CERTIFICATE_ID);
+        verify(mockCertificateProvider).getSigningCertificate(TEST_CERTIFICATE_ID);
         verify(mockCoseSigner).sign(msoBytes, mockCertificate);
     }
 
@@ -138,7 +138,7 @@ class IssuerSignedFactoryTest {
         when(mockMobileSecurityObjectFactory.build(mockNamespaces, mockEcPublicKey))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
+        when(mockCertificateProvider.getSigningCertificate(TEST_CERTIFICATE_ID))
                 .thenThrow(expectedException);
 
         // Act & Assert
@@ -148,7 +148,7 @@ class IssuerSignedFactoryTest {
                         () -> issuerSignedFactory.build(mockNamespaces, mockEcPublicKey));
         assertEquals("Certificate error", exception.getMessage());
 
-        verify(mockCertificateProvider).getCertificate(TEST_CERTIFICATE_ID);
+        verify(mockCertificateProvider).getSigningCertificate(TEST_CERTIFICATE_ID);
         verifyNoInteractions(mockCoseSigner);
     }
 
@@ -163,7 +163,7 @@ class IssuerSignedFactoryTest {
         when(mockMobileSecurityObjectFactory.build(mockNamespaces, mockEcPublicKey))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
-        when(mockCertificateProvider.getCertificate(TEST_CERTIFICATE_ID))
+        when(mockCertificateProvider.getSigningCertificate(TEST_CERTIFICATE_ID))
                 .thenReturn(mockCertificate);
         when(mockCoseSigner.sign(msoBytes, mockCertificate)).thenThrow(expectedException);
 

@@ -59,7 +59,7 @@ class CertificateProviderTest {
     void Should_ReturnReturnCertificateString() throws Exception {
         when(objectStore.getObject(BUCKET_NAME, ROOT_OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
 
-        String result = certificateProvider.getCertificateAsString(CERTIFICATE_ID);
+        String result = certificateProvider.getRootCertificate(CERTIFICATE_ID);
 
         assertEquals(CERTIFICATE_PEM, result);
         verify(objectStore).getObject(BUCKET_NAME, ROOT_OBJECT_KEY);
@@ -69,7 +69,7 @@ class CertificateProviderTest {
     void Should_ReturnX509Certificate() throws Exception {
         when(objectStore.getObject(BUCKET_NAME, SIGN_OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
 
-        X509Certificate result = certificateProvider.getCertificate(CERTIFICATE_ID);
+        X509Certificate result = certificateProvider.getSigningCertificate(CERTIFICATE_ID);
 
         assertNotNull(result);
         assertEquals("X.509", result.getType());
@@ -82,7 +82,7 @@ class CertificateProviderTest {
 
         assertThrows(
                 ObjectStoreException.class,
-                () -> certificateProvider.getCertificate(CERTIFICATE_ID));
+                () -> certificateProvider.getSigningCertificate(CERTIFICATE_ID));
     }
 
     @Test
@@ -92,6 +92,6 @@ class CertificateProviderTest {
 
         assertThrows(
                 CertificateException.class,
-                () -> certificateProvider.getCertificate(CERTIFICATE_ID));
+                () -> certificateProvider.getSigningCertificate(CERTIFICATE_ID));
     }
 }

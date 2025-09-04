@@ -52,7 +52,7 @@ class IacasServiceTest {
 
     @Test
     void Should_PropagatesException_When_ObjectStoreThrowsException() throws Exception {
-        when(certificateProvider.getCertificateAsString(TEST_CERTIFICATE_AUTHORITY_ID))
+        when(certificateProvider.getRootCertificate(TEST_CERTIFICATE_AUTHORITY_ID))
                 .thenThrow(new RuntimeException("Failed to get certificate"));
 
         Exception exception = assertThrows(RuntimeException.class, () -> iacasService.getIacas());
@@ -62,7 +62,7 @@ class IacasServiceTest {
 
     @Test
     void Should_ReturnIacasWithExpectedValues() throws Exception {
-        when(certificateProvider.getCertificateAsString(TEST_CERTIFICATE_AUTHORITY_ID))
+        when(certificateProvider.getRootCertificate(TEST_CERTIFICATE_AUTHORITY_ID))
                 .thenReturn(TEST_CERTIFICATE_PEM);
 
         Iacas result = iacasService.getIacas();
