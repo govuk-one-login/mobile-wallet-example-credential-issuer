@@ -5,11 +5,18 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
+import uk.gov.di.mobile.wallet.cri.credential.BasicCheckCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialExpiryCalculator;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerRegistry;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.DigitalVeteranCardHandler;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
+import uk.gov.di.mobile.wallet.cri.credential.MobileDrivingLicenceHandler;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.SocialSecurityCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
@@ -22,6 +29,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Mobile
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfoFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigestsFactory;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
@@ -39,6 +47,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 /**
  * Factory for creating and wiring all application services.
@@ -125,14 +134,28 @@ public class ServicesFactory {
         DocumentStoreClient documentStoreClient =
                 new DocumentStoreClient(configurationService, httpClient);
 
+      CredentialHandler socialSecurityHandler = new SocialSecurityCredentialHandler(new CredentialBuilder<>(configurationService, kmsService));
+      CredentialHandler basicCheckHandler = new BasicCheckCredentialHandler(new CredentialBuilder<>(configurationService, kmsService));
+      CredentialHandler veteranCardHandler = new DigitalVeteranCardHandler(new CredentialBuilder<>(configurationService, kmsService));
+      CredentialHandler mobileDrivingLicenceHandler = new MobileDrivingLicenceHandler(mobileDrivingLicenceService);
+
+      CredentialHandlerRegistry registry = new CredentialHandlerRegistry(
+              List.of(
+                      socialSecurityHandler,
+                      basicCheckHandler,
+                      veteranCardHandler,
+                      mobileDrivingLicenceHandler
+                     )
+      );
+
         CredentialService credentialService =
                 new CredentialService(
                         dynamoDbService,
                         accessTokenService,
                         proofJwtService,
                         documentStoreClient,
-                        credentialBuilder,
-                        mobileDrivingLicenceService);
+                        registry,
+                        new CredentialExpiryCalculator());
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);

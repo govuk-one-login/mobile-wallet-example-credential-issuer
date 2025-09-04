@@ -43,8 +43,8 @@ public class CredentialService {
     private final AccessTokenService accessTokenService;
     private final ProofJwtService proofJwtService;
     private final DocumentStoreClient documentStoreClient;
-    private final CredentialBuilder<? extends CredentialSubject> credentialBuilder;
-    private final MobileDrivingLicenceService mobileDrivingLicenceService;
+  private final CredentialHandlerRegistry credentialHandlerRegistry;
+  private final CredentialExpiryCalculator calculateExpiryCalculator;
 
     private final ObjectMapper mapper =
             new ObjectMapper()
@@ -57,24 +57,19 @@ public class CredentialService {
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
-            CredentialBuilder<?> credentialBuilder,
-            MobileDrivingLicenceService mobileDrivingLicenceService) {
+            CredentialHandlerRegistry credentialHandlerRegistry,
+            CredentialExpiryCalculator calculateExpiryCalculator
+            ) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
         this.documentStoreClient = documentStoreClient;
-        this.credentialBuilder = credentialBuilder;
-        this.mobileDrivingLicenceService = mobileDrivingLicenceService;
+      this.credentialHandlerRegistry = credentialHandlerRegistry;
+        this.calculateExpiryCalculator = calculateExpiryCalculator;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
-            throws DataStoreException,
-                    ProofJwtValidationException,
-                    NonceValidationException,
-                    AccessTokenValidationException,
-                    CredentialServiceException,
-                    CredentialOfferException,
-                    DocumentStoreException {
+            throws Exception {
         AccessTokenService.AccessTokenData accessTokenData =
                 accessTokenService.verifyAccessToken(accessToken);
 
@@ -106,67 +101,24 @@ public class CredentialService {
                 credentialOfferId,
                 documentId);
 
+      // Delete credential offer after redeeming it to prevent replay
         dataStore.deleteCredentialOffer(
-                credentialOfferId); // Delete credential offer after being redeemed to prevent
-        // replay
+                credentialOfferId);
 
-        String sub = proofJwtData.didKey();
-        String vcType = document.getVcType();
-        String credential;
-        long documentExpiry;
+          CredentialHandler handler = credentialHandlerRegistry.getHandler(document.getVcType());
+          String credential = handler.buildCredential(document, proofJwtData);
 
-        try {
-            if (Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType())) {
-                SocialSecurityDocument socialSecurityDocument =
-                        mapper.convertValue(document.getData(), SocialSecurityDocument.class);
-                credential = getSocialSecurityCredential(socialSecurityDocument, sub);
-                long ttl = socialSecurityDocument.getCredentialTtlMinutes();
-                documentExpiry = ExpiryUtil.calculateExpiryTimeFromTtl(ttl);
-
-            } else if (Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType())) {
-                BasicCheckDocument basicCheckDocument =
-                        mapper.convertValue(document.getData(), BasicCheckDocument.class);
-                credential = getBasicCheckCredential(basicCheckDocument, sub);
-                long ttl = basicCheckDocument.getCredentialTtlMinutes();
-                documentExpiry = ExpiryUtil.calculateExpiryTimeFromTtl(ttl);
-
-            } else if (Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType())) {
-                VeteranCardDocument veteranCardDocument =
-                        mapper.convertValue(document.getData(), VeteranCardDocument.class);
-                credential = getDigitalVeteranCard(veteranCardDocument, sub);
-                long ttl = veteranCardDocument.getCredentialTtlMinutes();
-                documentExpiry = ExpiryUtil.calculateExpiryTimeFromTtl(ttl);
-
-            } else if (Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType())) {
-                DrivingLicenceDocument drivingLicenceDocument =
-                        mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-                credential =
-                        getMobileDrivingLicence(drivingLicenceDocument, proofJwtData.publicKey());
-                LocalDate expiryDate = drivingLicenceDocument.getExpiryDate();
-                documentExpiry = ExpiryUtil.calculateExpiryTimeFromDate(expiryDate);
-
-            } else {
-                throw new CredentialServiceException(
-                        String.format("Invalid verifiable credential type %s", vcType));
-            }
+          long expiry = calculateExpiryCalculator.calculateExpiry(document);
 
             dataStore.saveStoredCredential(
                     new StoredCredential(
                             credentialOffer.getCredentialIdentifier(),
                             notificationId,
                             credentialOffer.getWalletSubjectId(),
-                            documentExpiry));
+                            expiry));
 
             return new CredentialResponse(credential, notificationId);
 
-        } catch (DataStoreException
-                | SigningException
-                | MDLException
-                | ObjectStoreException
-                | CertificateException exception) {
-            throw new CredentialServiceException(
-                    "Failed to issue credential due to an internal error", exception);
-        }
     }
 
     private boolean isValidCredentialOffer(
@@ -181,51 +133,6 @@ public class CredentialService {
             return false;
         }
         return true;
-    }
-
-    @SuppressWarnings("unchecked")
-    private String getSocialSecurityCredential(
-            SocialSecurityDocument socialSecurityDocument, String sub) throws SigningException {
-        SocialSecurityCredentialSubject socialSecurityCredentialSubject =
-                CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
-                        socialSecurityDocument, sub);
-        return ((CredentialBuilder<SocialSecurityCredentialSubject>) credentialBuilder)
-                .buildCredential(
-                        socialSecurityCredentialSubject,
-                        SOCIAL_SECURITY_CREDENTIAL,
-                        socialSecurityDocument.getCredentialTtlMinutes());
-    }
-
-    @SuppressWarnings("unchecked")
-    private String getBasicCheckCredential(BasicCheckDocument basicCheckDocument, String sub)
-            throws SigningException {
-        BasicCheckCredentialSubject basicCheckCredentialSubject =
-                CredentialSubjectMapper.buildBasicCheckCredentialSubject(basicCheckDocument, sub);
-
-        return ((CredentialBuilder<BasicCheckCredentialSubject>) credentialBuilder)
-                .buildCredential(
-                        basicCheckCredentialSubject,
-                        BASIC_DISCLOSURE_CREDENTIAL,
-                        basicCheckDocument.getCredentialTtlMinutes());
-    }
-
-    @SuppressWarnings("unchecked")
-    private String getDigitalVeteranCard(VeteranCardDocument veteranCardDocument, String sub)
-            throws SigningException {
-        VeteranCardCredentialSubject veteranCardCredentialSubject =
-                CredentialSubjectMapper.buildVeteranCardCredentialSubject(veteranCardDocument, sub);
-        return ((CredentialBuilder<VeteranCardCredentialSubject>) credentialBuilder)
-                .buildCredential(
-                        veteranCardCredentialSubject,
-                        DIGITAL_VETERAN_CARD,
-                        veteranCardDocument.getCredentialTtlMinutes());
-    }
-
-    private String getMobileDrivingLicence(
-            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
-            throws ObjectStoreException, SigningException, CertificateException {
-        return mobileDrivingLicenceService.createMobileDrivingLicence(
-                drivingLicenceDocument, publicKey);
     }
 
     protected Logger getLogger() {
