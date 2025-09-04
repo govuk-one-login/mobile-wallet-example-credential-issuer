@@ -32,7 +32,7 @@ class ArnUtilTest {
     @Test
     void Should_ReturnKeyId_When_KmsArnIsValid() {
         String arn = "arn:aws:kms:eu-west-2:123456789012:key/key-id";
-        String result = ArnUtil.extractCertificateAuthorityId(arn);
+        String result = ArnUtil.extractKeyId(arn);
         assertEquals("key-id", result);
     }
 
