@@ -37,15 +37,15 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
     const issuerAlternativeName = await getSsmParameter(config.PLATFORM_CA_ISSUER_ALTERNATIVE_NAME);
     const certificateAuthorityId = certificateAuthorityArn.split('/').pop();
 
-    if (await headObject(config.DOC_SIGNING_KEY_BUCKET, certificateAuthorityId + '/certificate.pem')) {
+    if (await headObject(config.DOC_SIGNING_KEY_BUCKET, `root/${certificateAuthorityId}/certificate.pem`)) {
       logger.info(LogMessage.ROOT_CERTIFICATE_ALREADY_EXISTS);
     } else {
       const rootCertificate = await getSsmParameter(config.ROOT_CERTIFICATE);
-      await putObject(config.DOC_SIGNING_KEY_BUCKET, certificateAuthorityId + '/certificate.pem', rootCertificate);
+      await putObject(config.DOC_SIGNING_KEY_BUCKET, `root/${certificateAuthorityId}/certificate.pem`, rootCertificate);
       logger.info(LogMessage.ROOT_CERTIFICATE_UPLOADED);
     }
 
-    if (await headObject(config.DOC_SIGNING_KEY_BUCKET, config.DOC_SIGNING_KEY_ID + '/certificate.pem')) {
+    if (await headObject(config.DOC_SIGNING_KEY_BUCKET, `sign/${config.DOC_SIGNING_KEY_ID}/certificate.pem`)) {
       logger.error(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ALREADY_EXISTS);
       throw new Error('Certificate already exists for this KMS Key');
     }
@@ -65,7 +65,11 @@ export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCerti
       );
 
       const issuedCertificate = await retrieveIssuedCertificate(issuedCertificateArn, certificateAuthorityArn);
-      await putObject(config.DOC_SIGNING_KEY_BUCKET, config.DOC_SIGNING_KEY_ID + '/certificate.pem', issuedCertificate);
+      await putObject(
+        config.DOC_SIGNING_KEY_BUCKET,
+        `sign/${config.DOC_SIGNING_KEY_ID}/certificate.pem`,
+        issuedCertificate,
+      );
 
       logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_CERTIFICATE_ISSUED);
     } catch (error) {

@@ -23,7 +23,8 @@ class CertificateProviderTest {
 
     private static final String BUCKET_NAME = "test-bucket";
     private static final String CERTIFICATE_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
-    private static final String OBJECT_KEY = CERTIFICATE_ID + "/certificate.pem";
+    private static final String ROOT_OBJECT_KEY = "root/" + CERTIFICATE_ID + "/certificate.pem";
+    private static final String SIGN_OBJECT_KEY = "sign/" + CERTIFICATE_ID + "/certificate.pem";
     private static final String CERTIFICATE_PEM =
             """
           -----BEGIN CERTIFICATE-----
@@ -56,19 +57,19 @@ class CertificateProviderTest {
 
     @Test
     void Should_ReturnReturnCertificateString() throws Exception {
-        when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
+        when(objectStore.getObject(BUCKET_NAME, ROOT_OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
 
-        String result = certificateProvider.getCertificateAsString(CERTIFICATE_ID);
+        String result = certificateProvider.getRootCertificate(CERTIFICATE_ID);
 
         assertEquals(CERTIFICATE_PEM, result);
-        verify(objectStore).getObject(BUCKET_NAME, OBJECT_KEY);
+        verify(objectStore).getObject(BUCKET_NAME, ROOT_OBJECT_KEY);
     }
 
     @Test
     void Should_ReturnX509Certificate() throws Exception {
-        when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
+        when(objectStore.getObject(BUCKET_NAME, SIGN_OBJECT_KEY)).thenReturn(CERTIFICATE_BYTES);
 
-        X509Certificate result = certificateProvider.getCertificate(CERTIFICATE_ID);
+        X509Certificate result = certificateProvider.getSigningCertificate(CERTIFICATE_ID);
 
         assertNotNull(result);
         assertEquals("X.509", result.getType());
@@ -76,21 +77,21 @@ class CertificateProviderTest {
 
     @Test
     void Should_PropagateExceptionThrownByObjectStore() throws Exception {
-        when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY))
+        when(objectStore.getObject(BUCKET_NAME, SIGN_OBJECT_KEY))
                 .thenThrow(new ObjectStoreException("Not found", new RuntimeException()));
 
         assertThrows(
                 ObjectStoreException.class,
-                () -> certificateProvider.getCertificate(CERTIFICATE_ID));
+                () -> certificateProvider.getSigningCertificate(CERTIFICATE_ID));
     }
 
     @Test
     void Should_ThrowsCertificateException_When_CertificateIsInvalid() throws Exception {
-        when(objectStore.getObject(BUCKET_NAME, OBJECT_KEY))
+        when(objectStore.getObject(BUCKET_NAME, SIGN_OBJECT_KEY))
                 .thenReturn("not a cert".getBytes(StandardCharsets.UTF_8));
 
         assertThrows(
                 CertificateException.class,
-                () -> certificateProvider.getCertificate(CERTIFICATE_ID));
+                () -> certificateProvider.getSigningCertificate(CERTIFICATE_ID));
     }
 }

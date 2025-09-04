@@ -32,7 +32,7 @@ public class IacasService {
                     NoSuchAlgorithmException,
                     JOSEException {
         String certificateAuthorityId = extractCertificateAuthorityId(certificateAuthorityArn);
-        String certificatePem = certificateProvider.getCertificateAsString(certificateAuthorityId);
+        String certificatePem = certificateProvider.getRootCertificate(certificateAuthorityId);
 
         Iaca iaca = Iaca.fromCertificate(certificateAuthorityId, true, certificatePem);
 
