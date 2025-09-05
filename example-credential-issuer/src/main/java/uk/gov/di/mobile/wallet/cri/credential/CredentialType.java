@@ -16,4 +16,13 @@ public enum CredentialType {
         this.type = type;
         this.name = name;
     }
+
+    public static CredentialType fromType(String type) {
+        for (CredentialType ct : values()) {
+            if (ct.type.equals(type)) {
+                return ct;
+            }
+        }
+        throw new IllegalArgumentException("Unknown credential type: " + type);
+    }
 }
