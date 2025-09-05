@@ -235,6 +235,19 @@ Resources:
               NoncurrentDays: 14
             Status: Enabled
 
+  DocSigningCertificateBucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref DocSigningCertificateBucket
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::921104553881:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA
+            Action: 's3:GetObject'
+            Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
+
   DocumentSigningKey1:
     Type: AWS::KMS::Key
     Properties:
@@ -243,6 +256,25 @@ Resources:
       Description: !Sub 'Example Document Signing Key 1 for ${AWS::StackName}'
       Enabled: true
       PendingWindowInDays: 7
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+          - Sid: EnableAccountRoot
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 'kms:*'
+            Resource: '*'
+
+          - Sid: AllowWalletIssuerRoleToSign
+            Effect: Allow
+            Principal:
+              AWS: arn:aws:iam::921104553881:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA
+            Action:
+              - kms:Sign
+              - kms:GetPublicKey
+              - kms:DescribeKey
+            Resource: '*'
 
   DocumentSigningKeyAlias1:
     Type: AWS::KMS::Alias
