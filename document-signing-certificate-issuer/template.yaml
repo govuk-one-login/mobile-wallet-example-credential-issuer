@@ -242,7 +242,8 @@ Resources:
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
-          - Effect: Allow
+          - Sid: AllowWalletBEECSTaskRoleToGetObject
+            Effect: Allow
             Principal:
               AWS: arn:aws:iam::921104553881:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA
             Action: 's3:GetObject'
@@ -259,21 +260,13 @@ Resources:
       KeyPolicy:
         Version: '2012-10-17'
         Statement:
-          - Sid: EnableAccountRoot
-            Effect: Allow
-            Principal:
-              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
-            Action: 'kms:*'
-            Resource: '*'
-
-          - Sid: AllowWalletIssuerRoleToSign
+          - Sid: AllowWalletBEECSTaskRoleToSign
             Effect: Allow
             Principal:
               AWS: arn:aws:iam::921104553881:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA
             Action:
               - kms:Sign
               - kms:GetPublicKey
-              - kms:DescribeKey
             Resource: '*'
 
   DocumentSigningKeyAlias1:
