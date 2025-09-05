@@ -11,26 +11,30 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLO
 
 public class BasicCheckCredentialHandler implements CredentialHandler {
 
-  private final CredentialBuilder<BasicCheckCredentialSubject> credentialBuilder;
-  private final ObjectMapper mapper = new ObjectMapper();
+    private final CredentialBuilder<BasicCheckCredentialSubject> credentialBuilder;
+    private final ObjectMapper mapper = new ObjectMapper();
 
-  public BasicCheckCredentialHandler(CredentialBuilder<BasicCheckCredentialSubject> credentialBuilder) {
-    this.credentialBuilder = credentialBuilder;
-  }
+    public BasicCheckCredentialHandler(
+            CredentialBuilder<BasicCheckCredentialSubject> credentialBuilder) {
+        this.credentialBuilder = credentialBuilder;
+    }
 
-  @Override
-  public boolean supports(String vcType) {
-    return Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType());
-  }
+    @Override
+    public boolean supports(String vcType) {
+        return Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType());
+    }
 
-  @Override
-  public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData) throws SigningException {
-    BasicCheckDocument basicCheckDocument =
-            mapper.convertValue(document.getData(), BasicCheckDocument.class);
+    @Override
+    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+            throws SigningException {
+        BasicCheckDocument basicCheckDocument =
+                mapper.convertValue(document.getData(), BasicCheckDocument.class);
 
-    BasicCheckCredentialSubject subject =
-            CredentialSubjectMapper.buildBasicCheckCredentialSubject(basicCheckDocument, proofData.didKey());
+        BasicCheckCredentialSubject subject =
+                CredentialSubjectMapper.buildBasicCheckCredentialSubject(
+                        basicCheckDocument, proofData.didKey());
 
-    return credentialBuilder.buildCredential(subject, BASIC_DISCLOSURE_CREDENTIAL, basicCheckDocument.getCredentialTtlMinutes());
-  }
+        return credentialBuilder.buildCredential(
+                subject, BASIC_DISCLOSURE_CREDENTIAL, basicCheckDocument.getCredentialTtlMinutes());
+    }
 }

@@ -29,7 +29,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Mobile
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfoFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigestsFactory;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
@@ -134,19 +133,25 @@ public class ServicesFactory {
         DocumentStoreClient documentStoreClient =
                 new DocumentStoreClient(configurationService, httpClient);
 
-      CredentialHandler socialSecurityHandler = new SocialSecurityCredentialHandler(new CredentialBuilder<>(configurationService, kmsService));
-      CredentialHandler basicCheckHandler = new BasicCheckCredentialHandler(new CredentialBuilder<>(configurationService, kmsService));
-      CredentialHandler veteranCardHandler = new DigitalVeteranCardHandler(new CredentialBuilder<>(configurationService, kmsService));
-      CredentialHandler mobileDrivingLicenceHandler = new MobileDrivingLicenceHandler(mobileDrivingLicenceService);
+        CredentialHandler socialSecurityHandler =
+                new SocialSecurityCredentialHandler(
+                        new CredentialBuilder<>(configurationService, kmsService));
+        CredentialHandler basicCheckHandler =
+                new BasicCheckCredentialHandler(
+                        new CredentialBuilder<>(configurationService, kmsService));
+        CredentialHandler veteranCardHandler =
+                new DigitalVeteranCardHandler(
+                        new CredentialBuilder<>(configurationService, kmsService));
+        CredentialHandler mobileDrivingLicenceHandler =
+                new MobileDrivingLicenceHandler(mobileDrivingLicenceService);
 
-      CredentialHandlerRegistry registry = new CredentialHandlerRegistry(
-              List.of(
-                      socialSecurityHandler,
-                      basicCheckHandler,
-                      veteranCardHandler,
-                      mobileDrivingLicenceHandler
-                     )
-      );
+        CredentialHandlerRegistry registry =
+                new CredentialHandlerRegistry(
+                        List.of(
+                                socialSecurityHandler,
+                                basicCheckHandler,
+                                veteranCardHandler,
+                                mobileDrivingLicenceHandler));
 
         CredentialService credentialService =
                 new CredentialService(

@@ -6,36 +6,14 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckDocument;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
-import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
-import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
-import uk.gov.di.mobile.wallet.cri.util.ExpiryUtil;
 
-import java.security.cert.CertificateException;
-import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.util.Objects;
 import java.util.UUID;
-
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
 
 public class CredentialService {
 
@@ -43,8 +21,8 @@ public class CredentialService {
     private final AccessTokenService accessTokenService;
     private final ProofJwtService proofJwtService;
     private final DocumentStoreClient documentStoreClient;
-  private final CredentialHandlerRegistry credentialHandlerRegistry;
-  private final CredentialExpiryCalculator calculateExpiryCalculator;
+    private final CredentialHandlerRegistry credentialHandlerRegistry;
+    private final CredentialExpiryCalculator calculateExpiryCalculator;
 
     private final ObjectMapper mapper =
             new ObjectMapper()
@@ -58,13 +36,12 @@ public class CredentialService {
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
             CredentialHandlerRegistry credentialHandlerRegistry,
-            CredentialExpiryCalculator calculateExpiryCalculator
-            ) {
+            CredentialExpiryCalculator calculateExpiryCalculator) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
         this.documentStoreClient = documentStoreClient;
-      this.credentialHandlerRegistry = credentialHandlerRegistry;
+        this.credentialHandlerRegistry = credentialHandlerRegistry;
         this.calculateExpiryCalculator = calculateExpiryCalculator;
     }
 
@@ -101,24 +78,22 @@ public class CredentialService {
                 credentialOfferId,
                 documentId);
 
-      // Delete credential offer after redeeming it to prevent replay
-        dataStore.deleteCredentialOffer(
-                credentialOfferId);
+        // Delete credential offer after redeeming it to prevent replay
+        dataStore.deleteCredentialOffer(credentialOfferId);
 
-          CredentialHandler handler = credentialHandlerRegistry.getHandler(document.getVcType());
-          String credential = handler.buildCredential(document, proofJwtData);
+        CredentialHandler handler = credentialHandlerRegistry.getHandler(document.getVcType());
+        String credential = handler.buildCredential(document, proofJwtData);
 
-          long expiry = calculateExpiryCalculator.calculateExpiry(document);
+        long expiry = calculateExpiryCalculator.calculateExpiry(document);
 
-            dataStore.saveStoredCredential(
-                    new StoredCredential(
-                            credentialOffer.getCredentialIdentifier(),
-                            notificationId,
-                            credentialOffer.getWalletSubjectId(),
-                            expiry));
+        dataStore.saveStoredCredential(
+                new StoredCredential(
+                        credentialOffer.getCredentialIdentifier(),
+                        notificationId,
+                        credentialOffer.getWalletSubjectId(),
+                        expiry));
 
-            return new CredentialResponse(credential, notificationId);
-
+        return new CredentialResponse(credential, notificationId);
     }
 
     private boolean isValidCredentialOffer(

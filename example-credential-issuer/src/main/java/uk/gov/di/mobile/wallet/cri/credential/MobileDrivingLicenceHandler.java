@@ -10,23 +10,25 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVI
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
-  private final MobileDrivingLicenceService mobileDrivingLicenceService;
-  private final ObjectMapper mapper = new ObjectMapper();
+    private final MobileDrivingLicenceService mobileDrivingLicenceService;
+    private final ObjectMapper mapper = new ObjectMapper();
 
-  public MobileDrivingLicenceHandler(MobileDrivingLicenceService mobileDrivingLicenceService) {
-    this.mobileDrivingLicenceService = mobileDrivingLicenceService;
-  }
+    public MobileDrivingLicenceHandler(MobileDrivingLicenceService mobileDrivingLicenceService) {
+        this.mobileDrivingLicenceService = mobileDrivingLicenceService;
+    }
 
-  @Override
-  public boolean supports(String vcType) {
-    return Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType());
-  }
+    @Override
+    public boolean supports(String vcType) {
+        return Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType());
+    }
 
-  @Override
-  public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData) throws Exception {
-    DrivingLicenceDocument drivingLicenceDocument =
-            mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+    @Override
+    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+            throws Exception {
+        DrivingLicenceDocument drivingLicenceDocument =
+                mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
-    return mobileDrivingLicenceService.createMobileDrivingLicence(drivingLicenceDocument, proofData.publicKey());
-  }
+        return mobileDrivingLicenceService.createMobileDrivingLicence(
+                drivingLicenceDocument, proofData.publicKey());
+    }
 }

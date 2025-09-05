@@ -8,25 +8,35 @@ import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialS
 import uk.gov.di.mobile.wallet.cri.util.ExpiryUtil;
 
 public class CredentialExpiryCalculator implements ExpiryCalculator {
-  @Override
-  public long calculateExpiry(Document document) {
-    String vcType = document.getVcType();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    switch (vcType) {
-      case "SOCIAL_SECURITY":
-        SocialSecurityDocument ssDoc = new ObjectMapper().convertValue(document.getData(), SocialSecurityDocument.class);
-        return ExpiryUtil.calculateExpiryTimeFromTtl(ssDoc.getCredentialTtlMinutes());
-      case "BASIC_DISCLOSURE":
-        BasicCheckDocument bcDoc = new ObjectMapper().convertValue(document.getData(), BasicCheckDocument.class);
-        return ExpiryUtil.calculateExpiryTimeFromTtl(bcDoc.getCredentialTtlMinutes());
-      case "DIGITAL_VETERAN_CARD":
-        VeteranCardDocument vetDoc = new ObjectMapper().convertValue(document.getData(), VeteranCardDocument.class);
-        return ExpiryUtil.calculateExpiryTimeFromTtl(vetDoc.getCredentialTtlMinutes());
-      case "MOBILE_DRIVING_LICENCE":
-        DrivingLicenceDocument dlDoc = new ObjectMapper().convertValue(document.getData(), DrivingLicenceDocument.class);
-        return ExpiryUtil.calculateExpiryTimeFromDate(dlDoc.getExpiryDate());
-      default:
-        throw new IllegalArgumentException("Unsupported credential type for expiry calculation: " + vcType);
+    @Override
+    public long calculateExpiry(Document document) {
+        String vcType = document.getVcType();
+        System.out.println(vcType);
+
+        CredentialType credentialType = CredentialType.fromType(vcType);
+        return switch (credentialType) {
+            case SOCIAL_SECURITY_CREDENTIAL -> {
+                SocialSecurityDocument socialSecurityDocument =
+                        mapper.convertValue(document.getData(), SocialSecurityDocument.class);
+                yield ExpiryUtil.calculateExpiryTimeFromTtl(socialSecurityDocument.getCredentialTtlMinutes());
+            }
+            case BASIC_DISCLOSURE_CREDENTIAL -> {
+                BasicCheckDocument basicCheckDocument =
+                        mapper.convertValue(document.getData(), BasicCheckDocument.class);
+                yield ExpiryUtil.calculateExpiryTimeFromTtl(basicCheckDocument.getCredentialTtlMinutes());
+            }
+            case DIGITAL_VETERAN_CARD -> {
+                VeteranCardDocument veteranCardDocument =
+                        mapper.convertValue(document.getData(), VeteranCardDocument.class);
+                yield ExpiryUtil.calculateExpiryTimeFromTtl(veteranCardDocument.getCredentialTtlMinutes());
+            }
+            case MOBILE_DRIVING_LICENCE -> {
+                DrivingLicenceDocument drivingLicenceDocument =
+                        mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+                yield ExpiryUtil.calculateExpiryTimeFromDate(drivingLicenceDocument.getExpiryDate());
+            }
+        };
     }
-  }
 }

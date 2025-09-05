@@ -11,26 +11,30 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETE
 
 public class DigitalVeteranCardHandler implements CredentialHandler {
 
-  private final CredentialBuilder<VeteranCardCredentialSubject> credentialBuilder;
-  private final ObjectMapper mapper = new ObjectMapper();
+    private final CredentialBuilder<VeteranCardCredentialSubject> credentialBuilder;
+    private final ObjectMapper mapper = new ObjectMapper();
 
-  public DigitalVeteranCardHandler(CredentialBuilder<VeteranCardCredentialSubject> credentialBuilder) {
-    this.credentialBuilder = credentialBuilder;
-  }
+    public DigitalVeteranCardHandler(
+            CredentialBuilder<VeteranCardCredentialSubject> credentialBuilder) {
+        this.credentialBuilder = credentialBuilder;
+    }
 
-  @Override
-  public boolean supports(String vcType) {
-    return Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType());
-  }
+    @Override
+    public boolean supports(String vcType) {
+        return Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType());
+    }
 
-  @Override
-  public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData) throws SigningException {
-    VeteranCardDocument veteranCardDocument =
-            mapper.convertValue(document.getData(), VeteranCardDocument.class);
+    @Override
+    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+            throws SigningException {
+        VeteranCardDocument veteranCardDocument =
+                mapper.convertValue(document.getData(), VeteranCardDocument.class);
 
-    VeteranCardCredentialSubject subject =
-            CredentialSubjectMapper.buildVeteranCardCredentialSubject(veteranCardDocument, proofData.didKey());
+        VeteranCardCredentialSubject subject =
+                CredentialSubjectMapper.buildVeteranCardCredentialSubject(
+                        veteranCardDocument, proofData.didKey());
 
-    return credentialBuilder.buildCredential(subject, DIGITAL_VETERAN_CARD, veteranCardDocument.getCredentialTtlMinutes());
-  }
+        return credentialBuilder.buildCredential(
+                subject, DIGITAL_VETERAN_CARD, veteranCardDocument.getCredentialTtlMinutes());
+    }
 }
