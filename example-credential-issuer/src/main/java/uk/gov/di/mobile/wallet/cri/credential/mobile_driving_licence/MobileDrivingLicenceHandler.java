@@ -1,9 +1,13 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
+import uk.gov.di.mobile.wallet.cri.credential.Document;
+import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.cert.CertificateException;
 import java.util.Objects;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
@@ -24,7 +28,7 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
 
     @Override
     public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
-            throws Exception {
+            throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 

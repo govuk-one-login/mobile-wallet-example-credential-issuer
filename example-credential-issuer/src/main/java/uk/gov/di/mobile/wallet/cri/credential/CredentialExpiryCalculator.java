@@ -20,22 +20,26 @@ public class CredentialExpiryCalculator implements ExpiryCalculator {
             case SOCIAL_SECURITY_CREDENTIAL -> {
                 SocialSecurityDocument socialSecurityDocument =
                         mapper.convertValue(document.getData(), SocialSecurityDocument.class);
-                yield ExpiryUtil.calculateExpiryTimeFromTtl(socialSecurityDocument.getCredentialTtlMinutes());
+                yield ExpiryUtil.calculateExpiryTimeFromTtl(
+                        socialSecurityDocument.getCredentialTtlMinutes());
             }
             case BASIC_DISCLOSURE_CREDENTIAL -> {
                 BasicCheckDocument basicCheckDocument =
                         mapper.convertValue(document.getData(), BasicCheckDocument.class);
-                yield ExpiryUtil.calculateExpiryTimeFromTtl(basicCheckDocument.getCredentialTtlMinutes());
+                yield ExpiryUtil.calculateExpiryTimeFromTtl(
+                        basicCheckDocument.getCredentialTtlMinutes());
             }
             case DIGITAL_VETERAN_CARD -> {
                 VeteranCardDocument veteranCardDocument =
                         mapper.convertValue(document.getData(), VeteranCardDocument.class);
-                yield ExpiryUtil.calculateExpiryTimeFromTtl(veteranCardDocument.getCredentialTtlMinutes());
+                yield ExpiryUtil.calculateExpiryTimeFromTtl(
+                        veteranCardDocument.getCredentialTtlMinutes());
             }
             case MOBILE_DRIVING_LICENCE -> {
                 DrivingLicenceDocument drivingLicenceDocument =
                         mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-                yield ExpiryUtil.calculateExpiryTimeFromDate(drivingLicenceDocument.getExpiryDate());
+                yield ExpiryUtil.calculateExpiryTimeFromDate(
+                        drivingLicenceDocument.getExpiryDate());
             }
         };
     }

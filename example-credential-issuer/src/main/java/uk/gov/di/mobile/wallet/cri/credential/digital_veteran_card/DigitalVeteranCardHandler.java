@@ -1,8 +1,11 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardDocument;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
+import uk.gov.di.mobile.wallet.cri.credential.Document;
+import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.Objects;
