@@ -6,12 +6,17 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
+import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
+import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
+import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -46,54 +51,68 @@ public class CredentialService {
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
-            throws Exception {
-        AccessTokenService.AccessTokenData accessTokenData =
-                accessTokenService.verifyAccessToken(accessToken);
+            throws AccessTokenValidationException,
+                    NonceValidationException,
+                    ProofJwtValidationException,
+                    CredentialOfferException,
+                    CredentialServiceException {
+        try {
+            AccessTokenService.AccessTokenData accessTokenData =
+                    accessTokenService.verifyAccessToken(accessToken);
 
-        ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
+            ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
 
-        if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
-            throw new NonceValidationException(
-                    "Access token c_nonce claim does not match Proof JWT nonce claim");
+            if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
+                throw new NonceValidationException(
+                        "Access token c_nonce claim does not match Proof JWT nonce claim");
+            }
+
+            String credentialOfferId = accessTokenData.credentialIdentifier();
+            CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
+            if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
+                throw new CredentialOfferException("Credential offer validation failed");
+            }
+
+            if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
+                throw new AccessTokenValidationException(
+                        "Access token sub claim does not match cached walletSubjectId");
+            }
+
+            String documentId = credentialOffer.getDocumentId();
+            Document document = documentStoreClient.getDocument(documentId);
+            String notificationId = UUID.randomUUID().toString();
+
+            LOGGER.info(
+                    "{} retrieved - credentialOfferId: {}, documentId: {}",
+                    document.getVcType(),
+                    credentialOfferId,
+                    documentId);
+
+            // Delete credential offer after redeeming it to prevent replay
+            dataStore.deleteCredentialOffer(credentialOfferId);
+
+            CredentialHandler handler = credentialHandlerRegistry.getHandler(document.getVcType());
+            String credential = handler.buildCredential(document, proofJwtData);
+
+            long expiry = calculateExpiryCalculator.calculateExpiry(document);
+
+            dataStore.saveStoredCredential(
+                    new StoredCredential(
+                            credentialOffer.getCredentialIdentifier(),
+                            notificationId,
+                            credentialOffer.getWalletSubjectId(),
+                            expiry));
+
+            return new CredentialResponse(credential, notificationId);
+        } catch (DataStoreException
+                | SigningException
+                | MDLException
+                | ObjectStoreException
+                | CertificateException
+                | DocumentStoreException exception) {
+            throw new CredentialServiceException(
+                    "Failed to issue credential due to an internal error", exception);
         }
-
-        String credentialOfferId = accessTokenData.credentialIdentifier();
-        CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-        if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
-            throw new CredentialOfferException("Credential offer validation failed");
-        }
-
-        if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
-            throw new AccessTokenValidationException(
-                    "Access token sub claim does not match cached walletSubjectId");
-        }
-
-        String documentId = credentialOffer.getDocumentId();
-        Document document = documentStoreClient.getDocument(documentId);
-        String notificationId = UUID.randomUUID().toString();
-
-        LOGGER.info(
-                "{} retrieved - credentialOfferId: {}, documentId: {}",
-                document.getVcType(),
-                credentialOfferId,
-                documentId);
-
-        // Delete credential offer after redeeming it to prevent replay
-        dataStore.deleteCredentialOffer(credentialOfferId);
-
-        CredentialHandler handler = credentialHandlerRegistry.getHandler(document.getVcType());
-        String credential = handler.buildCredential(document, proofJwtData);
-
-        long expiry = calculateExpiryCalculator.calculateExpiry(document);
-
-        dataStore.saveStoredCredential(
-                new StoredCredential(
-                        credentialOffer.getCredentialIdentifier(),
-                        notificationId,
-                        credentialOffer.getWalletSubjectId(),
-                        expiry));
-
-        return new CredentialResponse(credential, notificationId);
     }
 
     private boolean isValidCredentialOffer(
