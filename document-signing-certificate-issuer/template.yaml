@@ -260,6 +260,12 @@ Resources:
       KeyPolicy:
         Version: '2012-10-17'
         Statement:
+          - Sid: EnableAccountRoot
+            Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action: 'kms:*'
+            Resource: '*'
           - Sid: AllowWalletBEECSTaskRoleToSign
             Effect: Allow
             Principal:
