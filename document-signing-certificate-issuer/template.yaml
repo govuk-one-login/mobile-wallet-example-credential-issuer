@@ -265,8 +265,8 @@ Resources:
             Principal:
               AWS: arn:aws:iam::921104553881:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA
             Action:
-              - kms:Sign
-              - kms:GetPublicKey
+              - 'kms:Sign'
+              - 'kms:DescribeKey'
             Resource: '*'
 
   DocumentSigningKeyAlias1:
