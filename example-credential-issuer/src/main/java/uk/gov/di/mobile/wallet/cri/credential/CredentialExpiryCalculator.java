@@ -12,12 +12,20 @@ import uk.gov.di.mobile.wallet.cri.util.ExpiryUtil;
 import java.time.Clock;
 
 public class CredentialExpiryCalculator implements ExpiryCalculator {
-    private final ObjectMapper mapper =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .registerModule(new Jdk8Module());
-    ;
-    ExpiryUtil expiryUtil = new ExpiryUtil(Clock.systemDefaultZone());
+    private final ObjectMapper mapper;
+    private final ExpiryUtil expiryUtil;
+
+    public CredentialExpiryCalculator() {
+        this(Clock.systemDefaultZone());
+    }
+
+    CredentialExpiryCalculator(Clock clock) {
+        this.mapper =
+                new ObjectMapper()
+                        .registerModule(new JavaTimeModule())
+                        .registerModule(new Jdk8Module());
+        this.expiryUtil = new ExpiryUtil(clock);
+    }
 
     @Override
     public long calculateExpiry(Document document) {
