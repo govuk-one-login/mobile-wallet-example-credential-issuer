@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.nimbusds.jwt.SignedJWT;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,6 +21,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
+import java.util.HashMap;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -31,7 +33,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static testUtils.MockDocuments.getMockSocialSecurityDocument;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)
@@ -243,5 +244,15 @@ class CredentialServiceTest {
     private ProofJwtService.ProofJwtData getMockProofJwtData(String nonce) {
         return new ProofJwtService.ProofJwtData(
                 CredentialServiceTest.DID_KEY, nonce, mockEcPublicKey);
+    }
+
+    public static @NotNull Document getMockSocialSecurityDocument(String documentId) {
+        HashMap<String, Object> data = new HashMap<>();
+        data.put("familyName", "Edwards Green");
+        data.put("givenName", "Sarah Elizabeth");
+        data.put("nino", "QQ123456C");
+        data.put("title", "Miss");
+        data.put("credentialTtlMinutes", "525600");
+        return new Document(documentId, data, "SocialSecurityCredential");
     }
 }
