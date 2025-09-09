@@ -30,7 +30,7 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVI
 @ExtendWith(MockitoExtension.class)
 class MobileDrivingLicenceHandlerTest {
 
-    @Mock private MobileDrivingLicenceService mockMobileDrivingLicenceService;
+    @Mock private MobileDrivingLicenceBuilder mockMobileDrivingLicenceService;
     @Mock private Document mockDocument;
     @Mock private ECPublicKey ecPublicKey;
     @Mock private ProofJwtService.ProofJwtData mockProofData;

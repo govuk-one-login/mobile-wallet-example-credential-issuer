@@ -14,8 +14,8 @@ import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.DigitalVeteranCardHandler;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceHandler;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
@@ -123,8 +123,8 @@ public class ServicesFactory {
                         certificateProvider,
                         configurationService.getDocumentSigningKey1Arn());
 
-        MobileDrivingLicenceService mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(
+        MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder =
+                new MobileDrivingLicenceBuilder(
                         cborEncoder, namespacesFactory, issuerSignedFactory);
 
         DocumentStoreClient documentStoreClient =
@@ -140,7 +140,7 @@ public class ServicesFactory {
                 new DigitalVeteranCardHandler(
                         new CredentialBuilder<>(configurationService, kmsService));
         CredentialHandler mobileDrivingLicenceHandler =
-                new MobileDrivingLicenceHandler(mobileDrivingLicenceService);
+                new MobileDrivingLicenceHandler(mobileDrivingLicenceBuilder);
 
         CredentialHandlerRegistry registry =
                 new CredentialHandlerRegistry(

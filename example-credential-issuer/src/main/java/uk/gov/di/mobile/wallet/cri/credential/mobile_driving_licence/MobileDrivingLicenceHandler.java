@@ -14,11 +14,11 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVI
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
-    private final MobileDrivingLicenceService mobileDrivingLicenceService;
+    private final MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public MobileDrivingLicenceHandler(MobileDrivingLicenceService mobileDrivingLicenceService) {
-        this.mobileDrivingLicenceService = mobileDrivingLicenceService;
+    public MobileDrivingLicenceHandler(MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder) {
+        this.mobileDrivingLicenceBuilder = mobileDrivingLicenceBuilder;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
-        return mobileDrivingLicenceService.createMobileDrivingLicence(
+        return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                 drivingLicenceDocument, proofData.publicKey());
     }
 }
