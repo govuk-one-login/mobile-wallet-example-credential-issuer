@@ -58,7 +58,7 @@ class DigitalVeteranCardHandlerTest {
     }
 
     @Test
-    void Should_ReturnFalse_When_CredentialTypeIsNOTDigitalVeteranCard() {
+    void Should_ReturnFalse_When_CredentialTypeIsNotDigitalVeteranCard() {
         String vcType = "AnotherVCType";
 
         boolean result = handler.supports(vcType);

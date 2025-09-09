@@ -58,7 +58,7 @@ class BasicCheckCredentialHandlerTest {
     }
 
     @Test
-    void Should_ReturnFalse_When_CredentialTypeIsNOTBasicDisclosureCredential() {
+    void Should_ReturnFalse_When_CredentialTypeIsNotBasicDisclosureCredential() {
         String vcType = "AnotherVCType";
 
         boolean result = handler.supports(vcType);

@@ -58,7 +58,7 @@ class SocialSecurityCredentialHandlerTest {
     }
 
     @Test
-    void Should_ReturnFalse_When_CredentialTypeIsNOTSocialSecurityCredential() {
+    void Should_ReturnFalse_When_CredentialTypeIsNotSocialSecurityCredential() {
         String vcType = "AnotherVCType";
 
         boolean result = handler.supports(vcType);
