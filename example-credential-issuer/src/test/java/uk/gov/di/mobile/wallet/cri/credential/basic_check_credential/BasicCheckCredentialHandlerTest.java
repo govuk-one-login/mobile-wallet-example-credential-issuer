@@ -79,7 +79,7 @@ class BasicCheckCredentialHandlerTest {
                 .thenReturn(EXPECTED_CREDENTIAL);
         BasicCheckCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(eq(documentData), eq(BasicCheckDocument.class)))
+        when(mockMapper.convertValue((documentData), BasicCheckDocument.class))
                 .thenReturn(mockBasicCheckDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =
@@ -116,7 +116,7 @@ class BasicCheckCredentialHandlerTest {
                 .thenThrow(signingException);
         BasicCheckCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(eq(documentData), eq(BasicCheckDocument.class)))
+        when(mockMapper.convertValue(documentData, BasicCheckDocument.class))
                 .thenReturn(mockBasicCheckDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =

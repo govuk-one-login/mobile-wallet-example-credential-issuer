@@ -42,7 +42,7 @@ class CredentialResourceTest {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     private static final CredentialService MOCK_CREDENTIAL_SERVICE = mock(CredentialService.class);
 
-    private final ResourceExtension RESOURCE =
+    private final ResourceExtension resource =
             ResourceExtension.builder()
                     .addResource(new CredentialResource(MOCK_CREDENTIAL_SERVICE))
                     .build();
@@ -72,7 +72,7 @@ class CredentialResourceTest {
                     NonceValidationException,
                     CredentialOfferException {
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(arg, MediaType.APPLICATION_JSON));
@@ -91,7 +91,7 @@ class CredentialResourceTest {
                     CredentialServiceException,
                     CredentialOfferException {
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
@@ -108,7 +108,7 @@ class CredentialResourceTest {
                     CredentialServiceException,
                     CredentialOfferException {
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", "NotBearer " + ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
@@ -132,7 +132,7 @@ class CredentialResourceTest {
                 .getCredential(any(), any());
 
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
@@ -157,7 +157,7 @@ class CredentialResourceTest {
                 .getCredential(any(), any());
 
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
@@ -182,7 +182,7 @@ class CredentialResourceTest {
                 .getCredential(any(), any());
 
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
@@ -206,7 +206,7 @@ class CredentialResourceTest {
                 .getCredential(any(), any());
 
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
@@ -230,7 +230,7 @@ class CredentialResourceTest {
                 .getCredential(any(), any());
 
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
@@ -254,7 +254,7 @@ class CredentialResourceTest {
                 .thenReturn(mockCredentialResponse);
 
         final Response response =
-                RESOURCE.target("/credential")
+                resource.target("/credential")
                         .request()
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));

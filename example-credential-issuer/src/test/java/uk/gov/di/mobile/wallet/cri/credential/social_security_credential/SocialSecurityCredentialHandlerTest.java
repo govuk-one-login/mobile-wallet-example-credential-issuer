@@ -79,7 +79,7 @@ class SocialSecurityCredentialHandlerTest {
                 .thenReturn(EXPECTED_CREDENTIAL);
         SocialSecurityCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(eq(documentData), eq(SocialSecurityDocument.class)))
+        when(mockMapper.convertValue(documentData, SocialSecurityDocument.class))
                 .thenReturn(mockSocialSecurityDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =
@@ -116,7 +116,7 @@ class SocialSecurityCredentialHandlerTest {
                 .thenThrow(signingException);
         SocialSecurityCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(eq(documentData), eq(SocialSecurityDocument.class)))
+        when(mockMapper.convertValue(documentData, SocialSecurityDocument.class))
                 .thenReturn(mockSocialSecurityDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =

@@ -79,7 +79,7 @@ class DigitalVeteranCardHandlerTest {
                 .thenReturn(EXPECTED_CREDENTIAL);
         DigitalVeteranCardHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(eq(documentData), eq(VeteranCardDocument.class)))
+        when(mockMapper.convertValue(documentData, VeteranCardDocument.class))
                 .thenReturn(mockVeteranCardDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =
@@ -115,7 +115,7 @@ class DigitalVeteranCardHandlerTest {
                 .thenThrow(signingException);
         DigitalVeteranCardHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(eq(documentData), eq(VeteranCardDocument.class)))
+        when(mockMapper.convertValue(documentData, VeteranCardDocument.class))
                 .thenReturn(mockVeteranCardDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =

@@ -10,7 +10,6 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerRegistry;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialHandler;
@@ -96,8 +95,6 @@ public class ServicesFactory {
         AccessTokenService accessTokenService =
                 new AccessTokenService(jwksService, configurationService);
         ProofJwtService proofJwtService = new ProofJwtService(configurationService);
-        CredentialBuilder<? extends CredentialSubject> credentialBuilder =
-                new CredentialBuilder<>(configurationService, kmsService);
 
         CBOREncoder cborEncoder =
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
