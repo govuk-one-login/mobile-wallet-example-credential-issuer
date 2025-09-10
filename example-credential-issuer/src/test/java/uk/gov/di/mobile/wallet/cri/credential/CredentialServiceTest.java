@@ -38,19 +38,17 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CredentialServiceTest {
 
+    private CredentialService credentialService;
+
     @Mock private CredentialHandlerFactory mockCredentialHandlerFactory;
-
     @Mock private CredentialExpiryCalculator mockExpiryCalculator;
-
     @Mock private Logger mockLogger;
     @Mock private ECPublicKey mockEcPublicKey;
+    @Mock private DynamoDbService mockDynamoDbService;
+    @Mock private AccessTokenService mockAccessTokenService;
+    @Mock private ProofJwtService mockProofJwtService;
+    @Mock private DocumentStoreClient mockDocumentStoreClient;
 
-    private final DynamoDbService mockDynamoDbService = mock(DynamoDbService.class);
-    private final AccessTokenService mockAccessTokenService = mock(AccessTokenService.class);
-    private final ProofJwtService mockProofJwtService = mock(ProofJwtService.class);
-    private final DocumentStoreClient mockDocumentStoreClient = mock(DocumentStoreClient.class);
-
-    private CredentialService credentialService;
     private CachedCredentialOffer mockCachedCredentialOffer;
     private SignedJWT mockProofJwt;
     private SignedJWT mockAccessToken;
