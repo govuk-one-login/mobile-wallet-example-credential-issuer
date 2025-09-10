@@ -23,8 +23,8 @@ public class CredentialService {
     private final AccessTokenService accessTokenService;
     private final ProofJwtService proofJwtService;
     private final DocumentStoreClient documentStoreClient;
-    private final CredentialHandlerRegistry credentialHandlerRegistry;
-    private final CredentialExpiryCalculator calculateExpiryCalculator;
+    private final CredentialHandlerFactory credentialHandlerFactory;
+    private final CredentialExpiryCalculator credentialExpiryCalculator;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
@@ -33,14 +33,14 @@ public class CredentialService {
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
-            CredentialHandlerRegistry credentialHandlerRegistry,
-            CredentialExpiryCalculator calculateExpiryCalculator) {
+            CredentialHandlerFactory credentialHandlerFactory,
+            CredentialExpiryCalculator credentialExpiryCalculator) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
         this.documentStoreClient = documentStoreClient;
-        this.credentialHandlerRegistry = credentialHandlerRegistry;
-        this.calculateExpiryCalculator = calculateExpiryCalculator;
+        this.credentialHandlerFactory = credentialHandlerFactory;
+        this.credentialExpiryCalculator = credentialExpiryCalculator;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -84,10 +84,11 @@ public class CredentialService {
             // Delete credential offer after redeeming it to prevent replay
             dataStore.deleteCredentialOffer(credentialOfferId);
 
-            CredentialHandler handler = credentialHandlerRegistry.getHandler(document.getVcType());
+            CredentialHandler handler =
+                    credentialHandlerFactory.createHandler(document.getVcType());
             String credential = handler.buildCredential(document, proofJwtData);
 
-            long expiry = calculateExpiryCalculator.calculateExpiry(document);
+            long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
             dataStore.saveStoredCredential(
                     new StoredCredential(

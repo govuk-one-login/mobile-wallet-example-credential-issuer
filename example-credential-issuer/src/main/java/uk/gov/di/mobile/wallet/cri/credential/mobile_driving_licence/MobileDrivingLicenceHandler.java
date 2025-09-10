@@ -8,9 +8,6 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
-import java.util.Objects;
-
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
@@ -19,11 +16,6 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
 
     public MobileDrivingLicenceHandler(MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder) {
         this.mobileDrivingLicenceBuilder = mobileDrivingLicenceBuilder;
-    }
-
-    @Override
-    public boolean supports(String vcType) {
-        return Objects.equals(vcType, MOBILE_DRIVING_LICENCE.getType());
     }
 
     @Override

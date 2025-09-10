@@ -8,8 +8,6 @@ import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.util.Objects;
-
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
 
 public class DigitalVeteranCardHandler implements CredentialHandler {
@@ -20,11 +18,6 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
     public DigitalVeteranCardHandler(
             CredentialBuilder<VeteranCardCredentialSubject> credentialBuilder) {
         this.credentialBuilder = credentialBuilder;
-    }
-
-    @Override
-    public boolean supports(String vcType) {
-        return Objects.equals(vcType, DIGITAL_VETERAN_CARD.getType());
     }
 
     @Override

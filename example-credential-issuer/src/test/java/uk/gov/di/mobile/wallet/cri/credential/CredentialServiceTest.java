@@ -38,7 +38,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class CredentialServiceTest {
 
-    @Mock private CredentialHandlerRegistry mockRegistry;
+    @Mock private CredentialHandlerFactory mockCredentialHandlerFactory;
 
     @Mock private CredentialExpiryCalculator mockExpiryCalculator;
 
@@ -77,7 +77,7 @@ class CredentialServiceTest {
                         mockAccessTokenService,
                         mockProofJwtService,
                         mockDocumentStoreClient,
-                        mockRegistry,
+                        mockCredentialHandlerFactory,
                         mockExpiryCalculator) {
                     @Override
                     protected Logger getLogger() {
@@ -184,7 +184,8 @@ class CredentialServiceTest {
         when(mockDocumentStoreClient.getDocument(anyString()))
                 .thenReturn(getMockSocialSecurityDocument(DOCUMENT_ID));
         CredentialHandler mockHandler = mock(CredentialHandler.class);
-        when(mockRegistry.getHandler("SocialSecurityCredential")).thenReturn(mockHandler);
+        when(mockCredentialHandlerFactory.createHandler("SocialSecurityCredential"))
+                .thenReturn(mockHandler);
         when(mockHandler.buildCredential(any(), any()))
                 .thenThrow(new SigningException("Some signing error", new RuntimeException()));
         CredentialServiceException exception =
@@ -213,7 +214,8 @@ class CredentialServiceTest {
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
-        when(mockRegistry.getHandler("SocialSecurityCredential")).thenReturn(mockHandler);
+        when(mockCredentialHandlerFactory.createHandler("SocialSecurityCredential"))
+                .thenReturn(mockHandler);
         when(mockHandler.buildCredential(any(), any())).thenReturn(mockCredentialJwt);
 
         CredentialResponse credentialServiceReturnValue =

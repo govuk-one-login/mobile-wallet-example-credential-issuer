@@ -8,8 +8,6 @@ import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.util.Objects;
-
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
 
 public class SocialSecurityCredentialHandler implements CredentialHandler {
@@ -20,11 +18,6 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
     public SocialSecurityCredentialHandler(
             CredentialBuilder<SocialSecurityCredentialSubject> credentialBuilder) {
         this.credentialBuilder = credentialBuilder;
-    }
-
-    @Override
-    public boolean supports(String vcType) {
-        return Objects.equals(vcType, SOCIAL_SECURITY_CREDENTIAL.getType());
     }
 
     @Override

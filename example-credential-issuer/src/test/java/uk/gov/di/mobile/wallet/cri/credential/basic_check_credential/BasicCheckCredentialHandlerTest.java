@@ -17,9 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -46,24 +44,6 @@ class BasicCheckCredentialHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new BasicCheckCredentialHandler(mockCredentialBuilder);
-    }
-
-    @Test
-    void Should_ReturnTrue_When_CredentialTypeIsBasicDisclosureCredential() {
-        String vcType = BASIC_DISCLOSURE_CREDENTIAL.getType();
-
-        boolean result = handler.supports(vcType);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void Should_ReturnFalse_When_CredentialTypeIsNotBasicDisclosureCredential() {
-        String vcType = "AnotherVCType";
-
-        boolean result = handler.supports(vcType);
-
-        assertFalse(result);
     }
 
     @Test

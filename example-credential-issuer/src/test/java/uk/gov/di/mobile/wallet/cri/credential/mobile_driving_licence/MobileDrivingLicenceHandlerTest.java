@@ -17,15 +17,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 
 @ExtendWith(MockitoExtension.class)
 class MobileDrivingLicenceHandlerTest {
@@ -41,24 +38,6 @@ class MobileDrivingLicenceHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new MobileDrivingLicenceHandler(mockMobileDrivingLicenceService);
-    }
-
-    @Test
-    void Should_ReturnTrue_When_CredentialTypeIsMobileDrivingLicence() {
-        String vcType = MOBILE_DRIVING_LICENCE.getType();
-
-        boolean result = handler.supports(vcType);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void Should_ReturnFalse_When_CredentialTypeIsNotMobileDrivingLicence() {
-        String vcType = "AnotherVCType";
-
-        boolean result = handler.supports(vcType);
-
-        assertFalse(result);
     }
 
     @Test

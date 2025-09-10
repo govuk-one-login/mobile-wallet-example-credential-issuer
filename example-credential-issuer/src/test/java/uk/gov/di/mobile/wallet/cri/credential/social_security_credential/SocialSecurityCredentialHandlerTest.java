@@ -17,9 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -46,24 +44,6 @@ class SocialSecurityCredentialHandlerTest {
     @BeforeEach
     void setUp() {
         handler = new SocialSecurityCredentialHandler(mockCredentialBuilder);
-    }
-
-    @Test
-    void Should_ReturnTrue_When_CredentialTypeIsSocialSecurityCredential() {
-        String vcType = SOCIAL_SECURITY_CREDENTIAL.getType();
-
-        boolean result = handler.supports(vcType);
-
-        assertTrue(result);
-    }
-
-    @Test
-    void Should_ReturnFalse_When_CredentialTypeIsNotSocialSecurityCredential() {
-        String vcType = "AnotherVCType";
-
-        boolean result = handler.supports(vcType);
-
-        assertFalse(result);
     }
 
     @Test

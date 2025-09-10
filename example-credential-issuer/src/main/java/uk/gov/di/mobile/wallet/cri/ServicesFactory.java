@@ -7,15 +7,13 @@ import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialExpiryCalculator;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerRegistry;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialHandler;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.DigitalVeteranCardHandler;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceHandler;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
@@ -27,7 +25,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Mobile
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfoFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigestsFactory;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialHandler;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
@@ -45,7 +43,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 
 /**
  * Factory for creating and wiring all application services.
@@ -123,40 +120,33 @@ public class ServicesFactory {
                         certificateProvider,
                         configurationService.getDocumentSigningKey1Arn());
 
+        DocumentStoreClient documentStoreClient =
+                new DocumentStoreClient(configurationService, httpClient);
+
+        CredentialBuilder<BasicCheckCredentialSubject> basicCheckCredentialBuilder =
+                new CredentialBuilder<>(configurationService, kmsService);
+        CredentialBuilder<SocialSecurityCredentialSubject> socialSecurityCredentialBuilder =
+                new CredentialBuilder<>(configurationService, kmsService);
+        CredentialBuilder<VeteranCardCredentialSubject> digitalVeteranCardCredentialBuilder =
+                new CredentialBuilder<>(configurationService, kmsService);
+
         MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder =
                 new MobileDrivingLicenceBuilder(
                         cborEncoder, namespacesFactory, issuerSignedFactory);
 
-        DocumentStoreClient documentStoreClient =
-                new DocumentStoreClient(configurationService, httpClient);
-
-        CredentialHandler socialSecurityHandler =
-                new SocialSecurityCredentialHandler(
-                        new CredentialBuilder<>(configurationService, kmsService));
-        CredentialHandler basicCheckHandler =
-                new BasicCheckCredentialHandler(
-                        new CredentialBuilder<>(configurationService, kmsService));
-        CredentialHandler veteranCardHandler =
-                new DigitalVeteranCardHandler(
-                        new CredentialBuilder<>(configurationService, kmsService));
-        CredentialHandler mobileDrivingLicenceHandler =
-                new MobileDrivingLicenceHandler(mobileDrivingLicenceBuilder);
-
-        CredentialHandlerRegistry registry =
-                new CredentialHandlerRegistry(
-                        List.of(
-                                socialSecurityHandler,
-                                basicCheckHandler,
-                                veteranCardHandler,
-                                mobileDrivingLicenceHandler));
-
+        CredentialHandlerFactory credentialHandlerFactory =
+                new CredentialHandlerFactory(
+                        basicCheckCredentialBuilder,
+                        socialSecurityCredentialBuilder,
+                        digitalVeteranCardCredentialBuilder,
+                        mobileDrivingLicenceBuilder);
         CredentialService credentialService =
                 new CredentialService(
                         dynamoDbService,
                         accessTokenService,
                         proofJwtService,
                         documentStoreClient,
-                        registry,
+                        credentialHandlerFactory,
                         new CredentialExpiryCalculator());
 
         DidDocumentService didDocumentService =

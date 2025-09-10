@@ -8,8 +8,6 @@ import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.util.Objects;
-
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
 
 public class BasicCheckCredentialHandler implements CredentialHandler {
@@ -20,11 +18,6 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
     public BasicCheckCredentialHandler(
             CredentialBuilder<BasicCheckCredentialSubject> credentialBuilder) {
         this.credentialBuilder = credentialBuilder;
-    }
-
-    @Override
-    public boolean supports(String vcType) {
-        return Objects.equals(vcType, BASIC_DISCLOSURE_CREDENTIAL.getType());
     }
 
     @Override
