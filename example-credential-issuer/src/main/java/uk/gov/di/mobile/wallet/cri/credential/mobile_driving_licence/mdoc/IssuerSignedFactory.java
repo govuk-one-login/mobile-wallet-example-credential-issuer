@@ -41,7 +41,7 @@ public class IssuerSignedFactory {
 
         String certificateId = ArnUtil.extractKeyId(documentSigningKey1Arn);
 
-        X509Certificate certificate = certificateProvider.getCertificate(certificateId);
+        X509Certificate certificate = certificateProvider.getSigningCertificate(certificateId);
         COSESign1 sign1 = coseSigner.sign(mobileSecurityObjectBytes, certificate);
 
         return new IssuerSigned(namespaces.namespaces(), sign1);
