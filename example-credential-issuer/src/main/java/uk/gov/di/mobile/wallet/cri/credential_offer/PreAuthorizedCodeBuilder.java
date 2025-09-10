@@ -71,7 +71,7 @@ public class PreAuthorizedCodeBuilder {
                                                 configurationService
                                                         .getPreAuthorizedCodeTtlInSecs(),
                                                 ChronoUnit.SECONDS)))
-                        .claim("clientId", configurationService.getClientId())
+                        .claim("clientId", configurationService.getOIDCClientId())
                         .claim("credential_identifiers", new String[] {credentialIdentifier});
 
         return Base64URL.encode(claimsBuilder.build().toString());

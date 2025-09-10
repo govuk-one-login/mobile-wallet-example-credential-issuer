@@ -107,7 +107,7 @@ public class ConfigurationService extends Configuration {
      *
      * @return The OIDC client identifier
      */
-    public String getClientId() {
+    public String getOIDCClientId() {
         return getEnvOrDefault("OIDC_CLIENT_ID", "TEST_CLIENT_ID");
     }
 
@@ -211,6 +211,27 @@ public class ConfigurationService extends Configuration {
      */
     public int getTableItemTtlInDays() {
         return 3;
+    }
+
+    // ===========================================
+    // STATUS LIST
+    // ===========================================
+    /**
+     * Gets this CRI's status list client ID.
+     *
+     * @return The client identifier
+     */
+    public String getStatusListClientId() {
+        return getEnvOrDefault("STATUS_LIST_CLIENT_ID", "STATUS_LIST_TEST_CLIENT_ID");
+    }
+
+    /**
+     * Gets the status list URL.
+     *
+     * @return The status list URL as a string
+     */
+    public String getStatusListrUrl() {
+        return createValidatedUri("STATUS_LIST_URL", "http://localhost:8000").toString();
     }
 
     // ===========================================

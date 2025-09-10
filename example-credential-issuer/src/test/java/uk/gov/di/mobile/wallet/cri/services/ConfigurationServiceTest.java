@@ -123,13 +123,13 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnClientIdDefaultValue_When_EnvVarNotSet() {
-        assertEquals("TEST_CLIENT_ID", configurationService.getClientId());
+        assertEquals("TEST_CLIENT_ID", configurationService.getOIDCClientId());
     }
 
     @Test
     void Should_ReturnClientIdEnvVarValue() {
         environmentVariables.set("OIDC_CLIENT_ID", "test-client-id");
-        assertEquals("test-client-id", configurationService.getClientId());
+        assertEquals("test-client-id", configurationService.getOIDCClientId());
     }
 
     @Test
