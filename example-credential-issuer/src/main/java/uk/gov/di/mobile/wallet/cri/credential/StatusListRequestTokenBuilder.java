@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -24,6 +25,11 @@ import static uk.gov.di.mobile.wallet.cri.util.HashUtil.sha256Hex;
 public class StatusListRequestTokenBuilder {
 
     private static final JWSAlgorithm SIGNING_ALGORITHM = JWSAlgorithm.ES256;
+    private static final SigningAlgorithmSpec KMS_SIGNING_ALGORITHM =
+            SigningAlgorithmSpec.ECDSA_SHA_256;
+    private static final String CLAIM_STATUS_EXPIRY = "statusExpiry";
+    private static final String CLAIM_URI = "uri";
+    private static final String CLAIM_INDEX = "idx";
 
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
@@ -43,32 +49,45 @@ public class StatusListRequestTokenBuilder {
         this.clock = clock;
     }
 
-    public String buildToken(JWTClaimsSet claimsSet) throws SigningException {
-        String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-        var encodedHeader = getEncodedHeader(keyId);
-        var encodedClaims = getEncodedClaims(claimsSet);
-        var message = encodedHeader + "." + encodedClaims;
+    public String buildIssueToken(long credentialExpiry) throws SigningException {
+        JWTClaimsSet claims = buildIssueClaims(credentialExpiry);
+        return buildToken(claims);
+    }
 
-        var signRequest =
-                SignRequest.builder()
-                        .message(SdkBytes.fromByteArray(message.getBytes()))
-                        .keyId(keyId)
-                        .signingAlgorithm(SigningAlgorithmSpec.ECDSA_SHA_256)
-                        .build();
+    public String buildRevokeToken(String uri, int index) throws SigningException {
+        JWTClaimsSet claims = buildRevokeClaims(uri, index);
+        return buildToken(claims);
+    }
 
+    private String buildToken(JWTClaimsSet claimsSet) throws SigningException {
         try {
-            SignResponse signResult = keyProvider.sign(signRequest);
-            String signature = toBase64UrlEncodedSignature(signResult);
+            String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
+            Base64URL encodedHeader = buildEncodedHeader(keyId);
+            Base64URL encodedClaims = buildEncodedClaims(claimsSet);
+
+            String message = encodedHeader + "." + encodedClaims;
+            String signature = signMessage(message, keyId);
+
             return message + "." + signature;
-        } catch (Exception exception) {
-            throw new SigningException(
-                    String.format("Error signing token: %s", exception.getMessage()), exception);
+        } catch (JOSEException exception) {
+            throw new SigningException("Failed to build token", exception);
         }
     }
 
-    private Base64URL getEncodedHeader(String keyId) {
+    private String signMessage(String message, String keyId) throws JOSEException {
+        SignRequest signRequest =
+                SignRequest.builder()
+                        .message(SdkBytes.fromByteArray(message.getBytes()))
+                        .keyId(keyId)
+                        .signingAlgorithm(KMS_SIGNING_ALGORITHM)
+                        .build();
+        SignResponse signResult = keyProvider.sign(signRequest);
+        return toBase64UrlEncodedSignature(signResult);
+    }
+
+    private Base64URL buildEncodedHeader(String keyId) {
         String hashedKeyId = sha256Hex(keyId);
-        var jwsHeader =
+        JWSHeader jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
                         .keyID(hashedKeyId)
                         .type(JOSEObjectType.JWT)
@@ -76,24 +95,24 @@ public class StatusListRequestTokenBuilder {
         return jwsHeader.toBase64URL();
     }
 
-    private Base64URL getEncodedClaims(JWTClaimsSet claimsSet) {
+    private Base64URL buildEncodedClaims(JWTClaimsSet claimsSet) {
         return Base64URL.encode(claimsSet.toString());
     }
 
-    public JWTClaimsSet buildIssueClaims(long credentialTtlMinutes) {
-        return baseClaimsBuilder().claim("statusExpiry", credentialTtlMinutes).build();
+    private JWTClaimsSet buildIssueClaims(long credentialExpiry) {
+        return createBaseClaimsBuilder().claim(CLAIM_STATUS_EXPIRY, credentialExpiry).build();
     }
 
-    public JWTClaimsSet buildRevokeClaims(String uri, int index) {
-        return baseClaimsBuilder().claim("uri", uri).claim("idx", index).build();
+    private JWTClaimsSet buildRevokeClaims(String uri, int index) {
+        return createBaseClaimsBuilder().claim(CLAIM_URI, uri).claim(CLAIM_INDEX, index).build();
     }
 
-    private JWTClaimsSet.Builder baseClaimsBuilder() {
+    private JWTClaimsSet.Builder createBaseClaimsBuilder() {
         Instant now = clock.instant();
         String jti = UUID.randomUUID().toString();
 
         return new JWTClaimsSet.Builder()
-                .issuer(configurationService.getOIDCClientId())
+                .issuer(configurationService.getStatusListClientId())
                 .issueTime(Date.from(now))
                 .jwtID(jti);
     }

@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -95,9 +94,7 @@ public class CredentialService {
 
             CredentialType credentialType = CredentialType.fromType(vcType);
             if (credentialType == MOBILE_DRIVING_LICENCE) {
-                JWTClaimsSet claims = statusListRequestTokenBuilder.buildIssueClaims(expiry);
-                String issueToken = statusListRequestTokenBuilder.buildToken(claims);
-                System.out.println(issueToken);
+                String issueToken = statusListRequestTokenBuilder.buildIssueToken(expiry);
             }
 
             CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
