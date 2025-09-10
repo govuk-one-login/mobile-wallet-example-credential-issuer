@@ -230,7 +230,7 @@ public class ConfigurationService extends Configuration {
      *
      * @return The status list URL as a string
      */
-    public String getStatusListrUrl() {
+    public String getStatusListUrl() {
         return createValidatedUri("STATUS_LIST_URL", "http://localhost:8000").toString();
     }
 
