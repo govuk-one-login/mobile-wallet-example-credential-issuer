@@ -60,17 +60,19 @@ public class StatusListRequestTokenBuilder {
     }
 
     private String buildToken(JWTClaimsSet claimsSet) throws SigningException {
+        String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
+        Base64URL encodedHeader = buildEncodedHeader(keyId);
+        Base64URL encodedClaims = buildEncodedClaims(claimsSet);
+        String message = encodedHeader + "." + encodedClaims;
+
         try {
-            String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
-            Base64URL encodedHeader = buildEncodedHeader(keyId);
-            Base64URL encodedClaims = buildEncodedClaims(claimsSet);
-
-            String message = encodedHeader + "." + encodedClaims;
             String signature = signMessage(message, keyId);
-
             return message + "." + signature;
-        } catch (JOSEException exception) {
-            throw new SigningException("Failed to build token", exception);
+        } catch (Exception exception) {
+            throw new SigningException(
+                    String.format(
+                            "Error signing status list request token: %s", exception.getMessage()),
+                    exception);
         }
     }
 
