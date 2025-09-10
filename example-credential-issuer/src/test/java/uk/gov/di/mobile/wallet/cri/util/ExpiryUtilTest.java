@@ -1,75 +1,55 @@
 package uk.gov.di.mobile.wallet.cri.util;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
+import java.time.ZonedDateTime;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ExpiryUtilTest {
 
-    @Test
-    void calculateExpiryTimeFromTtl_positiveTtl() {
-        long ttlMinutes = 100;
-        long expectedExpiryTime =
-                Instant.now().plus(ttlMinutes, ChronoUnit.MINUTES).getEpochSecond();
-        long actualExpiryTime = ExpiryUtil.calculateExpiryTimeFromTtl(ttlMinutes);
-        // Allow for a small margin of error due to the time it takes to run the test
-        assertTrue(Math.abs(expectedExpiryTime - actualExpiryTime) <= 1);
+    @Mock private Clock mockClock;
+
+    private ExpiryUtil expiryUtil;
+
+    private static final Instant FIXED_INSTANT = Instant.parse("2024-01-15T10:30:00Z");
+    private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
+
+    @BeforeEach
+    void setUp() {
+        expiryUtil = new ExpiryUtil(mockClock);
     }
 
     @Test
-    void calculateExpiryTimeFromTtl_zeroTtl() {
-        long ttlMinutes = 0;
-        long expectedExpiryTime = Instant.now().getEpochSecond();
-        long actualExpiryTime = ExpiryUtil.calculateExpiryTimeFromTtl(ttlMinutes);
-        // Allow for a small margin of error due to the time it takes to run the test
-        assertTrue(Math.abs(expectedExpiryTime - actualExpiryTime) <= 1);
+    void Should_CalculateExpiryTimeFromTtl() {
+        when(mockClock.instant()).thenReturn(FIXED_INSTANT);
+        long ttlMinutes = 60;
+        long expectedEpochSecond = Instant.parse("2024-01-15T11:30:00Z").getEpochSecond();
+
+        long result = expiryUtil.calculateExpiryTimeFromTtl(ttlMinutes);
+
+        assertEquals(expectedEpochSecond, result);
     }
 
     @Test
-    void calculateExpiryTimeFromTtl_negativeTtl() {
-        long ttlMinutes = -10;
-        long expectedExpiryTime =
-                Instant.now().plus(ttlMinutes, ChronoUnit.MINUTES).getEpochSecond();
-        long actualExpiryTime = ExpiryUtil.calculateExpiryTimeFromTtl(ttlMinutes);
-        // Allow for a small margin of error due to the time it takes to run the test
-        assertTrue(Math.abs(expectedExpiryTime - actualExpiryTime) <= 1);
-    }
+    void Should_CalculateExpiryTimeFromDate() {
+        when(mockClock.getZone()).thenReturn(UTC_ZONE);
+        LocalDate expiryDate = LocalDate.of(2024, 6, 15);
+        long expectedEpochSecond =
+                ZonedDateTime.of(2024, 6, 15, 0, 0, 0, 0, UTC_ZONE).toInstant().getEpochSecond();
 
-    @Test
-    void calculateExpiryTimeFromDate_futureDate() {
-        LocalDate futureDate = LocalDate.now().plusDays(10);
-        long expectedExpiryTime =
-                futureDate.atStartOfDay(ZoneId.systemDefault()).toInstant().getEpochSecond();
-        long actualExpiryTime = ExpiryUtil.calculateExpiryTimeFromDate(futureDate);
-        assertEquals(expectedExpiryTime, actualExpiryTime);
-    }
+        long result = expiryUtil.calculateExpiryTimeFromDate(expiryDate);
 
-    @Test
-    void calculateExpiryTimeFromDate_pastDate() {
-        LocalDate pastDate = LocalDate.now().minusDays(10);
-        long expectedExpiryTime =
-                pastDate.atStartOfDay(ZoneId.systemDefault()).toInstant().getEpochSecond();
-        long actualExpiryTime = ExpiryUtil.calculateExpiryTimeFromDate(pastDate);
-        assertEquals(expectedExpiryTime, actualExpiryTime);
-    }
-
-    @Test
-    void calculateExpiryTimeFromDate_today() {
-        LocalDate today = LocalDate.now();
-        long expectedExpiryTime =
-                today.atStartOfDay(ZoneId.systemDefault()).toInstant().getEpochSecond();
-        long actualExpiryTime = ExpiryUtil.calculateExpiryTimeFromDate(today);
-        assertEquals(expectedExpiryTime, actualExpiryTime);
-    }
-
-    @Test
-    void calculateExpiryTimeFromDate_nullDate() {
-        assertThrows(
-                NullPointerException.class, () -> ExpiryUtil.calculateExpiryTimeFromDate(null));
+        assertEquals(expectedEpochSecond, result);
     }
 }
