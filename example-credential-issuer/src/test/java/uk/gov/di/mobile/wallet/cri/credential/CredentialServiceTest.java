@@ -39,8 +39,8 @@ import static org.mockito.Mockito.when;
 class CredentialServiceTest {
 
     @Mock private CredentialHandlerFactory mockCredentialHandlerFactory;
-
     @Mock private CredentialExpiryCalculator mockExpiryCalculator;
+    @Mock private StatusListRequestTokenBuilder mockStatusListRequestTokenBuilder;
 
     @Mock private Logger mockLogger;
     @Mock private ECPublicKey mockEcPublicKey;
@@ -78,7 +78,8 @@ class CredentialServiceTest {
                         mockProofJwtService,
                         mockDocumentStoreClient,
                         mockCredentialHandlerFactory,
-                        mockExpiryCalculator) {
+                        mockExpiryCalculator,
+                        mockStatusListRequestTokenBuilder) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;

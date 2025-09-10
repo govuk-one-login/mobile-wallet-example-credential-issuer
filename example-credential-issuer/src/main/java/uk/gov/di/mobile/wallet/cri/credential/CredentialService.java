@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +18,8 @@ import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.UUID;
 
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
+
 public class CredentialService {
 
     private final DataStore dataStore;
@@ -25,6 +28,7 @@ public class CredentialService {
     private final DocumentStoreClient documentStoreClient;
     private final CredentialHandlerFactory credentialHandlerFactory;
     private final CredentialExpiryCalculator credentialExpiryCalculator;
+    private final StatusListRequestTokenBuilder statusListRequestTokenBuilder;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
@@ -34,13 +38,15 @@ public class CredentialService {
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
             CredentialHandlerFactory credentialHandlerFactory,
-            CredentialExpiryCalculator credentialExpiryCalculator) {
+            CredentialExpiryCalculator credentialExpiryCalculator,
+            StatusListRequestTokenBuilder statusListRequestTokenBuilder) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
         this.documentStoreClient = documentStoreClient;
         this.credentialHandlerFactory = credentialHandlerFactory;
         this.credentialExpiryCalculator = credentialExpiryCalculator;
+        this.statusListRequestTokenBuilder = statusListRequestTokenBuilder;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -74,21 +80,28 @@ public class CredentialService {
             String documentId = credentialOffer.getDocumentId();
             Document document = documentStoreClient.getDocument(documentId);
             String notificationId = UUID.randomUUID().toString();
+            String vcType = document.getVcType();
 
             LOGGER.info(
                     "{} retrieved - credentialOfferId: {}, documentId: {}",
-                    document.getVcType(),
+                    vcType,
                     credentialOfferId,
                     documentId);
 
             // Delete credential offer after redeeming it to prevent replay
             dataStore.deleteCredentialOffer(credentialOfferId);
 
-            CredentialHandler handler =
-                    credentialHandlerFactory.createHandler(document.getVcType());
-            String credential = handler.buildCredential(document, proofJwtData);
-
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
+
+            CredentialType credentialType = CredentialType.fromType(vcType);
+            if (credentialType == MOBILE_DRIVING_LICENCE) {
+                JWTClaimsSet claims = statusListRequestTokenBuilder.buildIssueClaims(expiry);
+                String issueToken = statusListRequestTokenBuilder.buildToken(claims);
+                System.out.println(issueToken);
+            }
+
+            CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
+            String credential = handler.buildCredential(document, proofJwtData);
 
             dataStore.saveStoredCredential(
                     new StoredCredential(

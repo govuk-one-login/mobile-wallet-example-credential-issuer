@@ -11,6 +11,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListRequestTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceBuilder;
@@ -140,6 +141,10 @@ public class ServicesFactory {
                         socialSecurityCredentialBuilder,
                         digitalVeteranCardCredentialBuilder,
                         mobileDrivingLicenceBuilder);
+
+        StatusListRequestTokenBuilder statusListRequestTokenBuilder =
+                new StatusListRequestTokenBuilder(configurationService, kmsService);
+
         CredentialService credentialService =
                 new CredentialService(
                         dynamoDbService,
@@ -147,7 +152,8 @@ public class ServicesFactory {
                         proofJwtService,
                         documentStoreClient,
                         credentialHandlerFactory,
-                        new CredentialExpiryCalculator());
+                        new CredentialExpiryCalculator(),
+                        statusListRequestTokenBuilder);
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
