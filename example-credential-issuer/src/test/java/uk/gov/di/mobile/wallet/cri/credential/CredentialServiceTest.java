@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
@@ -22,6 +23,7 @@ import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -30,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -48,22 +51,25 @@ class CredentialServiceTest {
     @Mock private AccessTokenService mockAccessTokenService;
     @Mock private ProofJwtService mockProofJwtService;
     @Mock private DocumentStoreClient mockDocumentStoreClient;
-    @Mock private StatusListRequestTokenBuilder mockStatusListRequestTokenBuilder;
+    @Mock private StatusListClient mockStatusListClient;
 
     private CachedCredentialOffer mockCachedCredentialOffer;
     private SignedJWT mockProofJwt;
     private SignedJWT mockAccessToken;
     private ProofJwtService.ProofJwtData mockAccessProofJwtData;
     private String mockCredentialJwt;
+    private BuildCredentialResult mockBuilderResult;
 
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
-    private static final String NOTIFICATION_ID = "3fwe98js";
     private static final String CREDENTIAL_IDENTIFIER = "efb52887-48d6-43b7-b14c-da7896fbf54d";
     private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String DID_KEY =
             "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==";
+    public static final String DOCUMENT_NUMBER = "testDocumentNumber";
+    public static final UUID NOTIFICATION_ID =
+            UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
 
     @BeforeEach
     void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
@@ -78,7 +84,7 @@ class CredentialServiceTest {
                         mockDocumentStoreClient,
                         mockCredentialHandlerFactory,
                         mockExpiryCalculator,
-                        mockStatusListRequestTokenBuilder) {
+                        mockStatusListClient) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
@@ -91,6 +97,7 @@ class CredentialServiceTest {
 
         mockCredentialJwt =
                 "eyJraWQiOiJkaWQ6d2ViOmV4YW1wbGUtY3JlZGVudGlhbC1pc3N1ZXIubW9iaWxlLmJ1aWxkLmFjY291bnQuZ292LnVrIzVkY2JlZTg2M2I1ZDdjYzMwYzliYTFmNzM5M2RhY2M2YzE2NjEwNzgyZTRiNmExOTFmOTRhN2U4YjFlMTUxMGYiLCJjdHkiOiJ2YyIsInR5cCI6InZjK2p3dCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJkaWQ6a2V5OnpEbmFlU0dmU1FNWXZuTGJMV0V1YmhoR0RQb3E3cEE5TU1OdnVtdmJzbU1DWm92VVIiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDprZXk6ekRuYWVTR2ZTUU1Zdm5MYkxXRXViaGhHRFBvcTdwQTlNTU52dW12YnNtTUNab3ZVUiIsIm5hbWUiOlt7Im5hbWVQYXJ0cyI6W3sidHlwZSI6IlRpdGxlIiwidmFsdWUiOiJNciJ9LHsidHlwZSI6IkdpdmVuTmFtZSIsInZhbHVlIjoiU2FyYWgifSx7InR5cGUiOiJHaXZlbk5hbWUiLCJ2YWx1ZSI6IkVsaXphYmV0aCJ9LHsidHlwZSI6IkZhbWlseU5hbWUiLCJ2YWx1ZSI6IkVkd2FyZHMifV19XSwic29jaWFsU2VjdXJpdHlSZWNvcmQiOlt7InBlcnNvbmFsTnVtYmVyIjoiUVExMjM0NTZDIn1dfSwiaXNzIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsImRlc2NyaXB0aW9uIjoiTmF0aW9uYWwgSW5zdXJhbmNlIG51bWJlciIsInZhbGlkRnJvbSI6IjIwMjUtMDctMzFUMTU6MzM6MDBaIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIlNvY2lhbFNlY3VyaXR5Q3JlZGVudGlhbCJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsIm5iZiI6MTc1Mzk3NTk4MCwibmFtZSI6Ik5hdGlvbmFsIEluc3VyYW5jZSBudW1iZXIiLCJ2YWxpZFVudGlsIjoiMjAyNi0wNy0zMVQxNTozMzowMFoiLCJleHAiOjE3ODU1MTE5ODAsImlhdCI6MTc1Mzk3NTk4MH0.pxcRhjMZA6bCzHsyXVyygGpw0xk3VCVGS15LmTPM-TaUtBnSfG99rZylYcbDvojQJkzUqY66cr5mHx3lHpenkw";
+        mockBuilderResult = new BuildCredentialResult(mockCredentialJwt, DOCUMENT_NUMBER);
     }
 
     @Test
@@ -216,18 +223,23 @@ class CredentialServiceTest {
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler("SocialSecurityCredential"))
                 .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(any(), any())).thenReturn(mockCredentialJwt);
+        when(mockHandler.buildCredential(any(), any())).thenReturn(mockBuilderResult);
 
-        CredentialResponse credentialServiceReturnValue =
-                credentialService.getCredential(mockAccessToken, mockProofJwt);
+        try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
+            mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
-        assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
-        assertEquals("3fwe98js", NOTIFICATION_ID);
-        verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
-        verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
-        verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
-        verify(mockDynamoDbService, times(1)).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
-        verify(mockHandler, times(1)).buildCredential(mockDocument, mockAccessProofJwtData);
+            CredentialResponse credentialServiceReturnValue =
+                    credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+            assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
+            assertEquals(
+                    NOTIFICATION_ID.toString(), credentialServiceReturnValue.getNotificationId());
+            verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
+            verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
+            verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
+            verify(mockDynamoDbService, times(1)).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
+            verify(mockHandler, times(1)).buildCredential(mockDocument, mockAccessProofJwtData);
+        }
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(
