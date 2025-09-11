@@ -7,6 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
@@ -38,6 +39,7 @@ class BasicCheckCredentialHandlerTest {
     private BasicCheckCredentialHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
+    private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
 
@@ -52,6 +54,7 @@ class BasicCheckCredentialHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockBasicCheckDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockBasicCheckDocument.getCertificateNumber()).thenReturn(EXPECTED_DOCUMENT_NUMBER);
         when(mockCredentialBuilder.buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(BASIC_DISCLOSURE_CREDENTIAL),
@@ -71,9 +74,10 @@ class BasicCheckCredentialHandlerTest {
                                             mockBasicCheckDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
-            String result = spyHandler.buildCredential(mockDocument, mockProofData);
+            BuildCredentialResult result = spyHandler.buildCredential(mockDocument, mockProofData);
 
-            assertEquals(EXPECTED_CREDENTIAL, result);
+            assertEquals(EXPECTED_CREDENTIAL, result.credential());
+            assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentNumber());
             verify(mockCredentialBuilder)
                     .buildCredential(
                             mockCredentialSubject, BASIC_DISCLOSURE_CREDENTIAL, TTL_MINUTES);
