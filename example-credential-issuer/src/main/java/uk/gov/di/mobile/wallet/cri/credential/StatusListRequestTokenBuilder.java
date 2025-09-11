@@ -10,6 +10,7 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -33,6 +34,7 @@ public class StatusListRequestTokenBuilder {
     private final KeyProvider keyProvider;
     private final Clock clock;
 
+    @ExcludeFromGeneratedCoverageReport
     public StatusListRequestTokenBuilder(
             ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
