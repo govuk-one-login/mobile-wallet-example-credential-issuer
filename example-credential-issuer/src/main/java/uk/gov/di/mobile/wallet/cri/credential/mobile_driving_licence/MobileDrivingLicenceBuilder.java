@@ -52,7 +52,7 @@ public class MobileDrivingLicenceBuilder {
             String uri)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
-        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey);
+        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey, idx, uri);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
                 .withoutPadding()

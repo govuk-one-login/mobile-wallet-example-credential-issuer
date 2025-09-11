@@ -76,10 +76,12 @@ public class MobileSecurityObjectFactory {
      * @throws MDLException If an error occurs during the creation of the {@link ValueDigests}.
      * @throws IllegalArgumentException If the public key does not use the P-256 curve.
      */
-    public MobileSecurityObject build(Namespaces nameSpaces, ECPublicKey publicKey)
-            throws MDLException {
+    public MobileSecurityObject build(
+            Namespaces nameSpaces, ECPublicKey publicKey, int idx, String uri) throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         ValidityInfo validityInfo = validityInfoFactory.build();
+        StatusList statusList = new StatusList(idx, uri);
+        Status status = new Status(statusList);
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
 
         Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
@@ -91,6 +93,7 @@ public class MobileSecurityObjectFactory {
                 new DeviceKeyInfo(coseKey, keyAuthorizations),
                 valueDigests,
                 DOC_TYPE,
-                validityInfo);
+                validityInfo,
+                status);
     }
 }
