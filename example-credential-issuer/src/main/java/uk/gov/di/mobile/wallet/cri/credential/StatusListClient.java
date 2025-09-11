@@ -12,7 +12,6 @@ public class StatusListClient {
     public record IssueResponse(int idx, String uri) {}
 
     private static final String ENDPOINT_ISSUE = "/issue";
-    private static final String ENDPOINT_REVOKE = "/revoke";
 
     private final ConfigurationService configurationService;
     private final Client httpClient;
