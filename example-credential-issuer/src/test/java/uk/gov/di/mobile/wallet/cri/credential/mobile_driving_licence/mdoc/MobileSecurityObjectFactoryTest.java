@@ -29,6 +29,9 @@ class MobileSecurityObjectFactoryTest {
     @Mock private COSEKeyFactory mockCoseKeyFactory;
     @Mock private ECPublicKey mockEcPublicKey;
 
+    private static final int IDX = 0;
+    private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
+
     @Test
     void Should_CreateMobileSecurityObject() {
         // Arrange: Prepare IssuerSignedItem and Namespaces
@@ -46,6 +49,10 @@ class MobileSecurityObjectFactoryTest {
         Instant now = clock.instant();
         ValidityInfo validityInfo = new ValidityInfo(now, now, now.plus(Duration.ofDays(365)));
         when(mockValidityInfoFactory.build()).thenReturn(validityInfo);
+
+        // Arrange: Prepare Status
+        StatusList statusList = new StatusList(0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
+        Status status = new Status(statusList);
 
         // Arrange: Prepare COSEKey
         Map<Integer, Object> coseKeyParams = new HashMap<>();
@@ -65,13 +72,14 @@ class MobileSecurityObjectFactoryTest {
                         deviceKeyInfo,
                         valueDigests,
                         "org.iso.18013.5.1.mDL",
-                        validityInfo);
+                        validityInfo,
+                        status);
 
         // Act
         MobileSecurityObjectFactory factory =
                 new MobileSecurityObjectFactory(
                         mockValueDigestsFactory, mockValidityInfoFactory, mockCoseKeyFactory);
-        MobileSecurityObject result = factory.build(namespaces, mockEcPublicKey);
+        MobileSecurityObject result = factory.build(namespaces, mockEcPublicKey, IDX, URI);
 
         // Assert
         assertEquals(expectedMso, result, "MobileSecurityObject should be constructed as expected");
