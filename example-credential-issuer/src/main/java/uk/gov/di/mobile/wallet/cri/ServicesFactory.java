@@ -11,6 +11,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListRequestTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
@@ -144,6 +145,9 @@ public class ServicesFactory {
 
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);
+        StatusListClient statusListClient =
+                new StatusListClient(
+                        configurationService, httpClient, statusListRequestTokenBuilder);
 
         CredentialService credentialService =
                 new CredentialService(
@@ -153,7 +157,7 @@ public class ServicesFactory {
                         documentStoreClient,
                         credentialHandlerFactory,
                         new CredentialExpiryCalculator(),
-                        statusListRequestTokenBuilder);
+                        statusListClient);
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);

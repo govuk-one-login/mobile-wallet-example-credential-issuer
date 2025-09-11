@@ -29,7 +29,6 @@ public class CredentialService {
     private final DocumentStoreClient documentStoreClient;
     private final CredentialHandlerFactory credentialHandlerFactory;
     private final CredentialExpiryCalculator credentialExpiryCalculator;
-    private final StatusListRequestTokenBuilder statusListRequestTokenBuilder;
     private final StatusListClient statusListClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
@@ -41,7 +40,6 @@ public class CredentialService {
             DocumentStoreClient documentStoreClient,
             CredentialHandlerFactory credentialHandlerFactory,
             CredentialExpiryCalculator credentialExpiryCalculator,
-            StatusListRequestTokenBuilder statusListRequestTokenBuilder,
             StatusListClient statusListClient) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
@@ -49,7 +47,6 @@ public class CredentialService {
         this.documentStoreClient = documentStoreClient;
         this.credentialHandlerFactory = credentialHandlerFactory;
         this.credentialExpiryCalculator = credentialExpiryCalculator;
-        this.statusListRequestTokenBuilder = statusListRequestTokenBuilder;
         this.statusListClient = statusListClient;
     }
 
@@ -104,11 +101,7 @@ public class CredentialService {
             String uri = null;
             Map<String, String> result;
             if (credentialType == MOBILE_DRIVING_LICENCE) {
-                String issueRequestToken =
-                        statusListRequestTokenBuilder.buildIssueToken(
-                                expiry); // merge token builder and client
-                StatusListClient.IssueResponse issueResponse =
-                        statusListClient.getIndex(issueRequestToken);
+                StatusListClient.IssueResponse issueResponse = statusListClient.getIndex(expiry);
                 idx = issueResponse.idx();
                 uri = issueResponse.uri();
                 result =
