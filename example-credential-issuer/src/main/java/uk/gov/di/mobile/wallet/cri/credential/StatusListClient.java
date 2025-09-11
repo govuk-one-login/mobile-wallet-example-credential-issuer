@@ -21,7 +21,7 @@ public class StatusListClient {
         }
     }
 
-    private static final String ENDPOINT_GET_INDEX = "/get-index";
+    private static final String ENDPOINT_ISSUE = "/issue";
     private static final String ENDPOINT_REVOKE = "/revoke";
 
     private final ConfigurationService configurationService;
@@ -40,7 +40,7 @@ public class StatusListClient {
     public IssueResponse getIndex(long credentialExpiry)
             throws StatusListException, SigningException {
         String token = tokenBuilder.buildIssueToken(credentialExpiry);
-        String url = buildUrl(ENDPOINT_GET_INDEX);
+        String url = buildUrl(ENDPOINT_ISSUE);
 
         Response response =
                 httpClient
