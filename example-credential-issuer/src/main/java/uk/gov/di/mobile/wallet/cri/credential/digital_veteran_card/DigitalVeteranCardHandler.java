@@ -1,15 +1,13 @@
 package uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
 
@@ -24,7 +22,7 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
     }
 
     @Override
-    public Map<String, String> buildCredential(
+    public BuildCredentialResult buildCredential(
             Document document, ProofJwtService.ProofJwtData proofData) throws SigningException {
         VeteranCardDocument veteranCardDocument =
                 mapper.convertValue(document.getData(), VeteranCardDocument.class);
@@ -39,9 +37,6 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
                         DIGITAL_VETERAN_CARD,
                         veteranCardDocument.getCredentialTtlMinutes());
 
-        Map<String, String> result = new HashMap<>();
-        result.put("credential", credential);
-        result.put("documentNumber", veteranCardDocument.getServiceNumber());
-        return result;
+        return new BuildCredentialResult(credential, veteranCardDocument.getServiceNumber());
     }
 }

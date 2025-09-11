@@ -1,15 +1,13 @@
 package uk.gov.di.mobile.wallet.cri.credential.basic_check_credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
 
@@ -24,7 +22,7 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
     }
 
     @Override
-    public Map<String, String> buildCredential(
+    public BuildCredentialResult buildCredential(
             Document document, ProofJwtService.ProofJwtData proofData) throws SigningException {
         BasicCheckDocument basicCheckDocument =
                 mapper.convertValue(document.getData(), BasicCheckDocument.class);
@@ -38,9 +36,7 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
                         subject,
                         BASIC_DISCLOSURE_CREDENTIAL,
                         basicCheckDocument.getCredentialTtlMinutes());
-        Map<String, String> result = new HashMap<>();
-        result.put("credential", credential);
-        result.put("documentNumber", basicCheckDocument.getCertificateNumber());
-        return result;
+
+        return new BuildCredentialResult(credential, basicCheckDocument.getCertificateNumber());
     }
 }

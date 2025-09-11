@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
@@ -8,8 +9,6 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
@@ -21,14 +20,14 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
     }
 
     @Override
-    public Map<String, String> buildCredential(
+    public BuildCredentialResult buildCredential(
             Document document, ProofJwtService.ProofJwtData proofData)
             throws ObjectStoreException, SigningException, CertificateException {
         throw new UnsupportedOperationException(
                 "Use the method that accepts idx and uri for MobileDrivingLicence");
     }
 
-    public Map<String, String> buildCredential(
+    public BuildCredentialResult buildCredential(
             Document document, ProofJwtService.ProofJwtData proofData, int idx, String uri)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
@@ -38,9 +37,6 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                         drivingLicenceDocument, proofData.publicKey(), idx, uri);
 
-        Map<String, String> result = new HashMap<>();
-        result.put("credential", credential);
-        result.put("documentNumber", drivingLicenceDocument.getDocumentNumber());
-        return result;
+        return new BuildCredentialResult(credential, drivingLicenceDocument.getDocumentNumber());
     }
 }

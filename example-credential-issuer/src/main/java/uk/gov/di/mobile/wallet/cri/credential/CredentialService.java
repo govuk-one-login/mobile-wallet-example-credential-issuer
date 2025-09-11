@@ -16,7 +16,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
 import java.time.Instant;
-import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
@@ -99,7 +98,7 @@ public class CredentialService {
 
             Integer idx = null;
             String uri = null;
-            Map<String, String> result;
+            BuildCredentialResult result;
             if (credentialType == MOBILE_DRIVING_LICENCE) {
                 StatusListClient.IssueResponse issueResponse = statusListClient.getIndex(expiry);
                 idx = issueResponse.idx();
@@ -116,12 +115,12 @@ public class CredentialService {
                             credentialOffer.getCredentialIdentifier(),
                             notificationId,
                             credentialOffer.getWalletSubjectId(),
-                            result.get("documentNumber"),
+                            result.documentNumber(),
                             idx,
                             uri,
                             expiry));
 
-            return new CredentialResponse(result.get("credential"), notificationId);
+            return new CredentialResponse(result.credential(), notificationId);
         } catch (DataStoreException
                 | SigningException
                 | MDLException
