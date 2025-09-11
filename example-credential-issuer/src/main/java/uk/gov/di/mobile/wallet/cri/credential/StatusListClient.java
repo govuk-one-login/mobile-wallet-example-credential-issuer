@@ -9,17 +9,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 public class StatusListClient {
 
-    public static record IssueResponse(int idx, String uri) {
-        public IssueResponse {
-            if (idx < 0) {
-                throw new IllegalArgumentException("Index must be non-negative, got: " + idx);
-            }
-            if (uri == null || uri.trim().isEmpty()) {
-                throw new IllegalArgumentException("URI cannot be null or empty");
-            }
-            uri = uri.trim();
-        }
-    }
+    public record IssueResponse(int idx, String uri) {}
 
     private static final String ENDPOINT_ISSUE = "/issue";
     private static final String ENDPOINT_REVOKE = "/revoke";
@@ -77,6 +67,6 @@ public class StatusListClient {
 
     private String buildUrl(String endpoint) {
         String baseUrl = configurationService.getStatusListUrl();
-        return baseUrl.endsWith("/") ? baseUrl + endpoint.substring(1) : baseUrl + endpoint;
+        return baseUrl + endpoint;
     }
 }
