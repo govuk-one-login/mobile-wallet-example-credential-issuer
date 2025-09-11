@@ -11,6 +11,8 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKe
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceKeyInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.KeyAuthorizations;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Status;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.StatusList;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigests;
 
@@ -64,6 +66,10 @@ class MobileSecurityObjectSerializerTest {
                         Instant.parse("2025-06-27T12:00:00Z"),
                         Instant.parse("2026-06-27T12:00:00Z"));
 
+        // Arrange: Prepare Status
+        StatusList statusList = new StatusList(0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
+        Status status = new Status(statusList);
+
         // Arrange: Create the test object
         MobileSecurityObject testObject =
                 new MobileSecurityObject(
@@ -72,7 +78,8 @@ class MobileSecurityObjectSerializerTest {
                         deviceKeyInfo,
                         valueDigests,
                         "org.iso.18013.5.1.mDL",
-                        validityInfo);
+                        validityInfo,
+                        status);
 
         // Act: Serialize the object using ObjectMapper
         byte[] result = cborObjectMapper.writeValueAsBytes(testObject);
