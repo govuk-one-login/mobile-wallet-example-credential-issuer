@@ -8,6 +8,8 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
@@ -19,12 +21,26 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
     }
 
     @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    public Map<String, String> buildCredential(
+            Document document, ProofJwtService.ProofJwtData proofData)
+            throws ObjectStoreException, SigningException, CertificateException {
+        throw new UnsupportedOperationException(
+                "Use the method that accepts idx and uri for MobileDrivingLicence");
+    }
+
+    public Map<String, String> buildCredential(
+            Document document, ProofJwtService.ProofJwtData proofData, int idx, String uri)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
-        return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                drivingLicenceDocument, proofData.publicKey());
+        String credential =
+                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                        drivingLicenceDocument, proofData.publicKey(), idx, uri);
+
+        Map<String, String> result = new HashMap<>();
+        result.put("credential", credential);
+        result.put("documentNumber", drivingLicenceDocument.getDocumentNumber());
+        return result;
     }
 }

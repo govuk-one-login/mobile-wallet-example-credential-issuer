@@ -46,7 +46,10 @@ public class MobileDrivingLicenceBuilder {
      * @return A Base64URL-encoded string containing the CBOR-encoded {@code IssuerSigned} structure
      */
     public String createMobileDrivingLicence(
-            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
+            DrivingLicenceDocument drivingLicenceDocument,
+            ECPublicKey publicKey,
+            int idx,
+            String uri)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
         IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey);

@@ -4,8 +4,9 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.util.Map;
 
 public interface CredentialHandler {
-    String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    Map<String, String> buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
             throws SigningException, ObjectStoreException, CertificateException;
 }

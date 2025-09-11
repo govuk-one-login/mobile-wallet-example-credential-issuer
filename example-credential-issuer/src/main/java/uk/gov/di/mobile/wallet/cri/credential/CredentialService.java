@@ -4,6 +4,7 @@ import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceHandler;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -15,6 +16,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
@@ -28,6 +30,7 @@ public class CredentialService {
     private final CredentialHandlerFactory credentialHandlerFactory;
     private final CredentialExpiryCalculator credentialExpiryCalculator;
     private final StatusListRequestTokenBuilder statusListRequestTokenBuilder;
+    private final StatusListClient statusListClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
@@ -38,7 +41,8 @@ public class CredentialService {
             DocumentStoreClient documentStoreClient,
             CredentialHandlerFactory credentialHandlerFactory,
             CredentialExpiryCalculator credentialExpiryCalculator,
-            StatusListRequestTokenBuilder statusListRequestTokenBuilder) {
+            StatusListRequestTokenBuilder statusListRequestTokenBuilder,
+            StatusListClient statusListClient) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
@@ -46,6 +50,7 @@ public class CredentialService {
         this.credentialHandlerFactory = credentialHandlerFactory;
         this.credentialExpiryCalculator = credentialExpiryCalculator;
         this.statusListRequestTokenBuilder = statusListRequestTokenBuilder;
+        this.statusListClient = statusListClient;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -93,27 +98,44 @@ public class CredentialService {
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
             CredentialType credentialType = CredentialType.fromType(vcType);
-            if (credentialType == MOBILE_DRIVING_LICENCE) {
-                String issueToken = statusListRequestTokenBuilder.buildIssueToken(expiry);
-            }
-
             CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
-            String credential = handler.buildCredential(document, proofJwtData);
+
+            Integer idx = null;
+            String uri = null;
+            Map<String, String> result;
+            if (credentialType == MOBILE_DRIVING_LICENCE) {
+                String issueRequestToken =
+                        statusListRequestTokenBuilder.buildIssueToken(
+                                expiry); // merge token builder and client
+                StatusListClient.IssueResponse issueResponse =
+                        statusListClient.getIndex(issueRequestToken);
+                idx = issueResponse.idx();
+                uri = issueResponse.uri();
+                result =
+                        ((MobileDrivingLicenceHandler) handler)
+                                .buildCredential(document, proofJwtData, idx, uri);
+            } else {
+                result = handler.buildCredential(document, proofJwtData);
+            }
 
             dataStore.saveStoredCredential(
                     new StoredCredential(
                             credentialOffer.getCredentialIdentifier(),
                             notificationId,
                             credentialOffer.getWalletSubjectId(),
+                            result.get("documentNumber"),
+                            idx,
+                            uri,
                             expiry));
 
-            return new CredentialResponse(credential, notificationId);
+            return new CredentialResponse(result.get("credential"), notificationId);
         } catch (DataStoreException
                 | SigningException
                 | MDLException
                 | ObjectStoreException
                 | CertificateException
-                | DocumentStoreException exception) {
+                | DocumentStoreException
+                | StatusListException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }

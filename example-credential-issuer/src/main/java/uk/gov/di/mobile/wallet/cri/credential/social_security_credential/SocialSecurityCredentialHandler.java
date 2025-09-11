@@ -8,6 +8,9 @@ import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
 
 public class SocialSecurityCredentialHandler implements CredentialHandler {
@@ -21,8 +24,8 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
     }
 
     @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
-            throws SigningException {
+    public Map<String, String> buildCredential(
+            Document document, ProofJwtService.ProofJwtData proofData) throws SigningException {
         SocialSecurityDocument socialSecurityDocument =
                 mapper.convertValue(document.getData(), SocialSecurityDocument.class);
 
@@ -30,9 +33,15 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         socialSecurityDocument, proofData.didKey());
 
-        return credentialBuilder.buildCredential(
-                subject,
-                SOCIAL_SECURITY_CREDENTIAL,
-                socialSecurityDocument.getCredentialTtlMinutes());
+        String credential =
+                credentialBuilder.buildCredential(
+                        subject,
+                        SOCIAL_SECURITY_CREDENTIAL,
+                        socialSecurityDocument.getCredentialTtlMinutes());
+
+        Map<String, String> result = new HashMap<>();
+        result.put("credential", credential);
+        result.put("documentNumber", socialSecurityDocument.getNino());
+        return result;
     }
 }

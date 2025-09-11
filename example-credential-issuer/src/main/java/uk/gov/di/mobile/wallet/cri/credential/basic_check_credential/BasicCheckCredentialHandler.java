@@ -8,6 +8,9 @@ import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
 
 public class BasicCheckCredentialHandler implements CredentialHandler {
@@ -21,8 +24,8 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
     }
 
     @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
-            throws SigningException {
+    public Map<String, String> buildCredential(
+            Document document, ProofJwtService.ProofJwtData proofData) throws SigningException {
         BasicCheckDocument basicCheckDocument =
                 mapper.convertValue(document.getData(), BasicCheckDocument.class);
 
@@ -30,7 +33,14 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(
                         basicCheckDocument, proofData.didKey());
 
-        return credentialBuilder.buildCredential(
-                subject, BASIC_DISCLOSURE_CREDENTIAL, basicCheckDocument.getCredentialTtlMinutes());
+        String credential =
+                credentialBuilder.buildCredential(
+                        subject,
+                        BASIC_DISCLOSURE_CREDENTIAL,
+                        basicCheckDocument.getCredentialTtlMinutes());
+        Map<String, String> result = new HashMap<>();
+        result.put("credential", credential);
+        result.put("documentNumber", basicCheckDocument.getCertificateNumber());
+        return result;
     }
 }

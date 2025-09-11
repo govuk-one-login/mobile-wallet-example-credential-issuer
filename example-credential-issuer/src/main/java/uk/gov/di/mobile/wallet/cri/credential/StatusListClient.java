@@ -8,7 +8,17 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 public class StatusListClient {
 
-    public record CredentialIndexResponse(int idx, String uri) {}
+    public static record IssueResponse(int idx, String uri) {
+        public IssueResponse {
+            if (idx < 0) {
+                throw new IllegalArgumentException("Index must be non-negative, got: " + idx);
+            }
+            if (uri == null || uri.trim().isEmpty()) {
+                throw new IllegalArgumentException("URI cannot be null or empty");
+            }
+            uri = uri.trim();
+        }
+    }
 
     private static final String ENDPOINT_GET_INDEX = "/get-index";
     private static final String ENDPOINT_REVOKE = "/revoke";
@@ -21,7 +31,7 @@ public class StatusListClient {
         this.httpClient = httpClient;
     }
 
-    public CredentialIndexResponse getIndex(String token) throws StatusListException {
+    public IssueResponse getIndex(String token) throws StatusListException {
         String url = buildUrl(ENDPOINT_GET_INDEX);
 
         Response response =
@@ -36,7 +46,7 @@ public class StatusListClient {
                             "Request to get credential index failed with status code %s",
                             response.getStatus()));
         }
-        return response.readEntity(CredentialIndexResponse.class);
+        return response.readEntity(IssueResponse.class);
     }
 
     public void revoke(String token) throws StatusListException {
