@@ -97,37 +97,6 @@ class StatusListRequestTokenBuilderTest {
     }
 
     @Test
-    void Should_BuildStatusListRevokeToken() throws Exception {
-        int index = 1;
-        String uri = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
-
-        String result = builder.buildRevokeToken(uri, index);
-
-        SignedJWT parsedToken = SignedJWT.parse(result);
-        JWTClaimsSet claimSet = parsedToken.getJWTClaimsSet();
-        JWSHeader header = parsedToken.getHeader();
-        Base64URL signature = parsedToken.getSignature();
-
-        Set<String> expectedHeaders = Set.of("kid", "typ", "alg");
-        assertEquals(expectedHeaders, header.getIncludedParams());
-        assertEquals(KEY_ID_HASH, header.getKeyID());
-        assertEquals("JWT", header.getType().toString());
-        assertEquals("ES256", header.getAlgorithm().toString());
-
-        Set<String> expectedClaims = Set.of("iss", "iat", "idx", "uri", "jti");
-        assertEquals(expectedClaims, claimSet.getClaims().keySet());
-        assertEquals(CLIENT_ID, claimSet.getIssuer());
-        assertEquals(claimSet.getIssueTime(), Date.from(FIXED_INSTANT));
-        assertEquals(index, claimSet.getIntegerClaim("idx"));
-        assertEquals(uri, claimSet.getStringClaim("uri"));
-        String jwtId = claimSet.getJWTID();
-        assertNotNull(jwtId);
-        assertDoesNotThrow(() -> UUID.fromString(jwtId));
-
-        assertEquals(TEST_SIGNATURE, signature);
-    }
-
-    @Test
     void Should_PropagateSigningErrors_As_SigningException() {
         RuntimeException originalException = new RuntimeException("Some signing error");
         when(keyProvider.sign(any())).thenThrow(originalException);

@@ -30,7 +30,7 @@ public class StatusListClient {
     public IssueResponse getIndex(long credentialExpiry)
             throws StatusListException, SigningException {
         String token = tokenBuilder.buildIssueToken(credentialExpiry);
-        String url = buildUrl(ENDPOINT_ISSUE);
+        String url = buildUrl();
 
         Response response =
                 httpClient
@@ -47,26 +47,8 @@ public class StatusListClient {
         return response.readEntity(IssueResponse.class);
     }
 
-    public void revoke(String uri, int index) throws StatusListException, SigningException {
-        String token = tokenBuilder.buildRevokeToken(uri, index);
-        String url = buildUrl(ENDPOINT_REVOKE);
-
-        Response response =
-                httpClient
-                        .target(url)
-                        .request(MediaType.APPLICATION_JSON)
-                        .post(Entity.entity(token, MediaType.APPLICATION_JSON));
-
-        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-            throw new StatusListException(
-                    String.format(
-                            "Request to revoke credential failed with status code %s",
-                            response.getStatus()));
-        }
-    }
-
-    private String buildUrl(String endpoint) {
+    private String buildUrl() {
         String baseUrl = configurationService.getStatusListUrl();
-        return baseUrl + endpoint;
+        return baseUrl + StatusListClient.ENDPOINT_ISSUE;
     }
 }
