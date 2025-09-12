@@ -228,10 +228,21 @@ public class ConfigurationService extends Configuration {
     /**
      * Gets the status list URL.
      *
+     * <p>Note: Currently, there is no default value for STATUS_LIST_URL. This is temporary — once a
+     * default URL becomes available (i.e. when this ticket is completed <a
+     * href="https://govukverify.atlassian.net/browse/DCMAW-15575">...</a>), it should be added
+     * here.
+     *
      * @return The status list URL as a string
+     * @throws IllegalArgumentException if STATUS_LIST_URL is missing or invalid
      */
-    public String getStatusListUrl() {
-        return createValidatedUri("STATUS_LIST_URL", "http://localhost:8000").toString();
+    public URI getStatusListUrl() {
+        String key = "STATUS_LIST_URL";
+        String uriString = getEnvOrDefault(key, null);
+        if (uriString == null || uriString.isBlank()) {
+            throw new IllegalArgumentException("Missing required environment variable: " + key);
+        }
+        return createValidatedUri(key, uriString);
     }
 
     // ===========================================

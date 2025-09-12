@@ -229,6 +229,22 @@ class ConfigurationServiceTest {
     }
 
     @Test
+    void Should_ThrowIllegalArgumentException_When_StatusListUrlEnvVarNotSet() {
+        IllegalArgumentException thrown =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> configurationService.getStatusListUrl());
+        assertEquals("Missing required environment variable: STATUS_LIST_URL", thrown.getMessage());
+    }
+
+    @Test
+    void Should_ReturnStatusListUrlEnvVarValue() throws URISyntaxException {
+        environmentVariables.set("STATUS_LIST_URL", "https://status-list.test.com");
+        assertEquals(
+                new URI("https://status-list.test.com"), configurationService.getStatusListUrl());
+    }
+
+    @Test
     void Should_ReturnsDefault_WhenEnvVarIsNull() {
         environmentVariables.set("ENVIRONMENT", "local");
         String expectedDefaultValue = "eu-west-2";

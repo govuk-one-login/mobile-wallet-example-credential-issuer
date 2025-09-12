@@ -7,6 +7,8 @@ import jakarta.ws.rs.core.Response;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.net.URI;
+
 public class StatusListClient {
 
     public record IssueResponse(int idx, String uri) {}
@@ -47,7 +49,7 @@ public class StatusListClient {
     }
 
     private String buildUrl() {
-        String baseUrl = configurationService.getStatusListUrl();
+        URI baseUrl = configurationService.getStatusListUrl();
         return baseUrl + StatusListClient.ENDPOINT_ISSUE;
     }
 }

@@ -14,6 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.net.URI;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,7 +46,7 @@ class StatusListClientTest {
     void Should_ReturnIssueResponse_On_SuccessfulRequest() throws Exception {
         long credentialExpiry = 1234567890L;
         String token = "mock-issue-token";
-        String baseUrl = "https://status-list.test.com";
+        URI baseUrl = new URI("https://status-list.test.com");
         String expectedUrl = baseUrl + "/issue";
         StatusListClient.IssueResponse expectedResponse =
                 new StatusListClient.IssueResponse(42, "https://status-list.test.com/t/12345");
@@ -73,7 +75,7 @@ class StatusListClientTest {
     void Should_ThrowStatusListException_On_Non200Response() throws Exception {
         long credentialExpiry = 1234567890L;
         String token = "mock-issue-token";
-        String baseUrl = "https://status-list.test.com";
+        URI baseUrl = new URI("https://status-list.test.com");
 
         when(tokenBuilder.buildIssueToken(credentialExpiry)).thenReturn(token);
         when(configurationService.getStatusListUrl()).thenReturn(baseUrl);
