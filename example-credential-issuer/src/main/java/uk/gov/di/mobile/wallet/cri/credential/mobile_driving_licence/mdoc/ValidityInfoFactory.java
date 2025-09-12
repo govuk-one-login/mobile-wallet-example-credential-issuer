@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -15,8 +17,11 @@ public class ValidityInfoFactory {
     /** The source of current time for validity information. */
     private final Clock clock;
 
+    private DrivingLicenceDocument document;
+
     /** Constructs a new {@link ValidityInfoFactory}. */
     public ValidityInfoFactory() {
+
         this.clock = Clock.systemDefaultZone();
     }
 
@@ -26,6 +31,7 @@ public class ValidityInfoFactory {
      * @param clock The source of current time for validity information.
      */
     public ValidityInfoFactory(Clock clock) {
+
         this.clock = clock;
     }
 
@@ -38,9 +44,9 @@ public class ValidityInfoFactory {
      * @return A {@link ValidityInfo} object with current time as signed/valid from and current time
      *     plus 365 days as valid until.
      */
-    public ValidityInfo build() {
+    public ValidityInfo build(long credentialTtlMinutes) {
         Instant currentTimestamp = clock.instant();
-        Instant validUntil = currentTimestamp.plus(Duration.ofDays(365));
+        Instant validUntil = currentTimestamp.plus(Duration.ofMinutes(credentialTtlMinutes));
         return new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);
     }
 }
