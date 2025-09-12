@@ -34,7 +34,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -106,16 +105,14 @@ class CredentialServiceTest {
                 };
         mockAccessProofJwtData = getMockProofJwtData(NONCE);
         when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
-
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
-
         mockCredentialJwt =
                 "eyJraWQiOiJkaWQ6d2ViOmV4YW1wbGUtY3JlZGVudGlhbC1pc3N1ZXIubW9iaWxlLmJ1aWxkLmFjY291bnQuZ292LnVrIzVkY2JlZTg2M2I1ZDdjYzMwYzliYTFmNzM5M2RhY2M2YzE2NjEwNzgyZTRiNmExOTFmOTRhN2U4YjFlMTUxMGYiLCJjdHkiOiJ2YyIsInR5cCI6InZjK2p3dCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJkaWQ6a2V5OnpEbmFlU0dmU1FNWXZuTGJMV0V1YmhoR0RQb3E3cEE5TU1OdnVtdmJzbU1DWm92VVIiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDprZXk6ekRuYWVTR2ZTUU1Zdm5MYkxXRXViaGhHRFBvcTdwQTlNTU52dW12YnNtTUNab3ZVUiIsIm5hbWUiOlt7Im5hbWVQYXJ0cyI6W3sidHlwZSI6IlRpdGxlIiwidmFsdWUiOiJNciJ9LHsidHlwZSI6IkdpdmVuTmFtZSIsInZhbHVlIjoiU2FyYWgifSx7InR5cGUiOiJHaXZlbk5hbWUiLCJ2YWx1ZSI6IkVsaXphYmV0aCJ9LHsidHlwZSI6IkZhbWlseU5hbWUiLCJ2YWx1ZSI6IkVkd2FyZHMifV19XSwic29jaWFsU2VjdXJpdHlSZWNvcmQiOlt7InBlcnNvbmFsTnVtYmVyIjoiUVExMjM0NTZDIn1dfSwiaXNzIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsImRlc2NyaXB0aW9uIjoiTmF0aW9uYWwgSW5zdXJhbmNlIG51bWJlciIsInZhbGlkRnJvbSI6IjIwMjUtMDctMzFUMTU6MzM6MDBaIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIlNvY2lhbFNlY3VyaXR5Q3JlZGVudGlhbCJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsIm5iZiI6MTc1Mzk3NTk4MCwibmFtZSI6Ik5hdGlvbmFsIEluc3VyYW5jZSBudW1iZXIiLCJ2YWxpZFVudGlsIjoiMjAyNi0wNy0zMVQxNTozMzowMFoiLCJleHAiOjE3ODU1MTE5ODAsImlhdCI6MTc1Mzk3NTk4MH0.pxcRhjMZA6bCzHsyXVyygGpw0xk3VCVGS15LmTPM-TaUtBnSfG99rZylYcbDvojQJkzUqY66cr5mHx3lHpenkw";
         mockBuilderResult = new BuildCredentialResult(mockCredentialJwt, DOCUMENT_NUMBER);
     }
 
     @Test
-    void Should_ThrowNonceValidationException_When_NonceValuesDoNotMatch()
+    void Should_ThrowNonceValidationException_When_NonceValuesDontMatch()
             throws ProofJwtValidationException {
         mockAccessProofJwtData = getMockProofJwtData("not_the_same_nonce");
         when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
@@ -124,7 +121,6 @@ class CredentialServiceTest {
                 assertThrows(
                         NonceValidationException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
         assertEquals(
                 "Access token c_nonce claim does not match Proof JWT nonce claim",
                 exception.getMessage());
@@ -139,7 +135,6 @@ class CredentialServiceTest {
                 assertThrows(
                         CredentialOfferException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
         assertEquals("Credential offer validation failed", exception.getMessage());
         verify(mockLogger)
                 .error("Credential offer {} was not found", "efb52887-48d6-43b7-b14c-da7896fbf54d");
@@ -157,7 +152,6 @@ class CredentialServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
         assertThat(
                 exception.getMessage(),
                 containsString("Access token sub claim does not match cached walletSubjectId"));
@@ -189,8 +183,9 @@ class CredentialServiceTest {
                 assertThrows(
                         CredentialServiceException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
+        assertEquals(DataStoreException.class, exception.getCause().getClass());
+        assertEquals("Some database error", exception.getCause().getMessage());
     }
 
     @Test
@@ -209,13 +204,14 @@ class CredentialServiceTest {
                 .thenReturn(mockHandler);
         when(mockHandler.buildCredential(any(), any()))
                 .thenThrow(new SigningException("Some signing error", new RuntimeException()));
+
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-        assertThat(
-                exception.getMessage(),
-                containsString("Failed to issue credential due to an internal error"));
+        assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
+        assertEquals(SigningException.class, exception.getCause().getClass());
+        assertEquals("Some signing error", exception.getCause().getMessage());
     }
 
     @Test
@@ -232,14 +228,15 @@ class CredentialServiceTest {
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockMdlHandler);
         when(mockExpiryCalculator.calculateExpiry(mockMdlDocument)).thenReturn(EXPIRY_TIME);
         when(mockStatusListClient.getIndex(EXPIRY_TIME))
-                .thenThrow(new StatusListException("Status list service unavailable"));
+                .thenThrow(new StatusListException("Some status list error"));
 
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
-        assertTrue(exception.getCause() instanceof StatusListException);
+        assertEquals(StatusListException.class, exception.getCause().getClass());
+        assertEquals("Some status list error", exception.getCause().getMessage());
     }
 
     @Test
@@ -265,15 +262,15 @@ class CredentialServiceTest {
                         mockAccessProofJwtData,
                         STATUS_LIST_INDEX,
                         STATUS_LIST_URI))
-                .thenThrow(new MDLException("MDL processing failed", new RuntimeException()));
+                .thenThrow(new MDLException("Some mDL error", new RuntimeException()));
 
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
-        assertTrue(exception.getCause() instanceof MDLException);
+        assertEquals(MDLException.class, exception.getCause().getClass());
+        assertEquals("Some mDL error", exception.getCause().getMessage());
     }
 
     @Test
