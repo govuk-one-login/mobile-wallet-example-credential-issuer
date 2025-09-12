@@ -123,13 +123,13 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnClientIdDefaultValue_When_EnvVarNotSet() {
-        assertEquals("TEST_CLIENT_ID", configurationService.getClientId());
+        assertEquals("TEST_CLIENT_ID", configurationService.getOIDCClientId());
     }
 
     @Test
     void Should_ReturnClientIdEnvVarValue() {
         environmentVariables.set("OIDC_CLIENT_ID", "test-client-id");
-        assertEquals("test-client-id", configurationService.getClientId());
+        assertEquals("test-client-id", configurationService.getOIDCClientId());
     }
 
     @Test
@@ -226,6 +226,22 @@ class ConfigurationServiceTest {
     @Test
     void Should_ReturnTableItemTtl() {
         assertEquals(3, configurationService.getTableItemTtlInDays());
+    }
+
+    @Test
+    void Should_ThrowIllegalArgumentException_When_StatusListUrlEnvVarNotSet() {
+        IllegalArgumentException thrown =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> configurationService.getStatusListUrl());
+        assertEquals("Missing required environment variable: STATUS_LIST_URL", thrown.getMessage());
+    }
+
+    @Test
+    void Should_ReturnStatusListUrlEnvVarValue() throws URISyntaxException {
+        environmentVariables.set("STATUS_LIST_URL", "https://status-list.test.com");
+        assertEquals(
+                new URI("https://status-list.test.com"), configurationService.getStatusListUrl());
     }
 
     @Test

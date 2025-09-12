@@ -13,24 +13,24 @@ import java.security.interfaces.ECPublicKey;
 import java.util.Base64;
 
 /**
- * Service responsible for creating the {@code IssuerSigned} structure of Mobile Driving Licences
+ * Class responsible for creating the {@code IssuerSigned} structure of Mobile Driving Licences
  * (mDLs).
  */
-public class MobileDrivingLicenceService {
+public class MobileDrivingLicenceBuilder {
 
     private final CBOREncoder cborEncoder;
     private final NamespacesFactory namespacesFactory;
     private final IssuerSignedFactory issuerSignedFactory;
 
     /**
-     * Constructs a new MobileDrivingLicenceService.
+     * Constructs a new MobileDrivingLicenceBuilder.
      *
      * @param cborEncoder CBOR encoder for encoding objects into CBOR binary representation
      * @param namespacesFactory Factory for creating {@link Namespaces} from a driving licence
      *     document
      * @param issuerSignedFactory Factory for creating {@link IssuerSigned}
      */
-    public MobileDrivingLicenceService(
+    public MobileDrivingLicenceBuilder(
             CBOREncoder cborEncoder,
             NamespacesFactory namespacesFactory,
             IssuerSignedFactory issuerSignedFactory) {
@@ -46,10 +46,13 @@ public class MobileDrivingLicenceService {
      * @return A Base64URL-encoded string containing the CBOR-encoded {@code IssuerSigned} structure
      */
     public String createMobileDrivingLicence(
-            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
+            DrivingLicenceDocument drivingLicenceDocument,
+            ECPublicKey publicKey,
+            int idx,
+            String uri)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
-        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey);
+        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey, idx, uri);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
                 .withoutPadding()
