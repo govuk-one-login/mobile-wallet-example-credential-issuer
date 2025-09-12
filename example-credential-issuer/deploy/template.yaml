@@ -456,9 +456,7 @@ Resources:
                 - "https://${StatusListUrl}"
                 - StatusListUrl: !FindInMap [EnvironmentVariables, !Ref Environment, StatusListUrl]
             - Name: STATUS_LIST_CLIENT_ID
-              #  Temporary static client ID - will be saved to parameter store
-              Value: "STATUS_LIST_TEST_CLIENT_ID"
-
+              Value: !Sub "{{resolve:ssm:/${AWS::StackName}/Config/StatusList/Client/Id}}"
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
