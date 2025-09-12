@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
 
@@ -18,8 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MobileSecurityObjectFactoryTest {
@@ -28,6 +28,7 @@ class MobileSecurityObjectFactoryTest {
     @Mock private ValidityInfoFactory mockValidityInfoFactory;
     @Mock private COSEKeyFactory mockCoseKeyFactory;
     @Mock private ECPublicKey mockEcPublicKey;
+    DrivingLicenceDocument mockDocument = mock(DrivingLicenceDocument.class);
 
     @Test
     void Should_CreateMobileSecurityObject() {
@@ -35,6 +36,7 @@ class MobileSecurityObjectFactoryTest {
         IssuerSignedItem issuerSignedItem =
                 new IssuerSignedItem(5, new byte[] {1, 2, 3}, "ID", "Test");
         Namespaces namespaces = new Namespaces(Map.of("testNamespace1", List.of(issuerSignedItem)));
+        long CREDENTIAL_TTL_MINUTES = 43200;
 
         // Arrange: Prepare ValueDigests
         ValueDigests valueDigests = new ValueDigests(Map.of("Test", Map.of(5, new byte[] {1})));
@@ -44,7 +46,9 @@ class MobileSecurityObjectFactoryTest {
         // Arrange: Prepare ValidityInfo
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1750677223), ZoneId.systemDefault());
         Instant now = clock.instant();
-        ValidityInfo validityInfo = new ValidityInfo(now, now, now.plus(Duration.ofDays(365)));
+        ValidityInfo validityInfo =
+                new ValidityInfo(now, now, now.plus(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES)));
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         when(mockValidityInfoFactory.build()).thenReturn(validityInfo);
 
         // Arrange: Prepare COSEKey

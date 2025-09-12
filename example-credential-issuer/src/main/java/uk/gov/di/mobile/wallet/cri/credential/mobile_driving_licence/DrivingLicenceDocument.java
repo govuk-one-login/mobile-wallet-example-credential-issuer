@@ -103,7 +103,6 @@ public class DrivingLicenceDocument {
             @JsonProperty("resident_city") String residentCity,
             @JsonProperty("driving_privileges") List<DrivingPrivilege> drivingPrivileges,
             @JsonProperty("un_distinguishing_sign") String unDistinguishingSign,
-            long credentialTtlMinutes,
             @JsonProperty("provisional_driving_privileges")
                     List<DrivingPrivilege> provisionalDrivingPrivileges) {
         this.familyName = Objects.requireNonNull(familyName, "family_name is required");
@@ -135,7 +134,6 @@ public class DrivingLicenceDocument {
         this.unDistinguishingSign =
                 Objects.requireNonNull(unDistinguishingSign, "un_distinguishing_sign is required");
         this.provisionalDrivingPrivileges = Optional.ofNullable(provisionalDrivingPrivileges);
-        this.credentialTtlMinutes = credentialTtlMinutes;
     }
 
     private LocalDate parseDate(String dateString) {
