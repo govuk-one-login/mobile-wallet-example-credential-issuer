@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
 
@@ -28,7 +27,7 @@ class MobileSecurityObjectFactoryTest {
     @Mock private ValidityInfoFactory mockValidityInfoFactory;
     @Mock private COSEKeyFactory mockCoseKeyFactory;
     @Mock private ECPublicKey mockEcPublicKey;
-    DrivingLicenceDocument mockDocument = mock(DrivingLicenceDocument.class);
+    long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @Test
     void Should_CreateMobileSecurityObject() {
@@ -36,7 +35,6 @@ class MobileSecurityObjectFactoryTest {
         IssuerSignedItem issuerSignedItem =
                 new IssuerSignedItem(5, new byte[] {1, 2, 3}, "ID", "Test");
         Namespaces namespaces = new Namespaces(Map.of("testNamespace1", List.of(issuerSignedItem)));
-        long CREDENTIAL_TTL_MINUTES = 43200;
 
         // Arrange: Prepare ValueDigests
         ValueDigests valueDigests = new ValueDigests(Map.of("Test", Map.of(5, new byte[] {1})));
@@ -48,8 +46,7 @@ class MobileSecurityObjectFactoryTest {
         Instant now = clock.instant();
         ValidityInfo validityInfo =
                 new ValidityInfo(now, now, now.plus(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES)));
-        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
-        when(mockValidityInfoFactory.build()).thenReturn(validityInfo);
+        when(mockValidityInfoFactory.build(CREDENTIAL_TTL_MINUTES)).thenReturn(validityInfo);
 
         // Arrange: Prepare COSEKey
         Map<Integer, Object> coseKeyParams = new HashMap<>();
@@ -75,13 +72,14 @@ class MobileSecurityObjectFactoryTest {
         MobileSecurityObjectFactory factory =
                 new MobileSecurityObjectFactory(
                         mockValueDigestsFactory, mockValidityInfoFactory, mockCoseKeyFactory);
-        MobileSecurityObject result = factory.build(namespaces, mockEcPublicKey);
+        MobileSecurityObject result =
+                factory.build(namespaces, mockEcPublicKey, CREDENTIAL_TTL_MINUTES);
 
         // Assert
         assertEquals(expectedMso, result, "MobileSecurityObject should be constructed as expected");
         verify(mockValueDigestsFactory).createFromNamespaces(namespaces);
         verify(mockValueDigestsFactory).getDigestAlgorithm();
-        verify(mockValidityInfoFactory).build();
+        verify(mockValidityInfoFactory).build(43200);
         verify(mockCoseKeyFactory).fromECPublicKey(mockEcPublicKey);
     }
 }
