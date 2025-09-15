@@ -27,7 +27,7 @@ class MobileSecurityObjectFactoryTest {
     @Mock private ValidityInfoFactory mockValidityInfoFactory;
     @Mock private COSEKeyFactory mockCoseKeyFactory;
     @Mock private ECPublicKey mockEcPublicKey;
-    long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @Test
     void Should_CreateMobileSecurityObject() {

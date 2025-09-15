@@ -68,7 +68,7 @@ class MobileDrivingLicenceBuilderTest {
                 result,
                 "The actual base64url encoded string should match the expected result");
         assertFalse(result.contains("="), "Base64url encoded string should not contain padding");
-        assertEquals(mockDrivingLicenceDocument.getCredentialTtlMinutes(), CREDENTIAL_TTL_MINUTES);
+        assertEquals(CREDENTIAL_TTL_MINUTES, mockDrivingLicenceDocument.getCredentialTtlMinutes());
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
         verify(issuerSignedFactory).build(namespaces, mockEcPublicKey, CREDENTIAL_TTL_MINUTES);
         verify(cborEncoder).encode(issuerSigned);
