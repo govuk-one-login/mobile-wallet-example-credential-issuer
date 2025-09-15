@@ -97,10 +97,7 @@ public class CredentialService {
         }
 
         String documentId = credentialOffer.getDocumentId();
-
         Document document = documentStoreClient.getDocument(documentId);
-        LOGGER.info("FETCHED DOCUMENT FROM S3, documentId: {}", documentId);
-
         String notificationId = UUID.randomUUID().toString();
 
         LOGGER.info(
@@ -152,8 +149,6 @@ public class CredentialService {
                 throw new CredentialServiceException(
                         String.format("Invalid verifiable credential type %s", vcType));
             }
-
-            LOGGER.info("{} CREDENTIAL Retrieved - ", credential);
 
             dataStore.saveStoredCredential(
                     new StoredCredential(
@@ -229,9 +224,6 @@ public class CredentialService {
     private String getMobileDrivingLicence(
             DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
             throws ObjectStoreException, SigningException, CertificateException {
-
-        LOGGER.info("START TO CREATE MDL");
-
         return mobileDrivingLicenceService.createMobileDrivingLicence(
                 drivingLicenceDocument, publicKey);
     }

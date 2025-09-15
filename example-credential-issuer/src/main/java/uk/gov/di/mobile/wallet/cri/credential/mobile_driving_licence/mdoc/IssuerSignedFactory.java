@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
@@ -21,8 +19,6 @@ public class IssuerSignedFactory {
     private final COSESigner coseSigner;
     private final CertificateProvider certificateProvider;
     private final String documentSigningKey1Arn;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(IssuerSignedFactory.class);
 
     public IssuerSignedFactory(
             MobileSecurityObjectFactory mobileSecurityObjectFactory,
@@ -46,25 +42,9 @@ public class IssuerSignedFactory {
 
         String certificateId = ArnUtil.extractKeyId(documentSigningKey1Arn);
 
-        X509Certificate certificate;
+        X509Certificate certificate = certificateProvider.getSigningCertificate(certificateId);
+        COSESign1 sign1 = coseSigner.sign(mobileSecurityObjectBytes, certificate);
 
-        try {
-            certificate = certificateProvider.getSigningCertificate(certificateId);
-            LOGGER.info("FETCHED certificate: {}", certificateId);
-
-        } catch (Exception e) {
-            LOGGER.error("FETCHING certificate failed certificate: {}", certificateId);
-            throw e;
-        }
-
-        try {
-            COSESign1 sign1 = coseSigner.sign(mobileSecurityObjectBytes, certificate);
-            LOGGER.info("ISSUER_SIGNED_SUCCESS: {}", certificateId);
-            return new IssuerSigned(namespaces.namespaces(), sign1);
-
-        } catch (Exception e) {
-            LOGGER.error("ISSUER_SIGNED_FAILED: {}", certificateId);
-            throw e;
-        }
+        return new IssuerSigned(namespaces.namespaces(), sign1);
     }
 }
