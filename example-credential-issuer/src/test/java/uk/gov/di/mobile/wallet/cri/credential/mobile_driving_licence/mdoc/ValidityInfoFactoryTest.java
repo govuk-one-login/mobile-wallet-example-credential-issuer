@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidityInfoFactoryTest {
     private static final Instant FIXED_INSTANT = Instant.parse("2024-01-15T10:30:00Z");
-    long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @Test
     void Should_CreateValidityInfoWithProvidedClock() {

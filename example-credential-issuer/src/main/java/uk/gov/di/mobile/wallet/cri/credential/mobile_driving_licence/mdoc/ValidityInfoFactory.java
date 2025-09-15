@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
-
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -16,8 +14,6 @@ public class ValidityInfoFactory {
 
     /** The source of current time for validity information. */
     private final Clock clock;
-
-    private DrivingLicenceDocument document;
 
     /** Constructs a new {@link ValidityInfoFactory}. */
     public ValidityInfoFactory() {

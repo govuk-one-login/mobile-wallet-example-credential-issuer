@@ -35,7 +35,7 @@ class MobileDrivingLicenceServiceTest {
     @Mock private ECPublicKey mockEcPublicKey;
     private MobileDrivingLicenceService mobileDrivingLicenceService;
 
-    long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @BeforeEach
     void setUp() {

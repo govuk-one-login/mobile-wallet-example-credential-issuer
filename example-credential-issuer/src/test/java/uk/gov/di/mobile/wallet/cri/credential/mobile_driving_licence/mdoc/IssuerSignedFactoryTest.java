@@ -48,7 +48,7 @@ class IssuerSignedFactoryTest {
     private static final String TEST_KMS_KEY_ARN =
             "arn:aws:kms:eu-west-2:111122223333:key/1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String TEST_CERTIFICATE_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
-    long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @BeforeEach
     void setUp() {
