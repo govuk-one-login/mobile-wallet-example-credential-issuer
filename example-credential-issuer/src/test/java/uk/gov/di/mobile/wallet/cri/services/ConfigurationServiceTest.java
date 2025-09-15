@@ -29,13 +29,13 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    public void Should_HaveNonNullDefaultHttpClient_On_Initialisation() {
+    void Should_HaveNonNullDefaultHttpClient_On_Initialisation() {
         ConfigurationService config = new ConfigurationService();
         assertNotNull(config.getHttpClient(), "Default httpClient should not be null");
     }
 
     @Test
-    public void Should_ReturnSameHttpClient_After_SettingCustomClient() {
+    void Should_ReturnSameHttpClient_After_SettingCustomClient() {
         ConfigurationService config = new ConfigurationService();
         HttpClientConfiguration customClient = new HttpClientConfiguration();
         customClient.setTimeout(Duration.seconds(10));
