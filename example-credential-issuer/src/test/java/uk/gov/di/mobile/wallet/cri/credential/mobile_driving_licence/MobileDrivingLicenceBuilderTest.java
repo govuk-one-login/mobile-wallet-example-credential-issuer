@@ -24,7 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MobileDrivingLicenceServiceTest {
+class MobileDrivingLicenceBuilderTest {
 
     @Mock private CBOREncoder cborEncoder;
     @Mock private NamespacesFactory namespacesFactory;
@@ -33,14 +33,14 @@ class MobileDrivingLicenceServiceTest {
     @Mock private Namespaces namespaces;
     @Mock private IssuerSigned issuerSigned;
     @Mock private ECPublicKey mockEcPublicKey;
-    private MobileDrivingLicenceService mobileDrivingLicenceService;
+    private MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
 
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @BeforeEach
     void setUp() {
-        mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(
+        mobileDrivingLicenceBuilder =
+                new MobileDrivingLicenceBuilder(
                         cborEncoder, namespacesFactory, issuerSignedFactory);
     }
 
@@ -60,7 +60,7 @@ class MobileDrivingLicenceServiceTest {
                 .thenReturn(CREDENTIAL_TTL_MINUTES);
 
         String result =
-                mobileDrivingLicenceService.createMobileDrivingLicence(
+                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                         mockDrivingLicenceDocument, mockEcPublicKey);
 
         assertEquals(
@@ -84,7 +84,7 @@ class MobileDrivingLicenceServiceTest {
                 assertThrows(
                         MDLException.class,
                         () ->
-                                mobileDrivingLicenceService.createMobileDrivingLicence(
+                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument, mockEcPublicKey));
 
         assertEquals(expectedException, actualException);
@@ -108,7 +108,7 @@ class MobileDrivingLicenceServiceTest {
                 assertThrows(
                         SigningException.class,
                         () ->
-                                mobileDrivingLicenceService.createMobileDrivingLicence(
+                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument, mockEcPublicKey));
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
@@ -131,7 +131,7 @@ class MobileDrivingLicenceServiceTest {
                 assertThrows(
                         MDLException.class,
                         () ->
-                                mobileDrivingLicenceService.createMobileDrivingLicence(
+                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument, mockEcPublicKey));
 
         assertEquals(expectedException, actualException);
