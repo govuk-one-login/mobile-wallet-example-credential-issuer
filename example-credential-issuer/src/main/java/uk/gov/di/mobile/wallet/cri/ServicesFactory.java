@@ -6,11 +6,14 @@ import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialExpiryCalculator;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceService;
+import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
@@ -22,6 +25,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Mobile
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfoFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigestsFactory;
+import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
@@ -88,8 +92,6 @@ public class ServicesFactory {
         AccessTokenService accessTokenService =
                 new AccessTokenService(jwksService, configurationService);
         ProofJwtService proofJwtService = new ProofJwtService(configurationService);
-        CredentialBuilder<? extends CredentialSubject> credentialBuilder =
-                new CredentialBuilder<>(configurationService, kmsService);
 
         CBOREncoder cborEncoder =
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
@@ -118,21 +120,34 @@ public class ServicesFactory {
                         certificateProvider,
                         configurationService.getDocumentSigningKey1Arn());
 
-        MobileDrivingLicenceService mobileDrivingLicenceService =
-                new MobileDrivingLicenceService(
-                        cborEncoder, namespacesFactory, issuerSignedFactory);
-
         DocumentStoreClient documentStoreClient =
                 new DocumentStoreClient(configurationService, httpClient);
 
+        CredentialBuilder<BasicCheckCredentialSubject> basicCheckCredentialBuilder =
+                new CredentialBuilder<>(configurationService, kmsService);
+        CredentialBuilder<SocialSecurityCredentialSubject> socialSecurityCredentialBuilder =
+                new CredentialBuilder<>(configurationService, kmsService);
+        CredentialBuilder<VeteranCardCredentialSubject> digitalVeteranCardCredentialBuilder =
+                new CredentialBuilder<>(configurationService, kmsService);
+
+        MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder =
+                new MobileDrivingLicenceBuilder(
+                        cborEncoder, namespacesFactory, issuerSignedFactory);
+
+        CredentialHandlerFactory credentialHandlerFactory =
+                new CredentialHandlerFactory(
+                        basicCheckCredentialBuilder,
+                        socialSecurityCredentialBuilder,
+                        digitalVeteranCardCredentialBuilder,
+                        mobileDrivingLicenceBuilder);
         CredentialService credentialService =
                 new CredentialService(
                         dynamoDbService,
                         accessTokenService,
                         proofJwtService,
                         documentStoreClient,
-                        credentialBuilder,
-                        mobileDrivingLicenceService);
+                        credentialHandlerFactory,
+                        new CredentialExpiryCalculator());
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);
