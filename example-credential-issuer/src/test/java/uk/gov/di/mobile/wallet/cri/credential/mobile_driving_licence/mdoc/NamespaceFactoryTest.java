@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.Code;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
@@ -12,6 +13,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.consta
 
 import java.time.LocalDate;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -28,16 +30,22 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class NamespacesFactoryTest {
 
+    private static final List<Code> CODES = Collections.singletonList(new Code("01"));
     private static final List<DrivingPrivilege> DRIVING_PRIVILEGES =
             List.of(
-                    new DrivingPrivilege("A", "12-02-2020", "11-02-2030"),
-                    new DrivingPrivilege("B", null, null));
+                    new DrivingPrivilege("A", "12-02-2020", "11-02-2030", CODES),
+                    new DrivingPrivilege("B", null, null, null));
     private static final List<Map<String, Object>> DRIVING_PRIVILEGES_SNAKE_CASE =
             List.of(
                     Map.of(
-                            "vehicle_category_code", "A",
-                            "issue_date", LocalDate.parse("2020-02-12"),
-                            "expiry_date", LocalDate.parse("2030-02-11")),
+                            "vehicle_category_code",
+                            "A",
+                            "issue_date",
+                            LocalDate.parse("2020-02-12"),
+                            "expiry_date",
+                            LocalDate.parse("2030-02-11"),
+                            "codes",
+                            CODES),
                     Map.of("vehicle_category_code", "B"));
 
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;

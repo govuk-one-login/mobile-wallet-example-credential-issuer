@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -21,19 +22,22 @@ class DrivingPrivilegeTest {
     private static final String VALID_CATEGORY = "B";
     private static final String VALID_ISSUE_DATE = "02-01-2025";
     private static final String VALID_EXPIRY_DATE = "01-01-2035";
+    private static final List<Code> VALID_CODES = List.of(new Code("01"), new Code("22(7)"));
     private static final LocalDate EXPECTED_ISSUE_DATE = LocalDate.of(2025, 1, 2);
     private static final LocalDate EXPECTED_EXPIRY_DATE = LocalDate.of(2035, 1, 1);
 
     @Test
-    void Should_CreateInstance_When_DateIsValid() {
+    void Should_CreateInstance_When_DataIsValid() {
         DrivingPrivilege privilege =
-                new DrivingPrivilege(VALID_CATEGORY, VALID_ISSUE_DATE, VALID_EXPIRY_DATE);
+                new DrivingPrivilege(
+                        VALID_CATEGORY, VALID_ISSUE_DATE, VALID_EXPIRY_DATE, VALID_CODES);
 
         assertEquals(VALID_CATEGORY, privilege.getVehicleCategoryCode());
         assertTrue(privilege.getIssueDate().isPresent());
         assertEquals(EXPECTED_ISSUE_DATE, privilege.getIssueDate().get());
         assertTrue(privilege.getExpiryDate().isPresent());
         assertEquals(EXPECTED_EXPIRY_DATE, privilege.getExpiryDate().get());
+        assertEquals(VALID_CODES, privilege.getCodes());
     }
 
     @Test
@@ -41,37 +45,56 @@ class DrivingPrivilegeTest {
         NullPointerException exception =
                 assertThrows(
                         NullPointerException.class,
-                        () -> new DrivingPrivilege(null, VALID_ISSUE_DATE, VALID_EXPIRY_DATE));
+                        () ->
+                                new DrivingPrivilege(
+                                        null, VALID_ISSUE_DATE, VALID_EXPIRY_DATE, VALID_CODES));
         assertEquals("vehicle_category_code is required", exception.getMessage());
     }
 
     @Test
     void Should_CreateInstanceWithEmptyOptionals_When_DatesAreNull() {
-        DrivingPrivilege privilege = new DrivingPrivilege(VALID_CATEGORY, null, null);
+        DrivingPrivilege privilege = new DrivingPrivilege(VALID_CATEGORY, null, null, VALID_CODES);
 
         assertEquals(VALID_CATEGORY, privilege.getVehicleCategoryCode());
         assertFalse(privilege.getIssueDate().isPresent());
         assertFalse(privilege.getExpiryDate().isPresent());
+        assertEquals(VALID_CODES, privilege.getCodes());
     }
 
     @Test
     void Should_CreateInstanceWithoutIssueDate_When_IssueDateIsNull() {
-        DrivingPrivilege privilege = new DrivingPrivilege(VALID_CATEGORY, null, VALID_EXPIRY_DATE);
+        DrivingPrivilege privilege =
+                new DrivingPrivilege(VALID_CATEGORY, null, VALID_EXPIRY_DATE, VALID_CODES);
 
         assertEquals(VALID_CATEGORY, privilege.getVehicleCategoryCode());
         assertFalse(privilege.getIssueDate().isPresent());
         assertTrue(privilege.getExpiryDate().isPresent());
         assertEquals(EXPECTED_EXPIRY_DATE, privilege.getExpiryDate().get());
+        assertEquals(VALID_CODES, privilege.getCodes());
     }
 
     @Test
     void Should_CreateInstanceWithoutExpiryDate_When_ExpiryDateIsNull() {
-        DrivingPrivilege privilege = new DrivingPrivilege(VALID_CATEGORY, VALID_ISSUE_DATE, null);
+        DrivingPrivilege privilege =
+                new DrivingPrivilege(VALID_CATEGORY, VALID_ISSUE_DATE, null, VALID_CODES);
 
         assertEquals(VALID_CATEGORY, privilege.getVehicleCategoryCode());
         assertTrue(privilege.getIssueDate().isPresent());
         assertEquals(EXPECTED_ISSUE_DATE, privilege.getIssueDate().get());
         assertFalse(privilege.getExpiryDate().isPresent());
+        assertEquals(VALID_CODES, privilege.getCodes());
+    }
+
+    @Test
+    void Should_CreateInstanceWithoutCodes_When_CodesIsNull() {
+        DrivingPrivilege privilege =
+                new DrivingPrivilege(VALID_CATEGORY, VALID_ISSUE_DATE, VALID_EXPIRY_DATE, null);
+
+        assertEquals(VALID_CATEGORY, privilege.getVehicleCategoryCode());
+        assertEquals(EXPECTED_ISSUE_DATE, privilege.getIssueDate().get());
+        assertEquals(EXPECTED_EXPIRY_DATE, privilege.getExpiryDate().get());
+
+        assertNull(privilege.getCodes());
     }
 
     @ParameterizedTest
@@ -87,7 +110,7 @@ class DrivingPrivilegeTest {
             })
     void Should_CreateInstanceWithoutIssueDate_When_IssueDateFormatIsInvalid(String invalidDate) {
         DrivingPrivilege privilege =
-                new DrivingPrivilege(VALID_CATEGORY, invalidDate, VALID_EXPIRY_DATE) {
+                new DrivingPrivilege(VALID_CATEGORY, invalidDate, VALID_EXPIRY_DATE, VALID_CODES) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
@@ -111,7 +134,7 @@ class DrivingPrivilegeTest {
             })
     void Should_CreateInstanceWithoutExpiryDate_When_ExpiryDateFormatIsInvalid(String invalidDate) {
         DrivingPrivilege privilege =
-                new DrivingPrivilege(VALID_CATEGORY, VALID_ISSUE_DATE, invalidDate) {
+                new DrivingPrivilege(VALID_CATEGORY, VALID_ISSUE_DATE, invalidDate, VALID_CODES) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
