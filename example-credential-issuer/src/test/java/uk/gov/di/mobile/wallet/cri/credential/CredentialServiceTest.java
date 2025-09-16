@@ -309,8 +309,10 @@ class CredentialServiceTest {
             assertEquals(NOTIFICATION_ID.toString(), savedCredential.getNotificationId());
             assertEquals(WALLET_SUBJECT_ID, savedCredential.getWalletSubjectId());
             assertEquals(DOCUMENT_NUMBER, savedCredential.getDocumentNumber());
-            assertNull(savedCredential.getIdx(), "Should be null for non-MDL credentials");
-            assertNull(savedCredential.getUri(), "Should be null for non-MDL credentials");
+            assertNull(
+                    savedCredential.getStatusListIndex(), "Should be null for non-MDL credentials");
+            assertNull(
+                    savedCredential.getStatusListUri(), "Should be null for non-MDL credentials");
             assertEquals(EXPIRY_TIME, savedCredential.getTimeToLive());
             verify(mockStatusListClient, never()).getIndex(anyLong());
         }
@@ -436,8 +438,8 @@ class CredentialServiceTest {
             assertEquals(NOTIFICATION_ID.toString(), savedCredential.getNotificationId());
             assertEquals(WALLET_SUBJECT_ID, savedCredential.getWalletSubjectId());
             assertEquals(DOCUMENT_NUMBER, savedCredential.getDocumentNumber());
-            assertEquals(STATUS_LIST_INDEX, savedCredential.getIdx());
-            assertEquals(STATUS_LIST_URI, savedCredential.getUri());
+            assertEquals(STATUS_LIST_INDEX, savedCredential.getStatusListIndex());
+            assertEquals(STATUS_LIST_URI, savedCredential.getStatusListUri());
             assertEquals(EXPIRY_TIME, savedCredential.getTimeToLive());
         }
     }

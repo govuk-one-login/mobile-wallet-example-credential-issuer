@@ -90,16 +90,20 @@ public class CredentialService {
             CredentialType credentialType = CredentialType.fromType(vcType);
             CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
 
-            Integer idx = null;
-            String uri = null;
+            Integer credentialStatusIndex = null;
+            String credentialStatusUri = null;
             BuildCredentialResult result;
             if (credentialType == MOBILE_DRIVING_LICENCE) {
                 StatusListClient.IssueResponse issueResponse = statusListClient.getIndex(expiry);
-                idx = issueResponse.idx();
-                uri = issueResponse.uri();
+                credentialStatusIndex = issueResponse.idx();
+                credentialStatusUri = issueResponse.uri();
                 result =
                         ((MobileDrivingLicenceHandler) handler)
-                                .buildCredential(document, proofJwtData, idx, uri);
+                                .buildCredential(
+                                        document,
+                                        proofJwtData,
+                                        credentialStatusIndex,
+                                        credentialStatusUri);
             } else {
                 result = handler.buildCredential(document, proofJwtData);
             }
@@ -110,8 +114,8 @@ public class CredentialService {
                             notificationId,
                             credentialOffer.getWalletSubjectId(),
                             result.documentNumber(),
-                            idx,
-                            uri,
+                            credentialStatusIndex,
+                            credentialStatusUri,
                             expiry));
 
             return new CredentialResponse(result.credential(), notificationId);
