@@ -82,12 +82,6 @@ public class CredentialService {
             String notificationId = UUID.randomUUID().toString();
             String vcType = document.getVcType();
 
-            LOGGER.info(
-                    "{} retrieved - credentialOfferId: {}, documentId: {}",
-                    vcType,
-                    credentialOfferId,
-                    documentId);
-
             // Delete credential offer after redeeming it to prevent replay
             dataStore.deleteCredentialOffer(credentialOfferId);
 
