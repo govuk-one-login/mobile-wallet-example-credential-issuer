@@ -6,6 +6,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.security.cert.CertificateException;
 
 public interface CredentialHandler {
-    BuildCredentialResult buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    BuildCredentialResult buildCredential(CredentialBuildContext context)
             throws SigningException, ObjectStoreException, CertificateException;
 }
