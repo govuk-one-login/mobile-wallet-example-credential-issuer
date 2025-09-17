@@ -62,11 +62,7 @@ class MobileDrivingLicenceBuilderTest {
 
         String result =
                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                        mockDrivingLicenceDocument,
-                        mockEcPublicKey,
-                        IDX,
-                        URI,
-                        CREDENTIAL_TTL_MINUTES);
+                        mockDrivingLicenceDocument, mockEcPublicKey, IDX, URI);
 
         assertEquals(
                 expectedBase64,
