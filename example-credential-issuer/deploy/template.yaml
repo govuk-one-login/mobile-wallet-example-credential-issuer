@@ -682,6 +682,13 @@ Resources:
       TimeToLiveSpecification:
         AttributeName: timeToLive
         Enabled: true
+      GlobalSecondaryIndexes:
+        - IndexName: DrivingLicenceNumberIndex
+          KeySchema:
+            - AttributeName: drivingLicenceNumber
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       SSESpecification:
