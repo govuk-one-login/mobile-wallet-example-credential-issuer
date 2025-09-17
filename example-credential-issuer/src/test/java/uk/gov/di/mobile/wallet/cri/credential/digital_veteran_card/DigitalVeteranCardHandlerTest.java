@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialBuildContext;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
@@ -30,19 +32,26 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETE
 @ExtendWith(MockitoExtension.class)
 class DigitalVeteranCardHandlerTest {
 
+    private DigitalVeteranCardHandler handler;
+
     @Mock private CredentialBuilder<VeteranCardCredentialSubject> mockCredentialBuilder;
+    @Mock private CredentialBuildContext mockCredentialBuildContext;
     @Mock private Document mockDocument;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
     @Mock private VeteranCardDocument mockVeteranCardDocument;
     @Mock private VeteranCardCredentialSubject mockCredentialSubject;
-    private DigitalVeteranCardHandler handler;
 
-    private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
 
+    private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
+    private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
+
     @BeforeEach
     void setUp() {
+        when(mockCredentialBuildContext.getDocument()).thenReturn(mockDocument);
+        when(mockCredentialBuildContext.getProofData()).thenReturn(mockProofData);
+
         handler = new DigitalVeteranCardHandler(mockCredentialBuilder);
     }
 
@@ -52,6 +61,7 @@ class DigitalVeteranCardHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockVeteranCardDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockVeteranCardDocument.getServiceNumber()).thenReturn(EXPECTED_DOCUMENT_NUMBER);
         when(mockCredentialBuilder.buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(DIGITAL_VETERAN_CARD),
@@ -71,9 +81,10 @@ class DigitalVeteranCardHandlerTest {
                                             mockVeteranCardDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
-            String result = spyHandler.buildCredential(mockDocument, mockProofData);
+            BuildCredentialResult result = spyHandler.buildCredential(mockCredentialBuildContext);
 
-            assertEquals(EXPECTED_CREDENTIAL, result);
+            assertEquals(EXPECTED_CREDENTIAL, result.credential());
+            assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentNumber());
             verify(mockCredentialBuilder)
                     .buildCredential(mockCredentialSubject, DIGITAL_VETERAN_CARD, TTL_MINUTES);
         }
@@ -110,7 +121,7 @@ class DigitalVeteranCardHandlerTest {
             SigningException thrown =
                     assertThrows(
                             SigningException.class,
-                            () -> spyHandler.buildCredential(mockDocument, mockProofData));
+                            () -> spyHandler.buildCredential(mockCredentialBuildContext));
             assertEquals("Some signing error", thrown.getMessage());
         }
     }

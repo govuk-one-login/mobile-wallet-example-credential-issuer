@@ -13,6 +13,9 @@ public class StoredCredential {
     String credentialIdentifier;
     String notificationId;
     String walletSubjectId;
+    String documentNumber;
+    Integer statusListIndex;
+    String statusListUri;
     Long timeToLive;
 
     public StoredCredential() {
@@ -23,10 +26,16 @@ public class StoredCredential {
             String credentialIdentifier,
             String notificationId,
             String walletSubjectId,
+            String documentNumber,
+            Integer statusListIndex,
+            String statusListUri,
             Long timeToLive) {
         this.credentialIdentifier = credentialIdentifier;
         this.notificationId = notificationId;
         this.walletSubjectId = walletSubjectId;
+        this.documentNumber = documentNumber;
+        this.statusListIndex = statusListIndex;
+        this.statusListUri = statusListUri;
         this.timeToLive = timeToLive;
     }
 

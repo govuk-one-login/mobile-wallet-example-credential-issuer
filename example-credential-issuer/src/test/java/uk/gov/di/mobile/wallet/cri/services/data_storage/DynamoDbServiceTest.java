@@ -60,6 +60,9 @@ class DynamoDbServiceTest {
                         "4a1b1b18-b495-45ac-b0ce-73848bd32b70",
                         "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
                         "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+                        "testDocumentNumber",
+                        0,
+                        "https://test-status-list.gov.uk/t/3B0F3BD087A7",
                         525600L);
         dynamoDbService =
                 new DynamoDbService(
