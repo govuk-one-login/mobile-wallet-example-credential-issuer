@@ -4,7 +4,6 @@ import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceHandler;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
@@ -17,6 +16,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
@@ -99,14 +99,15 @@ public class CredentialService {
                 credentialStatusIndex = issueResponse.idx();
                 credentialStatusUri = issueResponse.uri();
                 result =
-                        ((MobileDrivingLicenceHandler) handler)
-                                .buildCredential(
-                                        document,
-                                        proofJwtData,
-                                        credentialStatusIndex,
-                                        credentialStatusUri);
+                        handler.buildCredential(
+                                document,
+                                proofJwtData,
+                                Optional.of(credentialStatusIndex),
+                                Optional.of(credentialStatusUri));
             } else {
-                result = handler.buildCredential(document, proofJwtData);
+                result =
+                        handler.buildCredential(
+                                document, proofJwtData, Optional.empty(), Optional.empty());
             }
 
             dataStore.saveStoredCredential(

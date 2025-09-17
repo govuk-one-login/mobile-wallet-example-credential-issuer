@@ -9,6 +9,7 @@ import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.util.Optional;
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
@@ -19,19 +20,11 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
         this.mobileDrivingLicenceBuilder = mobileDrivingLicenceBuilder;
     }
 
-    @Override
-    public BuildCredentialResult buildCredential(
-            Document document, ProofJwtService.ProofJwtData proofData)
-            throws ObjectStoreException, SigningException, CertificateException {
-        throw new UnsupportedOperationException(
-                "Use the method that accepts idx and uri for MobileDrivingLicence");
-    }
-
     public BuildCredentialResult buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
-            int statusListIndex,
-            String statusListUri)
+            Optional<Integer> statusListIndex,
+            Optional<String> statusListUri)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
