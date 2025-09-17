@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialBuildContext;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
@@ -31,20 +32,26 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLO
 @ExtendWith(MockitoExtension.class)
 class BasicCheckCredentialHandlerTest {
 
+    private BasicCheckCredentialHandler handler;
+
     @Mock private CredentialBuilder<BasicCheckCredentialSubject> mockCredentialBuilder;
+    @Mock private CredentialBuildContext mockCredentialBuildContext;
     @Mock private Document mockDocument;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
     @Mock private BasicCheckDocument mockBasicCheckDocument;
     @Mock private BasicCheckCredentialSubject mockCredentialSubject;
-    private BasicCheckCredentialHandler handler;
 
-    private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
-    private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
 
+    private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
+    private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
+
     @BeforeEach
     void setUp() {
+        when(mockCredentialBuildContext.getDocument()).thenReturn(mockDocument);
+        when(mockCredentialBuildContext.getProofData()).thenReturn(mockProofData);
+
         handler = new BasicCheckCredentialHandler(mockCredentialBuilder);
     }
 
@@ -74,7 +81,7 @@ class BasicCheckCredentialHandlerTest {
                                             mockBasicCheckDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
-            BuildCredentialResult result = spyHandler.buildCredential(mockDocument, mockProofData);
+            BuildCredentialResult result = spyHandler.buildCredential(mockCredentialBuildContext);
 
             assertEquals(EXPECTED_CREDENTIAL, result.credential());
             assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentNumber());
@@ -115,7 +122,7 @@ class BasicCheckCredentialHandlerTest {
             SigningException thrown =
                     assertThrows(
                             SigningException.class,
-                            () -> spyHandler.buildCredential(mockDocument, mockProofData));
+                            () -> spyHandler.buildCredential(mockCredentialBuildContext));
             assertEquals("Some signing error", thrown.getMessage());
         }
     }
