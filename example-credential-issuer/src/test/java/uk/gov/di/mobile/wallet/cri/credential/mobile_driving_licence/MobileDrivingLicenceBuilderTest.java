@@ -25,25 +25,25 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MobileDrivingLicenceBuilderTest {
 
-    @Mock private CBOREncoder cborEncoder;
-    @Mock private NamespacesFactory namespacesFactory;
-    @Mock private IssuerSignedFactory issuerSignedFactory;
+    private MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
+
+    @Mock private CBOREncoder mockCborEncoder;
+    @Mock private NamespacesFactory mockNamespacesFactory;
+    @Mock private IssuerSignedFactory mockIssuerSignedFactory;
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
-    @Mock private Namespaces namespaces;
-    @Mock private IssuerSigned issuerSigned;
+    @Mock private Namespaces mockNamespaces;
+    @Mock private IssuerSigned mockIssuerSigned;
     @Mock private ECPublicKey mockEcPublicKey;
 
     private static final int IDX = 0;
     private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
-    private MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
-
     @BeforeEach
     void setUp() {
         mobileDrivingLicenceBuilder =
                 new MobileDrivingLicenceBuilder(
-                        cborEncoder, namespacesFactory, issuerSignedFactory);
+                        mockCborEncoder, mockNamespacesFactory, mockIssuerSignedFactory);
     }
 
     @Test
@@ -54,11 +54,13 @@ class MobileDrivingLicenceBuilderTest {
                     0x05, 0x06, 0x07, 0x08, 0x09
                 }; // 10 bytes length, will yield padding if encoded with standard Base64
         String expectedBase64 = "AAECAwQFBgcICQ";
-        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
-        when(issuerSignedFactory.build(
-                        namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES))
-                .thenReturn(issuerSigned);
-        when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
+        when(mockNamespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(mockNamespaces);
+        when(mockDrivingLicenceDocument.getCredentialTtlMinutes())
+                .thenReturn(CREDENTIAL_TTL_MINUTES);
+        when(mockIssuerSignedFactory.build(
+                        mockNamespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES))
+                .thenReturn(mockIssuerSigned);
+        when(mockCborEncoder.encode(mockIssuerSigned)).thenReturn(mockCborData);
 
         String result =
                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
@@ -70,17 +72,17 @@ class MobileDrivingLicenceBuilderTest {
                 "The actual base64url encoded string should match the expected result");
         assertFalse(result.contains("="), "Base64url encoded string should not contain padding");
         assertEquals(CREDENTIAL_TTL_MINUTES, mockDrivingLicenceDocument.getCredentialTtlMinutes());
-        verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory)
-                .build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
-        verify(cborEncoder).encode(issuerSigned);
+        verify(mockNamespacesFactory).build(mockDrivingLicenceDocument);
+        verify(mockIssuerSignedFactory)
+                .build(mockNamespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
+        verify(mockCborEncoder).encode(mockIssuerSigned);
     }
 
     @Test
     void Should_PropagateMDLException_When_NamespacesFactoryThrows() throws Exception {
         MDLException expectedException =
                 new MDLException("Some error message", new RuntimeException());
-        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
+        when(mockNamespacesFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
 
         MDLException actualException =
                 assertThrows(
@@ -90,19 +92,21 @@ class MobileDrivingLicenceBuilderTest {
                                         mockDrivingLicenceDocument, mockEcPublicKey, IDX, URI));
 
         assertEquals(expectedException, actualException);
-        verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory, never())
-                .build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
-        verify(cborEncoder, never()).encode(any());
+        verify(mockNamespacesFactory).build(mockDrivingLicenceDocument);
+        verify(mockIssuerSignedFactory, never())
+                .build(mockNamespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
+        verify(mockCborEncoder, never()).encode(any());
     }
 
     @Test
     void Should_PropagateSigningException_When_IssuerSignedFactoryThrows() throws Exception {
         SigningException expectedException =
                 new SigningException("Some error message", new RuntimeException());
-        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
-        when(issuerSignedFactory.build(
-                        namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES))
+        when(mockNamespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(mockNamespaces);
+        when(mockDrivingLicenceDocument.getCredentialTtlMinutes())
+                .thenReturn(CREDENTIAL_TTL_MINUTES);
+        when(mockIssuerSignedFactory.build(
+                        mockNamespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES))
                 .thenThrow(expectedException);
 
         SigningException actualException =
@@ -112,23 +116,23 @@ class MobileDrivingLicenceBuilderTest {
                                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument, mockEcPublicKey, IDX, URI));
         assertEquals(expectedException, actualException);
-        verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory)
-                .build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
-        verify(cborEncoder, never()).encode(any());
+        verify(mockNamespacesFactory).build(mockDrivingLicenceDocument);
+        verify(mockIssuerSignedFactory)
+                .build(mockNamespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
+        verify(mockCborEncoder, never()).encode(any());
     }
 
     @Test
     void Should_PropagatePropagateMDLException_When_CborEncoderThrows() throws Exception {
         MDLException expectedException =
                 new MDLException("Some error message", new RuntimeException());
-        when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
+        when(mockNamespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(mockNamespaces);
         when(mockDrivingLicenceDocument.getCredentialTtlMinutes())
                 .thenReturn(CREDENTIAL_TTL_MINUTES);
-        when(issuerSignedFactory.build(
-                        namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES))
-                .thenReturn(issuerSigned);
-        when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
+        when(mockIssuerSignedFactory.build(
+                        mockNamespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES))
+                .thenReturn(mockIssuerSigned);
+        when(mockCborEncoder.encode(mockIssuerSigned)).thenThrow(expectedException);
 
         MDLException actualException =
                 assertThrows(
@@ -138,9 +142,9 @@ class MobileDrivingLicenceBuilderTest {
                                         mockDrivingLicenceDocument, mockEcPublicKey, IDX, URI));
 
         assertEquals(expectedException, actualException);
-        verify(namespacesFactory).build(mockDrivingLicenceDocument);
-        verify(issuerSignedFactory)
-                .build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
-        verify(cborEncoder).encode(issuerSigned);
+        verify(mockNamespacesFactory).build(mockDrivingLicenceDocument);
+        verify(mockIssuerSignedFactory)
+                .build(mockNamespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
+        verify(mockCborEncoder).encode(mockIssuerSigned);
     }
 }
