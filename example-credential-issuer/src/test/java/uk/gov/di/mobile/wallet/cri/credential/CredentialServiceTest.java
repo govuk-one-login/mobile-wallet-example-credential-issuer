@@ -14,6 +14,7 @@ import testUtils.MockAccessTokenBuilder;
 import testUtils.MockProofBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceHandler;
+import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -36,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -61,12 +61,12 @@ class CredentialServiceTest {
     @Mock private MobileDrivingLicenceHandler mockMdlHandler;
     @Mock private StatusListClient.IssueResponse mockIssueResponse;
 
-    private CachedCredentialOffer mockCachedCredentialOffer;
-    private SignedJWT mockProofJwt;
-    private SignedJWT mockAccessToken;
-    private ProofJwtService.ProofJwtData mockAccessProofJwtData;
-    private String mockCredentialJwt;
-    private BuildCredentialResult mockBuilderResult;
+    private CachedCredentialOffer cachedCredentialOffer;
+    private SignedJWT proofJwt;
+    private SignedJWT accessToken;
+    private ProofJwtService.ProofJwtData proofJwtData;
+    private String credentialJwt;
+    private BuildCredentialResult builderResult;
 
     private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
     private static final String CREDENTIAL_IDENTIFIER = "efb52887-48d6-43b7-b14c-da7896fbf54d";
@@ -86,9 +86,9 @@ class CredentialServiceTest {
 
     @BeforeEach
     void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
-        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "300");
-        mockProofJwt = new MockProofBuilder("ES256").build();
-        mockAccessToken = new MockAccessTokenBuilder("ES256").build();
+        cachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "300");
+        proofJwt = new MockProofBuilder("ES256").build();
+        accessToken = new MockAccessTokenBuilder("ES256").build();
         credentialService =
                 new CredentialService(
                         mockDynamoDbService,
@@ -103,24 +103,26 @@ class CredentialServiceTest {
                         return mockLogger;
                     }
                 };
-        mockAccessProofJwtData = getMockProofJwtData(NONCE);
-        when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
-        when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(getMockAccessTokenData());
-        mockCredentialJwt =
+        proofJwtData = getMockProofJwtData(NONCE);
+        when(mockProofJwtService.verifyProofJwt(proofJwt)).thenReturn(proofJwtData);
+
+        when(mockAccessTokenService.verifyAccessToken(accessToken))
+                .thenReturn(getMockAccessTokenData());
+        credentialJwt =
                 "eyJraWQiOiJkaWQ6d2ViOmV4YW1wbGUtY3JlZGVudGlhbC1pc3N1ZXIubW9iaWxlLmJ1aWxkLmFjY291bnQuZ292LnVrIzVkY2JlZTg2M2I1ZDdjYzMwYzliYTFmNzM5M2RhY2M2YzE2NjEwNzgyZTRiNmExOTFmOTRhN2U4YjFlMTUxMGYiLCJjdHkiOiJ2YyIsInR5cCI6InZjK2p3dCIsImFsZyI6IkVTMjU2In0.eyJzdWIiOiJkaWQ6a2V5OnpEbmFlU0dmU1FNWXZuTGJMV0V1YmhoR0RQb3E3cEE5TU1OdnVtdmJzbU1DWm92VVIiLCJjcmVkZW50aWFsU3ViamVjdCI6eyJpZCI6ImRpZDprZXk6ekRuYWVTR2ZTUU1Zdm5MYkxXRXViaGhHRFBvcTdwQTlNTU52dW12YnNtTUNab3ZVUiIsIm5hbWUiOlt7Im5hbWVQYXJ0cyI6W3sidHlwZSI6IlRpdGxlIiwidmFsdWUiOiJNciJ9LHsidHlwZSI6IkdpdmVuTmFtZSIsInZhbHVlIjoiU2FyYWgifSx7InR5cGUiOiJHaXZlbk5hbWUiLCJ2YWx1ZSI6IkVsaXphYmV0aCJ9LHsidHlwZSI6IkZhbWlseU5hbWUiLCJ2YWx1ZSI6IkVkd2FyZHMifV19XSwic29jaWFsU2VjdXJpdHlSZWNvcmQiOlt7InBlcnNvbmFsTnVtYmVyIjoiUVExMjM0NTZDIn1dfSwiaXNzIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsImRlc2NyaXB0aW9uIjoiTmF0aW9uYWwgSW5zdXJhbmNlIG51bWJlciIsInZhbGlkRnJvbSI6IjIwMjUtMDctMzFUMTU6MzM6MDBaIiwidHlwZSI6WyJWZXJpZmlhYmxlQ3JlZGVudGlhbCIsIlNvY2lhbFNlY3VyaXR5Q3JlZGVudGlhbCJdLCJAY29udGV4dCI6WyJodHRwczovL3d3dy53My5vcmcvbnMvY3JlZGVudGlhbHMvdjIiXSwiaXNzdWVyIjoiaHR0cHM6Ly9leGFtcGxlLWNyZWRlbnRpYWwtaXNzdWVyLm1vYmlsZS5idWlsZC5hY2NvdW50Lmdvdi51ayIsIm5iZiI6MTc1Mzk3NTk4MCwibmFtZSI6Ik5hdGlvbmFsIEluc3VyYW5jZSBudW1iZXIiLCJ2YWxpZFVudGlsIjoiMjAyNi0wNy0zMVQxNTozMzowMFoiLCJleHAiOjE3ODU1MTE5ODAsImlhdCI6MTc1Mzk3NTk4MH0.pxcRhjMZA6bCzHsyXVyygGpw0xk3VCVGS15LmTPM-TaUtBnSfG99rZylYcbDvojQJkzUqY66cr5mHx3lHpenkw";
-        mockBuilderResult = new BuildCredentialResult(mockCredentialJwt, DOCUMENT_NUMBER);
+        builderResult = new BuildCredentialResult(credentialJwt, DOCUMENT_NUMBER);
     }
 
     @Test
     void Should_ThrowNonceValidationException_When_NonceValuesDontMatch()
             throws ProofJwtValidationException {
-        mockAccessProofJwtData = getMockProofJwtData("not_the_same_nonce");
-        when(mockProofJwtService.verifyProofJwt(any())).thenReturn(mockAccessProofJwtData);
+        proofJwtData = getMockProofJwtData("not_the_same_nonce");
+        when(mockProofJwtService.verifyProofJwt(proofJwt)).thenReturn(proofJwtData);
 
         NonceValidationException exception =
                 assertThrows(
                         NonceValidationException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals(
                 "Access token c_nonce claim does not match Proof JWT nonce claim",
                 exception.getMessage());
@@ -129,12 +131,12 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialOfferValidationException_When_CredentialOfferNotFound()
             throws DataStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString())).thenReturn(null);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER)).thenReturn(null);
 
         CredentialOfferException exception =
                 assertThrows(
                         CredentialOfferException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Credential offer validation failed", exception.getMessage());
         verify(mockLogger)
                 .error("Credential offer {} was not found", "efb52887-48d6-43b7-b14c-da7896fbf54d");
@@ -143,15 +145,15 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_WalletSubjectIDsDontMatch()
             throws DataStoreException {
-        mockCachedCredentialOffer =
+        cachedCredentialOffer =
                 getMockCredentialOfferCacheItem("not_the_same_wallet_subject_id", "300");
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
 
         AccessTokenValidationException exception =
                 assertThrows(
                         AccessTokenValidationException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertThat(
                 exception.getMessage(),
                 containsString("Access token sub claim does not match cached walletSubjectId"));
@@ -160,14 +162,14 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialOfferException_When_CredentialOfferIsExpired()
             throws DataStoreException {
-        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "-1");
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
+        cachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "-1");
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
 
         CredentialOfferException exception =
                 assertThrows(
                         CredentialOfferException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Credential offer validation failed", exception.getMessage());
         verify(mockLogger)
                 .error("Credential offer {} is expired", "efb52887-48d6-43b7-b14c-da7896fbf54d");
@@ -176,13 +178,13 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialServiceException_When_DataStoreExceptionIsThrown()
             throws DataStoreException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenThrow(new DataStoreException("Some database error"));
 
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
         assertEquals(DataStoreException.class, exception.getCause().getClass());
         assertEquals("Some database error", exception.getCause().getMessage());
@@ -195,20 +197,20 @@ class CredentialServiceTest {
                     DocumentStoreException,
                     ObjectStoreException,
                     CertificateException {
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString()))
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID))
                 .thenReturn(getMockSocialSecurityDocument());
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
                 .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(any(), any()))
+        when(mockHandler.buildCredential(any(CredentialBuildContext.class)))
                 .thenThrow(new SigningException("Some signing error", new RuntimeException()));
 
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
         assertEquals(SigningException.class, exception.getCause().getClass());
         assertEquals("Some signing error", exception.getCause().getMessage());
@@ -222,9 +224,9 @@ class CredentialServiceTest {
                     SigningException {
 
         Document mockMdlDocument = getMockMobileDrivingLicenceDocument();
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockMdlDocument);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockMdlDocument);
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockMdlHandler);
         when(mockExpiryCalculator.calculateExpiry(mockMdlDocument)).thenReturn(EXPIRY_TIME);
         when(mockStatusListClient.getIndex(EXPIRY_TIME))
@@ -233,7 +235,7 @@ class CredentialServiceTest {
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
         assertEquals(StatusListException.class, exception.getCause().getClass());
         assertEquals("Some status list error", exception.getCause().getMessage());
@@ -249,25 +251,21 @@ class CredentialServiceTest {
                     CertificateException {
 
         Document mockMdlDocument = getMockMobileDrivingLicenceDocument();
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockMdlDocument);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockMdlDocument);
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockMdlHandler);
         when(mockExpiryCalculator.calculateExpiry(mockMdlDocument)).thenReturn(EXPIRY_TIME);
         when(mockIssueResponse.idx()).thenReturn(STATUS_LIST_INDEX);
         when(mockIssueResponse.uri()).thenReturn(STATUS_LIST_URI);
         when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(mockIssueResponse);
-        when(mockMdlHandler.buildCredential(
-                        mockMdlDocument,
-                        mockAccessProofJwtData,
-                        STATUS_LIST_INDEX,
-                        STATUS_LIST_URI))
+        when(mockMdlHandler.buildCredential(any(CredentialBuildContext.class)))
                 .thenThrow(new MDLException("Some mDL error", new RuntimeException()));
 
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+                        () -> credentialService.getCredential(accessToken, proofJwt));
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
         assertEquals(MDLException.class, exception.getCause().getClass());
         assertEquals("Some mDL error", exception.getCause().getMessage());
@@ -288,18 +286,19 @@ class CredentialServiceTest {
                     StatusListException {
 
         Document mockDocument = getMockSocialSecurityDocument();
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockDocument);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
                 .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(any(), any())).thenReturn(mockBuilderResult);
+        when(mockHandler.buildCredential(any(CredentialBuildContext.class)))
+                .thenReturn(builderResult);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
         try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
             mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
-            credentialService.getCredential(mockAccessToken, mockProofJwt);
+            credentialService.getCredential(accessToken, proofJwt);
 
             ArgumentCaptor<StoredCredential> storedCredentialCaptor =
                     ArgumentCaptor.forClass(StoredCredential.class);
@@ -332,18 +331,19 @@ class CredentialServiceTest {
                     DocumentStoreException {
 
         Document mockDocument = getMockSocialSecurityDocument();
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockDocument);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
                 .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(any(), any())).thenReturn(mockBuilderResult);
+        when(mockHandler.buildCredential(any(CredentialBuildContext.class)))
+                .thenReturn(builderResult);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
         try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
             mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
-            credentialService.getCredential(mockAccessToken, mockProofJwt);
+            credentialService.getCredential(accessToken, proofJwt);
 
             verify(mockExpiryCalculator).calculateExpiry(mockDocument);
         }
@@ -362,27 +362,28 @@ class CredentialServiceTest {
                     ProofJwtValidationException,
                     DocumentStoreException {
         Document mockDocument = getMockSocialSecurityDocument();
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockDocument);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
                 .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(any(), any())).thenReturn(mockBuilderResult);
+        when(mockHandler.buildCredential(any(CredentialBuildContext.class)))
+                .thenReturn(builderResult);
         try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
             mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
             CredentialResponse credentialServiceReturnValue =
-                    credentialService.getCredential(mockAccessToken, mockProofJwt);
+                    credentialService.getCredential(accessToken, proofJwt);
 
-            assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
+            assertEquals(credentialJwt, credentialServiceReturnValue.getCredential());
             assertEquals(
                     NOTIFICATION_ID.toString(), credentialServiceReturnValue.getNotificationId());
-            verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
-            verify(mockProofJwtService).verifyProofJwt(mockProofJwt);
+            verify(mockAccessTokenService).verifyAccessToken(accessToken);
+            verify(mockProofJwtService).verifyProofJwt(proofJwt);
             verify(mockDynamoDbService, times(1)).getCredentialOffer(CREDENTIAL_IDENTIFIER);
             verify(mockDynamoDbService, times(1)).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
-            verify(mockHandler, times(1)).buildCredential(mockDocument, mockAccessProofJwtData);
+            verify(mockHandler, times(1)).buildCredential(any(CredentialBuildContext.class));
         }
     }
 
@@ -401,35 +402,25 @@ class CredentialServiceTest {
                     StatusListException {
 
         Document mockMdlDocument = getMockMobileDrivingLicenceDocument();
-        when(mockDynamoDbService.getCredentialOffer(anyString()))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockMdlDocument);
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(cachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockMdlDocument);
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockMdlHandler);
         when(mockExpiryCalculator.calculateExpiry(mockMdlDocument)).thenReturn(EXPIRY_TIME);
         when(mockIssueResponse.idx()).thenReturn(STATUS_LIST_INDEX);
         when(mockIssueResponse.uri()).thenReturn(STATUS_LIST_URI);
         when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(mockIssueResponse);
-        when(mockMdlHandler.buildCredential(
-                        mockMdlDocument,
-                        mockAccessProofJwtData,
-                        STATUS_LIST_INDEX,
-                        STATUS_LIST_URI))
-                .thenReturn(mockBuilderResult);
+        when(mockMdlHandler.buildCredential(any(CredentialBuildContext.class)))
+                .thenReturn(builderResult);
         try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
             mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
-            CredentialResponse result =
-                    credentialService.getCredential(mockAccessToken, mockProofJwt);
+            CredentialResponse result = credentialService.getCredential(accessToken, proofJwt);
 
-            assertEquals(mockCredentialJwt, result.getCredential());
+            assertEquals(credentialJwt, result.getCredential());
             assertEquals(NOTIFICATION_ID.toString(), result.getNotificationId());
             verify(mockStatusListClient).getIndex(EXPIRY_TIME);
-            verify(mockMdlHandler)
-                    .buildCredential(
-                            mockMdlDocument,
-                            mockAccessProofJwtData,
-                            STATUS_LIST_INDEX,
-                            STATUS_LIST_URI);
+            verify(mockMdlHandler, times(1)).buildCredential(any(CredentialBuildContext.class));
             ArgumentCaptor<StoredCredential> storedCredentialCaptor =
                     ArgumentCaptor.forClass(StoredCredential.class);
             verify(mockDynamoDbService).saveStoredCredential(storedCredentialCaptor.capture());
