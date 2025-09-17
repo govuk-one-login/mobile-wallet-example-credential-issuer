@@ -18,8 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MobileSecurityObjectFactoryTest {
@@ -28,6 +27,7 @@ class MobileSecurityObjectFactoryTest {
     @Mock private ValidityInfoFactory mockValidityInfoFactory;
     @Mock private COSEKeyFactory mockCoseKeyFactory;
     @Mock private ECPublicKey mockEcPublicKey;
+    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @Test
     void Should_CreateMobileSecurityObject() {
@@ -44,8 +44,9 @@ class MobileSecurityObjectFactoryTest {
         // Arrange: Prepare ValidityInfo
         Clock clock = Clock.fixed(Instant.ofEpochSecond(1750677223), ZoneId.systemDefault());
         Instant now = clock.instant();
-        ValidityInfo validityInfo = new ValidityInfo(now, now, now.plus(Duration.ofDays(365)));
-        when(mockValidityInfoFactory.build()).thenReturn(validityInfo);
+        ValidityInfo validityInfo =
+                new ValidityInfo(now, now, now.plus(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES)));
+        when(mockValidityInfoFactory.build(CREDENTIAL_TTL_MINUTES)).thenReturn(validityInfo);
 
         // Arrange: Prepare COSEKey
         Map<Integer, Object> coseKeyParams = new HashMap<>();
@@ -71,13 +72,14 @@ class MobileSecurityObjectFactoryTest {
         MobileSecurityObjectFactory factory =
                 new MobileSecurityObjectFactory(
                         mockValueDigestsFactory, mockValidityInfoFactory, mockCoseKeyFactory);
-        MobileSecurityObject result = factory.build(namespaces, mockEcPublicKey);
+        MobileSecurityObject result =
+                factory.build(namespaces, mockEcPublicKey, CREDENTIAL_TTL_MINUTES);
 
         // Assert
         assertEquals(expectedMso, result, "MobileSecurityObject should be constructed as expected");
         verify(mockValueDigestsFactory).createFromNamespaces(namespaces);
         verify(mockValueDigestsFactory).getDigestAlgorithm();
-        verify(mockValidityInfoFactory).build();
+        verify(mockValidityInfoFactory).build(43200);
         verify(mockCoseKeyFactory).fromECPublicKey(mockEcPublicKey);
     }
 }
