@@ -61,7 +61,7 @@ zyaulhhqnewCIQCmJ0kwBidqVzCOIx5H8CaEHUnTA/ULJGC2DDFzT7s54A==
 EOF
 
 # Upload root certificate to S3
-aws --endpoint-url=http://localhost:4566 s3 cp root-certificate.pem s3://certificates/6bb42872-f4ed-4d55-a937-b8ffb8760de4/certificate.pem --region eu-west-2
+aws --endpoint-url=http://localhost:4566 s3 cp root-certificate.pem s3://certificates/root/6bb42872-f4ed-4d55-a937-b8ffb8760de4/certificate.pem --region eu-west-2
 
 # Document signing certificate containing the public key from the mDoc signing key pair, signed by the root certificate
 cat <<EOF > document-signing-certificate.pem
@@ -80,4 +80,4 @@ FmibH8pIONDZjSI=
 EOF
 
 # Upload document signing certificate to S3
-aws --endpoint-url=http://localhost:4566 s3 cp document-signing-certificate.pem s3://certificates/1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4/certificate.pem --region eu-west-2
+aws --endpoint-url=http://localhost:4566 s3 cp document-signing-certificate.pem s3://certificates/sign/1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4/certificate.pem --region eu-west-2
