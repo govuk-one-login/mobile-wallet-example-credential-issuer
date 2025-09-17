@@ -13,28 +13,29 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidityInfoFactoryTest {
     private static final Instant FIXED_INSTANT = Instant.parse("2024-01-15T10:30:00Z");
+    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @Test
     void Should_CreateValidityInfoWithProvidedClock() {
         Clock fixedClock = Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC);
 
         ValidityInfoFactory factory = new ValidityInfoFactory(fixedClock);
-        ValidityInfo validityInfo = factory.build();
+        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_MINUTES);
 
         assertEquals(FIXED_INSTANT, validityInfo.signed(), "signed should be current time");
         assertEquals(FIXED_INSTANT, validityInfo.validFrom(), "validFrom should be current time");
         assertEquals(
-                FIXED_INSTANT.plus(Duration.ofDays(365)),
+                FIXED_INSTANT.plus(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES)),
                 validityInfo.validUntil(),
-                "validUntil should be 365 days later");
+                "validUntil should be 30 days later");
     }
 
     @Test
     void Should_UseSystemDefaultZoneClock_When_NoClockPassedToConstructor() {
         Instant beforeCreation = Instant.now();
 
-        ValidityInfoFactory factory = new ValidityInfoFactory();
-        ValidityInfo validityInfo = factory.build();
+        ValidityInfoFactory factory = new ValidityInfoFactory(Clock.systemDefaultZone());
+        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_MINUTES);
 
         assertNotNull(validityInfo);
         Instant afterCreation = Instant.now();
@@ -45,10 +46,10 @@ class ValidityInfoFactoryTest {
         assertTrue(
                 validityInfo.validFrom().isBefore(afterCreation)
                         || validityInfo.validFrom().equals(afterCreation));
-        // Verify the duration is exactly 365 days
+        // Verify the duration is exactly 30 days
         Duration actualDuration =
                 Duration.between(validityInfo.validFrom(), validityInfo.validUntil());
 
-        assertEquals(Duration.ofDays(365), actualDuration);
+        assertEquals(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES), actualDuration);
     }
 }

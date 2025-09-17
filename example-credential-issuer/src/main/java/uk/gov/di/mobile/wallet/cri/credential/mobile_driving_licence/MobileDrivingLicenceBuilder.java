@@ -49,7 +49,9 @@ public class MobileDrivingLicenceBuilder {
             DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
-        IssuerSigned issuerSigned = issuerSignedFactory.build(namespaces, publicKey);
+        IssuerSigned issuerSigned =
+                issuerSignedFactory.build(
+                        namespaces, publicKey, drivingLicenceDocument.getCredentialTtlMinutes());
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
                 .withoutPadding()
