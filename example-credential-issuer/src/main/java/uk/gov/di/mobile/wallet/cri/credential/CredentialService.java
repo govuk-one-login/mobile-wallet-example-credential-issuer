@@ -139,10 +139,12 @@ public class CredentialService {
     }
 
     private String getDocumentPrimaryIdentifier(Document document) {
-        DrivingLicenceDocument drivingLicenceDocument =
-                mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-        return document.getVcType().equals("org.iso.18013.5.1.mDL")
-                ? drivingLicenceDocument.getDocumentNumber()
-                : document.getDocumentId();
+        if (document.getVcType().equals("org.iso.18013.5.1.mDL")) {
+            DrivingLicenceDocument drivingLicenceDocument =
+                    mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+            return drivingLicenceDocument.getDocumentNumber();
+        }
+
+        return document.getDocumentId();
     }
 }
