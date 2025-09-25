@@ -1,8 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
@@ -27,6 +31,10 @@ public class CredentialService {
     private final CredentialExpiryCalculator credentialExpiryCalculator;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+    private static final ObjectMapper mapper =
+            new ObjectMapper()
+                    .registerModule(new JavaTimeModule())
+                    .registerModule(new Jdk8Module());
 
     public CredentialService(
             DataStore dataStore,
@@ -90,12 +98,18 @@ public class CredentialService {
 
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
-            dataStore.saveStoredCredential(
-                    new StoredCredential(
-                            credentialOffer.getCredentialIdentifier(),
-                            notificationId,
-                            credentialOffer.getWalletSubjectId(),
-                            expiry));
+            var storedCredential =
+                    StoredCredential.builder()
+                            .credentialIdentifier(credentialOffer.getCredentialIdentifier())
+                            .notificationId(notificationId)
+                            .walletSubjectId(credentialOffer.getWalletSubjectId())
+                            .timeToLive(expiry)
+                            .drivingLicenceNumber(
+                                    document.getVcType().equals("org.iso.18013.5.1.mDL")
+                                            ? getDrivingLicenceNumber(document)
+                                            : null);
+
+            dataStore.saveStoredCredential(storedCredential.build());
 
             return new CredentialResponse(credential, notificationId);
         } catch (DataStoreException
@@ -125,5 +139,11 @@ public class CredentialService {
 
     protected Logger getLogger() {
         return LOGGER;
+    }
+
+    private String getDrivingLicenceNumber(Document document) {
+        DrivingLicenceDocument drivingLicenceDocument =
+                mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+        return drivingLicenceDocument.getDocumentNumber();
     }
 }

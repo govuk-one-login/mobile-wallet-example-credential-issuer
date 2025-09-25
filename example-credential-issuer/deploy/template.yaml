@@ -674,6 +674,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: credentialIdentifier
           AttributeType: S
+        - AttributeName: drivingLicenceNumber
+          AttributeType: S
       BillingMode: PAY_PER_REQUEST
       TableName: !Sub "${AWS::StackName}-credential_store"
       KeySchema:
