@@ -83,7 +83,8 @@ class NotificationServiceTest {
                         CREDENTIAL_IDENTIFIER,
                         NOTIFICATION_ID,
                         "not_the_same_wallet_subject_id",
-                        525600L);
+                        525600L,
+                        null);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         AccessTokenValidationException exception =
@@ -118,7 +119,7 @@ class NotificationServiceTest {
 
         StoredCredential mockStoredCredential =
                 new StoredCredential(
-                        CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L);
+                        CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L, null);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
@@ -144,7 +145,7 @@ class NotificationServiceTest {
                     InvalidNotificationIdException {
         StoredCredential mockStoredCredential =
                 new StoredCredential(
-                        CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L);
+                        CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L, null);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
         notificationService.processNotification(accessToken, requestBody);
 
