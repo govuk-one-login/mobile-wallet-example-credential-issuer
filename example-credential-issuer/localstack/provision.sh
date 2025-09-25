@@ -15,16 +15,16 @@ aws --endpoint-url=http://localhost:4566 dynamodb update-time-to-live --table-na
 
 aws --endpoint-url=http://localhost:4566 dynamodb create-table \
     --table-name $CREDENTIAL_TABLE_NAME \
-    --attribute-definitions AttributeName=credentialIdentifier,AttributeType=S AttributeName=drivingLicenceNumber,AttributeType=S \
+    --attribute-definitions AttributeName=credentialIdentifier,AttributeType=S AttributeName=documentPrimaryIdentifier,AttributeType=S \
     --key-schema AttributeName=credentialIdentifier,KeyType=HASH \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
     --region eu-west-2 \
     --global-secondary-indexes \
             "[
                 {
-                    \"IndexName\": \"DrivingLicenceNumberIndex\",
+                    \"IndexName\": \"documentPrimaryIdentifierIndex\",
                     \"KeySchema\": [
-                        {\"AttributeName\":\"drivingLicenceNumber\",\"KeyType\":\"HASH\"}
+                        {\"AttributeName\":\"documentPrimaryIdentifier\",\"KeyType\":\"HASH\"}
                     ],
                     \"Projection\": {
                         \"ProjectionType\":\"ALL\"

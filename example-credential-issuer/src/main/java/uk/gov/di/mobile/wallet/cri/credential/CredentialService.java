@@ -104,10 +104,7 @@ public class CredentialService {
                             .notificationId(notificationId)
                             .walletSubjectId(credentialOffer.getWalletSubjectId())
                             .timeToLive(expiry)
-                            .drivingLicenceNumber(
-                                    document.getVcType().equals("org.iso.18013.5.1.mDL")
-                                            ? getDrivingLicenceNumber(document)
-                                            : null);
+                            .documentPrimaryIdentifier(getDocumentPrimaryIdentifier(document));
 
             dataStore.saveStoredCredential(storedCredential.build());
 
@@ -141,9 +138,11 @@ public class CredentialService {
         return LOGGER;
     }
 
-    private String getDrivingLicenceNumber(Document document) {
+    private String getDocumentPrimaryIdentifier(Document document) {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-        return drivingLicenceDocument.getDocumentNumber();
+        return document.getVcType().equals("org.iso.18013.5.1.mDL")
+                ? drivingLicenceDocument.getDocumentNumber()
+                : document.getDocumentId();
     }
 }

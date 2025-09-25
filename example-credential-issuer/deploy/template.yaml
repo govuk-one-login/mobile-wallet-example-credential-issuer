@@ -674,7 +674,7 @@ Resources:
       AttributeDefinitions:
         - AttributeName: credentialIdentifier
           AttributeType: S
-        - AttributeName: drivingLicenceNumber
+        - AttributeName: documentPrimaryIdentifier
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
       TableName: !Sub "${AWS::StackName}-credential_store"
@@ -685,9 +685,9 @@ Resources:
         AttributeName: timeToLive
         Enabled: true
       GlobalSecondaryIndexes:
-        - IndexName: DrivingLicenceNumberIndex
+        - IndexName: documentPrimaryIdentifierIndex
           KeySchema:
-            - AttributeName: drivingLicenceNumber
+            - AttributeName: documentPrimaryIdentifier
               KeyType: HASH
           Projection:
             ProjectionType: ALL

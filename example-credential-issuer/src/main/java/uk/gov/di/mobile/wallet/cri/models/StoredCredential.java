@@ -18,7 +18,7 @@ public class StoredCredential {
     String notificationId;
     String walletSubjectId;
     Long timeToLive;
-    String drivingLicenceNumber;
+    String documentPrimaryIdentifier;
 
     public StoredCredential() {
         // Empty constructor needed for dynamoDb deserialization
@@ -29,12 +29,12 @@ public class StoredCredential {
             String notificationId,
             String walletSubjectId,
             Long timeToLive,
-            String drivingLicenceNumber) {
+            String documentPrimaryIdentifier) {
         this.credentialIdentifier = credentialIdentifier;
         this.notificationId = notificationId;
         this.walletSubjectId = walletSubjectId;
         this.timeToLive = timeToLive;
-        this.drivingLicenceNumber = drivingLicenceNumber;
+        this.documentPrimaryIdentifier = documentPrimaryIdentifier;
     }
 
     @DynamoDbPartitionKey
@@ -42,9 +42,9 @@ public class StoredCredential {
         return credentialIdentifier;
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = "DrivingLicenceNumberIndex")
-    @DynamoDbAttribute("drivingLicenceNumber")
-    public String getDrivingLicenceNumber() {
-        return drivingLicenceNumber;
+    @DynamoDbSecondaryPartitionKey(indexNames = "documentPrimaryIdentifierIndex")
+    @DynamoDbAttribute("documentPrimaryIdentifier")
+    public String getDocumentPrimaryIdentifier() {
+        return documentPrimaryIdentifier;
     }
 }
