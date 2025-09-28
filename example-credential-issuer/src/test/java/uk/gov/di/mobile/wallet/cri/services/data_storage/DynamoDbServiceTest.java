@@ -29,6 +29,8 @@ class DynamoDbServiceTest {
 
     private static final String PARTITION_KEY = "4a1b1b18-b495-45ac-b0ce-73848bd32b70";
     private static final Long TTL = Instant.now().plusSeconds(300).getEpochSecond();
+    private static final String DOCUMENT_PRIMARY_IDENTIFIER =
+            "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
 
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
     @Mock private DynamoDbTable<CachedCredentialOffer> mockCachedCredentialOfferTable;
@@ -60,8 +62,8 @@ class DynamoDbServiceTest {
                         "4a1b1b18-b495-45ac-b0ce-73848bd32b70",
                         "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
                         "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
-                        525600L,
-                        null);
+                        43200L,
+                        DOCUMENT_PRIMARY_IDENTIFIER);
         dynamoDbService =
                 new DynamoDbService(
                         mockDynamoDbEnhancedClient,
@@ -161,9 +163,12 @@ class DynamoDbServiceTest {
         assertEquals(
                 PARTITION_KEY, storedCredentialArgumentCaptor.getValue().getCredentialIdentifier());
         assertEquals(
+                DOCUMENT_PRIMARY_IDENTIFIER,
+                storedCredentialArgumentCaptor.getValue().getDocumentPrimaryIdentifier());
+        assertEquals(
                 "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
                 storedCredentialArgumentCaptor.getValue().getNotificationId());
-        assertEquals(525600L, storedCredentialArgumentCaptor.getValue().getTimeToLive());
+        assertEquals(43200L, storedCredentialArgumentCaptor.getValue().getTimeToLive());
     }
 
     @Test
