@@ -121,7 +121,11 @@ class NotificationServiceTest {
 
         StoredCredential mockStoredCredential =
                 new StoredCredential(
-                        CREDENTIAL_IDENTIFIER, NOTIFICATION_ID, WALLET_SUBJECT_ID, 525600L, null);
+                        CREDENTIAL_IDENTIFIER,
+                        NOTIFICATION_ID,
+                        WALLET_SUBJECT_ID,
+                        43200L,
+                        DOCUMENT_PRIMARY_IDENTIFIER);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
