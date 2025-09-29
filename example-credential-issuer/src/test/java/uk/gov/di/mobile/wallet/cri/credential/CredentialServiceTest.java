@@ -219,7 +219,9 @@ class CredentialServiceTest {
         CredentialResponse credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-        assertEquals(mockCredentialJwt, credentialServiceReturnValue.getCredential());
+        assertEquals(
+                mockCredentialJwt,
+                credentialServiceReturnValue.getCredentials().get(0).getCredentialObj());
         assertEquals("3fwe98js", NOTIFICATION_ID);
         verify(mockAccessTokenService).verifyAccessToken(mockAccessToken);
         verify(mockProofJwtService).verifyProofJwt(mockProofJwt);

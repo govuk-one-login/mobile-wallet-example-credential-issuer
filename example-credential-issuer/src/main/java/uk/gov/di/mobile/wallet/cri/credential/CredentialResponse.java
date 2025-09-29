@@ -9,7 +9,6 @@ import java.util.List;
 
 @Getter
 public class CredentialResponse {
-    private final String credential;
     private final ArrayList<Credential> credentials;
 
     @JsonProperty("notification_id")
@@ -19,7 +18,6 @@ public class CredentialResponse {
     public CredentialResponse(
             @JsonProperty("credential") String credential,
             @JsonProperty("notification_id") String notificationId) {
-        this.credential = credential;
         this.notificationId = notificationId;
         this.credentials = new ArrayList<>(List.of(new Credential(credential)));
     }
