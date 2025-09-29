@@ -219,7 +219,6 @@ class CredentialServiceTest {
         CredentialResponse credentialServiceReturnValue =
                 credentialService.getCredential(mockAccessToken, mockProofJwt);
 
-        // update credential response return value to be credential object
         assertEquals(
                 mockCredentialJwt,
                 credentialServiceReturnValue.getCredentials().get(0).getCredentialObj());
