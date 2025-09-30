@@ -1,8 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
@@ -27,6 +31,10 @@ public class CredentialService {
     private final CredentialExpiryCalculator credentialExpiryCalculator;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+    private static final ObjectMapper mapper =
+            new ObjectMapper()
+                    .registerModule(new JavaTimeModule())
+                    .registerModule(new Jdk8Module());
 
     public CredentialService(
             DataStore dataStore,
@@ -90,12 +98,15 @@ public class CredentialService {
 
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
-            dataStore.saveStoredCredential(
-                    new StoredCredential(
-                            credentialOffer.getCredentialIdentifier(),
-                            notificationId,
-                            credentialOffer.getWalletSubjectId(),
-                            expiry));
+            var storedCredential =
+                    StoredCredential.builder()
+                            .credentialIdentifier(credentialOffer.getCredentialIdentifier())
+                            .notificationId(notificationId)
+                            .walletSubjectId(credentialOffer.getWalletSubjectId())
+                            .timeToLive(expiry)
+                            .documentPrimaryIdentifier(getDocumentPrimaryIdentifier(document));
+
+            dataStore.saveStoredCredential(storedCredential.build());
 
             return new CredentialResponse(credential, notificationId);
         } catch (DataStoreException
@@ -125,5 +136,25 @@ public class CredentialService {
 
     protected Logger getLogger() {
         return LOGGER;
+    }
+
+    private String getDocumentPrimaryIdentifier(Document document) {
+        if (document.getVcType().equals("org.iso.18013.5.1.mDL")) {
+            DrivingLicenceDocument drivingLicenceDocument =
+                    mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+            return drivingLicenceDocument.getDocumentNumber();
+        }
+
+        /* For veterans card, national insurance, and DBS credentials, this value
+        should be set to the service number, NINo, and DBS certificate ID respectively.
+
+        At the moment documentId is a UUID for the document in the document
+        database table rather than the service number, NINo or DBS certificate ID.
+        We are accepting the existing documentId as the primaryIdentifier for non-mDL
+        credentials because it is not currently being read. Future work will set
+        documentId to the correct value within the Document Builder.
+        See https://govukverify.atlassian.net/browse/DCMAW-15868 */
+
+        return document.getDocumentId();
     }
 }
