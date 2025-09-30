@@ -145,12 +145,15 @@ public class CredentialService {
             return drivingLicenceDocument.getDocumentNumber();
         }
 
-        /* for veterans card, national insurance, and DBS
-        this value should be set to the service number, NINo. and DBS certificate ID.
-        At the moment DocumentId is a UUID for that item in the document table
-        instead of being the value above. We are accepting the existing DocumentId as the
-        PrimaryIdentifier for non mDL credentials because it will never be read at the moment.
-        Future work will set DocumentId to the desired value within the Document Builder */
+        /* For veterans card, national insurance, and DBS credentials, this value
+        should be set to the service number, NINo, and DBS certificate ID respectively.
+
+        At the moment documentId is a UUID for the document in the document
+        database table rather than the service number, NINo or DBS certificate ID.
+        We are accepting the existing documentId as the primaryIdentifier for non-mDL
+        credentials because it is not currently being read. Future work will set
+        documentId to the correct value within the Document Builder.
+        See https://govukverify.atlassian.net/browse/DCMAW-15868 */
 
         return document.getDocumentId();
     }
