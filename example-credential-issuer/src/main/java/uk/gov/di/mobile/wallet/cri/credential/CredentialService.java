@@ -94,49 +94,37 @@ public class CredentialService {
             // Delete credential offer after redeeming it to prevent replay
             dataStore.deleteCredentialOffer(credentialOfferId);
 
+            CredentialType credentialType = CredentialType.fromType(vcType);
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
-            CredentialType credentialType = CredentialType.fromType(vcType);
-            CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
-
-            Integer credentialStatusIndex = null;
-            String credentialStatusUri = null;
-            BuildCredentialResult result;
+            StatusList statusList;
             if (credentialType == MOBILE_DRIVING_LICENCE) {
                 StatusListClient.IssueResponse issueResponse = statusListClient.getIndex(expiry);
-                credentialStatusIndex = issueResponse.idx();
-                credentialStatusUri = issueResponse.uri();
-                result =
-                        handler.buildCredential(
-                                document,
-                                proofJwtData,
-                                Optional.of(credentialStatusIndex),
-                                Optional.of(credentialStatusUri));
+                statusList =
+                        StatusList.builder()
+                                .idx(issueResponse.idx())
+                                .uri(issueResponse.uri())
+                                .build();
             } else {
-                result =
-                        handler.buildCredential(
-                                document, proofJwtData, Optional.empty(), Optional.empty());
+                statusList = null;
             }
 
-          var storedCredential =
-                  StoredCredential.builder()
-                          .credentialIdentifier(credentialOffer.getCredentialIdentifier())
-                          .notificationId(notificationId)
-                          .walletSubjectId(credentialOffer.getWalletSubjectId())
-                          .timeToLive(expiry)
-                          .documentPrimaryIdentifier(getDocumentPrimaryIdentifier(document));
+            CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
+            BuildCredentialResult result =
+                    handler.buildCredential(
+                            document, proofJwtData, Optional.ofNullable(statusList));
 
-          dataStore.saveStoredCredential(storedCredential.build());
+            StoredCredential storedCredential =
+                    StoredCredential.builder()
+                            .credentialIdentifier(credentialOffer.getCredentialIdentifier())
+                            .notificationId(notificationId)
+                            .walletSubjectId(credentialOffer.getWalletSubjectId())
+                            .timeToLive(expiry)
+                            .statusList(statusList)
+                            .documentPrimaryIdentifier(getDocumentPrimaryIdentifier(document))
+                            .build();
 
-            dataStore.saveStoredCredential(
-                    new StoredCredential(
-                            credentialOffer.getCredentialIdentifier(),
-                            notificationId,
-                            credentialOffer.getWalletSubjectId(),
-                            result.documentNumber(),
-                            credentialStatusIndex,
-                            credentialStatusUri,
-                            expiry));
+            dataStore.saveStoredCredential(storedCredential);
 
             return new CredentialResponse(result.credential(), notificationId);
         } catch (DataStoreException

@@ -7,6 +7,7 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttri
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
+import uk.gov.di.mobile.wallet.cri.credential.StatusList;
 
 @Getter
 @Setter
@@ -17,9 +18,7 @@ public class StoredCredential {
     String credentialIdentifier;
     String notificationId;
     String walletSubjectId;
-    String documentNumber;
-    Integer statusListIndex;
-    String statusListUri;
+    StatusList statusList;
     Long timeToLive;
     String documentPrimaryIdentifier;
 
@@ -31,17 +30,13 @@ public class StoredCredential {
             String credentialIdentifier,
             String notificationId,
             String walletSubjectId,
-            String documentNumber,
-            Integer statusListIndex,
-            String statusListUri,
+            StatusList statusList,
             Long timeToLive,
             String documentPrimaryIdentifier) {
         this.credentialIdentifier = credentialIdentifier;
         this.notificationId = notificationId;
         this.walletSubjectId = walletSubjectId;
-        this.documentNumber = documentNumber;
-        this.statusListIndex = statusListIndex;
-        this.statusListUri = statusListUri;
+        this.statusList = statusList;
         this.timeToLive = timeToLive;
         this.documentPrimaryIdentifier = documentPrimaryIdentifier;
     }

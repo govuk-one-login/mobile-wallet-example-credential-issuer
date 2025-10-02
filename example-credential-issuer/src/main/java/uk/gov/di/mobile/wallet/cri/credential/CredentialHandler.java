@@ -10,7 +10,6 @@ public interface CredentialHandler {
     BuildCredentialResult buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
-            Optional<Integer> statusListIndex,
-            Optional<String> statusListUri)
+            Optional<StatusList> statusList)
             throws SigningException, ObjectStoreException, CertificateException;
 }
