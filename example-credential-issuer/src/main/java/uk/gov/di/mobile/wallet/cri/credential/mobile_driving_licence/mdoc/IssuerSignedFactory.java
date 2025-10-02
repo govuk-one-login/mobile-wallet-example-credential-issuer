@@ -34,11 +34,19 @@ public class IssuerSignedFactory {
     }
 
     public IssuerSigned build(
-            Namespaces namespaces, ECPublicKey publicKey, int statusListIndex, String statusListUri, long credentialTtlMinutes)
+            Namespaces namespaces,
+            ECPublicKey publicKey,
+            int statusListIndex,
+            String statusListUri,
+            long credentialTtlMinutes)
             throws MDLException, SigningException, CertificateException, ObjectStoreException {
         MobileSecurityObject mobileSecurityObject =
                 mobileSecurityObjectFactory.build(
-                        namespaces, publicKey, statusListIndex, statusListUri, credentialTtlMinutes);
+                        namespaces,
+                        publicKey,
+                        statusListIndex,
+                        statusListUri,
+                        credentialTtlMinutes);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
         String certificateId = ArnUtil.extractKeyId(documentSigningKey1Arn);
