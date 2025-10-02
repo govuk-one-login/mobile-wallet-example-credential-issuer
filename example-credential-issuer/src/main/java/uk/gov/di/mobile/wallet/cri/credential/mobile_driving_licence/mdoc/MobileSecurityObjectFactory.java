@@ -77,10 +77,10 @@ public class MobileSecurityObjectFactory {
      * @throws IllegalArgumentException If the public key does not use the P-256 curve.
      */
     public MobileSecurityObject build(
-            Namespaces nameSpaces, ECPublicKey publicKey, int statusListIndex, String statusListUri)
+            Namespaces nameSpaces, ECPublicKey publicKey, int statusListIndex, String statusListUri, long credentialTtlMinutes)
             throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
-        ValidityInfo validityInfo = validityInfoFactory.build();
+        ValidityInfo validityInfo = validityInfoFactory.build(credentialTtlMinutes);
         StatusList statusList = new StatusList(statusListIndex, statusListUri);
         Status status = new Status(statusList);
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);

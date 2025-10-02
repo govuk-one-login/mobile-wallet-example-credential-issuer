@@ -54,7 +54,7 @@ public class MobileDrivingLicenceBuilder {
         Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
         IssuerSigned issuerSigned =
                 issuerSignedFactory.build(
-                        namespaces, publicKey, credentialStatusIndex, credentialStatusUri);
+                        namespaces, publicKey, credentialStatusIndex, credentialStatusUri, drivingLicenceDocument.getCredentialTtlMinutes());
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
                 .withoutPadding()

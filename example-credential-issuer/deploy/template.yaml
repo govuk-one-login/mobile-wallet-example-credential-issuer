@@ -675,6 +675,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: credentialIdentifier
           AttributeType: S
+        - AttributeName: documentPrimaryIdentifier
+          AttributeType: S
       BillingMode: PAY_PER_REQUEST
       TableName: !Sub "${AWS::StackName}-credential_store"
       KeySchema:
@@ -683,6 +685,13 @@ Resources:
       TimeToLiveSpecification:
         AttributeName: timeToLive
         Enabled: true
+      GlobalSecondaryIndexes:
+        - IndexName: documentPrimaryIdentifierIndex
+          KeySchema:
+            - AttributeName: documentPrimaryIdentifier
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
       SSESpecification:

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -22,6 +23,7 @@ public class DrivingPrivilege {
     private String vehicleCategoryCode;
     private Optional<LocalDate> issueDate;
     private Optional<LocalDate> expiryDate;
+    private List<Code> codes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DrivingPrivilege.class);
 
@@ -29,11 +31,13 @@ public class DrivingPrivilege {
     public DrivingPrivilege(
             @JsonProperty("vehicle_category_code") String vehicleCategoryCode,
             @JsonProperty("issue_date") String issueDate,
-            @JsonProperty("expiry_date") String expiryDate) {
+            @JsonProperty("expiry_date") String expiryDate,
+            @JsonProperty("codes") List<Code> codes) {
         this.vehicleCategoryCode =
                 Objects.requireNonNull(vehicleCategoryCode, "vehicle_category_code is required");
         this.issueDate = Optional.ofNullable(parseDate(issueDate));
         this.expiryDate = Optional.ofNullable(parseDate(expiryDate));
+        this.codes = codes;
     }
 
     private LocalDate parseDate(String dateString) {

@@ -28,6 +28,8 @@ import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -75,7 +77,7 @@ class CredentialServiceTest {
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String DID_KEY =
             "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==";
-    public static final String DOCUMENT_NUMBER = "doc123";
+    public static final String DOCUMENT_NUMBER = "EDWAR740288SE5RO";
     public static final UUID NOTIFICATION_ID =
             UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
     private static final Integer STATUS_LIST_INDEX = 42;
@@ -83,6 +85,7 @@ class CredentialServiceTest {
     private static final long EXPIRY_TIME = 1234567890L;
     private static final String MDL_VC_TYPE = "org.iso.18013.5.1.mDL";
     private static final String SOCIAL_SECURITY_VC_TYPE = "SocialSecurityCredential";
+  private static final String EXPECTED_MDL_CREDENTIAL = "signed-mdoc-credential-string";
 
     @BeforeEach
     void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
@@ -444,6 +447,69 @@ class CredentialServiceTest {
         }
     }
 
+    @Test
+    void should_SaveDocumentIdAsDocumentPrimaryIdentifier_When_VcTypeIsNotMdl()
+            throws DocumentStoreException,
+                    DataStoreException,
+                    ObjectStoreException,
+                    NonceValidationException,
+                    CredentialOfferException,
+                    AccessTokenValidationException,
+                    CredentialServiceException,
+                    ProofJwtValidationException,
+                    SigningException,
+                    CertificateException {
+        Document mockDocument = getMockSocialSecurityDocument(DOCUMENT_ID);
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockDocument);
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler("SocialSecurityCredential"))
+                .thenReturn(mockHandler);
+        when(mockHandler.buildCredential(any(), any())).thenReturn(mockCredentialJwt);
+
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+        ArgumentCaptor<StoredCredential> storedCredentialCaptor =
+                ArgumentCaptor.forClass(StoredCredential.class);
+        verify(mockDynamoDbService, times(1))
+                .saveStoredCredential(storedCredentialCaptor.capture());
+        StoredCredential storedCredential = storedCredentialCaptor.getValue();
+        assertEquals(DOCUMENT_ID, storedCredential.getDocumentPrimaryIdentifier());
+    }
+
+    @Test
+    void should_SaveDocumentNumberAsDocumentPrimaryIdentifier_When_VcTypeIsMdl()
+            throws DocumentStoreException,
+                    DataStoreException,
+                    ObjectStoreException,
+                    NonceValidationException,
+                    CredentialOfferException,
+                    AccessTokenValidationException,
+                    CredentialServiceException,
+                    ProofJwtValidationException,
+                    SigningException,
+                    CertificateException {
+        Document mockDocument = getMockMdlDocument(DOCUMENT_ID);
+        when(mockDocumentStoreClient.getDocument(anyString())).thenReturn(mockDocument);
+        when(mockDynamoDbService.getCredentialOffer(anyString()))
+                .thenReturn(mockCachedCredentialOffer);
+
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler("org.iso.18013.5.1.mDL"))
+                .thenReturn(mockHandler);
+        when(mockHandler.buildCredential(any(), any())).thenReturn(EXPECTED_MDL_CREDENTIAL);
+
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+        ArgumentCaptor<StoredCredential> storedCredentialCaptor =
+                ArgumentCaptor.forClass(StoredCredential.class);
+        verify(mockDynamoDbService, times(1))
+                .saveStoredCredential(storedCredentialCaptor.capture());
+        StoredCredential storedCredential = storedCredentialCaptor.getValue();
+        assertEquals(DOCUMENT_NUMBER, storedCredential.getDocumentPrimaryIdentifier());
+    }
+
     private CachedCredentialOffer getMockCredentialOfferCacheItem(
             String walletSubjectId, String expiresInSeconds) {
         Long ttl = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
@@ -468,17 +534,17 @@ class CredentialServiceTest {
         data.put("givenName", "Sarah Elizabeth");
         data.put("nino", "QQ123456C");
         data.put("title", "Miss");
-        data.put("credentialTtlMinutes", "525600");
+      data.put("credentialTtlMinutes", "43200");
         return new Document(DOCUMENT_ID, data, SOCIAL_SECURITY_VC_TYPE);
     }
 
     private static Document getMockMobileDrivingLicenceDocument() {
         HashMap<String, Object> data = new HashMap<>();
-        data.put("familyName", "Smith");
-        data.put("givenName", "John");
-        data.put("licenceNumber", "ABC123456");
-        data.put("dateOfBirth", "1990-01-01");
-        data.put("credentialTtlMinutes", "525600");
+        data.put("family_name", "Smith");
+        data.put("given_name", "John");
+      data.put("document_number", DOCUMENT_NUMBER);
+      data.put("birth_date", "24-05-1985");
+      data.put("credentialTtlMinutes", 43200L);
         return new Document(DOCUMENT_ID, data, MDL_VC_TYPE);
     }
 }

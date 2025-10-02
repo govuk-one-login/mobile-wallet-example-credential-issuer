@@ -39,6 +39,8 @@ class NotificationServiceTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String NOTIFICATION_ID = "77368ca6-877b-4208-a397-99f1df890400";
+    private static final String DOCUMENT_PRIMARY_IDENTIFIER =
+            "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
 
     @Mock private DynamoDbService mockDynamoDbService;
     @Mock private AccessTokenService mockAccessTokenService;
@@ -86,7 +88,8 @@ class NotificationServiceTest {
                         "testDocumentNumber",
                         0,
                         "https://test-status-list.gov.uk/t/3B0F3BD087A7",
-                        525600L);
+                        525600L,
+                        DOCUMENT_PRIMARY_IDENTIFIER);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         AccessTokenValidationException exception =
@@ -127,7 +130,8 @@ class NotificationServiceTest {
                         "testDocumentNumber",
                         0,
                         "https://test-status-list.gov.uk/t/3B0F3BD087A7",
-                        525600L);
+                        525600L,
+                        DOCUMENT_PRIMARY_IDENTIFIER);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
@@ -159,7 +163,8 @@ class NotificationServiceTest {
                         "testDocumentNumber",
                         0,
                         "https://test-status-list.gov.uk/t/3B0F3BD087A7",
-                        525600L);
+                        525600L,
+                        DOCUMENT_PRIMARY_IDENTIFIER);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
         notificationService.processNotification(accessToken, requestBody);
 

@@ -269,7 +269,6 @@ class CredentialResourceTest {
         assertThat(
                 credentialResponse.getCredentials().get(0).getCredentialObj(),
                 is(EXPECTED_CREDENTIAL_JWT));
-        assertThat(credentialResponse.getCredential(), is(EXPECTED_CREDENTIAL_JWT));
         assertThat(credentialResponse.getNotificationId(), is(EXPECTED_NOTIFICATION_ID));
     }
 }
