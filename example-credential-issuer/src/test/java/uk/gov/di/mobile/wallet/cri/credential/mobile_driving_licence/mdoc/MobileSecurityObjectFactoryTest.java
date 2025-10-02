@@ -81,7 +81,8 @@ class MobileSecurityObjectFactoryTest {
         MobileSecurityObjectFactory factory =
                 new MobileSecurityObjectFactory(
                         mockValueDigestsFactory, mockValidityInfoFactory, mockCoseKeyFactory);
-        MobileSecurityObject result = factory.build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
+        MobileSecurityObject result =
+                factory.build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
 
         // Assert
         assertEquals(expectedMso, result, "MobileSecurityObject should be constructed as expected");

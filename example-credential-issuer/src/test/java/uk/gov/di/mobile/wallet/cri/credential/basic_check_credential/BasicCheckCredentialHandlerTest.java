@@ -12,10 +12,12 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusList;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,6 +44,7 @@ class BasicCheckCredentialHandlerTest {
     private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
+    private static final Optional<StatusList> STATUS_LIST = Optional.empty();
 
     @BeforeEach
     void setUp() {
@@ -74,7 +77,8 @@ class BasicCheckCredentialHandlerTest {
                                             mockBasicCheckDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
-            BuildCredentialResult result = spyHandler.buildCredential(mockDocument, mockProofData);
+            BuildCredentialResult result =
+                    spyHandler.buildCredential(mockDocument, mockProofData, STATUS_LIST);
 
             assertEquals(EXPECTED_CREDENTIAL, result.credential());
             assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentNumber());
@@ -115,7 +119,9 @@ class BasicCheckCredentialHandlerTest {
             SigningException thrown =
                     assertThrows(
                             SigningException.class,
-                            () -> spyHandler.buildCredential(mockDocument, mockProofData));
+                            () ->
+                                    spyHandler.buildCredential(
+                                            mockDocument, mockProofData, STATUS_LIST));
             assertEquals("Some signing error", thrown.getMessage());
         }
     }
