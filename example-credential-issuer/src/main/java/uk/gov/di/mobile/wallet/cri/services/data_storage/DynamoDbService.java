@@ -14,31 +14,35 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import java.net.URI;
 
 public class DynamoDbService implements DataStore {
-    private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
     private final DynamoDbTable<CachedCredentialOffer> cachedCredentialOfferTable;
     private final DynamoDbTable<StoredCredential> storedCredentialTable;
 
     public DynamoDbService(
             DynamoDbEnhancedClient dynamoDbEnhancedClient,
-            String cachedCredentialOfferTable,
-            String storedCredentialTable) {
-        this.dynamoDbEnhancedClient = dynamoDbEnhancedClient;
+            String cachedCredentialOfferTableName,
+            String storedCredentialTableName) {
         this.cachedCredentialOfferTable =
-                getTable(CachedCredentialOffer.class, cachedCredentialOfferTable);
-        this.storedCredentialTable = getTable(StoredCredential.class, storedCredentialTable);
+                getTable(
+                        dynamoDbEnhancedClient,
+                        CachedCredentialOffer.class,
+                        cachedCredentialOfferTableName);
+        this.storedCredentialTable =
+                getTable(dynamoDbEnhancedClient, StoredCredential.class, storedCredentialTableName);
     }
 
-    private <T> DynamoDbTable<T> getTable(Class<T> beanClass, String tableName) {
-        return dynamoDbEnhancedClient.table(tableName, TableSchema.fromBean(beanClass));
+    private static <T> DynamoDbTable<T> getTable(
+            DynamoDbEnhancedClient client, Class<T> beanClass, String tableName) {
+        return client.table(tableName, TableSchema.fromBean(beanClass));
     }
 
     public static DynamoDbEnhancedClient getClient(ConfigurationService configurationService) {
-        DynamoDbClient client;
-        if (configurationService.getEnvironment().equals("local")) {
-            client = getLocalClient(configurationService);
-        } else {
-            client = DynamoDbClient.builder().httpClient(UrlConnectionHttpClient.create()).build();
-        }
+        DynamoDbClient client =
+                configurationService.getEnvironment().equals("local")
+                        ? getLocalClient(configurationService)
+                        : DynamoDbClient.builder()
+                                .httpClient(UrlConnectionHttpClient.create())
+                                .build();
+
         return DynamoDbEnhancedClient.builder().dynamoDbClient(client).build();
     }
 
@@ -64,7 +68,8 @@ public class DynamoDbService implements DataStore {
     public CachedCredentialOffer getCredentialOffer(String partitionValue)
             throws DataStoreException {
         try {
-            return getItemByKey(Key.builder().partitionValue(partitionValue).build());
+            Key key = Key.builder().partitionValue(partitionValue).build();
+            return cachedCredentialOfferTable.getItem(key);
         } catch (Exception exception) {
             throw new DataStoreException("Error fetching credential offer", exception);
         }
@@ -85,24 +90,17 @@ public class DynamoDbService implements DataStore {
         try {
             storedCredentialTable.putItem(storedCredential);
         } catch (Exception exception) {
-            throw new DataStoreException("Failed to store credential in DynamoDB", exception);
+            throw new DataStoreException("Failed to store credential", exception);
         }
     }
 
     @Override
     public StoredCredential getStoredCredential(String partitionValue) throws DataStoreException {
         try {
-            return getStoredCredentialByKey(Key.builder().partitionValue(partitionValue).build());
+            Key key = Key.builder().partitionValue(partitionValue).build();
+            return storedCredentialTable.getItem(key);
         } catch (Exception exception) {
             throw new DataStoreException("Error fetching credential", exception);
         }
-    }
-
-    private CachedCredentialOffer getItemByKey(Key key) {
-        return cachedCredentialOfferTable.getItem(key);
-    }
-
-    private StoredCredential getStoredCredentialByKey(Key key) {
-        return storedCredentialTable.getItem(key);
     }
 }

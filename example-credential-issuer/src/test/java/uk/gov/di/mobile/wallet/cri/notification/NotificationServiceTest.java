@@ -39,6 +39,7 @@ class NotificationServiceTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String NOTIFICATION_ID = "77368ca6-877b-4208-a397-99f1df890400";
+    private static final Long TIME_TO_LIVE = 12345L;
     private static final String DOCUMENT_PRIMARY_IDENTIFIER =
             "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
 
@@ -79,14 +80,15 @@ class NotificationServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_WalletSubjectIDsDoNotMatch()
             throws DataStoreException {
-
         StoredCredential mockStoredCredential =
-                new StoredCredential(
-                        CREDENTIAL_IDENTIFIER,
-                        NOTIFICATION_ID,
-                        "not_the_same_wallet_subject_id",
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                StoredCredential.builder()
+                        .credentialIdentifier(CREDENTIAL_IDENTIFIER)
+                        .notificationId(NOTIFICATION_ID)
+                        .walletSubjectId("not_the_same_wallet_subject_id")
+                        .timeToLive(TIME_TO_LIVE)
+                        .statusList(null)
+                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         AccessTokenValidationException exception =
@@ -102,7 +104,6 @@ class NotificationServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_CredentialNotFound()
             throws DataStoreException {
-
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(null);
 
         AccessTokenValidationException exception =
@@ -118,14 +119,16 @@ class NotificationServiceTest {
     @Test
     void Should_ThrowInvalidNotificationIdException_When_NotificationIDsDoNotMatch()
             throws DataStoreException {
-
         StoredCredential mockStoredCredential =
-                new StoredCredential(
-                        CREDENTIAL_IDENTIFIER,
-                        NOTIFICATION_ID,
-                        WALLET_SUBJECT_ID,
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                StoredCredential.builder()
+                        .credentialIdentifier(CREDENTIAL_IDENTIFIER)
+                        .notificationId(NOTIFICATION_ID)
+                        .walletSubjectId(WALLET_SUBJECT_ID)
+                        .timeToLive(TIME_TO_LIVE)
+                        .statusList(null)
+                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .build();
+
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
@@ -150,13 +153,16 @@ class NotificationServiceTest {
                     AccessTokenValidationException,
                     InvalidNotificationIdException {
         StoredCredential mockStoredCredential =
-                new StoredCredential(
-                        CREDENTIAL_IDENTIFIER,
-                        NOTIFICATION_ID,
-                        WALLET_SUBJECT_ID,
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                StoredCredential.builder()
+                        .credentialIdentifier(CREDENTIAL_IDENTIFIER)
+                        .notificationId(NOTIFICATION_ID)
+                        .walletSubjectId(WALLET_SUBJECT_ID)
+                        .timeToLive(TIME_TO_LIVE)
+                        .statusList(null)
+                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
+
         notificationService.processNotification(accessToken, requestBody);
 
         verify(mockLogger)

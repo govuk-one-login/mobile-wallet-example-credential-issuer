@@ -18,7 +18,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MobileSecurityObjectFactoryTest {
@@ -28,6 +29,9 @@ class MobileSecurityObjectFactoryTest {
     @Mock private COSEKeyFactory mockCoseKeyFactory;
     @Mock private ECPublicKey mockEcPublicKey;
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
+
+    private static final int IDX = 0;
+    private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
 
     @Test
     void Should_CreateMobileSecurityObject() {
@@ -48,6 +52,10 @@ class MobileSecurityObjectFactoryTest {
                 new ValidityInfo(now, now, now.plus(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES)));
         when(mockValidityInfoFactory.build(CREDENTIAL_TTL_MINUTES)).thenReturn(validityInfo);
 
+        // Arrange: Prepare Status
+        StatusList statusList = new StatusList(0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
+        Status status = new Status(statusList);
+
         // Arrange: Prepare COSEKey
         Map<Integer, Object> coseKeyParams = new HashMap<>();
         coseKeyParams.put(1, "testParameterValue");
@@ -66,14 +74,15 @@ class MobileSecurityObjectFactoryTest {
                         deviceKeyInfo,
                         valueDigests,
                         "org.iso.18013.5.1.mDL",
-                        validityInfo);
+                        validityInfo,
+                        status);
 
         // Act
         MobileSecurityObjectFactory factory =
                 new MobileSecurityObjectFactory(
                         mockValueDigestsFactory, mockValidityInfoFactory, mockCoseKeyFactory);
         MobileSecurityObject result =
-                factory.build(namespaces, mockEcPublicKey, CREDENTIAL_TTL_MINUTES);
+                factory.build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
 
         // Assert
         assertEquals(expectedMso, result, "MobileSecurityObject should be constructed as expected");

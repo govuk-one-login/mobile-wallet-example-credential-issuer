@@ -1,12 +1,16 @@
 package uk.gov.di.mobile.wallet.cri.credential.social_security_credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+
+import java.util.Optional;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
 
@@ -21,7 +25,10 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
     }
 
     @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    public BuildCredentialResult buildCredential(
+            Document document,
+            ProofJwtService.ProofJwtData proofData,
+            Optional<StatusListClient.IssueResponse> issueResponse)
             throws SigningException {
         SocialSecurityDocument socialSecurityDocument =
                 mapper.convertValue(document.getData(), SocialSecurityDocument.class);
@@ -30,9 +37,12 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         socialSecurityDocument, proofData.didKey());
 
-        return credentialBuilder.buildCredential(
-                subject,
-                SOCIAL_SECURITY_CREDENTIAL,
-                socialSecurityDocument.getCredentialTtlMinutes());
+        String credential =
+                credentialBuilder.buildCredential(
+                        subject,
+                        SOCIAL_SECURITY_CREDENTIAL,
+                        socialSecurityDocument.getCredentialTtlMinutes());
+
+        return new BuildCredentialResult(credential, socialSecurityDocument.getNino());
     }
 }
