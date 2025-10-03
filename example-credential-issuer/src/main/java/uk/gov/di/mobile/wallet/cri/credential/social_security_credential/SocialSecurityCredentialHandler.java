@@ -7,7 +7,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
-import uk.gov.di.mobile.wallet.cri.credential.StatusList;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.Optional;
@@ -28,7 +28,7 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
     public BuildCredentialResult buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
-            Optional<StatusList> statusList)
+            Optional<StatusListClient.IssueResponse> issueResponse)
             throws SigningException {
         SocialSecurityDocument socialSecurityDocument =
                 mapper.convertValue(document.getData(), SocialSecurityDocument.class);

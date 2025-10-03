@@ -11,7 +11,7 @@ import java.net.URI;
 
 public class StatusListClient {
 
-    public record IssueResponse(int idx, String uri) {}
+    public record IssueResponse(Integer idx, String uri) {}
 
     private static final String ENDPOINT_ISSUE = "/issue";
 

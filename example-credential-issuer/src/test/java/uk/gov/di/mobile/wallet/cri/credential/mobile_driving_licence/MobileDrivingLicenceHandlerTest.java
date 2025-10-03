@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
-import uk.gov.di.mobile.wallet.cri.credential.StatusList;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -43,7 +43,8 @@ class MobileDrivingLicenceHandlerTest {
 
     private static final int INDEX = 0;
     private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
-    private static final StatusList STATUS_LIST = StatusList.builder().idx(INDEX).uri(URI).build();
+    private static final StatusListClient.IssueResponse STATUS_LIST_ISSUE_RESPONSE =
+            new StatusListClient.IssueResponse(INDEX, URI);
 
     @BeforeEach
     void setUp() {
@@ -71,10 +72,11 @@ class MobileDrivingLicenceHandlerTest {
         setMapperField(spyHandler, mockMapper);
 
         BuildCredentialResult result =
-                spyHandler.buildCredential(mockDocument, mockProofData, Optional.of(STATUS_LIST));
+                spyHandler.buildCredential(
+                        mockDocument, mockProofData, Optional.of(STATUS_LIST_ISSUE_RESPONSE));
 
         assertEquals(EXPECTED_CREDENTIAL, result.credential());
-        assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentNumber());
+        assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentPrimaryIdentifier());
         verify(mockMobileDrivingLicenceService)
                 .createMobileDrivingLicence(mockDrivingLicenceDocument, ecPublicKey, INDEX, URI);
     }
@@ -104,7 +106,9 @@ class MobileDrivingLicenceHandlerTest {
                         SigningException.class,
                         () ->
                                 spyHandler.buildCredential(
-                                        mockDocument, mockProofData, Optional.of(STATUS_LIST)));
+                                        mockDocument,
+                                        mockProofData,
+                                        Optional.of(STATUS_LIST_ISSUE_RESPONSE)));
         assertEquals("Some signing error", thrown.getMessage());
     }
 

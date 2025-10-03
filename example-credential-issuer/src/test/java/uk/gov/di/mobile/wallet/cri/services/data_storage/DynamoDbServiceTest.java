@@ -10,7 +10,7 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
-import uk.gov.di.mobile.wallet.cri.credential.StatusList;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 
@@ -31,6 +31,8 @@ class DynamoDbServiceTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final Long TIME_TO_LIVE = 12345L;
+    private static final StatusListClient.IssueResponse STATUS_LIST_ISSUER_RESPONSE =
+            new StatusListClient.IssueResponse(0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
 
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
     @Mock private DynamoDbTable<CachedCredentialOffer> mockCachedCredentialOfferTable;
@@ -62,11 +64,7 @@ class DynamoDbServiceTest {
                         .notificationId("77368ca6-877b-4208-a397-99f1df890400")
                         .walletSubjectId(WALLET_SUBJECT_ID)
                         .timeToLive(TIME_TO_LIVE)
-                        .statusList(
-                                StatusList.builder()
-                                        .idx(3)
-                                        .uri("https://test-status-list.gov.uk/t/3B0F3BD087A7")
-                                        .build())
+                        .statusList(STATUS_LIST_ISSUER_RESPONSE)
                         .documentPrimaryIdentifier("cb2e831f-b2d9-4c7a-b42e-be5370ea4c77")
                         .build();
         dynamoDbService =

@@ -12,7 +12,7 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
-import uk.gov.di.mobile.wallet.cri.credential.StatusList;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.HashMap;
@@ -44,7 +44,8 @@ class DigitalVeteranCardHandlerTest {
     private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
-    private static final Optional<StatusList> STATUS_LIST = Optional.empty();
+    private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
+            Optional.empty();
 
     @BeforeEach
     void setUp() {
@@ -78,10 +79,11 @@ class DigitalVeteranCardHandlerTest {
                     .thenReturn(mockCredentialSubject);
 
             BuildCredentialResult result =
-                    spyHandler.buildCredential(mockDocument, mockProofData, STATUS_LIST);
+                    spyHandler.buildCredential(
+                            mockDocument, mockProofData, STATUS_LIST_ISSUE_RESPONSE);
 
             assertEquals(EXPECTED_CREDENTIAL, result.credential());
-            assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentNumber());
+            assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentPrimaryIdentifier());
             verify(mockCredentialBuilder)
                     .buildCredential(mockCredentialSubject, DIGITAL_VETERAN_CARD, TTL_MINUTES);
         }
@@ -120,7 +122,9 @@ class DigitalVeteranCardHandlerTest {
                             SigningException.class,
                             () ->
                                     spyHandler.buildCredential(
-                                            mockDocument, mockProofData, STATUS_LIST));
+                                            mockDocument,
+                                            mockProofData,
+                                            STATUS_LIST_ISSUE_RESPONSE));
             assertEquals("Some signing error", thrown.getMessage());
         }
     }

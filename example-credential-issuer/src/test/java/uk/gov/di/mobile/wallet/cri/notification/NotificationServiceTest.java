@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.StatusList;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -43,7 +42,6 @@ class NotificationServiceTest {
     private static final Long TIME_TO_LIVE = 12345L;
     private static final String DOCUMENT_PRIMARY_IDENTIFIER =
             "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
-    private static final StatusList STATUS_LIST = null;
 
     @Mock private DynamoDbService mockDynamoDbService;
     @Mock private AccessTokenService mockAccessTokenService;
@@ -88,7 +86,7 @@ class NotificationServiceTest {
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId("not_the_same_wallet_subject_id")
                         .timeToLive(TIME_TO_LIVE)
-                        .statusList(STATUS_LIST)
+                        .statusList(null)
                         .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
                         .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
@@ -127,7 +125,7 @@ class NotificationServiceTest {
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId(WALLET_SUBJECT_ID)
                         .timeToLive(TIME_TO_LIVE)
-                        .statusList(STATUS_LIST)
+                        .statusList(null)
                         .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
                         .build();
 
@@ -160,7 +158,7 @@ class NotificationServiceTest {
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId(WALLET_SUBJECT_ID)
                         .timeToLive(TIME_TO_LIVE)
-                        .statusList(STATUS_LIST)
+                        .statusList(null)
                         .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
                         .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);

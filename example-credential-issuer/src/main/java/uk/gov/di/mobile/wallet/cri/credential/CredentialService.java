@@ -1,12 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
@@ -36,10 +32,6 @@ public class CredentialService {
     private final StatusListClient statusListClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
-    private static final ObjectMapper mapper =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .registerModule(new Jdk8Module());
 
     public CredentialService(
             DataStore dataStore,
@@ -97,22 +89,15 @@ public class CredentialService {
             CredentialType credentialType = CredentialType.fromType(vcType);
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
-            StatusList statusList;
+            StatusListClient.IssueResponse issueResponse = null;
             if (credentialType == MOBILE_DRIVING_LICENCE) {
-                StatusListClient.IssueResponse issueResponse = statusListClient.getIndex(expiry);
-                statusList =
-                        StatusList.builder()
-                                .idx(issueResponse.idx())
-                                .uri(issueResponse.uri())
-                                .build();
-            } else {
-                statusList = null;
+                issueResponse = statusListClient.getIndex(expiry);
             }
 
             CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
             BuildCredentialResult result =
                     handler.buildCredential(
-                            document, proofJwtData, Optional.ofNullable(statusList));
+                            document, proofJwtData, Optional.ofNullable(issueResponse));
 
             StoredCredential storedCredential =
                     StoredCredential.builder()
@@ -120,8 +105,8 @@ public class CredentialService {
                             .notificationId(notificationId)
                             .walletSubjectId(credentialOffer.getWalletSubjectId())
                             .timeToLive(expiry)
-                            .statusList(statusList)
-                            .documentPrimaryIdentifier(getDocumentPrimaryIdentifier(document))
+                            .statusList(issueResponse)
+                            .documentPrimaryIdentifier(result.documentPrimaryIdentifier())
                             .build();
 
             dataStore.saveStoredCredential(storedCredential);
@@ -155,25 +140,5 @@ public class CredentialService {
 
     protected Logger getLogger() {
         return LOGGER;
-    }
-
-    private String getDocumentPrimaryIdentifier(Document document) {
-        if (document.getVcType().equals("org.iso.18013.5.1.mDL")) {
-            DrivingLicenceDocument drivingLicenceDocument =
-                    mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-            return drivingLicenceDocument.getDocumentNumber();
-        }
-
-        /* For veterans card, national insurance, and DBS credentials, this value
-        should be set to the service number, NINo, and DBS certificate ID respectively.
-
-        At the moment documentId is a UUID for the document in the document
-        database table rather than the service number, NINo or DBS certificate ID.
-        We are accepting the existing documentId as the primaryIdentifier for non-mDL
-        credentials because it is not currently being read. Future work will set
-        documentId to the correct value within the Document Builder.
-        See https://govukverify.atlassian.net/browse/DCMAW-15868 */
-
-        return document.getDocumentId();
     }
 }

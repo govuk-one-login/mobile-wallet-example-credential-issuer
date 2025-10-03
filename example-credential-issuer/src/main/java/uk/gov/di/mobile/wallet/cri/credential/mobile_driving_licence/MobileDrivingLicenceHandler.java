@@ -5,7 +5,7 @@ import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
-import uk.gov.di.mobile.wallet.cri.credential.StatusList;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -24,7 +24,7 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
     public BuildCredentialResult buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
-            Optional<StatusList> statusList)
+            Optional<StatusListClient.IssueResponse> issueResponse)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
@@ -33,8 +33,8 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                         drivingLicenceDocument,
                         proofData.publicKey(),
-                        statusList.orElseThrow().getIdx(),
-                        statusList.orElseThrow().getUri());
+                        issueResponse.orElseThrow().idx(),
+                        issueResponse.orElseThrow().uri());
 
         return new BuildCredentialResult(credential, drivingLicenceDocument.getDocumentNumber());
     }
