@@ -148,6 +148,37 @@ class NotificationServiceTest {
     }
 
     @Test
+    void Should_Match_When_NotificationIDsAreOfDifferentCasing()
+            throws DataStoreException,
+                    AccessTokenValidationException,
+                    InvalidNotificationIdException {
+        String requestNotificationId = "6A6BB0DC-C6CB-4FD1-8C03-08423E38802A";
+        requestBody =
+                new NotificationRequestBody(
+                        requestNotificationId, EventType.credential_accepted, "Credential stored");
+
+        String storedNotificationId = "6a6bb0dc-c6cb-4fd1-8c03-08423e38802a";
+        StoredCredential mockStoredCredential =
+                new StoredCredential(
+                        CREDENTIAL_IDENTIFIER,
+                        storedNotificationId,
+                        WALLET_SUBJECT_ID,
+                        43200L,
+                        DOCUMENT_PRIMARY_IDENTIFIER);
+        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
+        notificationService.processNotification(accessToken, requestBody);
+        verify(mockLogger)
+                .info(
+                        "Notification received - notification_id: {}, event: {}, event_description: {}",
+                        "6A6BB0DC-C6CB-4FD1-8C03-08423E38802A",
+                        EventType.credential_accepted,
+                        "Credential stored");
+
+        verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
+        verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
+    }
+
+    @Test
     void Should_LogNotification_When_RequestIsValid()
             throws DataStoreException,
                     AccessTokenValidationException,
