@@ -1,9 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
-import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
-import software.amazon.awssdk.enhanced.dynamodb.Key;
-import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import org.eclipse.jetty.util.Index;
+import software.amazon.awssdk.core.pagination.sync.SdkIterable;
+import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
@@ -12,6 +15,8 @@ import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DynamoDbService implements DataStore {
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
@@ -95,6 +100,28 @@ public class DynamoDbService implements DataStore {
             return getStoredCredentialByKey(Key.builder().partitionValue(partitionValue).build());
         } catch (Exception exception) {
             throw new DataStoreException("Error fetching credential", exception);
+        }
+    }
+
+    @Override
+    public List<StoredCredential> getCredentialsByDocumentPrimaryIdentifier(String documentPrimaryIdentifier) throws DataStoreException {
+        try {
+            // Access the GSI
+            DynamoDbIndex<StoredCredential> index = storedCredentialTable.index("documentPrimaryIdentifierIndex");
+
+            // Build the query against the GSI
+            QueryEnhancedRequest request = QueryEnhancedRequest.builder()
+                    .queryConditional(QueryConditional.keyEqualTo(
+                            Key.builder().partitionValue(documentPrimaryIdentifier).build()
+                    )).build();
+
+            // collect and iterate over all items
+            var credential = index.query(request).iterator();
+
+            return new ArrayList<>(credential.next().items());
+
+        }  catch (Exception exception) {
+            throw new DataStoreException("Error fetching list of credentials by documentPrimaryIdentifier", exception);
         }
     }
 

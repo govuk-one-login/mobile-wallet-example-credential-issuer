@@ -6,11 +6,11 @@ import lombok.Getter;
 
 @Getter
 public class RevokeRequestBody {
-    @JsonProperty("driving_licence_number")
+    @JsonProperty("drivingLicenceNumber")
     private String drivingLicenceNumber;
 
     @JsonCreator
-    public RevokeRequestBody(@JsonProperty(value = "driving_licence_number", required = true) String drivingLicenceNumber) {
+    public RevokeRequestBody(@JsonProperty(value = "drivingLicenceNumber", required = true) String drivingLicenceNumber) {
         this.drivingLicenceNumber = drivingLicenceNumber;
     }
 }
