@@ -1,13 +1,16 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.util.Optional;
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
@@ -18,13 +21,21 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
         this.mobileDrivingLicenceBuilder = mobileDrivingLicenceBuilder;
     }
 
-    @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    public BuildCredentialResult buildCredential(
+            Document document,
+            ProofJwtService.ProofJwtData proofData,
+            Optional<StatusListClient.IssueResponse> issueResponse)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
-        return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                drivingLicenceDocument, proofData.publicKey());
+        String credential =
+                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                        drivingLicenceDocument,
+                        proofData.publicKey(),
+                        issueResponse.orElseThrow().idx(),
+                        issueResponse.orElseThrow().uri());
+
+        return new BuildCredentialResult(credential, drivingLicenceDocument.getDocumentNumber());
     }
 }

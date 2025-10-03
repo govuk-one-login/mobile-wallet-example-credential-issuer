@@ -55,7 +55,7 @@ class PreAuthorizedCodeBuilderTest {
         when(configurationService.getSelfUrl()).thenReturn(SELF_URL);
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_URL);
         when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
-        when(configurationService.getClientId()).thenReturn(AUTH_CLIENT_ID);
+        when(configurationService.getOIDCClientId()).thenReturn(AUTH_CLIENT_ID);
     }
 
     @Test

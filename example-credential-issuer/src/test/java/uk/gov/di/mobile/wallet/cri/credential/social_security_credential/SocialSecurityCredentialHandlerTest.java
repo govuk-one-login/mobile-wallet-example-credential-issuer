@@ -7,14 +7,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,8 +41,11 @@ class SocialSecurityCredentialHandlerTest {
     private SocialSecurityCredentialHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
+    private static final String EXPECTED_DOCUMENT_NUMBER = "QQ 12 34 56 A";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
+    private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
+            Optional.empty();
 
     @BeforeEach
     void setUp() {
@@ -52,6 +58,7 @@ class SocialSecurityCredentialHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockSocialSecurityDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockSocialSecurityDocument.getNino()).thenReturn(EXPECTED_DOCUMENT_NUMBER);
         when(mockCredentialBuilder.buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(SOCIAL_SECURITY_CREDENTIAL),
@@ -71,9 +78,12 @@ class SocialSecurityCredentialHandlerTest {
                                             mockSocialSecurityDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
-            String result = spyHandler.buildCredential(mockDocument, mockProofData);
+            BuildCredentialResult result =
+                    spyHandler.buildCredential(
+                            mockDocument, mockProofData, STATUS_LIST_ISSUE_RESPONSE);
 
-            assertEquals(EXPECTED_CREDENTIAL, result);
+            assertEquals(EXPECTED_CREDENTIAL, result.credential());
+            assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentPrimaryIdentifier());
             verify(mockCredentialBuilder)
                     .buildCredential(
                             mockCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, TTL_MINUTES);
@@ -111,7 +121,11 @@ class SocialSecurityCredentialHandlerTest {
             SigningException thrown =
                     assertThrows(
                             SigningException.class,
-                            () -> spyHandler.buildCredential(mockDocument, mockProofData));
+                            () ->
+                                    spyHandler.buildCredential(
+                                            mockDocument,
+                                            mockProofData,
+                                            STATUS_LIST_ISSUE_RESPONSE));
             assertEquals("Some signing error", thrown.getMessage());
         }
     }

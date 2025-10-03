@@ -1,13 +1,10 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -19,7 +16,10 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
+
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 
 public class CredentialService {
 
@@ -29,12 +29,9 @@ public class CredentialService {
     private final DocumentStoreClient documentStoreClient;
     private final CredentialHandlerFactory credentialHandlerFactory;
     private final CredentialExpiryCalculator credentialExpiryCalculator;
+    private final StatusListClient statusListClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
-    private static final ObjectMapper mapper =
-            new ObjectMapper()
-                    .registerModule(new JavaTimeModule())
-                    .registerModule(new Jdk8Module());
 
     public CredentialService(
             DataStore dataStore,
@@ -42,13 +39,15 @@ public class CredentialService {
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
             CredentialHandlerFactory credentialHandlerFactory,
-            CredentialExpiryCalculator credentialExpiryCalculator) {
+            CredentialExpiryCalculator credentialExpiryCalculator,
+            StatusListClient statusListClient) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
         this.documentStoreClient = documentStoreClient;
         this.credentialHandlerFactory = credentialHandlerFactory;
         this.credentialExpiryCalculator = credentialExpiryCalculator;
+        this.statusListClient = statusListClient;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -82,39 +81,44 @@ public class CredentialService {
             String documentId = credentialOffer.getDocumentId();
             Document document = documentStoreClient.getDocument(documentId);
             String notificationId = UUID.randomUUID().toString();
-
-            LOGGER.info(
-                    "{} retrieved - credentialOfferId: {}, documentId: {}",
-                    document.getVcType(),
-                    credentialOfferId,
-                    documentId);
+            String vcType = document.getVcType();
 
             // Delete credential offer after redeeming it to prevent replay
             dataStore.deleteCredentialOffer(credentialOfferId);
 
-            CredentialHandler handler =
-                    credentialHandlerFactory.createHandler(document.getVcType());
-            String credential = handler.buildCredential(document, proofJwtData);
-
+            CredentialType credentialType = CredentialType.fromType(vcType);
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
-            var storedCredential =
+            StatusListClient.IssueResponse issueResponse = null;
+            if (credentialType == MOBILE_DRIVING_LICENCE) {
+                issueResponse = statusListClient.getIndex(expiry);
+            }
+
+            CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
+            BuildCredentialResult result =
+                    handler.buildCredential(
+                            document, proofJwtData, Optional.ofNullable(issueResponse));
+
+            StoredCredential storedCredential =
                     StoredCredential.builder()
                             .credentialIdentifier(credentialOffer.getCredentialIdentifier())
                             .notificationId(notificationId)
                             .walletSubjectId(credentialOffer.getWalletSubjectId())
                             .timeToLive(expiry)
-                            .documentPrimaryIdentifier(getDocumentPrimaryIdentifier(document));
+                            .statusList(issueResponse)
+                            .documentPrimaryIdentifier(result.documentPrimaryIdentifier())
+                            .build();
 
-            dataStore.saveStoredCredential(storedCredential.build());
+            dataStore.saveStoredCredential(storedCredential);
 
-            return new CredentialResponse(credential, notificationId);
+            return new CredentialResponse(result.credential(), notificationId);
         } catch (DataStoreException
                 | SigningException
                 | MDLException
                 | ObjectStoreException
                 | CertificateException
-                | DocumentStoreException exception) {
+                | DocumentStoreException
+                | StatusListException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
@@ -136,25 +140,5 @@ public class CredentialService {
 
     protected Logger getLogger() {
         return LOGGER;
-    }
-
-    private String getDocumentPrimaryIdentifier(Document document) {
-        if (document.getVcType().equals("org.iso.18013.5.1.mDL")) {
-            DrivingLicenceDocument drivingLicenceDocument =
-                    mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
-            return drivingLicenceDocument.getDocumentNumber();
-        }
-
-        /* For veterans card, national insurance, and DBS credentials, this value
-        should be set to the service number, NINo, and DBS certificate ID respectively.
-
-        At the moment documentId is a UUID for the document in the document
-        database table rather than the service number, NINo or DBS certificate ID.
-        We are accepting the existing documentId as the primaryIdentifier for non-mDL
-        credentials because it is not currently being read. Future work will set
-        documentId to the correct value within the Document Builder.
-        See https://govukverify.atlassian.net/browse/DCMAW-15868 */
-
-        return document.getDocumentId();
     }
 }
