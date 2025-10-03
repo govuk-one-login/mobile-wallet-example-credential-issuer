@@ -159,12 +159,14 @@ class NotificationServiceTest {
 
         String storedNotificationId = "6a6bb0dc-c6cb-4fd1-8c03-08423e38802a";
         StoredCredential mockStoredCredential =
-                new StoredCredential(
-                        CREDENTIAL_IDENTIFIER,
-                        storedNotificationId,
-                        WALLET_SUBJECT_ID,
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                StoredCredential.builder()
+                        .credentialIdentifier(CREDENTIAL_IDENTIFIER)
+                        .notificationId(storedNotificationId)
+                        .walletSubjectId(WALLET_SUBJECT_ID)
+                        .timeToLive(TIME_TO_LIVE)
+                        .statusList(null)
+                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
         notificationService.processNotification(accessToken, requestBody);
         verify(mockLogger)
