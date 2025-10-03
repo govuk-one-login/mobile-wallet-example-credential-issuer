@@ -44,7 +44,7 @@ public class NotificationService {
 
         if (!storedCredential
                 .getNotificationId()
-                .equals(notificationRequestBody.getNotificationId())) {
+                .equalsIgnoreCase(notificationRequestBody.getNotificationId())) {
             throw new InvalidNotificationIdException(
                     "Request 'notification_id' does not match cached 'notificationId'");
         }
