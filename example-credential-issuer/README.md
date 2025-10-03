@@ -52,18 +52,11 @@ You must install:
 * Java
 * Gradle
 * a tool for running docker applications locally, like [Docker Desktop](https://www.docker.com/products/docker-desktop/) or [Rancher Desktop](https://rancherdesktop.io/)
-* the [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
-* [SDKMAN!](https://sdkman.io/install) - used by this project to manage Java versions
+* [AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 
 ### Run the credential issuer
 
-Use SDKMAN! to install the Java JDK listed in this project's .sdkmanrc file:
-
-```
-sdk install java x.y.z-amzn
-```
-
-Restart your terminal.
+> Ensure that you are using the JDK/Gradle versions specified in `.sdkmanrc`.
 
 #### Format
 
