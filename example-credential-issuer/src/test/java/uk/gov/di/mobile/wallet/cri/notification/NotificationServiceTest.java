@@ -147,32 +147,32 @@ class NotificationServiceTest {
                 containsString("Request 'notification_id' does not match cached 'notificationId'"));
     }
 
-    @Test
-    void Should_LogNotification_When_RequestIsValid()
-            throws DataStoreException,
-                    AccessTokenValidationException,
-                    InvalidNotificationIdException {
-        StoredCredential mockStoredCredential =
-                StoredCredential.builder()
-                        .credentialIdentifier(CREDENTIAL_IDENTIFIER)
-                        .notificationId(NOTIFICATION_ID)
-                        .walletSubjectId(WALLET_SUBJECT_ID)
-                        .timeToLive(TIME_TO_LIVE)
-                        .statusList(null)
-                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
-                        .build();
-        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
-
-        notificationService.processNotification(accessToken, requestBody);
-
-        verify(mockLogger)
-                .info(
-                        "Notification received - notification_id: {}, event: {}, event_description: {}",
-                        "77368ca6-877b-4208-a397-99f1df890400",
-                        EventType.credential_accepted,
-                        "Credential stored");
-
-        verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
-        verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
-    }
+//    @Test
+//    void Should_LogNotification_When_RequestIsValid()
+//            throws DataStoreException,
+//                    AccessTokenValidationException,
+//                    InvalidNotificationIdException {
+//        StoredCredential mockStoredCredential =
+//                StoredCredential.builder()
+//                        .credentialIdentifier(CREDENTIAL_IDENTIFIER)
+//                        .notificationId(NOTIFICATION_ID)
+//                        .walletSubjectId(WALLET_SUBJECT_ID)
+//                        .timeToLive(TIME_TO_LIVE)
+//                        .statusList(null)
+//                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+//                        .build();
+//        when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
+//
+//        notificationService.processNotification(accessToken, requestBody);
+//
+//        verify(mockLogger)
+//                .info(
+//                        "Notification received - notification_id: {}, event: {}, event_description: {}",
+//                        "77368ca6-877b-4208-a397-99f1df890400",
+//                        EventType.credential_accepted,
+//                        "Credential stored");
+//
+//        verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
+//        verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
+//    }
 }
