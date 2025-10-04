@@ -17,14 +17,12 @@ public class RevokeService {
         this.dataStore = dataStore;
     }
 
-    public void revokeCredential(RevokeRequestBody revokeRequestBody) throws DataStoreException{
-        if (revokeRequestBody == null) {
-            throw new DataStoreException("Request body is null");
+    public void revokeCredential(String documentPrimaryIdentifier) throws DataStoreException{
+        if (documentPrimaryIdentifier == null) {
+            throw new DataStoreException("Document primary identifier is null");
         }
 
-        String documentPrimaryIdentifierValue = revokeRequestBody.getDrivingLicenceNumber();
-
-        dataStore.getCredentialsByDocumentPrimaryIdentifier(documentPrimaryIdentifierValue);
+        dataStore.getCredentialsByDocumentPrimaryIdentifier(documentPrimaryIdentifier);
 
     }
 }

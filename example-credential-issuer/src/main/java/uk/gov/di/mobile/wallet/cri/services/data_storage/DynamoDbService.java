@@ -106,16 +106,13 @@ public class DynamoDbService implements DataStore {
     @Override
     public List<StoredCredential> getCredentialsByDocumentPrimaryIdentifier(String documentPrimaryIdentifier) throws DataStoreException {
         try {
-            // Access the GSI
             DynamoDbIndex<StoredCredential> index = storedCredentialTable.index("documentPrimaryIdentifierIndex");
 
-            // Build the query against the GSI
             QueryEnhancedRequest request = QueryEnhancedRequest.builder()
                     .queryConditional(QueryConditional.keyEqualTo(
                             Key.builder().partitionValue(documentPrimaryIdentifier).build()
                     )).build();
 
-            // collect and iterate over all items
             var credential = index.query(request).iterator();
 
             return new ArrayList<>(credential.next().items());
