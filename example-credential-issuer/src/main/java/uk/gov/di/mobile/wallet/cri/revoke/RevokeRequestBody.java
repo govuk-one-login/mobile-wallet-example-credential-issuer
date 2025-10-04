@@ -10,7 +10,9 @@ public class RevokeRequestBody {
     private String drivingLicenceNumber;
 
     @JsonCreator
-    public RevokeRequestBody(@JsonProperty(value = "drivingLicenceNumber", required = true) String drivingLicenceNumber) {
+    public RevokeRequestBody(
+            @JsonProperty(value = "drivingLicenceNumber", required = true)
+                    String drivingLicenceNumber) {
         this.drivingLicenceNumber = drivingLicenceNumber;
     }
 }

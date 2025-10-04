@@ -4,5 +4,4 @@ public class RevokeServiceException extends RuntimeException {
     public RevokeServiceException(String message) {
         super(message);
     }
-
 }
