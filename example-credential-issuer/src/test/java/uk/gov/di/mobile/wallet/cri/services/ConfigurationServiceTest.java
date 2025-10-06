@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.services;
 
-import io.dropwizard.client.HttpClientConfiguration;
-import io.dropwizard.util.Duration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,7 +11,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith({SystemStubsExtension.class})
@@ -26,24 +23,6 @@ class ConfigurationServiceTest {
     @BeforeEach
     void setUp() {
         configurationService = new ConfigurationService();
-    }
-
-    @Test
-    void Should_HaveNonNullDefaultHttpClient_On_Initialisation() {
-        ConfigurationService config = new ConfigurationService();
-        assertNotNull(config.getHttpClient(), "Default httpClient should not be null");
-    }
-
-    @Test
-    void Should_ReturnSameHttpClient_After_SettingCustomClient() {
-        ConfigurationService config = new ConfigurationService();
-        HttpClientConfiguration customClient = new HttpClientConfiguration();
-        customClient.setTimeout(Duration.seconds(10));
-        config.setHttpClient(customClient);
-        assertEquals(
-                customClient,
-                config.getHttpClient(),
-                "Should return the client instance set by setter");
     }
 
     @Test

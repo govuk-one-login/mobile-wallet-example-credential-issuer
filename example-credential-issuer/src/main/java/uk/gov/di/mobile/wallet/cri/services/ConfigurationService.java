@@ -1,7 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.services;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import io.dropwizard.client.HttpClientConfiguration;
 import io.dropwizard.core.Configuration;
 
 import java.net.URI;
@@ -11,18 +9,6 @@ import java.net.URI;
  * configuration with defaults for local development.
  */
 public class ConfigurationService extends Configuration {
-
-    private HttpClientConfiguration httpClient = new HttpClientConfiguration();
-
-    @JsonProperty("httpClient")
-    public HttpClientConfiguration getHttpClient() {
-        return httpClient;
-    }
-
-    @JsonProperty("httpClient")
-    public void setHttpClient(HttpClientConfiguration httpClient) {
-        this.httpClient = httpClient;
-    }
 
     /**
      * Gets the environment name (local, dev, build, staging).
