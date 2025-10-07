@@ -1,6 +1,10 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
-import software.amazon.awssdk.enhanced.dynamodb.*;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
+import software.amazon.awssdk.enhanced.dynamodb.Key;
+import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryConditional;
 import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
@@ -11,8 +15,8 @@ import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class DynamoDbService implements DataStore {
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
@@ -115,13 +119,13 @@ public class DynamoDbService implements DataStore {
                                                     .build()))
                             .build();
 
-            var credential = index.query(request).iterator();
-
-            return new ArrayList<>(credential.next().items());
+            return index.query(request).stream()
+                    .flatMap(page -> page.items().stream())
+                    .collect(Collectors.toList());
 
         } catch (Exception exception) {
             throw new DataStoreException(
-                    "Error fetching list of credentials by documentPrimaryIdentifier", exception);
+                    "Error fetching credentials by documentPrimaryIdentifier", exception);
         }
     }
 
