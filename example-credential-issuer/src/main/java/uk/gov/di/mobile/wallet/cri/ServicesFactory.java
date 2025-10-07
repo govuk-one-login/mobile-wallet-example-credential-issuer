@@ -32,6 +32,7 @@ import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
 import uk.gov.di.mobile.wallet.cri.iacas.IacasService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
+import uk.gov.di.mobile.wallet.cri.revoke.RevokeService;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
@@ -159,6 +160,8 @@ public class ServicesFactory {
                 new IacasService(
                         certificateProvider, configurationService.getCertificateAuthorityArn());
 
+        RevokeService revokeService = new RevokeService(dynamoDbService);
+
         return new Services.Builder()
                 .kmsService(kmsService)
                 .dynamoDbService(dynamoDbService)
@@ -170,6 +173,7 @@ public class ServicesFactory {
                 .jwksService(jwksService)
                 .notificationService(notificationService)
                 .iacasService(iacasService)
+                .revokeService(revokeService)
                 .build();
     }
 }

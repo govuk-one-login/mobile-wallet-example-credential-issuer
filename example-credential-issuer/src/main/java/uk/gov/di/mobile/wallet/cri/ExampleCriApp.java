@@ -15,6 +15,7 @@ import uk.gov.di.mobile.wallet.cri.iacas.IacasResource;
 import uk.gov.di.mobile.wallet.cri.jwks.JwksResource;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataResource;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationResource;
+import uk.gov.di.mobile.wallet.cri.revoke.RevokeResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.MalformedURLException;
@@ -72,5 +73,6 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         environment.jersey().register(new JwksResource(services.getJwksService()));
         environment.jersey().register(new NotificationResource(services.getNotificationService()));
         environment.jersey().register(new IacasResource(services.getIacasService()));
+        environment.jersey().register(new RevokeResource(services.getRevokeService()));
     }
 }
