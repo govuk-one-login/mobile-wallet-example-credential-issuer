@@ -9,7 +9,6 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
-import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -17,7 +16,6 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 public class RevokeResource {
 
     private final RevokeService revokeService;
-
     private static final Logger LOGGER = LoggerFactory.getLogger(RevokeResource.class);
 
     public RevokeResource(RevokeService revokeService) {
@@ -25,16 +23,22 @@ public class RevokeResource {
     }
 
     @POST
-    public Response revokeCredential(RevokeRequestBody body) throws DataStoreException {
-        if (body == null) {
-            return ResponseUtil.badRequest("Driving Licence Number not found");
+    public Response revokeCredential(RevokeRequestBody requestBody) {
+        if (requestBody == null) {
+            return ResponseUtil.badRequest("Request body is required");
         }
+
+        if (requestBody.getDrivingLicenceNumber() == null
+                || requestBody.getDrivingLicenceNumber().isBlank()) {
+            return ResponseUtil.badRequest("drivingLicenceNumber is required");
+        }
+
         try {
-            revokeService.revokeCredential(body.getDrivingLicenceNumber());
+            revokeService.revokeCredential(requestBody.getDrivingLicenceNumber());
             return ResponseUtil.accepted();
         } catch (Exception exception) {
-            LOGGER.error("An Error happened getting driving licence number", exception);
-            if (exception instanceof RevokeServiceException) {
+            LOGGER.error("An error happened trying to revoke credential(s): ", exception);
+            if (exception instanceof CredentialNotFoundException) {
                 return ResponseUtil.notFound();
             }
             return ResponseUtil.internalServerError();
