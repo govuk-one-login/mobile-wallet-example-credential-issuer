@@ -25,7 +25,7 @@ public class RevokeResource {
     @POST
     public Response revokeCredential(RevokeRequestBody requestBody) {
         if (requestBody == null) {
-            return ResponseUtil.badRequest("Request body is required");
+            return ResponseUtil.badRequest("request body is required");
         }
 
         if (requestBody.getDrivingLicenceNumber() == null
