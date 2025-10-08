@@ -28,13 +28,19 @@ import static org.mockito.Mockito.when;
 class DynamoDbServiceTest {
 
     private static final String PARTITION_KEY = "4a1b1b18-b495-45ac-b0ce-73848bd32b70";
+    private static final String ITEM_ID = "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
     private static final Long TTL = Instant.now().plusSeconds(300).getEpochSecond();
-    private static final String DOCUMENT_PRIMARY_IDENTIFIER =
-            "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
+    private static final String WALLET_SUBJECT_ID =
+            "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
+    private static final String NOTIFICATION_ID = "267b1335-fc0e-41cf-a2b1-16134bf62dc4";
+    private static final String DOCUMENT_ID = "1234ABCD";
+
+    private static final String CREDENTIAL_OFFER_TABLE = "test-cache-cri-table";
+    private static final String CREDENTIAL_TABLE = "test-credential-store-table";
 
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
-    @Mock private DynamoDbTable<CachedCredentialOffer> mockCachedCredentialOfferTable;
-    @Mock private DynamoDbTable<StoredCredential> mockStoredCredentialTable;
+    @Mock private DynamoDbTable<CachedCredentialOffer> mockCredentialOfferTable;
+    @Mock private DynamoDbTable<StoredCredential> mockCredentialTable;
     private CachedCredentialOffer cachedCredentialOffer;
     private DynamoDbService dynamoDbService;
     private StoredCredential storedCredential;
@@ -42,33 +48,23 @@ class DynamoDbServiceTest {
     @BeforeEach
     void setUp() {
         when(mockDynamoDbEnhancedClient.table(
-                        eq("test-cache-cri-table"),
+                        eq(CREDENTIAL_OFFER_TABLE),
                         ArgumentMatchers.<TableSchema<CachedCredentialOffer>>any()))
-                .thenReturn(mockCachedCredentialOfferTable);
+                .thenReturn(mockCredentialOfferTable);
         when(mockDynamoDbEnhancedClient.table(
-                        eq("test-credential-store-table"),
+                        eq(CREDENTIAL_TABLE),
                         ArgumentMatchers.<TableSchema<StoredCredential>>any()))
-                .thenReturn(mockStoredCredentialTable);
+                .thenReturn(mockCredentialTable);
 
         cachedCredentialOffer =
-                new CachedCredentialOffer(
-                        PARTITION_KEY,
-                        "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77",
-                        "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
-                        TTL);
-
+                new CachedCredentialOffer(PARTITION_KEY, ITEM_ID, WALLET_SUBJECT_ID, TTL);
         storedCredential =
                 new StoredCredential(
-                        "4a1b1b18-b495-45ac-b0ce-73848bd32b70",
-                        "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
-                        "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                        PARTITION_KEY, NOTIFICATION_ID, WALLET_SUBJECT_ID, TTL, DOCUMENT_ID);
+
         dynamoDbService =
                 new DynamoDbService(
-                        mockDynamoDbEnhancedClient,
-                        "test-cache-cri-table",
-                        "test-credential-store-table");
+                        mockDynamoDbEnhancedClient, CREDENTIAL_OFFER_TABLE, CREDENTIAL_TABLE);
     }
 
     @Test
@@ -77,16 +73,13 @@ class DynamoDbServiceTest {
 
         ArgumentCaptor<CachedCredentialOffer> credentialOfferCacheItemArgumentCaptor =
                 ArgumentCaptor.forClass(CachedCredentialOffer.class);
-        verify(mockCachedCredentialOfferTable)
-                .putItem(credentialOfferCacheItemArgumentCaptor.capture());
+        verify(mockCredentialOfferTable).putItem(credentialOfferCacheItemArgumentCaptor.capture());
         assertEquals(
                 PARTITION_KEY,
                 credentialOfferCacheItemArgumentCaptor.getValue().getCredentialIdentifier());
+        assertEquals(ITEM_ID, credentialOfferCacheItemArgumentCaptor.getValue().getItemId());
         assertEquals(
-                "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77",
-                credentialOfferCacheItemArgumentCaptor.getValue().getDocumentId());
-        assertEquals(
-                "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+                WALLET_SUBJECT_ID,
                 credentialOfferCacheItemArgumentCaptor.getValue().getWalletSubjectId());
         assertEquals(TTL, credentialOfferCacheItemArgumentCaptor.getValue().getTimeToLive());
     }
@@ -99,7 +92,7 @@ class DynamoDbServiceTest {
         ArgumentCaptor<CachedCredentialOffer> argumentCaptor =
                 ArgumentCaptor.forClass(CachedCredentialOffer.class);
         doThrow(new UnsupportedOperationException())
-                .when(mockCachedCredentialOfferTable)
+                .when(mockCredentialOfferTable)
                 .putItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
@@ -110,13 +103,12 @@ class DynamoDbServiceTest {
 
     @Test
     void Should_ReturnCachedCredentialOffer() throws DataStoreException {
-        when(mockCachedCredentialOfferTable.getItem(any(Key.class)))
-                .thenReturn(cachedCredentialOffer);
+        when(mockCredentialOfferTable.getItem(any(Key.class))).thenReturn(cachedCredentialOffer);
 
         CachedCredentialOffer response = dynamoDbService.getCredentialOffer(PARTITION_KEY);
 
         ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
-        verify(mockCachedCredentialOfferTable).getItem(argumentCaptor.capture());
+        verify(mockCredentialOfferTable).getItem(argumentCaptor.capture());
         assertEquals(PARTITION_KEY, argumentCaptor.getValue().partitionKeyValue().s());
         assertEquals(cachedCredentialOffer, response);
     }
@@ -128,7 +120,7 @@ class DynamoDbServiceTest {
 
         ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
         doThrow(new UnsupportedOperationException())
-                .when(mockCachedCredentialOfferTable)
+                .when(mockCredentialOfferTable)
                 .getItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
@@ -144,7 +136,7 @@ class DynamoDbServiceTest {
 
         ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
         doThrow(new UnsupportedOperationException())
-                .when(mockCachedCredentialOfferTable)
+                .when(mockCredentialOfferTable)
                 .deleteItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
@@ -159,16 +151,15 @@ class DynamoDbServiceTest {
 
         ArgumentCaptor<StoredCredential> storedCredentialArgumentCaptor =
                 ArgumentCaptor.forClass(StoredCredential.class);
-        verify(mockStoredCredentialTable).putItem(storedCredentialArgumentCaptor.capture());
+        verify(mockCredentialTable).putItem(storedCredentialArgumentCaptor.capture());
         assertEquals(
                 PARTITION_KEY, storedCredentialArgumentCaptor.getValue().getCredentialIdentifier());
         assertEquals(
-                DOCUMENT_PRIMARY_IDENTIFIER,
-                storedCredentialArgumentCaptor.getValue().getDocumentPrimaryIdentifier());
+                NOTIFICATION_ID, storedCredentialArgumentCaptor.getValue().getNotificationId());
         assertEquals(
-                "267b1335-fc0e-41cf-a2b1-16134bf62dc4",
-                storedCredentialArgumentCaptor.getValue().getNotificationId());
-        assertEquals(43200L, storedCredentialArgumentCaptor.getValue().getTimeToLive());
+                WALLET_SUBJECT_ID, storedCredentialArgumentCaptor.getValue().getWalletSubjectId());
+        assertEquals(TTL, storedCredentialArgumentCaptor.getValue().getTimeToLive());
+        assertEquals(DOCUMENT_ID, storedCredentialArgumentCaptor.getValue().getDocumentId());
     }
 
     @Test
@@ -179,7 +170,7 @@ class DynamoDbServiceTest {
         ArgumentCaptor<StoredCredential> argumentCaptor =
                 ArgumentCaptor.forClass(StoredCredential.class);
         doThrow(new UnsupportedOperationException())
-                .when(mockStoredCredentialTable)
+                .when(mockCredentialTable)
                 .putItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
@@ -190,12 +181,12 @@ class DynamoDbServiceTest {
 
     @Test
     void Should_ReturnStoredCredential() throws DataStoreException {
-        when(mockStoredCredentialTable.getItem(any(Key.class))).thenReturn(storedCredential);
+        when(mockCredentialTable.getItem(any(Key.class))).thenReturn(storedCredential);
 
         StoredCredential response = dynamoDbService.getStoredCredential(PARTITION_KEY);
 
         ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
-        verify(mockStoredCredentialTable).getItem(argumentCaptor.capture());
+        verify(mockCredentialTable).getItem(argumentCaptor.capture());
         assertEquals(PARTITION_KEY, argumentCaptor.getValue().partitionKeyValue().s());
         assertEquals(storedCredential, response);
     }
@@ -207,7 +198,7 @@ class DynamoDbServiceTest {
 
         ArgumentCaptor<Key> argumentCaptor = ArgumentCaptor.forClass(Key.class);
         doThrow(new UnsupportedOperationException())
-                .when(mockStoredCredentialTable)
+                .when(mockCredentialTable)
                 .getItem(argumentCaptor.capture());
         DataStoreException exception =
                 assertThrows(
