@@ -296,6 +296,6 @@ class DynamoDbServiceTest {
 
         assertEquals(
                 "Error fetching credentials by documentPrimaryIdentifier", exception.getMessage());
-        assertEquals(exception.getCause().getMessage(), "Some DynamoDB error");
+        assertEquals("Some DynamoDB error", exception.getCause().getMessage());
     }
 }

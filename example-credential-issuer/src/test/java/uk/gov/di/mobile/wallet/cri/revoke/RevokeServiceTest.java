@@ -42,7 +42,7 @@ class RevokeServiceTest {
                 assertThrows(
                         DataStoreException.class,
                         () -> revokeService.revokeCredential(DRIVING_LICENCE_NUMBER));
-        assertEquals(exception.getMessage(), "Some detabase error");
+        assertEquals("Some detabase error", exception.getMessage());
         verify(mockDynamoDbService, times(1))
                 .getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER);
     }
@@ -58,7 +58,7 @@ class RevokeServiceTest {
                         CredentialNotFoundException.class,
                         () -> revokeService.revokeCredential(DRIVING_LICENCE_NUMBER));
         assertEquals(
-                exception.getMessage(), "No credential found for document number EDWAR515163SE5RO");
+                "No credential found for document number EDWAR515163SE5RO", exception.getMessage());
         verify(mockDynamoDbService, times(1))
                 .getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER);
     }

@@ -16,7 +16,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DynamoDbService implements DataStore {
     private final DynamoDbEnhancedClient dynamoDbEnhancedClient;
@@ -119,9 +118,7 @@ public class DynamoDbService implements DataStore {
                                                     .build()))
                             .build();
 
-            return index.query(request).stream()
-                    .flatMap(page -> page.items().stream())
-                    .collect(Collectors.toList());
+            return index.query(request).stream().flatMap(page -> page.items().stream()).toList();
 
         } catch (Exception exception) {
             throw new DataStoreException(
