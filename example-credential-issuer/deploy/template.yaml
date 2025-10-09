@@ -674,6 +674,8 @@ Resources:
       AttributeDefinitions:
         - AttributeName: credentialIdentifier
           AttributeType: S
+        - AttributeName: documentPrimaryIdentifier
+          AttributeType: S
         - AttributeName: documentId
           AttributeType: S
       BillingMode: PAY_PER_REQUEST
@@ -685,6 +687,12 @@ Resources:
         AttributeName: timeToLive
         Enabled: true
       GlobalSecondaryIndexes:
+        - IndexName: documentPrimaryIdentifierIndex
+          KeySchema:
+            - AttributeName: documentPrimaryIdentifier
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
         - IndexName: documentIdIndex
           KeySchema:
             - AttributeName: documentId
