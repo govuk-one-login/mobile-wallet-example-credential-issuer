@@ -13,7 +13,8 @@ import java.util.HashMap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CredentialExpiryCalculatorTest {
-    private static final String DOCUMENT_ID = "550e8400-e29b-41d4-a716-446655440000";
+    private static final String ITEM_ID = "550e8400-e29b-41d4-a716-446655440000";
+    private static final String DOCUMENT_ID = "ABCdef123";
     private static final Instant FIXED_INSTANT = Instant.parse("2024-01-15T10:30:00Z");
     private static final ZoneId UTC_ZONE = ZoneId.of("UTC");
     private static final Clock FIXED_CLOCK = Clock.fixed(FIXED_INSTANT, UTC_ZONE);
@@ -31,7 +32,7 @@ class CredentialExpiryCalculatorTest {
         data.put("familyName", "Edwards Green");
         data.put("givenName", "Sarah Elizabeth");
         data.put("credentialTtlMinutes", 1440); // 24 hours
-        Document document = new Document(DOCUMENT_ID, data, "SocialSecurityCredential");
+        Document document = new Document(ITEM_ID, DOCUMENT_ID, data, "SocialSecurityCredential");
         // Expected: 2024-01-15T10:30:00Z + 1440 minutes = 2024-01-16T10:30:00Z
         long expectedEpochSecond = Instant.parse("2024-01-16T10:30:00Z").getEpochSecond();
 
@@ -46,7 +47,7 @@ class CredentialExpiryCalculatorTest {
         data.put("firstName", "Bonnie");
         data.put("lastName", "Blue");
         data.put("credentialTtlMinutes", "720"); // 12 hours
-        Document document = new Document(DOCUMENT_ID, data, "BasicDisclosureCredential");
+        Document document = new Document(ITEM_ID, DOCUMENT_ID, data, "BasicDisclosureCredential");
         // Expected: 2024-01-15T10:30:00Z + 720 minutes = 2024-01-15T22:30:00Z
         long expectedEpochSecond = Instant.parse("2024-01-15T22:30:00Z").getEpochSecond();
 
@@ -61,7 +62,7 @@ class CredentialExpiryCalculatorTest {
         data.put("givenName", "Bonnie");
         data.put("familyName", "Blue");
         data.put("credentialTtlMinutes", "60"); // 1 hour
-        Document document = new Document("documentId", data, "DigitalVeteranCard");
+        Document document = new Document(ITEM_ID, DOCUMENT_ID, data, "DigitalVeteranCard");
         // Expected: 2024-01-15T10:30:00Z + 60 minutes = 2024-01-15T11:30:00Z
         long expectedEpochSecond = Instant.parse("2024-01-15T11:30:00Z").getEpochSecond();
 
@@ -76,7 +77,7 @@ class CredentialExpiryCalculatorTest {
         data.put("family_name", "Edwards");
         data.put("given_name", "Sarah Ann");
         data.put("credentialTtlMinutes", 43200); // 30 days
-        Document document = new Document("documentId", data, "org.iso.18013.5.1.mDL");
+        Document document = new Document(ITEM_ID, DOCUMENT_ID, data, "org.iso.18013.5.1.mDL");
         // Expected: 2024-01-15T10:30:00Z + 43200 minutes = 2024-02-14T10:30:00Z
         long expectedEpochSecond =
                 ZonedDateTime.of(2024, 2, 14, 10, 30, 0, 0, UTC_ZONE).toInstant().getEpochSecond();
