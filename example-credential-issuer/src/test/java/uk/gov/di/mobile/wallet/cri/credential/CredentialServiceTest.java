@@ -65,26 +65,30 @@ class CredentialServiceTest {
 
     private static final String MDL_VC_TYPE = "org.iso.18013.5.1.mDL";
     private static final String SOCIAL_SECURITY_VC_TYPE = "SocialSecurityCredential";
-    private static final String DOCUMENT_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
     private static final String CREDENTIAL_IDENTIFIER = "efb52887-48d6-43b7-b14c-da7896fbf54d";
-    private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
+    private static final String ITEM_ID = "de9cbf02-2fbc-4d61-a627-f97851f6840b";
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
-    public static final String DOCUMENT_PRIMARY_IDENTIFIER = "TEST-DOCUMENT_PRIMARY_IDENTIFIER";
     public static final UUID NOTIFICATION_ID =
             UUID.fromString("123e4567-e89b-12d3-a456-426655440000");
+    public static final String NINO = "QQ123456C";
+    public static final String DOCUMENT_NUMBER = "EDWAR583720SE5RO";
+    private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
     private static final StatusListClient.IssueResponse STATUS_LIST_ISSUE_RESPONSE =
             new StatusListClient.IssueResponse(3, "https://example.com/status-list");
     private static final long EXPIRY_TIME = 1234567890L;
     private static final String CREDENTIAL = "test-credential";
-    private static final BuildCredentialResult BUILD_CREDENTIAL_RESULT =
-            new BuildCredentialResult(CREDENTIAL, DOCUMENT_PRIMARY_IDENTIFIER);
 
     @BeforeEach
     void setUp() throws AccessTokenValidationException, ProofJwtValidationException {
         mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "300");
         mockProofJwt = new MockProofBuilder("ES256").build();
+        mockProofJwtData = getMockProofJwtData(NONCE);
+        when(mockProofJwtService.verifyProofJwt(mockProofJwt)).thenReturn(mockProofJwtData);
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
+        when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
+                .thenReturn(getMockAccessTokenData());
+
         credentialService =
                 new CredentialService(
                         mockDynamoDbService,
@@ -99,10 +103,6 @@ class CredentialServiceTest {
                         return mockLogger;
                     }
                 };
-        mockProofJwtData = getMockProofJwtData(NONCE);
-        when(mockProofJwtService.verifyProofJwt(mockProofJwt)).thenReturn(mockProofJwtData);
-        when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
-                .thenReturn(getMockAccessTokenData());
     }
 
     @Test
@@ -121,6 +121,21 @@ class CredentialServiceTest {
     }
 
     @Test
+    void Should_ThrowCredentialServiceException_When_DataStoreExceptionIsThrown()
+            throws DataStoreException {
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenThrow(new DataStoreException("Some database error"));
+
+        CredentialServiceException exception =
+                assertThrows(
+                        CredentialServiceException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+        assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
+        assertEquals(DataStoreException.class, exception.getCause().getClass());
+        assertEquals("Some database error", exception.getCause().getMessage());
+    }
+
+    @Test
     void Should_ThrowCredentialOfferValidationException_When_CredentialOfferNotFound()
             throws DataStoreException {
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER)).thenReturn(null);
@@ -132,6 +147,22 @@ class CredentialServiceTest {
         assertEquals("Credential offer validation failed", exception.getMessage());
         verify(mockLogger)
                 .error("Credential offer {} was not found", "efb52887-48d6-43b7-b14c-da7896fbf54d");
+    }
+
+    @Test
+    void Should_ThrowCredentialOfferException_When_CredentialOfferIsExpired()
+            throws DataStoreException {
+        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "-1");
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(mockCachedCredentialOffer);
+
+        CredentialOfferException exception =
+                assertThrows(
+                        CredentialOfferException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+        assertEquals("Credential offer validation failed", exception.getMessage());
+        verify(mockLogger)
+                .error("Credential offer {} is expired", "efb52887-48d6-43b7-b14c-da7896fbf54d");
     }
 
     @Test
@@ -152,34 +183,76 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ThrowCredentialOfferException_When_CredentialOfferIsExpired()
-            throws DataStoreException {
-        mockCachedCredentialOffer = getMockCredentialOfferCacheItem(WALLET_SUBJECT_ID, "-1");
+    void Should_DeleteCredentialOffer() throws Exception {
+        Document mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
+                .thenReturn(mockHandler);
+        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
+                .thenReturn(CREDENTIAL);
 
-        CredentialOfferException exception =
-                assertThrows(
-                        CredentialOfferException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-        assertEquals("Credential offer validation failed", exception.getMessage());
-        verify(mockLogger)
-                .error("Credential offer {} is expired", "efb52887-48d6-43b7-b14c-da7896fbf54d");
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+        verify(mockDynamoDbService).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
     }
 
     @Test
-    void Should_ThrowCredentialServiceException_When_DataStoreExceptionIsThrown()
-            throws DataStoreException {
+    void Should_CallExpiryCalculator_To_CalculateCredentialExpiry() throws Exception {
+        Document mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
-                .thenThrow(new DataStoreException("Some database error"));
+                .thenReturn(mockCachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
+                .thenReturn(mockHandler);
+        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
+                .thenReturn(CREDENTIAL);
+        when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
+        try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
+            mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
-        CredentialServiceException exception =
-                assertThrows(
-                        CredentialServiceException.class,
-                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
-        assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
-        assertEquals(DataStoreException.class, exception.getCause().getClass());
-        assertEquals("Some database error", exception.getCause().getMessage());
+            credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+            verify(mockExpiryCalculator).calculateExpiry(mockDocument);
+        }
+    }
+
+    @Test
+    void Should_NotCallStatusListClient_When_ProcessingJWTCredentials() throws Exception {
+        Document mockDocument = getMockSocialSecurityDocument();
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(mockCachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
+                .thenReturn(mockHandler);
+        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
+                .thenReturn(CREDENTIAL);
+        when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
+
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+        verify(mockStatusListClient, never()).getIndex(anyLong());
+    }
+
+    @Test
+    void Should_CallStatusListClient_When_ProcessingMDLCredentials() throws Exception {
+        Document mockDocument = getMockMobileDrivingLicenceDocument();
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(mockCachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
+        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
+                .thenReturn(CREDENTIAL);
+        when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
+
+        credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+        verify(mockStatusListClient).getIndex(EXPIRY_TIME);
     }
 
     @Test
@@ -192,7 +265,7 @@ class CredentialServiceTest {
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         Document mockDocument = getMockSocialSecurityDocument();
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
                 .thenReturn(mockHandler);
@@ -217,7 +290,7 @@ class CredentialServiceTest {
         Document mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
         when(mockStatusListClient.getIndex(EXPIRY_TIME))
                 .thenThrow(new StatusListException("Some status list error"));
@@ -242,7 +315,7 @@ class CredentialServiceTest {
         Document mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
@@ -261,74 +334,18 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_CallExpiryCalculator() throws Exception {
-        Document mockDocument = getMockSocialSecurityDocument();
-        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
-        CredentialHandler mockHandler = mock(CredentialHandler.class);
-        when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
-                .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
-                .thenReturn(BUILD_CREDENTIAL_RESULT);
-        when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
-        try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
-            mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
-
-            credentialService.getCredential(mockAccessToken, mockProofJwt);
-
-            verify(mockExpiryCalculator).calculateExpiry(mockDocument);
-        }
-    }
-
-    @Test
-    void Should_DeleteCredentialOffer() throws Exception {
-        Document mockDocument = getMockSocialSecurityDocument();
-        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
-        CredentialHandler mockHandler = mock(CredentialHandler.class);
-        when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
-                .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
-                .thenReturn(BUILD_CREDENTIAL_RESULT);
-
-        credentialService.getCredential(mockAccessToken, mockProofJwt);
-
-        verify(mockDynamoDbService).deleteCredentialOffer(CREDENTIAL_IDENTIFIER);
-    }
-
-    @Test
-    void Should_NotCallStatusListClient_When_ProcessingJWTCredentials() throws Exception {
-        Document mockDocument = getMockSocialSecurityDocument();
-        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
-                .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
-        CredentialHandler mockHandler = mock(CredentialHandler.class);
-        when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
-                .thenReturn(mockHandler);
-        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
-                .thenReturn(BUILD_CREDENTIAL_RESULT);
-        when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
-
-        credentialService.getCredential(mockAccessToken, mockProofJwt);
-
-        verify(mockStatusListClient, never()).getIndex(anyLong());
-    }
-
-    @Test
     void Should_ReturnCredentialResponse_When_ProcessingSocialSecurityCredential()
             throws Exception {
         Document mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID)).thenReturn(mockDocument);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
                 .thenReturn(mockHandler);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
         when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
-                .thenReturn(BUILD_CREDENTIAL_RESULT);
+                .thenReturn(CREDENTIAL);
         try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
             mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
@@ -351,7 +368,7 @@ class CredentialServiceTest {
                     storedCredential.getStatusListIndex(),
                     "Should be null for non-MDL credentials");
             assertEquals(EXPIRY_TIME, storedCredential.getTimeToLive());
-            assertEquals(DOCUMENT_PRIMARY_IDENTIFIER, storedCredential.getDocumentId());
+            assertEquals(NINO, storedCredential.getDocumentId());
         }
     }
 
@@ -360,7 +377,7 @@ class CredentialServiceTest {
         Document mockMobileDrivingLicenceDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
-        when(mockDocumentStoreClient.getDocument(DOCUMENT_ID))
+        when(mockDocumentStoreClient.getDocument(ITEM_ID))
                 .thenReturn(mockMobileDrivingLicenceDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
@@ -371,7 +388,7 @@ class CredentialServiceTest {
                         mockMobileDrivingLicenceDocument,
                         mockProofJwtData,
                         Optional.of(STATUS_LIST_ISSUE_RESPONSE)))
-                .thenReturn(BUILD_CREDENTIAL_RESULT);
+                .thenReturn(CREDENTIAL);
         try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
             mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
 
@@ -396,14 +413,14 @@ class CredentialServiceTest {
             assertEquals(STATUS_LIST_ISSUE_RESPONSE.idx(), storedCredential.getStatusListIndex());
             assertEquals(STATUS_LIST_ISSUE_RESPONSE.uri(), storedCredential.getStatusListUri());
             assertEquals(EXPIRY_TIME, storedCredential.getTimeToLive());
-            assertEquals(DOCUMENT_PRIMARY_IDENTIFIER, storedCredential.getDocumentId());
+            assertEquals(DOCUMENT_NUMBER, storedCredential.getDocumentId());
         }
     }
 
     private CachedCredentialOffer getMockCredentialOfferCacheItem(
             String walletSubjectId, String expiresInSeconds) {
         Long ttl = Instant.now().plusSeconds(Long.parseLong(expiresInSeconds)).getEpochSecond();
-        return new CachedCredentialOffer(CREDENTIAL_IDENTIFIER, DOCUMENT_ID, walletSubjectId, ttl);
+        return new CachedCredentialOffer(CREDENTIAL_IDENTIFIER, ITEM_ID, walletSubjectId, ttl);
     }
 
     private AccessTokenService.AccessTokenData getMockAccessTokenData() {
@@ -420,21 +437,22 @@ class CredentialServiceTest {
                 mockEcPublicKey);
     }
 
-    private static Document getMockSocialSecurityDocument() {
+    public static Document getMockSocialSecurityDocument() {
         HashMap<String, Object> data = new HashMap<>();
         data.put("familyName", "Edwards Green");
         data.put("givenName", "Sarah Elizabeth");
-        data.put("nino", DOCUMENT_PRIMARY_IDENTIFIER);
+        data.put("nino", NINO);
+        data.put("title", "Miss");
         data.put("credentialTtlMinutes", "43200");
-        return new Document(DOCUMENT_ID, data, SOCIAL_SECURITY_VC_TYPE);
+        return new Document(ITEM_ID, NINO, data, "SocialSecurityCredential");
     }
 
     public static Document getMockMobileDrivingLicenceDocument() {
         HashMap<String, Object> data = new HashMap<>();
         data.put("family_name", "Edwards Green");
         data.put("given_name", "Sarah Elizabeth");
-        data.put("document_number", DOCUMENT_PRIMARY_IDENTIFIER);
+        data.put("document_number", DOCUMENT_NUMBER);
         data.put("credentialTtlMinutes", 43200L);
-        return new Document(DOCUMENT_ID, data, MDL_VC_TYPE);
+        return new Document(ITEM_ID, DOCUMENT_NUMBER, data, MDL_VC_TYPE);
     }
 }
