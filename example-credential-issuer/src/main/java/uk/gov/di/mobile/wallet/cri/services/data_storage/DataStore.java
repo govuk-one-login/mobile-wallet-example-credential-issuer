@@ -17,6 +17,5 @@ public interface DataStore {
 
     StoredCredential getStoredCredential(String credentialId) throws DataStoreException;
 
-    List<StoredCredential> getCredentialsByDocumentPrimaryIdentifier(
-            String documentPrimaryIdentifier) throws DataStoreException;
+    List<StoredCredential> getCredentialsByDocumentId(String documentId) throws DataStoreException;
 }

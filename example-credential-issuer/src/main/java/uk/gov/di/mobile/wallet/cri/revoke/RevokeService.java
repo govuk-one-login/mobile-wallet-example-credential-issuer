@@ -14,14 +14,13 @@ public class RevokeService {
         this.dataStore = dataStore;
     }
 
-    public void revokeCredential(String documentPrimaryIdentifier)
+    public void revokeCredential(String documentId)
             throws DataStoreException, CredentialNotFoundException {
-        List<StoredCredential> credentials =
-                dataStore.getCredentialsByDocumentPrimaryIdentifier(documentPrimaryIdentifier);
+        List<StoredCredential> credentials = dataStore.getCredentialsByDocumentId(documentId);
 
         if (credentials.isEmpty()) {
             throw new CredentialNotFoundException(
-                    "No credential found for document number " + documentPrimaryIdentifier);
+                    "No credential found for document with ID " + documentId);
         }
 
         // Revoke credentials found

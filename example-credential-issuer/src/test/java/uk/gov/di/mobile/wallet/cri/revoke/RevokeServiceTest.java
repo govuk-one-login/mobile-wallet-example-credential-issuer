@@ -35,7 +35,7 @@ class RevokeServiceTest {
     @Test
     void Should_PropagateDataStoreException() throws DataStoreException {
 
-        when(mockDynamoDbService.getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER))
+        when(mockDynamoDbService.getCredentialsByDocumentId(DRIVING_LICENCE_NUMBER))
                 .thenThrow(new DataStoreException("Some detabase error"));
 
         DataStoreException exception =
@@ -43,14 +43,13 @@ class RevokeServiceTest {
                         DataStoreException.class,
                         () -> revokeService.revokeCredential(DRIVING_LICENCE_NUMBER));
         assertEquals("Some detabase error", exception.getMessage());
-        verify(mockDynamoDbService, times(1))
-                .getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER);
+        verify(mockDynamoDbService, times(1)).getCredentialsByDocumentId(DRIVING_LICENCE_NUMBER);
     }
 
     @Test
     void Should_ThrowCredentialNotFoundException_When_NoCredentialFound()
             throws DataStoreException {
-        when(mockDynamoDbService.getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER))
+        when(mockDynamoDbService.getCredentialsByDocumentId(DRIVING_LICENCE_NUMBER))
                 .thenReturn(List.of());
 
         CredentialNotFoundException exception =
@@ -58,18 +57,17 @@ class RevokeServiceTest {
                         CredentialNotFoundException.class,
                         () -> revokeService.revokeCredential(DRIVING_LICENCE_NUMBER));
         assertEquals(
-                "No credential found for document number EDWAR515163SE5RO", exception.getMessage());
-        verify(mockDynamoDbService, times(1))
-                .getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER);
+                "No credential found for document with ID EDWAR515163SE5RO",
+                exception.getMessage());
+        verify(mockDynamoDbService, times(1)).getCredentialsByDocumentId(DRIVING_LICENCE_NUMBER);
     }
 
     @Test
     void Should_NotThrow_When_CredentialsFound() throws DataStoreException {
-        when(mockDynamoDbService.getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER))
+        when(mockDynamoDbService.getCredentialsByDocumentId(DRIVING_LICENCE_NUMBER))
                 .thenReturn(List.of(new StoredCredential()));
 
         assertDoesNotThrow(() -> revokeService.revokeCredential(DRIVING_LICENCE_NUMBER));
-        verify(mockDynamoDbService, times(1))
-                .getCredentialsByDocumentPrimaryIdentifier(DRIVING_LICENCE_NUMBER);
+        verify(mockDynamoDbService, times(1)).getCredentialsByDocumentId(DRIVING_LICENCE_NUMBER);
     }
 }

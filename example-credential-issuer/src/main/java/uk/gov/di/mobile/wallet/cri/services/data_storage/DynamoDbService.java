@@ -103,26 +103,22 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
-    public List<StoredCredential> getCredentialsByDocumentPrimaryIdentifier(
-            String documentPrimaryIdentifier) throws DataStoreException {
+    public List<StoredCredential> getCredentialsByDocumentId(String documentId)
+            throws DataStoreException {
         try {
-            DynamoDbIndex<StoredCredential> index =
-                    storedCredentialTable.index("documentPrimaryIdentifierIndex");
+            DynamoDbIndex<StoredCredential> index = storedCredentialTable.index("documentIdIndex");
 
             QueryEnhancedRequest request =
                     QueryEnhancedRequest.builder()
                             .queryConditional(
                                     QueryConditional.keyEqualTo(
-                                            Key.builder()
-                                                    .partitionValue(documentPrimaryIdentifier)
-                                                    .build()))
+                                            Key.builder().partitionValue(documentId).build()))
                             .build();
 
             return index.query(request).stream().flatMap(page -> page.items().stream()).toList();
 
         } catch (Exception exception) {
-            throw new DataStoreException(
-                    "Error fetching credentials by documentPrimaryIdentifier", exception);
+            throw new DataStoreException("Error fetching credentials by documentId", exception);
         }
     }
 

@@ -51,9 +51,9 @@ class DynamoDbServiceTest {
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
     @Mock private DynamoDbTable<CachedCredentialOffer> mockCredentialOfferTable;
     @Mock private DynamoDbTable<StoredCredential> mockCredentialTable;
-  @Mock private PageIterable<StoredCredential> mockPageIterable;
-  @Mock private Page<StoredCredential> mockPage;
-  @Mock private DynamoDbIndex<StoredCredential> mockIndex;
+    @Mock private PageIterable<StoredCredential> mockPageIterable;
+    @Mock private Page<StoredCredential> mockPage;
+    @Mock private DynamoDbIndex<StoredCredential> mockIndex;
     private CachedCredentialOffer cachedCredentialOffer;
     private DynamoDbService dynamoDbService;
     private StoredCredential storedCredential;
@@ -239,13 +239,10 @@ class DynamoDbServiceTest {
 
         when(mockPage.items()).thenReturn(Arrays.asList(credential1, credential2));
         when(mockPageIterable.stream()).thenReturn(Stream.of(mockPage));
-        when(mockCredentialTable.index("documentIdIndex"))
-                .thenReturn(mockIndex);
+        when(mockCredentialTable.index("documentIdIndex")).thenReturn(mockIndex);
         when(mockIndex.query(any(QueryEnhancedRequest.class))).thenReturn(mockPageIterable);
 
-        List<StoredCredential> result =
-                dynamoDbService.getCredentialsByDocumentPrimaryIdentifier(
-                        DOCUMENT_ID);
+        List<StoredCredential> result = dynamoDbService.getCredentialsByDocumentId(DOCUMENT_ID);
 
         assertEquals(2, result.size());
         assertEquals("credentialIdentifier1", result.get(0).getCredentialIdentifier());
@@ -258,13 +255,10 @@ class DynamoDbServiceTest {
     void Should_ReturnEmptyList_When_NoCredentialsFound() throws DataStoreException {
         when(mockPage.items()).thenReturn(Collections.emptyList());
         when(mockPageIterable.stream()).thenReturn(Stream.of(mockPage));
-        when(mockCredentialTable.index("documentIdIndex"))
-                .thenReturn(mockIndex);
+        when(mockCredentialTable.index("documentIdIndex")).thenReturn(mockIndex);
         when(mockIndex.query(any(QueryEnhancedRequest.class))).thenReturn(mockPageIterable);
 
-        List<StoredCredential> result =
-                dynamoDbService.getCredentialsByDocumentPrimaryIdentifier(
-                        DOCUMENT_ID);
+        List<StoredCredential> result = dynamoDbService.getCredentialsByDocumentId(DOCUMENT_ID);
 
         assertNotNull(result);
         assertTrue(result.isEmpty());
@@ -272,20 +266,16 @@ class DynamoDbServiceTest {
 
     @Test
     void Should_ThrowDataStoreException_When_QueryFails() {
-        when(mockCredentialTable.index("documentIdIndex"))
-                .thenReturn(mockIndex);
+        when(mockCredentialTable.index("documentIdIndex")).thenReturn(mockIndex);
         when(mockIndex.query(any(QueryEnhancedRequest.class)))
                 .thenThrow(new RuntimeException("Some DynamoDB error"));
 
         DataStoreException exception =
                 assertThrows(
                         DataStoreException.class,
-                        () ->
-                                dynamoDbService.getCredentialsByDocumentPrimaryIdentifier(
-                                        DOCUMENT_ID));
+                        () -> dynamoDbService.getCredentialsByDocumentId(DOCUMENT_ID));
 
-        assertEquals(
-                "Error fetching credentials by documentPrimaryIdentifier", exception.getMessage());
+        assertEquals("Error fetching credentials by documentId", exception.getMessage());
         assertEquals("Some DynamoDB error", exception.getCause().getMessage());
     }
 }
