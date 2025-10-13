@@ -32,13 +32,13 @@ jobs:
           node-version-file: document-signing-certificate-issuer/.nvmrc
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@a03048d87541d1d9fcf2ecf528a4a65ba9bd7838 # v5.0.0
+        uses: aws-actions/configure-aws-credentials@00943011d9042930efac3dcd3a170e4273319bc8 # v5.1.0
         with:
           role-to-assume: ${{ secrets.BUILD_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
 
       - name: Set up SAM CLI
-        uses: aws-actions/setup-sam@f664fad9e12492edfc187a31f575537dfbb0ff63 # v2
+        uses: aws-actions/setup-sam@c71dd89d980e49367c70391e8ada4353f52f2800 # v2
         with:
           version: 1.131.0
           use-installer: true
@@ -104,7 +104,7 @@ jobs:
 
       - name: Create GitHub release
         if: steps.created.outputs.bump == 'true'
-        uses: softprops/action-gh-release@62c96d0c4e8a889135c1f3a25910db8dbe0e85f7 # v2.3.4
+        uses: softprops/action-gh-release@6da8fa9354ddfdc4aeace5fc48d7f679b5214090 # v2.4.1
         with:
           tag_name: ${{ steps.release.outputs.version }}
           draft: false
