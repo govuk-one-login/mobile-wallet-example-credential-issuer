@@ -12,7 +12,7 @@ public class CachedCredentialOffer {
 
     String credentialIdentifier;
     String walletSubjectId;
-    String documentId;
+    String itemId;
     Long timeToLive;
 
     public CachedCredentialOffer() {
@@ -20,12 +20,9 @@ public class CachedCredentialOffer {
     }
 
     public CachedCredentialOffer(
-            String credentialIdentifier,
-            String documentId,
-            String walletSubjectId,
-            Long timeToLive) {
+            String credentialIdentifier, String itemId, String walletSubjectId, Long timeToLive) {
         this.credentialIdentifier = credentialIdentifier;
-        this.documentId = documentId;
+        this.itemId = itemId;
         this.walletSubjectId = walletSubjectId;
         this.timeToLive = timeToLive;
     }

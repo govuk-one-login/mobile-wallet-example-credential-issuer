@@ -48,7 +48,7 @@ class CredentialOfferResourceTest {
     @Mock private Logger mockLogger;
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
-    private static final String DOCUMENT_ID = "f8f7ae46-749a-4882-a426-2659fb81c9d2";
+    private static final String ITEM_ID = "f8f7ae46-749a-4882-a426-2659fb81c9d2";
     private static final String CREDENTIAL_TYPE = "TestCredentialType";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final KmsService kmsService = mock(KmsService.class);
@@ -88,7 +88,7 @@ class CredentialOfferResourceTest {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
-                        .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("itemId", ITEM_ID)
                         .queryParam("credentialType", CREDENTIAL_TYPE)
                         .request()
                         .get();
@@ -100,7 +100,7 @@ class CredentialOfferResourceTest {
         verify(mockDataStore, times(1)).saveCredentialOffer(any());
         verify(mockLogger)
                 .info(
-                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}",
+                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, itemId: {}",
                         "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                         "76bb18c0-86c6-446e-884d-37550247d49d",
                         "f8f7ae46-749a-4882-a426-2659fb81c9d2");
@@ -118,7 +118,7 @@ class CredentialOfferResourceTest {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
-                        .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("itemId", ITEM_ID)
                         .queryParam("credentialType", CREDENTIAL_TYPE)
                         .request()
                         .get();
@@ -132,7 +132,7 @@ class CredentialOfferResourceTest {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", "123")
-                        .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("itemId", ITEM_ID)
                         .queryParam("credentialType", CREDENTIAL_TYPE)
                         .request()
                         .get();
@@ -140,11 +140,11 @@ class CredentialOfferResourceTest {
     }
 
     @Test
-    void Should_Return400_When_DocumentIdIsInvalid() {
+    void Should_Return400_When_ItemIdIsInvalid() {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
-                        .queryParam("documentId", "&&^")
+                        .queryParam("itemId", "&&^")
                         .queryParam("credentialType", CREDENTIAL_TYPE)
                         .request()
                         .get();
@@ -158,7 +158,7 @@ class CredentialOfferResourceTest {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
-                        .queryParam("documentId", DOCUMENT_ID)
+                        .queryParam("itemId", ITEM_ID)
                         .queryParam("credentialType", "???")
                         .request()
                         .get();

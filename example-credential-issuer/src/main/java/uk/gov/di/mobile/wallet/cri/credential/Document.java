@@ -10,6 +10,9 @@ import java.util.Map;
 @Getter
 @Setter
 public class Document {
+    @JsonProperty("itemId")
+    private String itemId;
+
     @JsonProperty("documentId")
     private String documentId;
 
@@ -24,7 +27,8 @@ public class Document {
         // Empty constructor required for deserialization
     }
 
-    public Document(String documentId, Map<String, Object> data, String vcType) {
+    public Document(String itemId, String documentId, Map<String, Object> data, String vcType) {
+        this.itemId = itemId;
         this.documentId = documentId;
         this.data = data;
         this.vcType = vcType;

@@ -39,8 +39,9 @@ class NotificationServiceTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String NOTIFICATION_ID = "77368ca6-877b-4208-a397-99f1df890400";
-    private static final String DOCUMENT_PRIMARY_IDENTIFIER =
-            "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
+    private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
+    private static final String DOCUMENT_ID = "1234ABCD";
+    private static final Long TTL = 43200L;
 
     @Mock private DynamoDbService mockDynamoDbService;
     @Mock private AccessTokenService mockAccessTokenService;
@@ -70,9 +71,7 @@ class NotificationServiceTest {
 
         AccessTokenService.AccessTokenData mockAccessTokenData =
                 new AccessTokenService.AccessTokenData(
-                        WALLET_SUBJECT_ID,
-                        "134e0c41-a8b4-46d4-aec8-cd547e125589",
-                        CREDENTIAL_IDENTIFIER);
+                        WALLET_SUBJECT_ID, NONCE, CREDENTIAL_IDENTIFIER);
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
     }
 
@@ -85,8 +84,8 @@ class NotificationServiceTest {
                         CREDENTIAL_IDENTIFIER,
                         NOTIFICATION_ID,
                         "not_the_same_wallet_subject_id",
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                        TTL,
+                        DOCUMENT_ID);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         AccessTokenValidationException exception =
@@ -124,8 +123,8 @@ class NotificationServiceTest {
                         CREDENTIAL_IDENTIFIER,
                         NOTIFICATION_ID,
                         WALLET_SUBJECT_ID,
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                        TTL,
+                        DOCUMENT_ID);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
@@ -160,8 +159,8 @@ class NotificationServiceTest {
                         CREDENTIAL_IDENTIFIER,
                         storedNotificationId,
                         WALLET_SUBJECT_ID,
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                        TTL,
+                        DOCUMENT_ID);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
         notificationService.processNotification(accessToken, requestBody);
         verify(mockLogger)
@@ -185,8 +184,8 @@ class NotificationServiceTest {
                         CREDENTIAL_IDENTIFIER,
                         NOTIFICATION_ID,
                         WALLET_SUBJECT_ID,
-                        43200L,
-                        DOCUMENT_PRIMARY_IDENTIFIER);
+                        TTL,
+                        DOCUMENT_ID);
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
         notificationService.processNotification(accessToken, requestBody);
 
