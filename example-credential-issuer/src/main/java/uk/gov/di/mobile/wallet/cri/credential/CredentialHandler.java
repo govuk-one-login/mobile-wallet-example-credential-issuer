@@ -7,7 +7,7 @@ import java.security.cert.CertificateException;
 import java.util.Optional;
 
 public interface CredentialHandler {
-    BuildCredentialResult buildCredential(
+    String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.IssueResponse> issueResponse)

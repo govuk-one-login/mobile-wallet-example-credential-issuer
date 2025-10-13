@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.basic_check_credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
@@ -25,7 +24,7 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
     }
 
     @Override
-    public BuildCredentialResult buildCredential(
+    public String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.IssueResponse> issueResponse)
@@ -37,12 +36,7 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(
                         basicCheckDocument, proofData.didKey());
 
-        String credential =
-                credentialBuilder.buildCredential(
-                        subject,
-                        BASIC_DISCLOSURE_CREDENTIAL,
-                        basicCheckDocument.getCredentialTtlMinutes());
-
-        return new BuildCredentialResult(credential, basicCheckDocument.getCertificateNumber());
+        return credentialBuilder.buildCredential(
+                subject, BASIC_DISCLOSURE_CREDENTIAL, basicCheckDocument.getCredentialTtlMinutes());
     }
 }

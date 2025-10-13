@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
@@ -71,12 +70,11 @@ class MobileDrivingLicenceHandlerTest {
 
         setMapperField(spyHandler, mockMapper);
 
-        BuildCredentialResult result =
+        String credential =
                 spyHandler.buildCredential(
                         mockDocument, mockProofData, Optional.of(STATUS_LIST_ISSUE_RESPONSE));
 
-        assertEquals(EXPECTED_CREDENTIAL, result.credential());
-        assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentPrimaryIdentifier());
+        assertEquals(EXPECTED_CREDENTIAL, credential);
         verify(mockMobileDrivingLicenceService)
                 .createMobileDrivingLicence(mockDrivingLicenceDocument, ecPublicKey, INDEX, URI);
     }

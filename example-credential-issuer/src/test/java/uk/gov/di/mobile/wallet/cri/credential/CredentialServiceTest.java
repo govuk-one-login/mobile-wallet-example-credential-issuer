@@ -351,8 +351,7 @@ class CredentialServiceTest {
                     storedCredential.getStatusListIndex(),
                     "Should be null for non-MDL credentials");
             assertEquals(EXPIRY_TIME, storedCredential.getTimeToLive());
-            assertEquals(
-                    DOCUMENT_PRIMARY_IDENTIFIER, storedCredential.getDocumentPrimaryIdentifier());
+            assertEquals(DOCUMENT_PRIMARY_IDENTIFIER, storedCredential.getDocumentId());
         }
     }
 
@@ -397,8 +396,7 @@ class CredentialServiceTest {
             assertEquals(STATUS_LIST_ISSUE_RESPONSE.idx(), storedCredential.getStatusListIndex());
             assertEquals(STATUS_LIST_ISSUE_RESPONSE.uri(), storedCredential.getStatusListUri());
             assertEquals(EXPIRY_TIME, storedCredential.getTimeToLive());
-            assertEquals(
-                    DOCUMENT_PRIMARY_IDENTIFIER, storedCredential.getDocumentPrimaryIdentifier());
+            assertEquals(DOCUMENT_PRIMARY_IDENTIFIER, storedCredential.getDocumentId());
         }
     }
 

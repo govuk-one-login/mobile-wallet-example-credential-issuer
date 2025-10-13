@@ -18,7 +18,7 @@ public class StoredCredential {
     @Getter private Integer statusListIndex;
     @Getter private String statusListUri;
     @Getter private Long timeToLive;
-    private String documentPrimaryIdentifier;
+    private String documentId;
 
     public StoredCredential() {
         // Empty constructor needed for dynamoDb deserialization
@@ -31,7 +31,7 @@ public class StoredCredential {
         this.statusListIndex = builder.statusListIndex;
         this.statusListUri = builder.statusListUri;
         this.timeToLive = builder.timeToLive;
-        this.documentPrimaryIdentifier = builder.documentPrimaryIdentifier;
+        this.documentId = builder.documentId;
     }
 
     public static Builder builder() {
@@ -43,10 +43,10 @@ public class StoredCredential {
         return credentialIdentifier;
     }
 
-    @DynamoDbSecondaryPartitionKey(indexNames = "documentPrimaryIdentifierIndex")
-    @DynamoDbAttribute("documentPrimaryIdentifier")
-    public String getDocumentPrimaryIdentifier() {
-        return documentPrimaryIdentifier;
+    @DynamoDbSecondaryPartitionKey(indexNames = "documentIdIndex")
+    @DynamoDbAttribute("documentId")
+    public String getDocumentId() {
+        return documentId;
     }
 
     public static class Builder {
@@ -56,7 +56,7 @@ public class StoredCredential {
         private Integer statusListIndex;
         private String statusListUri;
         private Long timeToLive;
-        private String documentPrimaryIdentifier;
+        private String documentId;
 
         private Builder() {}
 
@@ -88,8 +88,8 @@ public class StoredCredential {
             return this;
         }
 
-        public Builder documentPrimaryIdentifier(String documentPrimaryIdentifier) {
-            this.documentPrimaryIdentifier = documentPrimaryIdentifier;
+        public Builder documentId(String documentId) {
+            this.documentId = documentId;
             return this;
         }
 

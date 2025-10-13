@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
@@ -25,7 +24,7 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
     }
 
     @Override
-    public BuildCredentialResult buildCredential(
+    public String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.IssueResponse> issueResponse)
@@ -37,12 +36,7 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(
                         veteranCardDocument, proofData.didKey());
 
-        String credential =
-                credentialBuilder.buildCredential(
-                        subject,
-                        DIGITAL_VETERAN_CARD,
-                        veteranCardDocument.getCredentialTtlMinutes());
-
-        return new BuildCredentialResult(credential, veteranCardDocument.getServiceNumber());
+        return credentialBuilder.buildCredential(
+                subject, DIGITAL_VETERAN_CARD, veteranCardDocument.getCredentialTtlMinutes());
     }
 }

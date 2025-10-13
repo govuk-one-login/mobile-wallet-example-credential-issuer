@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
@@ -78,12 +77,11 @@ class DigitalVeteranCardHandlerTest {
                                             mockVeteranCardDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
-            BuildCredentialResult result =
+            String credential =
                     spyHandler.buildCredential(
                             mockDocument, mockProofData, STATUS_LIST_ISSUE_RESPONSE);
 
-            assertEquals(EXPECTED_CREDENTIAL, result.credential());
-            assertEquals(EXPECTED_DOCUMENT_NUMBER, result.documentPrimaryIdentifier());
+            assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
                     .buildCredential(mockCredentialSubject, DIGITAL_VETERAN_CARD, TTL_MINUTES);
         }

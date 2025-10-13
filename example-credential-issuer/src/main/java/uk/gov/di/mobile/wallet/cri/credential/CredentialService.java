@@ -78,8 +78,8 @@ public class CredentialService {
                         "Access token sub claim does not match cached walletSubjectId");
             }
 
-            String documentId = credentialOffer.getDocumentId();
-            Document document = documentStoreClient.getDocument(documentId);
+            String itemId = credentialOffer.getItemId();
+            Document document = documentStoreClient.getDocument(itemId);
             String notificationId = UUID.randomUUID().toString();
             String vcType = document.getVcType();
 
@@ -95,7 +95,7 @@ public class CredentialService {
             }
 
             CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
-            BuildCredentialResult result =
+            String credential =
                     handler.buildCredential(
                             document, proofJwtData, Optional.ofNullable(issueResponse));
 
@@ -106,12 +106,12 @@ public class CredentialService {
                             .walletSubjectId(credentialOffer.getWalletSubjectId())
                             .timeToLive(expiry)
                             .statusList(issueResponse)
-                            .documentPrimaryIdentifier(result.documentPrimaryIdentifier())
+                            .documentId(document.getDocumentId())
                             .build();
 
             dataStore.saveStoredCredential(storedCredential);
 
-            return new CredentialResponse(result.credential(), notificationId);
+            return new CredentialResponse(credential, notificationId);
         } catch (DataStoreException
                 | SigningException
                 | MDLException

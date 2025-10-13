@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
@@ -21,7 +20,7 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
         this.mobileDrivingLicenceBuilder = mobileDrivingLicenceBuilder;
     }
 
-    public BuildCredentialResult buildCredential(
+    public String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.IssueResponse> issueResponse)
@@ -29,13 +28,10 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
-        String credential =
-                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                        drivingLicenceDocument,
-                        proofData.publicKey(),
-                        issueResponse.orElseThrow().idx(),
-                        issueResponse.orElseThrow().uri());
-
-        return new BuildCredentialResult(credential, drivingLicenceDocument.getDocumentNumber());
+        return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                drivingLicenceDocument,
+                proofData.publicKey(),
+                issueResponse.orElseThrow().idx(),
+                issueResponse.orElseThrow().uri());
     }
 }

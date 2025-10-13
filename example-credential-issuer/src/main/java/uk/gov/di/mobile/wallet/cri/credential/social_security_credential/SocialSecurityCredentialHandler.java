@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.social_security_credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.BuildCredentialResult;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
@@ -25,7 +24,7 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
     }
 
     @Override
-    public BuildCredentialResult buildCredential(
+    public String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.IssueResponse> issueResponse)
@@ -37,12 +36,9 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         socialSecurityDocument, proofData.didKey());
 
-        String credential =
-                credentialBuilder.buildCredential(
-                        subject,
-                        SOCIAL_SECURITY_CREDENTIAL,
-                        socialSecurityDocument.getCredentialTtlMinutes());
-
-        return new BuildCredentialResult(credential, socialSecurityDocument.getNino());
+        return credentialBuilder.buildCredential(
+                subject,
+                SOCIAL_SECURITY_CREDENTIAL,
+                socialSecurityDocument.getCredentialTtlMinutes());
     }
 }
