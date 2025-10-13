@@ -20,10 +20,10 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class RevokeResourceTest {
 
-  private final RevokeService revokeService = mock(RevokeService.class);
-  private final ResourceExtension resource =
+    private final RevokeService revokeService = mock(RevokeService.class);
+    private final ResourceExtension resource =
             ResourceExtension.builder().addResource(new RevokeResource(revokeService)).build();
-  private static final String DOCUMENT_ID = "ABCdef012345";
+    private static final String DOCUMENT_ID = "ABCdef012345";
 
     @Test
     void Should_Return400_When_DocumentIdIsMissing() {
@@ -38,9 +38,10 @@ class RevokeResourceTest {
     @ParameterizedTest
     @ValueSource(
             strings = {
-                "5h", // 'documentId' is too short
-                "5hBBAPcrUSPB77VDFDFNLpF214bVuxPB", // 'documentId' is too long
-                "d7ZstBcftkJLAns@!", // 'documentId' has special characters
+                "shrt", // 4 characters but minimum is 5
+                "documentIdIsTooLong1234567", // 26 characters but maximum is 25
+                "spaces are not ok",
+                "invalidChars@!",
             })
     void Should_Return400_When_DocumentIsInvalid(String documentId) {
         final Response response =
