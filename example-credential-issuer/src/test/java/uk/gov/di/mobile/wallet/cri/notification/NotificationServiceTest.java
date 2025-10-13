@@ -39,9 +39,9 @@ class NotificationServiceTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String NOTIFICATION_ID = "77368ca6-877b-4208-a397-99f1df890400";
-    private static final Long TIME_TO_LIVE = 12345L;
-    private static final String DOCUMENT_PRIMARY_IDENTIFIER =
-            "cb2e831f-b2d9-4c7a-b42e-be5370ea4c77";
+    private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
+    private static final String DOCUMENT_ID = "1234ABCD";
+    private static final Long TTL = 43200L;
 
     @Mock private DynamoDbService mockDynamoDbService;
     @Mock private AccessTokenService mockAccessTokenService;
@@ -71,9 +71,7 @@ class NotificationServiceTest {
 
         AccessTokenService.AccessTokenData mockAccessTokenData =
                 new AccessTokenService.AccessTokenData(
-                        WALLET_SUBJECT_ID,
-                        "134e0c41-a8b4-46d4-aec8-cd547e125589",
-                        CREDENTIAL_IDENTIFIER);
+                        WALLET_SUBJECT_ID, NONCE, CREDENTIAL_IDENTIFIER);
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
     }
 
@@ -85,9 +83,9 @@ class NotificationServiceTest {
                         .credentialIdentifier(CREDENTIAL_IDENTIFIER)
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId("not_the_same_wallet_subject_id")
-                        .timeToLive(TIME_TO_LIVE)
+                        .timeToLive(TTL)
                         .statusList(null)
-                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .documentId(DOCUMENT_ID)
                         .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
@@ -95,7 +93,6 @@ class NotificationServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> notificationService.processNotification(accessToken, requestBody));
-
         assertThat(
                 exception.getMessage(),
                 containsString("Access token 'sub' does not match credential 'walletSubjectId'"));
@@ -110,7 +107,6 @@ class NotificationServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> notificationService.processNotification(accessToken, requestBody));
-
         assertThat(
                 exception.getMessage(),
                 containsString("Credential efb52887-48d6-43b7-b14c-da7896fbf54d was not found"));
@@ -122,26 +118,22 @@ class NotificationServiceTest {
         StoredCredential mockStoredCredential =
                 StoredCredential.builder()
                         .credentialIdentifier(CREDENTIAL_IDENTIFIER)
-                        .notificationId(NOTIFICATION_ID)
+                        .notificationId("not_the_same_notification_id")
                         .walletSubjectId(WALLET_SUBJECT_ID)
-                        .timeToLive(TIME_TO_LIVE)
+                        .timeToLive(TTL)
                         .statusList(null)
-                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .documentId(DOCUMENT_ID)
                         .build();
-
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
         requestBody =
                 new NotificationRequestBody(
-                        "not_the_same_notification_id",
-                        EventType.credential_accepted,
-                        "Credential stored");
+                        NOTIFICATION_ID, EventType.credential_accepted, "Credential stored");
 
         InvalidNotificationIdException exception =
                 assertThrows(
                         InvalidNotificationIdException.class,
                         () -> notificationService.processNotification(accessToken, requestBody));
-
         assertThat(
                 exception.getMessage(),
                 containsString("Request 'notification_id' does not match cached 'notificationId'"));
@@ -156,26 +148,26 @@ class NotificationServiceTest {
         requestBody =
                 new NotificationRequestBody(
                         requestNotificationId, EventType.credential_accepted, "Credential stored");
-
         String storedNotificationId = "6a6bb0dc-c6cb-4fd1-8c03-08423e38802a";
         StoredCredential mockStoredCredential =
                 StoredCredential.builder()
                         .credentialIdentifier(CREDENTIAL_IDENTIFIER)
                         .notificationId(storedNotificationId)
                         .walletSubjectId(WALLET_SUBJECT_ID)
-                        .timeToLive(TIME_TO_LIVE)
+                        .timeToLive(TTL)
                         .statusList(null)
-                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .documentId(DOCUMENT_ID)
                         .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
+
         notificationService.processNotification(accessToken, requestBody);
+
         verify(mockLogger)
                 .info(
                         "Notification received - notification_id: {}, event: {}, event_description: {}",
                         "6A6BB0DC-C6CB-4FD1-8C03-08423E38802A",
                         EventType.credential_accepted,
                         "Credential stored");
-
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
     }
@@ -190,9 +182,9 @@ class NotificationServiceTest {
                         .credentialIdentifier(CREDENTIAL_IDENTIFIER)
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId(WALLET_SUBJECT_ID)
-                        .timeToLive(TIME_TO_LIVE)
+                        .timeToLive(TTL)
                         .statusList(null)
-                        .documentPrimaryIdentifier(DOCUMENT_PRIMARY_IDENTIFIER)
+                        .documentId(DOCUMENT_ID)
                         .build();
         when(mockDynamoDbService.getStoredCredential(anyString())).thenReturn(mockStoredCredential);
 
@@ -204,7 +196,6 @@ class NotificationServiceTest {
                         "77368ca6-877b-4208-a397-99f1df890400",
                         EventType.credential_accepted,
                         "Credential stored");
-
         verify(mockAccessTokenService, times(1)).verifyAccessToken(accessToken);
         verify(mockDynamoDbService, times(1)).getStoredCredential(CREDENTIAL_IDENTIFIER);
     }
