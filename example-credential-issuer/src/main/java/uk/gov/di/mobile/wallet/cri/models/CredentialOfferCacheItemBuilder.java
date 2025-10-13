@@ -2,7 +2,7 @@ package uk.gov.di.mobile.wallet.cri.models;
 
 public class CredentialOfferCacheItemBuilder {
     private String credentialIdentifier;
-    private String documentId;
+    private String itemId;
     private String walletSubjectId;
     private Long timeToLive;
 
@@ -11,8 +11,8 @@ public class CredentialOfferCacheItemBuilder {
         return this;
     }
 
-    public CredentialOfferCacheItemBuilder documentId(String documentId) {
-        this.documentId = documentId;
+    public CredentialOfferCacheItemBuilder itemId(String itemId) {
+        this.itemId = itemId;
         return this;
     }
 
@@ -27,7 +27,6 @@ public class CredentialOfferCacheItemBuilder {
     }
 
     public CachedCredentialOffer build() {
-        return new CachedCredentialOffer(
-                credentialIdentifier, documentId, walletSubjectId, timeToLive);
+        return new CachedCredentialOffer(credentialIdentifier, itemId, walletSubjectId, timeToLive);
     }
 }

@@ -38,7 +38,7 @@ public class CredentialOfferResource {
 
     private static final String WALLET_SUBJECT_ID_PATTERN =
             "^urn:fdc:wallet\\.account\\.gov\\.uk:2024:[a-zA-Z0-9_-]{43}$";
-    private static final String DOCUMENT_ID_PATTERN = "^[a-zA-Z0-9_-]{10,50}$";
+    private static final String ITEM_ID_PATTERN = "^[a-zA-Z0-9_-]{10,50}$";
     private static final String CREDENTIAL_TYPE_PATTERN = "^[a-zA-Z0-9.]{10,100}$";
 
     public CredentialOfferResource(
@@ -55,8 +55,7 @@ public class CredentialOfferResource {
     public Response getCredentialOffer(
             @QueryParam("walletSubjectId") @NotEmpty @Pattern(regexp = WALLET_SUBJECT_ID_PATTERN)
                     String walletSubjectId,
-            @QueryParam("documentId") @NotEmpty @Pattern(regexp = DOCUMENT_ID_PATTERN)
-                    String documentId,
+            @QueryParam("itemId") @NotEmpty @Pattern(regexp = ITEM_ID_PATTERN) String itemId,
             @QueryParam("credentialType") @NotEmpty @Pattern(regexp = CREDENTIAL_TYPE_PATTERN)
                     String credentialType)
             throws JsonProcessingException {
@@ -69,18 +68,18 @@ public class CredentialOfferResource {
                     credentialOfferService.buildCredentialOffer(credentialOfferId, credentialType);
         } catch (SigningException | NoSuchAlgorithmException exception) {
             LOGGER.error(
-                    "Failed to create credential offer - walletSubjectId: {}, documentId: {}",
+                    "Failed to create credential offer - walletSubjectId: {}, itemId: {}",
                     walletSubjectId,
-                    documentId,
+                    itemId,
                     exception);
             return ResponseUtil.internalServerError();
         }
 
         LOGGER.info(
-                "Credential offer created - walletSubjectId: {}, credentialOfferId: {}, documentId: {}",
+                "Credential offer created - walletSubjectId: {}, credentialOfferId: {}, itemId: {}",
                 walletSubjectId,
                 credentialOfferId,
-                documentId);
+                itemId);
 
         long credentialOfferTtl =
                 Instant.now()
@@ -90,7 +89,7 @@ public class CredentialOfferResource {
             CachedCredentialOffer cachedCredentialOffer =
                     new CredentialOfferCacheItemBuilder()
                             .credentialIdentifier(credentialOfferId)
-                            .documentId(documentId)
+                            .itemId(itemId)
                             .walletSubjectId(walletSubjectId)
                             .timeToLive(credentialOfferTtl)
                             .build();
@@ -98,19 +97,19 @@ public class CredentialOfferResource {
             dataStore.saveCredentialOffer(cachedCredentialOffer);
         } catch (DataStoreException exception) {
             LOGGER.error(
-                    "Failed to save credential offer - walletSubjectId: {}, documentId: {}",
+                    "Failed to save credential offer - walletSubjectId: {}, itemId: {}",
                     walletSubjectId,
-                    documentId,
+                    itemId,
                     exception);
             return ResponseUtil.internalServerError();
         }
 
         getLogger()
                 .info(
-                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, documentId: {}",
+                        "Credential offer saved - walletSubjectId: {}, credentialOfferId: {}, itemId: {}",
                         walletSubjectId,
                         credentialOfferId,
-                        documentId);
+                        itemId);
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialOfferString = mapper.writeValueAsString(credentialOffer);

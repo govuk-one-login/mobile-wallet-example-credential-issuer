@@ -18,27 +18,26 @@ public class DocumentStoreClient {
         this.httpClient = httpClient;
     }
 
-    public Document getDocument(String documentId) throws DocumentStoreException {
+    public Document getDocument(String itemId) throws DocumentStoreException {
         try {
-            URI uri = buildDocumentUri(documentId);
+            URI uri = buildDocumentUri(itemId);
             Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
             if (response.getStatus() != Response.Status.OK.getStatusCode()) {
                 throw new DocumentStoreException(
                         String.format(
                                 "Request to fetch document %s failed with status code %s",
-                                documentId, response.getStatus()));
+                                itemId, response.getStatus()));
             }
             return response.readEntity(Document.class);
         } catch (URISyntaxException exception) {
-            String errorMessage =
-                    String.format("Invalid URI constructed for document: %s", documentId);
+            String errorMessage = String.format("Invalid URI constructed for document: %s", itemId);
             throw new DocumentStoreException(errorMessage, exception);
         }
     }
 
-    private URI buildDocumentUri(String documentId) throws URISyntaxException {
+    private URI buildDocumentUri(String itemId) throws URISyntaxException {
         URI credentialStoreUrl = configurationService.getCredentialStoreUrl();
         String documentEndpoint = configurationService.getDocumentEndpoint();
-        return new URI(credentialStoreUrl + documentEndpoint + documentId);
+        return new URI(credentialStoreUrl + documentEndpoint + itemId);
     }
 }
