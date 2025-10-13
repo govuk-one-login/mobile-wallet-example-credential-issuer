@@ -40,7 +40,6 @@ class DigitalVeteranCardHandlerTest {
     private DigitalVeteranCardHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
-    private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
     private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
@@ -57,7 +56,6 @@ class DigitalVeteranCardHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockVeteranCardDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
-        when(mockVeteranCardDocument.getServiceNumber()).thenReturn(EXPECTED_DOCUMENT_NUMBER);
         when(mockCredentialBuilder.buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(DIGITAL_VETERAN_CARD),

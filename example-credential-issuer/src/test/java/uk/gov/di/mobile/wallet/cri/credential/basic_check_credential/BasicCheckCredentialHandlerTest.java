@@ -40,7 +40,6 @@ class BasicCheckCredentialHandlerTest {
     private BasicCheckCredentialHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
-    private static final String EXPECTED_DOCUMENT_NUMBER = "1234567890";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
     private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
@@ -57,7 +56,6 @@ class BasicCheckCredentialHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockBasicCheckDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
-        when(mockBasicCheckDocument.getCertificateNumber()).thenReturn(EXPECTED_DOCUMENT_NUMBER);
         when(mockCredentialBuilder.buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(BASIC_DISCLOSURE_CREDENTIAL),

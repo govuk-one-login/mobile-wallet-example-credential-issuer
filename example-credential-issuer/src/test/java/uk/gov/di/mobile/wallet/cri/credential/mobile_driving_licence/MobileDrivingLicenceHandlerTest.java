@@ -38,7 +38,6 @@ class MobileDrivingLicenceHandlerTest {
     private MobileDrivingLicenceHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-mdoc-credential-string";
-    private static final String EXPECTED_DOCUMENT_NUMBER = "123456789";
 
     private static final int INDEX = 0;
     private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
@@ -66,7 +65,6 @@ class MobileDrivingLicenceHandlerTest {
         ObjectMapper mockMapper = mock(ObjectMapper.class);
         when(mockMapper.convertValue(documentData, DrivingLicenceDocument.class))
                 .thenReturn(mockDrivingLicenceDocument);
-        when(mockDrivingLicenceDocument.getDocumentNumber()).thenReturn(EXPECTED_DOCUMENT_NUMBER);
 
         setMapperField(spyHandler, mockMapper);
 

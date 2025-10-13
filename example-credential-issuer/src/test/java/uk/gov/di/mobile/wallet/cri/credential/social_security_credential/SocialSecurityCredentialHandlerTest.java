@@ -40,7 +40,6 @@ class SocialSecurityCredentialHandlerTest {
     private SocialSecurityCredentialHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
-    private static final String EXPECTED_DOCUMENT_NUMBER = "QQ 12 34 56 A";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
     private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
@@ -57,7 +56,6 @@ class SocialSecurityCredentialHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockSocialSecurityDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
-        when(mockSocialSecurityDocument.getNino()).thenReturn(EXPECTED_DOCUMENT_NUMBER);
         when(mockCredentialBuilder.buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(SOCIAL_SECURITY_CREDENTIAL),
