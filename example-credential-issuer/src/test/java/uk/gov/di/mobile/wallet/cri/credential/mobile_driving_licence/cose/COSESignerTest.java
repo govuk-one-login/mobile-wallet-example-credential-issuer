@@ -1,5 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
+import org.bouncycastle.asn1.ASN1EncodableVector;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.DERSequence;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,11 +19,14 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREn
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.math.BigInteger;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,7 +50,7 @@ class COSESignerTest {
     private static final byte[] TEST_CERTIFICATE_ENCODED = "certificate data".getBytes();
     private static final byte[] TEST_PROTECTED_HEADER_ENCODED = "protected header".getBytes();
     private static final byte[] TEST_SIG_STRUCTURE = "sig structure".getBytes();
-    private static final byte[] TEST_SIGNATURE = "signature".getBytes();
+    private static final byte[] TEST_DER_SIGNATURE = createMockDerSignature();
     private static final String TEST_KEY_ARN = "test-key-arn";
 
     @BeforeEach
@@ -59,7 +65,7 @@ class COSESignerTest {
         when(cborEncoder.encode(any()))
                 .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
         when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
-        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_SIGNATURE));
+        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_DER_SIGNATURE));
 
         // Act: Execute the sign method
         COSESign1 result = coseSigner.sign(TEST_PAYLOAD, certificate);
@@ -69,6 +75,11 @@ class COSESignerTest {
         assertNotNull(result.unprotectedHeader());
         assertNotNull(result.payload());
         assertNotNull(result.signature());
+        assertEquals(
+                64,
+                result.signature().length,
+                "Signature should be 64 bytes for P-256 in IEEE P-1363 format");
+
         // Assert: Verify all expected interactions occurred
         verify(certificate).getEncoded();
         verify(cborEncoder, times(2))
@@ -77,33 +88,38 @@ class COSESignerTest {
     }
 
     @Test
-    void Should_CreatCorrectSigStructureFormat() throws Exception {
+    void Should_CreateCorrectSigStructureFormat() throws Exception {
         // Arrange: Setup mocks for successful signing
         when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
         when(cborEncoder.encode(any()))
                 .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
         when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
-        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_SIGNATURE));
+        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_DER_SIGNATURE));
 
         // Act: Execute the sign method
         coseSigner.sign(TEST_PAYLOAD, certificate);
 
-        // Capture the argument passed to cborEncoder.encode() method
-        ArgumentCaptor<Object[]> captor = ArgumentCaptor.forClass(Object[].class);
-        verify(cborEncoder).encode(captor.capture());
-        Object[] sigStructure = captor.getValue();
-        // Assert
+        // Capture all arguments passed to cborEncoder.encode() method
+        ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
+        verify(cborEncoder, times(2)).encode(captor.capture());
+        List<Object> allValues = captor.getAllValues();
+        Object[] sigStructure = (Object[]) allValues.get(1);
+
+        // Assert: Verify Sig_structure format
         assertEquals(4, sigStructure.length, "Sig_structure should have 4 elements");
-        assertEquals("Signature1", sigStructure[0], "First element should be 'Signature1'");
+        assertEquals(
+                "Signature1",
+                sigStructure[0],
+                "First element should be 'Signature1' context string");
         assertArrayEquals(
                 TEST_PROTECTED_HEADER_ENCODED,
                 (byte[]) sigStructure[1],
                 "Second element should be the protected header bytes");
-        assertTrue(sigStructure[2] instanceof byte[], "Third element should be a byte array");
+        assertTrue(
+                sigStructure[2] instanceof byte[],
+                "Third element should be a byte array (external_aad)");
         assertEquals(
-                0,
-                ((byte[]) sigStructure[2]).length,
-                "Third element (external_aad) should be an empty byte array");
+                0, ((byte[]) sigStructure[2]).length, "Third element should be empty for mDoc");
         assertArrayEquals(
                 TEST_PAYLOAD,
                 (byte[]) sigStructure[3],
@@ -117,25 +133,44 @@ class COSESignerTest {
         when(cborEncoder.encode(any()))
                 .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
         when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
-        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_SIGNATURE));
+        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_DER_SIGNATURE));
 
         // Act: Execute the sign method
         coseSigner.sign(TEST_PAYLOAD, certificate);
 
-        // Assert: Verify that KMS signing uses correct parameters
-        // Should use "DIGEST" message type and "ECDSA_SHA_256" algorithm
+        // Assert: Verify that KMS signing uses correct parameters for ES256
         verify(keyProvider)
                 .sign(
                         argThat(
                                 signRequest ->
-                                        signRequest.keyId().equals(TEST_KEY_ARN) // Correct key ID
-                                                && signRequest.messageType()
-                                                        == MessageType
-                                                                .DIGEST // Signing a hash digest
+                                        signRequest.keyId().equals(TEST_KEY_ARN)
+                                                && signRequest.messageType() == MessageType.DIGEST
                                                 && signRequest.signingAlgorithm()
-                                                        == SigningAlgorithmSpec
-                                                                .ECDSA_SHA_256 // ES256 algorithm
-                                ));
+                                                        == SigningAlgorithmSpec.ECDSA_SHA_256));
+    }
+
+    @Test
+    void Should_ConvertDerSignatureToP1363Format() throws Exception {
+        // Arrange: Setup mocks for successful signing
+        when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
+        when(cborEncoder.encode(any()))
+                .thenReturn(TEST_PROTECTED_HEADER_ENCODED, TEST_SIG_STRUCTURE);
+        when(keyProvider.sign(any(SignRequest.class))).thenReturn(signResponse);
+        when(signResponse.signature()).thenReturn(SdkBytes.fromByteArray(TEST_DER_SIGNATURE));
+
+        // Act: Execute the sign method
+        COSESign1 result = coseSigner.sign(TEST_PAYLOAD, certificate);
+
+        // Assert: Verify signature is converted to IEEE P-1363 format
+        byte[] signature = result.signature();
+        assertEquals(
+                64,
+                signature.length,
+                "IEEE P-1363 signature for P-256 must be exactly 64 bytes (32 for r, 32 for s)");
+        assertNotEquals(
+                0x30,
+                signature[0] & 0xFF,
+                "Signature should not start with DER SEQUENCE tag (0x30)");
     }
 
     @Test
@@ -176,5 +211,21 @@ class COSESignerTest {
 
         // Act & Assert: Execute and verify MDLException is thrown
         assertThrows(RuntimeException.class, () -> coseSigner.sign(TEST_PAYLOAD, certificate));
+    }
+
+    /** Creates a mock DER-encoded ECDSA signature for testing. */
+    private static byte[] createMockDerSignature() {
+        try {
+            BigInteger r = new BigInteger("12345678901234567890");
+            BigInteger s = new BigInteger("98765432109876543210");
+
+            ASN1EncodableVector v = new ASN1EncodableVector();
+            v.add(new ASN1Integer(r));
+            v.add(new ASN1Integer(s));
+
+            return new DERSequence(v).getEncoded();
+        } catch (Exception exception) {
+            throw new RuntimeException("Failed to create mock DER signature", exception);
+        }
     }
 }
