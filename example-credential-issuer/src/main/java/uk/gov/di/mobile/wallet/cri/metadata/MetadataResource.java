@@ -63,6 +63,7 @@ public class MetadataResource {
                             .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
+                            .addCredentialRefreshUrls(getCredentialRefreshUrl(selfUrl))
                             .build();
 
             return ResponseUtil.ok(metadata, true);
@@ -108,5 +109,12 @@ public class MetadataResource {
      */
     private boolean isStagingUrl(String url) {
         return url != null && url.contains(STAGING);
+    }
+
+    private String getCredentialRefreshUrl(String selfUrl) {
+        if (isRunningInStaging() && isStagingUrl(selfUrl)) {
+            return selfUrl.replace(STAGING, BUILD);
+        }
+        return selfUrl;
     }
 }

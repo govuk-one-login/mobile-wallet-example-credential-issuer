@@ -1,10 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.metadata;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 
 public class MetadataBuilder {
 
@@ -13,7 +15,7 @@ public class MetadataBuilder {
     String credentialEndpoint;
     String notificationEndpoint;
     String iacasEndpoint;
-    Object credentialConfigurationsSupported;
+    Map<String, Object> credentialConfigurationsSupported;
 
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {
@@ -68,7 +70,26 @@ public class MetadataBuilder {
                 new File(Resources.getResource(fileName).getPath());
         ObjectMapper mapper = new ObjectMapper();
         this.credentialConfigurationsSupported =
-                mapper.readValue(credentialConfigurationsSupportedFilePath, Object.class);
+                mapper.readValue(
+                        credentialConfigurationsSupportedFilePath, new TypeReference<>() {});
+        return this;
+    }
+
+    public MetadataBuilder addCredentialRefreshUrls(String selfUrl)
+            throws IllegalArgumentException {
+        if (credentialConfigurationsSupported == null) return this;
+
+        for (Map.Entry<String, Object> entry : credentialConfigurationsSupported.entrySet()) {
+            String credentialName = entry.getKey();
+            Object credentialValue = entry.getValue();
+            if (credentialValue instanceof Map) {
+                @SuppressWarnings("unchecked")
+                Map<String, Object> perCredential = (Map<String, Object>) credentialValue;
+                perCredential.putIfAbsent(
+                        "credential_refresh_web_journey_url",
+                        selfUrl + "/refresh/" + credentialName);
+            }
+        }
         return this;
     }
 
