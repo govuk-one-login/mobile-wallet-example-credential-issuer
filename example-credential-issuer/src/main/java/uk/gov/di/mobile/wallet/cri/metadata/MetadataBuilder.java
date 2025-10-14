@@ -19,7 +19,7 @@ public class MetadataBuilder {
     String iacasEndpoint;
     Map<String, Object> credentialConfigurationsSupported;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataBuilder.class);
 
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {

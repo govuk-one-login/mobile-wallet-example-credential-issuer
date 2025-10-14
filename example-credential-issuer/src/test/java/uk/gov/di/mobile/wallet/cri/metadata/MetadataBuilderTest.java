@@ -9,10 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MetadataBuilderTest {
 
@@ -152,5 +151,43 @@ class MetadataBuilderTest {
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setIacasEndpoint(null));
         Assertions.assertEquals("iacasEndpoint must not be null", exceptionThrown.getMessage());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void should_SetCredentialRefreshUrls_ForEach_Credential() throws IOException {
+        String SELF_URL = "https://test-credential-issuer.gov.uk";
+        Metadata metadata =
+                metadataBuilder
+                        .setCredentialIssuer("https://test-credential-issuer.gov.uk")
+                        .setCredentialEndpoint("https://test-credential-issuer.gov.uk/credential")
+                        .setAuthorizationServers(
+                                "https://test-authorization-server.gov.uk/auth-server")
+                        .setNotificationEndpoint(
+                                "https://test-credential-issuer.gov.uk/notification")
+                        .setIacasEndpoint("https://test-credential-issuer.gov.uk/iacas")
+                        .setCredentialConfigurationsSupported(
+                                "test_valid_credential_configurations_supported.json")
+                        .setCredentialRefreshUrls(SELF_URL)
+                        .build();
+
+        Map<String, Object> configs =
+                (Map<String, Object>) metadata.credentialConfigurationsSupported;
+        assertNotNull(configs);
+
+        for (Map.Entry<String, Object> entry : configs.entrySet()) {
+            String credentialName = entry.getKey();
+
+            Map<String, Object> perCredential =
+                    assertInstanceOf(Map.class, entry.getValue(), "Credentials are of type Map");
+
+            Object url = perCredential.get("credential_refresh_web_journey_url");
+
+            assertNotNull(url, "missing credential_refresh_web_journey_url for" + credentialName);
+            assertEquals(
+                    SELF_URL + "/refresh/" + credentialName,
+                    url,
+                    "wrong url for " + credentialName);
+        }
     }
 }
