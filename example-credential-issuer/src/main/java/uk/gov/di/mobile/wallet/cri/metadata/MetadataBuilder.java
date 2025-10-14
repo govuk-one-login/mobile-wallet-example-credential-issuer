@@ -3,6 +3,8 @@ package uk.gov.di.mobile.wallet.cri.metadata;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,6 +18,8 @@ public class MetadataBuilder {
     String notificationEndpoint;
     String iacasEndpoint;
     Map<String, Object> credentialConfigurationsSupported;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataResource.class);
 
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {
@@ -75,19 +79,22 @@ public class MetadataBuilder {
         return this;
     }
 
-    public MetadataBuilder addCredentialRefreshUrls(String selfUrl)
+    public MetadataBuilder setCredentialRefreshUrls(String selfUrl)
             throws IllegalArgumentException {
         if (credentialConfigurationsSupported == null) return this;
 
         for (Map.Entry<String, Object> entry : credentialConfigurationsSupported.entrySet()) {
-            String credentialName = entry.getKey();
-            Object credentialValue = entry.getValue();
-            if (credentialValue instanceof Map) {
-                @SuppressWarnings("unchecked")
-                Map<String, Object> perCredential = (Map<String, Object>) credentialValue;
-                perCredential.putIfAbsent(
-                        "credential_refresh_web_journey_url",
-                        selfUrl + "/refresh/" + credentialName);
+            try {
+                String credentialName = entry.getKey();
+                Object credentialValue = entry.getValue();
+                if (credentialValue instanceof Map) {
+                    Map<String, Object> perCredential = (Map<String, Object>) credentialValue;
+                    perCredential.putIfAbsent(
+                            "credential_refresh_web_journey_url",
+                            selfUrl + "/refresh/" + credentialName);
+                }
+            } catch (ClassCastException e) {
+                LOGGER.warn("Unexpected type for credential value", e);
             }
         }
         return this;

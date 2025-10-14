@@ -63,7 +63,7 @@ public class MetadataResource {
                             .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
-                            .addCredentialRefreshUrls(selfUrl)
+                            .setCredentialRefreshUrls(selfUrl)
                             .build();
 
             return ResponseUtil.ok(metadata, true);
