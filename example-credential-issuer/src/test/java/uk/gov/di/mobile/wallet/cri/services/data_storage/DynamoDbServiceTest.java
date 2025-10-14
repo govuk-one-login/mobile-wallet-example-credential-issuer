@@ -7,15 +7,26 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
+import software.amazon.awssdk.enhanced.dynamodb.DynamoDbIndex;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.Key;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
+import software.amazon.awssdk.enhanced.dynamodb.model.Page;
+import software.amazon.awssdk.enhanced.dynamodb.model.PageIterable;
+import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -42,6 +53,9 @@ class DynamoDbServiceTest {
     @Mock private DynamoDbTable<CachedCredentialOffer> mockCredentialOfferTable;
     @Mock private DynamoDbTable<StoredCredential> mockCredentialTable;
 
+    @Mock private PageIterable<StoredCredential> mockPageIterable;
+    @Mock private Page<StoredCredential> mockPage;
+    @Mock private DynamoDbIndex<StoredCredential> mockIndex;
     private CachedCredentialOffer cachedCredentialOffer;
     private DynamoDbService dynamoDbService;
     private StoredCredential storedCredential;
@@ -170,5 +184,49 @@ class DynamoDbServiceTest {
                         DataStoreException.class,
                         () -> dynamoDbService.getStoredCredential(PARTITION_KEY));
         assertEquals("Error fetching credential", exception.getMessage());
+    }
+
+    @Test
+    void Should_ReturnCredentialsFetchedByDocumentId() throws DataStoreException {
+        when(mockPage.items()).thenReturn(Arrays.asList(storedCredential, storedCredential));
+        when(mockPageIterable.stream()).thenReturn(Stream.of(mockPage));
+        when(mockCredentialTable.index("documentIdIndex")).thenReturn(mockIndex);
+        when(mockIndex.query(any(QueryEnhancedRequest.class))).thenReturn(mockPageIterable);
+
+        List<StoredCredential> result = dynamoDbService.getCredentialsByDocumentId(DOCUMENT_ID);
+
+        assertEquals(2, result.size());
+        assertEquals("credentialIdentifier1", result.get(0).getCredentialIdentifier());
+        assertEquals("credentialIdentifier2", result.get(1).getCredentialIdentifier());
+        verify(mockCredentialTable).index("documentIdIndex");
+        verify(mockIndex).query(any(QueryEnhancedRequest.class));
+    }
+
+    @Test
+    void Should_ReturnEmptyList_When_NoCredentialsFound() throws DataStoreException {
+        when(mockPage.items()).thenReturn(Collections.emptyList());
+        when(mockPageIterable.stream()).thenReturn(Stream.of(mockPage));
+        when(mockCredentialTable.index("documentIdIndex")).thenReturn(mockIndex);
+        when(mockIndex.query(any(QueryEnhancedRequest.class))).thenReturn(mockPageIterable);
+
+        List<StoredCredential> result = dynamoDbService.getCredentialsByDocumentId(DOCUMENT_ID);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void Should_ThrowDataStoreException_When_QueryFails() {
+        when(mockCredentialTable.index("documentIdIndex")).thenReturn(mockIndex);
+        when(mockIndex.query(any(QueryEnhancedRequest.class)))
+                .thenThrow(new RuntimeException("Some DynamoDB error"));
+
+        DataStoreException exception =
+                assertThrows(
+                        DataStoreException.class,
+                        () -> dynamoDbService.getCredentialsByDocumentId(DOCUMENT_ID));
+
+        assertEquals("Error fetching credentials by documentId", exception.getMessage());
+        assertEquals("Some DynamoDB error", exception.getCause().getMessage());
     }
 }

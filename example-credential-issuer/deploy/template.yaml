@@ -550,6 +550,10 @@ Resources:
                 Resource: !GetAtt CredentialTable.Arn
               - Effect: Allow
                 Action:
+                  - 'dynamodb:Query'
+                Resource:  !Sub ${CredentialTable.Arn}/index/*
+              - Effect: Allow
+                Action:
                   - 'kms:Decrypt'
                   - 'kms:Encrypt'
                   - 'kms:GenerateDataKey'

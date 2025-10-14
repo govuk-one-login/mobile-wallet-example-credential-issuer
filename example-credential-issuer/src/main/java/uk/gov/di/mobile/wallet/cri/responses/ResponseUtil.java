@@ -52,6 +52,18 @@ public class ResponseUtil {
                 .build();
     }
 
+    public static Response accepted() {
+        return Response.status(Response.Status.ACCEPTED)
+                .header(HttpHeaders.CACHE_CONTROL, NO_STORE)
+                .build();
+    }
+
+    public static Response notFound() {
+        return Response.status(Response.Status.NOT_FOUND)
+                .header(HttpHeaders.CACHE_CONTROL, NO_STORE)
+                .build();
+    }
+
     private static Response.ResponseBuilder jsonBuilder(Response.Status status, Object entity) {
         return Response.status(status)
                 .entity(entity)

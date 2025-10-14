@@ -8,6 +8,7 @@ import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
 import uk.gov.di.mobile.wallet.cri.iacas.IacasService;
 import uk.gov.di.mobile.wallet.cri.metadata.MetadataBuilder;
 import uk.gov.di.mobile.wallet.cri.notification.NotificationService;
+import uk.gov.di.mobile.wallet.cri.revoke.RevokeService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
@@ -29,6 +30,7 @@ public class Services {
     private final JwksService jwksService;
     private final NotificationService notificationService;
     private final IacasService iacasService;
+    private final RevokeService revokeService;
 
     private Services(Builder builder) {
         this.kmsService = builder.kmsService;
@@ -41,6 +43,7 @@ public class Services {
         this.jwksService = builder.jwksService;
         this.notificationService = builder.notificationService;
         this.iacasService = builder.iacasService;
+        this.revokeService = builder.revokeService;
     }
 
     /** Builder for {@link Services}. */
@@ -55,6 +58,7 @@ public class Services {
         private JwksService jwksService;
         private NotificationService notificationService;
         private IacasService iacasService;
+        private RevokeService revokeService;
 
         public Builder kmsService(KmsService kmsService) {
             this.kmsService = kmsService;
@@ -103,6 +107,11 @@ public class Services {
 
         public Builder iacasService(IacasService iacasService) {
             this.iacasService = iacasService;
+            return this;
+        }
+
+        public Builder revokeService(RevokeService revokeService) {
+            this.revokeService = revokeService;
             return this;
         }
 
