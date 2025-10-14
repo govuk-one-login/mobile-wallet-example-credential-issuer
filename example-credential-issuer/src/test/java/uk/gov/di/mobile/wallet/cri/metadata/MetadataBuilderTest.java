@@ -156,7 +156,7 @@ class MetadataBuilderTest {
     @Test
     @SuppressWarnings("unchecked")
     void should_SetCredentialRefreshUrls_ForEach_Credential() throws IOException {
-        String SELF_URL = "https://test-credential-issuer.gov.uk";
+        String selfUrl = "https://test-credential-issuer.gov.uk";
         Metadata metadata =
                 metadataBuilder
                         .setCredentialIssuer("https://test-credential-issuer.gov.uk")
@@ -168,7 +168,7 @@ class MetadataBuilderTest {
                         .setIacasEndpoint("https://test-credential-issuer.gov.uk/iacas")
                         .setCredentialConfigurationsSupported(
                                 "test_valid_credential_configurations_supported.json")
-                        .setCredentialRefreshUrls(SELF_URL)
+                        .setCredentialRefreshUrls(selfUrl)
                         .build();
 
         Map<String, Object> configs =
@@ -185,9 +185,7 @@ class MetadataBuilderTest {
 
             assertNotNull(url, "missing credential_refresh_web_journey_url for" + credentialName);
             assertEquals(
-                    SELF_URL + "/refresh/" + credentialName,
-                    url,
-                    "wrong url for " + credentialName);
+                    selfUrl + "/refresh/" + credentialName, url, "wrong url for " + credentialName);
         }
     }
 }
