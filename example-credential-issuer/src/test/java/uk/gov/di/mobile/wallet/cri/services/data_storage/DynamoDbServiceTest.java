@@ -188,7 +188,27 @@ class DynamoDbServiceTest {
 
     @Test
     void Should_ReturnCredentialsFetchedByDocumentId() throws DataStoreException {
-        when(mockPage.items()).thenReturn(Arrays.asList(storedCredential, storedCredential));
+        StoredCredential credential1 =
+                StoredCredential.builder()
+                        .credentialIdentifier("credentialIdentifier1")
+                        .notificationId(NOTIFICATION_ID)
+                        .walletSubjectId(WALLET_SUBJECT_ID)
+                        .timeToLive(TIME_TO_LIVE)
+                        .statusList(STATUS_LIST_ISSUER_RESPONSE)
+                        .documentId(DOCUMENT_ID)
+                        .build();
+
+        StoredCredential credential2 =
+                StoredCredential.builder()
+                        .credentialIdentifier("credentialIdentifier2")
+                        .notificationId(NOTIFICATION_ID)
+                        .walletSubjectId(WALLET_SUBJECT_ID)
+                        .timeToLive(TIME_TO_LIVE)
+                        .statusList(STATUS_LIST_ISSUER_RESPONSE)
+                        .documentId(DOCUMENT_ID)
+                        .build();
+
+        when(mockPage.items()).thenReturn(Arrays.asList(credential1, credential2));
         when(mockPageIterable.stream()).thenReturn(Stream.of(mockPage));
         when(mockCredentialTable.index("documentIdIndex")).thenReturn(mockIndex);
         when(mockIndex.query(any(QueryEnhancedRequest.class))).thenReturn(mockPageIterable);
