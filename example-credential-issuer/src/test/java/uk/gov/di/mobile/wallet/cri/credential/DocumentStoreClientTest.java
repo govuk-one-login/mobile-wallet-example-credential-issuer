@@ -23,65 +23,64 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class DocumentStoreClientTest {
+
+    private DocumentStoreClient documentStoreClient;
+
     @Mock private Client mockHttpClient;
     @Mock private WebTarget mockWebTarget;
     @Mock private Invocation.Builder mockInvocationBuilder;
     @Mock private Response mockResponse;
-    @Mock Document mockDocument;
+    @Mock private Document mockDocument;
     @Mock private ConfigurationService mockConfigurationService;
-    private DocumentStoreClient documentStoreClient;
+
+    private static final String ITEM_ID = "672ca5d0-818a-46b6-946a-f9481023e803";
+    private static final String DOCUMENT_PATH = "/documents/";
+
+    private static URI documentBuilderUrl;
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws URISyntaxException {
+        documentBuilderUrl = new URI("https://test-example-cri.com");
         documentStoreClient = new DocumentStoreClient(mockConfigurationService, mockHttpClient);
     }
 
     @Test
     void Should_ReturnDocument_When_DocumentAPIReturns200()
             throws URISyntaxException, DocumentStoreException {
-        String documentId = "672ca5d0-818a-46b6-946a-f9481023e803";
-        URI credentialStoreUrl = new URI("https://test-example-cri.com");
-        String documentEndpoint = "/documents/";
-        URI expectedUri = new URI(credentialStoreUrl + documentEndpoint + documentId);
-        when(mockConfigurationService.getCredentialStoreUrl()).thenReturn(credentialStoreUrl);
-        when(mockConfigurationService.getDocumentEndpoint()).thenReturn(documentEndpoint);
+        URI expectedUri = new URI(documentBuilderUrl + DOCUMENT_PATH + ITEM_ID);
+        when(mockConfigurationService.getCredentialStoreUrl()).thenReturn(documentBuilderUrl);
+        when(mockConfigurationService.getDocumentEndpoint()).thenReturn(DOCUMENT_PATH);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
         when(mockResponse.readEntity(Document.class)).thenReturn(mockDocument);
 
-        Document document = documentStoreClient.getDocument(documentId);
+        Document document = documentStoreClient.getDocument(ITEM_ID);
 
         assertEquals(mockDocument, document);
         verify(mockHttpClient).target(expectedUri);
     }
 
     @Test
-    void Should_ThrowDocumentStoreException_When_DocumentAPIReturns500() throws URISyntaxException {
-        String documentId = "672ca5d0-818a-46b6-946a-f9481023e803";
-        URI credentialStoreUrl = new URI("https://test-example-cri.com");
-        String documentEndpoint = "/documents/";
-        when(mockConfigurationService.getCredentialStoreUrl()).thenReturn(credentialStoreUrl);
-        when(mockConfigurationService.getDocumentEndpoint()).thenReturn(documentEndpoint);
+    void Should_ThrowDocumentStoreException_When_DocumentAPIReturns500() {
+        when(mockConfigurationService.getCredentialStoreUrl()).thenReturn(documentBuilderUrl);
+        when(mockConfigurationService.getDocumentEndpoint()).thenReturn(DOCUMENT_PATH);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(500);
 
-        assertThrows(
-                DocumentStoreException.class, () -> documentStoreClient.getDocument(documentId));
+        assertThrows(DocumentStoreException.class, () -> documentStoreClient.getDocument(ITEM_ID));
     }
 
     @Test
     void Should_ThrowDocumentStoreException_When_URLConstructionFails() {
-        String documentId = "672ca5d0-818a-46b6-946a-f9481023e803";
         when(mockConfigurationService.getDocumentEndpoint()).thenReturn(null);
         when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
 
-        assertThrows(
-                DocumentStoreException.class, () -> documentStoreClient.getDocument(documentId));
+        assertThrows(DocumentStoreException.class, () -> documentStoreClient.getDocument(ITEM_ID));
     }
 }
