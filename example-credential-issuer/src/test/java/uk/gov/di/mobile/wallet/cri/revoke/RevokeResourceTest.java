@@ -26,13 +26,10 @@ class RevokeResourceTest {
     private static final String DOCUMENT_ID = "ABCdef012345";
 
     @Test
-    void Should_Return400_When_DocumentIdIsMissing() {
+    void Should_Return404_When_DocumentIdIsMissingFromPath() {
         final Response response = resource.target("/revoke").request().post(Entity.json(null));
 
-        assertThat(response.getStatus(), is(400));
-        assertThat(
-                response.readEntity(String.class),
-                is("{\"errors\":[\"query param documentId must not be empty\"]}"));
+        assertThat(response.getStatus(), is(404));
     }
 
     @ParameterizedTest
@@ -45,16 +42,13 @@ class RevokeResourceTest {
             })
     void Should_Return400_When_DocumentIsInvalid(String documentId) {
         final Response response =
-                resource.target("/revoke")
-                        .queryParam("documentId", documentId)
-                        .request()
-                        .post(Entity.json(null));
+                resource.target("/revoke").path(documentId).request().post(Entity.json(null));
 
         assertThat(response.getStatus(), is(400));
         assertThat(
                 response.readEntity(String.class),
                 is(
-                        "{\"errors\":[\"query param documentId must match \\\"^[a-zA-Z0-9]{5,25}$\\\"\"]}"));
+                        "{\"errors\":[\"path param documentId must match \\\"^[a-zA-Z0-9]{5,25}$\\\"\"]}"));
     }
 
     @Test
@@ -65,10 +59,7 @@ class RevokeResourceTest {
                 .revokeCredential(DOCUMENT_ID);
 
         final Response response =
-                resource.target("/revoke")
-                        .queryParam("documentId", DOCUMENT_ID)
-                        .request()
-                        .post(Entity.json(null));
+                resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));
 
         assertThat(response.getStatus(), is(404));
     }
@@ -81,10 +72,7 @@ class RevokeResourceTest {
                 .revokeCredential(DOCUMENT_ID);
 
         final Response response =
-                resource.target("/revoke")
-                        .queryParam("documentId", DOCUMENT_ID)
-                        .request()
-                        .post(Entity.json(null));
+                resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));
 
         assertThat(response.getStatus(), is(500));
     }
@@ -92,10 +80,7 @@ class RevokeResourceTest {
     @Test
     void Should_Return202_When_RevokeServiceExecutesSuccessfully() {
         final Response response =
-                resource.target("/revoke")
-                        .queryParam("documentId", DOCUMENT_ID)
-                        .request()
-                        .post(Entity.json(null));
+                resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));
 
         assertThat(response.getStatus(), is(202));
     }

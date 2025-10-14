@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -25,8 +25,9 @@ public class RevokeResource {
     }
 
     @POST
+    @Path("/{documentId}")
     public Response revokeCredential(
-            @QueryParam("documentId") @NotEmpty @Pattern(regexp = DOCUMENT_ID_PATTERN)
+            @PathParam("documentId") @NotEmpty @Pattern(regexp = DOCUMENT_ID_PATTERN)
                     String documentId) {
         try {
             revokeService.revokeCredential(documentId);
