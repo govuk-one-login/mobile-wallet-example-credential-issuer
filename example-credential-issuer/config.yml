@@ -18,4 +18,3 @@ logging:
 httpClient:
   timeout: 5000ms
   connectionTimeout: 5000ms
-  connectionRequestTimeout: 5000ms
