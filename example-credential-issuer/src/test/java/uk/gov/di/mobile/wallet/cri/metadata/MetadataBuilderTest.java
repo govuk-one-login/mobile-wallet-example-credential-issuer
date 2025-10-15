@@ -3,7 +3,6 @@ package uk.gov.di.mobile.wallet.cri.metadata;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,11 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MetadataBuilderTest {
 
@@ -99,8 +102,7 @@ class MetadataBuilderTest {
                         () ->
                                 metadataBuilder.setCredentialConfigurationsSupported(
                                         "notARealFile.json"));
-        Assertions.assertEquals(
-                "resource notARealFile.json not found.", exceptionThrown.getMessage());
+        assertEquals("resource notARealFile.json not found.", exceptionThrown.getMessage());
     }
 
     @Test
@@ -112,7 +114,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialConfigurationsSupported(null));
-        Assertions.assertEquals("fileName must not be null", exceptionThrown.getMessage());
+        assertEquals("fileName must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -125,7 +127,7 @@ class MetadataBuilderTest {
                         () ->
                                 metadataBuilder.setCredentialConfigurationsSupported(
                                         "test_valid_credential_configurations_supported.json"));
-        Assertions.assertEquals(
+        assertEquals(
                 "credentialIssuer must be set before loading CredentialConfigurationsSupported",
                 exceptionThrown.getMessage());
     }
@@ -138,8 +140,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialEndpoint(null));
-        Assertions.assertEquals(
-                "credentialEndpoint must not be null", exceptionThrown.getMessage());
+        assertEquals("credentialEndpoint must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -150,8 +151,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setAuthorizationServers(null));
-        Assertions.assertEquals(
-                "authorizationServers must not be null", exceptionThrown.getMessage());
+        assertEquals("authorizationServers must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -162,7 +162,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialIssuer(null));
-        Assertions.assertEquals("credentialIssuer must not be null", exceptionThrown.getMessage());
+        assertEquals("credentialIssuer must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -173,8 +173,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setNotificationEndpoint(null));
-        Assertions.assertEquals(
-                "notificationEndpoint must not be null", exceptionThrown.getMessage());
+        assertEquals("notificationEndpoint must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -185,6 +184,6 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setIacasEndpoint(null));
-        Assertions.assertEquals("iacasEndpoint must not be null", exceptionThrown.getMessage());
+        assertEquals("iacasEndpoint must not be null", exceptionThrown.getMessage());
     }
 }
