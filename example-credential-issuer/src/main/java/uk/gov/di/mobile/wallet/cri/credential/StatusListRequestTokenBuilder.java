@@ -29,6 +29,8 @@ public class StatusListRequestTokenBuilder {
     private static final SigningAlgorithmSpec KMS_SIGNING_ALGORITHM =
             SigningAlgorithmSpec.ECDSA_SHA_256;
     private static final String CLAIM_STATUS_EXPIRY = "statusExpiry";
+    private static final String CLAIM_URI = "uri";
+    private static final String CLAIM_INDEX = "idx";
 
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
@@ -51,6 +53,11 @@ public class StatusListRequestTokenBuilder {
 
     public String buildIssueToken(long credentialExpiry) throws SigningException {
         JWTClaimsSet claims = buildIssueClaims(credentialExpiry);
+        return buildToken(claims);
+    }
+
+    public String buildRevokeToken(int index, String uri) throws SigningException {
+        JWTClaimsSet claims = buildRevokeClaims(uri, index);
         return buildToken(claims);
     }
 
@@ -98,6 +105,10 @@ public class StatusListRequestTokenBuilder {
 
     private JWTClaimsSet buildIssueClaims(long credentialExpiry) {
         return createBaseClaimsBuilder().claim(CLAIM_STATUS_EXPIRY, credentialExpiry).build();
+    }
+
+    private JWTClaimsSet buildRevokeClaims(String uri, int index) {
+        return createBaseClaimsBuilder().claim(CLAIM_URI, uri).claim(CLAIM_INDEX, index).build();
     }
 
     private JWTClaimsSet.Builder createBaseClaimsBuilder() {

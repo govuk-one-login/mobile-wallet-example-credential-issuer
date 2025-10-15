@@ -7,9 +7,11 @@ import com.nimbusds.jose.util.Base64URL;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignResponse;
@@ -49,16 +51,19 @@ class StatusListRequestTokenBuilderTest {
     private static final Base64URL TEST_SIGNATURE =
             new Base64URL(
                     "DtEhU3ljbEg8L38VWAfUAqOyKAM6-Xx-F4GawxaepmXFCgfTjDxw5djxLa8ISlSApmWQxfKTUJqPP3-Kg6NU1Q");
+    private static final long CREDENTIAL_EXPIRY = 1516239022L;
+    private static final int STATUS_LIST_INDEX = 5;
+    private static final String STATUS_LIST_URI = "https://status-list.test.com/t/12345";
 
     private StatusListRequestTokenBuilder builder;
 
     @BeforeEach
     void setUp() throws JOSEException {
         builder = new StatusListRequestTokenBuilder(configurationService, keyProvider, FIXED_CLOCK);
+
         when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
         when(configurationService.getStatusListClientId()).thenReturn(CLIENT_ID);
         when(keyProvider.getKeyId(KEY_ALIAS)).thenReturn(KEY_ID);
-
         byte[] signatureToDER = ECDSA.transcodeSignatureToDER(TEST_SIGNATURE.decode());
         when(keyProvider.sign(any()))
                 .thenReturn(
@@ -67,46 +72,112 @@ class StatusListRequestTokenBuilderTest {
                                 .build());
     }
 
-    @Test
-    void Should_BuildStatusListIssueToken() throws Exception {
-        long credentialExpiry = 1516239022;
+    @Nested
+    class BuildIssueTokenTests {
 
-        String result = builder.buildIssueToken(credentialExpiry);
+        @Test
+        void shouldBuildValidIssueToken() throws Exception {
+            String result = builder.buildIssueToken(CREDENTIAL_EXPIRY);
 
-        SignedJWT parsedToken = SignedJWT.parse(result);
-        JWTClaimsSet claimSet = parsedToken.getJWTClaimsSet();
-        JWSHeader header = parsedToken.getHeader();
-        Base64URL signature = parsedToken.getSignature();
+            SignedJWT parsedToken = SignedJWT.parse(result);
 
-        Set<String> expectedHeaders = Set.of("kid", "typ", "alg");
-        assertEquals(expectedHeaders, header.getIncludedParams());
-        assertEquals(KEY_ID_HASH, header.getKeyID());
-        assertEquals("JWT", header.getType().toString());
-        assertEquals("ES256", header.getAlgorithm().toString());
+            Set<String> expectedHeaders = Set.of("kid", "typ", "alg");
+            JWSHeader header = parsedToken.getHeader();
+            assertEquals(expectedHeaders, header.getIncludedParams());
+            assertEquals(KEY_ID_HASH, header.getKeyID());
+            assertEquals("JWT", header.getType().toString());
+            assertEquals("ES256", header.getAlgorithm().toString());
 
-        Set<String> expectedClaims = Set.of("iss", "iat", "statusExpiry", "jti");
-        assertEquals(expectedClaims, claimSet.getClaims().keySet());
-        assertEquals(CLIENT_ID, claimSet.getIssuer());
-        assertEquals(claimSet.getIssueTime(), Date.from(FIXED_INSTANT));
-        assertEquals(credentialExpiry, claimSet.getLongClaim("statusExpiry"));
-        String jwtId = claimSet.getJWTID();
-        assertNotNull(jwtId);
-        assertDoesNotThrow(() -> UUID.fromString(jwtId));
+            Set<String> expectedClaims = Set.of("iss", "iat", "statusExpiry", "jti");
+            JWTClaimsSet claimSet = parsedToken.getJWTClaimsSet();
+            assertEquals(expectedClaims, claimSet.getClaims().keySet());
+            assertEquals(CLIENT_ID, claimSet.getIssuer());
+            assertEquals(Date.from(FIXED_INSTANT), claimSet.getIssueTime());
+            String jwtId = claimSet.getJWTID();
+            assertNotNull(jwtId);
+            assertDoesNotThrow(() -> UUID.fromString(jwtId));
+            assertEquals(CREDENTIAL_EXPIRY, claimSet.getLongClaim("statusExpiry"));
 
-        assertEquals(TEST_SIGNATURE, signature);
+            assertEquals(TEST_SIGNATURE, parsedToken.getSignature());
+        }
+
+        @Test
+        void shouldThrowSigningErrorsWhenSigningFails() {
+            RuntimeException originalException = new RuntimeException("Signing error");
+            when(keyProvider.sign(any())).thenThrow(originalException);
+
+            SigningException exception =
+                    assertThrows(
+                            SigningException.class,
+                            () -> builder.buildIssueToken(CREDENTIAL_EXPIRY));
+            assertEquals(
+                    "Error signing status list request token: Signing error",
+                    exception.getMessage());
+            assertEquals(originalException, exception.getCause());
+        }
+
+        @Test
+        void shouldPropagateExceptionThrownWhenGettingKeyId() {
+            Mockito.reset(keyProvider);
+            when(keyProvider.getKeyId(KEY_ALIAS)).thenThrow(new RuntimeException("Key not found"));
+
+            assertThrows(RuntimeException.class, () -> builder.buildIssueToken(CREDENTIAL_EXPIRY));
+        }
     }
 
-    @Test
-    void Should_PropagateSigningErrors_As_SigningException() {
-        RuntimeException originalException = new RuntimeException("Some signing error");
-        when(keyProvider.sign(any())).thenThrow(originalException);
+    @Nested
+    class BuildRevokeTokenTests {
 
-        SigningException exception =
-                assertThrows(SigningException.class, () -> builder.buildIssueToken(1516239022L));
+        @Test
+        void shouldBuildValidRevokeToken() throws Exception {
+            String result = builder.buildRevokeToken(STATUS_LIST_INDEX, STATUS_LIST_URI);
 
-        assertEquals(
-                "Error signing status list request token: Some signing error",
-                exception.getMessage());
-        assertEquals(exception.getCause(), originalException);
+            SignedJWT parsedToken = SignedJWT.parse(result);
+
+            Set<String> expectedHeaders = Set.of("kid", "typ", "alg");
+            JWSHeader header = parsedToken.getHeader();
+            assertEquals(expectedHeaders, header.getIncludedParams());
+            assertEquals(KEY_ID_HASH, header.getKeyID());
+            assertEquals("JWT", header.getType().toString());
+            assertEquals("ES256", header.getAlgorithm().toString());
+
+            JWTClaimsSet claimSet = parsedToken.getJWTClaimsSet();
+            Set<String> expectedClaims = Set.of("iss", "iat", "uri", "idx", "jti");
+            assertEquals(expectedClaims, claimSet.getClaims().keySet());
+            assertEquals(CLIENT_ID, claimSet.getIssuer());
+            assertEquals(Date.from(FIXED_INSTANT), claimSet.getIssueTime());
+            String jwtId = claimSet.getJWTID();
+            assertNotNull(jwtId);
+            assertDoesNotThrow(() -> UUID.fromString(jwtId));
+            assertEquals(STATUS_LIST_URI, claimSet.getStringClaim("uri"));
+            assertEquals(STATUS_LIST_INDEX, claimSet.getIntegerClaim("idx"));
+
+            assertEquals(TEST_SIGNATURE, parsedToken.getSignature());
+        }
+
+        @Test
+        void shouldThrowSigningErrorsWhenSigningFails() {
+            RuntimeException originalException = new RuntimeException("Signing error");
+            when(keyProvider.sign(any())).thenThrow(originalException);
+
+            SigningException exception =
+                    assertThrows(
+                            SigningException.class,
+                            () -> builder.buildRevokeToken(STATUS_LIST_INDEX, STATUS_LIST_URI));
+            assertEquals(
+                    "Error signing status list request token: Signing error",
+                    exception.getMessage());
+            assertEquals(originalException, exception.getCause());
+        }
+
+        @Test
+        void shouldPropagateExceptionThrownWhenGettingKeyId() {
+            Mockito.reset(keyProvider);
+            when(keyProvider.getKeyId(KEY_ALIAS)).thenThrow(new RuntimeException("Key not found"));
+
+            assertThrows(
+                    RuntimeException.class,
+                    () -> builder.buildRevokeToken(STATUS_LIST_INDEX, STATUS_LIST_URI));
+        }
     }
 }
