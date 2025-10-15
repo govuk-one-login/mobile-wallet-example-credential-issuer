@@ -51,6 +51,22 @@ class MetadataBuilderTest {
                 "https://test-credential-issuer.gov.uk/notification",
                 metadata.notificationEndpoint);
         assertEquals("https://test-credential-issuer.gov.uk/iacas", metadata.iacasEndpoint);
+
+        Map<String, Object> CredentialConfigurationsSupported =
+                (Map<String, Object>) metadata.credentialConfigurationsSupported;
+        assertNotNull(CredentialConfigurationsSupported);
+
+        for (Map.Entry<String, Object> entry : CredentialConfigurationsSupported.entrySet()) {
+            String credentialName = entry.getKey();
+
+            Map<String, Object> perCredential =
+                    assertInstanceOf(Map.class, entry.getValue(), "Credentials are of type Map");
+
+            Object url = perCredential.get("credential_refresh_web_journey_url");
+
+            assertNotNull(url, "missing credential_refresh_web_journey_url for" + credentialName);
+            assertEquals("https://test-credential-issuer.gov.uk/refresh/" + credentialName, url);
+        }
         JsonNode actualCredentialConfigurationsSupported =
                 objectMapper.readTree(
                         objectMapper.writeValueAsString(
@@ -66,8 +82,10 @@ class MetadataBuilderTest {
         assertThrows(
                 JsonParseException.class,
                 () ->
-                        metadataBuilder.setCredentialConfigurationsSupported(
-                                "test_invalid_credential_configurations_supported.json"));
+                        metadataBuilder
+                                .setCredentialIssuer("https://test-credential-issuer.gov.uk")
+                                .setCredentialConfigurationsSupported(
+                                        "test_invalid_credential_configurations_supported.json"));
     }
 
     @Test
@@ -78,8 +96,10 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                metadataBuilder.setCredentialConfigurationsSupported(
-                                        "notARealFile.json"));
+                                metadataBuilder
+                                        .setCredentialIssuer(
+                                                "https://test-credential-issuer.gov.uk")
+                                        .setCredentialConfigurationsSupported("notARealFile.json"));
         Assertions.assertEquals(
                 "resource notARealFile.json not found.", exceptionThrown.getMessage());
     }
@@ -91,8 +111,27 @@ class MetadataBuilderTest {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> metadataBuilder.setCredentialConfigurationsSupported(null));
+                        () ->
+                                metadataBuilder
+                                        .setCredentialIssuer(
+                                                "https://test-credential-issuer.gov.uk")
+                                        .setCredentialConfigurationsSupported(null));
         Assertions.assertEquals("fileName must not be null", exceptionThrown.getMessage());
+    }
+
+    @Test
+    @DisplayName(
+            "Should throw IllegalStateException when setCredentialIssuer has not been called yet and credentialIssuer is null")
+    void Should_ThrowIllegalStateException_When_IssuerMissing_BeforeLoadingConfigurations() {
+        IllegalStateException exceptionThrown =
+                assertThrows(
+                        IllegalStateException.class,
+                        () ->
+                                metadataBuilder.setCredentialConfigurationsSupported(
+                                        "test_valid_credential_configurations_supported.json"));
+        Assertions.assertEquals(
+                "credentialIssuer must be set before loading CredentialConfigurationsSupported",
+                exceptionThrown.getMessage());
     }
 
     @Test
@@ -151,41 +190,5 @@ class MetadataBuilderTest {
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setIacasEndpoint(null));
         Assertions.assertEquals("iacasEndpoint must not be null", exceptionThrown.getMessage());
-    }
-
-    @Test
-    @SuppressWarnings("unchecked")
-    void should_SetCredentialRefreshUrls_ForEach_Credential() throws IOException {
-        String selfUrl = "https://test-credential-issuer.gov.uk";
-        Metadata metadata =
-                metadataBuilder
-                        .setCredentialIssuer("https://test-credential-issuer.gov.uk")
-                        .setCredentialEndpoint("https://test-credential-issuer.gov.uk/credential")
-                        .setAuthorizationServers(
-                                "https://test-authorization-server.gov.uk/auth-server")
-                        .setNotificationEndpoint(
-                                "https://test-credential-issuer.gov.uk/notification")
-                        .setIacasEndpoint("https://test-credential-issuer.gov.uk/iacas")
-                        .setCredentialConfigurationsSupported(
-                                "test_valid_credential_configurations_supported.json")
-                        .setCredentialRefreshUrls(selfUrl)
-                        .build();
-
-        Map<String, Object> configs =
-                (Map<String, Object>) metadata.credentialConfigurationsSupported;
-        assertNotNull(configs);
-
-        for (Map.Entry<String, Object> entry : configs.entrySet()) {
-            String credentialName = entry.getKey();
-
-            Map<String, Object> perCredential =
-                    assertInstanceOf(Map.class, entry.getValue(), "Credentials are of type Map");
-
-            Object url = perCredential.get("credential_refresh_web_journey_url");
-
-            assertNotNull(url, "missing credential_refresh_web_journey_url for" + credentialName);
-            assertEquals(
-                    selfUrl + "/refresh/" + credentialName, url, "wrong url for " + credentialName);
-        }
     }
 }

@@ -66,22 +66,21 @@ public class MetadataBuilder {
     }
 
     public MetadataBuilder setCredentialConfigurationsSupported(String fileName)
-            throws IOException, IllegalArgumentException {
+            throws IOException, IllegalArgumentException, IllegalStateException {
         if (fileName == null) {
             throw new IllegalArgumentException("fileName must not be null");
         }
+        if (this.credentialIssuer == null) {
+            throw new IllegalStateException(
+                    "credentialIssuer must be set before loading CredentialConfigurationsSupported");
+        }
+
         File credentialConfigurationsSupportedFilePath =
                 new File(Resources.getResource(fileName).getPath());
         ObjectMapper mapper = new ObjectMapper();
         this.credentialConfigurationsSupported =
                 mapper.readValue(
                         credentialConfigurationsSupportedFilePath, new TypeReference<>() {});
-        return this;
-    }
-
-    public MetadataBuilder setCredentialRefreshUrls(String selfUrl)
-            throws IllegalArgumentException {
-        if (credentialConfigurationsSupported == null) return this;
 
         for (Map.Entry<String, Object> entry : credentialConfigurationsSupported.entrySet()) {
             try {
@@ -91,12 +90,13 @@ public class MetadataBuilder {
                     Map<String, Object> perCredential = (Map<String, Object>) credentialValue;
                     perCredential.putIfAbsent(
                             "credential_refresh_web_journey_url",
-                            selfUrl + "/refresh/" + credentialName);
+                            this.credentialIssuer + "/refresh/" + credentialName);
                 }
             } catch (ClassCastException e) {
                 LOGGER.warn("Unexpected type for credential value", e);
             }
         }
+
         return this;
     }
 
