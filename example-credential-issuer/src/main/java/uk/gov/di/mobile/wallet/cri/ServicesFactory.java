@@ -169,7 +169,7 @@ public class ServicesFactory {
                 new IacasService(
                         certificateProvider, configurationService.getCertificateAuthorityArn());
 
-        RevokeService revokeService = new RevokeService(dynamoDbService);
+        RevokeService revokeService = new RevokeService(dynamoDbService, statusListClient);
 
         return new Services.Builder()
                 .kmsService(kmsService)
