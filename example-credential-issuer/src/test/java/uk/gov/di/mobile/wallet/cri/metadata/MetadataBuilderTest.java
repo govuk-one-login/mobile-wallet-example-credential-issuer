@@ -52,11 +52,11 @@ class MetadataBuilderTest {
                 metadata.notificationEndpoint);
         assertEquals("https://test-credential-issuer.gov.uk/iacas", metadata.iacasEndpoint);
 
-        Map<String, Object> CredentialConfigurationsSupported =
+        Map<String, Object> configs =
                 (Map<String, Object>) metadata.credentialConfigurationsSupported;
-        assertNotNull(CredentialConfigurationsSupported);
+        assertNotNull(configs);
 
-        for (Map.Entry<String, Object> entry : CredentialConfigurationsSupported.entrySet()) {
+        for (Map.Entry<String, Object> entry : configs.entrySet()) {
             String credentialName = entry.getKey();
 
             Map<String, Object> perCredential =
@@ -92,14 +92,13 @@ class MetadataBuilderTest {
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with a file name that does not exist")
     void Should_ThrowIllegalArgumentException_When_FileDoesNotExist() {
+        metadataBuilder.setCredentialIssuer("https://test-credential-issuer.gov.uk");
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                metadataBuilder
-                                        .setCredentialIssuer(
-                                                "https://test-credential-issuer.gov.uk")
-                                        .setCredentialConfigurationsSupported("notARealFile.json"));
+                                metadataBuilder.setCredentialConfigurationsSupported(
+                                        "notARealFile.json"));
         Assertions.assertEquals(
                 "resource notARealFile.json not found.", exceptionThrown.getMessage());
     }
@@ -108,14 +107,11 @@ class MetadataBuilderTest {
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with null")
     void Should_ThrowIllegalArgumentException_When_FileNameIsNull() {
+        metadataBuilder.setCredentialIssuer("https://test-credential-issuer.gov.uk");
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () ->
-                                metadataBuilder
-                                        .setCredentialIssuer(
-                                                "https://test-credential-issuer.gov.uk")
-                                        .setCredentialConfigurationsSupported(null));
+                        () -> metadataBuilder.setCredentialConfigurationsSupported(null));
         Assertions.assertEquals("fileName must not be null", exceptionThrown.getMessage());
     }
 
