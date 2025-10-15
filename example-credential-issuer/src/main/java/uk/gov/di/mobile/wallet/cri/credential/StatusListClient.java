@@ -13,7 +13,10 @@ public class StatusListClient {
 
     public record IssueResponse(Integer idx, String uri) {}
 
-    private static final String ENDPOINT_ISSUE = "/issue";
+    public record RevokeResponse(String message, Long revokedAt) {}
+
+    private static final String ISSUE_ENDPOINT = "/issue";
+    private static final String REVOKE_ENDPOINT = "/revoke";
 
     private final ConfigurationService configurationService;
     private final Client httpClient;
@@ -31,7 +34,7 @@ public class StatusListClient {
     public IssueResponse getIndex(long credentialExpiry)
             throws StatusListException, SigningException {
         String token = tokenBuilder.buildIssueToken(credentialExpiry);
-        String url = buildUrl();
+        String url = buildUrl(ISSUE_ENDPOINT);
 
         Response response =
                 httpClient
@@ -48,8 +51,28 @@ public class StatusListClient {
         return response.readEntity(IssueResponse.class);
     }
 
-    private String buildUrl() {
+    public RevokeResponse revokeCredential(int index, String uri)
+            throws StatusListException, SigningException {
+        String token = tokenBuilder.buildRevokeToken(index, uri);
+        String url = buildUrl(REVOKE_ENDPOINT);
+
+        Response response =
+                httpClient
+                        .target(url)
+                        .request(MediaType.APPLICATION_JSON)
+                        .post(Entity.entity(token, MediaType.APPLICATION_JSON));
+
+        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+            throw new StatusListException(
+                    String.format(
+                            "Request to revoke credential failed with status code %s",
+                            response.getStatus()));
+        }
+        return response.readEntity(RevokeResponse.class);
+    }
+
+    private String buildUrl(String endpoint) {
         URI baseUrl = configurationService.getStatusListUrl();
-        return baseUrl + StatusListClient.ENDPOINT_ISSUE;
+        return baseUrl + endpoint;
     }
 }
