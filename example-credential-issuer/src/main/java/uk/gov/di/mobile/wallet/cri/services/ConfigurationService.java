@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.Configuration;
 
 import java.net.URI;
@@ -9,6 +11,18 @@ import java.net.URI;
  * configuration with defaults for local development.
  */
 public class ConfigurationService extends Configuration {
+
+    private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
+
+    @JsonProperty("httpClient")
+    public JerseyClientConfiguration getHttpClient() {
+        return httpClient;
+    }
+
+    @JsonProperty("httpClient")
+    public void setHttpClient(JerseyClientConfiguration httpClient) {
+        this.httpClient = httpClient;
+    }
 
     /**
      * Gets the environment name (local, dev, build, staging).

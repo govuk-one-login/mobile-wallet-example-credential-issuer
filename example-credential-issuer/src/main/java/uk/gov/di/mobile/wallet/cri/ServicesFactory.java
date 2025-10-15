@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri;
 
 import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
@@ -88,7 +87,7 @@ public class ServicesFactory {
 
         Client httpClient =
                 new JerseyClientBuilder(environment)
-                        .using(new JerseyClientConfiguration())
+                        .using(configurationService.getHttpClient())
                         .build("example-cri");
 
         JwksService jwksService = new JwksService(configurationService, kmsService);
