@@ -8,12 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MetadataBuilderTest {
@@ -55,21 +52,6 @@ class MetadataBuilderTest {
                 metadata.notificationEndpoint);
         assertEquals("https://test-credential-issuer.gov.uk/iacas", metadata.iacasEndpoint);
 
-        Map<String, Object> configs =
-                (Map<String, Object>) metadata.credentialConfigurationsSupported;
-        assertNotNull(configs);
-
-        for (Map.Entry<String, Object> entry : configs.entrySet()) {
-            String credentialName = entry.getKey();
-
-            Map<String, Object> perCredential =
-                    assertInstanceOf(Map.class, entry.getValue(), "Credentials are of type Map");
-
-            Object url = perCredential.get("credential_refresh_web_journey_url");
-
-            assertNotNull(url, "missing credential_refresh_web_journey_url for" + credentialName);
-            assertEquals("https://test-credential-issuer.gov.uk/refresh/" + credentialName, url);
-        }
         JsonNode actualCredentialConfigurationsSupported =
                 objectMapper.readTree(
                         objectMapper.writeValueAsString(
