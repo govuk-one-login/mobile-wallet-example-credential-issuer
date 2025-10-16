@@ -30,17 +30,23 @@ public class CredentialService {
     private final CredentialHandlerFactory credentialHandlerFactory;
     private final CredentialExpiryCalculator credentialExpiryCalculator;
     private final StatusListClient statusListClient;
+    // environment property will be removed once the CRI has integrated with the status list in
+    // staging
+    private final String environment;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
-    public CredentialService(
+    public
+    CredentialService( // NOSONAR: Eighth parameter (environment) will be removed once CRI has
+            // integrated with status list
             DataStore dataStore,
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
             CredentialHandlerFactory credentialHandlerFactory,
             CredentialExpiryCalculator credentialExpiryCalculator,
-            StatusListClient statusListClient) {
+            StatusListClient statusListClient,
+            String environment) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
@@ -48,6 +54,7 @@ public class CredentialService {
         this.credentialHandlerFactory = credentialHandlerFactory;
         this.credentialExpiryCalculator = credentialExpiryCalculator;
         this.statusListClient = statusListClient;
+        this.environment = environment;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -90,7 +97,9 @@ public class CredentialService {
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
             StatusListClient.IssueResponse issueResponse = null;
-            if (credentialType == MOBILE_DRIVING_LICENCE) {
+            // !environment.equals("staging") will be removed once the CRI has integrated with the
+            // status list in staging
+            if (credentialType == MOBILE_DRIVING_LICENCE && !environment.equals("staging")) {
                 issueResponse = statusListClient.getIndex(expiry);
             }
 
