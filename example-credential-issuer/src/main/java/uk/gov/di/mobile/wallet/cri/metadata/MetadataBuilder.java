@@ -70,10 +70,6 @@ public class MetadataBuilder {
         if (fileName == null) {
             throw new IllegalArgumentException("fileName must not be null");
         }
-        if (this.credentialIssuer == null) {
-            throw new IllegalStateException(
-                    "credentialIssuer must be set before loading CredentialConfigurationsSupported");
-        }
 
         File credentialConfigurationsSupportedFilePath =
                 new File(Resources.getResource(fileName).getPath());

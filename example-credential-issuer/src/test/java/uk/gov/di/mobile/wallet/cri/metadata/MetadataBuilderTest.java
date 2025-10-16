@@ -85,17 +85,14 @@ class MetadataBuilderTest {
         assertThrows(
                 JsonParseException.class,
                 () ->
-                        metadataBuilder
-                                .setCredentialIssuer("https://test-credential-issuer.gov.uk")
-                                .setCredentialConfigurationsSupported(
-                                        "test_invalid_credential_configurations_supported.json"));
+                        metadataBuilder.setCredentialConfigurationsSupported(
+                                "test_invalid_credential_configurations_supported.json"));
     }
 
     @Test
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with a file name that does not exist")
     void Should_ThrowIllegalArgumentException_When_FileDoesNotExist() {
-        metadataBuilder.setCredentialIssuer("https://test-credential-issuer.gov.uk");
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
@@ -109,27 +106,11 @@ class MetadataBuilderTest {
     @DisplayName(
             "Should throw IllegalArgumentException when setCredentialConfigurationsSupported is called with null")
     void Should_ThrowIllegalArgumentException_When_FileNameIsNull() {
-        metadataBuilder.setCredentialIssuer("https://test-credential-issuer.gov.uk");
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialConfigurationsSupported(null));
         assertEquals("fileName must not be null", exceptionThrown.getMessage());
-    }
-
-    @Test
-    @DisplayName(
-            "Should throw IllegalStateException when setCredentialIssuer has not been called yet and credentialIssuer is null")
-    void Should_ThrowIllegalStateException_When_IssuerMissing_BeforeLoadingConfigurations() {
-        IllegalStateException exceptionThrown =
-                assertThrows(
-                        IllegalStateException.class,
-                        () ->
-                                metadataBuilder.setCredentialConfigurationsSupported(
-                                        "test_valid_credential_configurations_supported.json"));
-        assertEquals(
-                "credentialIssuer must be set before loading CredentialConfigurationsSupported",
-                exceptionThrown.getMessage());
     }
 
     @Test
