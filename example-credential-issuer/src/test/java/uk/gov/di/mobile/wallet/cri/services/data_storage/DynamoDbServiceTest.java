@@ -21,6 +21,7 @@ import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -46,8 +47,10 @@ class DynamoDbServiceTest {
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String NOTIFICATION_ID = "267b1335-fc0e-41cf-a2b1-16134bf62dc4";
     private static final String DOCUMENT_ID = "1234ABCD";
-    private static final StatusListClient.IssueResponse STATUS_LIST_ISSUER_RESPONSE =
-            new StatusListClient.IssueResponse(0, "https://test-status-list.com/t/3B0F3BD087A7");
+    private static final Optional<StatusListClient.StatusListInformation> STATUS_LIST_INFORMATION =
+            Optional.of(
+                    new StatusListClient.StatusListInformation(
+                            0, "https://test-status-list.gov.uk/t/3B0F3BD087A7"));
 
     @Mock private DynamoDbEnhancedClient mockDynamoDbEnhancedClient;
     @Mock private DynamoDbTable<CachedCredentialOffer> mockCredentialOfferTable;
@@ -78,7 +81,7 @@ class DynamoDbServiceTest {
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId(WALLET_SUBJECT_ID)
                         .timeToLive(TIME_TO_LIVE)
-                        .statusList(STATUS_LIST_ISSUER_RESPONSE)
+                        .statusList(STATUS_LIST_INFORMATION)
                         .documentId(DOCUMENT_ID)
                         .build();
 
@@ -194,7 +197,7 @@ class DynamoDbServiceTest {
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId(WALLET_SUBJECT_ID)
                         .timeToLive(TIME_TO_LIVE)
-                        .statusList(STATUS_LIST_ISSUER_RESPONSE)
+                        .statusList(STATUS_LIST_INFORMATION)
                         .documentId(DOCUMENT_ID)
                         .build();
 
@@ -204,7 +207,7 @@ class DynamoDbServiceTest {
                         .notificationId(NOTIFICATION_ID)
                         .walletSubjectId(WALLET_SUBJECT_ID)
                         .timeToLive(TIME_TO_LIVE)
-                        .statusList(STATUS_LIST_ISSUER_RESPONSE)
+                        .statusList(STATUS_LIST_INFORMATION)
                         .documentId(DOCUMENT_ID)
                         .build();
 

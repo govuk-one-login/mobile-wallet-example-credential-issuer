@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
@@ -79,13 +80,13 @@ public class MobileSecurityObjectFactory {
     public MobileSecurityObject build(
             Namespaces nameSpaces,
             ECPublicKey publicKey,
-            int statusListIndex,
-            String statusListUri,
+            StatusListClient.StatusListInformation statusListInformation,
             long credentialTtlMinutes)
             throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         ValidityInfo validityInfo = validityInfoFactory.build(credentialTtlMinutes);
-        StatusList statusList = new StatusList(statusListIndex, statusListUri);
+        StatusList statusList =
+                new StatusList(statusListInformation.idx(), statusListInformation.uri());
         Status status = new Status(statusList);
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
 

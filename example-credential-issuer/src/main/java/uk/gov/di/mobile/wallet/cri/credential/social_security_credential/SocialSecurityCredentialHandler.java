@@ -27,7 +27,7 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
     public String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
-            Optional<StatusListClient.IssueResponse> issueResponse)
+            Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException {
         SocialSecurityDocument socialSecurityDocument =
                 mapper.convertValue(document.getData(), SocialSecurityDocument.class);

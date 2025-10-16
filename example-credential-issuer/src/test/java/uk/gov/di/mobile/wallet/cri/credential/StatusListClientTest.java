@@ -62,12 +62,13 @@ class StatusListClientTest {
             when(requestBuilder.post(Entity.entity(MOCK_TOKEN, MediaType.APPLICATION_JSON)))
                     .thenReturn(response);
             when(response.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
-            StatusListClient.IssueResponse expectedResponse =
-                    new StatusListClient.IssueResponse(INDEX, STATUS_LIST_URI);
-            when(response.readEntity(StatusListClient.IssueResponse.class))
+            StatusListClient.StatusListInformation expectedResponse =
+                    new StatusListClient.StatusListInformation(INDEX, STATUS_LIST_URI);
+            when(response.readEntity(StatusListClient.StatusListInformation.class))
                     .thenReturn(expectedResponse);
 
-            StatusListClient.IssueResponse result = statusListClient.getIndex(CREDENTIAL_EXPIRY);
+            StatusListClient.StatusListInformation result =
+                    statusListClient.getIndex(CREDENTIAL_EXPIRY);
 
             assertEquals(expectedResponse, result);
             verify(tokenBuilder).buildIssueToken(CREDENTIAL_EXPIRY);

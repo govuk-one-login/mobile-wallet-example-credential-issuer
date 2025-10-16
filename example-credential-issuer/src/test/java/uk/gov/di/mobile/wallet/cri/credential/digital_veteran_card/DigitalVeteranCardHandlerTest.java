@@ -42,7 +42,7 @@ class DigitalVeteranCardHandlerTest {
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
-    private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
+    private static final Optional<StatusListClient.StatusListInformation> STATUS_LIST_INFORMATION =
             Optional.empty();
 
     @BeforeEach
@@ -77,7 +77,7 @@ class DigitalVeteranCardHandlerTest {
 
             String credential =
                     spyHandler.buildCredential(
-                            mockDocument, mockProofData, STATUS_LIST_ISSUE_RESPONSE);
+                            mockDocument, mockProofData, STATUS_LIST_INFORMATION);
 
             assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
@@ -118,9 +118,7 @@ class DigitalVeteranCardHandlerTest {
                             SigningException.class,
                             () ->
                                     spyHandler.buildCredential(
-                                            mockDocument,
-                                            mockProofData,
-                                            STATUS_LIST_ISSUE_RESPONSE));
+                                            mockDocument, mockProofData, STATUS_LIST_INFORMATION));
             assertEquals("Some signing error", thrown.getMessage());
         }
     }

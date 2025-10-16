@@ -30,23 +30,17 @@ public class CredentialService {
     private final CredentialHandlerFactory credentialHandlerFactory;
     private final CredentialExpiryCalculator credentialExpiryCalculator;
     private final StatusListClient statusListClient;
-    // environment property will be removed once the CRI has integrated with the status list in
-    // staging
-    private final String environment;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
 
-    public
-    CredentialService( // NOSONAR: Eighth parameter (environment) will be removed once CRI has
-            // integrated with status list
+    public CredentialService(
             DataStore dataStore,
             AccessTokenService accessTokenService,
             ProofJwtService proofJwtService,
             DocumentStoreClient documentStoreClient,
             CredentialHandlerFactory credentialHandlerFactory,
             CredentialExpiryCalculator credentialExpiryCalculator,
-            StatusListClient statusListClient,
-            String environment) {
+            StatusListClient statusListClient) {
         this.dataStore = dataStore;
         this.accessTokenService = accessTokenService;
         this.proofJwtService = proofJwtService;
@@ -54,7 +48,6 @@ public class CredentialService {
         this.credentialHandlerFactory = credentialHandlerFactory;
         this.credentialExpiryCalculator = credentialExpiryCalculator;
         this.statusListClient = statusListClient;
-        this.environment = environment;
     }
 
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
@@ -96,17 +89,15 @@ public class CredentialService {
             CredentialType credentialType = CredentialType.fromType(vcType);
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
-            StatusListClient.IssueResponse issueResponse = null;
-            // !environment.equals("staging") will be removed once the CRI has integrated with the
-            // status list in staging
-            if (credentialType == MOBILE_DRIVING_LICENCE && !environment.equals("staging")) {
-                issueResponse = statusListClient.getIndex(expiry);
+            Optional<StatusListClient.StatusListInformation> statusListInformation =
+                    Optional.empty();
+            if (credentialType == MOBILE_DRIVING_LICENCE) {
+                statusListInformation = Optional.of(statusListClient.getIndex(expiry));
             }
 
             CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
             String credential =
-                    handler.buildCredential(
-                            document, proofJwtData, Optional.ofNullable(issueResponse));
+                    handler.buildCredential(document, proofJwtData, statusListInformation);
 
             StoredCredential storedCredential =
                     StoredCredential.builder()
@@ -114,7 +105,7 @@ public class CredentialService {
                             .notificationId(notificationId)
                             .walletSubjectId(credentialOffer.getWalletSubjectId())
                             .timeToLive(expiry)
-                            .statusList(issueResponse)
+                            .statusList(statusListInformation)
                             .documentId(document.getDocumentId())
                             .build();
 

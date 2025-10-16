@@ -11,7 +11,7 @@ import java.net.URI;
 
 public class StatusListClient {
 
-    public record IssueResponse(Integer idx, String uri) {}
+    public record StatusListInformation(Integer idx, String uri) {}
 
     public record RevokeResponse(String message, Long revokedAt) {}
 
@@ -31,7 +31,7 @@ public class StatusListClient {
         this.tokenBuilder = tokenBuilder;
     }
 
-    public IssueResponse getIndex(long credentialExpiry)
+    public StatusListInformation getIndex(long credentialExpiry)
             throws StatusListException, SigningException {
         String token = tokenBuilder.buildIssueToken(credentialExpiry);
         String url = buildUrl(ISSUE_ENDPOINT);
@@ -48,7 +48,7 @@ public class StatusListClient {
                             "Request to get credential index failed with status code %s",
                             response.getStatus()));
         }
-        return response.readEntity(IssueResponse.class);
+        return response.readEntity(StatusListInformation.class);
     }
 
     public RevokeResponse revokeCredential(int index, String uri)

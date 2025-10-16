@@ -8,6 +8,8 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbParti
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 
+import java.util.Optional;
+
 @Setter
 @DynamoDbBean
 public class StoredCredential {
@@ -75,10 +77,11 @@ public class StoredCredential {
             return this;
         }
 
-        public StoredCredentialBuilder statusList(StatusListClient.IssueResponse issuerResponse) {
-            if (issuerResponse != null) {
-                this.statusListIndex = issuerResponse.idx();
-                this.statusListUri = issuerResponse.uri();
+        public StoredCredentialBuilder statusList(
+                Optional<StatusListClient.StatusListInformation> issuerResponse) {
+            if (issuerResponse.isPresent()) {
+                this.statusListIndex = issuerResponse.get().idx();
+                this.statusListUri = issuerResponse.get().uri();
             }
             return this;
         }

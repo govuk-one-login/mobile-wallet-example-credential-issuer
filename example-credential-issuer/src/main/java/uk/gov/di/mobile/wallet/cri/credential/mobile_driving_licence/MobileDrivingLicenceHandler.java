@@ -23,15 +23,12 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
     public String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
-            Optional<StatusListClient.IssueResponse> issueResponse)
+            Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
         return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                drivingLicenceDocument,
-                proofData.publicKey(),
-                issueResponse.orElseThrow().idx(),
-                issueResponse.orElseThrow().uri());
+                drivingLicenceDocument, proofData.publicKey(), statusListInformation.orElseThrow());
     }
 }
