@@ -43,7 +43,7 @@ class StatusListClientTest {
     }
 
     @Test
-    void Should_ReturnIssueResponse_On_SuccessfulRequest() throws Exception {
+    void Should_ReturnStatusListInformation_On_SuccessfulRequest() throws Exception {
         long credentialExpiry = 1234567890L;
         String token = "mock-issue-token";
         URI baseUrl = new URI("https://status-list.test.com");

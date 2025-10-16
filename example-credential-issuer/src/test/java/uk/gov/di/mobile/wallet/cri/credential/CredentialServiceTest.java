@@ -74,7 +74,7 @@ class CredentialServiceTest {
     public static final String NINO = "QQ123456C";
     public static final String DOCUMENT_NUMBER = "EDWAR583720SE5RO";
     private static final String NONCE = "134e0c41-a8b4-46d4-aec8-cd547e125589";
-    private static final StatusListClient.StatusListInformation STATUS_LIST_ISSUE_RESPONSE =
+    private static final StatusListClient.StatusListInformation STATUS_LIST_INFORMATION =
             new StatusListClient.StatusListInformation(3, "https://example.com/status-list");
     private static final long EXPIRY_TIME = 1234567890L;
     private static final String CREDENTIAL = "test-credential";
@@ -244,11 +244,11 @@ class CredentialServiceTest {
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
-        when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(STATUS_LIST_ISSUE_RESPONSE);
+        when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(STATUS_LIST_INFORMATION);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
         when(mockHandler.buildCredential(
-                        mockDocument, mockProofJwtData, Optional.of(STATUS_LIST_ISSUE_RESPONSE)))
+                        mockDocument, mockProofJwtData, Optional.of(STATUS_LIST_INFORMATION)))
                 .thenReturn(CREDENTIAL);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
 
@@ -321,7 +321,7 @@ class CredentialServiceTest {
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
-        when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(STATUS_LIST_ISSUE_RESPONSE);
+        when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(STATUS_LIST_INFORMATION);
         when(mockHandler.buildCredential(
                         eq(mockDocument), eq(mockProofJwtData), any(Optional.class)))
                 .thenThrow(new MDLException("Some mDL error", new RuntimeException()));
@@ -384,11 +384,11 @@ class CredentialServiceTest {
         when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
         when(mockExpiryCalculator.calculateExpiry(mockMobileDrivingLicenceDocument))
                 .thenReturn(EXPIRY_TIME);
-        when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(STATUS_LIST_ISSUE_RESPONSE);
+        when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(STATUS_LIST_INFORMATION);
         when(mockHandler.buildCredential(
                         mockMobileDrivingLicenceDocument,
                         mockProofJwtData,
-                        Optional.of(STATUS_LIST_ISSUE_RESPONSE)))
+                        Optional.of(STATUS_LIST_INFORMATION)))
                 .thenReturn(CREDENTIAL);
         try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
             mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
@@ -403,7 +403,7 @@ class CredentialServiceTest {
                     .buildCredential(
                             mockMobileDrivingLicenceDocument,
                             mockProofJwtData,
-                            Optional.of(STATUS_LIST_ISSUE_RESPONSE));
+                            Optional.of(STATUS_LIST_INFORMATION));
             ArgumentCaptor<StoredCredential> storedCredentialCaptor =
                     ArgumentCaptor.forClass(StoredCredential.class);
             verify(mockDynamoDbService).saveStoredCredential(storedCredentialCaptor.capture());
@@ -411,8 +411,8 @@ class CredentialServiceTest {
             assertEquals(CREDENTIAL_IDENTIFIER, storedCredential.getCredentialIdentifier());
             assertEquals(NOTIFICATION_ID.toString(), storedCredential.getNotificationId());
             assertEquals(WALLET_SUBJECT_ID, storedCredential.getWalletSubjectId());
-            assertEquals(STATUS_LIST_ISSUE_RESPONSE.idx(), storedCredential.getStatusListIndex());
-            assertEquals(STATUS_LIST_ISSUE_RESPONSE.uri(), storedCredential.getStatusListUri());
+            assertEquals(STATUS_LIST_INFORMATION.idx(), storedCredential.getStatusListIndex());
+            assertEquals(STATUS_LIST_INFORMATION.uri(), storedCredential.getStatusListUri());
             assertEquals(EXPIRY_TIME, storedCredential.getTimeToLive());
             assertEquals(DOCUMENT_NUMBER, storedCredential.getDocumentId());
         }
