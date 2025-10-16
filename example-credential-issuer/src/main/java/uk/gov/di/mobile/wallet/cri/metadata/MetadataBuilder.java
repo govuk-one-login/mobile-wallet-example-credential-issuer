@@ -66,7 +66,7 @@ public class MetadataBuilder {
     }
 
     public MetadataBuilder setCredentialConfigurationsSupported(String fileName)
-            throws IOException, IllegalArgumentException, IllegalStateException {
+            throws IOException, IllegalArgumentException {
         if (fileName == null) {
             throw new IllegalArgumentException("fileName must not be null");
         }
