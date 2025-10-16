@@ -16,12 +16,12 @@ import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -37,12 +37,10 @@ class MobileDrivingLicenceHandlerTest {
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
     private MobileDrivingLicenceHandler handler;
 
+    private static final StatusListClient.StatusListInformation STATUS_LIST_INFORMATION =
+            new StatusListClient.StatusListInformation(
+                    0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final String EXPECTED_CREDENTIAL = "signed-mdoc-credential-string";
-
-    private static final int INDEX = 0;
-    private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
-    private static final StatusListClient.IssueResponse STATUS_LIST_ISSUE_RESPONSE =
-            new StatusListClient.IssueResponse(INDEX, URI);
 
     @BeforeEach
     void setUp() {
@@ -58,8 +56,7 @@ class MobileDrivingLicenceHandlerTest {
         when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
-                        eq(INDEX),
-                        eq(URI)))
+                        any(StatusListClient.StatusListInformation.class)))
                 .thenReturn(EXPECTED_CREDENTIAL);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -70,11 +67,34 @@ class MobileDrivingLicenceHandlerTest {
 
         String credential =
                 spyHandler.buildCredential(
-                        mockDocument, mockProofData, Optional.of(STATUS_LIST_ISSUE_RESPONSE));
+                        mockDocument, mockProofData, Optional.of(STATUS_LIST_INFORMATION));
 
         assertEquals(EXPECTED_CREDENTIAL, credential);
         verify(mockMobileDrivingLicenceService)
-                .createMobileDrivingLicence(mockDrivingLicenceDocument, ecPublicKey, INDEX, URI);
+                .createMobileDrivingLicence(
+                        mockDrivingLicenceDocument, ecPublicKey, STATUS_LIST_INFORMATION);
+    }
+
+    @Test
+    void Should_ThrowNoSuchElementException_When_StatusListInformationIsEmpty() {
+        Map<String, Object> documentData = new HashMap<>();
+        when(mockDocument.getData()).thenReturn(documentData);
+        when(mockProofData.publicKey()).thenReturn(ecPublicKey);
+        MobileDrivingLicenceHandler spyHandler = spy(handler);
+        ObjectMapper mockMapper = mock(ObjectMapper.class);
+        when(mockMapper.convertValue(documentData, DrivingLicenceDocument.class))
+                .thenReturn(mockDrivingLicenceDocument);
+        setMapperField(spyHandler, mockMapper);
+        Optional<StatusListClient.StatusListInformation> emptyStatusListInformation =
+                Optional.empty();
+
+        NoSuchElementException thrown =
+                assertThrows(
+                        NoSuchElementException.class,
+                        () ->
+                                spyHandler.buildCredential(
+                                        mockDocument, mockProofData, emptyStatusListInformation));
+        assertEquals("No value present", thrown.getMessage());
     }
 
     @Test
@@ -88,8 +108,7 @@ class MobileDrivingLicenceHandlerTest {
         when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
-                        eq(INDEX),
-                        eq(URI)))
+                        any(StatusListClient.StatusListInformation.class)))
                 .thenThrow(signingException);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -104,7 +123,7 @@ class MobileDrivingLicenceHandlerTest {
                                 spyHandler.buildCredential(
                                         mockDocument,
                                         mockProofData,
-                                        Optional.of(STATUS_LIST_ISSUE_RESPONSE)));
+                                        Optional.of(STATUS_LIST_INFORMATION)));
         assertEquals("Some signing error", thrown.getMessage());
     }
 
