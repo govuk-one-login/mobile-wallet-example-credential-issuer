@@ -6,4 +6,5 @@ public record MobileSecurityObject(
         DeviceKeyInfo deviceKeyInfo,
         ValueDigests valueDigests,
         String docType,
-        ValidityInfo validityInfo) {}
+        ValidityInfo validityInfo,
+        Status status) {}

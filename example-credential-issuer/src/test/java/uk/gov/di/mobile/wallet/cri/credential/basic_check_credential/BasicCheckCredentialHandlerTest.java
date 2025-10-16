@@ -11,10 +11,12 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,6 +42,8 @@ class BasicCheckCredentialHandlerTest {
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
+    private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
+            Optional.empty();
 
     @BeforeEach
     void setUp() {
@@ -71,9 +75,11 @@ class BasicCheckCredentialHandlerTest {
                                             mockBasicCheckDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
-            String result = spyHandler.buildCredential(mockDocument, mockProofData);
+            String credential =
+                    spyHandler.buildCredential(
+                            mockDocument, mockProofData, STATUS_LIST_ISSUE_RESPONSE);
 
-            assertEquals(EXPECTED_CREDENTIAL, result);
+            assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
                     .buildCredential(
                             mockCredentialSubject, BASIC_DISCLOSURE_CREDENTIAL, TTL_MINUTES);
@@ -111,7 +117,11 @@ class BasicCheckCredentialHandlerTest {
             SigningException thrown =
                     assertThrows(
                             SigningException.class,
-                            () -> spyHandler.buildCredential(mockDocument, mockProofData));
+                            () ->
+                                    spyHandler.buildCredential(
+                                            mockDocument,
+                                            mockProofData,
+                                            STATUS_LIST_ISSUE_RESPONSE));
             assertEquals("Some signing error", thrown.getMessage());
         }
     }

@@ -1,16 +1,16 @@
 package uk.gov.di.mobile.wallet.cri;
 
 import io.dropwizard.client.JerseyClientBuilder;
-import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListRequestTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceBuilder;
@@ -26,6 +26,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Namesp
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfoFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigestsFactory;
 import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
 import uk.gov.di.mobile.wallet.cri.credential_offer.PreAuthorizedCodeBuilder;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentService;
@@ -86,7 +87,7 @@ public class ServicesFactory {
 
         Client httpClient =
                 new JerseyClientBuilder(environment)
-                        .using(new JerseyClientConfiguration())
+                        .using(configurationService.getHttpClient())
                         .build("example-cri");
 
         JwksService jwksService = new JwksService(configurationService, kmsService);
@@ -141,6 +142,13 @@ public class ServicesFactory {
                         socialSecurityCredentialBuilder,
                         digitalVeteranCardCredentialBuilder,
                         mobileDrivingLicenceBuilder);
+
+        StatusListRequestTokenBuilder statusListRequestTokenBuilder =
+                new StatusListRequestTokenBuilder(configurationService, kmsService);
+        StatusListClient statusListClient =
+                new StatusListClient(
+                        configurationService, httpClient, statusListRequestTokenBuilder);
+
         CredentialService credentialService =
                 new CredentialService(
                         dynamoDbService,
@@ -148,7 +156,9 @@ public class ServicesFactory {
                         proofJwtService,
                         documentStoreClient,
                         credentialHandlerFactory,
-                        new CredentialExpiryCalculator());
+                        new CredentialExpiryCalculator(),
+                        statusListClient,
+                        configurationService.getEnvironment());
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);

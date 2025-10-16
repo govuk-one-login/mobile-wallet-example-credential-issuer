@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.Configuration;
 
 import java.net.URI;
@@ -9,6 +11,18 @@ import java.net.URI;
  * configuration with defaults for local development.
  */
 public class ConfigurationService extends Configuration {
+
+    private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
+
+    @JsonProperty("httpClient")
+    public JerseyClientConfiguration getHttpClient() {
+        return httpClient;
+    }
+
+    @JsonProperty("httpClient")
+    public void setHttpClient(JerseyClientConfiguration httpClient) {
+        this.httpClient = httpClient;
+    }
 
     /**
      * Gets the environment name (local, dev, build, staging).
@@ -107,7 +121,7 @@ public class ConfigurationService extends Configuration {
      *
      * @return The OIDC client identifier
      */
-    public String getClientId() {
+    public String getOIDCClientId() {
         return getEnvOrDefault("OIDC_CLIENT_ID", "TEST_CLIENT_ID");
     }
 
@@ -211,6 +225,38 @@ public class ConfigurationService extends Configuration {
      */
     public int getTableItemTtlInDays() {
         return 3;
+    }
+
+    // ===========================================
+    // STATUS LIST
+    // ===========================================
+    /**
+     * Gets this CRI's status list client ID.
+     *
+     * @return The client identifier
+     */
+    public String getStatusListClientId() {
+        return getEnvOrDefault("STATUS_LIST_CLIENT_ID", "STATUS_LIST_TEST_CLIENT_ID");
+    }
+
+    /**
+     * Gets the status list URL.
+     *
+     * <p>Note: Currently, there is no default value for STATUS_LIST_URL. This is temporary — once a
+     * default URL becomes available (i.e. when this ticket is completed <a
+     * href="https://govukverify.atlassian.net/browse/DCMAW-15575">...</a>), it should be added
+     * here.
+     *
+     * @return The status list URL as a string
+     * @throws IllegalArgumentException if STATUS_LIST_URL is missing or invalid
+     */
+    public URI getStatusListUrl() {
+        String key = "STATUS_LIST_URL";
+        String uriString = getEnvOrDefault(key, null);
+        if (uriString == null || uriString.isBlank()) {
+            throw new IllegalArgumentException("Missing required environment variable: " + key);
+        }
+        return createValidatedUri(key, uriString);
     }
 
     // ===========================================

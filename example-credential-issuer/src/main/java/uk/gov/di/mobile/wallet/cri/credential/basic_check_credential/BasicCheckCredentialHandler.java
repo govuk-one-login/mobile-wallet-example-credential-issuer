@@ -6,7 +6,10 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+
+import java.util.Optional;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.BASIC_DISCLOSURE_CREDENTIAL;
 
@@ -21,7 +24,10 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
     }
 
     @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    public String buildCredential(
+            Document document,
+            ProofJwtService.ProofJwtData proofData,
+            Optional<StatusListClient.IssueResponse> issueResponse)
             throws SigningException {
         BasicCheckDocument basicCheckDocument =
                 mapper.convertValue(document.getData(), BasicCheckDocument.class);

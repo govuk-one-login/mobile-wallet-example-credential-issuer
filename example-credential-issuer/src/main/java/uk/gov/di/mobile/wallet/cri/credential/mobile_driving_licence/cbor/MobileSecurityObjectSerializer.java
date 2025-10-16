@@ -27,7 +27,7 @@ public class MobileSecurityObjectSerializer extends JsonSerializer<MobileSecurit
         try (CBORGenerator innerGenerator = factory.createGenerator(baos)) {
             innerGenerator.setCodec(generator.getCodec());
 
-            innerGenerator.writeStartObject(6);
+            innerGenerator.writeStartObject(7);
             innerGenerator.writeStringField("version", mobileSecurityObject.version());
             innerGenerator.writeStringField(
                     "digestAlgorithm", mobileSecurityObject.digestAlgorithm());
@@ -39,6 +39,8 @@ public class MobileSecurityObjectSerializer extends JsonSerializer<MobileSecurit
             innerGenerator.writeString(mobileSecurityObject.docType());
             innerGenerator.writeFieldName("validityInfo");
             innerGenerator.writeObject(mobileSecurityObject.validityInfo());
+            innerGenerator.writeFieldName("status");
+            innerGenerator.writeObject(mobileSecurityObject.status());
             innerGenerator.writeEndObject();
         }
         cborGenerator.writeTag(24);

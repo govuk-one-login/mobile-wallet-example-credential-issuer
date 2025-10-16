@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -15,10 +16,12 @@ import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -33,7 +36,13 @@ class MobileDrivingLicenceHandlerTest {
     @Mock private ProofJwtService.ProofJwtData mockProofData;
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
     private MobileDrivingLicenceHandler handler;
+
     private static final String EXPECTED_CREDENTIAL = "signed-mdoc-credential-string";
+
+    private static final int INDEX = 0;
+    private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
+    private static final StatusListClient.IssueResponse STATUS_LIST_ISSUE_RESPONSE =
+            new StatusListClient.IssueResponse(INDEX, URI);
 
     @BeforeEach
     void setUp() {
@@ -47,19 +56,25 @@ class MobileDrivingLicenceHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
-                        any(DrivingLicenceDocument.class), any(ECPublicKey.class)))
+                        any(DrivingLicenceDocument.class),
+                        any(ECPublicKey.class),
+                        eq(INDEX),
+                        eq(URI)))
                 .thenReturn(EXPECTED_CREDENTIAL);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
         when(mockMapper.convertValue(documentData, DrivingLicenceDocument.class))
                 .thenReturn(mockDrivingLicenceDocument);
+
         setMapperField(spyHandler, mockMapper);
 
-        String result = spyHandler.buildCredential(mockDocument, mockProofData);
+        String credential =
+                spyHandler.buildCredential(
+                        mockDocument, mockProofData, Optional.of(STATUS_LIST_ISSUE_RESPONSE));
 
-        assertEquals(EXPECTED_CREDENTIAL, result);
+        assertEquals(EXPECTED_CREDENTIAL, credential);
         verify(mockMobileDrivingLicenceService)
-                .createMobileDrivingLicence(mockDrivingLicenceDocument, ecPublicKey);
+                .createMobileDrivingLicence(mockDrivingLicenceDocument, ecPublicKey, INDEX, URI);
     }
 
     @Test
@@ -71,7 +86,10 @@ class MobileDrivingLicenceHandlerTest {
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
-                        any(DrivingLicenceDocument.class), any(ECPublicKey.class)))
+                        any(DrivingLicenceDocument.class),
+                        any(ECPublicKey.class),
+                        eq(INDEX),
+                        eq(URI)))
                 .thenThrow(signingException);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -82,7 +100,11 @@ class MobileDrivingLicenceHandlerTest {
         SigningException thrown =
                 assertThrows(
                         SigningException.class,
-                        () -> spyHandler.buildCredential(mockDocument, mockProofData));
+                        () ->
+                                spyHandler.buildCredential(
+                                        mockDocument,
+                                        mockProofData,
+                                        Optional.of(STATUS_LIST_ISSUE_RESPONSE)));
         assertEquals("Some signing error", thrown.getMessage());
     }
 
