@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.revoke;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListException;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
@@ -11,6 +13,8 @@ import java.util.List;
 
 public class RevokeService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RevokeService.class);
+
     private final DataStore dataStore;
     private final StatusListClient statusListClient;
 
@@ -20,10 +24,7 @@ public class RevokeService {
     }
 
     public void revokeCredential(String documentId)
-            throws DataStoreException,
-                    CredentialNotFoundException,
-                    StatusListException,
-                    SigningException {
+            throws DataStoreException, CredentialNotFoundException, RevocationException {
         List<StoredCredential> credentials = dataStore.getCredentialsByDocumentId(documentId);
 
         if (credentials.isEmpty()) {
@@ -31,11 +32,25 @@ public class RevokeService {
                     "No credential found for document with ID " + documentId);
         }
 
+        int failureCount = 0;
         for (StoredCredential credential : credentials) {
-            int index = credential.getStatusListIndex();
-            String uri = credential.getStatusListUri();
+            try {
+                String uri = credential.getStatusListUri();
+                int index = credential.getStatusListIndex();
+                statusListClient.revokeCredential(index, uri);
+            } catch (StatusListException | SigningException exception) {
+                failureCount++;
+                LOGGER.error(
+                        "Failed to revoke credential with ID {} and document ID {}: {}",
+                        credential.getCredentialIdentifier(),
+                        credential.getDocumentId(),
+                        exception.getMessage(),
+                        exception);
+            }
+        }
 
-            statusListClient.revokeCredential(index, uri);
+        if (failureCount > 0) {
+            throw new RevocationException("One or more credentials could not be revoked");
         }
     }
 }
