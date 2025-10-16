@@ -42,8 +42,8 @@ class BasicCheckCredentialHandlerTest {
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_MINUTES = 1440L;
-    private static final Optional<StatusListClient.IssueResponse> STATUS_LIST_ISSUE_RESPONSE =
-            Optional.empty();
+    private static final Optional<StatusListClient.StatusListInformation>
+            STATUS_LIST_ISSUE_RESPONSE = Optional.empty();
 
     @BeforeEach
     void setUp() {

@@ -27,7 +27,7 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
     public String buildCredential(
             Document document,
             ProofJwtService.ProofJwtData proofData,
-            Optional<StatusListClient.IssueResponse> issueResponse)
+            Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException {
         VeteranCardDocument veteranCardDocument =
                 mapper.convertValue(document.getData(), VeteranCardDocument.class);

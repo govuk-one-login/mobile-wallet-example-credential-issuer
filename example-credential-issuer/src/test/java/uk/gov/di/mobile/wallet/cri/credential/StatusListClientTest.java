@@ -48,8 +48,9 @@ class StatusListClientTest {
         String token = "mock-issue-token";
         URI baseUrl = new URI("https://status-list.test.com");
         String expectedUrl = baseUrl + "/issue";
-        StatusListClient.IssueResponse expectedResponse =
-                new StatusListClient.IssueResponse(42, "https://status-list.test.com/t/12345");
+        StatusListClient.StatusListInformation expectedResponse =
+                new StatusListClient.StatusListInformation(
+                        0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
 
         when(tokenBuilder.buildIssueToken(credentialExpiry)).thenReturn(token);
         when(configurationService.getStatusListUrl()).thenReturn(baseUrl);
@@ -58,10 +59,10 @@ class StatusListClientTest {
         when(requestBuilder.post(Entity.entity(token, MediaType.APPLICATION_JSON)))
                 .thenReturn(response);
         when(response.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
-        when(response.readEntity(StatusListClient.IssueResponse.class))
+        when(response.readEntity(StatusListClient.StatusListInformation.class))
                 .thenReturn(expectedResponse);
 
-        StatusListClient.IssueResponse result = statusListClient.getIndex(credentialExpiry);
+        StatusListClient.StatusListInformation result = statusListClient.getIndex(credentialExpiry);
 
         assertEquals(expectedResponse, result);
         verify(tokenBuilder).buildIssueToken(credentialExpiry);

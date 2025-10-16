@@ -21,6 +21,7 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 
 import java.text.ParseException;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -190,7 +191,7 @@ class NotificationServiceTest {
                 .notificationId(notificationId)
                 .walletSubjectId(walletSubjectId)
                 .timeToLive(TIME_TO_LIVE)
-                .statusList(null)
+                .statusList(Optional.empty())
                 .documentId(DOCUMENT_ID)
                 .build();
     }

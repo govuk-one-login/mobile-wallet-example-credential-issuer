@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
 
@@ -29,9 +30,9 @@ class MobileSecurityObjectFactoryTest {
     @Mock private COSEKeyFactory mockCoseKeyFactory;
     @Mock private ECPublicKey mockEcPublicKey;
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
-
-    private static final int IDX = 0;
-    private static final String URI = "https://test-status-list.gov.uk/t/3B0F3BD087A7";
+    private static final StatusListClient.StatusListInformation STATUS_LIST_INFORMATION =
+            new StatusListClient.StatusListInformation(
+                    0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
 
     @Test
     void Should_CreateMobileSecurityObject() {
@@ -40,7 +41,6 @@ class MobileSecurityObjectFactoryTest {
                 new IssuerSignedItem(5, new byte[] {1, 2, 3}, "ID", "Test");
         Namespaces namespaces = new Namespaces(Map.of("testNamespace1", List.of(issuerSignedItem)));
 
-        // Arrange: Prepare ValueDigests
         ValueDigests valueDigests = new ValueDigests(Map.of("Test", Map.of(5, new byte[] {1})));
         when(mockValueDigestsFactory.createFromNamespaces(namespaces)).thenReturn(valueDigests);
         when(mockValueDigestsFactory.getDigestAlgorithm()).thenReturn("SHA-256");
@@ -82,7 +82,11 @@ class MobileSecurityObjectFactoryTest {
                 new MobileSecurityObjectFactory(
                         mockValueDigestsFactory, mockValidityInfoFactory, mockCoseKeyFactory);
         MobileSecurityObject result =
-                factory.build(namespaces, mockEcPublicKey, IDX, URI, CREDENTIAL_TTL_MINUTES);
+                factory.build(
+                        namespaces,
+                        mockEcPublicKey,
+                        STATUS_LIST_INFORMATION,
+                        CREDENTIAL_TTL_MINUTES);
 
         // Assert
         assertEquals(expectedMso, result, "MobileSecurityObject should be constructed as expected");
