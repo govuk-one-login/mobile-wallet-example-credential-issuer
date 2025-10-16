@@ -85,13 +85,15 @@ class MobileDrivingLicenceHandlerTest {
         when(mockMapper.convertValue(documentData, DrivingLicenceDocument.class))
                 .thenReturn(mockDrivingLicenceDocument);
         setMapperField(spyHandler, mockMapper);
+        Optional<StatusListClient.StatusListInformation> emptyStatusListInformation =
+                Optional.empty();
 
         NoSuchElementException thrown =
                 assertThrows(
                         NoSuchElementException.class,
                         () ->
                                 spyHandler.buildCredential(
-                                        mockDocument, mockProofData, Optional.empty()));
+                                        mockDocument, mockProofData, emptyStatusListInformation));
         assertEquals("No value present", thrown.getMessage());
     }
 
