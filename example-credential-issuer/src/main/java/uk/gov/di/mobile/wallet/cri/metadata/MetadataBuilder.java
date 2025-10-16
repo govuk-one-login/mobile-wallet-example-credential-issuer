@@ -79,17 +79,15 @@ public class MetadataBuilder {
                         credentialConfigurationsSupportedFilePath, new TypeReference<>() {});
 
         for (Map.Entry<String, Object> entry : credentialConfigurationsSupported.entrySet()) {
-            try {
-                String credentialName = entry.getKey();
-                Object credentialValue = entry.getValue();
-                if (credentialValue instanceof Map) {
-                    Map<String, Object> perCredential = (Map<String, Object>) credentialValue;
-                    perCredential.putIfAbsent(
-                            "credential_refresh_web_journey_url",
-                            this.credentialIssuer + "/refresh/" + credentialName);
-                }
-            } catch (ClassCastException e) {
-                LOGGER.warn("Unexpected type for credential value", e);
+            String credentialName = entry.getKey();
+            Object credentialValue = entry.getValue();
+            if (credentialValue instanceof Map) {
+                Map<String, Object> perCredential = (Map<String, Object>) credentialValue;
+                perCredential.putIfAbsent(
+                        "credential_refresh_web_journey_url",
+                        this.credentialIssuer + "/refresh/" + credentialName);
+            } else {
+                LOGGER.warn("Unexpected type for credential value");
             }
         }
 
