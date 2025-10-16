@@ -157,7 +157,8 @@ public class ServicesFactory {
                         documentStoreClient,
                         credentialHandlerFactory,
                         new CredentialExpiryCalculator(),
-                        statusListClient);
+                        statusListClient,
+                        configurationService.getEnvironment());
 
         DidDocumentService didDocumentService =
                 new DidDocumentService(configurationService, kmsService);

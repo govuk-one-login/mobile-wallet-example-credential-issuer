@@ -63,6 +63,7 @@ class CredentialServiceTest {
     private SignedJWT mockAccessToken;
     private ProofJwtService.ProofJwtData mockProofJwtData;
 
+    private static final String ENVIRONMENT = "test";
     private static final String MDL_VC_TYPE = "org.iso.18013.5.1.mDL";
     private static final String SOCIAL_SECURITY_VC_TYPE = "SocialSecurityCredential";
     private static final String CREDENTIAL_IDENTIFIER = "efb52887-48d6-43b7-b14c-da7896fbf54d";
@@ -97,7 +98,8 @@ class CredentialServiceTest {
                         mockDocumentStoreClient,
                         mockCredentialHandlerFactory,
                         mockExpiryCalculator,
-                        mockStatusListClient) {
+                        mockStatusListClient,
+                        ENVIRONMENT) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
@@ -221,7 +223,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_NotCallStatusListClient_When_ProcessingJWTCredentials() throws Exception {
+    void Should_NotCallStatusListClient_When_IssuingJWTCredentials() throws Exception {
         Document mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
@@ -239,7 +241,19 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_CallStatusListClient_When_ProcessingMDLCredentials() throws Exception {
+    void Should_CallStatusListClient_When_IssuingMDLCredentialsAndEnvironmentIsNotStaging()
+            throws Exception {
+        String environment = "build";
+        CredentialService credentialServiceBuild =
+                new CredentialService(
+                        mockDynamoDbService,
+                        mockAccessTokenService,
+                        mockProofJwtService,
+                        mockDocumentStoreClient,
+                        mockCredentialHandlerFactory,
+                        mockExpiryCalculator,
+                        mockStatusListClient,
+                        environment);
         Document mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
@@ -250,9 +264,38 @@ class CredentialServiceTest {
                 .thenReturn(CREDENTIAL);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
 
-        credentialService.getCredential(mockAccessToken, mockProofJwt);
+        credentialServiceBuild.getCredential(mockAccessToken, mockProofJwt);
 
         verify(mockStatusListClient).getIndex(EXPIRY_TIME);
+    }
+
+    @Test
+    void Should_NotCallStatusListClient_When_IssuingMDLCredentialsAndEnvironmentIsStaging()
+            throws Exception {
+        String environment = "staging";
+        CredentialService credentialServiceStaging =
+                new CredentialService(
+                        mockDynamoDbService,
+                        mockAccessTokenService,
+                        mockProofJwtService,
+                        mockDocumentStoreClient,
+                        mockCredentialHandlerFactory,
+                        mockExpiryCalculator,
+                        mockStatusListClient,
+                        environment);
+        Document mockDocument = getMockMobileDrivingLicenceDocument();
+        when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
+                .thenReturn(mockCachedCredentialOffer);
+        when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
+        when(mockHandler.buildCredential(mockDocument, mockProofJwtData, Optional.empty()))
+                .thenReturn(CREDENTIAL);
+        when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
+
+        credentialServiceStaging.getCredential(mockAccessToken, mockProofJwt);
+
+        verify(mockStatusListClient, never()).getIndex(EXPIRY_TIME);
     }
 
     @Test
@@ -334,8 +377,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ReturnCredentialResponse_When_ProcessingSocialSecurityCredential()
-            throws Exception {
+    void Should_ReturnCredentialResponse_When_IssuingSocialSecurityCredential() throws Exception {
         Document mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
@@ -373,7 +415,7 @@ class CredentialServiceTest {
     }
 
     @Test
-    void Should_ReturnCredentialResponse_When_ProcessingMobileDrivingLicence() throws Exception {
+    void Should_ReturnCredentialResponse_When_IssuingMobileDrivingLicence() throws Exception {
         Document mockMobileDrivingLicenceDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);

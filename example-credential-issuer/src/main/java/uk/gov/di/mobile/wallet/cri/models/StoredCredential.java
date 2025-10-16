@@ -24,7 +24,7 @@ public class StoredCredential {
         // Empty constructor needed for dynamoDb deserialization
     }
 
-    private StoredCredential(Builder builder) {
+    private StoredCredential(StoredCredentialBuilder builder) {
         this.credentialIdentifier = builder.credentialIdentifier;
         this.notificationId = builder.notificationId;
         this.walletSubjectId = builder.walletSubjectId;
@@ -34,8 +34,8 @@ public class StoredCredential {
         this.documentId = builder.documentId;
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static StoredCredentialBuilder builder() {
+        return new StoredCredentialBuilder();
     }
 
     @DynamoDbPartitionKey
@@ -49,7 +49,7 @@ public class StoredCredential {
         return documentId;
     }
 
-    public static class Builder {
+    public static class StoredCredentialBuilder {
         private String credentialIdentifier;
         private String notificationId;
         private String walletSubjectId;
@@ -58,24 +58,24 @@ public class StoredCredential {
         private Long timeToLive;
         private String documentId;
 
-        private Builder() {}
+        private StoredCredentialBuilder() {}
 
-        public Builder credentialIdentifier(String credentialIdentifier) {
+        public StoredCredentialBuilder credentialIdentifier(String credentialIdentifier) {
             this.credentialIdentifier = credentialIdentifier;
             return this;
         }
 
-        public Builder notificationId(String notificationId) {
+        public StoredCredentialBuilder notificationId(String notificationId) {
             this.notificationId = notificationId;
             return this;
         }
 
-        public Builder walletSubjectId(String walletSubjectId) {
+        public StoredCredentialBuilder walletSubjectId(String walletSubjectId) {
             this.walletSubjectId = walletSubjectId;
             return this;
         }
 
-        public Builder statusList(StatusListClient.IssueResponse issuerResponse) {
+        public StoredCredentialBuilder statusList(StatusListClient.IssueResponse issuerResponse) {
             if (issuerResponse != null) {
                 this.statusListIndex = issuerResponse.idx();
                 this.statusListUri = issuerResponse.uri();
@@ -83,12 +83,12 @@ public class StoredCredential {
             return this;
         }
 
-        public Builder timeToLive(Long timeToLive) {
+        public StoredCredentialBuilder timeToLive(Long timeToLive) {
             this.timeToLive = timeToLive;
             return this;
         }
 
-        public Builder documentId(String documentId) {
+        public StoredCredentialBuilder documentId(String documentId) {
             this.documentId = documentId;
             return this;
         }
