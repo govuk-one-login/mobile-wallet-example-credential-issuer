@@ -24,7 +24,10 @@ public class RevokeService {
     }
 
     public void revokeCredential(String documentId)
-            throws DataStoreException, CredentialNotFoundException, RevocationException {
+            throws DataStoreException,
+                    CredentialNotFoundException,
+                    RevocationException,
+                    SigningException {
         List<StoredCredential> credentials = dataStore.getCredentialsByDocumentId(documentId);
 
         if (credentials.isEmpty()) {
@@ -38,10 +41,18 @@ public class RevokeService {
                 String uri = credential.getStatusListUri();
                 int index = credential.getStatusListIndex();
                 statusListClient.revokeCredential(index, uri);
-            } catch (StatusListException | SigningException exception) {
+                dataStore.deleteCredential(credential.getCredentialIdentifier());
+            } catch (StatusListException exception) {
                 failureCount++;
                 LOGGER.error(
                         "Failed to revoke credential with ID {} and document ID {}: {}",
+                        credential.getCredentialIdentifier(),
+                        credential.getDocumentId(),
+                        exception.getMessage(),
+                        exception);
+            } catch (DataStoreException exception) {
+                LOGGER.error(
+                        "Failed to delete revoked credential with ID {} and document ID {}: {}",
                         credential.getCredentialIdentifier(),
                         credential.getDocumentId(),
                         exception.getMessage(),

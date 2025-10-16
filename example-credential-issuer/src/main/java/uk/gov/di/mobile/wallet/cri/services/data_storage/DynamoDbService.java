@@ -90,6 +90,16 @@ public class DynamoDbService implements DataStore {
     }
 
     @Override
+    public void deleteCredential(String partitionValue) throws DataStoreException {
+        try {
+            Key key = Key.builder().partitionValue(partitionValue).build();
+            storedCredentialTable.deleteItem(key);
+        } catch (Exception exception) {
+            throw new DataStoreException("Error deleting credential", exception);
+        }
+    }
+
+    @Override
     public void saveStoredCredential(StoredCredential storedCredential) throws DataStoreException {
         try {
             storedCredentialTable.putItem(storedCredential);
