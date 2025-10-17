@@ -3,7 +3,6 @@ package uk.gov.di.mobile.wallet.cri.metadata;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,7 +27,7 @@ class MetadataBuilderTest {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonNode expectedCredentialConfigurationsSupported =
                 objectMapper.readTree(
-                        "{\"SocialSecurityCredential\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"type\":[\"VerifiableCredential\",\"SocialSecurityCredential\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}},\"BasicDisclosureCredential\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"type\":[\"VerifiableCredential\",\"BasicDisclosureCredential\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}},\"DigitalVeteranCard\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"type\":[\"VerifiableCredential\",\"DigitalVeteranCard\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}},\"org.iso.18013.5.1.mDL\": {\"format\": \"mso_mdoc\",\"doctype\": \"org.iso.18013.5.1.mDL\",\"cryptographic_binding_methods_supported\": [\"cose_key\"],\"credential_signing_alg_values_supported\": [\"ES256\"]}}");
+                        "{\"SocialSecurityCredential\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"type\":[\"VerifiableCredential\",\"SocialSecurityCredential\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}, \"credential_refresh_web_journey_url\": \"https://test-credential-issuer.gov.uk/refresh/SocialSecurityCredential\"},\"BasicDisclosureCredential\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"type\":[\"VerifiableCredential\",\"BasicDisclosureCredential\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}, \"credential_refresh_web_journey_url\": \"https://test-credential-issuer.gov.uk/refresh/BasicDisclosureCredential\"},\"DigitalVeteranCard\":{\"format\":\"jwt_vc_json\",\"credential_definition\":{\"type\":[\"VerifiableCredential\",\"DigitalVeteranCard\"]},\"cryptographic_binding_methods_supported\":[\"did:key\"],\"credential_signing_alg_values_supported\":[\"ES256\"],\"proof_types_supported\":{\"jwt\":{\"proof_signing_alg_values_supported\":[\"ES256\"]}}, \"credential_refresh_web_journey_url\": \"https://test-credential-issuer.gov.uk/refresh/DigitalVeteranCard\"},\"org.iso.18013.5.1.mDL\": {\"format\": \"mso_mdoc\",\"doctype\": \"org.iso.18013.5.1.mDL\",\"cryptographic_binding_methods_supported\": [\"cose_key\"],\"credential_signing_alg_values_supported\": [\"ES256\"], \"credential_refresh_web_journey_url\": \"https://test-credential-issuer.gov.uk/refresh/org.iso.18013.5.1.mDL\"}}");
         Metadata metadata =
                 metadataBuilder
                         .setCredentialIssuer("https://test-credential-issuer.gov.uk")
@@ -52,6 +51,7 @@ class MetadataBuilderTest {
                 "https://test-credential-issuer.gov.uk/notification",
                 metadata.notificationEndpoint);
         assertEquals("https://test-credential-issuer.gov.uk/iacas", metadata.iacasEndpoint);
+
         JsonNode actualCredentialConfigurationsSupported =
                 objectMapper.readTree(
                         objectMapper.writeValueAsString(
@@ -81,8 +81,7 @@ class MetadataBuilderTest {
                         () ->
                                 metadataBuilder.setCredentialConfigurationsSupported(
                                         "notARealFile.json"));
-        Assertions.assertEquals(
-                "resource notARealFile.json not found.", exceptionThrown.getMessage());
+        assertEquals("resource notARealFile.json not found.", exceptionThrown.getMessage());
     }
 
     @Test
@@ -93,7 +92,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialConfigurationsSupported(null));
-        Assertions.assertEquals("fileName must not be null", exceptionThrown.getMessage());
+        assertEquals("fileName must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -104,8 +103,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialEndpoint(null));
-        Assertions.assertEquals(
-                "credentialEndpoint must not be null", exceptionThrown.getMessage());
+        assertEquals("credentialEndpoint must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -116,8 +114,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setAuthorizationServers(null));
-        Assertions.assertEquals(
-                "authorizationServers must not be null", exceptionThrown.getMessage());
+        assertEquals("authorizationServers must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -128,7 +125,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setCredentialIssuer(null));
-        Assertions.assertEquals("credentialIssuer must not be null", exceptionThrown.getMessage());
+        assertEquals("credentialIssuer must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -139,8 +136,7 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setNotificationEndpoint(null));
-        Assertions.assertEquals(
-                "notificationEndpoint must not be null", exceptionThrown.getMessage());
+        assertEquals("notificationEndpoint must not be null", exceptionThrown.getMessage());
     }
 
     @Test
@@ -151,6 +147,6 @@ class MetadataBuilderTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> metadataBuilder.setIacasEndpoint(null));
-        Assertions.assertEquals("iacasEndpoint must not be null", exceptionThrown.getMessage());
+        assertEquals("iacasEndpoint must not be null", exceptionThrown.getMessage());
     }
 }
