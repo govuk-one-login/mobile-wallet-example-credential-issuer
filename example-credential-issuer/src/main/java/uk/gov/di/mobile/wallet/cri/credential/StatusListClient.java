@@ -30,7 +30,7 @@ public class StatusListClient {
         this.tokenBuilder = tokenBuilder;
     }
 
-    public StatusListInformation getIndex(long credentialExpiry) throws StatusListException {
+    public StatusListInformation getIndex(long credentialExpiry) throws StatusListClientException {
         try {
             String token = tokenBuilder.buildIssueToken(credentialExpiry);
             String url = buildUrl(ISSUE_ENDPOINT);
@@ -42,21 +42,21 @@ public class StatusListClient {
                             .post(Entity.entity(token, MediaType.APPLICATION_JSON));
 
             if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-                throw new StatusListException(
+                throw new StatusListClientException(
                         String.format(
                                 "Request to get credential index failed with status code %s",
                                 response.getStatus()));
             }
             return response.readEntity(StatusListInformation.class);
         } catch (Exception exception) {
-            if (exception instanceof StatusListException) {
-                throw (StatusListException) exception;
+            if (exception instanceof StatusListClientException) {
+                throw (StatusListClientException) exception;
             }
-            throw new StatusListException("Failed to get credential index", exception);
+            throw new StatusListClientException("Failed to get credential index", exception);
         }
     }
 
-    public RevokeResponse revokeCredential(int index, String uri) throws StatusListException {
+    public RevokeResponse revokeCredential(int index, String uri) throws StatusListClientException {
         try {
             String token = tokenBuilder.buildRevokeToken(index, uri);
             String url = buildUrl(REVOKE_ENDPOINT);
@@ -68,17 +68,17 @@ public class StatusListClient {
                             .post(Entity.entity(token, MediaType.APPLICATION_JSON));
 
             if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-                throw new StatusListException(
+                throw new StatusListClientException(
                         String.format(
                                 "Request to revoke credential failed with status code %s",
                                 response.getStatus()));
             }
             return response.readEntity(RevokeResponse.class);
         } catch (Exception exception) {
-            if (exception instanceof StatusListException) {
-                throw (StatusListException) exception;
+            if (exception instanceof StatusListClientException) {
+                throw (StatusListClientException) exception;
             }
-            throw new StatusListException("Failed to revoke credential", exception);
+            throw new StatusListClientException("Failed to revoke credential", exception);
         }
     }
 

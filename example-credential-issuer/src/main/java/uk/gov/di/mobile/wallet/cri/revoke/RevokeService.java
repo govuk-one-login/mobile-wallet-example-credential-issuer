@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.revoke;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
-import uk.gov.di.mobile.wallet.cri.credential.StatusListException;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClientException;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
@@ -38,7 +38,7 @@ public class RevokeService {
                     int index = credential.getStatusListIndex();
                     statusListClient.revokeCredential(index, uri);
                     dataStore.deleteCredential(credential.getCredentialIdentifier());
-                } catch (StatusListException exception) {
+                } catch (StatusListClientException exception) {
                     failureCount++;
                     LOGGER.error(
                             "Failed to revoke credential with ID {} and document ID {}: {}",

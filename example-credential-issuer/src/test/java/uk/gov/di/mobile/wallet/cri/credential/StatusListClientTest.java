@@ -87,9 +87,9 @@ class StatusListClientTest {
             when(requestBuilder.post(any())).thenReturn(response);
             when(response.getStatus()).thenReturn(500);
 
-            StatusListException exception =
+            StatusListClientException exception =
                     assertThrows(
-                            StatusListException.class,
+                            StatusListClientException.class,
                             () -> statusListClient.getIndex(CREDENTIAL_EXPIRY));
             assertEquals(
                     "Request to get credential index failed with status code 500",
@@ -150,9 +150,9 @@ class StatusListClientTest {
             when(requestBuilder.post(any())).thenReturn(response);
             when(response.getStatus()).thenReturn(500);
 
-            StatusListException exception =
+            StatusListClientException exception =
                     assertThrows(
-                            StatusListException.class,
+                            StatusListClientException.class,
                             () -> statusListClient.revokeCredential(INDEX, STATUS_LIST_URI));
             assertEquals(
                     "Request to revoke credential failed with status code 500",
