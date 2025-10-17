@@ -5,7 +5,6 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
 
@@ -31,44 +30,56 @@ public class StatusListClient {
         this.tokenBuilder = tokenBuilder;
     }
 
-    public StatusListInformation getIndex(long credentialExpiry)
-            throws StatusListException, SigningException {
-        String token = tokenBuilder.buildIssueToken(credentialExpiry);
-        String url = buildUrl(ISSUE_ENDPOINT);
+    public StatusListInformation getIndex(long credentialExpiry) throws StatusListException {
+        try {
+            String token = tokenBuilder.buildIssueToken(credentialExpiry);
+            String url = buildUrl(ISSUE_ENDPOINT);
 
-        Response response =
-                httpClient
-                        .target(url)
-                        .request(MediaType.APPLICATION_JSON)
-                        .post(Entity.entity(token, MediaType.APPLICATION_JSON));
+            Response response =
+                    httpClient
+                            .target(url)
+                            .request(MediaType.APPLICATION_JSON)
+                            .post(Entity.entity(token, MediaType.APPLICATION_JSON));
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new StatusListException(
-                    String.format(
-                            "Request to get credential index failed with status code %s",
-                            response.getStatus()));
+            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                throw new StatusListException(
+                        String.format(
+                                "Request to get credential index failed with status code %s",
+                                response.getStatus()));
+            }
+            return response.readEntity(StatusListInformation.class);
+        } catch (Exception exception) {
+            if (exception instanceof StatusListException) {
+                throw (StatusListException) exception;
+            }
+            throw new StatusListException("Failed to get credential index", exception);
         }
-        return response.readEntity(StatusListInformation.class);
     }
 
-    public RevokeResponse revokeCredential(int index, String uri)
-            throws StatusListException, SigningException {
-        String token = tokenBuilder.buildRevokeToken(index, uri);
-        String url = buildUrl(REVOKE_ENDPOINT);
+    public RevokeResponse revokeCredential(int index, String uri) throws StatusListException {
+        try {
+            String token = tokenBuilder.buildRevokeToken(index, uri);
+            String url = buildUrl(REVOKE_ENDPOINT);
 
-        Response response =
-                httpClient
-                        .target(url)
-                        .request(MediaType.APPLICATION_JSON)
-                        .post(Entity.entity(token, MediaType.APPLICATION_JSON));
+            Response response =
+                    httpClient
+                            .target(url)
+                            .request(MediaType.APPLICATION_JSON)
+                            .post(Entity.entity(token, MediaType.APPLICATION_JSON));
 
-        if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-            throw new StatusListException(
-                    String.format(
-                            "Request to revoke credential failed with status code %s",
-                            response.getStatus()));
+            if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+                throw new StatusListException(
+                        String.format(
+                                "Request to revoke credential failed with status code %s",
+                                response.getStatus()));
+            }
+            return response.readEntity(RevokeResponse.class);
+        } catch (Exception exception) {
+            if (exception instanceof StatusListException) {
+                throw (StatusListException) exception;
+            }
+            throw new StatusListException("Failed to revoke credential", exception);
         }
-        return response.readEntity(RevokeResponse.class);
     }
 
     private String buildUrl(String endpoint) {
