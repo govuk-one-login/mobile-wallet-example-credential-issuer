@@ -7,7 +7,6 @@ import uk.gov.di.mobile.wallet.cri.credential.StatusListException;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.List;
 
@@ -24,44 +23,55 @@ public class RevokeService {
     }
 
     public void revokeCredential(String documentId)
-            throws DataStoreException,
-                    CredentialNotFoundException,
-                    RevocationException,
-                    SigningException {
-        List<StoredCredential> credentials = dataStore.getCredentialsByDocumentId(documentId);
-
-        if (credentials.isEmpty()) {
-            throw new CredentialNotFoundException(
-                    "No credential found for document with ID " + documentId);
-        }
-
-        int failureCount = 0;
-        for (StoredCredential credential : credentials) {
-            try {
-                String uri = credential.getStatusListUri();
-                int index = credential.getStatusListIndex();
-                statusListClient.revokeCredential(index, uri);
-                dataStore.deleteCredential(credential.getCredentialIdentifier());
-            } catch (StatusListException exception) {
-                failureCount++;
-                LOGGER.error(
-                        "Failed to revoke credential with ID {} and document ID {}: {}",
-                        credential.getCredentialIdentifier(),
-                        credential.getDocumentId(),
-                        exception.getMessage(),
-                        exception);
-            } catch (DataStoreException exception) {
-                LOGGER.error(
-                        "Failed to delete revoked credential with ID {} and document ID {}: {}",
-                        credential.getCredentialIdentifier(),
-                        credential.getDocumentId(),
-                        exception.getMessage(),
-                        exception);
+            throws CredentialNotFoundException, RevocationException {
+        try {
+            List<StoredCredential> credentials = dataStore.getCredentialsByDocumentId(documentId);
+            if (credentials.isEmpty()) {
+                throw new CredentialNotFoundException(
+                        "No credential found for document with ID " + documentId);
             }
-        }
 
-        if (failureCount > 0) {
-            throw new RevocationException("One or more credentials could not be revoked");
+            int failureCount = 0;
+            for (StoredCredential credential : credentials) {
+                try {
+                    String uri = credential.getStatusListUri();
+                    int index = credential.getStatusListIndex();
+                    statusListClient.revokeCredential(index, uri);
+                    dataStore.deleteCredential(credential.getCredentialIdentifier());
+                } catch (StatusListException exception) {
+                    failureCount++;
+                    LOGGER.error(
+                            "Failed to revoke credential with ID {} and document ID {}: {}",
+                            credential.getCredentialIdentifier(),
+                            credential.getDocumentId(),
+                            exception.getMessage(),
+                            exception);
+                } catch (DataStoreException exception) {
+                    LOGGER.error(
+                            "Failed to delete revoked credential with ID {} and document ID {}: {}",
+                            credential.getCredentialIdentifier(),
+                            credential.getDocumentId(),
+                            exception.getMessage(),
+                            exception);
+                }
+            }
+
+            int totalCount = credentials.size();
+            int successCount = totalCount - failureCount;
+            LOGGER.info(
+                    "Revocation complete for document {}: {} succeeded, {} failed out of {} total",
+                    documentId,
+                    successCount,
+                    failureCount,
+                    totalCount);
+
+            if (failureCount > 0) {
+                throw new RevocationException("One or more credentials could not be revoked");
+            }
+
+        } catch (DataStoreException exception) {
+            throw new RevocationException(
+                    "Failed to retrieve credentials for revocation", exception);
         }
     }
 }
