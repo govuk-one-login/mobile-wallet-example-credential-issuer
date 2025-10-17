@@ -97,19 +97,21 @@ class StatusListClientTest {
             verify(response, never()).readEntity((Class<Object>) any());
         }
 
-        @Test
-        void shouldPropagateSigningException() throws Exception {
-            SigningException expectedException =
-                    new SigningException("Signing error", new RuntimeException());
-            when(tokenBuilder.buildIssueToken(CREDENTIAL_EXPIRY)).thenThrow(expectedException);
+      @Test
+      void shouldThrowStatusListClientExceptionOnSigningException() throws Exception {
+        SigningException signingException = new SigningException("Signing error", new RuntimeException());
+        when(tokenBuilder.buildIssueToken(CREDENTIAL_EXPIRY)).thenThrow(signingException);
 
-            SigningException exception =
-                    assertThrows(
-                            SigningException.class,
-                            () -> statusListClient.getIndex(CREDENTIAL_EXPIRY));
-            assertEquals(expectedException, exception);
-            verifyNoInteractions(httpClient);
-        }
+        StatusListClientException exception =
+                assertThrows(
+                        StatusListClientException.class,
+                        () -> statusListClient.getIndex(CREDENTIAL_EXPIRY));
+
+        assertEquals("Failed to get credential index", exception.getMessage());
+        assertEquals(SigningException.class, exception.getCause().getClass());
+        assertEquals("Signing error", exception.getCause().getMessage());
+        verifyNoInteractions(httpClient);
+      }
     }
 
     @Nested
@@ -161,18 +163,20 @@ class StatusListClientTest {
         }
 
         @Test
-        void shouldPropagateSigningException() throws Exception {
-            SigningException expectedException =
-                    new SigningException("Signing error", new RuntimeException());
+        void shouldThrowStatusListClientExceptionOnSigningException() throws Exception {
+            SigningException signingException = new SigningException("Signing error", new RuntimeException());
             when(tokenBuilder.buildRevokeToken(INDEX, STATUS_LIST_URI))
-                    .thenThrow(expectedException);
+                    .thenThrow(signingException);
 
-            SigningException exception =
+            StatusListClientException exception =
                     assertThrows(
-                            SigningException.class,
+                            StatusListClientException.class,
                             () -> statusListClient.revokeCredential(INDEX, STATUS_LIST_URI));
-            assertEquals(expectedException, exception);
-            verifyNoInteractions(httpClient);
+
+            assertEquals("Failed to revoke credential", exception.getMessage());
+          assertEquals(SigningException.class, exception.getCause().getClass());
+          assertEquals("Signing error", exception.getCause().getMessage());
+          verifyNoInteractions(httpClient);
         }
     }
 }
