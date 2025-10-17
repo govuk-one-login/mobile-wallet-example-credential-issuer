@@ -40,30 +40,31 @@ public class RevokeService {
                     dataStore.deleteCredential(credential.getCredentialIdentifier());
                 } catch (StatusListClientException exception) {
                     failureCount++;
-                    LOGGER.error(
-                            "Failed to revoke credential with ID {} and document ID {}: {}",
-                            credential.getCredentialIdentifier(),
-                            credential.getDocumentId(),
-                            exception.getMessage(),
-                            exception);
+                    getLogger()
+                            .error(
+                                    "Failed to revoke credential with ID {} and document ID {}",
+                                    credential.getCredentialIdentifier(),
+                                    credential.getDocumentId(),
+                                    exception);
                 } catch (DataStoreException exception) {
-                    LOGGER.error(
-                            "Failed to delete revoked credential with ID {} and document ID {}: {}",
-                            credential.getCredentialIdentifier(),
-                            credential.getDocumentId(),
-                            exception.getMessage(),
-                            exception);
+                    getLogger()
+                            .error(
+                                    "Failed to delete revoked credential with ID {} and document ID {}",
+                                    credential.getCredentialIdentifier(),
+                                    credential.getDocumentId(),
+                                    exception);
                 }
             }
 
             int totalCount = credentials.size();
             int successCount = totalCount - failureCount;
-            LOGGER.info(
-                    "Revocation complete for document {}: {} succeeded, {} failed out of {} total",
-                    documentId,
-                    successCount,
-                    failureCount,
-                    totalCount);
+            getLogger()
+                    .info(
+                            "Revocation complete for document {}: {} succeeded, {} failed out of {} total",
+                            documentId,
+                            successCount,
+                            failureCount,
+                            totalCount);
 
             if (failureCount > 0) {
                 throw new RevokeServiceException("One or more credentials could not be revoked");
@@ -73,5 +74,9 @@ public class RevokeService {
             throw new RevokeServiceException(
                     "Failed to retrieve credentials for revocation", exception);
         }
+    }
+
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }
