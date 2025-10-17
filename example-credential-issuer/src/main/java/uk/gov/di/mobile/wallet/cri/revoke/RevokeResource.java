@@ -16,9 +16,10 @@ import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 @Path("/revoke")
 public class RevokeResource {
 
-    private final RevokeService revokeService;
     private static final Logger LOGGER = LoggerFactory.getLogger(RevokeResource.class);
     private static final String DOCUMENT_ID_PATTERN = "^[a-zA-Z0-9]{5,25}$";
+
+    private final RevokeService revokeService;
 
     public RevokeResource(RevokeService revokeService) {
         this.revokeService = revokeService;
