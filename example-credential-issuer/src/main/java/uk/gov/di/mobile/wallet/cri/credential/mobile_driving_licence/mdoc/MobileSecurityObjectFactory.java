@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
@@ -77,10 +78,16 @@ public class MobileSecurityObjectFactory {
      * @throws IllegalArgumentException If the public key does not use the P-256 curve.
      */
     public MobileSecurityObject build(
-            Namespaces nameSpaces, ECPublicKey publicKey, long credentialTtlMinutes)
+            Namespaces nameSpaces,
+            ECPublicKey publicKey,
+            StatusListClient.StatusListInformation statusListInformation,
+            long credentialTtlMinutes)
             throws MDLException {
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         ValidityInfo validityInfo = validityInfoFactory.build(credentialTtlMinutes);
+        StatusList statusList =
+                new StatusList(statusListInformation.idx(), statusListInformation.uri());
+        Status status = new Status(statusList);
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
 
         Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
@@ -92,6 +99,7 @@ public class MobileSecurityObjectFactory {
                 new DeviceKeyInfo(coseKey, keyAuthorizations),
                 valueDigests,
                 DOC_TYPE,
-                validityInfo);
+                validityInfo,
+                status);
     }
 }

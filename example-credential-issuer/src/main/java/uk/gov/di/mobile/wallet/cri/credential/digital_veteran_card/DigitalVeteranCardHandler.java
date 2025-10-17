@@ -6,7 +6,10 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
+
+import java.util.Optional;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
 
@@ -21,7 +24,10 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
     }
 
     @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    public String buildCredential(
+            Document document,
+            ProofJwtService.ProofJwtData proofData,
+            Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException {
         VeteranCardDocument veteranCardDocument =
                 mapper.convertValue(document.getData(), VeteranCardDocument.class);

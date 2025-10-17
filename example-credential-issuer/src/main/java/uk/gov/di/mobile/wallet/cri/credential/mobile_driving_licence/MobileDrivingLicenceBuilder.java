@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedFactory;
@@ -46,12 +47,17 @@ public class MobileDrivingLicenceBuilder {
      * @return A Base64URL-encoded string containing the CBOR-encoded {@code IssuerSigned} structure
      */
     public String createMobileDrivingLicence(
-            DrivingLicenceDocument drivingLicenceDocument, ECPublicKey publicKey)
+            DrivingLicenceDocument drivingLicenceDocument,
+            ECPublicKey publicKey,
+            StatusListClient.StatusListInformation statusListInformation)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
         IssuerSigned issuerSigned =
                 issuerSignedFactory.build(
-                        namespaces, publicKey, drivingLicenceDocument.getCredentialTtlMinutes());
+                        namespaces,
+                        publicKey,
+                        statusListInformation,
+                        drivingLicenceDocument.getCredentialTtlMinutes());
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
                 .withoutPadding()

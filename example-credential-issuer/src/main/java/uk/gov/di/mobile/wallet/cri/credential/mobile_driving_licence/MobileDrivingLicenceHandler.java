@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
+import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.cert.CertificateException;
+import java.util.Optional;
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
@@ -18,13 +20,15 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
         this.mobileDrivingLicenceBuilder = mobileDrivingLicenceBuilder;
     }
 
-    @Override
-    public String buildCredential(Document document, ProofJwtService.ProofJwtData proofData)
+    public String buildCredential(
+            Document document,
+            ProofJwtService.ProofJwtData proofData,
+            Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
         return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                drivingLicenceDocument, proofData.publicKey());
+                drivingLicenceDocument, proofData.publicKey(), statusListInformation.orElseThrow());
     }
 }
