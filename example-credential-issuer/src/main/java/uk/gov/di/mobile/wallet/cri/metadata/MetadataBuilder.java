@@ -3,8 +3,6 @@ package uk.gov.di.mobile.wallet.cri.metadata;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +16,6 @@ public class MetadataBuilder {
     String notificationEndpoint;
     String iacasEndpoint;
     Map<String, Object> credentialConfigurationsSupported;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataBuilder.class);
 
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {
