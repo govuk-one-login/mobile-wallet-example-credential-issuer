@@ -53,7 +53,7 @@ class RevokeResourceTest {
 
     @Test
     void shouldReturn404WhenRevokeServiceThrowsCredentialNotFoundException()
-            throws CredentialNotFoundException, RevocationException {
+            throws CredentialNotFoundException, RevokeServiceException {
         doThrow(new CredentialNotFoundException("No credentials found"))
                 .when(revokeService)
                 .revokeCredential(DOCUMENT_ID);
@@ -66,8 +66,8 @@ class RevokeResourceTest {
 
     @Test
     void shouldReturn500WhenRevokeServiceThrowsRevocationException()
-            throws CredentialNotFoundException, RevocationException {
-        doThrow(new RevocationException("Revocation error"))
+            throws CredentialNotFoundException, RevokeServiceException {
+        doThrow(new RevokeServiceException("Revocation error"))
                 .when(revokeService)
                 .revokeCredential(DOCUMENT_ID);
 

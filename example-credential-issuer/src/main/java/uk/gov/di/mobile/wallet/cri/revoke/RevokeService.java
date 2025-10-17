@@ -23,7 +23,7 @@ public class RevokeService {
     }
 
     public void revokeCredential(String documentId)
-            throws CredentialNotFoundException, RevocationException {
+            throws CredentialNotFoundException, RevokeServiceException {
         try {
             List<StoredCredential> credentials = dataStore.getCredentialsByDocumentId(documentId);
             if (credentials.isEmpty()) {
@@ -66,11 +66,11 @@ public class RevokeService {
                     totalCount);
 
             if (failureCount > 0) {
-                throw new RevocationException("One or more credentials could not be revoked");
+                throw new RevokeServiceException("One or more credentials could not be revoked");
             }
 
         } catch (DataStoreException exception) {
-            throw new RevocationException(
+            throw new RevokeServiceException(
                     "Failed to retrieve credentials for revocation", exception);
         }
     }
