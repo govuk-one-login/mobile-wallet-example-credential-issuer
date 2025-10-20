@@ -81,7 +81,7 @@ jobs:
         id: release
         with:
           command: bump
-          args: --auto --from-latest-tag
+          args: --auto
           git-user: 'github-actions[bot]'
           git-user-email: 'github-actions[bot]@users.noreply.github.com'
 
