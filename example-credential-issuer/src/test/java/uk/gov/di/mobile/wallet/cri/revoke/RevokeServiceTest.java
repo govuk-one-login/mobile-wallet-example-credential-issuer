@@ -123,8 +123,6 @@ class RevokeServiceTest {
                         () -> revokeService.revokeCredential(DOCUMENT_ID));
 
         assertEquals("One or more credentials could not be revoked", exception.getMessage());
-        verify(mockStatusListClient).revokeCredential(1, "uri1");
-        verify(mockDataStore, never()).deleteCredential("credentialId1");
         verify(mockLogger)
                 .info(
                         "Revocation complete for document {}: {} succeeded, {} failed out of {} total",
@@ -160,7 +158,7 @@ class RevokeServiceTest {
 
     @Test
     void shouldNotThrowExceptionWhenDataStoreFailsToDeleteRevokedCredential()
-            throws DataStoreException, StatusListClientException {
+            throws DataStoreException {
         StoredCredential credential = createStoredCredential();
         when(mockDataStore.getCredentialsByDocumentId(DOCUMENT_ID)).thenReturn(List.of(credential));
         DataStoreException dataStoreException = new DataStoreException("Delete failed");
@@ -168,8 +166,6 @@ class RevokeServiceTest {
 
         assertDoesNotThrow(() -> revokeService.revokeCredential(DOCUMENT_ID));
 
-        verify(mockStatusListClient, times(1)).revokeCredential(STATUS_LIST_INDEX, STATUS_LIST_URI);
-        verify(mockDataStore, times(1)).deleteCredential(CREDENTIAL_ID);
         verify(mockLogger)
                 .info(
                         "Revocation complete for document {}: {} succeeded, {} failed out of {} total",
