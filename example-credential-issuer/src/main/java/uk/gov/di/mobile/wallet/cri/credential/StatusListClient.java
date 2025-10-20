@@ -48,10 +48,9 @@ public class StatusListClient {
                                 response.getStatus()));
             }
             return response.readEntity(StatusListInformation.class);
+        } catch (StatusListClientException exception) {
+            throw exception;
         } catch (Exception exception) {
-            if (exception instanceof StatusListClientException) {
-                throw (StatusListClientException) exception;
-            }
             throw new StatusListClientException("Failed to get credential index", exception);
         }
     }
@@ -74,10 +73,9 @@ public class StatusListClient {
                                 response.getStatus()));
             }
             return response.readEntity(RevokeResponse.class);
+        } catch (StatusListClientException exception) {
+            throw exception;
         } catch (Exception exception) {
-            if (exception instanceof StatusListClientException) {
-                throw (StatusListClientException) exception;
-            }
             throw new StatusListClientException("Failed to revoke credential", exception);
         }
     }
