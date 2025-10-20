@@ -285,10 +285,7 @@ class CredentialServiceTest {
 
     @Test
     void Should_ThrowCredentialServiceException_When_StatusListExceptionIsThrown()
-            throws DataStoreException,
-                    DocumentStoreException,
-                    StatusListClientException,
-                    SigningException {
+            throws DataStoreException, DocumentStoreException, StatusListClientException {
         Document mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
