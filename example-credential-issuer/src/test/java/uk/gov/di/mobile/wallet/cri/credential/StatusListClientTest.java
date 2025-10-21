@@ -56,8 +56,7 @@ class StatusListClientTest {
         when(configurationService.getStatusListUrl()).thenReturn(baseUrl);
         when(httpClient.target(expectedUrl)).thenReturn(webTarget);
         when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
-        when(requestBuilder.post(Entity.entity(token, MediaType.APPLICATION_JSON)))
-                .thenReturn(response);
+        when(requestBuilder.post(Entity.entity(token, "application/jwt"))).thenReturn(response);
         when(response.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
         when(response.readEntity(StatusListClient.StatusListInformation.class))
                 .thenReturn(expectedResponse);
@@ -69,7 +68,7 @@ class StatusListClientTest {
         verify(configurationService).getStatusListUrl();
         verify(httpClient).target(expectedUrl);
         verify(webTarget).request(MediaType.APPLICATION_JSON);
-        verify(requestBuilder).post(Entity.entity(token, MediaType.APPLICATION_JSON));
+        verify(requestBuilder).post(Entity.entity(token, "application/jwt"));
     }
 
     @Test
