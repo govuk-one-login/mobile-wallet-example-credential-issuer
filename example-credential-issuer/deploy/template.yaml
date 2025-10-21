@@ -81,9 +81,7 @@ Mappings:
       CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
-      StatusListUrl: "status-list-mock.mobile.build.account.gov.uk"
-      # Point staging Example CRI to build Status List Mock temporarily until integration with the staging Status List is finalised
-      # StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
+      StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
   ElasticLoadBalancerAccountIds:
     eu-west-2:
       AccountId: 652711504416
