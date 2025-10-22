@@ -53,7 +53,7 @@ class StatusListClientTest {
     class GetIndexTests {
 
         @Test
-        void shouldReturnIssueResponseOnSuccess() throws Exception {
+        void shouldReturnStatuListInformationOnSuccess() throws Exception {
             when(tokenBuilder.buildIssueToken(CREDENTIAL_EXPIRY)).thenReturn(MOCK_TOKEN);
             when(configurationService.getStatusListUrl()).thenReturn(BASE_URL);
             String expectedUrl = BASE_URL + "/issue";
