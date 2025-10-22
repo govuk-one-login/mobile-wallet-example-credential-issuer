@@ -24,6 +24,5 @@ public class RevokeService {
         }
 
         // Revoke credentials found
-
     }
 }
