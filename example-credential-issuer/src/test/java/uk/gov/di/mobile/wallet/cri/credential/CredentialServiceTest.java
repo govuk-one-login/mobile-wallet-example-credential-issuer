@@ -285,24 +285,21 @@ class CredentialServiceTest {
 
     @Test
     void Should_ThrowCredentialServiceException_When_StatusListExceptionIsThrown()
-            throws DataStoreException,
-                    DocumentStoreException,
-                    StatusListException,
-                    SigningException {
+            throws DataStoreException, DocumentStoreException, StatusListClientException {
         Document mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
         when(mockExpiryCalculator.calculateExpiry(mockDocument)).thenReturn(EXPIRY_TIME);
         when(mockStatusListClient.getIndex(EXPIRY_TIME))
-                .thenThrow(new StatusListException("Some status list error"));
+                .thenThrow(new StatusListClientException("Some status list error"));
 
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
-        assertEquals(StatusListException.class, exception.getCause().getClass());
+        assertEquals(StatusListClientException.class, exception.getCause().getClass());
         assertEquals("Some status list error", exception.getCause().getMessage());
     }
 
@@ -310,7 +307,7 @@ class CredentialServiceTest {
     void Should_ThrowCredentialServiceException_When_MDLExceptionIsThrown()
             throws DataStoreException,
                     DocumentStoreException,
-                    StatusListException,
+                    StatusListClientException,
                     SigningException,
                     ObjectStoreException,
                     CertificateException {

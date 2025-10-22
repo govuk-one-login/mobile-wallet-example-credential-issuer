@@ -9,7 +9,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
@@ -20,13 +19,14 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class RevokeResourceTest {
 
+    private static final String DOCUMENT_ID = "ABCdef012345";
+
     private final RevokeService revokeService = mock(RevokeService.class);
     private final ResourceExtension resource =
             ResourceExtension.builder().addResource(new RevokeResource(revokeService)).build();
-    private static final String DOCUMENT_ID = "ABCdef012345";
 
     @Test
-    void Should_Return404_When_DocumentIdIsMissingFromPath() {
+    void shouldReturn404WhenDocumentIdIsMissingFromPath() {
         final Response response = resource.target("/revoke").request().post(Entity.json(null));
 
         assertThat(response.getStatus(), is(404));
@@ -40,7 +40,7 @@ class RevokeResourceTest {
                 "spaces are not ok",
                 "invalidChars@!",
             })
-    void Should_Return400_When_DocumentIsInvalid(String documentId) {
+    void shouldReturn400WhenDocumentIdIsInvalid(String documentId) {
         final Response response =
                 resource.target("/revoke").path(documentId).request().post(Entity.json(null));
 
@@ -52,11 +52,11 @@ class RevokeResourceTest {
     }
 
     @Test
-    void Should_Return404_When_RevokeServiceThrowsCredentialNotFoundException()
-            throws CredentialNotFoundException, DataStoreException {
+    void shouldReturn404WhenRevokeServiceThrowsCredentialNotFoundException()
+            throws CredentialNotFoundException, RevokeServiceException {
         doThrow(new CredentialNotFoundException("No credentials found"))
                 .when(revokeService)
-                .revokeCredential(DOCUMENT_ID);
+                .revokeCredentials(DOCUMENT_ID);
 
         final Response response =
                 resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));
@@ -65,11 +65,11 @@ class RevokeResourceTest {
     }
 
     @Test
-    void Should_Return500_When_RevokeServiceThrowsDataStoreException()
-            throws CredentialNotFoundException, DataStoreException {
-        doThrow(new DataStoreException("Some database error"))
+    void shouldReturn500WhenRevokeServiceThrowsRevocationException()
+            throws CredentialNotFoundException, RevokeServiceException {
+        doThrow(new RevokeServiceException("Revocation error"))
                 .when(revokeService)
-                .revokeCredential(DOCUMENT_ID);
+                .revokeCredentials(DOCUMENT_ID);
 
         final Response response =
                 resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));
@@ -78,7 +78,7 @@ class RevokeResourceTest {
     }
 
     @Test
-    void Should_Return202_When_RevokeServiceExecutesSuccessfully() {
+    void shouldReturn202WhenRevokeServiceExecutesSuccessfully() {
         final Response response =
                 resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));
 

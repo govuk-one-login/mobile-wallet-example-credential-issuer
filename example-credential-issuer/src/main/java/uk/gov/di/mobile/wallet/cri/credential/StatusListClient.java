@@ -5,7 +5,6 @@ import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
-import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
 
@@ -13,7 +12,10 @@ public class StatusListClient {
 
     public record StatusListInformation(Integer idx, String uri) {}
 
-    private static final String ENDPOINT_ISSUE = "/issue";
+    public record RevokeResponse(String message, Long revokedAt) {}
+
+    private static final String ISSUE_ENDPOINT = "/issue";
+    private static final String REVOKE_ENDPOINT = "/revoke";
 
     private final ConfigurationService configurationService;
     private final Client httpClient;
@@ -28,28 +30,58 @@ public class StatusListClient {
         this.tokenBuilder = tokenBuilder;
     }
 
-    public StatusListInformation getIndex(long credentialExpiry)
-            throws StatusListException, SigningException {
-        String token = tokenBuilder.buildIssueToken(credentialExpiry);
-        String url = buildUrl();
+    public StatusListInformation getIndex(long credentialExpiry) throws StatusListClientException {
+        try {
+            String token = tokenBuilder.buildIssueToken(credentialExpiry);
+            String url = buildUrl(ISSUE_ENDPOINT);
 
-        Response response =
-                httpClient
-                        .target(url)
-                        .request(MediaType.APPLICATION_JSON)
-                        .post(Entity.entity(token, "application/jwt"));
+            Response response =
+                    httpClient
+                            .target(url)
+                            .request(MediaType.APPLICATION_JSON)
+                            .post(Entity.entity(token, "application/jwt"));
 
-        if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-            throw new StatusListException(
-                    String.format(
-                            "Request to get credential index failed with status code %s",
-                            response.getStatus()));
+            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                throw new StatusListClientException(
+                        String.format(
+                                "Request to get credential index failed with status code %s",
+                                response.getStatus()));
+            }
+            return response.readEntity(StatusListInformation.class);
+        } catch (StatusListClientException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new StatusListClientException("Failed to get credential index", exception);
         }
-        return response.readEntity(StatusListInformation.class);
     }
 
-    private String buildUrl() {
+    public RevokeResponse revokeCredential(int index, String uri) throws StatusListClientException {
+        try {
+            String token = tokenBuilder.buildRevokeToken(index, uri);
+            String url = buildUrl(REVOKE_ENDPOINT);
+
+            Response response =
+                    httpClient
+                            .target(url)
+                            .request(MediaType.APPLICATION_JSON)
+                            .post(Entity.entity(token, "application/jwt"));
+
+            if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+                throw new StatusListClientException(
+                        String.format(
+                                "Request to revoke credential failed with status code %s",
+                                response.getStatus()));
+            }
+            return response.readEntity(RevokeResponse.class);
+        } catch (StatusListClientException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            throw new StatusListClientException("Failed to revoke credential", exception);
+        }
+    }
+
+    private String buildUrl(String endpoint) {
         URI baseUrl = configurationService.getStatusListUrl();
-        return baseUrl + StatusListClient.ENDPOINT_ISSUE;
+        return baseUrl + endpoint;
     }
 }

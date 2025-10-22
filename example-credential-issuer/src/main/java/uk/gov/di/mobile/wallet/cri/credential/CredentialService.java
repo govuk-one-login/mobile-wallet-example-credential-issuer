@@ -118,7 +118,7 @@ public class CredentialService {
                 | ObjectStoreException
                 | CertificateException
                 | DocumentStoreException
-                | StatusListException exception) {
+                | StatusListClientException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }

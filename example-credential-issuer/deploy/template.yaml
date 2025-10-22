@@ -549,6 +549,7 @@ Resources:
                 Action:
                   - 'dynamodb:PutItem'
                   - 'dynamodb:GetItem'
+                  - 'dynamodb:DeleteItem'
                 Resource: !GetAtt CredentialTable.Arn
               - Effect: Allow
                 Action:

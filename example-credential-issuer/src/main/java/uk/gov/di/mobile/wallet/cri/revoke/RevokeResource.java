@@ -16,9 +16,10 @@ import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 @Path("/revoke")
 public class RevokeResource {
 
-    private final RevokeService revokeService;
     private static final Logger LOGGER = LoggerFactory.getLogger(RevokeResource.class);
     private static final String DOCUMENT_ID_PATTERN = "^[a-zA-Z0-9]{5,25}$";
+
+    private final RevokeService revokeService;
 
     public RevokeResource(RevokeService revokeService) {
         this.revokeService = revokeService;
@@ -30,7 +31,7 @@ public class RevokeResource {
             @PathParam("documentId") @NotEmpty @Pattern(regexp = DOCUMENT_ID_PATTERN)
                     String documentId) {
         try {
-            revokeService.revokeCredential(documentId);
+            revokeService.revokeCredentials(documentId);
             return ResponseUtil.accepted();
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to revoke credential(s): ", exception);

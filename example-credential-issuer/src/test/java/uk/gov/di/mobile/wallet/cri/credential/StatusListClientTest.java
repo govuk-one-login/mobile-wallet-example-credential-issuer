@@ -7,6 +7,7 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -37,77 +38,146 @@ class StatusListClientTest {
 
     private StatusListClient statusListClient;
 
+    private static final URI BASE_URL = URI.create("https://status-list.test.com");
+    private static final String MOCK_TOKEN = "mock-token";
+    private static final long CREDENTIAL_EXPIRY = 1234567890L;
+    private static final int INDEX = 5;
+    private static final String STATUS_LIST_URI = "https://status-list.test.com/t/12345";
+
     @BeforeEach
     void setUp() {
         statusListClient = new StatusListClient(configurationService, httpClient, tokenBuilder);
     }
 
-    @Test
-    void Should_ReturnStatusListInformation_On_SuccessfulRequest() throws Exception {
-        long credentialExpiry = 1234567890L;
-        String token = "mock-issue-token";
-        URI baseUrl = new URI("https://status-list.test.com");
-        String expectedUrl = baseUrl + "/issue";
-        StatusListClient.StatusListInformation expectedResponse =
-                new StatusListClient.StatusListInformation(
-                        0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
+    @Nested
+    class GetIndexTests {
 
-        when(tokenBuilder.buildIssueToken(credentialExpiry)).thenReturn(token);
-        when(configurationService.getStatusListUrl()).thenReturn(baseUrl);
-        when(httpClient.target(expectedUrl)).thenReturn(webTarget);
-        when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
-        when(requestBuilder.post(Entity.entity(token, "application/jwt"))).thenReturn(response);
-        when(response.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
-        when(response.readEntity(StatusListClient.StatusListInformation.class))
-                .thenReturn(expectedResponse);
+        @Test
+        void shouldReturnStatuListInformationOnSuccess() throws Exception {
+            when(tokenBuilder.buildIssueToken(CREDENTIAL_EXPIRY)).thenReturn(MOCK_TOKEN);
+            when(configurationService.getStatusListUrl()).thenReturn(BASE_URL);
+            String expectedUrl = BASE_URL + "/issue";
+            when(httpClient.target(expectedUrl)).thenReturn(webTarget);
+            when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
+            when(requestBuilder.post(Entity.entity(MOCK_TOKEN, "application/jwt")))
+                    .thenReturn(response);
+            when(response.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
+            StatusListClient.StatusListInformation expectedResponse =
+                    new StatusListClient.StatusListInformation(INDEX, STATUS_LIST_URI);
+            when(response.readEntity(StatusListClient.StatusListInformation.class))
+                    .thenReturn(expectedResponse);
 
-        StatusListClient.StatusListInformation result = statusListClient.getIndex(credentialExpiry);
+            StatusListClient.StatusListInformation result =
+                    statusListClient.getIndex(CREDENTIAL_EXPIRY);
 
-        assertEquals(expectedResponse, result);
-        verify(tokenBuilder).buildIssueToken(credentialExpiry);
-        verify(configurationService).getStatusListUrl();
-        verify(httpClient).target(expectedUrl);
-        verify(webTarget).request(MediaType.APPLICATION_JSON);
-        verify(requestBuilder).post(Entity.entity(token, "application/jwt"));
+            assertEquals(expectedResponse, result);
+            verify(tokenBuilder).buildIssueToken(CREDENTIAL_EXPIRY);
+            verify(configurationService).getStatusListUrl();
+            verify(httpClient).target(expectedUrl);
+            verify(webTarget).request(MediaType.APPLICATION_JSON);
+            verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, "application/jwt"));
+        }
+
+        @Test
+        void shouldThrowExceptionOnNon200Response() throws Exception {
+            when(tokenBuilder.buildIssueToken(CREDENTIAL_EXPIRY)).thenReturn(MOCK_TOKEN);
+            when(configurationService.getStatusListUrl()).thenReturn(BASE_URL);
+            when(httpClient.target(anyString())).thenReturn(webTarget);
+            when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
+            when(requestBuilder.post(any())).thenReturn(response);
+            when(response.getStatus()).thenReturn(500);
+
+            StatusListClientException exception =
+                    assertThrows(
+                            StatusListClientException.class,
+                            () -> statusListClient.getIndex(CREDENTIAL_EXPIRY));
+            assertEquals(
+                    "Request to get credential index failed with status code 500",
+                    exception.getMessage());
+            verify(response, never()).readEntity((Class<Object>) any());
+        }
+
+        @Test
+        void shouldThrowStatusListClientExceptionOnSigningException() throws Exception {
+            SigningException signingException =
+                    new SigningException("Signing error", new RuntimeException());
+            when(tokenBuilder.buildIssueToken(CREDENTIAL_EXPIRY)).thenThrow(signingException);
+
+            StatusListClientException exception =
+                    assertThrows(
+                            StatusListClientException.class,
+                            () -> statusListClient.getIndex(CREDENTIAL_EXPIRY));
+
+            assertEquals("Failed to get credential index", exception.getMessage());
+            assertEquals(SigningException.class, exception.getCause().getClass());
+            assertEquals("Signing error", exception.getCause().getMessage());
+            verifyNoInteractions(httpClient);
+        }
     }
 
-    @Test
-    void Should_ThrowStatusListException_On_Non200Response() throws Exception {
-        long credentialExpiry = 1234567890L;
-        String token = "mock-issue-token";
-        URI baseUrl = new URI("https://status-list.test.com");
+    @Nested
+    class RevokeCredentialTests {
 
-        when(tokenBuilder.buildIssueToken(credentialExpiry)).thenReturn(token);
-        when(configurationService.getStatusListUrl()).thenReturn(baseUrl);
-        when(httpClient.target(anyString())).thenReturn(webTarget);
-        when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
-        when(requestBuilder.post(any())).thenReturn(response);
-        when(response.getStatus()).thenReturn(500);
+        @Test
+        void shouldReturnRevokeResponseOnSuccess() throws Exception {
+            when(tokenBuilder.buildRevokeToken(INDEX, STATUS_LIST_URI)).thenReturn(MOCK_TOKEN);
+            when(configurationService.getStatusListUrl()).thenReturn(BASE_URL);
+            String expectedUrl = BASE_URL + "/revoke";
+            when(httpClient.target(expectedUrl)).thenReturn(webTarget);
+            when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
+            when(requestBuilder.post(Entity.entity(MOCK_TOKEN, "application/jwt")))
+                    .thenReturn(response);
+            when(response.getStatus()).thenReturn(Response.Status.ACCEPTED.getStatusCode());
+            StatusListClient.RevokeResponse expectedResponse =
+                    new StatusListClient.RevokeResponse("Credential revoked", 1760550306L);
+            when(response.readEntity(StatusListClient.RevokeResponse.class))
+                    .thenReturn(expectedResponse);
 
-        StatusListException exception =
-                assertThrows(
-                        StatusListException.class,
-                        () -> statusListClient.getIndex(credentialExpiry));
+            StatusListClient.RevokeResponse result =
+                    statusListClient.revokeCredential(INDEX, STATUS_LIST_URI);
 
-        assertEquals(
-                "Request to get credential index failed with status code 500",
-                exception.getMessage());
-        verify(response, never()).readEntity((Class<Object>) any());
-    }
+            assertEquals(expectedResponse, result);
+            verify(tokenBuilder).buildRevokeToken(INDEX, STATUS_LIST_URI);
+            verify(configurationService).getStatusListUrl();
+            verify(httpClient).target(expectedUrl);
+            verify(webTarget).request(MediaType.APPLICATION_JSON);
+            verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, "application/jwt"));
+        }
 
-    @Test
-    void Should_PropagateSigningException() throws Exception {
-        long credentialExpiry = 1234567890L;
-        SigningException expectedException =
-                new SigningException("Some signing error", new RuntimeException());
+        @Test
+        void ShouldThrowExceptionOnNon202Response() throws Exception {
+            when(tokenBuilder.buildRevokeToken(INDEX, STATUS_LIST_URI)).thenReturn(MOCK_TOKEN);
+            when(configurationService.getStatusListUrl()).thenReturn(BASE_URL);
+            when(httpClient.target(anyString())).thenReturn(webTarget);
+            when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
+            when(requestBuilder.post(any())).thenReturn(response);
+            when(response.getStatus()).thenReturn(500);
 
-        when(tokenBuilder.buildIssueToken(credentialExpiry)).thenThrow(expectedException);
+            StatusListClientException exception =
+                    assertThrows(
+                            StatusListClientException.class,
+                            () -> statusListClient.revokeCredential(INDEX, STATUS_LIST_URI));
+            assertEquals(
+                    "Request to revoke credential failed with status code 500",
+                    exception.getMessage());
+            verify(response, never()).readEntity((Class<Object>) any());
+        }
 
-        SigningException exception =
-                assertThrows(
-                        SigningException.class, () -> statusListClient.getIndex(credentialExpiry));
+        @Test
+        void shouldThrowStatusListClientExceptionOnSigningException() throws Exception {
+            SigningException signingException =
+                    new SigningException("Signing error", new RuntimeException());
+            when(tokenBuilder.buildRevokeToken(INDEX, STATUS_LIST_URI)).thenThrow(signingException);
 
-        assertEquals(expectedException, exception);
-        verifyNoInteractions(httpClient);
+            StatusListClientException exception =
+                    assertThrows(
+                            StatusListClientException.class,
+                            () -> statusListClient.revokeCredential(INDEX, STATUS_LIST_URI));
+
+            assertEquals("Failed to revoke credential", exception.getMessage());
+            assertEquals(SigningException.class, exception.getCause().getClass());
+            assertEquals("Signing error", exception.getCause().getMessage());
+            verifyNoInteractions(httpClient);
+        }
     }
 }
