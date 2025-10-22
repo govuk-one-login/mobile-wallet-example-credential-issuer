@@ -56,7 +56,7 @@ class RevokeResourceTest {
             throws CredentialNotFoundException, RevokeServiceException {
         doThrow(new CredentialNotFoundException("No credentials found"))
                 .when(revokeService)
-                .revokeCredential(DOCUMENT_ID);
+                .revokeCredentials(DOCUMENT_ID);
 
         final Response response =
                 resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));
@@ -69,7 +69,7 @@ class RevokeResourceTest {
             throws CredentialNotFoundException, RevokeServiceException {
         doThrow(new RevokeServiceException("Revocation error"))
                 .when(revokeService)
-                .revokeCredential(DOCUMENT_ID);
+                .revokeCredentials(DOCUMENT_ID);
 
         final Response response =
                 resource.target("/revoke").path(DOCUMENT_ID).request().post(Entity.json(null));

@@ -59,7 +59,7 @@ class RevokeServiceTest {
         RevokeServiceException exception =
                 assertThrows(
                         RevokeServiceException.class,
-                        () -> revokeService.revokeCredential(DOCUMENT_ID));
+                        () -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         assertEquals("Failed to retrieve credentials for revocation", exception.getMessage());
         assertEquals("Database error", exception.getCause().getMessage());
@@ -73,7 +73,7 @@ class RevokeServiceTest {
         CredentialNotFoundException exception =
                 assertThrows(
                         CredentialNotFoundException.class,
-                        () -> revokeService.revokeCredential(DOCUMENT_ID));
+                        () -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         assertEquals(
                 "No credential found for document with ID EDWAR515163SE5RO",
@@ -93,7 +93,7 @@ class RevokeServiceTest {
         doThrow(statusListClientException).when(mockStatusListClient).revokeCredential(1, "uri1");
 
         assertThrows(
-                RevokeServiceException.class, () -> revokeService.revokeCredential(DOCUMENT_ID));
+                RevokeServiceException.class, () -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         verify(mockStatusListClient, times(1)).revokeCredential(1, "uri1");
         verify(mockLogger)
@@ -120,7 +120,7 @@ class RevokeServiceTest {
         RevokeServiceException exception =
                 assertThrows(
                         RevokeServiceException.class,
-                        () -> revokeService.revokeCredential(DOCUMENT_ID));
+                        () -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         assertEquals("One or more credentials could not be revoked", exception.getMessage());
         verify(mockLogger)
@@ -142,7 +142,7 @@ class RevokeServiceTest {
         DataStoreException dataStoreException = new DataStoreException("Delete failed");
         doThrow(dataStoreException).when(mockDataStore).deleteCredential("credentialId1");
 
-        assertDoesNotThrow(() -> revokeService.revokeCredential(DOCUMENT_ID));
+        assertDoesNotThrow(() -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         verify(mockStatusListClient, times(1)).revokeCredential(1, "uri1");
         verify(mockDataStore, times(1)).deleteCredential("credentialId1");
@@ -164,7 +164,7 @@ class RevokeServiceTest {
         DataStoreException dataStoreException = new DataStoreException("Delete failed");
         doThrow(dataStoreException).when(mockDataStore).deleteCredential(CREDENTIAL_ID);
 
-        assertDoesNotThrow(() -> revokeService.revokeCredential(DOCUMENT_ID));
+        assertDoesNotThrow(() -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         verify(mockLogger)
                 .info(
@@ -181,7 +181,7 @@ class RevokeServiceTest {
         StoredCredential credential = createStoredCredential();
         when(mockDataStore.getCredentialsByDocumentId(DOCUMENT_ID)).thenReturn(List.of(credential));
 
-        assertDoesNotThrow(() -> revokeService.revokeCredential(DOCUMENT_ID));
+        assertDoesNotThrow(() -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         verify(mockDataStore, times(1)).getCredentialsByDocumentId(DOCUMENT_ID);
         verify(mockStatusListClient, times(1)).revokeCredential(STATUS_LIST_INDEX, STATUS_LIST_URI);
@@ -203,7 +203,7 @@ class RevokeServiceTest {
         when(mockDataStore.getCredentialsByDocumentId(DOCUMENT_ID))
                 .thenReturn(List.of(credential1, credential2));
 
-        assertDoesNotThrow(() -> revokeService.revokeCredential(DOCUMENT_ID));
+        assertDoesNotThrow(() -> revokeService.revokeCredentials(DOCUMENT_ID));
 
         verify(mockDataStore, times(1)).getCredentialsByDocumentId(DOCUMENT_ID);
         verify(mockStatusListClient, times(1)).revokeCredential(1, "uri1");

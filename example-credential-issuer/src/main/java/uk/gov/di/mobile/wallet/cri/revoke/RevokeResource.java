@@ -31,7 +31,7 @@ public class RevokeResource {
             @PathParam("documentId") @NotEmpty @Pattern(regexp = DOCUMENT_ID_PATTERN)
                     String documentId) {
         try {
-            revokeService.revokeCredential(documentId);
+            revokeService.revokeCredentials(documentId);
             return ResponseUtil.accepted();
         } catch (Exception exception) {
             LOGGER.error("An error happened trying to revoke credential(s): ", exception);

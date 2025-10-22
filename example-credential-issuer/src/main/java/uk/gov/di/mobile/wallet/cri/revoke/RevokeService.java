@@ -22,7 +22,7 @@ public class RevokeService {
         this.statusListClient = statusListClient;
     }
 
-    public void revokeCredential(String documentId)
+    public void revokeCredentials(String documentId)
             throws CredentialNotFoundException, RevokeServiceException {
         try {
             List<StoredCredential> credentials = dataStore.getCredentialsByDocumentId(documentId);
