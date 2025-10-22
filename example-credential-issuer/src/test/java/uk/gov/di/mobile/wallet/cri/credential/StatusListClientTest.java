@@ -59,7 +59,7 @@ class StatusListClientTest {
             String expectedUrl = BASE_URL + "/issue";
             when(httpClient.target(expectedUrl)).thenReturn(webTarget);
             when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
-            when(requestBuilder.post(Entity.entity(MOCK_TOKEN, MediaType.APPLICATION_JSON)))
+            when(requestBuilder.post(Entity.entity(MOCK_TOKEN, "application/jwt")))
                     .thenReturn(response);
             when(response.getStatus()).thenReturn(Response.Status.OK.getStatusCode());
             StatusListClient.StatusListInformation expectedResponse =
@@ -75,7 +75,7 @@ class StatusListClientTest {
             verify(configurationService).getStatusListUrl();
             verify(httpClient).target(expectedUrl);
             verify(webTarget).request(MediaType.APPLICATION_JSON);
-            verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, MediaType.APPLICATION_JSON));
+            verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, "application/jwt"));
         }
 
         @Test
@@ -125,7 +125,7 @@ class StatusListClientTest {
             String expectedUrl = BASE_URL + "/revoke";
             when(httpClient.target(expectedUrl)).thenReturn(webTarget);
             when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
-            when(requestBuilder.post(Entity.entity(MOCK_TOKEN, MediaType.APPLICATION_JSON)))
+            when(requestBuilder.post(Entity.entity(MOCK_TOKEN, "application/jwt")))
                     .thenReturn(response);
             when(response.getStatus()).thenReturn(Response.Status.ACCEPTED.getStatusCode());
             StatusListClient.RevokeResponse expectedResponse =
@@ -141,7 +141,7 @@ class StatusListClientTest {
             verify(configurationService).getStatusListUrl();
             verify(httpClient).target(expectedUrl);
             verify(webTarget).request(MediaType.APPLICATION_JSON);
-            verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, MediaType.APPLICATION_JSON));
+            verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, "application/jwt"));
         }
 
         @Test

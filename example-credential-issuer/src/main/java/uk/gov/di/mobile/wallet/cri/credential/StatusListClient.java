@@ -64,7 +64,7 @@ public class StatusListClient {
                     httpClient
                             .target(url)
                             .request(MediaType.APPLICATION_JSON)
-                            .post(Entity.entity(token, MediaType.APPLICATION_JSON));
+                            .post(Entity.entity(token, "application/jwt"));
 
             if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
                 throw new StatusListClientException(
