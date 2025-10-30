@@ -20,7 +20,6 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.net.URI;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.interfaces.ECPublicKey;
@@ -50,7 +49,6 @@ public class KmsService implements KeyProvider {
             System.out.println("LOCALSTACK ENDPOINT: " + localstackEndpoint);
             this.kmsClient =
                     KmsClient.builder()
-                            .endpointOverride(URI.create(localstackEndpoint))
                             .credentialsProvider(DefaultCredentialsProvider.builder().build())
                             .region(Region.of(awsRegion))
                             .build();
