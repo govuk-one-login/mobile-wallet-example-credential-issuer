@@ -3,17 +3,17 @@
 export CREDENTIAL_OFFER_TABLE_NAME=credential_offer_cache
 export CREDENTIAL_TABLE_NAME=credential_store
 
-aws --endpoint-url=http://localhost:4566 dynamodb create-table \
+awslocal dynamodb create-table \
     --table-name $CREDENTIAL_OFFER_TABLE_NAME \
     --attribute-definitions AttributeName=credentialIdentifier,AttributeType=S \
     --key-schema AttributeName=credentialIdentifier,KeyType=HASH \
     --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1 \
     --region eu-west-2
 
-aws --endpoint-url=http://localhost:4566 dynamodb update-time-to-live --table-name $CREDENTIAL_OFFER_TABLE_NAME \
+awslocal dynamodb update-time-to-live --table-name $CREDENTIAL_OFFER_TABLE_NAME \
                       --time-to-live-specification Enabled=true,AttributeName=timeToLive
 
-aws --endpoint-url=http://localhost:4566 dynamodb create-table \
+awslocal dynamodb create-table \
     --table-name $CREDENTIAL_TABLE_NAME \
     --attribute-definitions AttributeName=credentialIdentifier,AttributeType=S AttributeName=documentId,AttributeType=S \
     --key-schema AttributeName=credentialIdentifier,KeyType=HASH \
@@ -36,29 +36,29 @@ aws --endpoint-url=http://localhost:4566 dynamodb create-table \
                 }
             ]"
 
-aws --endpoint-url=http://localhost:4566 dynamodb update-time-to-live --table-name $CREDENTIAL_TABLE_NAME \
+awslocal dynamodb update-time-to-live --table-name $CREDENTIAL_TABLE_NAME \
                       --time-to-live-specification Enabled=true,AttributeName=timeToLive
 
 # Create signing key pair to sign JWTs and JWT-based credentials
-aws --endpoint-url=http://localhost:4566 kms create-key \
+awslocal kms create-key \
     --region eu-west-2 \
     --key-usage SIGN_VERIFY \
     --key-spec ECC_NIST_P256 \
     --tags '[{"TagKey":"_custom_id_","TagValue":"ff275b92-0def-4dfc-b0f6-87c96b26c6c7"}]'
 
-aws --endpoint-url=http://localhost:4566 kms create-alias \
+awslocal kms create-alias \
     --region eu-west-2 \
     --alias-name alias/localSigningKeyAlias \
     --target-key-id ff275b92-0def-4dfc-b0f6-87c96b26c6c7
 
 # Create mDoc signing key pair with custom key material - this key material matches the key in the document signing certificate below
-aws --endpoint-url=http://localhost:4566 kms create-key \
+awslocal kms create-key \
     --region eu-west-2 \
     --key-usage SIGN_VERIFY \
     --key-spec ECC_NIST_P256 \
     --tags '[{"TagKey":"_custom_key_material_","TagValue":"MHcCAQEEIKexbdPE2TDYzOuasfwN4QWNqHF1wNsV30ERMPPaRYnWoAoGCCqGSM49AwEHoUQDQgAE+NKi4QpYV/avqTFFoldRIYEZaRgKF/qv+xJsek63Eh2cKn922zlJHj2KglzSlLm439BfFYGDYVet6W7pkvIYfg=="},{"TagKey":"_custom_id_","TagValue":"1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4"}]'
 
-aws --endpoint-url=http://localhost:4566 s3api create-bucket --bucket certificates --create-bucket-configuration LocationConstraint=eu-west-2 --region eu-west-2
+awslocal s3api create-bucket --bucket certificates --create-bucket-configuration LocationConstraint=eu-west-2 --region eu-west-2
 
 # Root certificate.
 cat <<EOF > root-certificate.pem
@@ -77,7 +77,7 @@ zyaulhhqnewCIQCmJ0kwBidqVzCOIx5H8CaEHUnTA/ULJGC2DDFzT7s54A==
 EOF
 
 # Upload root certificate to S3
-aws --endpoint-url=http://localhost:4566 s3 cp root-certificate.pem s3://certificates/root/6bb42872-f4ed-4d55-a937-b8ffb8760de4/certificate.pem --region eu-west-2
+awslocal s3 cp root-certificate.pem s3://certificates/root/6bb42872-f4ed-4d55-a937-b8ffb8760de4/certificate.pem --region eu-west-2
 
 # Document signing certificate containing the public key from the mDoc signing key pair, signed by the root certificate
 cat <<EOF > document-signing-certificate.pem
@@ -96,4 +96,4 @@ FmibH8pIONDZjSI=
 EOF
 
 # Upload document signing certificate to S3
-aws --endpoint-url=http://localhost:4566 s3 cp document-signing-certificate.pem s3://certificates/sign/1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4/certificate.pem --region eu-west-2
+awslocal s3 cp document-signing-certificate.pem s3://certificates/sign/1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4/certificate.pem --region eu-west-2
