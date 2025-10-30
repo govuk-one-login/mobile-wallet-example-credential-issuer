@@ -45,7 +45,7 @@ Mappings:
     dev:
       DocumentSigningKeyParameterPrefix: '/iaca/'
       DocumentSigningKeyCommonName: 'Example Issuer DSC (DEV)'
-      DocumentSigningKeyCountryName: 'UK'
+      DocumentSigningKeyCountryName: 'GB'
       PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
       PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
       RootCertificate: '/platform-ca/iaca/root-certificate'
@@ -57,7 +57,7 @@ Mappings:
     build:
       DocumentSigningKeyParameterPrefix: '/iaca/'
       DocumentSigningKeyCommonName: 'Example Issuer DSC (BUILD)'
-      DocumentSigningKeyCountryName: 'UK'
+      DocumentSigningKeyCountryName: 'GB'
       PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
       PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
       RootCertificate: '/platform-ca/iaca/root-certificate'

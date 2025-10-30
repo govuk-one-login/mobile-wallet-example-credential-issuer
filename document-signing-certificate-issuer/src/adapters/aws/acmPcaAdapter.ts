@@ -72,7 +72,7 @@ export async function retrieveIssuedCertificate(
 
   const makeTimeoutPromise = (timeoutMs: number): Promise<void> =>
     new Promise(function (resolve, reject) {
-      setTimeout(() => reject(Error('Request timed out')), timeoutMs);
+      setTimeout(() => reject(new Error('Request timed out')), timeoutMs);
     });
 
   const timeoutPromise = makeTimeoutPromise(timeoutMs);
