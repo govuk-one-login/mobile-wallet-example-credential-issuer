@@ -22,7 +22,6 @@ export const handler = lambdaHandlerConstructor(dependencies);
 
 export function lambdaHandlerConstructor(dependencies: IssueDocumentSigningCertificateDependencies) {
   return async (_event: unknown, context: Context) => {
-    // temporary comment to trigger PR workflow and test sonar integration
     logger.addContext(context);
     logger.info(LogMessage.DOC_SIGNING_CERT_ISSUER_STARTED);
 
