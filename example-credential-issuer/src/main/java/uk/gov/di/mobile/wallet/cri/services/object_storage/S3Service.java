@@ -8,6 +8,8 @@ import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
+import java.net.URI;
+
 public class S3Service implements ObjectStore {
     private final S3Client s3Client;
 
@@ -31,6 +33,7 @@ public class S3Service implements ObjectStore {
 
     private static S3Client getLocalClient(ConfigurationService configurationService) {
         return S3Client.builder()
+                .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
                 .region(Region.of(configurationService.getAwsRegion()))
                 .credentialsProvider(DefaultCredentialsProvider.builder().build())
                 .forcePathStyle(true) // Required for running locally with localstack

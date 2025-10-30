@@ -14,6 +14,7 @@ import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
+import java.net.URI;
 import java.util.List;
 
 public class DynamoDbService implements DataStore {
@@ -51,6 +52,7 @@ public class DynamoDbService implements DataStore {
 
     private static DynamoDbClient getLocalClient(ConfigurationService configurationService) {
         return DynamoDbClient.builder()
+                .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
                 .httpClient(UrlConnectionHttpClient.create())
                 .region(Region.of(configurationService.getAwsRegion()))
                 .build();
