@@ -45,6 +45,8 @@ public class KmsService implements KeyProvider {
 
     public KmsService(String localstackEndpoint, String awsRegion, String environment) {
         System.out.println("ENVIRONMENT:" + environment);
+        System.out.println("LOCALSTACK ENDPOINT:" + localstackEndpoint);
+
         if (environment.equals("local")) {
             this.kmsClient =
                     KmsClient.builder()
