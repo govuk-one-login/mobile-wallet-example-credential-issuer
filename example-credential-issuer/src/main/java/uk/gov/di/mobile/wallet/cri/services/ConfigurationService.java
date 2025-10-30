@@ -52,7 +52,7 @@ public class ConfigurationService extends Configuration {
      * @return The LocalStack endpoint URL
      */
     public String getLocalstackEndpoint() {
-        return "http://localstack_credentialIssuer:4566";
+        return "http://localstack-credentialIssuer:4566";
     }
 
     /**
