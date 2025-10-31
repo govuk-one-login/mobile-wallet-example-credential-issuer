@@ -159,6 +159,7 @@ public class AccessTokenService {
         String keyId = accessToken.getHeader().getKeyID();
         try {
             JWK jwk = jwksService.retrieveJwkFromURLWithKeyId(keyId);
+            System.out.println("JWK: " + jwk.toString());
 
             Algorithm algorithm = jwk.getAlgorithm();
             // Check that the JWK's algorithm matches expectation, if present

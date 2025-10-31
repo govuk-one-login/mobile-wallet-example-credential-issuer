@@ -30,6 +30,9 @@ public class JwksService {
                 new URL(
                         configurationService.getOneLoginAuthServerUrl()
                                 + configurationService.getJwksEndpoint());
+
+        System.out.println("AUTH SERVER / TEST HARNESS URL: " + url);
+
         this.jwkSource =
                 JWKSourceBuilder.create(url)
                         .retrying(true)
@@ -49,6 +52,8 @@ public class JwksService {
     }
 
     public JWK retrieveJwkFromURLWithKeyId(String keyId) throws KeySourceException {
+        System.out.println("CALLING AUTH SERVER / TEST HARNESS");
+
         JWKSelector selector = new JWKSelector(new JWKMatcher.Builder().keyID(keyId).build());
         return jwkSource.get(selector, null).stream()
                 .findFirst()
@@ -59,6 +64,7 @@ public class JwksService {
             throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
 
         String keyAlias = configurationService.getSigningKeyAlias();
+        System.out.println("KEY ALIAS: " + keyAlias);
         if (!keyProvider.isKeyActive(keyAlias)) {
             throw new KeyNotActiveException("Public key is not active");
         }

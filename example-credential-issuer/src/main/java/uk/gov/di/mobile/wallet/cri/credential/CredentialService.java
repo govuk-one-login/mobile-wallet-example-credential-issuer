@@ -59,19 +59,23 @@ public class CredentialService {
         try {
             AccessTokenService.AccessTokenData accessTokenData =
                     accessTokenService.verifyAccessToken(accessToken);
+            System.out.println("access token ok");
 
             ProofJwtService.ProofJwtData proofJwtData = proofJwtService.verifyProofJwt(proofJwt);
+            System.out.println("proof ok");
 
             if (!proofJwtData.nonce().equals(accessTokenData.nonce())) {
                 throw new NonceValidationException(
                         "Access token c_nonce claim does not match Proof JWT nonce claim");
             }
+            System.out.println("nonce ok");
 
             String credentialOfferId = accessTokenData.credentialIdentifier();
             CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
             if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
                 throw new CredentialOfferException("Credential offer validation failed");
             }
+            System.out.println("credential offer ok");
 
             if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
                 throw new AccessTokenValidationException(
@@ -80,6 +84,8 @@ public class CredentialService {
 
             String itemId = credentialOffer.getItemId();
             Document document = documentStoreClient.getDocument(itemId);
+            System.out.println("document ok");
+
             String notificationId = UUID.randomUUID().toString();
             String vcType = document.getVcType();
 
