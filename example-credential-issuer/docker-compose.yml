@@ -1,7 +1,3 @@
-networks:
-  host:
-    external: true
-
 services:
   localstack:
     container_name: localstack-credentialIssuer
@@ -15,5 +11,3 @@ services:
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
       - ./localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
-    networks:
-      - host
