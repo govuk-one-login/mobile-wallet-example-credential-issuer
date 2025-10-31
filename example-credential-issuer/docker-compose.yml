@@ -1,6 +1,6 @@
 services:
   localstack:
-    container_name: localstack-credentialIssuer
+    container_name: localstack_credentialIssuer
     image: localstack/localstack:latest
     ports:
       - "4566:4566"
