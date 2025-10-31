@@ -11,3 +11,4 @@ services:
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
       - ./localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
+    network_mode: host
