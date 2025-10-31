@@ -9,4 +9,4 @@ COPY gradle/ gradle/
 RUN ./gradlew build -x test
 
 EXPOSE 8080
-CMD ONE_LOGIN_AUTH_SERVER_URL=http://test-harness ./gradlew run
+CMD ONE_LOGIN_AUTH_SERVER_URL=http://test-harness SELF_URL=http://example-cri ./gradlew run
