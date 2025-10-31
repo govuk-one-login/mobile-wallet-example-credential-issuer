@@ -1,5 +1,5 @@
 networks:
-  example-cri-network:
+  host:
     external: true
 
 services:
@@ -16,4 +16,4 @@ services:
     volumes:
       - ./localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
     networks:
-      - example-cri-network
+      - host
