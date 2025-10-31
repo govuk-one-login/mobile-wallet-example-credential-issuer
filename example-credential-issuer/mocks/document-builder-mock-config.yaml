@@ -1,0 +1,7 @@
+plugin: rest
+path: "/document/{itemId}"
+method: GET
+contentType: "application/json"
+response:
+  statusCode: 201
+  content: "{\"itemId\":\"{itemId}\",\"name\":\"Sample Document\",\"value\":42}"
