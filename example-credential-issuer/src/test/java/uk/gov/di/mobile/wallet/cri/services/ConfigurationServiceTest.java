@@ -70,7 +70,7 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnLocalStackEndpointEnvVarValue() {
-        assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
+        assertEquals("http://localhost:4566", configurationService.getLocalstackEndpoint());
     }
 
     @Test
