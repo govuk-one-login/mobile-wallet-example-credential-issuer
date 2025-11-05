@@ -1,0 +1,22 @@
+plugin: rest
+resources:
+  - path: "/document/{itemId}"
+    contentType: "application/json"
+    method: GET
+    response:
+      statusCode: 200
+      content: "{\"itemId\":\"1b6db837-a6cc-4641-8503-3de7f3357c16\",\"vcType\":\"SocialSecurityCredential\",\"documentId\":\"QQ123456C\",\"data\":{\"title\":\"Ms\",\"credentialTtlMinutes\":43200,\"givenName\":\"Sarah\",\"familyName\":\"Edwards\",\"nino\":\"QQ123456C\"},\"timeToLive\":1764783862}"
+
+  - path: "/issue"
+    contentType: "application/json"
+    method: GET
+    response:
+      statusCode: 200
+      content: "{\"index\":5,\"uri\":\"https://status-list-mock.com/t/156PK3XHVCOQ\"}"
+
+  - path: "/revoke"
+    contentType: "application/json"
+    method: GET
+    response:
+      statusCode: 202
+      content: "{\"message\":\"Request processed for revocation\",\"revokedAt\":1762189296}"

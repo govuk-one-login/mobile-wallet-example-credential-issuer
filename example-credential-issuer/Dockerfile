@@ -6,7 +6,7 @@ WORKDIR /app
 COPY src/ src/
 COPY build.gradle settings.gradle gradlew gradlew.bat config.yml ./
 COPY gradle/ gradle/
-RUN ./gradlew
+RUN ./gradlew build -x test
 
 EXPOSE 8080
 CMD ./gradlew run
