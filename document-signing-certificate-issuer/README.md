@@ -18,6 +18,7 @@ This code is for government departments and service teams who want to issue cred
 If you have questions or suggestions, contact us on [govukwallet-queries@digital.cabinet-office.gov.uk](mailto:govukwallet-queries@digital.cabinet-office.gov.uk) or use #govuk-wallet in x-gov Slack.
 
 ## Maintaining the issuer
+
 These instructions are for GOV.UK Wallet developers who are maintaining this service.
 
 The `template.yaml` in this project deploys:
@@ -93,4 +94,3 @@ The certificate issuer stores the certificates it outputs in an S3 bucket with t
 - `certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation
 
 The certificate issuer uploads the root certificate to the same bucket with the key `<keyId>/certificate.pem`, where `<keyId>` is the certificate authority ID (in the form of a UUIDv4 string).
-
