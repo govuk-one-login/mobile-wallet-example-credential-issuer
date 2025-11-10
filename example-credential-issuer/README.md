@@ -19,12 +19,12 @@ There is more guidance on GOV.UK Wallet in the [technical documentation](https:/
 
 ## What is supported/not supported
 
-| Feature   | Support   |
-|--------------|--------------|
-| Issuing an [ISO_mDL](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential   | ✅ Yes   |
-| Issuing a [W3C VCDM](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential   | ✅ Yes   |
-| Issuing a SD-JWT-VC credential   | ❌ This format is not supported   |
-| Revoking a credential with the status list   | ❌ Coming soon   |
+| Feature                                                                                                                  | Support                        |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| Issuing an [ISO_mDL](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅  Yes                         |
+| Issuing a [W3C VCDM](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅ Yes                          |
+| Issuing a SD-JWT-VC credential                                                                                           | ❌ This format is not supported |
+| Revoking a credential with the status list                                                                               | ✅ Yes                          |
 
 This example credential issuer does not connect to any real data sources. To use this example credential issuer, you need to modify its code to connect to your existing data sources and systems that contain the information required for the credentials you wish to issue.
 
