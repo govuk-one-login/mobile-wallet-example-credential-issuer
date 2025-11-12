@@ -252,10 +252,7 @@ public class ConfigurationService extends Configuration {
      */
     public URI getStatusListUrl() {
         String key = "STATUS_LIST_URL";
-        String uriString = getEnvOrDefault(key, null);
-        if (uriString == null || uriString.isBlank()) {
-            throw new IllegalArgumentException("Missing required environment variable: " + key);
-        }
+        String uriString = getEnvOrDefault(key, "http://localhost:3000");
         return createValidatedUri(key, uriString);
     }
 
