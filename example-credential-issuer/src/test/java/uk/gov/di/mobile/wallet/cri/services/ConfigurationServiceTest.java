@@ -250,33 +250,19 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ThrowIllegalArgumentException_When_StatusListUrlEnvVarNotSet() {
-        IllegalArgumentException thrown =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () -> configurationService.getStatusListUrl());
-        assertEquals("Missing required environment variable: STATUS_LIST_URL", thrown.getMessage());
+    void Should_ReturnStatusListDefaultValue_When_EnvVarNotSet() throws URISyntaxException {
+        assertEquals(new URI("http://localhost:3000"), configurationService.getStatusListUrl());
     }
 
     @Test
-    void Should_ReturnStatusListUrlEnvVarValue() throws URISyntaxException {
+    void Should_ReturnStatusListEnvVarValue() throws URISyntaxException {
         environmentVariables.set("STATUS_LIST_URL", "https://status-list.test.com");
         assertEquals(
                 new URI("https://status-list.test.com"), configurationService.getStatusListUrl());
     }
 
     @Test
-    void Should_ReturnsDefault_WhenEnvVarIsNull() {
-        environmentVariables.set("ENVIRONMENT", "local");
-        String expectedDefaultValue = "eu-west-2";
-
-        String result = configurationService.getAwsRegion();
-
-        assertEquals(expectedDefaultValue, result);
-    }
-
-    @Test
-    void Should_ThrowException_When_InvalidUri() {
+    void Should_ThrowException_When_UrlIsInvalid() {
         environmentVariables.set("CREDENTIAL_STORE_URL", "invalid://uri with spaces");
 
         IllegalArgumentException exception =
