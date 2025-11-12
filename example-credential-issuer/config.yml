@@ -18,4 +18,7 @@ logging:
 httpClient:
   timeout: 5000ms
   connectionTimeout: 5000ms
+  # GZIP compression is disabled by default to ensure compatibility with local
+  # development environments that do not support it. Additionally, CRI request
+  # payloads are small, so GZIP compression is unnecessary.
   gzipEnabledForRequests: false
