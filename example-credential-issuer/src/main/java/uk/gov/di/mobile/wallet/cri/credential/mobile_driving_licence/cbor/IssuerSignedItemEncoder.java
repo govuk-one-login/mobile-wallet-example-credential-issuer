@@ -7,6 +7,9 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.Objects;
 
 public class IssuerSignedItemEncoder {
 
@@ -36,7 +39,25 @@ public class IssuerSignedItemEncoder {
             innerGenerator.writeStringField(
                     "elementIdentifier", issuerSignedItem.elementIdentifier());
             innerGenerator.writeFieldName("elementValue");
-            innerGenerator.writeObject(issuerSignedItem.elementValue());
+            if (Objects.equals(issuerSignedItem.elementIdentifier(), "driving_privileges")
+                    || Objects.equals(
+                            issuerSignedItem.elementIdentifier(),
+                            "provisional_driving_privileges")) {
+                ArrayList<Map<String, Object>> privileges =
+                        (ArrayList<Map<String, Object>>) issuerSignedItem.elementValue();
+                innerGenerator.writeStartArray(privileges.size());
+                for (Map<String, Object> privilege : privileges) {
+                    innerGenerator.writeStartObject(privilege.size());
+                    for (Map.Entry<String, Object> entry : privilege.entrySet()) {
+                        innerGenerator.writeFieldName(entry.getKey());
+                        innerGenerator.writeObject(entry.getValue());
+                    }
+                    innerGenerator.writeEndObject();
+                }
+                innerGenerator.writeEndArray();
+            } else {
+                innerGenerator.writeObject(issuerSignedItem.elementValue());
+            }
             innerGenerator.writeEndObject();
         }
 
