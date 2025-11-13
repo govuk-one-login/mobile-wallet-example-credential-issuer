@@ -5,4 +5,5 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESi
 import java.util.List;
 import java.util.Map;
 
-public record IssuerSigned(Map<String, List<IssuerSignedItem>> nameSpaces, COSESign1 issuerAuth) {}
+public record IssuerSigned(
+        Map<String, List<IssuerSignedItem<?>>> nameSpaces, COSESign1 issuerAuth) {}

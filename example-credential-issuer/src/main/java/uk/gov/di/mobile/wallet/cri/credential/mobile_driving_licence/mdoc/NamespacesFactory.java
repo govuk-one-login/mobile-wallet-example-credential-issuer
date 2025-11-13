@@ -43,11 +43,11 @@ public class NamespacesFactory {
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
     public Namespaces build(DrivingLicenceDocument document) throws MDLException {
-        Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
+        Map<String, List<IssuerSignedItem<?>>> namespaces = new LinkedHashMap<>();
         Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
 
         for (Map.Entry<String, List<Field>> entry : fieldsByNamespace.entrySet()) {
-            List<IssuerSignedItem> issuerSignedItems = new ArrayList<>();
+            List<IssuerSignedItem<?>> issuerSignedItems = new ArrayList<>();
             for (Field field : entry.getValue()) {
                 String fieldName = field.getName();
                 String fieldNameAsSnakeCase = camelToSnake(fieldName);
@@ -80,7 +80,7 @@ public class NamespacesFactory {
                                     fieldName),
                             exception);
                 }
-                IssuerSignedItem issuerSignedItem =
+                IssuerSignedItem<?> issuerSignedItem =
                         issuerSignedItemFactory.build(fieldNameAsSnakeCase, fieldValue);
                 issuerSignedItems.add(issuerSignedItem);
             }

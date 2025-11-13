@@ -29,11 +29,11 @@ public class IssuerSignedItemFactory {
      * @param elementValue The value of the data element.
      * @return A new {@link IssuerSignedItem} instance.
      */
-    public IssuerSignedItem build(final String elementIdentifier, final Object elementValue) {
+    public IssuerSignedItem<?> build(final String elementIdentifier, final Object elementValue) {
         byte[] randomBytes = generateRandomBytes();
         int digestID = digestIDGenerator.next();
 
-        return new IssuerSignedItem(digestID, randomBytes, elementIdentifier, elementValue);
+        return new IssuerSignedItem<>(digestID, randomBytes, elementIdentifier, elementValue);
     }
 
     /**

@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
@@ -15,10 +15,14 @@ import java.io.IOException;
  * a tagged CBOR binary with tag 24. Tag 24 indicates that the following byte string contains a
  * fully encoded embedded CBOR data item.
  */
-public class IssuerSignedItemCBORSerializer extends JsonSerializer<IssuerSignedItem> {
+public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedItem<?>> {
+    public IssuerSignedItemCBORSerializer() {
+        super((Class<IssuerSignedItem<?>>) (Class<?>) IssuerSignedItem.class);
+    }
+
     @Override
     public void serialize(
-            final IssuerSignedItem issuerSignedItem,
+            final IssuerSignedItem<?> issuerSignedItem,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
