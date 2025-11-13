@@ -44,7 +44,7 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
 
         cborGenerator.writeFieldName("nameSpaces");
         cborGenerator.writeStartObject();
-        for (Map.Entry<String, List<IssuerSignedItem>> entry :
+        for (Map.Entry<String, List<IssuerSignedItem<?>>> entry :
                 issuerSigned.nameSpaces().entrySet()) {
             cborGenerator.writeFieldName(entry.getKey());
             cborGenerator.writeStartArray();

@@ -22,7 +22,7 @@ public class IssuerSignedItemEncoder {
      * @return The encoded CBOR bytes
      * @throws IOException If encoding fails
      */
-    public static byte[] encode(IssuerSignedItem issuerSignedItem, ObjectCodec codec)
+    public static byte[] encode(IssuerSignedItem<?> issuerSignedItem, ObjectCodec codec)
             throws IOException {
         CBORFactory factory = new CBORFactory();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

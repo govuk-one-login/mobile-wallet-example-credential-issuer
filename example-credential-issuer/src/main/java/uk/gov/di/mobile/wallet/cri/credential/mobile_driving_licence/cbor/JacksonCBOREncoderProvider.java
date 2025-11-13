@@ -6,7 +6,6 @@ import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
 
 import java.time.Instant;
@@ -25,7 +24,7 @@ public final class JacksonCBOREncoderProvider {
                 new SimpleModule()
                         .addSerializer(LocalDate.class, new LocalDateCBORSerializer())
                         .addSerializer(Instant.class, new InstantCBORSerializer())
-                        .addSerializer(IssuerSignedItem.class, new IssuerSignedItemCBORSerializer())
+                        .addSerializer(new IssuerSignedItemCBORSerializer())
                         .addSerializer(
                                 MobileSecurityObject.class, new MobileSecurityObjectSerializer())
                         .addSerializer(IssuerSigned.class, new IssuerSignedCBORSerializer());
