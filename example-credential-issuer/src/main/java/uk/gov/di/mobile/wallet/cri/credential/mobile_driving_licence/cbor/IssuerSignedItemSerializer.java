@@ -15,8 +15,8 @@ import java.io.IOException;
  * a tagged CBOR binary with tag 24. Tag 24 indicates that the following byte string contains a
  * fully encoded embedded CBOR data item.
  */
-public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedItem<?>> {
-    public IssuerSignedItemCBORSerializer() {
+public class IssuerSignedItemSerializer extends StdSerializer<IssuerSignedItem<?>> {
+    public IssuerSignedItemSerializer() {
         super((Class<IssuerSignedItem<?>>) (Class<?>) IssuerSignedItem.class);
     }
 
@@ -32,6 +32,7 @@ public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedIt
 
         byte[] encodedBytes =
                 IssuerSignedItemEncoder.encode(issuerSignedItem, generator.getCodec());
+
         cborGenerator.writeTag(24);
         cborGenerator.writeBinary(encodedBytes);
     }

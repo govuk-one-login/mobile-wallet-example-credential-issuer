@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
@@ -19,12 +19,16 @@ import java.util.Map;
  * array, tagging it with CBOR tag 24 to indicate embedded CBOR data. Writes the 'issuerAuth' field
  * as a CBOR array with its components.
  */
-public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
+public class IssuerSignedSerializer extends StdSerializer<IssuerSigned> {
+
+    public IssuerSignedSerializer() {
+        super(IssuerSigned.class);
+    }
 
     /**
      * Serializes the {@link IssuerSigned} object to CBOR.
      *
-     * @param issuerSigned The {@link IssuerSigned} object to serialize.
+     * @param value The {@link IssuerSigned} object to serialize.
      * @param generator The {@link JsonGenerator} (must be a {@link CBORGenerator}).
      * @param serializer The {@link SerializerProvider}.
      * @throws IOException If an I/O error occurs during serialization.
@@ -32,7 +36,7 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
      */
     @Override
     public void serialize(
-            final IssuerSigned issuerSigned,
+            final IssuerSigned value,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
@@ -44,8 +48,7 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
 
         cborGenerator.writeFieldName("nameSpaces");
         cborGenerator.writeStartObject();
-        for (Map.Entry<String, List<IssuerSignedItem<?>>> entry :
-                issuerSigned.nameSpaces().entrySet()) {
+        for (Map.Entry<String, List<IssuerSignedItem<?>>> entry : value.nameSpaces().entrySet()) {
             cborGenerator.writeFieldName(entry.getKey());
             cborGenerator.writeStartArray();
 
@@ -61,7 +64,7 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
         }
         cborGenerator.writeEndObject();
 
-        COSESign1 issuerAuth = issuerSigned.issuerAuth();
+        COSESign1 issuerAuth = value.issuerAuth();
         cborGenerator.writeFieldName("issuerAuth");
         cborGenerator.writeStartArray();
         cborGenerator.writeBinary(issuerAuth.protectedHeader());

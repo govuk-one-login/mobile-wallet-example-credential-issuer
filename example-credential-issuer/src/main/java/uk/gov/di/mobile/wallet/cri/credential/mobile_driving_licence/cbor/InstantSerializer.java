@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 
 import java.io.IOException;
@@ -19,10 +19,14 @@ import java.time.temporal.ChronoUnit;
  *
  * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}.
  */
-public class InstantCBORSerializer extends JsonSerializer<Instant> {
+public class InstantSerializer extends StdSerializer<Instant> {
+    public InstantSerializer() {
+        super(Instant.class);
+    }
+
     @Override
     public void serialize(
-            final Instant instant,
+            final Instant value,
             final JsonGenerator generator,
             final SerializerProvider serializers)
             throws IOException {
@@ -31,7 +35,7 @@ public class InstantCBORSerializer extends JsonSerializer<Instant> {
         }
 
         String formatted =
-                instant.truncatedTo(ChronoUnit.SECONDS).toString(); // "2026-06-24T16:05:21Z"
+                value.truncatedTo(ChronoUnit.SECONDS).toString(); // "2026-06-24T16:05:21Z"
         cborGenerator.writeTag(0);
         generator.writeString(formatted);
     }
