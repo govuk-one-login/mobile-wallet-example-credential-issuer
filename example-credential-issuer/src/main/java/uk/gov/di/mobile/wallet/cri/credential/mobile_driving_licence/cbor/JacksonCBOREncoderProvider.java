@@ -5,11 +5,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
-
-import java.time.Instant;
-import java.time.LocalDate;
 
 /** Provides a pre-configured {@link CBORMapper} instance with custom serializers. */
 public final class JacksonCBOREncoderProvider {
@@ -22,12 +17,18 @@ public final class JacksonCBOREncoderProvider {
     public static CBORMapper configuredCBORMapper() {
         SimpleModule simpleModule =
                 new SimpleModule()
-                        .addSerializer(LocalDate.class, new LocalDateCBORSerializer())
-                        .addSerializer(Instant.class, new InstantCBORSerializer())
-                        .addSerializer(new IssuerSignedItemCBORSerializer())
-                        .addSerializer(
-                                MobileSecurityObject.class, new MobileSecurityObjectSerializer())
-                        .addSerializer(IssuerSigned.class, new IssuerSignedCBORSerializer());
+                        .addSerializer(new LocalDateSerializer())
+                        .addSerializer(new InstantSerializer())
+                        .addSerializer(new IssuerSignedItemSerializer())
+                        .addSerializer(new MobileSecurityObjectSerializer())
+                        .addSerializer(new IssuerSignedSerializer())
+                        .addSerializer(new DrivingPrivilegeSerializer())
+                        .addSerializer(new ValidityInfoSerializer())
+                        .addSerializer(new StatusSerializer())
+                        .addSerializer(new DeviceKeyInfoSerializer())
+                        .addSerializer(new ValueDigestsSerializer())
+                        .addSerializer(new COSEProtectedHeaderSerializer())
+                        .addSerializer(new COSEUnprotectedHeaderSerializer());
 
         CBORMapper mapper = new CBORMapper();
         mapper.registerModule(simpleModule)
