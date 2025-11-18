@@ -44,7 +44,7 @@ public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
         cborGenerator.writeStartObject(1);
         cborGenerator.writeFieldName("nameSpaces");
         List<String> namespaces = new ArrayList<>(value.keyAuthorizations().nameSpaces());
-        cborGenerator.writeStartArray(namespaces.size());
+        cborGenerator.writeStartArray(namespaces, namespaces.size());
         for (String namespace : namespaces) {
             cborGenerator.writeString(namespace);
         }
