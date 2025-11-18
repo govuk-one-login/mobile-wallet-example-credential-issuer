@@ -53,8 +53,11 @@ public class NamespacesFactory {
                 Object fieldValue;
                 try {
                     fieldValue = field.get(document);
-                    if (fieldValue == Optional.empty()) {
-                        continue;
+                    if (fieldValue instanceof Optional<?> optional) {
+                        if (optional.isEmpty()) {
+                            continue;
+                        }
+                        fieldValue = optional.get();
                     }
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
