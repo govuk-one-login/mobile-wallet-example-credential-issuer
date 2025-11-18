@@ -8,11 +8,27 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Status
 
 import java.io.IOException;
 
+/**
+ * CBOR serializer for {@link Status}.
+ *
+ * <p>Produces a definite-length map with a single entry <b>status_list</b>, which itself is a
+ * definite-length map containing:
+ *
+ * <ul>
+ *   <li><b>idx</b> → numeric index in the status list
+ *   <li><b>uri</b> → URI string of the status list
+ * </ul>
+ */
 public class StatusSerializer extends StdSerializer<Status> {
     public StatusSerializer() {
         super(Status.class);
     }
 
+    /**
+     * Serializes {@link Status} as a nested, definite-length CBOR map.
+     *
+     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     */
     @Override
     public void serialize(
             final Status value, final JsonGenerator generator, final SerializerProvider serializer)
