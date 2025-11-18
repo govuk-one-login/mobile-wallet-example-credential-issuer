@@ -8,11 +8,27 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Validi
 
 import java.io.IOException;
 
+/**
+ * CBOR serializer for {@link ValidityInfo}.
+ *
+ * <p>Encodes a definite-length map with three entries representing the validity window of the MSO:
+ *
+ * <ul>
+ *   <li>signed → timestamp (serialized via configured {@link java.time.Instant} serializer)
+ *   <li>validFrom → timestamp (serialized via configured {@link java.time.Instant} serializer)
+ *   <li>validUntil → timestamp (serialized via configured {@link java.time.Instant} serializer)
+ * </ul>
+ */
 public class ValidityInfoSerializer extends StdSerializer<ValidityInfo> {
     public ValidityInfoSerializer() {
         super(ValidityInfo.class);
     }
 
+    /**
+     * Serializes {@link ValidityInfo} as a definite-length CBOR map with exactly 3 fields.
+     *
+     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     */
     @Override
     public void serialize(
             final ValidityInfo value,
