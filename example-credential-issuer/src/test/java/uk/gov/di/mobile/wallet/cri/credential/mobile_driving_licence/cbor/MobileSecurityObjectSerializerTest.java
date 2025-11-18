@@ -5,9 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEKeyTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceKeyInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.KeyAuthorizations;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
@@ -24,6 +28,7 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 class MobileSecurityObjectSerializerTest {
@@ -41,57 +46,34 @@ class MobileSecurityObjectSerializerTest {
         cborObjectMapper.registerModule(module).registerModule(new JavaTimeModule());
     }
 
+    @DisplayName(
+            "Should serialize MobileSecurityObject with CBOR tag 24)and definite-length byte string")
     @Test
-    void Should_SerializeMobileSecurityObjectWithCBORGenerator() throws IOException {
-        // Arrange: Prepare DeviceKeyInfo
-        Map<Integer, Object> parameterMap = new HashMap<>();
-        parameterMap.put(1, "testParameterValue");
-        parameterMap.put(-1, 2);
-        COSEKey coseKey = new COSEKey(parameterMap);
-        KeyAuthorizations keyAuthorizations =
-                new KeyAuthorizations(Set.of("testNamespace1", "testNamespace2"));
-        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
+    void shouldSerializeMobileSecurityObject() throws IOException {
+        MobileSecurityObject testObject = getTestMobileSecurityObject();
 
-        // Arrange: Prepare ValueDigests
-        Map<Integer, byte[]> digestMap = new HashMap<>();
-        digestMap.put(1, new byte[] {0x01, 0x02, 0x03});
-        Map<String, Map<Integer, byte[]>> valueDigestsMap = new HashMap<>();
-        valueDigestsMap.put("org.iso.18013.5.1", digestMap);
-        ValueDigests valueDigests = new ValueDigests(valueDigestsMap);
-
-        // Arrange: Prepare ValidityInfo
-        ValidityInfo validityInfo =
-                new ValidityInfo(
-                        Instant.parse("2025-06-27T12:00:00Z"),
-                        Instant.parse("2025-06-27T12:00:00Z"),
-                        Instant.parse("2026-06-27T12:00:00Z"));
-
-        // Arrange: Prepare Status
-        StatusList statusList = new StatusList(0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
-        Status status = new Status(statusList);
-
-        // Arrange: Create the test object
-        MobileSecurityObject testObject =
-                new MobileSecurityObject(
-                        "1.0",
-                        "SHA-256",
-                        deviceKeyInfo,
-                        valueDigests,
-                        "org.iso.18013.5.1.mDL",
-                        validityInfo,
-                        status);
-
-        // Act: Serialize the object using ObjectMapper
         byte[] result = cborObjectMapper.writeValueAsBytes(testObject);
 
-        // Assert: The result should start with CBOR tag 24
-        assertEquals(((byte) 0xD8), result[0]);
-        assertEquals(((byte) 0x18), result[1]);
+        // The first two bytes should encode tag 24, indicating that the following data is
+        // CBOR-encoded.
+        // 0xD8: major type 6 (tag) with additional info 24
+        // 0x18: tag number 24
+        assertEquals((byte) 0xD8, result[0]);
+        assertEquals((byte) 0x18, result[1]);
+
+        // The third byte should signal a definite-length byte string
+        // Top 3 bits (0xE0 mask) == 0x40 means major type 2 (byte string)
+        // Lower 5 bits (0x1F mask) != 0x1F means definite length (not indefinite)
+        byte initialByte = result[2];
+        boolean isByteStringMajorType = (initialByte & 0xE0) == 0x40;
+        boolean isDefiniteLength = (initialByte & 0x1F) != 0x1F;
+        assertTrue(isByteStringMajorType && isDefiniteLength);
     }
 
+    @DisplayName("Should throw if serializer is used with a non-CBOR generator")
     @Test
-    void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
-        // Arrange: Create a regular JSON ObjectMapper
+    void shouldThrowWhenSerializerUsesNonCborGenerator() {
+        // Create a JSON ObjectMapper (not CBOR) so the serializer sees a non-CBOR generator
         ObjectMapper jsonObjectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
         module.addSerializer(MobileSecurityObject.class, serializer);
@@ -99,14 +81,44 @@ class MobileSecurityObjectSerializerTest {
 
         MobileSecurityObject testObject = mock(MobileSecurityObject.class);
 
-        // Act & Assert: Expect JsonMappingException which wraps the IllegalArgumentException
         JsonMappingException exception =
                 assertThrows(
                         JsonMappingException.class,
                         () -> jsonObjectMapper.writeValueAsBytes(testObject));
-
-        // Verify the root cause is IllegalArgumentException with the expected message
         assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
         assertEquals("Requires CBORGenerator", exception.getCause().getMessage());
+    }
+
+    private static @NotNull MobileSecurityObject getTestMobileSecurityObject() {
+        byte[] x = new byte[] {0x01, 0x02, 0x03};
+        byte[] y = new byte[] {0x04, 0x05, 0x06};
+        COSEKey coseKey = new COSEKey(COSEKeyTypes.EC2, COSEEllipticCurves.P256, x, y);
+        KeyAuthorizations keyAuthorizations =
+                new KeyAuthorizations(Set.of("testNamespace1", "testNamespace2"));
+        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
+
+        Map<Integer, byte[]> digestMap = new HashMap<>();
+        digestMap.put(1, new byte[] {0x01, 0x02, 0x03});
+        Map<String, Map<Integer, byte[]>> valueDigestsMap = new HashMap<>();
+        valueDigestsMap.put("org.iso.18013.5.1", digestMap);
+        ValueDigests valueDigests = new ValueDigests(valueDigestsMap);
+
+        ValidityInfo validityInfo =
+                new ValidityInfo(
+                        Instant.parse("2025-06-27T12:00:00Z"),
+                        Instant.parse("2025-06-27T12:00:00Z"),
+                        Instant.parse("2026-06-27T12:00:00Z"));
+
+        StatusList statusList = new StatusList(0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
+        Status status = new Status(statusList);
+
+        return new MobileSecurityObject(
+                "1.0",
+                "SHA-256",
+                deviceKeyInfo,
+                valueDigests,
+                "org.iso.18013.5.1.mDL",
+                validityInfo,
+                status);
     }
 }
