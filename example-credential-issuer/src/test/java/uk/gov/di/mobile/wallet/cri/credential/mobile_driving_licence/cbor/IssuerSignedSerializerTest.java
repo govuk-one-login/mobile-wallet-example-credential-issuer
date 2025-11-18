@@ -3,7 +3,6 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
@@ -32,9 +31,8 @@ class IssuerSignedSerializerTest {
     @Mock private SerializerProvider serializerProvider;
     @Mock private IssuerSigned issuerSigned;
 
-    @DisplayName("Should serialize IssuerSigned with a single namespace containing multiple items")
     @Test
-    void shouldSerializeIssuerSignedWithSingleNamespace() throws IOException {
+    void Should_SerializeIssuerSigned_SingleNameSpaceWithMultipleItems() throws IOException {
         Map<String, List<IssuerSignedItem<?>>> namespaces = new LinkedHashMap<>();
         namespaces.put("namespace1", List.of(buildTestItem(1), buildTestItem(2)));
         when(issuerSigned.nameSpaces()).thenReturn(namespaces);
@@ -63,9 +61,8 @@ class IssuerSignedSerializerTest {
         inOrder.verify(cborGenerator).writeEndObject();
     }
 
-    @DisplayName("Should serialize IssuerSigned with multiple namespaces containing one item")
     @Test
-    void shouldSerializeIssuerSignedWithMultipleNamespaces() throws IOException {
+    void Should_SerializeIssuerSignedWithCBORGenerator_MultipleNameSpaces() throws IOException {
         Map<String, List<IssuerSignedItem<?>>> namespaces = new LinkedHashMap<>();
         namespaces.put("namespace1", List.of(buildTestItem(1)));
         namespaces.put("namespace2", List.of(buildTestItem(1)));
@@ -98,9 +95,8 @@ class IssuerSignedSerializerTest {
         inOrder.verify(cborGenerator).writeEndObject();
     }
 
-    @DisplayName("Should throw if serializer is used with a non-CBOR generator")
     @Test
-    void shouldThrowWhenSerializerUsesNonCborGenerator() {
+    void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
 
         IllegalArgumentException exception =

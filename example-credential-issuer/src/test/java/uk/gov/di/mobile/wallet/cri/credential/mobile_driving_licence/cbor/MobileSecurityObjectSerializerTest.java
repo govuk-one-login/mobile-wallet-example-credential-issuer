@@ -7,7 +7,6 @@ import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
@@ -46,10 +45,8 @@ class MobileSecurityObjectSerializerTest {
         cborObjectMapper.registerModule(module).registerModule(new JavaTimeModule());
     }
 
-    @DisplayName(
-            "Should serialize MobileSecurityObject with CBOR tag 24)and definite-length byte string")
     @Test
-    void shouldSerializeMobileSecurityObject() throws IOException {
+    void Should_SerializeMobileSecurityObjectWithCBORGenerator() throws IOException {
         MobileSecurityObject testObject = getTestMobileSecurityObject();
 
         byte[] result = cborObjectMapper.writeValueAsBytes(testObject);
@@ -70,9 +67,8 @@ class MobileSecurityObjectSerializerTest {
         assertTrue(isByteStringMajorType && isDefiniteLength);
     }
 
-    @DisplayName("Should throw if serializer is used with a non-CBOR generator")
     @Test
-    void shouldThrowWhenSerializerUsesNonCborGenerator() {
+    void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         // Create a JSON ObjectMapper (not CBOR) so the serializer sees a non-CBOR generator
         ObjectMapper jsonObjectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();

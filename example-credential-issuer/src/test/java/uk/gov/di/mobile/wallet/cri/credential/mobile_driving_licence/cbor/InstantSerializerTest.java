@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,8 +30,7 @@ class InstantSerializerTest {
     }
 
     @Test
-    @DisplayName("Should serialize Instant with CBOR tag 0 and truncate to seconds")
-    void shouldSerializeInstant() throws IOException {
+    void Should_SerializeInstantWithCBORGenerator() throws IOException {
         Instant testDate = Instant.parse("2025-06-27T12:42:52.123178Z");
         // Serializer truncates fractional seconds
         String expectedDateString = "2025-06-27T12:42:52Z";
@@ -49,9 +47,8 @@ class InstantSerializerTest {
         assertEquals(expectedDateString, parsedResult.asText());
     }
 
-    @DisplayName("Should throw if serializer is used with a non-CBOR generator")
     @Test
-    void shouldThrowWhenSerializerUsesNonCborGenerator() {
+    void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         // Create a JSON ObjectMapper (not CBOR) so the serializer sees a non-CBOR generator
         ObjectMapper jsonObjectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();

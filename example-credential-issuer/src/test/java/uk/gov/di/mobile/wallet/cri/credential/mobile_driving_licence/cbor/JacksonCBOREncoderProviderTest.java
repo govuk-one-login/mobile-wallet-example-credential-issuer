@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class JacksonCBOREncoderProviderTest {
 
     @Test
-    void shouldReturnConfiguredCborMapper() {
+    void Should_ReturnNonNullMapper_When_CBORMapperIsConfigured() {
         CBORMapper mapper = JacksonCBOREncoderProvider.configuredCBORMapper();
 
         assertNotNull(mapper, "Configured CBOR mapper should not be null");

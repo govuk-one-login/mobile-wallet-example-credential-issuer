@@ -36,7 +36,8 @@ class IssuerSignedItemSerializerTest {
     @Test
     void Should_SerializeIssuerSignedItemWithCBORGenerator() throws IOException {
         IssuerSignedItem<?> issuerSignedItem =
-                new IssuerSignedItem<>(1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
+                new IssuerSignedItem<>(
+                        1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
 
         byte[] result = cborObjectMapper.writeValueAsBytes(issuerSignedItem);
 
@@ -48,7 +49,8 @@ class IssuerSignedItemSerializerTest {
     @Test
     void Should_EncodeIssuerSignedItemStructureInsideEmbeddedCBOR() throws IOException {
         IssuerSignedItem<?> issuerSignedItem =
-                new IssuerSignedItem<>(1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
+                new IssuerSignedItem<>(
+                        1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
 
         byte[] outer = cborObjectMapper.writeValueAsBytes(issuerSignedItem);
 

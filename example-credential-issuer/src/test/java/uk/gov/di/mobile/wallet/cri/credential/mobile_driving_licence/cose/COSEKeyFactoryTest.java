@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import testUtils.EcKeyHelper;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
@@ -27,9 +26,8 @@ class COSEKeyFactoryTest {
         coseKeyFactory = new COSEKeyFactory();
     }
 
-    @DisplayName("Should convert a P-256 ECPublicKey to a COSEKey with 32-byte coordinates")
     @Test
-    void shouldConvertRealP256KeyToCOSEKey() throws Exception {
+    void Should_ConvertP256KeyToCOSEKey() throws Exception {
         byte[] expectedY = {
             -101, -83, 16, -38, 66, -12, 45, -72, 71, 74, 91, 92, 41, -118, -53, -93, 75, 53, -25,
             117, -24, -57, -7, -109, -26, -12, 84, -50, 12, 124, 50, 65
@@ -53,9 +51,8 @@ class COSEKeyFactoryTest {
                 () -> assertArrayEquals(expectedY, coseKey.y(), "y must match expected value"));
     }
 
-    @DisplayName("Should throw exception when EC public key is not P-256")
     @Test
-    void shouldThrowWhenNonP256Curve()
+    void Should_ThrowIllegalArgumentException_When_NonP256Curve()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
         kpg.initialize(new ECGenParameterSpec("secp384r1")); // P-384 curve

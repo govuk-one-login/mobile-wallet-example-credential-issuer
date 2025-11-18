@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,9 +30,8 @@ class LocalDateSerializerTest {
         cborObjectMapper.registerModule(module);
     }
 
-    @DisplayName("Should serialize LocalDate with CBOR tag 1004 as ISO-8601 date string")
     @Test
-    void shouldSerializeLocalDate() throws IOException {
+    void Should_SerializeInstantWithCBORGenerator() throws IOException {
         LocalDate testDate = LocalDate.of(2025, 4, 4);
         String expectedDateString = testDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
 
@@ -51,9 +49,8 @@ class LocalDateSerializerTest {
         assertEquals(expectedDateString, parsedResult.asText());
     }
 
-    @DisplayName("Should throw if serializer is used with a non-CBOR generator")
     @Test
-    void shouldThrowWhenSerializerUsesNonCborGenerator() {
+    void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         // Create a JSON ObjectMapper (not CBOR) so the serializer sees a non-CBOR generator
         ObjectMapper jsonObjectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
