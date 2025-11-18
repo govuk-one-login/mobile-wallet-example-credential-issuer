@@ -58,7 +58,7 @@ public class COSESigner {
 
         return new COSESign1Builder()
                 .protectedHeader(protectedHeaderEncoded)
-                .unprotectedHeader(unprotectedHeader.unprotectedHeader())
+                .unprotectedHeader(unprotectedHeader)
                 .payload(payload)
                 .signature(signature)
                 .build();

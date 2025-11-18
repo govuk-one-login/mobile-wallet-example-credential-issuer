@@ -1,5 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
-import java.util.Map;
+import lombok.Getter;
 
-public record COSEUnprotectedHeader(Map<Integer, Object> unprotectedHeader) {}
+@Getter
+public class COSEUnprotectedHeader {
+    private byte[] x5chain;
+
+    COSEUnprotectedHeader(COSEUnprotectedHeaderBuilder builder) {
+        this.x5chain = builder.x5chain;
+    }
+}
