@@ -1,0 +1,129 @@
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeader;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeaderBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
+
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class IssuerSignedSerializerTest {
+
+    @Mock private CBORGenerator cborGenerator;
+    @Mock private SerializerProvider serializerProvider;
+    @Mock private IssuerSigned issuerSigned;
+
+    @DisplayName("Should serialize IssuerSigned with a single namespace containing multiple items")
+    @Test
+    void shouldSerializeIssuerSignedWithSingleNamespace() throws IOException {
+        Map<String, List<IssuerSignedItem<?>>> namespaces = new LinkedHashMap<>();
+        namespaces.put("namespace1", List.of(buildTestItem(1), buildTestItem(2)));
+        when(issuerSigned.nameSpaces()).thenReturn(namespaces);
+        COSESign1 issuerAuth = buildTestIssuerAuth();
+        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
+
+        new IssuerSignedSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
+
+        InOrder inOrder = inOrder(cborGenerator);
+        inOrder.verify(cborGenerator).writeStartObject();
+        inOrder.verify(cborGenerator).writeFieldName("nameSpaces");
+        inOrder.verify(cborGenerator).writeStartObject();
+        inOrder.verify(cborGenerator).writeFieldName("namespace1");
+        inOrder.verify(cborGenerator).writeStartArray();
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace1").get(0));
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace1").get(1));
+        inOrder.verify(cborGenerator).writeEndArray();
+        inOrder.verify(cborGenerator).writeEndObject();
+        inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
+        inOrder.verify(cborGenerator).writeStartArray();
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.protectedHeader());
+        inOrder.verify(cborGenerator).writeObject(issuerAuth.unprotectedHeader());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.payload());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.signature());
+        inOrder.verify(cborGenerator).writeEndArray();
+        inOrder.verify(cborGenerator).writeEndObject();
+    }
+
+    @DisplayName("Should serialize IssuerSigned with multiple namespaces containing one item")
+    @Test
+    void shouldSerializeIssuerSignedWithMultipleNamespaces() throws IOException {
+        Map<String, List<IssuerSignedItem<?>>> namespaces = new LinkedHashMap<>();
+        namespaces.put("namespace1", List.of(buildTestItem(1)));
+        namespaces.put("namespace2", List.of(buildTestItem(1)));
+        when(issuerSigned.nameSpaces()).thenReturn(namespaces);
+        COSESign1 issuerAuth = buildTestIssuerAuth();
+        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
+
+        new IssuerSignedSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
+
+        InOrder inOrder = inOrder(cborGenerator);
+        inOrder.verify(cborGenerator).writeStartObject();
+        inOrder.verify(cborGenerator).writeFieldName("nameSpaces");
+        inOrder.verify(cborGenerator).writeStartObject();
+        inOrder.verify(cborGenerator).writeFieldName("namespace1");
+        inOrder.verify(cborGenerator).writeStartArray();
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace1").get(0));
+        inOrder.verify(cborGenerator).writeEndArray();
+        inOrder.verify(cborGenerator).writeFieldName("namespace2");
+        inOrder.verify(cborGenerator).writeStartArray();
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace2").get(0));
+        inOrder.verify(cborGenerator).writeEndArray();
+        inOrder.verify(cborGenerator).writeEndObject();
+        inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
+        inOrder.verify(cborGenerator).writeStartArray();
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.protectedHeader());
+        inOrder.verify(cborGenerator).writeObject(issuerAuth.unprotectedHeader());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.payload());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.signature());
+        inOrder.verify(cborGenerator).writeEndArray();
+        inOrder.verify(cborGenerator).writeEndObject();
+    }
+
+    @DisplayName("Should throw if serializer is used with a non-CBOR generator")
+    @Test
+    void shouldThrowWhenSerializerUsesNonCborGenerator() {
+        JsonGenerator invalidGenerator = mock(JsonGenerator.class);
+
+        IllegalArgumentException exception =
+                org.junit.jupiter.api.Assertions.assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            new IssuerSignedSerializer()
+                                    .serialize(issuerSigned, invalidGenerator, serializerProvider);
+                        });
+        assertEquals("Requires CBORGenerator", exception.getMessage());
+    }
+
+    private IssuerSignedItem<?> buildTestItem(int id) {
+        return new IssuerSignedItem<>(id, new byte[] {1, 2}, "elementId", "elementValue");
+    }
+
+    private COSESign1 buildTestIssuerAuth() {
+        byte[] protectedHeader = {1, 2, 3, 4};
+        byte[] x5chain = {5, 6, 7, 8};
+        byte[] payload = {9, 10, 11, 12};
+        byte[] signature = {13, 14, 15, 16};
+        COSEUnprotectedHeader unprotectedHeader =
+                new COSEUnprotectedHeaderBuilder().x5chain(x5chain).build();
+        return new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
+    }
+}
