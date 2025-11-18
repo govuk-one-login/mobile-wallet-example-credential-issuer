@@ -10,11 +10,28 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * CBOR serializer for {@link ValueDigests}.
+ *
+ * <p>Encodes a map of namespaces to element digests using definite-length CBOR maps:
+ *
+ * <ul>
+ *   <li>Outer: namespaces → definite-length map where keys are namespace strings.
+ *   <li>Inner: for each namespace, a definite-length map of element identifiers to digest bytes.
+ *       Element identifiers are encoded as CBOR integer keys using {@code writeFieldId(...)}.
+ * </ul>
+ */
 public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
     public ValueDigestsSerializer() {
         super(ValueDigests.class);
     }
 
+    /**
+     * Serializes {@link ValueDigests} as nested, definite-length CBOR maps with integer keys for
+     * element identifiers.
+     *
+     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     */
     @Override
     public void serialize(
             ValueDigests value, JsonGenerator generator, SerializerProvider serializer)
