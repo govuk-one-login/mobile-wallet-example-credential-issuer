@@ -56,7 +56,7 @@ public class DrivingPrivilegeSerializer extends StdSerializer<DrivingPrivilege> 
         if (codes.isPresent() && !codes.get().isEmpty()) {
             List<Code> list = codes.get();
             cborGenerator.writeFieldName("codes");
-            cborGenerator.writeStartArray(list.size());
+            cborGenerator.writeStartArray(list, list.size());
             for (Code code : list) {
                 cborGenerator.writeStartObject(1);
                 cborGenerator.writeFieldName("code");
