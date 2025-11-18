@@ -2,9 +2,11 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
@@ -53,12 +55,24 @@ public class NamespacesFactory {
                 Object fieldValue;
                 try {
                     fieldValue = field.get(document);
-                    if (fieldValue instanceof Optional<?> optional) {
-                        if (optional.isEmpty()) {
-                            continue;
-                        }
-                        fieldValue = optional.get();
+                    if (fieldValue == Optional.empty()) {
+                        continue;
                     }
+
+                    if ("driving_privileges".equals(fieldNameAsSnakeCase)) {
+                        fieldValue =
+                                convertDrivingPrivilegesToSnakeCase(
+                                        (List<DrivingPrivilege>) fieldValue);
+                    }
+
+                    if ("provisional_driving_privileges".equals(fieldNameAsSnakeCase)) {
+                        Optional<List<DrivingPrivilege>> optionalPrivileges =
+                                (Optional<List<DrivingPrivilege>>) fieldValue;
+                        if (optionalPrivileges.isPresent()) {
+                            fieldValue = convertDrivingPrivilegesToSnakeCase(optionalPrivileges);
+                        }
+                    }
+
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
                             String.format(
@@ -87,5 +101,55 @@ public class NamespacesFactory {
                 .collect(
                         Collectors.groupingBy(
                                 field -> field.getAnnotation(Namespace.class).value()));
+    }
+
+    /**
+     * Converts a List or Optional List of DrivingPrivilege objects to a List of Maps with
+     * snake_case keys.
+     *
+     * @param optionalDrivingPrivileges Optional wrapping List of DrivingPrivilege objects
+     * @return List of Maps with snake_case keys representing each DrivingPrivilege
+     * @throws IllegalAccessException if reflective access fails
+     */
+    public List<Map<String, Object>> convertDrivingPrivilegesToSnakeCase(
+            Optional<List<DrivingPrivilege>> optionalDrivingPrivileges)
+            throws IllegalAccessException {
+        return convertDrivingPrivilegesToSnakeCase(optionalDrivingPrivileges.get());
+    }
+
+    /**
+     * Converts a List of DrivingPrivilege objects to a List of Maps with snake_case keys.
+     *
+     * @param drivingPrivileges List of DrivingPrivilege objects
+     * @return List of Maps with snake_case keys representing each DrivingPrivilege
+     * @throws IllegalAccessException if reflective access fails
+     */
+    public List<Map<String, Object>> convertDrivingPrivilegesToSnakeCase(
+            List<DrivingPrivilege> drivingPrivileges) throws IllegalAccessException {
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (DrivingPrivilege privilege : drivingPrivileges) {
+            Map<String, Object> map = new LinkedHashMap<>();
+            for (Field field : privilege.getClass().getDeclaredFields()) {
+                if (shouldSkipField(field)) {
+                    continue;
+                }
+                field.setAccessible(true);
+                String snakeKey = camelToSnake(field.getName());
+                Object fieldValue = field.get(privilege);
+                if (fieldValue instanceof Optional<?> optionalValue) {
+                    if (optionalValue.isEmpty()) {
+                        continue;
+                    }
+                    fieldValue = optionalValue.get();
+                }
+                map.put(snakeKey, fieldValue);
+            }
+            result.add(map);
+        }
+        return result;
+    }
+
+    private boolean shouldSkipField(Field field) {
+        return Modifier.isStatic(field.getModifiers()) || field.isSynthetic();
     }
 }
