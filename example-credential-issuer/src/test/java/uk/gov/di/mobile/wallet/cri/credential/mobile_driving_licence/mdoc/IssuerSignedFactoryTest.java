@@ -41,8 +41,8 @@ class IssuerSignedFactoryTest {
     @Mock private X509Certificate mockCertificate;
     @Mock private COSESign1 mockCoseSign1;
     @Mock private ECPublicKey mockEcPublicKey;
-    @Mock private IssuerSignedItem mockIssuerSignedItem1;
-    @Mock private IssuerSignedItem mockIssuerSignedItem2;
+    @Mock private IssuerSignedItem<?> mockIssuerSignedItem1;
+    @Mock private IssuerSignedItem<?> mockIssuerSignedItem2;
 
     private IssuerSignedFactory issuerSignedFactory;
 
@@ -71,10 +71,10 @@ class IssuerSignedFactoryTest {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
 
-        Map<String, List<IssuerSignedItem>> namespacesMap = new LinkedHashMap<>();
+        Map<String, List<IssuerSignedItem<?>>> namespacesMap = new LinkedHashMap<>();
         namespacesMap.put(
                 "namespace1", Arrays.asList(mockIssuerSignedItem1, mockIssuerSignedItem2));
-        namespacesMap.put("namespace2", Arrays.asList(mockIssuerSignedItem1));
+        namespacesMap.put("namespace2", List.of(mockIssuerSignedItem1));
 
         when(mockNamespaces.namespaces()).thenReturn(namespacesMap);
         when(mockMobileSecurityObjectFactory.build(
