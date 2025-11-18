@@ -10,11 +10,30 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * CBOR serializer for {@link DeviceKeyInfo}.
+ *
+ * <p>Encodes the device key information as a definite-length CBOR map with two entries:
+ *
+ * <ul>
+ *   <li>deviceKey → COSE_Key map with integer labels (1=kty, -1=crv, -2=x, -3=y), all written with
+ *       definite length
+ *   <li>keyAuthorizations → map with a single field "nameSpaces" containing a definite-length array
+ *       of strings
+ * </ul>
+ *
+ * <p>Integer labels for COSE_Key follow RFC 8152 §13.1.
+ */
 public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
     public DeviceKeyInfoSerializer() {
         super(DeviceKeyInfo.class);
     }
 
+    /**
+     * Serializes {@link DeviceKeyInfo} using definite-length maps and arrays.
+     *
+     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     */
     @Override
     public void serialize(
             final DeviceKeyInfo value,
