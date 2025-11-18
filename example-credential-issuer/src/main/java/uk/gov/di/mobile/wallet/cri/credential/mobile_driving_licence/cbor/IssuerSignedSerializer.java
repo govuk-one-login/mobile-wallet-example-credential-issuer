@@ -64,7 +64,7 @@ public class IssuerSignedSerializer extends StdSerializer<IssuerSigned> {
             cborGenerator.writeFieldName(entry.getKey());
             cborGenerator.writeStartArray();
 
-            for (IssuerSignedItem issuerSignedItem : entry.getValue()) {
+            for (IssuerSignedItem<?> issuerSignedItem : entry.getValue()) {
                 cborGenerator.writeObject(issuerSignedItem);
             }
             cborGenerator.writeEndArray();
