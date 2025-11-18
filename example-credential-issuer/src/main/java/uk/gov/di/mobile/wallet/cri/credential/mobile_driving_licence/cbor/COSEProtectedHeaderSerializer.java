@@ -8,11 +8,29 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEPr
 
 import java.io.IOException;
 
+/**
+ * CBOR serializer for {@link COSEProtectedHeader}.
+ *
+ * <p>Produces a definite-length CBOR map with integer labels as required by COSE (RFC 9052):
+ *
+ * <ul>
+ *   <li>Map length: 1
+ *   <li>Key 1 (alg) → algorithm identifier (e.g., -7 for ES256)
+ * </ul>
+ *
+ * <p>This serializer is used to create the protected header bytes that are embedded into COSE_Sign1
+ * as a bstr and also used when building the Sig_structure to be signed.
+ */
 public class COSEProtectedHeaderSerializer extends StdSerializer<COSEProtectedHeader> {
     public COSEProtectedHeaderSerializer() {
         super(COSEProtectedHeader.class);
     }
 
+    /**
+     * Serializes the protected header as a definite-length CBOR map with label {@code 1 → alg}.
+     *
+     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     */
     @Override
     public void serialize(
             final COSEProtectedHeader value,
