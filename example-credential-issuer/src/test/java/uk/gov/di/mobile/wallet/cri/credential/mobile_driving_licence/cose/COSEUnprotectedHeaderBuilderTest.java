@@ -23,7 +23,7 @@ class COSEUnprotectedHeaderBuilderTest {
         COSEUnprotectedHeader header = builder.x5chain(x5chain).build();
 
         assertNotNull(header);
-        assertEquals(x5chain, header.unprotectedHeader().get(33));
+        assertEquals(x5chain, header.getX5chain());
     }
 
     @Test
