@@ -20,7 +20,7 @@ import java.util.Map;
  * <ul>
  *   <li><b>nameSpaces</b> → a map of namespace → array of IssuerSignedItem; each item is encoded as
  *       embedded CBOR using tag 24 followed by a byte string via the registered {@link
- *       IssuerSignedItemSerializer}.
+ *       IssuerSignedItemCBORSerializer}.
  *   <li><b>issuerAuth</b> → COSE_Sign1 structure represented as an array of 4 elements in order:
  *       <ol>
  *         <li>protected header (CBOR-encoded map as bstr)
@@ -30,9 +30,9 @@ import java.util.Map;
  *       </ol>
  * </ul>
  */
-public class IssuerSignedSerializer extends StdSerializer<IssuerSigned> {
+public class IssuerSignedCBORSerializer extends StdSerializer<IssuerSigned> {
 
-    public IssuerSignedSerializer() {
+    public IssuerSignedCBORSerializer() {
         super(IssuerSigned.class);
     }
 

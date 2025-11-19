@@ -18,8 +18,8 @@ import java.io.IOException;
  * 24. Tag 24 indicates that the following byte string contains a fully encoded embedded CBOR data
  * item.
  */
-public class IssuerSignedItemSerializer extends StdSerializer<IssuerSignedItem<?>> {
-    public IssuerSignedItemSerializer() {
+public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedItem<?>> {
+    public IssuerSignedItemCBORSerializer() {
         super((Class<IssuerSignedItem<?>>) (Class<?>) IssuerSignedItem.class);
     }
 
