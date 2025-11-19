@@ -25,7 +25,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class IssuerSignedSerializerTest {
+class IssuerSignedCBORSerializerTest {
 
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
