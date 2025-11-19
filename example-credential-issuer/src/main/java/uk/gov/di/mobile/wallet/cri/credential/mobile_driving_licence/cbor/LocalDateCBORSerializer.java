@@ -18,8 +18,8 @@ import java.time.format.DateTimeFormatter;
  * <p>Tag 1004 indicates that the tagged string represents a calendar date (YYYY-MM-DD) without time
  * or timezone information.
  */
-public class LocalDateSerializer extends StdSerializer<LocalDate> {
-    public LocalDateSerializer() {
+public class LocalDateCBORSerializer extends StdSerializer<LocalDate> {
+    public LocalDateCBORSerializer() {
         super(LocalDate.class);
     }
 

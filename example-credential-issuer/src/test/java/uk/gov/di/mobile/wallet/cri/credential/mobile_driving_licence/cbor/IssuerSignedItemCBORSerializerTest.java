@@ -21,14 +21,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class IssuerSignedItemSerializerTest {
 
     private ObjectMapper cborObjectMapper;
-    private IssuerSignedItemSerializer serializer;
+    private IssuerSignedItemCBORSerializer serializer;
 
     @BeforeEach
     void setUp() {
         CBORFactory cborFactory = new CBORFactory();
         cborObjectMapper = new ObjectMapper(cborFactory);
         SimpleModule module = new SimpleModule();
-        serializer = new IssuerSignedItemSerializer();
+        serializer = new IssuerSignedItemCBORSerializer();
         module.addSerializer((Class) IssuerSignedItem.class, serializer);
         cborObjectMapper.registerModule(module);
     }

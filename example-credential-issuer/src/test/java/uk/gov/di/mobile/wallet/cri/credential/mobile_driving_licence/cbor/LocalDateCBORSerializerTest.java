@@ -18,14 +18,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class LocalDateSerializerTest {
 
     private ObjectMapper cborObjectMapper;
-    private LocalDateSerializer serializer;
+    private LocalDateCBORSerializer serializer;
 
     @BeforeEach
     void setUp() {
         CBORFactory cborFactory = new CBORFactory();
         cborObjectMapper = new ObjectMapper(cborFactory);
         SimpleModule module = new SimpleModule();
-        serializer = new LocalDateSerializer();
+        serializer = new LocalDateCBORSerializer();
         module.addSerializer(LocalDate.class, serializer);
         cborObjectMapper.registerModule(module);
     }

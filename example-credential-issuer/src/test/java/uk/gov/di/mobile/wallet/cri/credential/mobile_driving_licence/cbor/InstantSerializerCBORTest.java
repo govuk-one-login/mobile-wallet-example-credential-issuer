@@ -17,14 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class InstantSerializerTest {
 
     private ObjectMapper cborObjectMapper;
-    private InstantSerializer serializer;
+    private InstantCBORSerializer serializer;
 
     @BeforeEach
     void setUp() {
         CBORFactory cborFactory = new CBORFactory();
         cborObjectMapper = new ObjectMapper(cborFactory);
         SimpleModule module = new SimpleModule();
-        serializer = new InstantSerializer();
+        serializer = new InstantCBORSerializer();
         module.addSerializer(Instant.class, serializer);
         cborObjectMapper.registerModule(module);
     }

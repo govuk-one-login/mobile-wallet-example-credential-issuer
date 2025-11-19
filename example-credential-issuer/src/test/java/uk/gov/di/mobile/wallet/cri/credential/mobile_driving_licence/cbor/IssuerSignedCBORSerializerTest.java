@@ -39,7 +39,7 @@ class IssuerSignedSerializerTest {
         COSESign1 issuerAuth = buildTestIssuerAuth();
         when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
 
-        new IssuerSignedSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
+        new IssuerSignedCBORSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject();
@@ -70,7 +70,7 @@ class IssuerSignedSerializerTest {
         COSESign1 issuerAuth = buildTestIssuerAuth();
         when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
 
-        new IssuerSignedSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
+        new IssuerSignedCBORSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject();
@@ -103,7 +103,7 @@ class IssuerSignedSerializerTest {
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
                         () -> {
-                            new IssuerSignedSerializer()
+                            new IssuerSignedCBORSerializer()
                                     .serialize(issuerSigned, invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
