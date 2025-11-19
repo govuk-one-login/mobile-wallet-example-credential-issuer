@@ -91,7 +91,7 @@
       "credential_validity_period_max_days": 30,
       "credential_refresh_web_journey_url": "https://example-credential-issuer.mobile.build.account.gov.uk/refresh/org.iso.18013.5.1.mDL"
     },
-    "uk.gov.account.mobile.example-cri.fishinglicence_mdoc": {
+    "uk.gov.account.mobile.example-cri.fishinglicence.1": {
       "format": "mso_mdoc",
       "doctype": "uk.gov.account.mobile.example-cri.fishinglicence.1",
       "cryptographic_binding_methods_supported": [
@@ -101,7 +101,7 @@
         "ES256"
       ],
       "credential_validity_period_max_days": 30,
-      "credential_refresh_web_journey_url": "https://example-credential-issuer.mobile.staging.account.gov.uk/refresh/<TBC>",
+      "credential_refresh_web_journey_url": "https://example-credential-issuer.mobile.staging.account.gov.uk/refresh/uk.gov.account.mobile.example-cri.fishinglicence.1",
       "credential_metadata": {
         "display": [
           {
@@ -246,18 +246,10 @@
   "display": [
     {
       "locale": "en",
-      "logo": {
-        "alt_text": "GOV.UK Wallet Example Credential Issuer Logo",
-        "uri": "https://logo.com/en-logo.png"
-      },
       "name": "GOV.UK Wallet Example Credential Issuer"
     },
     {
       "locale": "cy",
-      "logo": {
-        "alt_text": "WELSH_ALT_TEXT_FOR_LOGO",
-        "uri": "https://logo.com/cy-logo.png"
-      },
       "name": "ISSUER_NAME_WELSH"
     }
   ]
