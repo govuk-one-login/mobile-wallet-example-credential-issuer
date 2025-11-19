@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,7 +24,8 @@ class DrivingPrivilegeTest {
     private static final String VEHICLE_CATEGORY_CODE = "B";
     private static final String ISSUE_DATE = "02-01-2025";
     private static final String EXPIRY_DATE = "01-01-2035";
-    private static final List<Code> CODES = List.of(new Code("01"), new Code("22(7)"));
+    private static final List<Map<String, String>> CODES =
+            List.of(Map.of("code", "01"), Map.of("code", "22(7)"));
     private static final LocalDate EXPECTED_ISSUE_DATE = LocalDate.of(2025, 1, 2);
     private static final LocalDate EXPECTED_EXPIRY_DATE = LocalDate.of(2035, 1, 1);
 
