@@ -19,8 +19,8 @@ import java.time.temporal.ChronoUnit;
  *
  * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}.
  */
-public class InstantSerializer extends StdSerializer<Instant> {
-    public InstantSerializer() {
+public class InstantCBORSerializer extends StdSerializer<Instant> {
+    public InstantCBORSerializer() {
         super(Instant.class);
     }
 
