@@ -3,8 +3,6 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
@@ -20,7 +18,6 @@ import java.util.Optional;
 @Setter
 @Getter
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class DrivingPrivilege {
 
     private String vehicleCategoryCode;
