@@ -14,53 +14,55 @@ import java.time.Instant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class InstantSerializerTest {
+class InstantSerializerCBORTest {
 
     private ObjectMapper cborObjectMapper;
-    private InstantCBORSerializer serializer;
 
     @BeforeEach
     void setUp() {
         CBORFactory cborFactory = new CBORFactory();
         cborObjectMapper = new ObjectMapper(cborFactory);
         SimpleModule module = new SimpleModule();
-        serializer = new InstantCBORSerializer();
-        module.addSerializer(Instant.class, serializer);
+        module.addSerializer(new InstantCBORSerializer());
         cborObjectMapper.registerModule(module);
     }
 
     @Test
-    void Should_SerializeInstantWithCBORGenerator() throws IOException {
-        Instant testDate = Instant.parse("2025-06-27T12:42:52.123178Z");
-        // Serializer truncates fractional seconds
+    void Should_SerializeInstant() throws IOException {
+        Instant valueToSerialize = Instant.parse("2025-06-27T12:42:52.123178Z");
+
+        byte[] cborBytes = cborObjectMapper.writeValueAsBytes(valueToSerialize);
+
+        // Tag 0 (0xC0) used for Instant
+        assertEquals((byte) 0xC0, cborBytes[0]);
+    }
+
+    @Test
+    void Should_SerializeInstant_ContentRoundtrip() throws IOException {
+        Instant valueToSerialize = Instant.parse("2025-06-27T12:42:52.123178Z");
         String expectedDateString = "2025-06-27T12:42:52Z";
 
-        byte[] result = cborObjectMapper.writeValueAsBytes(testDate);
+        byte[] cborBytes = cborObjectMapper.writeValueAsBytes(valueToSerialize);
 
-        // Verify CBOR tag 0 at the start of the byte array
-        // 0xC0 == CBOR tag 0 for date/time string
-        assertEquals((byte) 0xC0, result[0]);
-        // Parse the CBOR back to verify the textual content matches the expected truncation
         CBORFactory cborFactory = new CBORFactory();
         ObjectMapper parser = new ObjectMapper(cborFactory);
-        JsonNode parsedResult = parser.readTree(result);
+        JsonNode parsedResult = parser.readTree(cborBytes);
         assertEquals(expectedDateString, parsedResult.asText());
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         // Create a JSON ObjectMapper (not CBOR) so the serializer sees a non-CBOR generator
-        ObjectMapper jsonObjectMapper = new ObjectMapper();
+        ObjectMapper jsonMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
-        module.addSerializer(Instant.class, serializer);
-        jsonObjectMapper.registerModule(module);
-
-        Instant testDate = Instant.now();
+        module.addSerializer(new InstantCBORSerializer());
+        jsonMapper.registerModule(module);
+        Instant valueToSerialize = Instant.now();
 
         JsonMappingException exception =
                 assertThrows(
                         JsonMappingException.class,
-                        () -> jsonObjectMapper.writeValueAsBytes(testDate));
+                        () -> jsonMapper.writeValueAsBytes(valueToSerialize));
         assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
         assertEquals("Requires CBORGenerator", exception.getCause().getMessage());
     }
