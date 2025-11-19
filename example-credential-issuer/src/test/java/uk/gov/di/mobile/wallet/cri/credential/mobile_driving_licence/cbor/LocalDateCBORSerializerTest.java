@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -43,7 +42,7 @@ class LocalDateCBORSerializerTest {
     @Test
     void Should_SerializeLocalDate_ContentRoundtrip() throws IOException {
         LocalDate valueToSerialize = LocalDate.of(2025, 4, 4);
-        String expectedDateString = valueToSerialize.format(DateTimeFormatter.ISO_LOCAL_DATE);
+        String expectedDateString = "2025-04-04";
 
         byte[] result = cborObjectMapper.writeValueAsBytes(valueToSerialize);
 
