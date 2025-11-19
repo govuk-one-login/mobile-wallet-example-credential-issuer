@@ -26,8 +26,7 @@ class COSEUnprotectedHeaderSerializerTest {
         CBORFactory cborFactory = new CBORFactory();
         cborObjectMapper = new ObjectMapper(cborFactory);
         SimpleModule module = new SimpleModule();
-        COSEUnprotectedHeaderSerializer serializer = new COSEUnprotectedHeaderSerializer();
-        module.addSerializer(COSEUnprotectedHeader.class, serializer);
+        module.addSerializer(new COSEUnprotectedHeaderSerializer());
         cborObjectMapper.registerModule(module);
     }
 

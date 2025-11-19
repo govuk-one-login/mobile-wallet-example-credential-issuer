@@ -19,15 +19,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class StatusSerializerTest {
 
     private ObjectMapper cborObjectMapper;
-    private StatusSerializer serializer;
 
     @BeforeEach
     void setUp() {
         CBORFactory cborFactory = new CBORFactory();
         cborObjectMapper = new ObjectMapper(cborFactory);
         SimpleModule module = new SimpleModule();
-        serializer = new StatusSerializer();
-        module.addSerializer(Status.class, serializer);
+        module.addSerializer(new StatusSerializer());
         cborObjectMapper.registerModule(module);
     }
 
