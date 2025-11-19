@@ -17,11 +17,11 @@ public final class JacksonCBOREncoderProvider {
     public static CBORMapper configuredCBORMapper() {
         SimpleModule simpleModule =
                 new SimpleModule()
-                        .addSerializer(new LocalDateSerializer())
-                        .addSerializer(new InstantSerializer())
-                        .addSerializer(new IssuerSignedItemSerializer())
+                        .addSerializer(new LocalDateCBORSerializer())
+                        .addSerializer(new InstantCBORSerializer())
+                        .addSerializer(new IssuerSignedItemCBORSerializer())
                         .addSerializer(new MobileSecurityObjectSerializer())
-                        .addSerializer(new IssuerSignedSerializer())
+                        .addSerializer(new IssuerSignedCBORSerializer())
                         .addSerializer(new DrivingPrivilegeSerializer())
                         .addSerializer(new ValidityInfoSerializer())
                         .addSerializer(new StatusSerializer())
