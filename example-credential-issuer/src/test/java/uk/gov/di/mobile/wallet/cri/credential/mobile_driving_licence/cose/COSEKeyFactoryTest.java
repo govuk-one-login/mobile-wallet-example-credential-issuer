@@ -37,6 +37,14 @@ class COSEKeyFactoryTest {
     }
 
     @Test
+    void Should_ThrowIllegalArgumentException_When_KeyIsNull() {
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class, () -> coseKeyFactory.fromECPublicKey(null));
+        assertEquals("publicKey must not be null", exception.getMessage());
+    }
+
+    @Test
     void Should_ThrowIllegalArgumentException_When_NonP256Curve()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
