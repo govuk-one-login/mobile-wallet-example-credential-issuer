@@ -205,6 +205,34 @@ class DrivingLicenceDocumentTest {
                                 PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
+    @Test
+    void Should_ThrowIllegalArgumentException_When_DrivingPrivilegesIsEmpty() {
+        List<DrivingPrivilege> emptyDrivingPrivileges = List.of();
+        assertThrows(
+                IllegalArgumentException.class,
+                () ->
+                        new DrivingLicenceDocument(
+                                FAMILY_NAME,
+                                GIVEN_NAME,
+                                TITLE,
+                                WELSH_LICENSE,
+                                PORTRAIT,
+                                ISSUE_DATE,
+                                BIRTH_PLACE,
+                                ISSUE_DATE,
+                                EXPIRY_DATE,
+                                ISSUING_AUTHORITY,
+                                ISSUING_COUNTRY,
+                                DOCUMENT_NUMBER,
+                                RESIDENT_ADDRESS,
+                                RESIDENT_POSTAL_CODE,
+                                RESIDENT_CITY,
+                                emptyDrivingPrivileges,
+                                UN_DISTINGUISHING_SIGN,
+                                CREDENTIAL_TTL_MINUTES,
+                                PROVISIONAL_DRIVING_PRIVILEGES));
+    }
+
     @ParameterizedTest
     @ValueSource(strings = {"2020-01-01", "01/01/2020", "01.01.2020", "2020", "Jan 1, 2020", ""})
     void Should_ThrowDateTimeParseException_When_BirthDateFormatIsInvalid(String invalidDate) {
