@@ -64,12 +64,12 @@ class NamespacesFactoryTest {
     @Test
     void Should_BuildISOAndUKNamespaces() {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
-        IssuerSignedItem<?> issuerSignedItem = mock(IssuerSignedItem.class);
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        Map<String, List<IssuerSignedItem<?>>> namespaces = result.namespaces();
+        Map<String, List<IssuerSignedItem>> namespaces = result.namespaces();
         assertEquals(2, namespaces.size(), "Should have 2 nameSpaces (ISO and UK)");
         assertTrue(namespaces.containsKey(NamespaceTypes.ISO), "Should contain ISO namespace");
         assertTrue(namespaces.containsKey(NamespaceTypes.GB), "Should contain UK namespace");
@@ -89,12 +89,12 @@ class NamespacesFactoryTest {
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
             throws MDLException {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
-        IssuerSignedItem<?> issuerSignedItem = mock(IssuerSignedItem.class);
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem<?>> isoNamespace = result.namespaces().get(NamespaceTypes.ISO);
+        List<IssuerSignedItem> isoNamespace = result.namespaces().get(NamespaceTypes.ISO);
         assertEquals(
                 18,
                 isoNamespace.size(),
@@ -129,12 +129,12 @@ class NamespacesFactoryTest {
             throws MDLException {
         DrivingLicenceDocument drivingLicenceDocument =
                 createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
-        IssuerSignedItem<?> issuerSignedItem = mock(IssuerSignedItem.class);
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem<?>> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
+        List<IssuerSignedItem> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
         assertEquals(
                 3,
                 ukNamespace.size(),
@@ -154,12 +154,12 @@ class NamespacesFactoryTest {
     void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_WhenItsValueIsNull()
             throws MDLException {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument(null);
-        IssuerSignedItem<?> issuerSignedItem = mock(IssuerSignedItem.class);
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem<?>> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
+        List<IssuerSignedItem> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
         assertEquals(
                 2,
                 ukNamespace.size(),

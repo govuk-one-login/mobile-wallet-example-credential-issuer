@@ -21,9 +21,9 @@ import java.util.Objects;
  * 24. Tag 24 indicates that the following byte string contains a fully encoded embedded CBOR data
  * item.
  */
-public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedItem<?>> {
+public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedItem> {
     public IssuerSignedItemCBORSerializer() {
-        super((Class<IssuerSignedItem<?>>) (Class<?>) IssuerSignedItem.class);
+        super(IssuerSignedItem.class);
     }
 
     /**
@@ -34,7 +34,7 @@ public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedIt
      */
     @Override
     public void serialize(
-            final IssuerSignedItem<?> issuerSignedItem,
+            final IssuerSignedItem issuerSignedItem,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {

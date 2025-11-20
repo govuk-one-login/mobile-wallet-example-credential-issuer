@@ -60,11 +60,11 @@ public class IssuerSignedCBORSerializer extends StdSerializer<IssuerSigned> {
 
         cborGenerator.writeFieldName("nameSpaces");
         cborGenerator.writeStartObject();
-        for (Map.Entry<String, List<IssuerSignedItem<?>>> entry : value.nameSpaces().entrySet()) {
+        for (Map.Entry<String, List<IssuerSignedItem>> entry : value.nameSpaces().entrySet()) {
             cborGenerator.writeFieldName(entry.getKey());
             cborGenerator.writeStartArray();
 
-            for (IssuerSignedItem<?> issuerSignedItem : entry.getValue()) {
+            for (IssuerSignedItem issuerSignedItem : entry.getValue()) {
                 cborGenerator.writeObject(issuerSignedItem);
             }
             cborGenerator.writeEndArray();

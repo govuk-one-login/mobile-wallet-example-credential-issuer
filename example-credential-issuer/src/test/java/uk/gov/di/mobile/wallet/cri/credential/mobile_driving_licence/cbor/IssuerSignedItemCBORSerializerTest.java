@@ -29,15 +29,14 @@ class IssuerSignedItemCBORSerializerTest {
         cborObjectMapper = new ObjectMapper(cborFactory);
         SimpleModule module = new SimpleModule();
         serializer = new IssuerSignedItemCBORSerializer();
-        module.addSerializer((Class) IssuerSignedItem.class, serializer);
+        module.addSerializer(IssuerSignedItem.class, serializer);
         cborObjectMapper.registerModule(module);
     }
 
     @Test
     void Should_SerializeIssuerSignedItemWithCBORGenerator() throws IOException {
-        IssuerSignedItem<?> issuerSignedItem =
-                new IssuerSignedItem<>(
-                        1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
+        IssuerSignedItem issuerSignedItem =
+                new IssuerSignedItem(1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
 
         byte[] result = cborObjectMapper.writeValueAsBytes(issuerSignedItem);
 
@@ -48,9 +47,8 @@ class IssuerSignedItemCBORSerializerTest {
 
     @Test
     void Should_EncodeIssuerSignedItemStructureInsideEmbeddedCBOR() throws IOException {
-        IssuerSignedItem<?> issuerSignedItem =
-                new IssuerSignedItem<>(
-                        1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
+        IssuerSignedItem issuerSignedItem =
+                new IssuerSignedItem(1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
 
         byte[] outer = cborObjectMapper.writeValueAsBytes(issuerSignedItem);
 
@@ -83,11 +81,11 @@ class IssuerSignedItemCBORSerializerTest {
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         ObjectMapper jsonObjectMapper = new ObjectMapper();
         SimpleModule module = new SimpleModule();
-        module.addSerializer((Class) IssuerSignedItem.class, serializer);
+        module.addSerializer(IssuerSignedItem.class, serializer);
         jsonObjectMapper.registerModule(module);
 
-        IssuerSignedItem<?> issuerSignedItem =
-                new IssuerSignedItem<>(1, new byte[] {0x01}, "test", "value");
+        IssuerSignedItem issuerSignedItem =
+                new IssuerSignedItem(1, new byte[] {0x01}, "test", "value");
 
         JsonMappingException exception =
                 assertThrows(

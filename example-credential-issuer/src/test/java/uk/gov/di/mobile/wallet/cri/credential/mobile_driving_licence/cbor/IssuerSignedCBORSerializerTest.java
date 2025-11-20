@@ -33,7 +33,7 @@ class IssuerSignedCBORSerializerTest {
 
     @Test
     void Should_SerializeIssuerSigned_SingleNameSpaceWithMultipleItems() throws IOException {
-        Map<String, List<IssuerSignedItem<?>>> namespaces = new LinkedHashMap<>();
+        Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         namespaces.put("namespace1", List.of(buildTestItem(1), buildTestItem(2)));
         when(issuerSigned.nameSpaces()).thenReturn(namespaces);
         COSESign1 issuerAuth = buildTestIssuerAuth();
@@ -63,7 +63,7 @@ class IssuerSignedCBORSerializerTest {
 
     @Test
     void Should_SerializeIssuerSignedWithCBORGenerator_MultipleNameSpaces() throws IOException {
-        Map<String, List<IssuerSignedItem<?>>> namespaces = new LinkedHashMap<>();
+        Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         namespaces.put("namespace1", List.of(buildTestItem(1)));
         namespaces.put("namespace2", List.of(buildTestItem(1)));
         when(issuerSigned.nameSpaces()).thenReturn(namespaces);
@@ -109,8 +109,8 @@ class IssuerSignedCBORSerializerTest {
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 
-    private IssuerSignedItem<?> buildTestItem(int id) {
-        return new IssuerSignedItem<>(id, new byte[] {1, 2}, "elementId", "elementValue");
+    private IssuerSignedItem buildTestItem(int id) {
+        return new IssuerSignedItem(id, new byte[] {1, 2}, "elementId", "elementValue");
     }
 
     private COSESign1 buildTestIssuerAuth() {
