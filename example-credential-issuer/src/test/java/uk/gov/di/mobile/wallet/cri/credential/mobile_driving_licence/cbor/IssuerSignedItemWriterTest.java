@@ -14,7 +14,7 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-class IssuerSignedItemInnerWriterTest {
+class IssuerSignedItemWriterTest {
 
     @Mock private CBORGenerator cborGenerator;
 
@@ -28,7 +28,7 @@ class IssuerSignedItemInnerWriterTest {
         IssuerSignedItem valueToWrite =
                 new IssuerSignedItem(digestId, random, elementIdentifier, elementValue);
 
-        IssuerSignedItemInnerWriter.write(cborGenerator, valueToWrite);
+        IssuerSignedItemWriter.write(cborGenerator, valueToWrite);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(4);

@@ -5,7 +5,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 
 import java.io.IOException;
 
-class IssuerSignedItemInnerWriter {
+class IssuerSignedItemWriter {
 
     static void write(final CBORGenerator generator, final IssuerSignedItem item)
             throws IOException {
