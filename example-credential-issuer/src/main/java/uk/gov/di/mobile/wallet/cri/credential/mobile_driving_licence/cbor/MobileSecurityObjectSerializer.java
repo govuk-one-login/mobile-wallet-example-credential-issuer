@@ -27,24 +27,9 @@ public class MobileSecurityObjectSerializer extends StdSerializer<MobileSecurity
 
         CBORFactory factory = new CBORFactory();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         try (CBORGenerator innerGenerator = factory.createGenerator(baos)) {
             innerGenerator.setCodec(generator.getCodec());
-
-            innerGenerator.writeStartObject(7);
-            innerGenerator.writeStringField("version", value.version());
-            innerGenerator.writeStringField("digestAlgorithm", value.digestAlgorithm());
-            innerGenerator.writeFieldName("valueDigests");
-            innerGenerator.writeObject(value.valueDigests());
-            innerGenerator.writeFieldName("deviceKeyInfo");
-            innerGenerator.writeObject(value.deviceKeyInfo());
-            innerGenerator.writeFieldName("docType");
-            innerGenerator.writeString(value.docType());
-            innerGenerator.writeFieldName("validityInfo");
-            innerGenerator.writeObject(value.validityInfo());
-            innerGenerator.writeFieldName("status");
-            innerGenerator.writeObject(value.status());
-            innerGenerator.writeEndObject();
+            MobileSecurityObjectWriter.write(innerGenerator, value);
         }
         cborGenerator.writeTag(24);
         cborGenerator.writeBinary(baos.toByteArray());
