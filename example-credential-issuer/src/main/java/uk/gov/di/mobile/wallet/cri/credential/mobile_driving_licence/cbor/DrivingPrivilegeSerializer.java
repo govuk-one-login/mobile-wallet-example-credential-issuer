@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-/** CBOR serializer for {@link DrivingPrivilege} that enforces definite-length maps and arrays. */
 public class DrivingPrivilegeSerializer extends StdSerializer<DrivingPrivilege> {
 
     public DrivingPrivilegeSerializer() {
@@ -21,8 +20,7 @@ public class DrivingPrivilegeSerializer extends StdSerializer<DrivingPrivilege> 
 
     /**
      * Serializes {@link DrivingPrivilege} as a definite-length CBOR map. Optional fields
-     * (issue_date, expiry_date, codes) are included only when present, and array lengths are
-     * pre-declared.
+     * (issue_date, expiry_date, codes) are included only when present.
      *
      * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
      */
