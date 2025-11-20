@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.Code;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
@@ -29,8 +30,7 @@ import static org.mockito.Mockito.verify;
 @ExtendWith(MockitoExtension.class)
 class NamespacesFactoryTest {
 
-    private static final List<Map<String, String>> CODES =
-            Collections.singletonList(Map.of("code", "01"));
+    private static final List<Code> CODES = Collections.singletonList(new Code("01"));
     private static final List<DrivingPrivilege> DRIVING_PRIVILEGES =
             List.of(
                     new DrivingPrivilege("A", "12-02-2020", "11-02-2030", CODES),
