@@ -1,78 +1,55 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEProtectedHeader;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEProtectedHeaderBuilder;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 class COSEProtectedHeaderSerializerTest {
 
-    private ObjectMapper cborObjectMapper;
-
-    @BeforeEach
-    void setUp() {
-        CBORFactory cborFactory = new CBORFactory();
-        cborObjectMapper = new ObjectMapper(cborFactory);
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(new COSEProtectedHeaderSerializer());
-        cborObjectMapper.registerModule(module);
-    }
+    @Mock private CBORGenerator cborGenerator;
+    @Mock private SerializerProvider serializerProvider;
 
     @Test
     void Should_SerializeCOSEProtectedHeader() throws IOException {
         COSEProtectedHeader valueToSerialize = new COSEProtectedHeaderBuilder().alg(-7).build();
 
-        byte[] cborBytes = cborObjectMapper.writeValueAsBytes(valueToSerialize);
+        new COSEProtectedHeaderSerializer()
+                .serialize(valueToSerialize, cborGenerator, serializerProvider);
 
-        // Definite-length, 1-entry map
-        assertEquals((byte) 0xA1, cborBytes[0]);
-        // Key 1 as CBOR integer → 0x01
-        assertEquals((byte) 0x01, cborBytes[1]);
-        // Value -7 as CBOR negative integer -> 0x26
-        assertEquals((byte) 0x26, cborBytes[2]);
-    }
-
-    @Test
-    void Should_SerializeCOSEProtectedHeader_ContentRoundtrip() throws IOException {
-        int signingAlgorithm = -7; // -7="ES256"
-        COSEProtectedHeader valueToSerialize =
-                new COSEProtectedHeaderBuilder().alg(signingAlgorithm).build();
-        int expectedAlgKey = 1; // 1="alg"
-
-        byte[] cborBytes = cborObjectMapper.writeValueAsBytes(valueToSerialize);
-
-        JsonNode node = cborObjectMapper.readTree(cborBytes);
-        assertTrue(node.isObject());
-        assertEquals(1, node.size());
-        assertTrue(node.has(String.valueOf(expectedAlgKey)));
-        assertEquals(signingAlgorithm, node.get(String.valueOf(expectedAlgKey)).asInt());
+        InOrder inOrder = inOrder(cborGenerator);
+        inOrder.verify(cborGenerator).writeStartObject(1);
+        inOrder.verify(cborGenerator).writeFieldId(1); // 1="alg"
+        inOrder.verify(cborGenerator).writeNumber(-7); // -7="ES256"
+        inOrder.verify(cborGenerator).writeEndObject();
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
-        // Create a JSON ObjectMapper (not CBOR) so the serializer sees a non-CBOR generator
-        ObjectMapper jsonMapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(new COSEProtectedHeaderSerializer());
-        jsonMapper.registerModule(module);
-        COSEProtectedHeader valueToSerialize = new COSEProtectedHeaderBuilder().alg(-7).build();
+        JsonGenerator invalidGenerator = mock(JsonGenerator.class);
+        COSEProtectedHeader valueToSerialize = mock(COSEProtectedHeader.class);
 
-        JsonMappingException exception =
-                assertThrows(
-                        JsonMappingException.class,
-                        () -> jsonMapper.writeValueAsBytes(valueToSerialize));
-        assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
-        assertEquals("Requires CBORGenerator", exception.getCause().getMessage());
+        IllegalArgumentException exception =
+                org.junit.jupiter.api.Assertions.assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            new COSEProtectedHeaderSerializer()
+                                    .serialize(
+                                            valueToSerialize, invalidGenerator, serializerProvider);
+                        });
+        assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

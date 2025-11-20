@@ -1,78 +1,59 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Status;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.StatusList;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
+@ExtendWith(MockitoExtension.class)
 class StatusSerializerTest {
 
-    private ObjectMapper cborObjectMapper;
-
-    @BeforeEach
-    void setUp() {
-        CBORFactory cborFactory = new CBORFactory();
-        cborObjectMapper = new ObjectMapper(cborFactory);
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(new StatusSerializer());
-        cborObjectMapper.registerModule(module);
-    }
+    @Mock private CBORGenerator cborGenerator;
+    @Mock private SerializerProvider serializerProvider;
 
     @Test
-    void Should_SerializeStatus_AsDefiniteLengthMap() throws IOException {
+    void Should_SerializeStatus() throws IOException {
         Status valueToSerialize = new Status(new StatusList(5, "https://test-status-list/123"));
 
-        byte[] cborBytes = cborObjectMapper.writeValueAsBytes(valueToSerialize);
+        new StatusSerializer().serialize(valueToSerialize, cborGenerator, serializerProvider);
 
-        // Definite-length, 1-entry outer map -> 0xA1
-        assertEquals((byte) 0xa1, cborBytes[0]);
-        int innerMapStart = 2 + 11;
-        // Definite-length, 2-entry inner map -> 0xA2
-        assertEquals((byte) 0xA2, cborBytes[innerMapStart]);
-    }
-
-    @Test
-    void Should_SerializeStatus_ContentRoundtrip_InSnakeCase() throws IOException {
-        int index = 5;
-        String uri = "https://test-status-list/123";
-        Status valueToSerialize = new Status(new StatusList(index, uri));
-        String expectedStatusListKey = "status_list";
-
-        byte[] cborBytes = cborObjectMapper.writeValueAsBytes(valueToSerialize);
-
-        ObjectMapper parser = new ObjectMapper(new CBORFactory());
-        JsonNode node = parser.readTree(cborBytes);
-        assertTrue(node.has(expectedStatusListKey));
-        JsonNode statusList = node.get(expectedStatusListKey);
-        assertEquals(index, statusList.get("idx").asInt());
-        assertEquals(uri, statusList.get("uri").asText());
+        InOrder inOrder = inOrder(cborGenerator);
+        inOrder.verify(cborGenerator).writeStartObject(1);
+        inOrder.verify(cborGenerator).writeFieldName("status_list");
+        inOrder.verify(cborGenerator).writeStartObject(2);
+        inOrder.verify(cborGenerator).writeFieldName("idx");
+        inOrder.verify(cborGenerator).writeNumber(5);
+        inOrder.verify(cborGenerator).writeFieldName("uri");
+        inOrder.verify(cborGenerator).writeString("https://test-status-list/123");
+        inOrder.verify(cborGenerator, times(2)).writeEndObject();
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
-        // Create a JSON ObjectMapper (not CBOR) so the serializer sees a non-CBOR generator
-        ObjectMapper jsonMapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(new StatusSerializer());
-        jsonMapper.registerModule(module);
-        Status valueToSerialize = new Status(new StatusList(1, "u"));
+        JsonGenerator invalidGenerator = mock(JsonGenerator.class);
+        Status valueToSerialize = new Status(new StatusList(5, "https://test-status-list/123"));
 
-        JsonMappingException exception =
-                assertThrows(
-                        JsonMappingException.class,
-                        () -> jsonMapper.writeValueAsBytes(valueToSerialize));
-        assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
-        assertEquals("Requires CBORGenerator", exception.getCause().getMessage());
+        IllegalArgumentException exception =
+                org.junit.jupiter.api.Assertions.assertThrows(
+                        IllegalArgumentException.class,
+                        () -> {
+                            new StatusSerializer()
+                                    .serialize(
+                                            valueToSerialize, invalidGenerator, serializerProvider);
+                        });
+        assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }
