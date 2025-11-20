@@ -4,26 +4,20 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEProtectedHeader;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeader;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceKeyInfo;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeaderBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Status;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValidityInfo;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.ValueDigests;
 
-import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class JacksonCBOREncoderProviderTest {
@@ -35,30 +29,39 @@ class JacksonCBOREncoderProviderTest {
         assertNotNull(mapper, "Configured CBOR mapper should not be null");
     }
 
-    @ParameterizedTest(name = "Should be able to serialize {0}")
-    @ValueSource(
-            classes = {
-                LocalDate.class,
-                Instant.class,
-                IssuerSignedItem.class,
-                MobileSecurityObject.class,
-                IssuerSigned.class,
-                DrivingPrivilege.class,
-                ValidityInfo.class,
-                Status.class,
-                DeviceKeyInfo.class,
-                ValueDigests.class,
-                COSEProtectedHeader.class,
-                COSEUnprotectedHeader.class,
-            })
-    void Should_BeAbleToSerialize_Types(Class<?> type) {
-        var mapper = JacksonCBOREncoderProvider.configuredCBORMapper();
-        assertTrue(mapper.canSerialize(type));
+    @Test
+    void Should_BeAbleToSerializeLocalDate() {
+        LocalDate testDate = LocalDate.of(2025, 4, 4);
+
+        assertDoesNotThrow(() -> mapper.writeValueAsBytes(testDate));
+    }
+
+    @Test
+    void Should_BeAbleToSerializeIssuerSigned() {
+        byte[] protectedHeaderBytes = {1, 2, 3, 4};
+        COSEUnprotectedHeader unprotectedHeader =
+                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {1, 2, 3, 4}).build();
+        byte[] payloadBytes = {1, 2, 3, 4};
+        byte[] signatureBytes = {1, 2, 3, 4};
+        COSESign1 coseSign1 =
+                new COSESign1(
+                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes);
+        Map<String, List<IssuerSignedItem>> nameSpaces =
+                Map.of(
+                        "namespace",
+                        List.of(
+                                new IssuerSignedItem(
+                                        1,
+                                        new byte[] {1, 2, 3, 4},
+                                        "test_element_identifier",
+                                        "Test Element Value")));
+        IssuerSigned valueToSerialize = new IssuerSigned(nameSpaces, coseSign1);
+
+        assertDoesNotThrow(() -> mapper.writeValueAsBytes(valueToSerialize));
     }
 
     @Test
     void Should_SetDefaultInclusion_ToNonAbsent() {
-        CBORMapper mapper = JacksonCBOREncoderProvider.configuredCBORMapper();
         var inclusion = mapper.getSerializationConfig().getDefaultPropertyInclusion();
 
         assertEquals(JsonInclude.Include.NON_ABSENT, inclusion.getValueInclusion());
