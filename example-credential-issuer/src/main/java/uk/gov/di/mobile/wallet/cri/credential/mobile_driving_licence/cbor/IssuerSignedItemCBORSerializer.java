@@ -9,9 +9,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Custom Jackson serializer for {@link IssuerSignedItem} to CBOR format.
@@ -34,7 +31,7 @@ public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedIt
      */
     @Override
     public void serialize(
-            final IssuerSignedItem issuerSignedItem,
+            final IssuerSignedItem value,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
@@ -42,69 +39,14 @@ public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedIt
             throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
-        // Encode the IssuerSignedItem into CBOR bytes using an inner generator to produce a
-        // complete CBOR data item that will be embedded (tag 24 + bstr)
         CBORFactory factory = new CBORFactory();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (CBORGenerator innerGenerator = factory.createGenerator(baos)) {
             innerGenerator.setCodec(generator.getCodec());
-
-            innerGenerator.writeStartObject(4);
-            innerGenerator.writeNumberField("digestID", issuerSignedItem.digestId());
-            innerGenerator.writeBinaryField("random", issuerSignedItem.random());
-            innerGenerator.writeStringField(
-                    "elementIdentifier", issuerSignedItem.elementIdentifier());
-            innerGenerator.writeFieldName("elementValue");
-            Object elementValue = issuerSignedItem.elementValue();
-            writeDefinite((CBORGenerator) innerGenerator, elementValue);
-            innerGenerator.writeEndObject();
+            IssuerSignedItemInnerWriter.write(innerGenerator, value);
         }
 
         cborGenerator.writeTag(24);
         cborGenerator.writeBinary(baos.toByteArray());
-    }
-
-    private void writeDefinite(final CBORGenerator cborGenerator, final Object value)
-            throws IOException {
-        if (value == null) {
-            cborGenerator.writeNull();
-            return;
-        }
-
-        if (value instanceof Map<?, ?> map) {
-            writeMapDefinite(cborGenerator, (Map<Object, Object>) map);
-            return;
-        }
-
-        if (value instanceof List<?> list) {
-            writeListDefinite(cborGenerator, list);
-            return;
-        }
-
-        cborGenerator.writeObject(value);
-    }
-
-    private void writeMapDefinite(final CBORGenerator cborGenerate, final Map<Object, Object> map)
-            throws IOException {
-        cborGenerate.writeStartObject(map.size());
-        for (Map.Entry<Object, Object> entry : map.entrySet()) {
-            var key = entry.getKey();
-            if (key instanceof Number num) {
-                cborGenerate.writeFieldId(num.longValue());
-            } else {
-                cborGenerate.writeFieldName(Objects.toString(key));
-            }
-            writeDefinite(cborGenerate, entry.getValue());
-        }
-        cborGenerate.writeEndObject();
-    }
-
-    private void writeListDefinite(final CBORGenerator cborGenerator, final List<?> list)
-            throws IOException {
-        cborGenerator.writeStartArray(list, list.size());
-        for (Object item : list) {
-            writeDefinite(cborGenerator, item);
-        }
-        cborGenerator.writeEndArray();
     }
 }
