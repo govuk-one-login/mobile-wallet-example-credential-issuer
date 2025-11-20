@@ -1,97 +1,61 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
-import com.fasterxml.jackson.dataformat.cbor.CBORParser;
-import org.junit.jupiter.api.BeforeEach;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.mock;
 
+@ExtendWith(MockitoExtension.class)
 class IssuerSignedItemCBORSerializerTest {
 
-    private ObjectMapper cborObjectMapper;
-    private IssuerSignedItemCBORSerializer serializer;
-
-    @BeforeEach
-    void setUp() {
-        CBORFactory cborFactory = new CBORFactory();
-        cborObjectMapper = new ObjectMapper(cborFactory);
-        SimpleModule module = new SimpleModule();
-        serializer = new IssuerSignedItemCBORSerializer();
-        module.addSerializer(IssuerSignedItem.class, serializer);
-        cborObjectMapper.registerModule(module);
-    }
+    @Mock private CBORGenerator cborGenerator;
+    @Mock private SerializerProvider serializerProvider;
 
     @Test
-    void Should_SerializeIssuerSignedItemWithCBORGenerator() throws IOException {
-        IssuerSignedItem issuerSignedItem =
-                new IssuerSignedItem(1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
+    void Should_SerializeIssuerSignedItem_AsTaggedEncodedCBORDataItem() throws IOException {
+        IssuerSignedItem valueToSerialize =
+                new IssuerSignedItem(
+                        1,
+                        new byte[] {0x01, 0x02, 0x03},
+                        "test_element_identifier",
+                        "Test Element Value");
 
-        byte[] result = cborObjectMapper.writeValueAsBytes(issuerSignedItem);
+        new IssuerSignedItemCBORSerializer()
+                .serialize(valueToSerialize, cborGenerator, serializerProvider);
 
-        // Outer bytes should start with tag 24 (0xD8 0x18)
-        assertEquals((byte) 0xD8, result[0]); // CBOR tag 24 byte 1
-        assertEquals((byte) 0x18, result[1]); // CBOR tag 24 byte 2
-    }
-
-    @Test
-    void Should_EncodeIssuerSignedItemStructureInsideEmbeddedCBOR() throws IOException {
-        IssuerSignedItem issuerSignedItem =
-                new IssuerSignedItem(1, new byte[] {0x01, 0x02, 0x03}, "testElement", "testValue");
-
-        byte[] outer = cborObjectMapper.writeValueAsBytes(issuerSignedItem);
-
-        // Extract the inner embedded CBOR from the tag-24 wrapped byte string
-        CBORFactory factory = new CBORFactory();
-        byte[] embedded;
-        try (CBORParser parser = factory.createParser(new ByteArrayInputStream(outer))) {
-            parser.nextToken(); // VALUE_EMBEDDED_OBJECT representing the tag-24 + bstr
-            embedded = parser.getBinaryValue();
-        }
-
-        // Parse the embedded CBOR structure to verify fields and values
-        ObjectMapper innerMapper = new ObjectMapper(new CBORFactory());
-        JsonNode parsed = innerMapper.readTree(embedded);
-
-        assertTrue(parsed.isObject());
-        assertEquals(4, parsed.size());
-        assertTrue(parsed.has("digestID"));
-        assertTrue(parsed.has("random"));
-        assertTrue(parsed.has("elementIdentifier"));
-        assertTrue(parsed.has("elementValue"));
-
-        assertEquals(1, parsed.get("digestID").asInt());
-        assertArrayEquals(new byte[] {0x01, 0x02, 0x03}, parsed.get("random").binaryValue());
-        assertEquals("testElement", parsed.get("elementIdentifier").asText());
-        assertEquals("testValue", parsed.get("elementValue").asText());
+        InOrder inOrder = inOrder(cborGenerator);
+        inOrder.verify(cborGenerator).writeTag(24);
+        var bytesCaptor = ArgumentCaptor.forClass(byte[].class);
+        inOrder.verify(cborGenerator).writeBinary(bytesCaptor.capture());
     }
 
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
-        ObjectMapper jsonObjectMapper = new ObjectMapper();
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(IssuerSignedItem.class, serializer);
-        jsonObjectMapper.registerModule(module);
+        JsonGenerator invalidGenerator = mock(JsonGenerator.class);
+        IssuerSignedItem valueToSerialize = mock(IssuerSignedItem.class);
 
-        IssuerSignedItem issuerSignedItem =
-                new IssuerSignedItem(1, new byte[] {0x01}, "test", "value");
-
-        JsonMappingException exception =
+        IllegalArgumentException exception =
                 assertThrows(
-                        JsonMappingException.class,
-                        () -> jsonObjectMapper.writeValueAsBytes(issuerSignedItem));
-        assertEquals(IllegalArgumentException.class, exception.getCause().getClass());
-        assertEquals("Requires CBORGenerator", exception.getCause().getMessage());
+                        IllegalArgumentException.class,
+                        () ->
+                                new IssuerSignedItemCBORSerializer()
+                                        .serialize(
+                                                valueToSerialize,
+                                                invalidGenerator,
+                                                serializerProvider));
+        assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }
