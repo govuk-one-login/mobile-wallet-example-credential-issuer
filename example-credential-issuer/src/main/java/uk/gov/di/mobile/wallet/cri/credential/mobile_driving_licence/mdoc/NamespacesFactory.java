@@ -39,7 +39,6 @@ public class NamespacesFactory {
      * @return Map from namespace names to lists of issuer-signed items.
      * @throws MDLException If reflection fails or encoding fails.
      */
-    @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
     public Namespaces build(DrivingLicenceDocument document) throws MDLException {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
@@ -62,7 +61,7 @@ public class NamespacesFactory {
                 } catch (IllegalAccessException exception) {
                     throw new MDLException(
                             String.format(
-                                    "Failed to access driving licence property %s to build IssuerSignedItem",
+                                    "Failed to access property %s to build IssuerSignedItem",
                                     fieldName),
                             exception);
                 }
