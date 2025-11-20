@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.mobile_driving_licence.DrivingPrivilegeSerializer;
 
 /** Provides a pre-configured {@link CBORMapper} instance with custom serializers. */
 public final class JacksonCBOREncoderProvider {

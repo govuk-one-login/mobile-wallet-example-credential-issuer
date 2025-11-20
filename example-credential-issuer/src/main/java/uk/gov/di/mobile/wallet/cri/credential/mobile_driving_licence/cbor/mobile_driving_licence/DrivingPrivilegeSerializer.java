@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
+package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.mobile_driving_licence;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
