@@ -22,24 +22,22 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class IssuerSignedCBORSerializerTest {
 
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
-    @Mock private IssuerSigned issuerSigned;
 
     @Test
     void Should_SerializeIssuerSigned_SingleNameSpaceWithMultipleItems() throws IOException {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         namespaces.put("namespace1", List.of(buildTestItem(1), buildTestItem(2)));
-        when(issuerSigned.nameSpaces()).thenReturn(namespaces);
         COSESign1 issuerAuth = buildTestIssuerAuth();
-        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
+        IssuerSigned valueToSerialize = new IssuerSigned(namespaces, issuerAuth);
 
-        new IssuerSignedCBORSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
+        new IssuerSignedCBORSerializer()
+                .serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject();
@@ -66,11 +64,11 @@ class IssuerSignedCBORSerializerTest {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         namespaces.put("namespace1", List.of(buildTestItem(1)));
         namespaces.put("namespace2", List.of(buildTestItem(1)));
-        when(issuerSigned.nameSpaces()).thenReturn(namespaces);
         COSESign1 issuerAuth = buildTestIssuerAuth();
-        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
+        IssuerSigned valueToSerialize = new IssuerSigned(namespaces, issuerAuth);
 
-        new IssuerSignedCBORSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
+        new IssuerSignedCBORSerializer()
+                .serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject();
@@ -98,13 +96,15 @@ class IssuerSignedCBORSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
+        IssuerSigned valueToSerialize = new IssuerSigned(mock(Map.class), mock(COSESign1.class));
 
         IllegalArgumentException exception =
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
                         () -> {
                             new IssuerSignedCBORSerializer()
-                                    .serialize(issuerSigned, invalidGenerator, serializerProvider);
+                                    .serialize(
+                                            valueToSerialize, invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
