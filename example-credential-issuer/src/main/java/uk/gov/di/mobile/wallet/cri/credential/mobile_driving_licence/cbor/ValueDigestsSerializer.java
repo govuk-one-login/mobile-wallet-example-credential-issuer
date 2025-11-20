@@ -27,8 +27,7 @@ public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
     }
 
     /**
-     * Serializes {@link ValueDigests} as nested, definite-length CBOR maps with integer keys for
-     * element identifiers.
+     * Serializes {@link ValueDigests} as nested, definite-length CBOR maps.
      *
      * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
      */
@@ -46,11 +45,6 @@ public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
         for (var namespace : namespaces.entrySet()) {
             cborGenerator.writeFieldName(namespace.getKey());
             Map<Integer, byte[]> elements = namespace.getValue();
-            if (elements == null) {
-                cborGenerator.writeStartObject(0);
-                cborGenerator.writeEndObject();
-                continue;
-            }
             var sortedElements = new TreeMap<>(elements);
             cborGenerator.writeStartObject(sortedElements.size());
             for (var element : sortedElements.entrySet()) {
