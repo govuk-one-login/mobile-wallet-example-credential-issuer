@@ -1,11 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
 
@@ -13,36 +14,18 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CBOREncoderTest {
 
-    private CBORMapper mockMapper;
-    private CBOREncoder cborEncoder;
-
-    @BeforeEach
-    void setUp() {
-        mockMapper = mock(CBORMapper.class);
-        cborEncoder = new CBOREncoder(mockMapper);
-    }
+    @Mock private CBORMapper mockMapper;
 
     @Test
-    void Should_ReturnEncodedBytes_When_EncodingDocument() throws IOException, MDLException {
-        IssuerSigned issuerSigned = mock(IssuerSigned.class);
+    void Should_ReturnEncodedBytes() throws IOException, MDLException {
+        IssuerSigned valueToEncode = mock(IssuerSigned.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
-        when(mockMapper.writeValueAsBytes(issuerSigned)).thenReturn(expectedEncodedBytes);
+        when(mockMapper.writeValueAsBytes(valueToEncode)).thenReturn(expectedEncodedBytes);
 
-        byte[] actualEncodedBytes = cborEncoder.encode(issuerSigned);
-
-        assertArrayEquals(expectedEncodedBytes, actualEncodedBytes);
-    }
-
-    @Test
-    void Should_ReturnEncodedBytes_When_EncodingIssuerSignedItem()
-            throws IOException, MDLException {
-        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        byte[] expectedEncodedBytes = {1, 2, 3, 4};
-        when(mockMapper.writeValueAsBytes(issuerSignedItem)).thenReturn(expectedEncodedBytes);
-
-        byte[] actualEncodedBytes = cborEncoder.encode(issuerSignedItem);
+        byte[] actualEncodedBytes = new CBOREncoder(mockMapper).encode(valueToEncode);
 
         assertArrayEquals(expectedEncodedBytes, actualEncodedBytes);
     }
