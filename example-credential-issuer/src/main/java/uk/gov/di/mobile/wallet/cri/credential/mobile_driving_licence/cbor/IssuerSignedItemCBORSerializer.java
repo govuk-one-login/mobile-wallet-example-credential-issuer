@@ -45,7 +45,6 @@ public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedIt
             innerGenerator.setCodec(generator.getCodec());
             IssuerSignedItemWriter.write(innerGenerator, value);
         }
-
         cborGenerator.writeTag(24);
         cborGenerator.writeBinary(baos.toByteArray());
     }

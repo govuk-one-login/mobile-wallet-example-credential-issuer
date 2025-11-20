@@ -11,14 +11,14 @@ class IssuerSignedItemWriter {
         throw new IllegalStateException("Instantiation is not valid for this class.");
     }
 
-    static void write(final CBORGenerator generator, final IssuerSignedItem item)
+    static void write(final CBORGenerator generator, final IssuerSignedItem value)
             throws IOException {
         generator.writeStartObject(4);
-        generator.writeNumberField("digestID", item.digestId());
-        generator.writeBinaryField("random", item.random());
-        generator.writeStringField("elementIdentifier", item.elementIdentifier());
+        generator.writeNumberField("digestID", value.digestId());
+        generator.writeBinaryField("random", value.random());
+        generator.writeStringField("elementIdentifier", value.elementIdentifier());
         generator.writeFieldName("elementValue");
-        generator.writeObject(item.elementValue());
+        generator.writeObject(value.elementValue());
         generator.writeEndObject();
     }
 }
