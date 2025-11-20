@@ -104,7 +104,6 @@ class DrivingPrivilegeSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        DrivingPrivilege valueToSerialize = mock(DrivingPrivilege.class);
 
         IllegalArgumentException exception =
                 org.junit.jupiter.api.Assertions.assertThrows(
@@ -112,7 +111,7 @@ class DrivingPrivilegeSerializerTest {
                         () -> {
                             new DrivingPrivilegeSerializer()
                                     .serialize(
-                                            valueToSerialize, invalidGenerator, serializerProvider);
+                                            mock(DrivingPrivilege.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

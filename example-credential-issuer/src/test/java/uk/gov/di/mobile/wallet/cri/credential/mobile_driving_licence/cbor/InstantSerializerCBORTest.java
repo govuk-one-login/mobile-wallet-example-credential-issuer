@@ -37,7 +37,6 @@ class InstantSerializerCBORTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        Instant valueToSerialize = Instant.now();
 
         IllegalArgumentException exception =
                 assertThrows(
@@ -45,7 +44,7 @@ class InstantSerializerCBORTest {
                         () ->
                                 new InstantCBORSerializer()
                                         .serialize(
-                                                valueToSerialize,
+                                               mock(Instant.class),
                                                 invalidGenerator,
                                                 serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());

@@ -46,7 +46,6 @@ class ValidityInfoSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        ValidityInfo valueToSerialize = mock(ValidityInfo.class);
 
         IllegalArgumentException exception =
                 org.junit.jupiter.api.Assertions.assertThrows(
@@ -54,7 +53,7 @@ class ValidityInfoSerializerTest {
                         () -> {
                             new ValidityInfoSerializer()
                                     .serialize(
-                                            valueToSerialize, invalidGenerator, serializerProvider);
+                                            mock(ValidityInfo.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

@@ -45,7 +45,6 @@ class IssuerSignedItemCBORSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        IssuerSignedItem valueToSerialize = mock(IssuerSignedItem.class);
 
         IllegalArgumentException exception =
                 assertThrows(
@@ -53,7 +52,7 @@ class IssuerSignedItemCBORSerializerTest {
                         () ->
                                 new IssuerSignedItemCBORSerializer()
                                         .serialize(
-                                                valueToSerialize,
+                                                mock(IssuerSignedItem.class),
                                                 invalidGenerator,
                                                 serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());

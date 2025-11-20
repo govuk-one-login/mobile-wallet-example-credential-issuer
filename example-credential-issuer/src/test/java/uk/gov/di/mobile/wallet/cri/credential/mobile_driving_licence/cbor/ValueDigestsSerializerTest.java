@@ -54,15 +54,13 @@ class ValueDigestsSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        ValueDigests value =
-                new ValueDigests(Map.of("org.iso.18013.5.1", Map.of(1, new byte[] {0x01})));
 
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
                                 new ValueDigestsSerializer()
-                                        .serialize(value, invalidGenerator, serializerProvider));
+                                        .serialize(mock(ValueDigests.class), invalidGenerator, serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

@@ -40,7 +40,6 @@ class COSEProtectedHeaderSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        COSEProtectedHeader valueToSerialize = mock(COSEProtectedHeader.class);
 
         IllegalArgumentException exception =
                 org.junit.jupiter.api.Assertions.assertThrows(
@@ -48,7 +47,7 @@ class COSEProtectedHeaderSerializerTest {
                         () -> {
                             new COSEProtectedHeaderSerializer()
                                     .serialize(
-                                            valueToSerialize, invalidGenerator, serializerProvider);
+                                            mock(COSEProtectedHeader.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

@@ -38,7 +38,6 @@ class LocalDateCBORSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        LocalDate valueToSerialize = LocalDate.now();
 
         IllegalArgumentException exception =
                 assertThrows(
@@ -46,7 +45,7 @@ class LocalDateCBORSerializerTest {
                         () ->
                                 new LocalDateCBORSerializer()
                                         .serialize(
-                                                valueToSerialize,
+                                                mock(LocalDate.class),
                                                 invalidGenerator,
                                                 serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());

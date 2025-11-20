@@ -68,17 +68,13 @@ class DeviceKeyInfoSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        DeviceKeyInfo value =
-                new DeviceKeyInfo(
-                        new COSEKey(2, 1, new byte[] {0x01}, new byte[] {0x02}),
-                        new KeyAuthorizations(Set.of("ns")));
 
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
                                 new DeviceKeyInfoSerializer()
-                                        .serialize(value, invalidGenerator, serializerProvider));
+                                        .serialize(mock(DeviceKeyInfo.class), invalidGenerator, serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

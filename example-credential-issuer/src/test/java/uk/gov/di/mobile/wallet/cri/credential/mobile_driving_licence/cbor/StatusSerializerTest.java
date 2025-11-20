@@ -44,7 +44,6 @@ class StatusSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        Status valueToSerialize = new Status(new StatusList(5, "https://test-status-list/123"));
 
         IllegalArgumentException exception =
                 org.junit.jupiter.api.Assertions.assertThrows(
@@ -52,7 +51,7 @@ class StatusSerializerTest {
                         () -> {
                             new StatusSerializer()
                                     .serialize(
-                                            valueToSerialize, invalidGenerator, serializerProvider);
+                                            mock(Status.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

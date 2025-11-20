@@ -96,7 +96,6 @@ class IssuerSignedCBORSerializerTest {
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
-        IssuerSigned valueToSerialize = new IssuerSigned(mock(Map.class), mock(COSESign1.class));
 
         IllegalArgumentException exception =
                 org.junit.jupiter.api.Assertions.assertThrows(
@@ -104,7 +103,7 @@ class IssuerSignedCBORSerializerTest {
                         () -> {
                             new IssuerSignedCBORSerializer()
                                     .serialize(
-                                            valueToSerialize, invalidGenerator, serializerProvider);
+                                            mock(IssuerSigned.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
