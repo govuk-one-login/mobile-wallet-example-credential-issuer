@@ -23,6 +23,7 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 class ValueDigestsSerializerTest {
 
+    private final ValueDigestsSerializer serializer = new ValueDigestsSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -36,7 +37,7 @@ class ValueDigestsSerializerTest {
         namespaces.put("org.iso.18013.5.1", elements);
         ValueDigests valueToSerialize = new ValueDigests(namespaces);
 
-        new ValueDigestsSerializer().serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(1);
@@ -59,8 +60,10 @@ class ValueDigestsSerializerTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new ValueDigestsSerializer()
-                                        .serialize(mock(ValueDigests.class), invalidGenerator, serializerProvider));
+                                serializer.serialize(
+                                        mock(ValueDigests.class),
+                                        invalidGenerator,
+                                        serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

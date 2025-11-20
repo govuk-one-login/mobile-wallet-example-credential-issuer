@@ -21,6 +21,7 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 class StatusSerializerTest {
 
+    private final StatusSerializer serializer = new StatusSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -28,7 +29,7 @@ class StatusSerializerTest {
     void Should_SerializeStatus() throws IOException {
         Status valueToSerialize = new Status(new StatusList(5, "https://test-status-list/123"));
 
-        new StatusSerializer().serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(1);
@@ -49,9 +50,8 @@ class StatusSerializerTest {
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
                         () -> {
-                            new StatusSerializer()
-                                    .serialize(
-                                            mock(Status.class), invalidGenerator, serializerProvider);
+                            serializer.serialize(
+                                    mock(Status.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

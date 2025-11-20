@@ -7,6 +7,10 @@ import java.io.IOException;
 
 class IssuerSignedItemWriter {
 
+    private IssuerSignedItemWriter() {
+        throw new IllegalStateException("Instantiation is not valid for this class.");
+    }
+
     static void write(final CBORGenerator generator, final IssuerSignedItem item)
             throws IOException {
         generator.writeStartObject(4);

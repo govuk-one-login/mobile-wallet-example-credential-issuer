@@ -26,6 +26,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class IssuerSignedCBORSerializerTest {
 
+    private final IssuerSignedCBORSerializer serializer = new IssuerSignedCBORSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -36,8 +37,7 @@ class IssuerSignedCBORSerializerTest {
         COSESign1 issuerAuth = buildTestIssuerAuth();
         IssuerSigned valueToSerialize = new IssuerSigned(namespaces, issuerAuth);
 
-        new IssuerSignedCBORSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject();
@@ -67,8 +67,7 @@ class IssuerSignedCBORSerializerTest {
         COSESign1 issuerAuth = buildTestIssuerAuth();
         IssuerSigned valueToSerialize = new IssuerSigned(namespaces, issuerAuth);
 
-        new IssuerSignedCBORSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject();
@@ -101,9 +100,8 @@ class IssuerSignedCBORSerializerTest {
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
                         () -> {
-                            new IssuerSignedCBORSerializer()
-                                    .serialize(
-                                            mock(IssuerSigned.class), invalidGenerator, serializerProvider);
+                            serializer.serialize(
+                                    mock(IssuerSigned.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class LocalDateCBORSerializerTest {
 
+    private final LocalDateCBORSerializer serializer = new LocalDateCBORSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -27,8 +28,7 @@ class LocalDateCBORSerializerTest {
     void Should_SerializeLocalDate() throws IOException {
         LocalDate valueToSerialize = LocalDate.of(2025, 4, 4);
 
-        new LocalDateCBORSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeTag(1004);
@@ -43,11 +43,10 @@ class LocalDateCBORSerializerTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new LocalDateCBORSerializer()
-                                        .serialize(
-                                                mock(LocalDate.class),
-                                                invalidGenerator,
-                                                serializerProvider));
+                                serializer.serialize(
+                                        mock(LocalDate.class),
+                                        invalidGenerator,
+                                        serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

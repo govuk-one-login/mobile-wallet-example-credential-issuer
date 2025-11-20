@@ -22,6 +22,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class DrivingPrivilegeSerializerTest {
 
+    private final DrivingPrivilegeSerializer serializer = new DrivingPrivilegeSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -29,8 +30,7 @@ class DrivingPrivilegeSerializerTest {
     void Should_SerializeDrivingPrivilege_OneProperty() throws IOException {
         DrivingPrivilege valueToSerialize = new DrivingPrivilege("B1", null, null, null);
 
-        new DrivingPrivilegeSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(1);
@@ -42,8 +42,7 @@ class DrivingPrivilegeSerializerTest {
     void Should_SerializeDrivingPrivilege_TwoProperties() throws IOException {
         DrivingPrivilege valueToSerialize = new DrivingPrivilege("B1", "01-01-2024", null, null);
 
-        new DrivingPrivilegeSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(2);
@@ -58,8 +57,7 @@ class DrivingPrivilegeSerializerTest {
         DrivingPrivilege valueToSerialize =
                 new DrivingPrivilege("B1", "01-01-2024", "31-12-2025", null);
 
-        new DrivingPrivilegeSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(3);
@@ -77,8 +75,7 @@ class DrivingPrivilegeSerializerTest {
                 new DrivingPrivilege(
                         "B1", "01-01-2024", "31-12-2025", List.of(new Code("A"), new Code("B")));
 
-        new DrivingPrivilegeSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(4);
@@ -109,9 +106,10 @@ class DrivingPrivilegeSerializerTest {
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
                         () -> {
-                            new DrivingPrivilegeSerializer()
-                                    .serialize(
-                                            mock(DrivingPrivilege.class), invalidGenerator, serializerProvider);
+                            serializer.serialize(
+                                    mock(DrivingPrivilege.class),
+                                    invalidGenerator,
+                                    serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

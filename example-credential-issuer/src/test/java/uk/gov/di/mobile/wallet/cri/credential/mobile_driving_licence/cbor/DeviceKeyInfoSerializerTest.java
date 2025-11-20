@@ -27,6 +27,7 @@ import static org.mockito.Mockito.times;
 @ExtendWith(MockitoExtension.class)
 class DeviceKeyInfoSerializerTest {
 
+    private final DeviceKeyInfoSerializer serializer = new DeviceKeyInfoSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -39,8 +40,7 @@ class DeviceKeyInfoSerializerTest {
         DeviceKeyInfo valueToSerialize =
                 new DeviceKeyInfo(coseKey, new KeyAuthorizations(namespaces));
 
-        new DeviceKeyInfoSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(2);
@@ -73,8 +73,10 @@ class DeviceKeyInfoSerializerTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new DeviceKeyInfoSerializer()
-                                        .serialize(mock(DeviceKeyInfo.class), invalidGenerator, serializerProvider));
+                                serializer.serialize(
+                                        mock(DeviceKeyInfo.class),
+                                        invalidGenerator,
+                                        serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

@@ -21,6 +21,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class IssuerSignedItemCBORSerializerTest {
 
+    private final IssuerSignedItemCBORSerializer serializer = new IssuerSignedItemCBORSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -33,8 +34,7 @@ class IssuerSignedItemCBORSerializerTest {
                         "test_element_identifier",
                         "Test Element Value");
 
-        new IssuerSignedItemCBORSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeTag(24);
@@ -50,11 +50,10 @@ class IssuerSignedItemCBORSerializerTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new IssuerSignedItemCBORSerializer()
-                                        .serialize(
-                                                mock(IssuerSignedItem.class),
-                                                invalidGenerator,
-                                                serializerProvider));
+                                serializer.serialize(
+                                        mock(IssuerSignedItem.class),
+                                        invalidGenerator,
+                                        serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

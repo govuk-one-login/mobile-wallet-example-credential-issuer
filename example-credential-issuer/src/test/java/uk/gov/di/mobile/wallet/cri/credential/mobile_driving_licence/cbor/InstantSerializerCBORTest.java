@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class InstantSerializerCBORTest {
 
+    private final InstantCBORSerializer serializer = new InstantCBORSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -27,7 +28,7 @@ class InstantSerializerCBORTest {
     void Should_SerializeInstant() throws IOException {
         Instant valueToSerialize = Instant.parse("2025-06-27T12:42:52.123178Z");
 
-        new InstantCBORSerializer().serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeTag(0);
@@ -42,11 +43,8 @@ class InstantSerializerCBORTest {
                 assertThrows(
                         IllegalArgumentException.class,
                         () ->
-                                new InstantCBORSerializer()
-                                        .serialize(
-                                               mock(Instant.class),
-                                                invalidGenerator,
-                                                serializerProvider));
+                                serializer.serialize(
+                                        mock(Instant.class), invalidGenerator, serializerProvider));
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

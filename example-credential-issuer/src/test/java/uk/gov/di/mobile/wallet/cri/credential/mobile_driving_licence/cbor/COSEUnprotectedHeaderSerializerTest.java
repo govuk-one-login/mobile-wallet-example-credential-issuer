@@ -20,6 +20,8 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class COSEUnprotectedHeaderSerializerTest {
 
+    private final COSEUnprotectedHeaderSerializer serializer =
+            new COSEUnprotectedHeaderSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -28,8 +30,7 @@ class COSEUnprotectedHeaderSerializerTest {
         COSEUnprotectedHeader valueToSerialize =
                 new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {1, 2, 3}).build();
 
-        new COSEUnprotectedHeaderSerializer()
-                .serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(1);
@@ -46,9 +47,10 @@ class COSEUnprotectedHeaderSerializerTest {
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
                         () -> {
-                            new COSEUnprotectedHeaderSerializer()
-                                    .serialize(
-                                            mock(COSEUnprotectedHeader.class), invalidGenerator, serializerProvider);
+                            serializer.serialize(
+                                    mock(COSEUnprotectedHeader.class),
+                                    invalidGenerator,
+                                    serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }

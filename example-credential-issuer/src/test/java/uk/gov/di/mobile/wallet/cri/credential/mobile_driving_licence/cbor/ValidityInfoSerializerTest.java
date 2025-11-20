@@ -20,6 +20,7 @@ import static org.mockito.Mockito.mock;
 @ExtendWith(MockitoExtension.class)
 class ValidityInfoSerializerTest {
 
+    private final ValidityInfoSerializer serializer = new ValidityInfoSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
@@ -30,7 +31,7 @@ class ValidityInfoSerializerTest {
         Instant validUntil = Instant.parse("2025-01-01T00:00:00Z");
         ValidityInfo valueToSerialize = new ValidityInfo(signed, validFrom, validUntil);
 
-        new ValidityInfoSerializer().serialize(valueToSerialize, cborGenerator, serializerProvider);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
         inOrder.verify(cborGenerator).writeStartObject(3);
@@ -51,9 +52,8 @@ class ValidityInfoSerializerTest {
                 org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
                         () -> {
-                            new ValidityInfoSerializer()
-                                    .serialize(
-                                            mock(ValidityInfo.class), invalidGenerator, serializerProvider);
+                            serializer.serialize(
+                                    mock(ValidityInfo.class), invalidGenerator, serializerProvider);
                         });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
