@@ -1,12 +1,14 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
 
 class IssuerSignedItemWriter {
 
+    @ExcludeFromGeneratedCoverageReport
     private IssuerSignedItemWriter() {
         throw new IllegalStateException("Instantiation is not valid for this class.");
     }
