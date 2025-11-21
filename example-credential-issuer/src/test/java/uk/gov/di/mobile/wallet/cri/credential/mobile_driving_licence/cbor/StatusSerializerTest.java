@@ -8,31 +8,38 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Status;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.StatusList;
 
 import java.io.IOException;
-import java.time.LocalDate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
-class LocalDateCBORSerializerTest {
+class StatusSerializerTest {
 
-    private final LocalDateCBORSerializer serializer = new LocalDateCBORSerializer();
+    private final StatusSerializer serializer = new StatusSerializer();
     @Mock private CBORGenerator cborGenerator;
     @Mock private SerializerProvider serializerProvider;
 
     @Test
-    void Should_SerializeLocalDate() throws IOException {
-        LocalDate valueToSerialize = LocalDate.of(2025, 4, 4);
+    void Should_SerializeStatus() throws IOException {
+        Status valueToSerialize = new Status(new StatusList(5, "https://test-status-list/123"));
 
         serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
-        inOrder.verify(cborGenerator).writeTag(1004);
-        inOrder.verify(cborGenerator).writeString("2025-04-04");
+        inOrder.verify(cborGenerator).writeStartObject(1);
+        inOrder.verify(cborGenerator).writeFieldName("status_list");
+        inOrder.verify(cborGenerator).writeStartObject(2);
+        inOrder.verify(cborGenerator).writeFieldName("idx");
+        inOrder.verify(cborGenerator).writeNumber(5);
+        inOrder.verify(cborGenerator).writeFieldName("uri");
+        inOrder.verify(cborGenerator).writeString("https://test-status-list/123");
+        inOrder.verify(cborGenerator, times(2)).writeEndObject();
     }
 
     @Test
@@ -40,13 +47,12 @@ class LocalDateCBORSerializerTest {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
 
         IllegalArgumentException exception =
-                assertThrows(
+                org.junit.jupiter.api.Assertions.assertThrows(
                         IllegalArgumentException.class,
-                        () ->
-                                serializer.serialize(
-                                        mock(LocalDate.class),
-                                        invalidGenerator,
-                                        serializerProvider));
+                        () -> {
+                            serializer.serialize(
+                                    mock(Status.class), invalidGenerator, serializerProvider);
+                        });
         assertEquals("Requires CBORGenerator", exception.getMessage());
     }
 }

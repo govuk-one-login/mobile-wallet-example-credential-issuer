@@ -1,11 +1,9 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,27 +25,36 @@ import java.util.Map;
 import java.util.Set;
 
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 @ExtendWith(MockitoExtension.class)
-class MobileSecurityObjectSerializerTest {
+class MobileSecurityObjectWriterTest {
 
-    private final MobileSecurityObjectSerializer serializer = new MobileSecurityObjectSerializer();
     @Mock private CBORGenerator cborGenerator;
-    @Mock private SerializerProvider serializerProvider;
 
     @Test
-    void Should_SerializeMobileSecurityObject_AsTaggedEncodedCBORDataItem() throws IOException {
-        when(cborGenerator.getCodec())
-                .thenReturn(JacksonCBOREncoderProvider.configuredCBORMapper());
-        MobileSecurityObject valueToSerialize = getTestMobileSecurityObject();
+    void Should_WriteMobileSecurityObject() throws IOException {
+        MobileSecurityObject valueToWrite = getTestMobileSecurityObject();
 
-        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
+        MobileSecurityObjectWriter.write(cborGenerator, valueToWrite);
 
         InOrder inOrder = inOrder(cborGenerator);
-        inOrder.verify(cborGenerator).writeTag(24);
-        var bytesCaptor = ArgumentCaptor.forClass(byte[].class);
-        inOrder.verify(cborGenerator).writeBinary(bytesCaptor.capture());
+        inOrder.verify(cborGenerator).writeStartObject(7);
+        inOrder.verify(cborGenerator).writeStringField("version", valueToWrite.version());
+        inOrder.verify(cborGenerator)
+                .writeStringField("digestAlgorithm", valueToWrite.digestAlgorithm());
+        inOrder.verify(cborGenerator).writeFieldName("valueDigests");
+        inOrder.verify(cborGenerator).writeObject(valueToWrite.valueDigests());
+        inOrder.verify(cborGenerator).writeFieldName("deviceKeyInfo");
+        inOrder.verify(cborGenerator).writeObject(valueToWrite.deviceKeyInfo());
+        inOrder.verify(cborGenerator).writeFieldName("docType");
+        inOrder.verify(cborGenerator).writeString(valueToWrite.docType());
+        inOrder.verify(cborGenerator).writeFieldName("validityInfo");
+        inOrder.verify(cborGenerator).writeObject(valueToWrite.validityInfo());
+        inOrder.verify(cborGenerator).writeFieldName("status");
+        inOrder.verify(cborGenerator).writeObject(valueToWrite.status());
+        inOrder.verify(cborGenerator).writeEndObject();
+        verifyNoMoreInteractions(cborGenerator);
     }
 
     private static @NotNull MobileSecurityObject getTestMobileSecurityObject() {

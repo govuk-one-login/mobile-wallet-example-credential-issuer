@@ -23,7 +23,7 @@ public class DrivingPrivilege {
     private String vehicleCategoryCode;
     private Optional<LocalDate> issueDate;
     private Optional<LocalDate> expiryDate;
-    private List<Code> codes;
+    private Optional<List<Code>> codes;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DrivingPrivilege.class);
 
@@ -37,7 +37,7 @@ public class DrivingPrivilege {
                 Objects.requireNonNull(vehicleCategoryCode, "vehicle_category_code is required");
         this.issueDate = Optional.ofNullable(parseDate(issueDate));
         this.expiryDate = Optional.ofNullable(parseDate(expiryDate));
-        this.codes = codes;
+        this.codes = Optional.ofNullable(codes);
     }
 
     private LocalDate parseDate(String dateString) {

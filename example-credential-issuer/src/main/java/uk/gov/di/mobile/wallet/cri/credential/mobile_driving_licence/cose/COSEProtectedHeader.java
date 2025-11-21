@@ -1,5 +1,12 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
-import java.util.Map;
+import lombok.Getter;
 
-public record COSEProtectedHeader(Map<Integer, Object> protectedHeader) {}
+@Getter
+public class COSEProtectedHeader {
+    private final int alg;
+
+    COSEProtectedHeader(COSEProtectedHeaderBuilder builder) {
+        this.alg = builder.alg;
+    }
+}

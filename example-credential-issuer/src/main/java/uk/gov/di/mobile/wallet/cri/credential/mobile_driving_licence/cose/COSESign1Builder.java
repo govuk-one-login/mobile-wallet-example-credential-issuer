@@ -1,10 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
-import java.util.Map;
-
 public class COSESign1Builder {
     private byte[] protectedHeader;
-    private Map<Integer, Object> unprotectedHeader;
+    private COSEUnprotectedHeader unprotectedHeader;
     private byte[] payload;
     private byte[] signature;
 
@@ -16,7 +14,7 @@ public class COSESign1Builder {
         return this;
     }
 
-    public COSESign1Builder unprotectedHeader(Map<Integer, Object> header) {
+    public COSESign1Builder unprotectedHeader(COSEUnprotectedHeader header) {
         if (header == null) {
             throw new IllegalArgumentException("unprotectedHeader cannot be null");
         }

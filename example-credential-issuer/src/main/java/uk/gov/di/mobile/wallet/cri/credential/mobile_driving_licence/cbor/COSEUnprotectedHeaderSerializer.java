@@ -4,30 +4,29 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeader;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 /**
- * CBOR serializer for {@link LocalDate}.
+ * CBOR serializer for {@link COSEUnprotectedHeader}.
  *
- * <p>Serializes a {@link LocalDate} object as a tagged CBOR text string.
+ * <p>Serializes a {@link COSEUnprotectedHeader} object as a definite-length CBOR map with one
+ * entry:
  *
  * <ul>
- *   <li>{@code Tag 1004}: indicates a full-date string as defined in RFC 8943
- *   <li>The string value is formatted as {@code "YYYY-MM-DD"} according to ISO-8601
+ *   <li>{@code 33}: byte string, certificate chain as DER-encoded bytes (per RFC 9360)
  * </ul>
  */
-public class LocalDateCBORSerializer extends StdSerializer<LocalDate> {
-    public LocalDateCBORSerializer() {
-        super(LocalDate.class);
+public class COSEUnprotectedHeaderSerializer extends StdSerializer<COSEUnprotectedHeader> {
+    public COSEUnprotectedHeaderSerializer() {
+        super(COSEUnprotectedHeader.class);
     }
 
     /**
-     * Serializes an {@link LocalDate} object as a CBOR text string tagged with {@code Tag 1004}.
+     * Serializes a {@link COSEUnprotectedHeader} object as a definite-length CBOR map.
      *
-     * @param value the {@link LocalDate} object to serialize
+     * @param value the {@link COSEUnprotectedHeader} object to serialize
      * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
      * @param serializer the {@link SerializerProvider} used to find other serializers
      * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
@@ -35,16 +34,18 @@ public class LocalDateCBORSerializer extends StdSerializer<LocalDate> {
      */
     @Override
     public void serialize(
-            final LocalDate value,
+            final COSEUnprotectedHeader value,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
+
         if (!(generator instanceof CBORGenerator cborGenerator)) {
             throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
-        String dateString = value.format(DateTimeFormatter.ISO_LOCAL_DATE);
-        cborGenerator.writeTag(1004);
-        generator.writeString(dateString);
+        cborGenerator.writeStartObject(1);
+        cborGenerator.writeFieldId(33);
+        cborGenerator.writeBinary(value.getX5chain());
+        cborGenerator.writeEndObject();
     }
 }

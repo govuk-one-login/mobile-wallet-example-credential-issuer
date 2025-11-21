@@ -7,13 +7,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKeyFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEKeyTypes;
 
 import java.security.interfaces.ECPublicKey;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,10 +58,9 @@ class MobileSecurityObjectFactoryTest {
         Status status = new Status(statusList);
 
         // Arrange: Prepare COSEKey
-        Map<Integer, Object> coseKeyParams = new HashMap<>();
-        coseKeyParams.put(1, "testParameterValue");
-        coseKeyParams.put(-1, 2);
-        COSEKey coseKey = new COSEKey(coseKeyParams);
+        byte[] x = new byte[] {0x01, 0x02, 0x03};
+        byte[] y = new byte[] {0x04, 0x05, 0x06};
+        COSEKey coseKey = new COSEKey(COSEKeyTypes.EC2, COSEEllipticCurves.P256, x, y);
         when(mockCoseKeyFactory.fromECPublicKey(mockEcPublicKey)).thenReturn(coseKey);
 
         // Arrange: Build expected DeviceKeyInfo and MobileSecurityObject

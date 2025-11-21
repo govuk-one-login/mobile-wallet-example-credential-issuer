@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NamespacesFactoryTest {
@@ -35,18 +35,6 @@ class NamespacesFactoryTest {
             List.of(
                     new DrivingPrivilege("A", "12-02-2020", "11-02-2030", CODES),
                     new DrivingPrivilege("B", null, null, null));
-    private static final List<Map<String, Object>> DRIVING_PRIVILEGES_SNAKE_CASE =
-            List.of(
-                    Map.of(
-                            "vehicle_category_code",
-                            "A",
-                            "issue_date",
-                            LocalDate.parse("2020-02-12"),
-                            "expiry_date",
-                            LocalDate.parse("2030-02-11"),
-                            "codes",
-                            CODES),
-                    Map.of("vehicle_category_code", "B"));
 
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
 
@@ -65,7 +53,7 @@ class NamespacesFactoryTest {
     void Should_BuildISOAndUKNamespaces() {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
@@ -90,7 +78,7 @@ class NamespacesFactoryTest {
             throws MDLException {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
@@ -114,8 +102,7 @@ class NamespacesFactoryTest {
         verify(mockIssuerSignedItemFactory).build("resident_address", "123 Main St, Apt 4B");
         verify(mockIssuerSignedItemFactory).build("resident_postal_code", "SW1A 2AA");
         verify(mockIssuerSignedItemFactory).build("resident_city", "London");
-        verify(mockIssuerSignedItemFactory)
-                .build("driving_privileges", DRIVING_PRIVILEGES_SNAKE_CASE);
+        verify(mockIssuerSignedItemFactory).build("driving_privileges", DRIVING_PRIVILEGES);
         verify(mockIssuerSignedItemFactory).build("un_distinguishing_sign", "UK");
         verify(mockIssuerSignedItemFactory).build("welsh_licence", false);
     }
@@ -130,7 +117,7 @@ class NamespacesFactoryTest {
         DrivingLicenceDocument drivingLicenceDocument =
                 createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
@@ -141,8 +128,9 @@ class NamespacesFactoryTest {
                 "Should create one IssuerSignedItem per UK namespace attribute");
         // Verify that the factory was called with all expected UK fields and values
         verify(mockIssuerSignedItemFactory)
-                .build("provisional_driving_privileges", DRIVING_PRIVILEGES_SNAKE_CASE);
+                .build("provisional_driving_privileges", DRIVING_PRIVILEGES);
         verify(mockIssuerSignedItemFactory).build("title", "Miss");
+        verify(mockIssuerSignedItemFactory).build("welsh_licence", false);
     }
 
     /**
@@ -154,7 +142,7 @@ class NamespacesFactoryTest {
             throws MDLException {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument(null);
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 

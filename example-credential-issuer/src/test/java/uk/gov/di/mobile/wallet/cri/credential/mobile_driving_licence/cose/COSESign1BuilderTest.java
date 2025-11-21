@@ -3,9 +3,6 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -14,7 +11,7 @@ class COSESign1BuilderTest {
 
     private COSESign1Builder builder;
     private byte[] testProtectedHeader;
-    private Map<Integer, Object> testUnprotectedHeader;
+    private COSEUnprotectedHeader testUnprotectedHeader;
     private byte[] testPayload;
     private byte[] testSignature;
 
@@ -22,8 +19,7 @@ class COSESign1BuilderTest {
     void setUp() {
         builder = new COSESign1Builder();
         testProtectedHeader = new byte[] {1, 2, 3};
-        testUnprotectedHeader = new HashMap<>();
-        testUnprotectedHeader.put(4, "test");
+        testUnprotectedHeader = new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
         testPayload = new byte[] {4, 5, 6};
         testSignature = new byte[] {7, 8, 9};
     }
@@ -78,6 +74,7 @@ class COSESign1BuilderTest {
 
     @Test
     void Should_ThrowIllegalArgumentException_When_UnprotectedHeaderIsNotSet() {
+
         builder.protectedHeader(testProtectedHeader).payload(testPayload).signature(testSignature);
 
         IllegalStateException exception =

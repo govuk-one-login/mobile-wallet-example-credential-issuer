@@ -51,14 +51,14 @@ public class COSESigner {
         // Build protected header with algorithm identifier (ES256 = ECDSA with SHA-256)
         COSEProtectedHeader protectedHeader =
                 new COSEProtectedHeaderBuilder().alg(COSEAlgorithms.ES256).build();
-        byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader.protectedHeader());
+        byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader);
         // Create the Sig_structure and sign it
         byte[] toBeSigned = createSigStructure(protectedHeaderEncoded, payload);
         byte[] signature = signPayload(toBeSigned);
 
         return new COSESign1Builder()
                 .protectedHeader(protectedHeaderEncoded)
-                .unprotectedHeader(unprotectedHeader.unprotectedHeader())
+                .unprotectedHeader(unprotectedHeader)
                 .payload(payload)
                 .signature(signature)
                 .build();
