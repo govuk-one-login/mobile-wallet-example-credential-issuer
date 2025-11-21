@@ -1,0 +1,14 @@
+plugin: rest
+resources:
+  - path: "/document/{itemId}"
+    contentType: "application/json"
+    type: array
+    response:
+      file: documents.json
+
+  - path: "/issue"
+    contentType: "application/json"
+    method: POST
+    response:
+      statusCode: 200
+      content: "{\"idx\":5,\"uri\":\"https://status-list-mock.com/t/156PK3XHVCOQ\"}"
