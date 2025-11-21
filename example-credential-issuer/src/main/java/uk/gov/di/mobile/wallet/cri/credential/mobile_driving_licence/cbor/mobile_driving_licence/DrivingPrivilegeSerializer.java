@@ -6,12 +6,32 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.Code;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.DrivingPrivilege;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor.LocalDateCBORSerializer;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * CBOR serializer for {@link DrivingPrivilege}.
+ *
+ * <p>Serializes a {@link DrivingPrivilege} object as a definite-length CBOR map containing between
+ * one and four entries:
+ *
+ * <ul>
+ *   <li>{@code vehicle_category_code}: serialized as a string
+ *   <li>{@code issue_date}: serialized as a string via the configured {@link
+ *       LocalDateCBORSerializer}, included only when non-empty
+ *   <li>{@code expiry_date}: serialized as a string via the configured {@link
+ *       LocalDateCBORSerializer}, included only when non-empty
+ *   <li>{@code codes}: definite-length CBOR array containing one or more definite-length CBOR maps
+ *       containing one entry, included only when non-empty:
+ *       <ul>
+ *         <li>{@code code}: string, representing the restriction code
+ *       </ul>
+ * </ul>
+ */
 public class DrivingPrivilegeSerializer extends StdSerializer<DrivingPrivilege> {
 
     public DrivingPrivilegeSerializer() {
@@ -19,10 +39,13 @@ public class DrivingPrivilegeSerializer extends StdSerializer<DrivingPrivilege> 
     }
 
     /**
-     * Serializes {@link DrivingPrivilege} as a definite-length CBOR map. Optional fields
-     * (issue_date, expiry_date, codes) are included only when present.
+     * Serializes a {@link DrivingPrivilege} object as a definite-length CBOR map.
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link DrivingPrivilege} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(

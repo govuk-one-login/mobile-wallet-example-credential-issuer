@@ -10,11 +10,31 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Mobile
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+/**
+ * CBOR serializer for {@link MobileSecurityObject}.
+ *
+ * <p>Serializes an {@link MobileSecurityObject} object as an embedded CBOR data item (RFC 8949).
+ *
+ * <ul>
+ *   <li>Encodes the item using the current codec and an inner CBOR generator.
+ *   <li>Prefixes with CBOR tag 24 to mark the following byte string as embedded CBOR.
+ *   <li>Writes the map's CBOR byte string after the tag.
+ * </ul>
+ */
 public class MobileSecurityObjectSerializer extends StdSerializer<MobileSecurityObject> {
     public MobileSecurityObjectSerializer() {
         super(MobileSecurityObject.class);
     }
 
+    /**
+     * Serializes {@link MobileSecurityObject} as embedded CBOR (tag 24 + byte string).
+     *
+     * @param value the {@link MobileSecurityObject} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
+     */
     @Override
     public void serialize(
             final MobileSecurityObject value,

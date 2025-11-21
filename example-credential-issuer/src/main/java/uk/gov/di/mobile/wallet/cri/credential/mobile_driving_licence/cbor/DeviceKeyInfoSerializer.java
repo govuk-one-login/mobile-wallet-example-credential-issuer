@@ -13,16 +13,21 @@ import java.util.List;
 /**
  * CBOR serializer for {@link DeviceKeyInfo}.
  *
- * <p>Encodes the device key information as a definite-length CBOR map with two entries:
+ * <p>Serializes a {@link DeviceKeyInfo} object as a definite-length CBOR map with two entries:
  *
  * <ul>
- *   <li>deviceKey → COSE_Key map with integer labels (1=kty, -1=crv, -2=x, -3=y), all written with
- *       definite length
- *   <li>keyAuthorizations → map with a single field "nameSpaces" containing a definite-length array
- *       of strings
+ *   <li>{@code "deviceKey"}: definite-length CBOR map with four entries:
+ *       <ul>
+ *         <li>{@code 1}: integer, key type (kty)
+ *         <li>{@code -1}: integer, curve identifier (crv)
+ *         <li>{@code -2}: byte string, x-coordinate (x)
+ *         <li>{@code -3}: byte string, y-coordinate (y)
+ *       </ul>
+ *   <li>{@code "keyAuthorizations"}: map with a single field {@code "nameSpaces"} containing a
+ *       definite-length array of strings
  * </ul>
  *
- * <p>Integer labels for COSE_Key follow RFC 8152 §13.1.
+ * <p>The integer labels in the {@code "deviceKey"} map are defined by RFC 8152 §13.1.
  */
 public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
     public DeviceKeyInfoSerializer() {
@@ -30,9 +35,13 @@ public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
     }
 
     /**
-     * Serializes {@link DeviceKeyInfo} using definite-length maps and arrays.
+     * Serializes a {@link DeviceKeyInfo} object as a definite-length CBOR map.
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link DeviceKeyInfo} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(
@@ -46,19 +55,17 @@ public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
         }
 
         cborGenerator.writeStartObject(2);
-
         cborGenerator.writeFieldName("deviceKey");
         cborGenerator.writeStartObject(4);
-        cborGenerator.writeFieldId(1); // from RFC8152 13.1
+        cborGenerator.writeFieldId(1);
         cborGenerator.writeNumber(value.deviceKey().keyType());
-        cborGenerator.writeFieldId(-1); // from RFC8152 13.1
+        cborGenerator.writeFieldId(-1);
         cborGenerator.writeNumber(value.deviceKey().curve());
-        cborGenerator.writeFieldId(-2); // from RFC8152 13.1
+        cborGenerator.writeFieldId(-2);
         cborGenerator.writeBinary(value.deviceKey().x());
-        cborGenerator.writeFieldId(-3); // from RFC8152 13.1
+        cborGenerator.writeFieldId(-3);
         cborGenerator.writeBinary(value.deviceKey().y());
         cborGenerator.writeEndObject();
-
         cborGenerator.writeFieldName("keyAuthorizations");
         cborGenerator.writeStartObject(1);
         cborGenerator.writeFieldName("nameSpaces");
@@ -69,7 +76,6 @@ public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
         }
         cborGenerator.writeEndArray();
         cborGenerator.writeEndObject();
-
         cborGenerator.writeEndObject();
     }
 }

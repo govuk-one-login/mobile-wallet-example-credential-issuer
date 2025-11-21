@@ -11,12 +11,12 @@ import java.io.IOException;
 /**
  * CBOR serializer for {@link ValidityInfo}.
  *
- * <p>Encodes a definite-length map with three entries representing the validity window of the MSO:
+ * <p>Serializes a {@link ValidityInfo} object as a definite-length CBOR map with three entries:
  *
  * <ul>
- *   <li>signed → timestamp (serialized via configured {@link java.time.Instant} serializer)
- *   <li>validFrom → timestamp (serialized via configured {@link java.time.Instant} serializer)
- *   <li>validUntil → timestamp (serialized via configured {@link java.time.Instant} serializer)
+ *   <li>{@code signed}: serialized as a string via the configured {@link InstantCBORSerializer}
+ *   <li>{@code validFrom}: serialized as a string via the configured {@link InstantCBORSerializer}
+ *   <li>{@code validUntil}: serialized as a string via the configured {@link InstantCBORSerializer}
  * </ul>
  */
 public class ValidityInfoSerializer extends StdSerializer<ValidityInfo> {
@@ -25,9 +25,13 @@ public class ValidityInfoSerializer extends StdSerializer<ValidityInfo> {
     }
 
     /**
-     * Serializes {@link ValidityInfo} as a definite-length CBOR map with exactly 3 fields.
+     * Serializes a {@link ValidityInfo} object as a definite-length CBOR map.
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link ValidityInfo} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(

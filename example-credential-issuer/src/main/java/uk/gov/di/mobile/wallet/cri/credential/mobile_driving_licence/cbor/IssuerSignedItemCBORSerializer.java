@@ -11,12 +11,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * Custom Jackson serializer for {@link IssuerSignedItem} to CBOR format.
+ * CBOR serializer for {@link IssuerSignedItem}.
  *
- * <p>This serializer encodes the {@link IssuerSignedItem} into a CBOR byte array using an inner
- * generator (definite-length map with 4 fields), then writes it as a tagged CBOR binary with tag
- * 24. Tag 24 indicates that the following byte string contains a fully encoded embedded CBOR data
- * item.
+ * <p>Serializes an {@link IssuerSignedItem} object as an embedded CBOR data item (RFC 8949).
+ *
+ * <ul>
+ *   <li>Encodes the item using the current codec and an inner CBOR generator.
+ *   <li>Prefixes with CBOR tag 24 to mark the following byte string as embedded CBOR.
+ *   <li>Writes the map's CBOR byte string after the tag.
+ * </ul>
  */
 public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedItem> {
     public IssuerSignedItemCBORSerializer() {
@@ -24,10 +27,13 @@ public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedIt
     }
 
     /**
-     * Serializes an {@link IssuerSignedItem} as embedded CBOR: first encodes the item to CBOR bytes
-     * using the current codec, then writes CBOR tag 24 followed by the byte string.
+     * Serializes {@link IssuerSignedItem} as embedded CBOR (tag 24 + byte string).
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link IssuerSignedItem} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(

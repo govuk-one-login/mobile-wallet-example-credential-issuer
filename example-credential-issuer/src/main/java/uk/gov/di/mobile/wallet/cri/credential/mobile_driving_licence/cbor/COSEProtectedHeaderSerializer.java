@@ -11,15 +11,15 @@ import java.io.IOException;
 /**
  * CBOR serializer for {@link COSEProtectedHeader}.
  *
- * <p>Produces a definite-length CBOR map with integer labels as required by COSE (RFC 9052):
+ * <p>Serializes a {@link COSEProtectedHeader} object as a definite-length CBOR map with one entry:
  *
  * <ul>
- *   <li>Map length: 1
- *   <li>Key 1 (alg) → algorithm identifier (e.g., -7 for ES256)
+ *   <li>{@code 1}: integer, algorithm identifier (per RFC 9052 and IANA COSE Algorithms registry)
  * </ul>
  *
- * <p>This serializer is used to create the protected header bytes that are embedded into COSE_Sign1
- * as a bstr and also used when building the Sig_structure to be signed.
+ * <p>Usage note: In a COSE_Sign1 structure, this map is CBOR-encoded to bytes and embedded as the
+ * first array element. This serializer emits only the map; the encoding to bytes and insertion into
+ * the COSE_Sign1 structure are handled elsewhere.
  */
 public class COSEProtectedHeaderSerializer extends StdSerializer<COSEProtectedHeader> {
     public COSEProtectedHeaderSerializer() {
@@ -27,9 +27,13 @@ public class COSEProtectedHeaderSerializer extends StdSerializer<COSEProtectedHe
     }
 
     /**
-     * Serializes the protected header as a definite-length CBOR map with label {@code 1 → alg}.
+     * Serializes a {@link COSEProtectedHeader} object as a definite-length CBOR map.
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link COSEProtectedHeader} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(
@@ -43,7 +47,7 @@ public class COSEProtectedHeaderSerializer extends StdSerializer<COSEProtectedHe
         }
 
         cborGenerator.writeStartObject(1);
-        cborGenerator.writeFieldId(1); // from RFC9052 3.1
+        cborGenerator.writeFieldId(1);
         cborGenerator.writeNumber(value.getAlg());
         cborGenerator.writeEndObject();
     }

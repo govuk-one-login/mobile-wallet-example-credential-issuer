@@ -11,12 +11,11 @@ import java.io.IOException;
 /**
  * CBOR serializer for {@link COSEUnprotectedHeader}.
  *
- * <p>Produces a definite-length CBOR map containing the unprotected header parameters used in
- * COSE_Sign1. The certificate chain is included under label 33 (x5chain) as defined in RFC 9360.
+ * <p>Serializes a {@link COSEUnprotectedHeader} object as a definite-length CBOR map with one
+ * entry:
  *
  * <ul>
- *   <li>Map length: 1
- *   <li>Key 33 (x5chain) → DER-encoded certificate chain as a byte string
+ *   <li>{@code 33}: byte string, certificate chain as DER-encoded bytes (per RFC 9360)
  * </ul>
  */
 public class COSEUnprotectedHeaderSerializer extends StdSerializer<COSEUnprotectedHeader> {
@@ -25,10 +24,13 @@ public class COSEUnprotectedHeaderSerializer extends StdSerializer<COSEUnprotect
     }
 
     /**
-     * Serializes the unprotected header as a definite-length CBOR map ({@code 1} entry), using
-     * integer label {@code 33 → x5chain}.
+     * Serializes a {@link COSEUnprotectedHeader} object as a definite-length CBOR map.
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link COSEUnprotectedHeader} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(
@@ -42,7 +44,7 @@ public class COSEUnprotectedHeaderSerializer extends StdSerializer<COSEUnprotect
         }
 
         cborGenerator.writeStartObject(1);
-        cborGenerator.writeFieldId(33); // from RFC9360 2
+        cborGenerator.writeFieldId(33);
         cborGenerator.writeBinary(value.getX5chain());
         cborGenerator.writeEndObject();
     }

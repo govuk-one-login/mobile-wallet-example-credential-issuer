@@ -13,12 +13,12 @@ import java.util.TreeMap;
 /**
  * CBOR serializer for {@link ValueDigests}.
  *
- * <p>Encodes a map of namespaces to element digests using definite-length CBOR maps:
+ * <p>Serializes a {@link ValueDigests} object as a nested, definite-length CBOR map representing a
+ * mapping of namespaces to element digest values.
  *
  * <ul>
- *   <li>Outer: namespaces → definite-length map where keys are namespace strings.
- *   <li>Inner: for each namespace, a definite-length map of element identifiers to digest bytes.
- *       Element identifiers are encoded as CBOR integer keys using {@code writeFieldId(...)}.
+ *   <li><strong>Outer map:</strong> text keys (namespaces), each mapped to an inner map
+ *   <li><strong>Inner map:</strong> integer keys (element identifiers) to digest byte arrays
  * </ul>
  */
 public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
@@ -27,9 +27,13 @@ public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
     }
 
     /**
-     * Serializes {@link ValueDigests} as nested, definite-length CBOR maps.
+     * Serializes a {@link ValueDigests} object as a definite-length CBOR map.
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link ValueDigests} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(
@@ -40,7 +44,6 @@ public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
         }
 
         Map<String, Map<Integer, byte[]>> namespaces = value.valueDigests();
-
         cborGenerator.writeStartObject(namespaces.size());
         for (var namespace : namespaces.entrySet()) {
             cborGenerator.writeFieldName(namespace.getKey());

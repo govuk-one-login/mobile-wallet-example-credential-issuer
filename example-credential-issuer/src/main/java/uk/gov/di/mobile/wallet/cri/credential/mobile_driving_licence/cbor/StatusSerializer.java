@@ -11,12 +11,14 @@ import java.io.IOException;
 /**
  * CBOR serializer for {@link Status}.
  *
- * <p>Produces a definite-length map with a single entry <b>status_list</b>, which itself is a
- * definite-length map containing:
+ * <p>Serializes a {@link Status} object as a definite-length CBOR map with one entry:
  *
  * <ul>
- *   <li><b>idx</b> → numeric index in the status list
- *   <li><b>uri</b> → URI string of the status list
+ *   <li>{@code "status_list"}: definite-length map with two entries:
+ *       <ul>
+ *         <li>{@code "idx"}: integer, representing the status list index
+ *         <li>{@code "uri"}: string, representing the status list URI
+ *       </ul>
  * </ul>
  */
 public class StatusSerializer extends StdSerializer<Status> {
@@ -25,9 +27,13 @@ public class StatusSerializer extends StdSerializer<Status> {
     }
 
     /**
-     * Serializes {@link Status} as a nested, definite-length CBOR map.
+     * Serializes a {@link Status} object as a definite-length CBOR map.
      *
-     * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @param value the {@link Status} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(

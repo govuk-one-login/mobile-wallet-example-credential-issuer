@@ -15,18 +15,18 @@ import java.util.Map;
 /**
  * CBOR serializer for {@link IssuerSigned}.
  *
- * <p>Produces a map with two entries:
+ * <p>Serializes an {@link IssuerSigned} object as a definite-length CBOR map with two entries:
  *
  * <ul>
- *   <li><b>nameSpaces</b> → a map of namespace → array of IssuerSignedItem; each item is encoded as
- *       embedded CBOR using tag 24 followed by a byte string via the registered {@link
- *       IssuerSignedItemCBORSerializer}.
- *   <li><b>issuerAuth</b> → COSE_Sign1 structure represented as an array of 4 elements in order:
+ *   <li><b>nameSpaces</b>: a definite-length CBOR map from namespace strings to arrays of {@link
+ *       IssuerSignedItem} objects serialized via the configured {@link IssuerSignedCBORSerializer}
+ *   <li><b>issuerAuth</b>: a COSE_Sign1 structure represented as an array of four elements:
  *       <ol>
- *         <li>protected header (CBOR-encoded map as bstr)
- *         <li>unprotected header (map; definite-length via its own serializer)
- *         <li>payload (bstr)
- *         <li>signature (bstr, IEEE P-1363)
+ *         <li>protected header, a byte string
+ *         <li>unprotected header, a definite-length CBOR map serialized via the configured {@link
+ *             COSEUnprotectedHeaderSerializer}
+ *         <li>payload, a byte string
+ *         <li>signature, a byte string
  *       </ol>
  * </ul>
  */
@@ -37,14 +37,13 @@ public class IssuerSignedCBORSerializer extends StdSerializer<IssuerSigned> {
     }
 
     /**
-     * Serializes {@link IssuerSigned} as a CBOR map with fields {@code nameSpaces} and {@code
-     * issuerAuth}.
+     * Serializes a {@link IssuerSigned} object as a definite-length CBOR map.
      *
-     * @param value the object to serialize
-     * @param generator must be a {@link CBORGenerator}
-     * @param serializer the provider
-     * @throws IOException on write errors
+     * @param value the {@link IssuerSigned} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
      * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(
