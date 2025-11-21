@@ -107,14 +107,14 @@
           {
             "locale": "en",
             "name": "Fishing License",
-            "background_color_1": "PINK",
-            "background_color_2": "WHITE"
+            "background_color_1": "#74ebd5",
+            "background_color_2": "#acb6e5"
           },
           {
             "locale": "cy",
             "name": "CREDENTIAL_TITLE_WELSH",
-            "background_color_1": "PINK",
-            "background_color_2": "WHITE"
+            "background_color_1": "#74ebd5",
+            "background_color_2": "#acb6e5"
           }
         ],
         "claims": [
