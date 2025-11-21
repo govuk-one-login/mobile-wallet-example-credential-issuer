@@ -29,7 +29,11 @@ public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
     /**
      * Serializes {@link ValueDigests} as nested, definite-length CBOR maps.
      *
+     * @param value the object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find or invoke other serializers
      * @throws IllegalArgumentException if the provided generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(
@@ -40,7 +44,6 @@ public class ValueDigestsSerializer extends StdSerializer<ValueDigests> {
         }
 
         Map<String, Map<Integer, byte[]>> namespaces = value.valueDigests();
-
         cborGenerator.writeStartObject(namespaces.size());
         for (var namespace : namespaces.entrySet()) {
             cborGenerator.writeFieldName(namespace.getKey());
