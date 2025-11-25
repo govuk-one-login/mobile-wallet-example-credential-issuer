@@ -2,8 +2,6 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -14,7 +12,7 @@ class COSESign1Test {
     @Test
     void Should_CreateRecordWithAllFields() {
         byte[] protectedHeader = {1, 2, 3};
-        Map<Integer, Object> unprotectedHeader = Map.of(1, "test");
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
@@ -30,7 +28,7 @@ class COSESign1Test {
     void Should_BeEqual_When_ArrayContentIsSame() {
         byte[] protectedHeader1 = {1, 2, 3};
         byte[] protectedHeader2 = {1, 2, 3};
-        Map<Integer, Object> unprotectedHeader = Map.of(1, "test");
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload1 = {4, 5, 6};
         byte[] payload2 = {4, 5, 6};
         byte[] signature1 = {7, 8, 9};
@@ -48,7 +46,7 @@ class COSESign1Test {
     void Should_NotBeEqual_When_ProtectedHeaderDiffers() {
         byte[] protectedHeader1 = {1, 2, 3};
         byte[] protectedHeader2 = {1, 2, 4};
-        Map<Integer, Object> unprotectedHeader = Map.of(1, "test");
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
@@ -61,7 +59,7 @@ class COSESign1Test {
     @Test
     void Should_NotBeEqual_When_PayloadDiffers() {
         byte[] protectedHeader = {1, 2, 3};
-        Map<Integer, Object> unprotectedHeader = Map.of(1, "test");
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload1 = {4, 5, 6};
         byte[] payload2 = {4, 5, 7};
         byte[] signature = {7, 8, 9};
@@ -75,7 +73,7 @@ class COSESign1Test {
     @Test
     void Should_NotBeEqual_When_SignatureDiffers() {
         byte[] protectedHeader = {1, 2, 3};
-        Map<Integer, Object> unprotectedHeader = Map.of(1, "test");
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature1 = {7, 8, 9};
         byte[] signature2 = {7, 8, 10};
@@ -89,8 +87,8 @@ class COSESign1Test {
     @Test
     void Should_NotBeEqual_When_UnprotectedHeaderDiffers() {
         byte[] protectedHeader = {1, 2, 3};
-        Map<Integer, Object> unprotectedHeader1 = Map.of(1, "test");
-        Map<Integer, Object> unprotectedHeader2 = Map.of(1, "different");
+        COSEUnprotectedHeader unprotectedHeader1 = new COSEUnprotectedHeader(new byte[] {10});
+        COSEUnprotectedHeader unprotectedHeader2 = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
@@ -104,7 +102,7 @@ class COSESign1Test {
     void Should_HaveSameHashCodeForEqualObjects() {
         byte[] protectedHeader1 = {1, 2, 3};
         byte[] protectedHeader2 = {1, 2, 3};
-        Map<Integer, Object> unprotectedHeader = Map.of(1, "test");
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload1 = {4, 5, 6};
         byte[] payload2 = {4, 5, 6};
         byte[] signature1 = {7, 8, 9};
@@ -121,7 +119,7 @@ class COSESign1Test {
     @Test
     void Should_IncludeArrayContentInToString() {
         byte[] protectedHeader = {1, 2, 3};
-        Map<Integer, Object> unprotectedHeader = Map.of(1, "test");
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
@@ -131,6 +129,5 @@ class COSESign1Test {
         assertTrue(toString.contains("[1, 2, 3]"));
         assertTrue(toString.contains("[4, 5, 6]"));
         assertTrue(toString.contains("[7, 8, 9]"));
-        assertTrue(toString.contains("test"));
     }
 }

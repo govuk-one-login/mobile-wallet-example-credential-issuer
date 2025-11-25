@@ -45,20 +45,16 @@ public class COSESigner {
      */
     public COSESign1 sign(byte[] payload, X509Certificate certificate)
             throws SigningException, MDLException, CertificateEncodingException {
-        // Build unprotected header with certificate chain
         COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(certificate.getEncoded()).build();
-        // Build protected header with algorithm identifier (ES256 = ECDSA with SHA-256)
-        COSEProtectedHeader protectedHeader =
-                new COSEProtectedHeaderBuilder().alg(COSEAlgorithms.ES256).build();
-        byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader.protectedHeader());
-        // Create the Sig_structure and sign it
+                new COSEUnprotectedHeader(certificate.getEncoded());
+        COSEProtectedHeader protectedHeader = new COSEProtectedHeader(COSEAlgorithms.ES256);
+        byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader.alg());
         byte[] toBeSigned = createSigStructure(protectedHeaderEncoded, payload);
         byte[] signature = signPayload(toBeSigned);
 
         return new COSESign1Builder()
                 .protectedHeader(protectedHeaderEncoded)
-                .unprotectedHeader(unprotectedHeader.unprotectedHeader())
+                .unprotectedHeader(unprotectedHeader)
                 .payload(payload)
                 .signature(signature)
                 .build();
