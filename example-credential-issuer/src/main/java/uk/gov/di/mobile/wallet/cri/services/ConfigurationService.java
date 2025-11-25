@@ -203,7 +203,7 @@ public class ConfigurationService extends Configuration {
      * @return The TTL in seconds
      */
     public int getPreAuthorizedCodeTtlInSecs() {
-        return 300;
+        return 900;
     }
 
     /**
