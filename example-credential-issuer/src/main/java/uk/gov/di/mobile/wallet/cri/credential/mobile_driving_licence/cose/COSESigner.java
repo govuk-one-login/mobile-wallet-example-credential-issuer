@@ -4,6 +4,7 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.crypto.signers.PlainDSAEncoding;
 import org.bouncycastle.math.ec.custom.sec.SecP256R1Curve;
+import org.bouncycastle.util.encoders.Hex;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
@@ -50,6 +51,8 @@ public class COSESigner {
         COSEProtectedHeader protectedHeader = new COSEProtectedHeader(COSEAlgorithms.ES256);
         byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader);
         byte[] toBeSigned = createSigStructure(protectedHeaderEncoded, payload);
+        System.out.println("toBeSigned");
+        System.out.println(Hex.toHexString(toBeSigned));
         byte[] signature = signPayload(toBeSigned);
 
         return new COSESign1Builder()
