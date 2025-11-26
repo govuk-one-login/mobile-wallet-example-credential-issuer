@@ -51,7 +51,8 @@ public class COSEUnprotectedHeaderSerializer extends StdSerializer<COSEUnprotect
         }
 
         cborGenerator.writeStartObject(1);
-        cborGenerator.writeFieldId(33);
+        int x5ChainLabel = 33;
+        cborGenerator.writeFieldId(x5ChainLabel);
         cborGenerator.writeBinary(value.x5chain());
         cborGenerator.writeEndObject();
     }

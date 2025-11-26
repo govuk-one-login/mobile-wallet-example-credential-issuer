@@ -52,7 +52,8 @@ public class COSEProtectedHeaderSerializer extends StdSerializer<COSEProtectedHe
         }
 
         cborGenerator.writeStartObject(1);
-        cborGenerator.writeFieldId(1);
+        int algLabel = 1;
+        cborGenerator.writeFieldId(algLabel);
         cborGenerator.writeNumber(value.alg());
         cborGenerator.writeEndObject();
     }
