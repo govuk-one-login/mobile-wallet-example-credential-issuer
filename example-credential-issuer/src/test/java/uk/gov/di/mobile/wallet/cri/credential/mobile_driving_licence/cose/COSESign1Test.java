@@ -88,7 +88,7 @@ class COSESign1Test {
     void Should_NotBeEqual_When_UnprotectedHeaderDiffers() {
         byte[] protectedHeader = {1, 2, 3};
         COSEUnprotectedHeader unprotectedHeader1 = new COSEUnprotectedHeader(new byte[] {10});
-        COSEUnprotectedHeader unprotectedHeader2 = new COSEUnprotectedHeader(new byte[] {10});
+        COSEUnprotectedHeader unprotectedHeader2 = new COSEUnprotectedHeader(new byte[] {20});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
