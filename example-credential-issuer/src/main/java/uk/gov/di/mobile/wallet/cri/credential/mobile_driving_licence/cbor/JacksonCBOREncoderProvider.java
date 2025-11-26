@@ -28,7 +28,9 @@ public final class JacksonCBOREncoderProvider {
                         .addSerializer(IssuerSignedItem.class, new IssuerSignedItemCBORSerializer())
                         .addSerializer(
                                 MobileSecurityObject.class, new MobileSecurityObjectSerializer())
-                        .addSerializer(IssuerSigned.class, new IssuerSignedCBORSerializer());
+                        .addSerializer(IssuerSigned.class, new IssuerSignedCBORSerializer())
+                        .addSerializer(new COSEProtectedHeaderSerializer())
+                        .addSerializer(new COSEUnprotectedHeaderSerializer());
 
         CBORMapper mapper = new CBORMapper();
         mapper.registerModule(simpleModule)
