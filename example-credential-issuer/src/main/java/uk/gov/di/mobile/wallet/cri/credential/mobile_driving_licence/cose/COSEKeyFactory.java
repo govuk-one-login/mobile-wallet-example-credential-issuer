@@ -7,8 +7,6 @@ import java.math.BigInteger;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECParameterSpec;
 import java.security.spec.ECPoint;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.BigIntegerToFixedBytes.bigIntegerToFixedBytes;
 
@@ -45,17 +43,10 @@ public class COSEKeyFactory {
         BigInteger x = point.getAffineX();
         BigInteger y = point.getAffineY();
 
-        // Convert BigInteger to fixed-length byte array
+        // Convert BigInteger to a fixed-length byte array
         byte[] xBytes = bigIntegerToFixedBytes(x, curveSizeBits);
         byte[] yBytes = bigIntegerToFixedBytes(y, curveSizeBits);
 
-        // Build the COSE key map
-        Map<Integer, Object> coseKeyMap = new LinkedHashMap<>();
-        coseKeyMap.put(1, COSEKeyTypes.EC2); // Key type: EC2
-        coseKeyMap.put(-1, COSEEllipticCurves.P256); // Curve: P-256
-        coseKeyMap.put(-2, xBytes); // x-coordinate
-        coseKeyMap.put(-3, yBytes); // y-coordinate
-
-        return new COSEKey(coseKeyMap);
+        return new COSEKey(COSEKeyTypes.EC2, COSEEllipticCurves.P256, xBytes, yBytes);
     }
 }

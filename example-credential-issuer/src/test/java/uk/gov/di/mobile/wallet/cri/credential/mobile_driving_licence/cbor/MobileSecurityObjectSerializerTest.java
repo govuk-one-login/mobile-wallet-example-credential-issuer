@@ -8,6 +8,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEKey;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEKeyTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.DeviceKeyInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.KeyAuthorizations;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
@@ -43,11 +45,9 @@ class MobileSecurityObjectSerializerTest {
 
     @Test
     void Should_SerializeMobileSecurityObjectWithCBORGenerator() throws IOException {
-        // Arrange: Prepare DeviceKeyInfo
-        Map<Integer, Object> parameterMap = new HashMap<>();
-        parameterMap.put(1, "testParameterValue");
-        parameterMap.put(-1, 2);
-        COSEKey coseKey = new COSEKey(parameterMap);
+        byte[] x = new byte[] {0x01, 0x02, 0x03};
+        byte[] y = new byte[] {0x04, 0x05, 0x06};
+        COSEKey coseKey = new COSEKey(COSEKeyTypes.EC2, COSEEllipticCurves.P256, x, y);
         KeyAuthorizations keyAuthorizations =
                 new KeyAuthorizations(Set.of("testNamespace1", "testNamespace2"));
         DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
