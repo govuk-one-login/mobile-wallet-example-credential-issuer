@@ -11,11 +11,9 @@ import java.security.spec.ECPoint;
 import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.BigIntegerToFixedBytes.bigIntegerToFixedBytes;
 
 /**
- * Factory for creating {@link COSEKey} instance from EC public keys.
+ * Factory for creating {@link COSEKey} instance from an EC public key.
  *
- * <p>This factory encapsulates the logic for converting a Java {@link ECPublicKey} (specifically on
- * the P-256 curve) into a COSE_Key (CBOR Object Signing and Encryption key) format, as required for
- * mobile security objects.
+ * <p>This factory contains the logic for converting a Java {@link ECPublicKey} into a COSE_Key.
  */
 public class COSEKeyFactory {
 
@@ -28,18 +26,26 @@ public class COSEKeyFactory {
      *
      * @param publicKey the EC public key to convert.
      * @return The {@link COSEKey} representation of the public key.
-     * @throws IllegalArgumentException If the key does not use the P-256 curve.
+     * @throws IllegalArgumentException If the key is not a valid P-256 (secp256r1) key.
      */
     public COSEKey fromECPublicKey(ECPublicKey publicKey) {
-        // Validate curve is P-256
+        if (publicKey == null) {
+            throw new IllegalArgumentException("publicKey must not be null");
+        }
+
         ECParameterSpec params = publicKey.getParams();
         int curveSizeBits = params.getCurve().getField().getFieldSize();
         if (curveSizeBits != 256) {
-            throw new IllegalArgumentException("Invalid key curve - expected P-256");
+            throw new IllegalArgumentException(
+                    "Invalid EC key curve: expected P-256 (secp256r1), got field size "
+                            + curveSizeBits
+                            + " bits");
         }
 
-        // Extract x and y coordinates
         ECPoint point = publicKey.getW();
+        if (point == null || point.getAffineX() == null || point.getAffineY() == null) {
+            throw new IllegalArgumentException("Invalid EC public key point: missing coordinates");
+        }
         BigInteger x = point.getAffineX();
         BigInteger y = point.getAffineY();
 

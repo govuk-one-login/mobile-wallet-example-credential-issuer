@@ -37,16 +37,26 @@ class COSEKeyFactoryTest {
     }
 
     @Test
+    void Should_ThrowIllegalArgumentException_When_KeyIsNull() {
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class, () -> coseKeyFactory.fromECPublicKey(null));
+        assertEquals("publicKey must not be null", exception.getMessage());
+    }
+
+    @Test
     void Should_ThrowIllegalArgumentException_When_NonP256Curve()
             throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
-        kpg.initialize(new ECGenParameterSpec("secp384r1")); // P-384 curve
+        kpg.initialize(new ECGenParameterSpec("secp384r1")); // non P-256 curve
         ECPublicKey ecPublicKey = (ECPublicKey) kpg.generateKeyPair().getPublic();
 
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
                         () -> coseKeyFactory.fromECPublicKey(ecPublicKey));
-        assertEquals("Invalid key curve - expected P-256", exception.getMessage());
+        assertEquals(
+                "Invalid EC key curve: expected P-256 (secp256r1), got field size 384 bits",
+                exception.getMessage());
     }
 }
