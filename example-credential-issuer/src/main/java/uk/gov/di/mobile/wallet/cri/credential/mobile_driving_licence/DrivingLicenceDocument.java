@@ -132,6 +132,9 @@ public class DrivingLicenceDocument {
         this.residentCity = Objects.requireNonNull(residentCity, "resident_city is required");
         this.drivingPrivileges =
                 Objects.requireNonNull(drivingPrivileges, "driving_privileges is required");
+        if (this.drivingPrivileges.isEmpty()) {
+            throw new IllegalArgumentException("driving_privileges list must not be empty");
+        }
         this.unDistinguishingSign =
                 Objects.requireNonNull(unDistinguishingSign, "un_distinguishing_sign is required");
         this.credentialTtlMinutes = credentialTtlMinutes;
