@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
@@ -103,7 +104,7 @@ class DrivingPrivilegeSerializerTest {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
 
         IllegalArgumentException exception =
-                org.junit.jupiter.api.Assertions.assertThrows(
+                assertThrows(
                         IllegalArgumentException.class,
                         () -> {
                             serializer.serialize(
