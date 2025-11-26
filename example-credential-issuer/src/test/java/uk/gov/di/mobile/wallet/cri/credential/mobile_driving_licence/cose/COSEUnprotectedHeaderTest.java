@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class COSEUnprotectedHeaderTest {
 
     @Test
-    void shouldCreateRecordWithX5Chain() {
+    void Should_CreateRecordWithAllFields() {
         byte[] x5chain = {1, 2, 3};
         COSEUnprotectedHeader result = new COSEUnprotectedHeader(x5chain);
 
@@ -18,7 +18,7 @@ class COSEUnprotectedHeaderTest {
     }
 
     @Test
-    void shouldBeEqualWhenArraysAreEqual() {
+    void Should_BeEqual_When_ArraysAreEqual() {
         byte[] x5chain1 = {1, 2, 3};
         byte[] x5chain2 = {1, 2, 3};
 
@@ -29,7 +29,7 @@ class COSEUnprotectedHeaderTest {
     }
 
     @Test
-    void shouldNotBeEqualWhenArraysAreDifferent() {
+    void Should_NotBeEqual_When_ArraysAreDifferent() {
         byte[] x5chain1 = {1, 2, 3};
         byte[] x5chain2 = {1, 2, 4};
 
@@ -40,7 +40,7 @@ class COSEUnprotectedHeaderTest {
     }
 
     @Test
-    void shouldHaveSameHashCodeWhenArraysAreEqual() {
+    void Should_Have_SameHashCode_When_ArraysAreEqual() {
         byte[] x5chain1 = {1, 2, 3};
         byte[] x5chain2 = {1, 2, 3};
 
@@ -51,7 +51,7 @@ class COSEUnprotectedHeaderTest {
     }
 
     @Test
-    void shouldIncludeX5ChainInToString() {
+    void Should_IncludeArraysInToString() {
         byte[] x5chain = {1, 2, 3};
 
         COSEUnprotectedHeader result = new COSEUnprotectedHeader(x5chain);
