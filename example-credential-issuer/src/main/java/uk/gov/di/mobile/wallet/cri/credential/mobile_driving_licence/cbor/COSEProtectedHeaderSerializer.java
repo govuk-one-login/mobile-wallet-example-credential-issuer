@@ -14,8 +14,13 @@ import java.io.IOException;
  * <p>Serializes a {@link COSEProtectedHeader} object as a definite-length CBOR map with one entry:
  *
  * <ul>
- *   <li>{@code 1}: integer, algorithm identifier (per RFC 9052 and IANA COSE Algorithms registry)
+ *   <li>{@code 1}: integer, algorithm identifier
  * </ul>
+ *
+ * <p>Key {@code 1}corresponds to the {@code alg} (algorithm) header parameter as defined in <a
+ * href="https://datatracker.ietf.org/doc/html/rfc9052#section-3.1">RFC 9052: CBOR Object Signing
+ * and Encryption (COSE) - Section 3.1 Header Parameters</a>. The integer value identifies the
+ * cryptographic algorithm used for signing the credential.
  *
  * <p>Usage note: In a COSE_Sign1 structure, this map is CBOR-encoded to bytes and embedded as the
  * first array element. This serializer emits only the map; the encoding to bytes and insertion into

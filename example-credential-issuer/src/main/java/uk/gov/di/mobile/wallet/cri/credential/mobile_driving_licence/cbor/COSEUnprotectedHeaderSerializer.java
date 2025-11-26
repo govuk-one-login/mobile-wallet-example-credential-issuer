@@ -15,8 +15,15 @@ import java.io.IOException;
  * entry:
  *
  * <ul>
- *   <li>{@code 33}: byte string, certificate chain as DER-encoded bytes (per RFC 9360)
+ *   <li>{@code 33}: byte string, certificate chain as DER-encoded bytes
  * </ul>
+ *
+ * <p>Key {@code 33} corresponds to the {@code x5chain} header parameter as defined in <a
+ * href="https://datatracker.ietf.org/doc/html/rfc9360">RFC 9360: CBOR Object Signing and Encryption
+ * (COSE): Header Parameters for Carrying and Referencing X.509 Certificates</a>. The {@code
+ * x5chain} parameter is used to carry a chain of X.509 certificates, where each certificate is
+ * DER-encoded. The first certificate in the chain is the end-entity certificate, followed by the
+ * certificate that signed it, and so on.
  */
 public class COSEUnprotectedHeaderSerializer extends StdSerializer<COSEUnprotectedHeader> {
     public COSEUnprotectedHeaderSerializer() {
