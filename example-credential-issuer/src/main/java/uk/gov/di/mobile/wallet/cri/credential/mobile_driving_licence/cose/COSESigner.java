@@ -48,7 +48,7 @@ public class COSESigner {
         COSEUnprotectedHeader unprotectedHeader =
                 new COSEUnprotectedHeader(certificate.getEncoded());
         COSEProtectedHeader protectedHeader = new COSEProtectedHeader(COSEAlgorithms.ES256);
-        byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader.alg());
+        byte[] protectedHeaderEncoded = cborEncoder.encode(protectedHeader);
         byte[] toBeSigned = createSigStructure(protectedHeaderEncoded, payload);
         byte[] signature = signPayload(toBeSigned);
 
