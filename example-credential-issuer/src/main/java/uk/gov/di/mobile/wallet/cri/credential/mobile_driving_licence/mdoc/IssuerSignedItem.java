@@ -1,6 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -29,7 +30,7 @@ public record IssuerSignedItem(
     }
 
     @Override
-    public String toString() {
+    public @NotNull String toString() {
         return "IssuerSignedItem{"
                 + "digestId="
                 + digestId

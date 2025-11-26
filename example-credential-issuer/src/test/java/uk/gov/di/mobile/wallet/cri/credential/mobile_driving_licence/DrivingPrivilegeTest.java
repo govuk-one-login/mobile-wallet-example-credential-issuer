@@ -28,7 +28,7 @@ class DrivingPrivilegeTest {
     private static final LocalDate EXPECTED_EXPIRY_DATE = LocalDate.of(2035, 1, 1);
 
     @Test
-    void Should_CreateInstance_When_DataIsValid() {
+    void Should_SetAllProperties_When_InputIsValid() {
         DrivingPrivilege privilege =
                 new DrivingPrivilege(VEHICLE_CATEGORY_CODE, ISSUE_DATE, EXPIRY_DATE, CODES);
 
@@ -50,17 +50,29 @@ class DrivingPrivilegeTest {
     }
 
     @Test
-    void Should_CreateInstanceWithEmptyOptionals_When_DatesAreNull() {
-        DrivingPrivilege privilege = new DrivingPrivilege(VEHICLE_CATEGORY_CODE, null, null, CODES);
+    void Should_SetIssueDateAsEmpty_When_IssueDateIsNull() {
+        DrivingPrivilege privilege =
+                new DrivingPrivilege(VEHICLE_CATEGORY_CODE, null, EXPIRY_DATE, CODES);
 
         assertEquals(VEHICLE_CATEGORY_CODE, privilege.getVehicleCategoryCode());
         assertEquals(Optional.empty(), privilege.getIssueDate());
+        assertEquals(EXPECTED_EXPIRY_DATE, privilege.getExpiryDate().get());
+        assertEquals(CODES, privilege.getCodes().get());
+    }
+
+    @Test
+    void Should_SetExpiryDateAsEmpty_When_ExpiryDateIsNull() {
+        DrivingPrivilege privilege =
+                new DrivingPrivilege(VEHICLE_CATEGORY_CODE, ISSUE_DATE, null, CODES);
+
+        assertEquals(VEHICLE_CATEGORY_CODE, privilege.getVehicleCategoryCode());
+        assertEquals(EXPECTED_ISSUE_DATE, privilege.getIssueDate().get());
         assertEquals(Optional.empty(), privilege.getExpiryDate());
         assertEquals(CODES, privilege.getCodes().get());
     }
 
     @Test
-    void Should_CreateInstanceWithCodesAsOptionalEmpty_When_CodesIsNull() {
+    void Should_SetCodesAsEmpty_When_CodesIsNull() {
         DrivingPrivilege privilege =
                 new DrivingPrivilege(VEHICLE_CATEGORY_CODE, ISSUE_DATE, EXPIRY_DATE, null);
 
@@ -81,8 +93,7 @@ class DrivingPrivilegeTest {
                 "",
                 "A-B-C"
             })
-    void Should_CreateInstanceWithIssueDateAsOptionalEmpty_When_IssueDateFormatIsInvalid(
-            String invalidDate) {
+    void Should_SetIssueDateAsEmpty_When_IssueDateFormatIsInvalid(String invalidDate) {
         DrivingPrivilege privilege =
                 new DrivingPrivilege(VEHICLE_CATEGORY_CODE, invalidDate, EXPIRY_DATE, CODES) {
                     @Override
@@ -106,8 +117,7 @@ class DrivingPrivilegeTest {
                 "",
                 "A-B-C"
             })
-    void Should_CreateInstanceWithExpiryDateAsOptionalEmpty_When_ExpiryDateFormatIsInvalid(
-            String invalidDate) {
+    void Should_SetExpiryDateAsEmpty_When_ExpiryDateFormatIsInvalid(String invalidDate) {
         DrivingPrivilege privilege =
                 new DrivingPrivilege(VEHICLE_CATEGORY_CODE, ISSUE_DATE, invalidDate, CODES) {
                     @Override

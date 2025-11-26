@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class NamespacesFactoryTest {
@@ -53,7 +53,7 @@ class NamespacesFactoryTest {
     void Should_BuildISOAndUKNamespaces() {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
@@ -76,9 +76,9 @@ class NamespacesFactoryTest {
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
             throws MDLException {
-        DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
+        DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
@@ -87,7 +87,6 @@ class NamespacesFactoryTest {
                 18,
                 isoNamespace.size(),
                 "Should create one IssuerSignedItem per ISO namespace attribute");
-        // Verify that the factory was called with the expected ISO fields and values
         verify(mockIssuerSignedItemFactory).build("family_name", "Doe");
         verify(mockIssuerSignedItemFactory).build("given_name", "John");
         verify(mockIssuerSignedItemFactory)
@@ -104,33 +103,34 @@ class NamespacesFactoryTest {
         verify(mockIssuerSignedItemFactory).build("resident_city", "London");
         verify(mockIssuerSignedItemFactory).build("driving_privileges", DRIVING_PRIVILEGES);
         verify(mockIssuerSignedItemFactory).build("un_distinguishing_sign", "UK");
-        verify(mockIssuerSignedItemFactory).build("welsh_licence", false);
+        verify(mockIssuerSignedItemFactory).build("age_over_18", true);
+        verify(mockIssuerSignedItemFactory).build("age_over_21", true);
+        verify(mockIssuerSignedItemFactory).build("age_over_25", true);
     }
 
     /**
-     * Test that the NamespacesFactory builds an IssuerSignedItem for each UK namespace field. Also
+     * Test that the NamespacesFactory builds an IssuerSignedItem for each GB namespace field. Also
      * verifies that the correct values are passed to the IssuerSignedItemFactory for each field.
      */
     @Test
-    void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_UKNamespace()
+    void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_GBNamespace()
             throws MDLException {
+        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
         DrivingLicenceDocument drivingLicenceDocument =
                 createTestDrivingLicenceDocument(DRIVING_PRIVILEGES);
-        IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 
-        List<IssuerSignedItem> ukNamespace = result.namespaces().get(NamespaceTypes.GB);
+        List<IssuerSignedItem> gbNamespace = result.namespaces().get(NamespaceTypes.GB);
         assertEquals(
                 3,
-                ukNamespace.size(),
+                gbNamespace.size(),
                 "Should create one IssuerSignedItem per UK namespace attribute");
-        // Verify that the factory was called with all expected UK fields and values
-        verify(mockIssuerSignedItemFactory)
-                .build("provisional_driving_privileges", DRIVING_PRIVILEGES);
         verify(mockIssuerSignedItemFactory).build("title", "Miss");
         verify(mockIssuerSignedItemFactory).build("welsh_licence", false);
+        verify(mockIssuerSignedItemFactory)
+                .build("provisional_driving_privileges", DRIVING_PRIVILEGES);
     }
 
     /**
@@ -142,7 +142,7 @@ class NamespacesFactoryTest {
             throws MDLException {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument(null);
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
-        doReturn(issuerSignedItem).when(mockIssuerSignedItemFactory).build(anyString(), any());
+        when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
 
         Namespaces result = namespacesFactory.build(drivingLicenceDocument);
 

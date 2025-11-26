@@ -236,7 +236,7 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnPreAuthorizedCodeTtl() {
-        assertEquals(300, configurationService.getPreAuthorizedCodeTtlInSecs());
+        assertEquals(900, configurationService.getPreAuthorizedCodeTtlInSecs());
     }
 
     @Test
