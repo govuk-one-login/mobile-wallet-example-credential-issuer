@@ -7,7 +7,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeader;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeaderBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
@@ -40,7 +39,7 @@ class JacksonCBOREncoderProviderTest {
     void Should_BeAbleToSerializeIssuerSigned() {
         byte[] protectedHeaderBytes = {1, 2, 3, 4};
         COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {1, 2, 3, 4}).build();
+                new COSEUnprotectedHeader(new byte[] {1, 2, 3, 4});
         byte[] payloadBytes = {1, 2, 3, 4};
         byte[] signatureBytes = {1, 2, 3, 4};
         COSESign1 coseSign1 =

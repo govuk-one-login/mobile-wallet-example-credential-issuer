@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeader;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeaderBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
@@ -111,12 +110,10 @@ class IssuerSignedCBORSerializerTest {
     }
 
     private COSESign1 buildTestIssuerAuth() {
-        byte[] protectedHeader = {1, 2, 3, 4};
-        byte[] x5chain = {5, 6, 7, 8};
-        byte[] payload = {9, 10, 11, 12};
-        byte[] signature = {13, 14, 15, 16};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(x5chain).build();
+        byte[] protectedHeader = {1, 2, 3};
+        byte[] payload = {4, 5, 6};
+        byte[] signature = {7, 8, 9};
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         return new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
     }
 }

@@ -19,7 +19,7 @@ class COSESign1BuilderTest {
     void setUp() {
         builder = new COSESign1Builder();
         testProtectedHeader = new byte[] {1, 2, 3};
-        testUnprotectedHeader = new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        testUnprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         testPayload = new byte[] {4, 5, 6};
         testSignature = new byte[] {7, 8, 9};
     }
@@ -74,7 +74,6 @@ class COSESign1BuilderTest {
 
     @Test
     void Should_ThrowIllegalArgumentException_When_UnprotectedHeaderIsNotSet() {
-
         builder.protectedHeader(testProtectedHeader).payload(testPayload).signature(testSignature);
 
         IllegalStateException exception =

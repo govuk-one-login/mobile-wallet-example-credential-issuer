@@ -9,7 +9,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEProtectedHeader;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEProtectedHeaderBuilder;
 
 import java.io.IOException;
 
@@ -26,7 +25,7 @@ class COSEProtectedHeaderSerializerTest {
 
     @Test
     void Should_SerializeCOSEProtectedHeader() throws IOException {
-        COSEProtectedHeader valueToSerialize = new COSEProtectedHeaderBuilder().alg(-7).build();
+        COSEProtectedHeader valueToSerialize = new COSEProtectedHeader(-7);
 
         serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 

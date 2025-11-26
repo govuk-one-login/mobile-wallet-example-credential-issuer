@@ -12,8 +12,7 @@ class COSESign1Test {
     @Test
     void Should_CreateRecordWithAllFields() {
         byte[] protectedHeader = {1, 2, 3};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
@@ -29,8 +28,7 @@ class COSESign1Test {
     void Should_BeEqual_When_ArrayContentIsSame() {
         byte[] protectedHeader1 = {1, 2, 3};
         byte[] protectedHeader2 = {1, 2, 3};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload1 = {4, 5, 6};
         byte[] payload2 = {4, 5, 6};
         byte[] signature1 = {7, 8, 9};
@@ -48,8 +46,7 @@ class COSESign1Test {
     void Should_NotBeEqual_When_ProtectedHeaderDiffers() {
         byte[] protectedHeader1 = {1, 2, 3};
         byte[] protectedHeader2 = {1, 2, 4};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
@@ -62,8 +59,7 @@ class COSESign1Test {
     @Test
     void Should_NotBeEqual_When_PayloadDiffers() {
         byte[] protectedHeader = {1, 2, 3};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload1 = {4, 5, 6};
         byte[] payload2 = {4, 5, 7};
         byte[] signature = {7, 8, 9};
@@ -77,8 +73,7 @@ class COSESign1Test {
     @Test
     void Should_NotBeEqual_When_SignatureDiffers() {
         byte[] protectedHeader = {1, 2, 3};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature1 = {7, 8, 9};
         byte[] signature2 = {7, 8, 10};
@@ -92,10 +87,8 @@ class COSESign1Test {
     @Test
     void Should_NotBeEqual_When_UnprotectedHeaderDiffers() {
         byte[] protectedHeader = {1, 2, 3};
-        COSEUnprotectedHeader unprotectedHeader1 =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
-        COSEUnprotectedHeader unprotectedHeader2 =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {12}).build();
+        COSEUnprotectedHeader unprotectedHeader1 = new COSEUnprotectedHeader(new byte[] {10});
+        COSEUnprotectedHeader unprotectedHeader2 = new COSEUnprotectedHeader(new byte[] {20});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
@@ -109,8 +102,7 @@ class COSESign1Test {
     void Should_HaveSameHashCodeForEqualObjects() {
         byte[] protectedHeader1 = {1, 2, 3};
         byte[] protectedHeader2 = {1, 2, 3};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload1 = {4, 5, 6};
         byte[] payload2 = {4, 5, 6};
         byte[] signature1 = {7, 8, 9};
@@ -127,8 +119,7 @@ class COSESign1Test {
     @Test
     void Should_IncludeArrayContentInToString() {
         byte[] protectedHeader = {1, 2, 3};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeaderBuilder().x5chain(new byte[] {10}).build();
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
         byte[] payload = {4, 5, 6};
         byte[] signature = {7, 8, 9};
 
