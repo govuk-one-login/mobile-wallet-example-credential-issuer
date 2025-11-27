@@ -9,41 +9,32 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.consta
 import java.security.interfaces.ECPublicKey;
 import java.util.Set;
 
-/**
- * Factory for creating {@link MobileSecurityObject} instances for mobile driver's licenses.
- *
- * <p>This factory handles the creation of value digests, validity information, and device key
- * information required for the MSO.
- */
+/** Creates {@link MobileSecurityObject} instances for mobile driver's licenses. */
 public class MobileSecurityObjectFactory {
 
-    /** The version for the {@link MobileSecurityObject}. */
+    /** Version for the {@link MobileSecurityObject}. */
     private static final String MSO_VERSION = "1.0";
 
     /**
-     * The document type identifier for a mobile driver's license (mDL), as specified by ISO
-     * 18013-5.
+     * Document type identifier for a mobile driver's license (mDL), as specified by ISO 18013-5.
      */
     private static final String DOC_TYPE = DocumentTypes.MDL;
 
-    /** The factory responsible for creating {@link ValueDigests} instances. */
+    /** Factory for creating {@link ValueDigests} instances. */
     private final ValueDigestsFactory valueDigestsFactory;
 
-    /** The factory responsible for creating {@link ValidityInfo} instances. */
+    /** Factory for creating {@link ValidityInfo} instances. */
     private final ValidityInfoFactory validityInfoFactory;
 
-    /** The factory responsible for creating {@link COSEKeyFactory} instances. */
+    /** Factory for creating {@link COSEKey} instances. */
     private final COSEKeyFactory coseKeyFactory;
 
     /**
-     * Constructs a new {@link MobileSecurityObjectFactory} with the provided factories.
+     * Constructs a new {@link MobileSecurityObjectFactory}.
      *
-     * @param valueDigestsFactory The factory used to create value digests for the {@link
-     *     MobileSecurityObject}.
-     * @param validityInfoFactory The factory used to create validity information for the {@link
-     *     MobileSecurityObject}.
-     * @param coseKeyFactory The factory used to create the COSE key for the {@link
-     *     MobileSecurityObject}.
+     * @param valueDigestsFactory Factory for creating value digests
+     * @param validityInfoFactory Factory for creating validity information
+     * @param coseKeyFactory Factory for creating COSE keys
      */
     public MobileSecurityObjectFactory(
             ValueDigestsFactory valueDigestsFactory,
@@ -55,27 +46,19 @@ public class MobileSecurityObjectFactory {
     }
 
     /**
-     * Builds a {@link MobileSecurityObject} instance from the provided namespaces and public key.
+     * Builds a new {@link MobileSecurityObject} instance using the provided parameters.
      *
-     * <p>This method creates a mobile security object by:
+     * <p>
      *
-     * <ul>
-     *   <li>Generating value digests for the provided namespaces
-     *   <li>Creating validity information with a one-year validity period
-     *   <li>Converting the EC public key to COSE key format
-     *   <li>Setting up key authorizations for all provided namespaces
-     * </ul>
-     *
-     * <p>The validity period is determined by the configured {@link ValidityInfoFactory}. The
-     * created MSO will authorize access to all namespaces provided in the input.
-     *
-     * @param nameSpaces A map where the key is the namespace string and the value is a list of
-     *     {@link IssuerSignedItem} objects belonging to that namespace. This map provides the data
-     *     used to generate the value digests for the {@link MobileSecurityObject}.
-     * @param publicKey The EC public key for device authentication. Must use the P-256 curve.
-     * @return The constructed {@link MobileSecurityObject} instance.
-     * @throws MDLException If an error occurs during the creation of the {@link ValueDigests}.
-     * @throws IllegalArgumentException If the public key does not use the P-256 curve.
+     * @param nameSpaces The namespaces from which to generate value digests.
+     * @param publicKey The device's elliptic curve public key that will be encoded into the COSE
+     *     key.
+     * @param statusListInformation Status list data containing index and URI information for
+     *     revocation or status checking.
+     * @param credentialTtlMinutes The credential time-to-live, in minutes, used to determine its
+     *     validity period.
+     * @return {@link MobileSecurityObject}
+     * @throws MDLException If an error occurs when building the {@link ValueDigests}
      */
     public MobileSecurityObject build(
             Namespaces nameSpaces,
