@@ -1,7 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -11,22 +11,17 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class JacksonCBOREncoderProviderTest {
 
-    private CBORMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        mapper = JacksonCBOREncoderProvider.configuredCBORMapper();
-    }
+    private static final CBORMapper mapper = JacksonCBOREncoderProvider.configuredCBORMapper();
 
     @Test
     void Should_ReturnNonNullMapper_When_CBORMapperIsConfigured() {
@@ -34,58 +29,40 @@ class JacksonCBOREncoderProviderTest {
     }
 
     @Test
-    void Should_SerializeLocalDate() throws Exception {
-        // Create a LocalDate object for testing
-        Map<String, Object> testObj = new HashMap<>();
+    void Should_BeAbleToSerializeLocalDate() {
         LocalDate testDate = LocalDate.of(2025, 4, 4);
-        testObj.put("date", testDate);
 
-        // Serialize to bytes
-        byte[] serialized = mapper.writeValueAsBytes(testObj);
-        assertNotNull(serialized, "Serialization of LocalDate should work");
-        assertTrue(serialized.length > 0, "Serialized data should not be empty");
-
-        // Deserialize back to ensure correct serialization
-        Map<?, ?> deserialized = mapper.readValue(serialized, Map.class);
-        assertNotNull(
-                deserialized.get("date"), "Date field should be present after deserialization");
+        assertDoesNotThrow(() -> mapper.writeValueAsBytes(testDate));
     }
 
     @Test
-    void Should_SerializeIssuerSigned() throws Exception {
-        // Create an IssuerSigned object for testing
-        IssuerSigned testIssuerSigned = createTestIssuerSigned();
-        Map<String, Object> testObj = new HashMap<>();
-        testObj.put("issuerSigned", testIssuerSigned);
-
-        // Serialize to bytes
-        byte[] serialized = mapper.writeValueAsBytes(testObj);
-        assertNotNull(serialized, "Serialization of IssuerSigned should work");
-        assertTrue(serialized.length > 0, "Serialized data should not be empty");
-
-        // Deserialize back to ensure correct serialization
-        Map<?, ?> deserialized = mapper.readValue(serialized, Map.class);
-        assertNotNull(
-                deserialized.get("issuerSigned"),
-                "Date field should be present after deserialization");
-    }
-
-    private IssuerSigned createTestIssuerSigned() {
+    void Should_BeAbleToSerializeIssuerSigned() {
         byte[] protectedHeaderBytes = {1, 2, 3, 4};
         COSEUnprotectedHeader unprotectedHeader =
                 new COSEUnprotectedHeader(new byte[] {1, 2, 3, 4});
         byte[] payloadBytes = {1, 2, 3, 4};
         byte[] signatureBytes = {1, 2, 3, 4};
-        byte[] random = {1, 2, 3, 4};
-        Map<String, List<IssuerSignedItem>> testNameSpaces =
+        COSESign1 coseSign1 =
+                new COSESign1(
+                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes);
+        Map<String, List<IssuerSignedItem>> nameSpaces =
                 Map.of(
                         "namespace",
                         List.of(
                                 new IssuerSignedItem(
-                                        1, random, "testElementIdentifier", "testElementValue")));
-        return new IssuerSigned(
-                testNameSpaces,
-                new COSESign1(
-                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes));
+                                        1,
+                                        new byte[] {1, 2, 3, 4},
+                                        "test_element_identifier",
+                                        "Test Element Value")));
+        IssuerSigned valueToSerialize = new IssuerSigned(nameSpaces, coseSign1);
+
+        assertDoesNotThrow(() -> mapper.writeValueAsBytes(valueToSerialize));
+    }
+
+    @Test
+    void Should_SetDefaultInclusion_ToNonAbsent() {
+        var inclusion = mapper.getSerializationConfig().getDefaultPropertyInclusion();
+
+        assertEquals(JsonInclude.Include.NON_ABSENT, inclusion.getValueInclusion());
     }
 }

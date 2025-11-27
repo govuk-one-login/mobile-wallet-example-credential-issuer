@@ -14,180 +14,107 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Issuer
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class IssuerSignedCBORSerializerTest {
 
+    private final IssuerSignedCBORSerializer serializer = new IssuerSignedCBORSerializer();
     @Mock private CBORGenerator cborGenerator;
-    @Mock private JsonGenerator regularGenerator;
     @Mock private SerializerProvider serializerProvider;
-    @Mock private IssuerSigned issuerSigned;
 
-    /** Serializes an IssuerSigned object with a single namespace containing multiple items. */
     @Test
     void Should_SerializeIssuerSigned_SingleNameSpaceWithMultipleItems() throws IOException {
-        // Arrange: Prepare a map with one namespace containing two items
-        Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
-        byte[] random1 = new byte[] {1, 2, 2};
-        byte[] random2 = new byte[] {1, 2, 4};
-        IssuerSignedItem issuerSignedItem1 =
-                new IssuerSignedItem(1, random1, "testElementIdentifier1", "testElementValue1");
-        IssuerSignedItem issuerSignedItem2 =
-                new IssuerSignedItem(2, random2, "testElementIdentifier2", "testElementValue2");
-        nameSpaces.put("namespace1", Arrays.asList(issuerSignedItem1, issuerSignedItem2));
-        when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
+        Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
+        namespaces.put("namespace1", List.of(buildTestItem(1), buildTestItem(2)));
+        COSESign1 issuerAuth = buildTestIssuerAuth();
+        IssuerSigned valueToSerialize = new IssuerSigned(namespaces, issuerAuth);
 
-        // Arrange: Prepare a CoseSign1 object
-        byte[] protectedHeaderBytes = {1, 2, 3, 4};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeader(new byte[] {1, 2, 3, 4});
-        byte[] payloadBytes = {5, 6, 7, 8};
-        byte[] signatureBytes = {9, 10, 11, 12};
-        COSESign1 issuerAuth =
-                new COSESign1(
-                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes);
-        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
-        // Act: Serialize the IssuerSigned object
-        new IssuerSignedCBORSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
-
-        // Assert: Verify the correct sequence of CBOR generator calls
         InOrder inOrder = inOrder(cborGenerator);
-
-        // Start the outer object and nameSpaces object
         inOrder.verify(cborGenerator).writeStartObject();
         inOrder.verify(cborGenerator).writeFieldName("nameSpaces");
         inOrder.verify(cborGenerator).writeStartObject();
-
-        // Write the namespace field and start the array for its items
         inOrder.verify(cborGenerator).writeFieldName("namespace1");
         inOrder.verify(cborGenerator).writeStartArray();
-
-        // For each item: write tag 24 then the item value
-        inOrder.verify(cborGenerator).writeTag(24);
-        byte[] issuerSignedItemBytes1 =
-                HexFormat.of()
-                        .parseHex(
-                                "a4686469676573744944016672616e646f6d4301020271656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572316c656c656d656e7456616c75657174657374456c656d656e7456616c756531");
-        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes1);
-        inOrder.verify(cborGenerator).writeTag(24);
-        byte[] issuerSignedItemBytes2 =
-                HexFormat.of()
-                        .parseHex(
-                                "a4686469676573744944026672616e646f6d4301020471656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572326c656c656d656e7456616c75657174657374456c656d656e7456616c756532");
-        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes2);
-
-        // Close the array and objects
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace1").get(0));
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace1").get(1));
         inOrder.verify(cborGenerator).writeEndArray();
         inOrder.verify(cborGenerator).writeEndObject();
-
-        // Write the issuerAuth field and start the array for its items
         inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
         inOrder.verify(cborGenerator).writeStartArray();
-        // Write issuerAuth (COSE_Sign1) items
-        inOrder.verify(cborGenerator).writeBinary(protectedHeaderBytes);
-        inOrder.verify(cborGenerator).writeObject(unprotectedHeader);
-        inOrder.verify(cborGenerator).writeBinary(payloadBytes);
-        inOrder.verify(cborGenerator).writeBinary(signatureBytes);
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.protectedHeader());
+        inOrder.verify(cborGenerator).writeObject(issuerAuth.unprotectedHeader());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.payload());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.signature());
         inOrder.verify(cborGenerator).writeEndArray();
-
-        // End the outer object
         inOrder.verify(cborGenerator).writeEndObject();
     }
 
-    /** Serializes an IssuerSigned object with multiple nameSpaces. */
     @Test
     void Should_SerializeIssuerSignedWithCBORGenerator_MultipleNameSpaces() throws IOException {
-        // Arrange: Prepare a map with two nameSpaces, each containing one item
-        Map<String, List<IssuerSignedItem>> nameSpaces = new LinkedHashMap<>();
-        byte[] random1 = new byte[] {1, 2, 2};
-        byte[] random2 = new byte[] {1, 2, 4};
-        IssuerSignedItem issuerSignedItem1 =
-                new IssuerSignedItem(1, random1, "testElementIdentifier1", "testElementValue1");
-        IssuerSignedItem issuerSignedItem2 =
-                new IssuerSignedItem(2, random2, "testElementIdentifier2", "testElementValue2");
-        nameSpaces.put("namespace1", List.of(issuerSignedItem1));
-        nameSpaces.put("namespace2", List.of(issuerSignedItem2));
-        when(issuerSigned.nameSpaces()).thenReturn(nameSpaces);
+        Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
+        namespaces.put("namespace1", List.of(buildTestItem(1)));
+        namespaces.put("namespace2", List.of(buildTestItem(1)));
+        COSESign1 issuerAuth = buildTestIssuerAuth();
+        IssuerSigned valueToSerialize = new IssuerSigned(namespaces, issuerAuth);
 
-        // Arrange: Prepare a CoseSign1 object
-        byte[] protectedHeaderBytes = {1, 2, 3, 4};
-        COSEUnprotectedHeader unprotectedHeader =
-                new COSEUnprotectedHeader(new byte[] {1, 2, 3, 4});
-        byte[] payloadBytes = {5, 6, 7, 8};
-        byte[] signatureBytes = {9, 10, 11, 12};
-        COSESign1 issuerAuth =
-                new COSESign1(
-                        protectedHeaderBytes, unprotectedHeader, payloadBytes, signatureBytes);
-        when(issuerSigned.issuerAuth()).thenReturn(issuerAuth);
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
-        // Act: Serialize the IssuerSigned object
-        new IssuerSignedCBORSerializer().serialize(issuerSigned, cborGenerator, serializerProvider);
-
-        // Assert: Verify the correct sequence of CBOR generator calls
         InOrder inOrder = inOrder(cborGenerator);
-
-        // Start the outer object and nameSpaces object
         inOrder.verify(cborGenerator).writeStartObject();
         inOrder.verify(cborGenerator).writeFieldName("nameSpaces");
         inOrder.verify(cborGenerator).writeStartObject();
-
-        // Write the first namespace and its item
         inOrder.verify(cborGenerator).writeFieldName("namespace1");
         inOrder.verify(cborGenerator).writeStartArray();
-        inOrder.verify(cborGenerator).writeTag(24);
-        byte[] issuerSignedItemBytes1 =
-                HexFormat.of()
-                        .parseHex(
-                                "a4686469676573744944016672616e646f6d4301020271656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572316c656c656d656e7456616c75657174657374456c656d656e7456616c756531");
-        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes1);
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace1").get(0));
         inOrder.verify(cborGenerator).writeEndArray();
-
-        // Write the second namespace and its item
         inOrder.verify(cborGenerator).writeFieldName("namespace2");
         inOrder.verify(cborGenerator).writeStartArray();
-        inOrder.verify(cborGenerator).writeTag(24);
-        byte[] issuerSignedItemBytes2 =
-                HexFormat.of()
-                        .parseHex(
-                                "a4686469676573744944026672616e646f6d4301020471656c656d656e744964656e7469666965727674657374456c656d656e744964656e746966696572326c656c656d656e7456616c75657174657374456c656d656e7456616c756532");
-        inOrder.verify(cborGenerator).writeBinary(issuerSignedItemBytes2);
+        inOrder.verify(cborGenerator).writeObject(namespaces.get("namespace2").get(0));
         inOrder.verify(cborGenerator).writeEndArray();
-
-        // Close nameSpaces object
         inOrder.verify(cborGenerator).writeEndObject();
-
-        // Write the issuerAuth field and start the array for its items
         inOrder.verify(cborGenerator).writeFieldName("issuerAuth");
         inOrder.verify(cborGenerator).writeStartArray();
-        // Write issuerAuth (COSE_Sign1) items
-        inOrder.verify(cborGenerator).writeBinary(protectedHeaderBytes);
-        inOrder.verify(cborGenerator).writeObject(unprotectedHeader);
-        inOrder.verify(cborGenerator).writeBinary(payloadBytes);
-        inOrder.verify(cborGenerator).writeBinary(signatureBytes);
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.protectedHeader());
+        inOrder.verify(cborGenerator).writeObject(issuerAuth.unprotectedHeader());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.payload());
+        inOrder.verify(cborGenerator).writeBinary(issuerAuth.signature());
         inOrder.verify(cborGenerator).writeEndArray();
-
-        // End the outer object
         inOrder.verify(cborGenerator).writeEndObject();
     }
 
-    /** Throws an exception if a non-CBOR generator is used. */
     @Test
     void Should_ThrowIllegalArgumentException_When_SerializerIsNonCBORGenerator() {
-        // Act & Assert: Attempting to serialize with a regular (non-CBOR) generator should fail
-        IssuerSignedCBORSerializer issuerSignedCBORSerializer = new IssuerSignedCBORSerializer();
+        JsonGenerator invalidGenerator = mock(JsonGenerator.class);
+
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () ->
-                                issuerSignedCBORSerializer.serialize(
-                                        issuerSigned, regularGenerator, serializerProvider));
+                        () -> {
+                            serializer.serialize(
+                                    mock(IssuerSigned.class), invalidGenerator, serializerProvider);
+                        });
         assertEquals("Requires CBORGenerator", exception.getMessage());
+    }
+
+    private IssuerSignedItem buildTestItem(int id) {
+        return new IssuerSignedItem(id, new byte[] {1, 2}, "elementId", "elementValue");
+    }
+
+    private COSESign1 buildTestIssuerAuth() {
+        byte[] protectedHeader = {1, 2, 3};
+        byte[] payload = {4, 5, 6};
+        byte[] signature = {7, 8, 9};
+        COSEUnprotectedHeader unprotectedHeader = new COSEUnprotectedHeader(new byte[] {10});
+        return new COSESign1(protectedHeader, unprotectedHeader, payload, signature);
     }
 }

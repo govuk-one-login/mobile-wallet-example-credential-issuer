@@ -1,24 +1,43 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * Custom Jackson serializer for {@link IssuerSignedItem} to CBOR format.
+ * CBOR serializer for {@link IssuerSignedItem}.
  *
- * <p>This serializer encodes the {@link IssuerSignedItem} into a CBOR byte array, then writes it as
- * a tagged CBOR binary with tag 24. Tag 24 indicates that the following byte string contains a
- * fully encoded embedded CBOR data item.
+ * <p>Serializes an {@link IssuerSignedItem} object as an embedded CBOR data item (RFC 8949).
+ *
+ * <ul>
+ *   <li>Encodes the item using the current codec and an inner CBOR generator.
+ *   <li>Prefixes with CBOR tag 24 to mark the following byte string as embedded CBOR.
+ *   <li>Writes the map's CBOR byte string after the tag.
+ * </ul>
  */
-public class IssuerSignedItemCBORSerializer extends JsonSerializer<IssuerSignedItem> {
+public class IssuerSignedItemCBORSerializer extends StdSerializer<IssuerSignedItem> {
+    public IssuerSignedItemCBORSerializer() {
+        super(IssuerSignedItem.class);
+    }
+
+    /**
+     * Serializes {@link IssuerSignedItem} as embedded CBOR (tag 24 + byte string).
+     *
+     * @param value the {@link IssuerSignedItem} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
+     */
     @Override
     public void serialize(
-            final IssuerSignedItem issuerSignedItem,
+            final IssuerSignedItem value,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
@@ -26,9 +45,13 @@ public class IssuerSignedItemCBORSerializer extends JsonSerializer<IssuerSignedI
             throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
-        byte[] encodedBytes =
-                IssuerSignedItemEncoder.encode(issuerSignedItem, generator.getCodec());
+        CBORFactory factory = new CBORFactory();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (CBORGenerator innerGenerator = factory.createGenerator(baos)) {
+            innerGenerator.setCodec(generator.getCodec());
+            IssuerSignedItemWriter.write(innerGenerator, value);
+        }
         cborGenerator.writeTag(24);
-        cborGenerator.writeBinary(encodedBytes);
+        cborGenerator.writeBinary(baos.toByteArray());
     }
 }

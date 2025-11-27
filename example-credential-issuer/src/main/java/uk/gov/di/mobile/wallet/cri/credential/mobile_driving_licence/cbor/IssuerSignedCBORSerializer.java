@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
@@ -13,26 +13,41 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Serializer for {@link IssuerSigned} to CBOR format.
+ * CBOR serializer for {@link IssuerSigned}.
  *
- * <p>Serializes the 'namespaces' map by encoding each {@link IssuerSignedItem} into a CBOR byte
- * array, tagging it with CBOR tag 24 to indicate embedded CBOR data. Writes the 'issuerAuth' field
- * as a CBOR array with its components.
+ * <p>Serializes an {@link IssuerSigned} object as a definite-length CBOR map with two entries:
+ *
+ * <ul>
+ *   <li><b>nameSpaces</b>: a definite-length CBOR map from namespace strings to arrays of {@link
+ *       IssuerSignedItem} objects serialized via the configured {@link IssuerSignedCBORSerializer}
+ *   <li><b>issuerAuth</b>: a COSE_Sign1 structure represented as an array of four elements:
+ *       <ol>
+ *         <li>protected header, a byte string
+ *         <li>unprotected header, a definite-length CBOR map serialized via the configured {@link
+ *             COSEUnprotectedHeaderSerializer}
+ *         <li>payload, a byte string
+ *         <li>signature, a byte string
+ *       </ol>
+ * </ul>
  */
-public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
+public class IssuerSignedCBORSerializer extends StdSerializer<IssuerSigned> {
+
+    public IssuerSignedCBORSerializer() {
+        super(IssuerSigned.class);
+    }
 
     /**
-     * Serializes the {@link IssuerSigned} object to CBOR.
+     * Serializes a {@link IssuerSigned} object as a definite-length CBOR map.
      *
-     * @param issuerSigned The {@link IssuerSigned} object to serialize.
-     * @param generator The {@link JsonGenerator} (must be a {@link CBORGenerator}).
-     * @param serializer The {@link SerializerProvider}.
-     * @throws IOException If an I/O error occurs during serialization.
-     * @throws IllegalArgumentException If the provided generator is not a {@link CBORGenerator}.
+     * @param value the {@link IssuerSigned} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
      */
     @Override
     public void serialize(
-            final IssuerSigned issuerSigned,
+            final IssuerSigned value,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
@@ -44,24 +59,18 @@ public class IssuerSignedCBORSerializer extends JsonSerializer<IssuerSigned> {
 
         cborGenerator.writeFieldName("nameSpaces");
         cborGenerator.writeStartObject();
-        for (Map.Entry<String, List<IssuerSignedItem>> entry :
-                issuerSigned.nameSpaces().entrySet()) {
+        for (Map.Entry<String, List<IssuerSignedItem>> entry : value.nameSpaces().entrySet()) {
             cborGenerator.writeFieldName(entry.getKey());
             cborGenerator.writeStartArray();
 
             for (IssuerSignedItem issuerSignedItem : entry.getValue()) {
-                byte[] encodedBytes =
-                        IssuerSignedItemEncoder.encode(issuerSignedItem, generator.getCodec());
-                // '24' is a tag that represents encoded CBOR data items. It's used when
-                // embedding CBOR data within CBOR.
-                cborGenerator.writeTag(24);
-                cborGenerator.writeBinary(encodedBytes);
+                cborGenerator.writeObject(issuerSignedItem);
             }
             cborGenerator.writeEndArray();
         }
         cborGenerator.writeEndObject();
 
-        COSESign1 issuerAuth = issuerSigned.issuerAuth();
+        COSESign1 issuerAuth = value.issuerAuth();
         cborGenerator.writeFieldName("issuerAuth");
         cborGenerator.writeStartArray();
         cborGenerator.writeBinary(issuerAuth.protectedHeader());

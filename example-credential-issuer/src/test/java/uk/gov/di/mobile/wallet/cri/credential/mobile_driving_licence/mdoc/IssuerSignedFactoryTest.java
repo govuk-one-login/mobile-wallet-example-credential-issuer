@@ -74,7 +74,7 @@ class IssuerSignedFactoryTest {
         Map<String, List<IssuerSignedItem>> namespacesMap = new LinkedHashMap<>();
         namespacesMap.put(
                 "namespace1", Arrays.asList(mockIssuerSignedItem1, mockIssuerSignedItem2));
-        namespacesMap.put("namespace2", Arrays.asList(mockIssuerSignedItem1));
+        namespacesMap.put("namespace2", List.of(mockIssuerSignedItem1));
 
         when(mockNamespaces.namespaces()).thenReturn(namespacesMap);
         when(mockMobileSecurityObjectFactory.build(

@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cbor;
 
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORFactory;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.MobileSecurityObject;
@@ -10,10 +10,34 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.Mobile
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-public class MobileSecurityObjectSerializer extends JsonSerializer<MobileSecurityObject> {
+/**
+ * CBOR serializer for {@link MobileSecurityObject}.
+ *
+ * <p>Serializes an {@link MobileSecurityObject} object as an embedded CBOR data item (RFC 8949).
+ *
+ * <ul>
+ *   <li>Encodes the item using the current codec and an inner CBOR generator.
+ *   <li>Prefixes with CBOR tag 24 to mark the following byte string as embedded CBOR.
+ *   <li>Writes the map's CBOR byte string after the tag.
+ * </ul>
+ */
+public class MobileSecurityObjectSerializer extends StdSerializer<MobileSecurityObject> {
+    public MobileSecurityObjectSerializer() {
+        super(MobileSecurityObject.class);
+    }
+
+    /**
+     * Serializes {@link MobileSecurityObject} as embedded CBOR (tag 24 + byte string).
+     *
+     * @param value the {@link MobileSecurityObject} object to serialize
+     * @param generator the {@link CBORGenerator} used to write CBOR-formatted output
+     * @param serializer the {@link SerializerProvider} used to find other serializers
+     * @throws IllegalArgumentException if the generator is not a {@link CBORGenerator}
+     * @throws IOException on write errors
+     */
     @Override
     public void serialize(
-            final MobileSecurityObject mobileSecurityObject,
+            final MobileSecurityObject value,
             final JsonGenerator generator,
             final SerializerProvider serializer)
             throws IOException {
@@ -23,25 +47,9 @@ public class MobileSecurityObjectSerializer extends JsonSerializer<MobileSecurit
 
         CBORFactory factory = new CBORFactory();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
         try (CBORGenerator innerGenerator = factory.createGenerator(baos)) {
             innerGenerator.setCodec(generator.getCodec());
-
-            innerGenerator.writeStartObject(7);
-            innerGenerator.writeStringField("version", mobileSecurityObject.version());
-            innerGenerator.writeStringField(
-                    "digestAlgorithm", mobileSecurityObject.digestAlgorithm());
-            innerGenerator.writeFieldName("valueDigests");
-            innerGenerator.writeObject(mobileSecurityObject.valueDigests());
-            innerGenerator.writeFieldName("deviceKeyInfo");
-            innerGenerator.writeObject(mobileSecurityObject.deviceKeyInfo());
-            innerGenerator.writeFieldName("docType");
-            innerGenerator.writeString(mobileSecurityObject.docType());
-            innerGenerator.writeFieldName("validityInfo");
-            innerGenerator.writeObject(mobileSecurityObject.validityInfo());
-            innerGenerator.writeFieldName("status");
-            innerGenerator.writeObject(mobileSecurityObject.status());
-            innerGenerator.writeEndObject();
+            MobileSecurityObjectWriter.write(innerGenerator, value);
         }
         cborGenerator.writeTag(24);
         cborGenerator.writeBinary(baos.toByteArray());
