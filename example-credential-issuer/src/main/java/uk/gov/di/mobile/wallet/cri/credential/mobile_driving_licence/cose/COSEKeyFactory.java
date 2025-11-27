@@ -13,8 +13,7 @@ import static uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose
 /**
  * Factory for creating {@link COSEKey} instance from an EC public key.
  *
- * <p>This factory encapsulates the logic for converting a Java {@link ECPublicKey} into a COSE_Key
- * (CBOR Object Signing and Encryption key) format, as required for mobile security objects.
+ * <p>This factory contains the logic for converting a Java {@link ECPublicKey} into a COSE_Key.
  */
 public class COSEKeyFactory {
 

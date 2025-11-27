@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class COSEKeyTest {
 
     @Test
-    void Should_CreateRecordWithAllFields() {
+    void shouldCreateRecordWithAllFields() {
         int keyType = 1;
         int curve = 2;
         byte[] x = {1, 2, 3};
@@ -25,49 +25,53 @@ class COSEKeyTest {
     }
 
     @Test
-    void Should_BeEqual_When_ArrayContentIsSame() {
+    void shouldBeEqualWhenArraysAreEqual() {
         COSEKey result1 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
         COSEKey result2 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
+
         assertEquals(result1, result2);
     }
 
     @Test
-    void Should_NotBeEqual_When_KeyTypeDiffers() {
+    void shouldNotBeEqualWhenKeyTypeIsDifferent() {
         COSEKey result1 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
         COSEKey result2 = new COSEKey(9, 2, new byte[] {1, 2}, new byte[] {3, 4});
+
         assertNotEquals(result1, result2);
     }
 
     @Test
-    void Should_NotBeEqual_When_CurveDiffers() {
+    void shouldNotBeEqualWhenCurveIsDifferent() {
         COSEKey result1 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
         COSEKey result2 = new COSEKey(1, 9, new byte[] {1, 2}, new byte[] {3, 4});
+
         assertNotEquals(result1, result2);
     }
 
     @Test
-    void Should_NotBeEqual_When_XDiffers() {
+    void shouldNotBeEqualWhenXIsDifferent() {
         COSEKey result1 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
         COSEKey result2 = new COSEKey(1, 2, new byte[] {9, 9}, new byte[] {3, 4});
         assertNotEquals(result1, result2);
     }
 
     @Test
-    void Should_NotBeEqual_When_YDiffers() {
+    void shouldNotBeEqualWhenYIsDifferent() {
         COSEKey result1 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
         COSEKey result2 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {9, 9});
         assertNotEquals(result1, result2);
     }
 
     @Test
-    void Should_HaveSameHashCodeForEqualObjects() {
+    void shouldHaveSameHashCodeForEqualObjects() {
         COSEKey result1 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
         COSEKey result2 = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
+
         assertEquals(result1.hashCode(), result2.hashCode());
     }
 
     @Test
-    void Should_IncludeArrayContentInToString() {
+    void shouldIncludeArrayContentInToString() {
         COSEKey result = new COSEKey(1, 2, new byte[] {1, 2}, new byte[] {3, 4});
         String toString = result.toString();
 
