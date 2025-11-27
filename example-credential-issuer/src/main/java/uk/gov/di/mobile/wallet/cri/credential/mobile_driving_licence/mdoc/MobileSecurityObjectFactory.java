@@ -83,20 +83,20 @@ public class MobileSecurityObjectFactory {
             StatusListClient.StatusListInformation statusListInformation,
             long credentialTtlMinutes)
             throws MDLException {
+        COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
+        Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
+        KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
+        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         ValidityInfo validityInfo = validityInfoFactory.build(credentialTtlMinutes);
         StatusList statusList =
                 new StatusList(statusListInformation.idx(), statusListInformation.uri());
         Status status = new Status(statusList);
-        COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
-
-        Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
-        KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
 
         return new MobileSecurityObject(
                 MSO_VERSION,
                 valueDigestsFactory.getDigestAlgorithm(),
-                new DeviceKeyInfo(coseKey, keyAuthorizations),
+                deviceKeyInfo,
                 valueDigests,
                 DOC_TYPE,
                 validityInfo,
