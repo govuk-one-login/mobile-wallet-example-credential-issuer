@@ -31,6 +31,8 @@ public final class JacksonCBOREncoderProvider {
                                 MobileSecurityObject.class, new MobileSecurityObjectSerializer())
                         .addSerializer(IssuerSigned.class, new IssuerSignedCBORSerializer())
                         .addSerializer(new DrivingPrivilegeSerializer())
+                        .addSerializer(new COSEProtectedHeaderSerializer())
+                        .addSerializer(new COSEUnprotectedHeaderSerializer())
                         .addSerializer(new ValidityInfoSerializer())
                         .addSerializer(new StatusSerializer())
                         .addSerializer(new DeviceKeyInfoSerializer())
