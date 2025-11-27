@@ -2,36 +2,20 @@ package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.junit.jupiter.MockitoExtension;
+import testUtils.EcKeyHelper;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEEllipticCurves;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.constants.COSEKeyTypes;
 
-import java.math.BigInteger;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.KeyPairGenerator;
+import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
-import java.security.spec.ECFieldFp;
-import java.security.spec.ECParameterSpec;
-import java.security.spec.ECPoint;
-import java.security.spec.EllipticCurve;
-import java.util.Map;
+import java.security.spec.ECGenParameterSpec;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Answers.CALLS_REAL_METHODS;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
 class COSEKeyFactoryTest {
-
-    @Mock private ECPublicKey mockEcPublicKey;
-    @Mock private ECParameterSpec mockParams;
-    @Mock private EllipticCurve mockCurve;
-    @Mock private ECFieldFp mockField;
-    @Mock private ECPoint mockPoint;
 
     private COSEKeyFactory coseKeyFactory;
 
@@ -41,54 +25,38 @@ class COSEKeyFactoryTest {
     }
 
     @Test
-    void Should_ConvertP256KeyToCOSEKey() {
-        // Arrange: Mock EC key
-        when(mockEcPublicKey.getParams()).thenReturn(mockParams);
-        when(mockParams.getCurve()).thenReturn(mockCurve);
-        when(mockCurve.getField()).thenReturn(mockField);
-        when(mockField.getFieldSize()).thenReturn(256); // P-256 curve
-        when(mockEcPublicKey.getW()).thenReturn(mockPoint);
-        final BigInteger x = new BigInteger("123456789");
-        final BigInteger y = new BigInteger("987654321");
-        when(mockPoint.getAffineX()).thenReturn(x);
-        when(mockPoint.getAffineY()).thenReturn(y);
+    void Should_ConvertP256KeyToCOSEKey() throws Exception {
+        ECPublicKey ecPublicKey = EcKeyHelper.getEcKey().toECPublicKey();
 
-        // Arrange: Mock static method for converting BigInteger to fixed-length bytes
-        final byte[] xBytes = new byte[] {1, 2, 3, 4};
-        final byte[] yBytes = new byte[] {5, 6, 7, 8};
-        try (MockedStatic<BigIntegerToFixedBytes> mocked =
-                mockStatic(BigIntegerToFixedBytes.class, CALLS_REAL_METHODS)) {
-            mocked.when(() -> BigIntegerToFixedBytes.bigIntegerToFixedBytes(x, 256))
-                    .thenReturn(xBytes);
-            mocked.when(() -> BigIntegerToFixedBytes.bigIntegerToFixedBytes(y, 256))
-                    .thenReturn(yBytes);
+        COSEKey coseKey = coseKeyFactory.fromECPublicKey(ecPublicKey);
 
-            // Act: Convert EC key to COSEKey
-            COSEKey coseKey = coseKeyFactory.fromECPublicKey(mockEcPublicKey);
-
-            // Assert: COSEKey parameters match expectations
-            Map<Integer, Object> parameters = coseKey.parameters();
-            assertEquals(4, parameters.size(), "COSEKey map should have 4 items");
-            assertEquals(COSEKeyTypes.EC2, parameters.get(1), "Key type should be EC2");
-            assertEquals(COSEEllipticCurves.P256, parameters.get(-1), "Curve should be P-256");
-            assertArrayEquals(xBytes, (byte[]) parameters.get(-2), "x coordinate bytes match");
-            assertArrayEquals(yBytes, (byte[]) parameters.get(-3), "y coordinate bytes match");
-        }
+        assertEquals(COSEKeyTypes.EC2, coseKey.keyType(), "Key type should be EC2");
+        assertEquals(COSEEllipticCurves.P256, coseKey.curve(), "Curve should be P-256");
+        assertEquals(32, coseKey.x().length, "x must be 32 bytes for P-256");
+        assertEquals(32, coseKey.y().length, "y must be 32 bytes for P-256");
     }
 
     @Test
-    void Should_ThrowIllegalArgumentException_When_NonP256Curve() {
-        // Arrange: Mock EC key
-        when(mockEcPublicKey.getParams()).thenReturn(mockParams);
-        when(mockParams.getCurve()).thenReturn(mockCurve);
-        when(mockCurve.getField()).thenReturn(mockField);
-        when(mockField.getFieldSize()).thenReturn(384); // P-384 curve
+    void Should_ThrowIllegalArgumentException_When_KeyIsNull() {
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class, () -> coseKeyFactory.fromECPublicKey(null));
+        assertEquals("publicKey must not be null", exception.getMessage());
+    }
 
-        // Act & Assert
+    @Test
+    void Should_ThrowIllegalArgumentException_When_NonP256Curve()
+            throws NoSuchAlgorithmException, InvalidAlgorithmParameterException {
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("EC");
+        kpg.initialize(new ECGenParameterSpec("secp384r1")); // non P-256 curve
+        ECPublicKey ecPublicKey = (ECPublicKey) kpg.generateKeyPair().getPublic();
+
         IllegalArgumentException exception =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> coseKeyFactory.fromECPublicKey(mockEcPublicKey));
-        assertEquals("Invalid key curve - expected P-256", exception.getMessage());
+                        () -> coseKeyFactory.fromECPublicKey(ecPublicKey));
+        assertEquals(
+                "Invalid EC key curve: expected P-256 (secp256r1), got field size 384 bits",
+                exception.getMessage());
     }
 }

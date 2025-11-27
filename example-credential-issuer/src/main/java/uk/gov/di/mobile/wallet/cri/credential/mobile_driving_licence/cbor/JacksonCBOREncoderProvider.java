@@ -32,7 +32,11 @@ public final class JacksonCBOREncoderProvider {
                         .addSerializer(IssuerSigned.class, new IssuerSignedCBORSerializer())
                         .addSerializer(new DrivingPrivilegeSerializer())
                         .addSerializer(new COSEProtectedHeaderSerializer())
-                        .addSerializer(new COSEUnprotectedHeaderSerializer());
+                        .addSerializer(new COSEUnprotectedHeaderSerializer())
+                        .addSerializer(new ValidityInfoSerializer())
+                        .addSerializer(new StatusSerializer())
+                        .addSerializer(new DeviceKeyInfoSerializer())
+                        .addSerializer(new ValueDigestsSerializer());
 
         CBORMapper mapper = new CBORMapper();
         mapper.registerModule(simpleModule)
