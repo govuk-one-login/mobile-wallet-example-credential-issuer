@@ -13,6 +13,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEPr
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
@@ -41,7 +42,7 @@ class COSEProtectedHeaderSerializerTest {
         JsonGenerator invalidGenerator = mock(JsonGenerator.class);
 
         IllegalArgumentException exception =
-                org.junit.jupiter.api.Assertions.assertThrows(
+                assertThrows(
                         IllegalArgumentException.class,
                         () -> {
                             serializer.serialize(

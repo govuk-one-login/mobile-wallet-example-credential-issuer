@@ -74,6 +74,7 @@ class COSESign1BuilderTest {
 
     @Test
     void Should_ThrowIllegalArgumentException_When_UnprotectedHeaderIsNotSet() {
+
         builder.protectedHeader(testProtectedHeader).payload(testPayload).signature(testSignature);
 
         IllegalStateException exception =
