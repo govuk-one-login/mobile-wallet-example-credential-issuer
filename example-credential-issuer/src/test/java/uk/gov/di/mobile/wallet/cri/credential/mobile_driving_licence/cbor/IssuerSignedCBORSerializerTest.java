@@ -9,6 +9,7 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSESign1;
+import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose.COSEUnprotectedHeader;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.mdoc.IssuerSignedItem;
 
@@ -44,7 +45,8 @@ class IssuerSignedCBORSerializerTest {
 
         // Arrange: Prepare a CoseSign1 object
         byte[] protectedHeaderBytes = {1, 2, 3, 4};
-        Map<Integer, Object> unprotectedHeader = new HashMap<>();
+        COSEUnprotectedHeader unprotectedHeader =
+                new COSEUnprotectedHeader(new byte[] {1, 2, 3, 4});
         byte[] payloadBytes = {5, 6, 7, 8};
         byte[] signatureBytes = {9, 10, 11, 12};
         COSESign1 issuerAuth =
@@ -116,7 +118,8 @@ class IssuerSignedCBORSerializerTest {
 
         // Arrange: Prepare a CoseSign1 object
         byte[] protectedHeaderBytes = {1, 2, 3, 4};
-        Map<Integer, Object> unprotectedHeader = new HashMap<>();
+        COSEUnprotectedHeader unprotectedHeader =
+                new COSEUnprotectedHeader(new byte[] {1, 2, 3, 4});
         byte[] payloadBytes = {5, 6, 7, 8};
         byte[] signatureBytes = {9, 10, 11, 12};
         COSESign1 issuerAuth =

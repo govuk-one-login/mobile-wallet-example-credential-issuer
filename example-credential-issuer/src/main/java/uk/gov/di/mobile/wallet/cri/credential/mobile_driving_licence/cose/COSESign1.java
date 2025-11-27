@@ -1,12 +1,11 @@
 package uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.cose;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Objects;
 
 public record COSESign1(
         byte[] protectedHeader,
-        Map<Integer, Object> unprotectedHeader,
+        COSEUnprotectedHeader unprotectedHeader,
         byte[] payload,
         byte[] signature) {
 
