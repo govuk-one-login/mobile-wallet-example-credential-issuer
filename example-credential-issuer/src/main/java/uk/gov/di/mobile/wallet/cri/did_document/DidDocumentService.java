@@ -28,7 +28,10 @@ public class DidDocumentService {
             throws PEMException, NoSuchAlgorithmException, KeyNotActiveException {
 
         String keyAlias = configurationService.getSigningKeyAlias();
-        String controller = CONTROLLER_PREFIX + configurationService.getDidController();
+        String controller = CONTROLLER_PREFIX + configurationService.getSelfUrl().getHost();
+        System.out.println(controller);
+        System.out.println(configurationService.getSelfUrl());
+        System.out.println(configurationService.getSelfUrl().getHost());
         Did did = generateDid(keyAlias, controller);
         List<Did> verificationMethod = Collections.singletonList(did);
         List<String> assertionMethod = Collections.singletonList(did.getId());

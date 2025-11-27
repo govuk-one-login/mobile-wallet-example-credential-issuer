@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
@@ -49,7 +50,7 @@ class CredentialOfferServiceTest {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
         when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER))
                 .thenReturn(preAuthorizedCode);
-        when(configurationService.getSelfUrl()).thenReturn(CREDENTIAL_ISSUER);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
                 credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE);

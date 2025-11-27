@@ -142,8 +142,8 @@ public class ConfigurationService extends Configuration {
      *
      * @return The service's own URL as a string
      */
-    public String getSelfUrl() {
-        return createValidatedUri("SELF_URL", "http://localhost:8080").toString();
+    public URI getSelfUrl() {
+        return createValidatedUri("SELF_URL", "http://localhost:8080");
     }
 
     /**
@@ -151,15 +151,15 @@ public class ConfigurationService extends Configuration {
      *
      * @return The DID controller
      */
-    public String getDidController() {
-        return getEnvOrDefault("DID_CONTROLLER", "localhost:8080");
-    }
-
-    /**
-     * Gets the wallet mobile app deep link URL.
-     *
-     * @return The wallet deep link URL as a string
-     */
+    //    public String getDidController() {
+    //        return getEnvOrDefault("DID_CONTROLLER", "localhost:8080");
+    //    }
+    //
+    //    /**
+    //     * Gets the wallet mobile app deep link URL.
+    //     *
+    //     * @return The wallet deep link URL as a string
+    //     */
     public String getWalletDeepLinkUrl() {
         return createValidatedUri(
                         "WALLET_APP_DEEP_LINK_URL", "https://mobile.account.gov.uk/wallet")

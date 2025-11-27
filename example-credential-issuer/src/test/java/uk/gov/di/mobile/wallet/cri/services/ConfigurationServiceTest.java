@@ -168,30 +168,16 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ReturnExampleCriUrlDefaultValue_When_EnvVarNotSet() {
-        assertEquals("http://localhost:8080", configurationService.getSelfUrl());
+    void Should_ReturnSelfUrlDefaultValue_When_EnvVarNotSet() throws URISyntaxException {
+        assertEquals(new URI("http://localhost:8080"), configurationService.getSelfUrl());
     }
 
     @Test
-    void Should_ReturnExampleCriUrlEnvVarValue() {
-        environmentVariables.set(
-                "SELF_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
+    void Should_ReturnSelfUrlEnvVarValue() throws URISyntaxException {
+        environmentVariables.set("SELF_URL", "https://example-credential-issuer.gov.uk");
         assertEquals(
-                "https://example-credential-issuer.mobile.test.account.gov.uk",
+                new URI("https://example-credential-issuer.gov.uk"),
                 configurationService.getSelfUrl());
-    }
-
-    @Test
-    void Should_ReturnDidControllerDefaultValue_When_EnvVarNotSet() {
-        assertEquals("localhost:8080", configurationService.getDidController());
-    }
-
-    @Test
-    void Should_ReturnDidControllerEnvVarValue() {
-        environmentVariables.set("DID_CONTROLLER", "https://example-credential-issuer.gov.uk");
-        assertEquals(
-                "https://example-credential-issuer.gov.uk",
-                configurationService.getDidController());
     }
 
     @Test

@@ -420,13 +420,6 @@ Resources:
                 - !Sub
                   - "https://${AWS::StackName}-${SelfUrl}"
                   - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
-            - Name: DID_CONTROLLER
-              Value: !If
-                - StackNameIsWalletCredIssuerBE
-                - !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
-                - !Sub
-                  - "${AWS::StackName}-${SelfUrl}"
-                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
             - Name: OIDC_CLIENT_ID
               Value: !Sub "{{resolve:ssm:/${DocumentBuilderStackName}/Config/OIDC/Client/Id}}"
             - Name: CREDENTIAL_STORE_URL
