@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.DigitalVeteranCardHandler;
