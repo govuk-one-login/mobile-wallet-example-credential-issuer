@@ -183,7 +183,7 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnDidControllerDefaultValue_When_EnvVarNotSet() {
-        assertEquals("localhost:8080", configurationService.getDidController());
+        assertEquals("localhost", configurationService.getDidController());
     }
 
     @Test

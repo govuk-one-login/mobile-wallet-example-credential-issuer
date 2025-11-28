@@ -1,0 +1,41 @@
+services:
+  localstack:
+    container_name: localstack
+    image: localstack/localstack:latest
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=dynamodb,kms,s3
+      - AWS_ACCESS_KEY_ID=na
+      - AWS_SECRET_ACCESS_KEY=na
+      - AWS_DEFAULT_REGION=eu-west-2
+    volumes:
+      - ../localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
+  imposter:
+    container_name: imposter_mock
+    image: outofcoffee/imposter
+    ports:
+      - "8001:8080"
+    volumes:
+      - ./mocks/config:/opt/imposter/config
+  cri:
+    container_name: example_cri
+    platform: linux/amd64
+    build:
+      context: ..
+      dockerfile: ./Dockerfile
+    environment:
+      - AWS_ACCESS_KEY_ID=na
+      - AWS_SECRET_ACCESS_KEY=na
+      - AWS_REGION=eu-west-2
+      - AWS_ENDPOINT=http://localstack:4566
+      - ONE_LOGIN_AUTH_SERVER_URL=http://test-harness:3001
+      - SELF_URL=http://example_cri:8080
+      - DID_CONTROLLER=example_cri
+      - CREDENTIAL_STORE_URL=http://imposter_mock:8080
+      - STATUS_LIST_URL=http://imposter_mock:8080
+    ports:
+      - "8080:8080"
+    depends_on:
+      - localstack
+      - imposter
