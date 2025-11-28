@@ -22,6 +22,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -52,7 +53,7 @@ class PreAuthorizedCodeBuilderTest {
     @BeforeEach
     void setUp() {
         preAuthorizedCodeBuilder = new PreAuthorizedCodeBuilder(configurationService, kmsService);
-        when(configurationService.getSelfUrl()).thenReturn(SELF_URL);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_URL);
         when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
         when(configurationService.getOIDCClientId()).thenReturn(AUTH_CLIENT_ID);

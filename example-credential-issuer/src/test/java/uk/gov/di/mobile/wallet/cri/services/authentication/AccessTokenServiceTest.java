@@ -13,6 +13,7 @@ import testUtils.MockAccessTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
+import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.Date;
@@ -37,7 +38,7 @@ class AccessTokenServiceTest {
     void setup() throws ParseException, JOSEException {
         ecSigner = new ECDSASigner(getEcKey());
         accessTokenService = new AccessTokenService(jwksService, configurationService);
-        when(configurationService.getSelfUrl()).thenReturn("https://issuer-url.gov.uk");
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
     }
 

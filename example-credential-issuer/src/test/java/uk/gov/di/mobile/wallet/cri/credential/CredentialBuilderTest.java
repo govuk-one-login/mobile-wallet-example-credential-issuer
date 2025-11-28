@@ -25,6 +25,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.net.URI;
 import java.text.ParseException;
 import java.time.Clock;
 import java.time.Instant;
@@ -61,8 +62,8 @@ class CredentialBuilderTest {
 
     private static final String KMS_KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String DID_KEY_ID =
-            "did:web:example-credential-issuer.gov.uk#78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
-    private static final String EXAMPLE_CREDENTIAL_ISSUER = "https://example-cri-url.gov.uk";
+            "did:web:example-cri.gov.uk#78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
+    private static final String EXAMPLE_CREDENTIAL_ISSUER = "https://example-cri.gov.uk";
     private static final String DID_KEY =
             "did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==";
 
@@ -82,10 +83,8 @@ class CredentialBuilderTest {
         credentialBuilderVeteranCard =
                 new CredentialBuilder<>(configurationService, kmsService, nowClock);
         when(configurationService.getSigningKeyAlias()).thenReturn("mock-signing-key-alias");
-        when(configurationService.getSelfUrl()).thenReturn(EXAMPLE_CREDENTIAL_ISSUER);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(EXAMPLE_CREDENTIAL_ISSUER));
         when(kmsService.getKeyId(any(String.class))).thenReturn(KMS_KEY_ID);
-        when(configurationService.getDidController())
-                .thenReturn("example-credential-issuer.gov.uk");
         socialSecurityCredentialSubject =
                 objectMapper.readValue(
                         "{\"id\":\"did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==\",\"name\":[{\"nameParts\":[{\"type\":\"Title\",\"value\":\"Miss\"},{\"type\":\"GivenName\",\"value\":\"Sarah\"},{\"type\":\"GivenName\",\"value\":\"Elizabeth\"},{\"type\":\"FamilyName\",\"value\":\"Edwards\"},{\"type\":\"FamilyName\",\"value\":\"Green\"}]}],\"socialSecurityRecord\":[{\"personalNumber\":\"QQ123456C\"}]}",

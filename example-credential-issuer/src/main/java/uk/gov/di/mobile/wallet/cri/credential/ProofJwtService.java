@@ -116,7 +116,7 @@ public class ProofJwtService {
      * @throws ProofJwtValidationException On invalid payload claims
      */
     private void verifyTokenClaims(SignedJWT proofJwt) throws ProofJwtValidationException {
-        String expectedAudience = configurationService.getSelfUrl();
+        String expectedAudience = configurationService.getSelfUrl().toString();
         JWTClaimsSet expectedClaimValues =
                 new JWTClaimsSet.Builder()
                         .issuer(EXPECTED_ISSUER)

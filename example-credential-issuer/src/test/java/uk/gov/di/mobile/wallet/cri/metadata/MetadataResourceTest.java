@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,7 +48,7 @@ class MetadataResourceTest {
         objectMapper = new ObjectMapper();
 
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
-        when(configurationService.getSelfUrl()).thenReturn(SELF_URL);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getEnvironment()).thenReturn("test");
         when(metadataBuilder.build()).thenReturn(metadata);
     }
@@ -107,7 +108,7 @@ class MetadataResourceTest {
     void Should_UseCorrectIacasEndpoint(
             String environment, String selfUrl, String expectedIacasEndpoint, String testName) {
         when(configurationService.getEnvironment()).thenReturn(environment);
-        when(configurationService.getSelfUrl()).thenReturn(selfUrl);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(selfUrl));
 
         final Response response = resource.target(OPENID_CREDENTIAL_ISSUER_PATH).request().get();
 

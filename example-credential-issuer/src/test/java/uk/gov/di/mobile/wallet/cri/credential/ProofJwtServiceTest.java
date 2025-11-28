@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import testUtils.MockProofBuilder;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
+import java.net.URI;
 import java.text.ParseException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,7 +35,7 @@ class ProofJwtServiceTest {
                 "{\"kty\":\"EC\",\"d\":\"aWs8vn4m77PZ_SFMqpGgDlmgBCvtccsV1sE8UCmWPm0\",\"crv\":\"P-256\",\"x\":\"QW9GkrKtsARqx2stUsf1EwBmFaORYzheMbCq28oAIsg\",\"y\":\"DM7AJ0OmO9EduJoQEzGVT0pNKuzwGr1KI1r3fuU85oQ\"}";
         ecSigner = new ECDSASigner(ECKey.parse(proofSigningKey));
         proofJwtService = new ProofJwtService(configurationService);
-        when(configurationService.getSelfUrl()).thenReturn("https://issuer-url.gov.uk");
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
     }
 
     @Test
