@@ -8,9 +8,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.DeviceKeyInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.KeyAuthorizations;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 
 import java.io.IOException;
 import java.util.LinkedHashSet;

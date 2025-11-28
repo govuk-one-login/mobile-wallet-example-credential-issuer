@@ -10,8 +10,8 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import software.amazon.awssdk.http.urlconnection.UrlConnectionHttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
-import uk.gov.di.mobile.wallet.cri.credential_offer.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.credential.StoredCredential;
+import uk.gov.di.mobile.wallet.cri.credential_offer.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;

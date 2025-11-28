@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedItem;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
 
 import java.io.IOException;
 import java.util.List;

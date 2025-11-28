@@ -4,9 +4,9 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.LocalDateCBORSerializer;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.Code;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingPrivilege;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.LocalDateCBORSerializer;
 
 import java.io.IOException;
 import java.time.LocalDate;

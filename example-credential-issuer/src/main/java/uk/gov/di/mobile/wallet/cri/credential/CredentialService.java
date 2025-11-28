@@ -54,7 +54,7 @@ public class CredentialService {
     public CredentialResponse getCredential(SignedJWT accessToken, SignedJWT proofJwt)
             throws AccessTokenValidationException,
                     NonceValidationException,
-            ProofJwtValidationException,
+                    ProofJwtValidationException,
                     CredentialOfferException,
                     CredentialServiceException {
         try {
