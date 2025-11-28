@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.proof;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JOSEObjectType;
@@ -11,8 +11,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
-import uk.gov.di.mobile.wallet.cri.credential.did_key.DidKeyResolver;
-import uk.gov.di.mobile.wallet.cri.credential.did_key.InvalidDidKeyException;
+import uk.gov.di.mobile.wallet.cri.credential.proof.did_key.DidKeyResolver;
+import uk.gov.di.mobile.wallet.cri.credential.proof.did_key.InvalidDidKeyException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;

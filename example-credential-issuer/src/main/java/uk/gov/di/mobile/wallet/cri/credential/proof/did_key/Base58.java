@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-package uk.gov.di.mobile.wallet.cri.credential.did_key;
+package uk.gov.di.mobile.wallet.cri.credential.proof.did_key;
 
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 

@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.did_key;
+package uk.gov.di.mobile.wallet.cri.credential.proof.did_key;
 
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.ECPointUtil;
