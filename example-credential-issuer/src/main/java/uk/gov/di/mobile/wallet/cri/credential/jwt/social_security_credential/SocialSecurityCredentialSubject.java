@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.Name;
 
 import java.util.List;
