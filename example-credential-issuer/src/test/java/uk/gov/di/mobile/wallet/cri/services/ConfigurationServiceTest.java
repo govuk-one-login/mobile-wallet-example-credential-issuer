@@ -168,16 +168,14 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ReturnSelfUrlDefaultValue_When_EnvVarNotSet() throws URISyntaxException {
-        assertEquals(new URI("http://localhost:8080"), configurationService.getSelfUrl());
+    void Should_ReturnSelfUrlDefaultValue_When_EnvVarNotSet() {
+        assertEquals(URI.create("http://localhost:8080"), configurationService.getSelfUrl());
     }
 
     @Test
-    void Should_ReturnSelfUrlEnvVarValue() throws URISyntaxException {
+    void Should_ReturnSelfUrlEnvVarValue() {
         environmentVariables.set("SELF_URL", "https://example-credential-issuer.gov.uk");
-        assertEquals(
-                new URI("https://example-credential-issuer.gov.uk"),
-                configurationService.getSelfUrl());
+        assertEquals(URI.create("https://example-credential-issuer.gov.uk"), configurationService.getSelfUrl());
     }
 
     @Test
