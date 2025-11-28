@@ -1,10 +1,7 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.jwt;
 
 import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
-import uk.gov.di.mobile.wallet.cri.credential.jwt.BirthDate;
-import uk.gov.di.mobile.wallet.cri.credential.jwt.Name;
-import uk.gov.di.mobile.wallet.cri.credential.jwt.NamePart;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.Address;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialSubjectBuilder;

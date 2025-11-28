@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential;
+package uk.gov.di.mobile.wallet.cri.credential.jwt;
 
 import org.junit.jupiter.api.Test;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialSubject;

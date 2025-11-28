@@ -2,7 +2,7 @@ package uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
-import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
