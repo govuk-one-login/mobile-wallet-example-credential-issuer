@@ -60,6 +60,7 @@ public class CredentialOfferService {
                         PRE_AUTHORIZED_CODE_GRANT_TYPE,
                         Map.of(PRE_AUTHORIZED_CODE_PARAM, signedJwtString));
 
-        return new CredentialOffer(configurationService.getSelfUrl(), credentialType, grants);
+        return new CredentialOffer(
+                configurationService.getSelfUrl().toString(), credentialType, grants);
     }
 }

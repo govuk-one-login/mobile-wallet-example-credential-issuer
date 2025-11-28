@@ -92,7 +92,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
-                        .issuer(configurationService.getSelfUrl())
+                        .issuer(configurationService.getSelfUrl().toString())
                         .subject(credentialSubject.getId())
                         .issueTime(nowDate)
                         .notBeforeTime(nowDate)
@@ -101,7 +101,7 @@ public class CredentialBuilder<T extends CredentialSubject> {
                         .claim(
                                 "type",
                                 new String[] {"VerifiableCredential", credentialType.getType()})
-                        .claim("issuer", configurationService.getSelfUrl())
+                        .claim("issuer", configurationService.getSelfUrl().toString())
                         .claim("name", credentialType.getName())
                         .claim("description", credentialType.getName())
                         .claim("validFrom", validFromISO)
@@ -113,7 +113,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
 
     private Base64URL getEncodedHeader(String keyId) {
         String hashedKeyId = sha256Hex(keyId);
-        String didKeyId = "did:web:" + configurationService.getDidController() + "#" + hashedKeyId;
+        String didKeyId =
+                "did:web:" + configurationService.getSelfUrl().getHost() + "#" + hashedKeyId;
         var jwsHeader =
                 new JWSHeader.Builder(SIGNING_ALGORITHM)
                         .keyID(didKeyId)

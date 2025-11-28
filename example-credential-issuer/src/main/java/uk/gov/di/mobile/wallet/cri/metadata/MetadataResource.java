@@ -50,7 +50,7 @@ public class MetadataResource {
     @GET
     public Response getMetadata() {
         try {
-            String selfUrl = configurationService.getSelfUrl();
+            String selfUrl = configurationService.getSelfUrl().toString();
             String iacasEndpoint = getIacasEndpoint(selfUrl);
 
             Metadata metadata =

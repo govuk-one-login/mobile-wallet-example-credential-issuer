@@ -16,6 +16,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
+import java.net.URI;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -54,8 +55,8 @@ class DidDocumentServiceTest {
     void setUp() {
         didDocumentService = new DidDocumentService(configurationService, kmsService);
         when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
-        when(configurationService.getDidController())
-                .thenReturn("test-example-credential-issuer.gov.uk");
+        when(configurationService.getSelfUrl())
+                .thenReturn(URI.create("https://test-example-credential-issuer.gov.uk"));
     }
 
     @Test
