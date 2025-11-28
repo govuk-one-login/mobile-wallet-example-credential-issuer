@@ -146,11 +146,11 @@ public class ConfigurationService extends Configuration {
         return createValidatedUri("SELF_URL", "http://localhost:8080");
     }
 
-        /**
-         * Gets the wallet mobile app deep link URL.
-         *
-         * @return The wallet deep link URL
-      */
+    /**
+     * Gets the wallet mobile app deep link URL.
+     *
+     * @return The wallet deep link URL
+     */
     public String getWalletDeepLinkUrl() {
         return createValidatedUri(
                         "WALLET_APP_DEEP_LINK_URL", "https://mobile.account.gov.uk/wallet")

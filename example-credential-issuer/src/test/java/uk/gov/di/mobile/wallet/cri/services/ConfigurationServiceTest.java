@@ -175,7 +175,9 @@ class ConfigurationServiceTest {
     @Test
     void Should_ReturnSelfUrlEnvVarValue() {
         environmentVariables.set("SELF_URL", "https://example-credential-issuer.gov.uk");
-        assertEquals(URI.create("https://example-credential-issuer.gov.uk"), configurationService.getSelfUrl());
+        assertEquals(
+                URI.create("https://example-credential-issuer.gov.uk"),
+                configurationService.getSelfUrl());
     }
 
     @Test
