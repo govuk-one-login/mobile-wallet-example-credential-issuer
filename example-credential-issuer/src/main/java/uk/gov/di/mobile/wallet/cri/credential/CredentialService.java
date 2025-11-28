@@ -7,8 +7,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLExc
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
-import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
-import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
+import uk.gov.di.mobile.wallet.cri.credential_offer.CachedCredentialOffer;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenService;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
