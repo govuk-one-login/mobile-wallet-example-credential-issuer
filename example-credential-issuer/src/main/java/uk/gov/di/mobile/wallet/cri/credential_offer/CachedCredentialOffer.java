@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.models;
+package uk.gov.di.mobile.wallet.cri.credential_offer;
 
 import lombok.Getter;
 import lombok.Setter;

@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.models;
+package uk.gov.di.mobile.wallet.cri.credential;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -6,7 +6,6 @@ import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbAttri
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbBean;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbPartitionKey;
 import software.amazon.awssdk.enhanced.dynamodb.mapper.annotations.DynamoDbSecondaryPartitionKey;
-import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 
 import java.util.Optional;
 

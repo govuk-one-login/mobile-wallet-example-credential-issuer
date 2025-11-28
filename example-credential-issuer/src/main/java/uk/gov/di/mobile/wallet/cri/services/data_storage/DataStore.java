@@ -1,7 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.services.data_storage;
 
-import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
-import uk.gov.di.mobile.wallet.cri.models.StoredCredential;
+import uk.gov.di.mobile.wallet.cri.credential_offer.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.credential.StoredCredential;
 
 import java.util.List;
 
