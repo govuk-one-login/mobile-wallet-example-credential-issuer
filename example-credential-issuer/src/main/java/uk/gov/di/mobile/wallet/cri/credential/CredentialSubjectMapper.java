@@ -1,6 +1,5 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jetbrains.annotations.NotNull;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.BirthDate;

@@ -2,8 +2,6 @@ package uk.gov.di.mobile.wallet.cri.credential.proof.did_key;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import uk.gov.di.mobile.wallet.cri.credential.proof.did_key.AddressFormatException;
-import uk.gov.di.mobile.wallet.cri.credential.proof.did_key.Base58;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;

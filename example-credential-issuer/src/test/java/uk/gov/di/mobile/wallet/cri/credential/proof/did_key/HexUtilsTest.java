@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.proof.did_key;
 
 import org.junit.jupiter.api.Test;
-import uk.gov.di.mobile.wallet.cri.credential.proof.did_key.HexUtils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

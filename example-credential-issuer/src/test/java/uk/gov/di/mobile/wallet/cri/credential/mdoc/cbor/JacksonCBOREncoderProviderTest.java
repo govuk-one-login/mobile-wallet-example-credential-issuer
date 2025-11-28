@@ -5,10 +5,10 @@ import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEUnprotectedHeader;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedItem;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEUnprotectedHeader;
 
 import java.time.LocalDate;
 import java.util.List;

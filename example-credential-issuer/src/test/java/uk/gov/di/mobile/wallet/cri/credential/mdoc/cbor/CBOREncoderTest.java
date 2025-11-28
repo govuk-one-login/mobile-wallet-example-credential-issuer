@@ -5,8 +5,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.io.IOException;
 

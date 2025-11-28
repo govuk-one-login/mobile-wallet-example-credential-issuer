@@ -9,9 +9,9 @@ import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.constants.COSEAlgorithms;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 

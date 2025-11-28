@@ -1,9 +1,9 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.DocumentTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.DocumentTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.security.interfaces.ECPublicKey;

@@ -69,7 +69,7 @@ class CredentialResourceTest {
     void Should_Return400_When_RequestBodyIsInvalid(String arg)
             throws AccessTokenValidationException,
                     CredentialServiceException,
-            ProofJwtValidationException,
+                    ProofJwtValidationException,
                     NonceValidationException,
                     CredentialOfferException {
         final Response response =
