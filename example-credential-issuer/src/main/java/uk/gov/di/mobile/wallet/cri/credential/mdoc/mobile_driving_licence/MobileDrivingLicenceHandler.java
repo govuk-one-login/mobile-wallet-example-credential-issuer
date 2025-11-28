@@ -21,14 +21,17 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
     }
 
     public String buildCredential(
-            DocumentStoreRecord document,
+            DocumentStoreRecord record,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws ObjectStoreException, SigningException, CertificateException {
         DrivingLicenceDocument drivingLicenceDocument =
-                mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
+                mapper.convertValue(record.getData(), DrivingLicenceDocument.class);
 
         return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                drivingLicenceDocument, proofData.publicKey(), statusListInformation.orElseThrow());
+                drivingLicenceDocument,
+                proofData.publicKey(),
+                statusListInformation.orElseThrow(),
+                record.getCredentialTtlMinutes());
     }
 }

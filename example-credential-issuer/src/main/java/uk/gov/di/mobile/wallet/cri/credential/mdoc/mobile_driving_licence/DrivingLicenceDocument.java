@@ -79,8 +79,6 @@ public class DrivingLicenceDocument {
     @Namespace(NamespaceTypes.ISO)
     private final String unDistinguishingSign;
 
-    private long credentialTtlMinutes;
-
     @Namespace(NamespaceTypes.GB)
     private final Optional<List<DrivingPrivilege>> provisionalDrivingPrivileges;
 
@@ -103,7 +101,6 @@ public class DrivingLicenceDocument {
             @JsonProperty("resident_city") String residentCity,
             @JsonProperty("driving_privileges") List<DrivingPrivilege> drivingPrivileges,
             @JsonProperty("un_distinguishing_sign") String unDistinguishingSign,
-            @JsonProperty("credentialTtlMinutes") long credentialTtlMinutes,
             @JsonProperty("provisional_driving_privileges")
                     List<DrivingPrivilege> provisionalDrivingPrivileges) {
         this.familyName = Objects.requireNonNull(familyName, "family_name is required");
@@ -137,7 +134,6 @@ public class DrivingLicenceDocument {
         }
         this.unDistinguishingSign =
                 Objects.requireNonNull(unDistinguishingSign, "un_distinguishing_sign is required");
-        this.credentialTtlMinutes = credentialTtlMinutes;
         this.provisionalDrivingPrivileges = Optional.ofNullable(provisionalDrivingPrivileges);
     }
 

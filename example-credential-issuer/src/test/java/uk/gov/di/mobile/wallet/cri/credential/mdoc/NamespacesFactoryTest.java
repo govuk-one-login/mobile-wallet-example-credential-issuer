@@ -189,7 +189,6 @@ class NamespacesFactoryTest {
                 "London",
                 DRIVING_PRIVILEGES,
                 "UK",
-                43200L,
                 provisionalDrivingPrivileges);
     }
 }

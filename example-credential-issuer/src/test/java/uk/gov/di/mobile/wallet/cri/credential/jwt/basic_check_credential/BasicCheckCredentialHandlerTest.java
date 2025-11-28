@@ -41,7 +41,7 @@ class BasicCheckCredentialHandlerTest {
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
-    private static final long TTL_MINUTES = 1440L;
+    private static final long CREDENTIAL_TTL_MINUTES = 1440L;
     private static final Optional<StatusListClient.StatusListInformation> STATUS_LIST_INFORMATION =
             Optional.empty();
 
@@ -55,11 +55,11 @@ class BasicCheckCredentialHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockBasicCheckDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         when(mockCredentialBuilder.buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(BASIC_DISCLOSURE_CREDENTIAL),
-                        eq(TTL_MINUTES)))
+                        eq(CREDENTIAL_TTL_MINUTES)))
                 .thenReturn(EXPECTED_CREDENTIAL);
         BasicCheckCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -82,7 +82,9 @@ class BasicCheckCredentialHandlerTest {
             assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
                     .buildCredential(
-                            mockCredentialSubject, BASIC_DISCLOSURE_CREDENTIAL, TTL_MINUTES);
+                            mockCredentialSubject,
+                            BASIC_DISCLOSURE_CREDENTIAL,
+                            CREDENTIAL_TTL_MINUTES);
         }
     }
 
@@ -92,13 +94,13 @@ class BasicCheckCredentialHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockBasicCheckDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockCredentialBuilder.buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(BASIC_DISCLOSURE_CREDENTIAL),
-                        eq(TTL_MINUTES)))
+                        eq(CREDENTIAL_TTL_MINUTES)))
                 .thenThrow(signingException);
         BasicCheckCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);

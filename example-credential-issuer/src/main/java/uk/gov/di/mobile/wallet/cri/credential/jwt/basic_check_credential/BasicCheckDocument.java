@@ -47,5 +47,4 @@ public class BasicCheckDocument {
     private String certificateType;
     private String outcome;
     private String policeRecordsCheck;
-    private long credentialTtlMinutes;
 }
