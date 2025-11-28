@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
