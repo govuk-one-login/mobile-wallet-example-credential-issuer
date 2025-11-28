@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card;
+package uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

@@ -1,7 +1,7 @@
-package uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card;
+package uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card;
 
-import uk.gov.di.mobile.wallet.cri.credential.BirthDate;
-import uk.gov.di.mobile.wallet.cri.credential.Name;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.BirthDate;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.Name;
 
 import java.util.List;
 

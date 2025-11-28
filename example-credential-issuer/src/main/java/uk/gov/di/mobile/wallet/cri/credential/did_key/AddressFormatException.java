@@ -15,9 +15,7 @@
  * limitations under the License.
  */
 
-package uk.gov.di.mobile.wallet.cri.credential;
-
-import uk.gov.di.mobile.wallet.cri.credential.did_key.Base58;
+package uk.gov.di.mobile.wallet.cri.credential.did_key;
 
 @SuppressWarnings("serial")
 public class AddressFormatException extends IllegalArgumentException {

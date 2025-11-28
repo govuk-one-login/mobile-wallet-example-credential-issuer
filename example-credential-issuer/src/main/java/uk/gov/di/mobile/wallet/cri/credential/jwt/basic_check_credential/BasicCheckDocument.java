@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.basic_check_credential;
+package uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;

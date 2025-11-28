@@ -1,6 +1,6 @@
-package uk.gov.di.mobile.wallet.cri.credential.social_security_credential;
+package uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential;
 
-import uk.gov.di.mobile.wallet.cri.credential.Name;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.Name;
 
 import java.util.List;
 

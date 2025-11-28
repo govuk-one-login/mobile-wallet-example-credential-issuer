@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card;
+package uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -12,6 +12,9 @@ import uk.gov.di.mobile.wallet.cri.credential.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.Document;
 import uk.gov.di.mobile.wallet.cri.credential.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialHandler;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityDocument;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.util.HashMap;
@@ -27,17 +30,17 @@ import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.DIGITAL_VETERAN_CARD;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECURITY_CREDENTIAL;
 
 @ExtendWith(MockitoExtension.class)
-class DigitalVeteranCardHandlerTest {
+class SocialSecurityCredentialHandlerTest {
 
-    @Mock private CredentialBuilder<VeteranCardCredentialSubject> mockCredentialBuilder;
+    @Mock private CredentialBuilder<SocialSecurityCredentialSubject> mockCredentialBuilder;
     @Mock private Document mockDocument;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
-    @Mock private VeteranCardDocument mockVeteranCardDocument;
-    @Mock private VeteranCardCredentialSubject mockCredentialSubject;
-    private DigitalVeteranCardHandler handler;
+    @Mock private SocialSecurityDocument mockSocialSecurityDocument;
+    @Mock private SocialSecurityCredentialSubject mockCredentialSubject;
+    private SocialSecurityCredentialHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
@@ -47,32 +50,32 @@ class DigitalVeteranCardHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new DigitalVeteranCardHandler(mockCredentialBuilder);
+        handler = new SocialSecurityCredentialHandler(mockCredentialBuilder);
     }
 
     @Test
-    void Should_ReturnDigitalVeteranCard() throws SigningException {
+    void Should_ReturnSocialSecurityCredential() throws SigningException {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockVeteranCardDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockSocialSecurityDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
         when(mockCredentialBuilder.buildCredential(
-                        any(VeteranCardCredentialSubject.class),
-                        eq(DIGITAL_VETERAN_CARD),
+                        any(SocialSecurityCredentialSubject.class),
+                        eq(SOCIAL_SECURITY_CREDENTIAL),
                         eq(TTL_MINUTES)))
                 .thenReturn(EXPECTED_CREDENTIAL);
-        DigitalVeteranCardHandler spyHandler = spy(handler);
+        SocialSecurityCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(documentData, VeteranCardDocument.class))
-                .thenReturn(mockVeteranCardDocument);
+        when(mockMapper.convertValue(documentData, SocialSecurityDocument.class))
+                .thenReturn(mockSocialSecurityDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =
                 mockStatic(CredentialSubjectMapper.class)) {
             mockedMapper
                     .when(
                             () ->
-                                    CredentialSubjectMapper.buildVeteranCardCredentialSubject(
-                                            mockVeteranCardDocument, DID_KEY))
+                                    CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
+                                            mockSocialSecurityDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
             String credential =
@@ -81,7 +84,8 @@ class DigitalVeteranCardHandlerTest {
 
             assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
-                    .buildCredential(mockCredentialSubject, DIGITAL_VETERAN_CARD, TTL_MINUTES);
+                    .buildCredential(
+                            mockCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, TTL_MINUTES);
         }
     }
 
@@ -91,26 +95,26 @@ class DigitalVeteranCardHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockVeteranCardDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockSocialSecurityDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockCredentialBuilder.buildCredential(
-                        any(VeteranCardCredentialSubject.class),
-                        eq(DIGITAL_VETERAN_CARD),
+                        any(SocialSecurityCredentialSubject.class),
+                        eq(SOCIAL_SECURITY_CREDENTIAL),
                         eq(TTL_MINUTES)))
                 .thenThrow(signingException);
-        DigitalVeteranCardHandler spyHandler = spy(handler);
+        SocialSecurityCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(documentData, VeteranCardDocument.class))
-                .thenReturn(mockVeteranCardDocument);
+        when(mockMapper.convertValue(documentData, SocialSecurityDocument.class))
+                .thenReturn(mockSocialSecurityDocument);
         setMapperField(spyHandler, mockMapper);
         try (MockedStatic<CredentialSubjectMapper> mockedMapper =
                 mockStatic(CredentialSubjectMapper.class)) {
             mockedMapper
                     .when(
                             () ->
-                                    CredentialSubjectMapper.buildVeteranCardCredentialSubject(
-                                            mockVeteranCardDocument, DID_KEY))
+                                    CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
+                                            mockSocialSecurityDocument, DID_KEY))
                     .thenReturn(mockCredentialSubject);
 
             SigningException thrown =
@@ -123,9 +127,9 @@ class DigitalVeteranCardHandlerTest {
         }
     }
 
-    private void setMapperField(DigitalVeteranCardHandler handler, ObjectMapper mapper) {
+    private void setMapperField(SocialSecurityCredentialHandler handler, ObjectMapper mapper) {
         try {
-            var mapperField = DigitalVeteranCardHandler.class.getDeclaredField("mapper");
+            var mapperField = SocialSecurityCredentialHandler.class.getDeclaredField("mapper");
             mapperField.setAccessible(true);
             mapperField.set(handler, mapper);
         } catch (Exception exception) {

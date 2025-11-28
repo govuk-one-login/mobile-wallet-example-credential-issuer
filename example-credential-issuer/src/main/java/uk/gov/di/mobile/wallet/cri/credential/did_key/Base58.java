@@ -18,7 +18,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.did_key;
 
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
-import uk.gov.di.mobile.wallet.cri.credential.AddressFormatException;
 
 import java.util.Arrays;
 

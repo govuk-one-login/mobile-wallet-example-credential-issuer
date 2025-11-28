@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.basic_check_credential;
+package uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialBuilder;

@@ -1,11 +1,11 @@
-package uk.gov.di.mobile.wallet.cri.credential.basic_check_credential;
+package uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import uk.gov.di.mobile.wallet.cri.credential.BirthDate;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.Name;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.BirthDate;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.Name;
 
 import java.util.List;
 
