@@ -25,8 +25,6 @@ import java.util.List;
 
 public class CredentialSubjectMapper {
 
-    static final ObjectMapper objectMapper = new ObjectMapper();
-
     @ExcludeFromGeneratedCoverageReport
     private CredentialSubjectMapper() {
         throw new IllegalStateException("Instantiation is not valid for this class.");
