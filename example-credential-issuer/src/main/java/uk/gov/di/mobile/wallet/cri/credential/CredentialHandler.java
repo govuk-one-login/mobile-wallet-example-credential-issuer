@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface CredentialHandler {
     String buildCredential(
-            Document document,
+            DocumentStoreRecord document,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException, ObjectStoreException, CertificateException;

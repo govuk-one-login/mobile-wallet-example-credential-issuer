@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.Document;
+import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreRecord;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 class MobileDrivingLicenceHandlerTest {
 
     @Mock private MobileDrivingLicenceBuilder mockMobileDrivingLicenceService;
-    @Mock private Document mockDocument;
+    @Mock private DocumentStoreRecord mockDocument;
     @Mock private ECPublicKey ecPublicKey;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;

@@ -80,7 +80,7 @@ public class CredentialService {
             }
 
             String itemId = credentialOffer.getItemId();
-            Document document = documentStoreClient.getDocument(itemId);
+            DocumentStoreRecord document = documentStoreClient.getDocument(itemId);
             String notificationId = UUID.randomUUID().toString();
             String vcType = document.getVcType();
 

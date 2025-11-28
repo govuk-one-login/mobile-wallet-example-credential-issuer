@@ -2,10 +2,10 @@ package uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
-import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialSubjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.Document;
+import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreRecord;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -25,7 +25,7 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
 
     @Override
     public String buildCredential(
-            Document document,
+            DocumentStoreRecord document,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException {

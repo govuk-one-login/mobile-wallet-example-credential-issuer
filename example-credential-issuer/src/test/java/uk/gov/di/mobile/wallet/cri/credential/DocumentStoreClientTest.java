@@ -30,7 +30,7 @@ class DocumentStoreClientTest {
     @Mock private WebTarget mockWebTarget;
     @Mock private Invocation.Builder mockInvocationBuilder;
     @Mock private Response mockResponse;
-    @Mock private Document mockDocument;
+    @Mock private DocumentStoreRecord mockDocument;
     @Mock private ConfigurationService mockConfigurationService;
 
     private static final String ITEM_ID = "672ca5d0-818a-46b6-946a-f9481023e803";
@@ -54,9 +54,9 @@ class DocumentStoreClientTest {
         when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
         when(mockInvocationBuilder.get()).thenReturn(mockResponse);
         when(mockResponse.getStatus()).thenReturn(200);
-        when(mockResponse.readEntity(Document.class)).thenReturn(mockDocument);
+        when(mockResponse.readEntity(DocumentStoreRecord.class)).thenReturn(mockDocument);
 
-        Document document = documentStoreClient.getDocument(ITEM_ID);
+        DocumentStoreRecord document = documentStoreClient.getDocument(ITEM_ID);
 
         assertEquals(mockDocument, document);
         verify(mockHttpClient).target(expectedUri);
