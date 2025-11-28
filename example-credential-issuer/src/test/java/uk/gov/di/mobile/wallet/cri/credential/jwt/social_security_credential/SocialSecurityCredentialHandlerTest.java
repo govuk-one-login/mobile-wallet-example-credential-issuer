@@ -7,10 +7,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialSubjectMapper;
-import uk.gov.di.mobile.wallet.cri.credential.Document;
+import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreRecord;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialSubjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -33,7 +33,7 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SOCIAL_SECUR
 class SocialSecurityCredentialHandlerTest {
 
     @Mock private CredentialBuilder<SocialSecurityCredentialSubject> mockCredentialBuilder;
-    @Mock private Document mockDocument;
+    @Mock private DocumentStoreRecord mockDocument;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
     @Mock private SocialSecurityDocument mockSocialSecurityDocument;
     @Mock private SocialSecurityCredentialSubject mockCredentialSubject;

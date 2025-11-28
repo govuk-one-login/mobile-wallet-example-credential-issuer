@@ -185,7 +185,7 @@ class CredentialServiceTest {
 
     @Test
     void Should_DeleteCredentialOffer() throws Exception {
-        Document mockDocument = getMockSocialSecurityDocument();
+        DocumentStoreRecord mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
@@ -202,7 +202,7 @@ class CredentialServiceTest {
 
     @Test
     void Should_CallExpiryCalculator_To_CalculateCredentialExpiry() throws Exception {
-        Document mockDocument = getMockSocialSecurityDocument();
+        DocumentStoreRecord mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
@@ -223,7 +223,7 @@ class CredentialServiceTest {
 
     @Test
     void Should_NotCallStatusListClient_When_IssuingJWTCredentials() throws Exception {
-        Document mockDocument = getMockSocialSecurityDocument();
+        DocumentStoreRecord mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
@@ -241,7 +241,7 @@ class CredentialServiceTest {
 
     @Test
     void Should_CallStatusListClient_When_IssuingMDLCredentials() throws Exception {
-        Document mockDocument = getMockMobileDrivingLicenceDocument();
+        DocumentStoreRecord mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
@@ -267,7 +267,7 @@ class CredentialServiceTest {
                     CertificateException {
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
-        Document mockDocument = getMockSocialSecurityDocument();
+        DocumentStoreRecord mockDocument = getMockSocialSecurityDocument();
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
@@ -287,7 +287,7 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialServiceException_When_StatusListExceptionIsThrown()
             throws DataStoreException, DocumentStoreException, StatusListClientException {
-        Document mockDocument = getMockMobileDrivingLicenceDocument();
+        DocumentStoreRecord mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
@@ -312,7 +312,7 @@ class CredentialServiceTest {
                     SigningException,
                     ObjectStoreException,
                     CertificateException {
-        Document mockDocument = getMockMobileDrivingLicenceDocument();
+        DocumentStoreRecord mockDocument = getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
@@ -335,7 +335,7 @@ class CredentialServiceTest {
 
     @Test
     void Should_ReturnCredentialResponse_When_IssuingSocialSecurityCredential() throws Exception {
-        Document mockDocument = getMockSocialSecurityDocument();
+        DocumentStoreRecord mockDocument = getMockSocialSecurityDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID)).thenReturn(mockDocument);
@@ -373,7 +373,8 @@ class CredentialServiceTest {
 
     @Test
     void Should_ReturnCredentialResponse_When_IssuingMobileDrivingLicence() throws Exception {
-        Document mockMobileDrivingLicenceDocument = getMockMobileDrivingLicenceDocument();
+        DocumentStoreRecord mockMobileDrivingLicenceDocument =
+                getMockMobileDrivingLicenceDocument();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER))
                 .thenReturn(mockCachedCredentialOffer);
         when(mockDocumentStoreClient.getDocument(ITEM_ID))
@@ -436,22 +437,22 @@ class CredentialServiceTest {
                 mockEcPublicKey);
     }
 
-    public static Document getMockSocialSecurityDocument() {
+    public static DocumentStoreRecord getMockSocialSecurityDocument() {
         HashMap<String, Object> data = new HashMap<>();
         data.put("familyName", "Edwards Green");
         data.put("givenName", "Sarah Elizabeth");
         data.put("nino", NINO);
         data.put("title", "Miss");
         data.put("credentialTtlMinutes", "43200");
-        return new Document(ITEM_ID, NINO, data, "SocialSecurityCredential");
+        return new DocumentStoreRecord(ITEM_ID, NINO, data, "SocialSecurityCredential");
     }
 
-    public static Document getMockMobileDrivingLicenceDocument() {
+    public static DocumentStoreRecord getMockMobileDrivingLicenceDocument() {
         HashMap<String, Object> data = new HashMap<>();
         data.put("family_name", "Edwards Green");
         data.put("given_name", "Sarah Elizabeth");
         data.put("document_number", DOCUMENT_NUMBER);
         data.put("credentialTtlMinutes", 43200L);
-        return new Document(ITEM_ID, DOCUMENT_NUMBER, data, MDL_VC_TYPE);
+        return new DocumentStoreRecord(ITEM_ID, DOCUMENT_NUMBER, data, MDL_VC_TYPE);
     }
 }

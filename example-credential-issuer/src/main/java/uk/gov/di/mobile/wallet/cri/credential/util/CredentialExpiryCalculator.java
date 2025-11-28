@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import uk.gov.di.mobile.wallet.cri.credential.Document;
+import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreRecord;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -27,7 +27,7 @@ public class CredentialExpiryCalculator {
         this.clock = clock;
     }
 
-    public long calculateExpiry(Document document) {
+    public long calculateExpiry(DocumentStoreRecord document) {
         JsonNode dataNode = mapper.valueToTree(document.getData());
         long ttlMinutes = dataNode.get("credentialTtlMinutes").asLong();
 
