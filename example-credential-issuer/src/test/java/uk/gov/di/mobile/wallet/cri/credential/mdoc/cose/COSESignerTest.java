@@ -14,8 +14,8 @@ import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 

@@ -25,6 +25,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESigner;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
@@ -138,12 +139,19 @@ public class ServicesFactory {
                 new MdocCredentialBuilder<>(
                         cborEncoder, drivingLicenceNamespacesFactory, issuerSignedFactory);
 
+        NamespacesFactory<FishingLicenceDocument> fishingLicenceNamespacesFactory =
+                new NamespacesFactory<>(issuerSignedItemFactory);
+        MdocCredentialBuilder<FishingLicenceDocument> fishingLicenceMdocCredentialBuilder =
+                new MdocCredentialBuilder<>(
+                        cborEncoder, fishingLicenceNamespacesFactory, issuerSignedFactory);
+
         CredentialHandlerFactory credentialHandlerFactory =
                 new CredentialHandlerFactory(
                         basicCheckCredentialBuilder,
                         socialSecurityCredentialBuilder,
                         digitalVeteranCardCredentialBuilder,
-                        drivingLicenceMdocCredentialBuilder);
+                        drivingLicenceMdocCredentialBuilder,
+                        fishingLicenceMdocCredentialBuilder);
 
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);

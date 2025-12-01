@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.FISHING_LICENCE;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 
 public class CredentialService {
@@ -92,7 +93,7 @@ public class CredentialService {
 
             Optional<StatusListClient.StatusListInformation> statusListInformation =
                     Optional.empty();
-            if (credentialType == MOBILE_DRIVING_LICENCE) {
+            if (credentialType == MOBILE_DRIVING_LICENCE || credentialType == FISHING_LICENCE) {
                 statusListInformation = Optional.of(statusListClient.getIndex(expiry));
             }
 
@@ -114,12 +115,12 @@ public class CredentialService {
 
             return new CredentialResponse(credential, notificationId);
         } catch (DataStoreException
-                 | SigningException
-                 | MdocException
-                 | ObjectStoreException
-                 | CertificateException
-                 | DocumentStoreException
-                 | StatusListClientException exception) {
+                | SigningException
+                | MdocException
+                | ObjectStoreException
+                | CertificateException
+                | DocumentStoreException
+                | StatusListClientException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }

@@ -143,7 +143,8 @@ class IssuerSignedFactoryTest {
     @Test
     void Should_ThrowMDLException_When_CBOREncodingMSOFails() throws MdocException {
         // Arrange
-        MdocException expectedException = new MdocException("CBOR encoding failed", new Exception());
+        MdocException expectedException =
+                new MdocException("CBOR encoding failed", new Exception());
         when(mockMobileSecurityObjectFactory.build(
                         mockNamespaces,
                         mockEcPublicKey,
