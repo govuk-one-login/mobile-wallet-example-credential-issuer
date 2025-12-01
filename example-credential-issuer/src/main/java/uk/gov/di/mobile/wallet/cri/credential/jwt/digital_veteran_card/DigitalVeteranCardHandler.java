@@ -25,18 +25,18 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
 
     @Override
     public String buildCredential(
-            DocumentStoreRecord record,
+            DocumentStoreRecord documentStoreRecord,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException {
         VeteranCardDocument document =
-                mapper.convertValue(record.getData(), VeteranCardDocument.class);
+                mapper.convertValue(documentStoreRecord.getData(), VeteranCardDocument.class);
 
         VeteranCardCredentialSubject subject =
                 CredentialSubjectMapper.buildVeteranCardCredentialSubject(
                         document, proofData.didKey());
 
         return credentialBuilder.buildCredential(
-                subject, DIGITAL_VETERAN_CARD, record.getCredentialTtlMinutes());
+                subject, DIGITAL_VETERAN_CARD, documentStoreRecord.getCredentialTtlMinutes());
     }
 }

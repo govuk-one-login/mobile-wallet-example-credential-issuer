@@ -18,9 +18,9 @@ public class CredentialExpiryCalculator {
         this.clock = clock;
     }
 
-    public long calculateExpiry(DocumentStoreRecord record) {
+    public long calculateExpiry(DocumentStoreRecord documentStoreRecord) {
         return Instant.now(clock)
-                .plus(record.getCredentialTtlMinutes(), ChronoUnit.MINUTES)
+                .plus(documentStoreRecord.getCredentialTtlMinutes(), ChronoUnit.MINUTES)
                 .getEpochSecond();
     }
 }

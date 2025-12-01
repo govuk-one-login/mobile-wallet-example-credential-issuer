@@ -43,16 +43,16 @@ public class MobileDrivingLicenceBuilder {
     /**
      * Creates an {@link IssuerSigned} structure in Base64URL-encoded CBOR format.
      *
-     * @param drivingLicenceDocument The driving licence data to serialise and sign
+     * @param document The driving licence data to serialise and sign
      * @return A Base64URL-encoded string containing the CBOR-encoded {@code IssuerSigned} structure
      */
     public String createMobileDrivingLicence(
-            DrivingLicenceDocument drivingLicenceDocument,
+            DrivingLicenceDocument document,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
             long credentialTtlMinutes)
             throws ObjectStoreException, SigningException, CertificateException {
-        Namespaces namespaces = namespacesFactory.build(drivingLicenceDocument);
+        Namespaces namespaces = namespacesFactory.build(document);
         IssuerSigned issuerSigned =
                 issuerSignedFactory.build(
                         namespaces, publicKey, statusListInformation, credentialTtlMinutes);
