@@ -13,6 +13,18 @@ import java.util.stream.Collectors;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mdoc.CamelToSnake.camelToSnake;
 
+/**
+ * Creates {@link Namespaces} from a document class by reflecting over its fields annotated with
+ * {@link Namespace}.
+ *
+ * <ul>
+ *   <li>Fields are grouped by the annotation value (the namespace name).
+ *   <li>Field names are converted from camelCase to snake_case for use as data element names.
+ *   <li>{@link Optional} fields are skipped when empty; otherwise their contained value is used.
+ *   <li>Iteration order is preserved (via {@link LinkedHashMap}) so namespaces appear in a stable
+ *       order.
+ * </ul>
+ */
 public class NamespacesFactory<T> {
     private final IssuerSignedItemFactory issuerSignedItemFactory;
 
@@ -21,21 +33,15 @@ public class NamespacesFactory<T> {
     }
 
     /**
-     * Builds all namespaces for a given document.
+     * Builds the {@link Namespaces} for a given document.
      *
-     * <p>For each field in the document annotated with {@link Namespace}, this method:
+     * <p>Reflects over fields annotated with {@link Namespace}, converts each field name to
+     * snake_case, and creates an {@link IssuerSignedItem} for its value. Empty {@link Optional}
+     * fields are ignored.
      *
-     * <ul>
-     *   <li>Groups fields by namespace value.
-     *   <li>Converts field names to snake_case.
-     *   <li>Builds an {@link IssuerSignedItem} for each field.
-     *   <li>Returns a map where each key is a namespace and each value is a list of {@link
-     *       IssuerSignedItem} objects belonging to that namespace.
-     * </ul>
-     *
-     * @param document The document to process/extract fields from.
-     * @return Map from namespace names to lists of issuer-signed items.
-     * @throws MdocException If reflection fails or encoding fails.
+     * @param document Annotated document instance
+     * @return Namespaces mapped to their {@link IssuerSignedItem} structures
+     * @throws MdocException When a field cannot be accessed or when encoding fails
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
     public Namespaces build(T document) throws MdocException {
@@ -74,9 +80,9 @@ public class NamespacesFactory<T> {
     }
 
     /**
-     * Groups the declared fields of a class by their {@link Namespace} annotation value.
+     * Groups declared fields by the value of their {@link Namespace} annotation.
      *
-     * @param clazz The class to inspect.
+     * @param clazz Class to inspect.
      * @return Map from namespace value to list of fields.
      */
     private static Map<String, List<Field>> getFieldsByNamespace(Class<?> clazz) {

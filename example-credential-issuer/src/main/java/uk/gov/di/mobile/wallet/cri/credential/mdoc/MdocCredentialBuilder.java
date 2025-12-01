@@ -9,7 +9,10 @@ import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 import java.util.Base64;
 
-/** Class responsible for creating the {@code IssuerSigned} structure of mDocs. */
+/**
+ * Builds an {@link IssuerSigned} mDoc structure from the given document and returns it as
+ * Base64URL-encoded CBOR.
+ */
 public class MdocCredentialBuilder<T> {
 
     private final CBOREncoder cborEncoder;
@@ -17,7 +20,7 @@ public class MdocCredentialBuilder<T> {
     private final IssuerSignedFactory issuerSignedFactory;
 
     /**
-     * Constructs a new CredentialBuilder.
+     * Constructs a new {@link MdocCredentialBuilder}.
      *
      * @param cborEncoder CBOR encoder for encoding objects into CBOR binary representation
      * @param namespacesFactory Factory for creating {@link Namespaces} from a document
@@ -33,10 +36,22 @@ public class MdocCredentialBuilder<T> {
     }
 
     /**
-     * Creates an {@link IssuerSigned} structure in Base64URL-encoded CBOR format.
+     * Creates an {@link IssuerSigned} structure and returns it as Base64URL-encoded CBOR.
      *
-     * @param document The document to serialise and sign
-     * @return A Base64URL-encoded string containing the CBOR-encoded {@code IssuerSigned} structure
+     * <ul>
+     *   <li>Uses {@link NamespacesFactory} to derive namespaces from the document;
+     *   <li>Builds {@link IssuerSigned} via {@link IssuerSignedFactory};
+     *   <li>CBOR-encodes the result with {@link CBOREncoder} and Base64URL-encodes it.
+     * </ul>
+     *
+     * @param document Typed credential document
+     * @param publicKey Device public key
+     * @param statusListInformation Status list information (URI and index)
+     * @param credentialTtlMinutes Credential validity period in minutes
+     * @return Base64URL string of the CBOR-encoded {@link IssuerSigned}
+     * @throws ObjectStoreException When persistence interactions fail
+     * @throws SigningException When signing fails
+     * @throws CertificateException When certificate material cannot be processed
      */
     public String buildCredential(
             T document,
