@@ -11,7 +11,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.constants.COSEEllipticCurves;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.constants.COSEKeyTypes;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
@@ -55,7 +54,7 @@ class MobileSecurityObjectFactoryTest {
     }
 
     @Test
-    void Should_ConstructMobileSecurityObject_With_ExpectedFields() throws MDLException {
+    void Should_ConstructMobileSecurityObject_With_ExpectedFields() throws MdocException {
         Namespaces namespaces = getTestNamespaces();
         ValueDigests valueDigests = getTestValueDigests();
         when(valueDigestsFactory.createFromNamespaces(namespaces)).thenReturn(valueDigests);
@@ -87,7 +86,7 @@ class MobileSecurityObjectFactoryTest {
     }
 
     @Test
-    void Should_CallValueDigestsFactory_With_Namespaces() throws MDLException {
+    void Should_CallValueDigestsFactory_With_Namespaces() throws MdocException {
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
                 .thenReturn(getTestValueDigests());
@@ -100,7 +99,7 @@ class MobileSecurityObjectFactoryTest {
     }
 
     @Test
-    void Should_UseProvidedCredentialTtl_When_BuildingValidityInfo() throws MDLException {
+    void Should_UseProvidedCredentialTtl_When_BuildingValidityInfo() throws MdocException {
         long ttl = 5000L;
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
@@ -114,7 +113,7 @@ class MobileSecurityObjectFactoryTest {
     }
 
     @Test
-    void Should_ConvertPublicKey_Via_CoseKeyFactory() throws MDLException {
+    void Should_ConvertPublicKey_Via_CoseKeyFactory() throws MdocException {
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
                 .thenReturn(getTestValueDigests());

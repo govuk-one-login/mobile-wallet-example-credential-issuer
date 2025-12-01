@@ -4,7 +4,6 @@ import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.DocumentTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.security.interfaces.ECPublicKey;
 import java.util.Set;
@@ -58,14 +57,14 @@ public class MobileSecurityObjectFactory {
      * @param credentialTtlMinutes The credential time-to-live, in minutes, used to determine its
      *     validity period.
      * @return {@link MobileSecurityObject}
-     * @throws MDLException If an error occurs when building the {@link ValueDigests}
+     * @throws MdocException If an error occurs when building the {@link ValueDigests}
      */
     public MobileSecurityObject build(
             Namespaces nameSpaces,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
             long credentialTtlMinutes)
-            throws MDLException {
+            throws MdocException {
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
         Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
         KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);

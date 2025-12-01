@@ -9,7 +9,6 @@ import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESigner;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -67,7 +66,7 @@ class IssuerSignedFactoryTest {
 
     @Test
     void Should_ReturnIssuerSigned_When_ValidNamespacesProvided()
-            throws MDLException, SigningException, CertificateException, ObjectStoreException {
+            throws MdocException, SigningException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
 
@@ -110,9 +109,9 @@ class IssuerSignedFactoryTest {
     }
 
     @Test
-    void Should_ThrowMDLException_When_MobileSecurityObjectFactoryThrows() throws MDLException {
+    void Should_ThrowMDLException_When_MobileSecurityObjectFactoryThrows() throws MdocException {
         // Arrange
-        MDLException expectedException = new MDLException("MSO creation failed", new Exception());
+        MdocException expectedException = new MdocException("MSO creation failed", new Exception());
         when(mockMobileSecurityObjectFactory.build(
                         mockNamespaces,
                         mockEcPublicKey,
@@ -121,9 +120,9 @@ class IssuerSignedFactoryTest {
                 .thenThrow(expectedException);
 
         // Act & Assert
-        MDLException exception =
+        MdocException exception =
                 assertThrows(
-                        MDLException.class,
+                        MdocException.class,
                         () ->
                                 issuerSignedFactory.build(
                                         mockNamespaces,
@@ -142,9 +141,9 @@ class IssuerSignedFactoryTest {
     }
 
     @Test
-    void Should_ThrowMDLException_When_CBOREncodingMSOFails() throws MDLException {
+    void Should_ThrowMDLException_When_CBOREncodingMSOFails() throws MdocException {
         // Arrange
-        MDLException expectedException = new MDLException("CBOR encoding failed", new Exception());
+        MdocException expectedException = new MdocException("CBOR encoding failed", new Exception());
         when(mockMobileSecurityObjectFactory.build(
                         mockNamespaces,
                         mockEcPublicKey,
@@ -154,9 +153,9 @@ class IssuerSignedFactoryTest {
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenThrow(expectedException);
 
         // Act & Assert
-        MDLException exception =
+        MdocException exception =
                 assertThrows(
-                        MDLException.class,
+                        MdocException.class,
                         () ->
                                 issuerSignedFactory.build(
                                         mockNamespaces,
@@ -177,7 +176,7 @@ class IssuerSignedFactoryTest {
 
     @Test
     void Should_ThrowCertificateException_When_CertificateProviderThrows()
-            throws MDLException, CertificateException, ObjectStoreException {
+            throws MdocException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
         CertificateException expectedException = new CertificateException("Certificate error");
@@ -210,7 +209,7 @@ class IssuerSignedFactoryTest {
 
     @Test
     void Should_ThrowSigningException_When_COSESignerThrows()
-            throws MDLException, SigningException, CertificateException, ObjectStoreException {
+            throws MdocException, SigningException, CertificateException, ObjectStoreException {
         // Arrange
         byte[] msoBytes = "mso-bytes".getBytes();
         SigningException expectedException =

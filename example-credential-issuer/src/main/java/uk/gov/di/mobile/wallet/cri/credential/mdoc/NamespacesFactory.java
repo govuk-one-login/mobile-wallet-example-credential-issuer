@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -36,10 +35,10 @@ public class NamespacesFactory<T> {
      *
      * @param document The document to process/extract fields from.
      * @return Map from namespace names to lists of issuer-signed items.
-     * @throws MDLException If reflection fails or encoding fails.
+     * @throws MdocException If reflection fails or encoding fails.
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
-    public Namespaces build(T document) throws MDLException {
+    public Namespaces build(T document) throws MdocException {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
 
@@ -59,7 +58,7 @@ public class NamespacesFactory<T> {
                         fieldValue = optional.get();
                     }
                 } catch (IllegalAccessException exception) {
-                    throw new MDLException(
+                    throw new MdocException(
                             String.format(
                                     "Failed to access property %s to build IssuerSignedItem",
                                     fieldName),

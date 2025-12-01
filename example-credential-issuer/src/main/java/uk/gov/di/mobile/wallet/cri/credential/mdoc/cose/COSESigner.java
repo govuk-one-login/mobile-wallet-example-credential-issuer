@@ -11,7 +11,7 @@ import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.constants.COSEAlgorithms;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -40,11 +40,11 @@ public class COSESigner {
      * @param certificate the X.509 certificate to include in the unprotected header
      * @return a COSESign1 structure containing headers, payload, and signature
      * @throws SigningException if the signing operation fails
-     * @throws MDLException if CBOR encoding fails
+     * @throws MdocException if CBOR encoding fails
      * @throws CertificateEncodingException if the certificate cannot be encoded
      */
     public COSESign1 sign(byte[] payload, X509Certificate certificate)
-            throws SigningException, MDLException, CertificateEncodingException {
+            throws SigningException, MdocException, CertificateEncodingException {
         COSEUnprotectedHeader unprotectedHeader =
                 new COSEUnprotectedHeader(certificate.getEncoded());
         COSEProtectedHeader protectedHeader = new COSEProtectedHeader(COSEAlgorithms.ES256);

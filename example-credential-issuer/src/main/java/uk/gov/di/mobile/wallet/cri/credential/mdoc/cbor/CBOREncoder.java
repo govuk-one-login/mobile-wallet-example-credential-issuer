@@ -1,7 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor;
 
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 
 import java.io.IOException;
 
@@ -27,13 +27,13 @@ public class CBOREncoder {
      *
      * @param dataToEncode The Java object to encode into CBOR format.
      * @return A byte array containing the CBOR representation of the input object.
-     * @throws MDLException If an error occurs during the encoding process.
+     * @throws MdocException If an error occurs during the encoding process.
      */
-    public byte[] encode(Object dataToEncode) throws MDLException {
+    public byte[] encode(Object dataToEncode) throws MdocException {
         try {
             return this.mapper.writeValueAsBytes(dataToEncode);
         } catch (IOException exception) {
-            throw new MDLException("Failed to CBOR encode data", exception);
+            throw new MdocException("Failed to CBOR encode data", exception);
         }
     }
 }

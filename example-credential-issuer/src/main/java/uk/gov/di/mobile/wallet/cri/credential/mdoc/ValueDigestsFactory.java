@@ -3,7 +3,6 @@ package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import lombok.SneakyThrows;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.security.MessageDigest;
 import java.util.HashMap;
@@ -52,7 +51,7 @@ public class ValueDigestsFactory {
      * @return A new {@link ValueDigests} instance containing the calculated digests.
      */
     @SneakyThrows
-    public ValueDigests createFromNamespaces(Namespaces namespaces) throws MDLException {
+    public ValueDigests createFromNamespaces(Namespaces namespaces) throws MdocException {
         // Map to hold the final result: namespace -> (digestId -> digest bytes)
         final Map<String, Map<Integer, byte[]>> namespaceToValueDigests = new HashMap<>();
 
@@ -77,10 +76,10 @@ public class ValueDigestsFactory {
      *
      * @param issuerSignedItem The item to digest.
      * @return A map entry where the key is the digest ID and the value is the digest byte array.
-     * @throws MDLException If serialization or digest calculation fails.
+     * @throws MdocException If serialization or digest calculation fails.
      */
     private Map.Entry<Integer, byte[]> serializeAndComputeDigest(
-            final IssuerSignedItem issuerSignedItem) throws MDLException {
+            final IssuerSignedItem issuerSignedItem) throws MdocException {
         // Serialize the IssuerSignedItem to a CBOR byte array
         byte[] serializedIssuerSignedItem = cborEncoder.encode(issuerSignedItem);
 

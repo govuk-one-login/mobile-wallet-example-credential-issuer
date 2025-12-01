@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
@@ -114,12 +114,12 @@ public class CredentialService {
 
             return new CredentialResponse(credential, notificationId);
         } catch (DataStoreException
-                | SigningException
-                | MDLException
-                | ObjectStoreException
-                | CertificateException
-                | DocumentStoreException
-                | StatusListClientException exception) {
+                 | SigningException
+                 | MdocException
+                 | ObjectStoreException
+                 | CertificateException
+                 | DocumentStoreException
+                 | StatusListClientException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }

@@ -9,6 +9,7 @@ import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.Namespaces;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
@@ -89,13 +90,13 @@ class MdocCredentialBuilderTest {
 
     @Test
     void Should_PropagateMDLException_When_NamespacesFactoryThrows() throws Exception {
-        MDLException expectedException =
-                new MDLException("Some error message", new RuntimeException());
+        MdocException expectedException =
+                new MdocException("Some error message", new RuntimeException());
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
 
-        MDLException actualException =
+        MdocException actualException =
                 assertThrows(
-                        MDLException.class,
+                        MdocException.class,
                         () ->
                                 mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
@@ -155,8 +156,8 @@ class MdocCredentialBuilderTest {
 
     @Test
     void Should_PropagatePropagateMDLException_When_CborEncoderThrows() throws Exception {
-        MDLException expectedException =
-                new MDLException("Some error message", new RuntimeException());
+        MdocException expectedException =
+                new MdocException("Some error message", new RuntimeException());
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
         when(issuerSignedFactory.build(
                         namespaces,
@@ -166,9 +167,9 @@ class MdocCredentialBuilderTest {
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
 
-        MDLException actualException =
+        MdocException actualException =
                 assertThrows(
-                        MDLException.class,
+                        MdocException.class,
                         () ->
                                 mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
