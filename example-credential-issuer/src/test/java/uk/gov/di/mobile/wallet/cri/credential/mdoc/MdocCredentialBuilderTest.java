@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence;
+package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -6,13 +6,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.Namespaces;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.interfaces.ECPublicKey;
