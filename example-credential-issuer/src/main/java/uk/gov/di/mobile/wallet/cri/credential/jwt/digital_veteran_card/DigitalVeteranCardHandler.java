@@ -37,6 +37,6 @@ public class DigitalVeteranCardHandler implements CredentialHandler {
                         veteranCardDocument, proofData.didKey());
 
         return credentialBuilder.buildCredential(
-                subject, DIGITAL_VETERAN_CARD, veteranCardDocument.getCredentialTtlMinutes());
+                subject, DIGITAL_VETERAN_CARD, document.getCredentialTtlMinutes());
     }
 }

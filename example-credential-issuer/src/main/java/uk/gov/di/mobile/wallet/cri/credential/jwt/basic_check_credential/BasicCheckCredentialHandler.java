@@ -37,6 +37,6 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
                         basicCheckDocument, proofData.didKey());
 
         return credentialBuilder.buildCredential(
-                subject, BASIC_DISCLOSURE_CREDENTIAL, basicCheckDocument.getCredentialTtlMinutes());
+                subject, BASIC_DISCLOSURE_CREDENTIAL, document.getCredentialTtlMinutes());
     }
 }

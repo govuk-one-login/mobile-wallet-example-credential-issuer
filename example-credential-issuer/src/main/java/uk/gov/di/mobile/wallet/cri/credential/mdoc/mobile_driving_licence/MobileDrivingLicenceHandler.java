@@ -29,6 +29,9 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
                 mapper.convertValue(document.getData(), DrivingLicenceDocument.class);
 
         return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                drivingLicenceDocument, proofData.publicKey(), statusListInformation.orElseThrow());
+                drivingLicenceDocument,
+                proofData.publicKey(),
+                statusListInformation.orElseThrow(),
+                document.getCredentialTtlMinutes());
     }
 }
