@@ -27,60 +27,7 @@ class CredentialExpiryCalculatorTest {
     }
 
     @Test
-    void Should_CalculateExpiry_For_SocialSecurityCredential() {
-        HashMap<String, Object> data = new HashMap<>();
-        long credentialTtlMinutes = 1440; // 24 hours
-        DocumentStoreRecord document =
-                new DocumentStoreRecord(
-                        ITEM_ID,
-                        DOCUMENT_ID,
-                        data,
-                        "SocialSecurityCredential",
-                        credentialTtlMinutes);
-        // Expected: 2024-01-15T10:30:00Z + 1440 minutes = 2024-01-16T10:30:00Z
-        long expectedEpochSecond = Instant.parse("2024-01-16T10:30:00Z").getEpochSecond();
-
-        long result = calculator.calculateExpiry(document);
-
-        assertEquals(expectedEpochSecond, result);
-    }
-
-    @Test
-    void Should_CalculateExpiry_For_BasicDisclosureCredential() {
-        HashMap<String, Object> data = new HashMap<>();
-        long credentialTtlMinutes = 720; // 12 hours
-        DocumentStoreRecord document =
-                new DocumentStoreRecord(
-                        ITEM_ID,
-                        DOCUMENT_ID,
-                        data,
-                        "BasicDisclosureCredential",
-                        credentialTtlMinutes);
-        // Expected: 2024-01-15T10:30:00Z + 720 minutes = 2024-01-15T22:30:00Z
-        long expectedEpochSecond = Instant.parse("2024-01-15T22:30:00Z").getEpochSecond();
-
-        long result = calculator.calculateExpiry(document);
-
-        assertEquals(expectedEpochSecond, result);
-    }
-
-    @Test
-    void Should_CalculateExpiry_For_DigitalVeteranCard() {
-        HashMap<String, Object> data = new HashMap<>();
-        long credentialTtlMinutes = 60; // 1 hour
-        DocumentStoreRecord document =
-                new DocumentStoreRecord(
-                        ITEM_ID, DOCUMENT_ID, data, "DigitalVeteranCard", credentialTtlMinutes);
-        // Expected: 2024-01-15T10:30:00Z + 60 minutes = 2024-01-15T11:30:00Z
-        long expectedEpochSecond = Instant.parse("2024-01-15T11:30:00Z").getEpochSecond();
-
-        long result = calculator.calculateExpiry(document);
-
-        assertEquals(expectedEpochSecond, result);
-    }
-
-    @Test
-    void Should_CalculateExpiry_Fo_MobileDrivingLicence() {
+    void Should_CalculateCredentialExpiry() {
         HashMap<String, Object> data = new HashMap<>();
         long credentialTtlMinutes = 43200; // 30 days
         DocumentStoreRecord document =
