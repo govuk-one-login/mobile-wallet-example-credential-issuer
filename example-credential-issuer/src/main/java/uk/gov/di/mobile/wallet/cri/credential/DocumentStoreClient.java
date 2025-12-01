@@ -18,7 +18,7 @@ public class DocumentStoreClient {
         this.httpClient = httpClient;
     }
 
-    public Document getDocument(String itemId) throws DocumentStoreException {
+    public DocumentStoreRecord getDocument(String itemId) throws DocumentStoreException {
         try {
             URI uri = buildDocumentUri(itemId);
             Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
@@ -28,7 +28,7 @@ public class DocumentStoreClient {
                                 "Request to fetch document %s failed with status code %s",
                                 itemId, response.getStatus()));
             }
-            return response.readEntity(Document.class);
+            return response.readEntity(DocumentStoreRecord.class);
         } catch (URISyntaxException exception) {
             String errorMessage = String.format("Invalid URI constructed for document: %s", itemId);
             throw new DocumentStoreException(errorMessage, exception);

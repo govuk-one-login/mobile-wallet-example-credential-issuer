@@ -13,8 +13,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItemBuilder;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
