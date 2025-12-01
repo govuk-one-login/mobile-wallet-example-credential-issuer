@@ -7,7 +7,8 @@ import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.DigitalVe
 import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceHandler;
 
 public class CredentialHandlerFactory {
@@ -16,13 +17,13 @@ public class CredentialHandlerFactory {
     private final CredentialBuilder<SocialSecurityCredentialSubject>
             socialSecurityCredentialBuilder;
     private final CredentialBuilder<VeteranCardCredentialSubject> digitalVeteranCardBuilder;
-    private final MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
+    private final MdocCredentialBuilder<DrivingLicenceDocument> mobileDrivingLicenceBuilder;
 
     public CredentialHandlerFactory(
             CredentialBuilder<BasicCheckCredentialSubject> basicCredentialBuilder,
             CredentialBuilder<SocialSecurityCredentialSubject> socialSecurityCredentialBuilder,
             CredentialBuilder<VeteranCardCredentialSubject> digitalVeteranCardBuilder,
-            MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder) {
+            MdocCredentialBuilder<DrivingLicenceDocument> mobileDrivingLicenceBuilder) {
         this.basicCheckCredentialBuilder = basicCredentialBuilder;
         this.socialSecurityCredentialBuilder = socialSecurityCredentialBuilder;
         this.digitalVeteranCardBuilder = digitalVeteranCardBuilder;

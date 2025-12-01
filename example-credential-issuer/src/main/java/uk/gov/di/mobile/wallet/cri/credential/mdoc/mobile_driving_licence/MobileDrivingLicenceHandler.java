@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreRecord;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -13,11 +14,12 @@ import java.util.Optional;
 
 public class MobileDrivingLicenceHandler implements CredentialHandler {
 
-    private final MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
+    private final MdocCredentialBuilder<DrivingLicenceDocument> mdocCredentialBuilder;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public MobileDrivingLicenceHandler(MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder) {
-        this.mobileDrivingLicenceBuilder = mobileDrivingLicenceBuilder;
+    public MobileDrivingLicenceHandler(
+            MdocCredentialBuilder<DrivingLicenceDocument> mdocCredentialBuilder) {
+        this.mdocCredentialBuilder = mdocCredentialBuilder;
     }
 
     public String buildCredential(
@@ -28,7 +30,7 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
         DrivingLicenceDocument document =
                 mapper.convertValue(documentStoreRecord.getData(), DrivingLicenceDocument.class);
 
-        return mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+        return mdocCredentialBuilder.buildCredential(
                 document,
                 proofData.publicKey(),
                 statusListInformation.orElseThrow(),

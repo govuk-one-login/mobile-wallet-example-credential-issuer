@@ -6,14 +6,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.DigitalVeteranCardHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -24,13 +23,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("CredentialHandlerFactory Tests")
 class CredentialHandlerFactoryTest {
 
-    @Mock private CredentialBuilder<BasicCheckCredentialSubject> mockBasicCheckCredentialBuilder;
+    @Mock
+    private uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder<
+                    BasicCheckCredentialSubject>
+            mockBasicCheckCredentialBuilder;
 
     @Mock
-    private CredentialBuilder<SocialSecurityCredentialSubject> mockSocialSecurityCredentialBuilder;
+    private uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder<
+                    SocialSecurityCredentialSubject>
+            mockSocialSecurityCredentialBuilder;
 
-    @Mock private CredentialBuilder<VeteranCardCredentialSubject> mockDigitalVeteranCardBuilder;
-    @Mock private MobileDrivingLicenceBuilder mockMobileDrivingLicenceBuilder;
+    @Mock
+    private uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder<
+                    VeteranCardCredentialSubject>
+            mockDigitalVeteranCardBuilder;
+
+    @Mock private MdocCredentialBuilder mockMobileDrivingLicenceBuilder;
     private CredentialHandlerFactory factory;
 
     @BeforeEach

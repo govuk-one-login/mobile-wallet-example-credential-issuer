@@ -16,6 +16,7 @@ import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.Soc
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.DigestIDGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedItemFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.MobileSecurityObjectFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.ValidityInfoFactory;
@@ -24,7 +25,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESigner;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
@@ -113,7 +114,6 @@ public class ServicesFactory {
         CertificateProvider certificateProvider =
                 new CertificateProvider(
                         s3Service, configurationService.getCertificatesBucketName());
-        NamespacesFactory namespacesFactory = new NamespacesFactory(issuerSignedItemFactory);
         IssuerSignedFactory issuerSignedFactory =
                 new IssuerSignedFactory(
                         mobileSecurityObjectFactory,
@@ -132,16 +132,18 @@ public class ServicesFactory {
         CredentialBuilder<VeteranCardCredentialSubject> digitalVeteranCardCredentialBuilder =
                 new CredentialBuilder<>(configurationService, kmsService);
 
-        MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder =
-                new MobileDrivingLicenceBuilder(
-                        cborEncoder, namespacesFactory, issuerSignedFactory);
+        NamespacesFactory<DrivingLicenceDocument> drivingLicenceNamespacesFactory =
+                new NamespacesFactory<>(issuerSignedItemFactory);
+        MdocCredentialBuilder<DrivingLicenceDocument> drivingLicenceMdocCredentialBuilder =
+                new MdocCredentialBuilder<>(
+                        cborEncoder, drivingLicenceNamespacesFactory, issuerSignedFactory);
 
         CredentialHandlerFactory credentialHandlerFactory =
                 new CredentialHandlerFactory(
                         basicCheckCredentialBuilder,
                         socialSecurityCredentialBuilder,
                         digitalVeteranCardCredentialBuilder,
-                        mobileDrivingLicenceBuilder);
+                        drivingLicenceMdocCredentialBuilder);
 
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);

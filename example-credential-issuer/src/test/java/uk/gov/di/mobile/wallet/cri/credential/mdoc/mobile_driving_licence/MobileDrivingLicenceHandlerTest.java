@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreRecord;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -32,7 +33,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MobileDrivingLicenceHandlerTest {
 
-    @Mock private MobileDrivingLicenceBuilder mockMobileDrivingLicenceService;
+    @Mock private MdocCredentialBuilder mockMobileDrivingLicenceService;
     @Mock private DocumentStoreRecord mockDocument;
     @Mock private ECPublicKey ecPublicKey;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
@@ -57,7 +58,7 @@ class MobileDrivingLicenceHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
-        when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
+        when(mockMobileDrivingLicenceService.buildCredential(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),
@@ -76,7 +77,7 @@ class MobileDrivingLicenceHandlerTest {
 
         assertEquals(EXPECTED_CREDENTIAL, credential);
         verify(mockMobileDrivingLicenceService)
-                .createMobileDrivingLicence(
+                .buildCredential(
                         mockDrivingLicenceDocument,
                         ecPublicKey,
                         STATUS_LIST_INFORMATION,
@@ -115,7 +116,7 @@ class MobileDrivingLicenceHandlerTest {
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
-        when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
+        when(mockMobileDrivingLicenceService.buildCredential(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),

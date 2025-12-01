@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.annotations.Namespace;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.lang.reflect.Field;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 
 import static uk.gov.di.mobile.wallet.cri.credential.mdoc.CamelToSnake.camelToSnake;
 
-public class NamespacesFactory {
+public class NamespacesFactory<T> {
     private final IssuerSignedItemFactory issuerSignedItemFactory;
 
     public NamespacesFactory(IssuerSignedItemFactory issuerSignedItemFactory) {
@@ -23,7 +22,7 @@ public class NamespacesFactory {
     }
 
     /**
-     * Builds all namespaces for a given {@link DrivingLicenceDocument}.
+     * Builds all namespaces for a given document.
      *
      * <p>For each field in the document annotated with {@link Namespace}, this method:
      *
@@ -35,12 +34,12 @@ public class NamespacesFactory {
      *       IssuerSignedItem} objects belonging to that namespace.
      * </ul>
      *
-     * @param document The driving licence document to process/extract fields from.
+     * @param document The document to process/extract fields from.
      * @return Map from namespace names to lists of issuer-signed items.
      * @throws MDLException If reflection fails or encoding fails.
      */
     @SuppressWarnings("java:S3011") // Suppressing "Accessibility bypass" warning
-    public Namespaces build(DrivingLicenceDocument document) throws MDLException {
+    public Namespaces build(T document) throws MDLException {
         Map<String, List<IssuerSignedItem>> namespaces = new LinkedHashMap<>();
         Map<String, List<Field>> fieldsByNamespace = getFieldsByNamespace(document.getClass());
 

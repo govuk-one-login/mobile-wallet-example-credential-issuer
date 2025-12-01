@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedFactory;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.Namespaces;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
@@ -24,10 +25,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MobileDrivingLicenceBuilderTest {
+class MdocCredentialBuilderTest {
 
     @Mock private CBOREncoder cborEncoder;
-    @Mock private NamespacesFactory namespacesFactory;
+    @Mock private NamespacesFactory<DrivingLicenceDocument> namespacesFactory;
     @Mock private IssuerSignedFactory issuerSignedFactory;
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
     @Mock private Namespaces namespaces;
@@ -39,13 +40,12 @@ class MobileDrivingLicenceBuilderTest {
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
-    private MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
+    private MdocCredentialBuilder<DrivingLicenceDocument> mdocCredentialBuilder;
 
     @BeforeEach
     void setUp() {
-        mobileDrivingLicenceBuilder =
-                new MobileDrivingLicenceBuilder(
-                        cborEncoder, namespacesFactory, issuerSignedFactory);
+        mdocCredentialBuilder =
+                new MdocCredentialBuilder<>(cborEncoder, namespacesFactory, issuerSignedFactory);
     }
 
     @Test
@@ -66,7 +66,7 @@ class MobileDrivingLicenceBuilderTest {
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
 
         String result =
-                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                mdocCredentialBuilder.buildCredential(
                         mockDrivingLicenceDocument,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
@@ -97,7 +97,7 @@ class MobileDrivingLicenceBuilderTest {
                 assertThrows(
                         MDLException.class,
                         () ->
-                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                                mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
@@ -137,7 +137,7 @@ class MobileDrivingLicenceBuilderTest {
                 assertThrows(
                         SigningException.class,
                         () ->
-                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                                mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
@@ -170,7 +170,7 @@ class MobileDrivingLicenceBuilderTest {
                 assertThrows(
                         MDLException.class,
                         () ->
-                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                                mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
