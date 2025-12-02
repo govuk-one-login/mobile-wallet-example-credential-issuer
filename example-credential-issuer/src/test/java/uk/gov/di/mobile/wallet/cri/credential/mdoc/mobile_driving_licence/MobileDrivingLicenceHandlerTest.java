@@ -109,7 +109,7 @@ class MobileDrivingLicenceHandlerTest {
     }
 
     @Test
-    void Should_PropagateException_When_MobileDrivingLicenceServiceThrowsSigningException()
+    void Should_PropagateException_When_MdocCredentialBuilderThrowsSigningException()
             throws SigningException, ObjectStoreException, CertificateException {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
