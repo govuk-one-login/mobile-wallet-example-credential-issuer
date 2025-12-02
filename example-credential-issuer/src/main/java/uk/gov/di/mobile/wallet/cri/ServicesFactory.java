@@ -6,6 +6,7 @@ import jakarta.ws.rs.client.Client;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListRequestTokenBuilder;
@@ -137,13 +138,19 @@ public class ServicesFactory {
                 new NamespacesFactory<>(issuerSignedItemFactory);
         MdocCredentialBuilder<DrivingLicenceDocument> drivingLicenceMdocCredentialBuilder =
                 new MdocCredentialBuilder<>(
-                        cborEncoder, drivingLicenceNamespacesFactory, issuerSignedFactory);
+                        cborEncoder,
+                        drivingLicenceNamespacesFactory,
+                        issuerSignedFactory,
+                        CredentialType.MOBILE_DRIVING_LICENCE.getType());
 
         NamespacesFactory<FishingLicenceDocument> fishingLicenceNamespacesFactory =
                 new NamespacesFactory<>(issuerSignedItemFactory);
         MdocCredentialBuilder<FishingLicenceDocument> fishingLicenceMdocCredentialBuilder =
                 new MdocCredentialBuilder<>(
-                        cborEncoder, fishingLicenceNamespacesFactory, issuerSignedFactory);
+                        cborEncoder,
+                        fishingLicenceNamespacesFactory,
+                        issuerSignedFactory,
+                        CredentialType.FISHING_LICENCE.getType());
 
         CredentialHandlerFactory credentialHandlerFactory =
                 new CredentialHandlerFactory(

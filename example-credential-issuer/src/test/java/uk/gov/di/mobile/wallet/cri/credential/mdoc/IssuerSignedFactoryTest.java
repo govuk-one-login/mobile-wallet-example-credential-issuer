@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
@@ -52,6 +53,7 @@ class IssuerSignedFactoryTest {
             new StatusListClient.StatusListInformation(
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final String DOC_TYPE = CredentialType.MOBILE_DRIVING_LICENCE.getType();
 
     @BeforeEach
     void setUp() {
@@ -80,7 +82,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
         when(mockCertificateProvider.getSigningCertificate(CERTIFICATE_ID))
@@ -93,7 +96,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
 
         // Assert
         assertNotNull(result);
@@ -102,7 +106,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(mockCborEncoder).encode(mockMobileSecurityObject);
         verify(mockCertificateProvider).getSigningCertificate(CERTIFICATE_ID);
         verify(mockCoseSigner).sign(msoBytes, mockCertificate);
@@ -116,7 +121,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenThrow(expectedException);
 
         // Act & Assert
@@ -128,7 +134,8 @@ class IssuerSignedFactoryTest {
                                         mockNamespaces,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
-                                        CREDENTIAL_TTL_MINUTES));
+                                        CREDENTIAL_TTL_MINUTES,
+                                        DOC_TYPE));
         assertEquals("MSO creation failed", exception.getMessage());
 
         verify(mockMobileSecurityObjectFactory)
@@ -136,7 +143,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verifyNoInteractions(mockCoseSigner, mockCertificateProvider);
     }
 
@@ -149,7 +157,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenThrow(expectedException);
 
@@ -162,7 +171,8 @@ class IssuerSignedFactoryTest {
                                         mockNamespaces,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
-                                        CREDENTIAL_TTL_MINUTES));
+                                        CREDENTIAL_TTL_MINUTES,
+                                        DOC_TYPE));
         assertEquals("CBOR encoding failed", exception.getMessage());
 
         verify(mockMobileSecurityObjectFactory)
@@ -170,7 +180,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(mockCborEncoder).encode(mockMobileSecurityObject);
         verifyNoInteractions(mockCoseSigner, mockCertificateProvider);
     }
@@ -186,7 +197,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
         when(mockCertificateProvider.getSigningCertificate(CERTIFICATE_ID))
@@ -201,7 +213,8 @@ class IssuerSignedFactoryTest {
                                         mockNamespaces,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
-                                        CREDENTIAL_TTL_MINUTES));
+                                        CREDENTIAL_TTL_MINUTES,
+                                        DOC_TYPE));
         assertEquals("Certificate error", exception.getMessage());
 
         verify(mockCertificateProvider).getSigningCertificate(CERTIFICATE_ID);
@@ -220,7 +233,8 @@ class IssuerSignedFactoryTest {
                         mockNamespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
         when(mockCertificateProvider.getSigningCertificate(CERTIFICATE_ID))
@@ -236,7 +250,8 @@ class IssuerSignedFactoryTest {
                                         mockNamespaces,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
-                                        CREDENTIAL_TTL_MINUTES));
+                                        CREDENTIAL_TTL_MINUTES,
+                                        DOC_TYPE));
         assertEquals("Signing failed", exception.getMessage());
 
         verify(mockCoseSigner).sign(msoBytes, mockCertificate);

@@ -37,11 +37,16 @@ public class IssuerSignedFactory {
             Namespaces namespaces,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
-            long credentialTtlMinutes)
+            long credentialTtlMinutes,
+            String docType)
             throws MdocException, SigningException, CertificateException, ObjectStoreException {
         MobileSecurityObject mobileSecurityObject =
                 mobileSecurityObjectFactory.build(
-                        namespaces, publicKey, statusListInformation, credentialTtlMinutes);
+                        namespaces,
+                        publicKey,
+                        statusListInformation,
+                        credentialTtlMinutes,
+                        docType);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
         String certificateId = ArnUtil.extractKeyId(documentSigningKey1Arn);

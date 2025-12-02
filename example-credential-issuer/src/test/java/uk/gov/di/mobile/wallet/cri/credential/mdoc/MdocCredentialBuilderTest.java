@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
@@ -35,13 +36,15 @@ class MdocCredentialBuilderTest {
             new StatusListClient.StatusListInformation(
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final String DOC_TYPE = CredentialType.MOBILE_DRIVING_LICENCE.getType();
 
     private MdocCredentialBuilder<DrivingLicenceDocument> mdocCredentialBuilder;
 
     @BeforeEach
     void setUp() {
         mdocCredentialBuilder =
-                new MdocCredentialBuilder<>(cborEncoder, namespacesFactory, issuerSignedFactory);
+                new MdocCredentialBuilder<>(
+                        cborEncoder, namespacesFactory, issuerSignedFactory, DOC_TYPE);
     }
 
     @Test
@@ -57,7 +60,8 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
 
@@ -79,7 +83,8 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }
 
@@ -106,14 +111,8 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
-        verify(issuerSignedFactory, never())
-                .build(
-                        namespaces,
-                        mockEcPublicKey,
-                        STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
-
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
 
@@ -126,7 +125,8 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenThrow(expectedException);
 
         SigningException actualException =
@@ -145,7 +145,8 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
 
@@ -158,7 +159,8 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
 
@@ -179,7 +181,8 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }
 }

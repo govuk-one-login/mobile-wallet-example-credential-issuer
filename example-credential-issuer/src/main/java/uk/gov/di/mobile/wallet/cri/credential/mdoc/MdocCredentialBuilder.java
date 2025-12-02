@@ -18,6 +18,7 @@ public class MdocCredentialBuilder<T> {
     private final CBOREncoder cborEncoder;
     private final NamespacesFactory<T> namespacesFactory;
     private final IssuerSignedFactory issuerSignedFactory;
+    private final String docType;
 
     /**
      * Constructs a new {@link MdocCredentialBuilder}.
@@ -25,14 +26,17 @@ public class MdocCredentialBuilder<T> {
      * @param cborEncoder CBOR encoder for encoding objects into CBOR binary representation
      * @param namespacesFactory Factory for creating {@link Namespaces} from a document
      * @param issuerSignedFactory Factory for creating {@link IssuerSigned}
+     * @param docType Document type for the {@link MobileSecurityObject}
      */
     public MdocCredentialBuilder(
             CBOREncoder cborEncoder,
             NamespacesFactory<T> namespacesFactory,
-            IssuerSignedFactory issuerSignedFactory) {
+            IssuerSignedFactory issuerSignedFactory,
+            String docType) {
         this.cborEncoder = cborEncoder;
         this.namespacesFactory = namespacesFactory;
         this.issuerSignedFactory = issuerSignedFactory;
+        this.docType = docType;
     }
 
     /**
@@ -62,7 +66,11 @@ public class MdocCredentialBuilder<T> {
         Namespaces namespaces = namespacesFactory.build(document);
         IssuerSigned issuerSigned =
                 issuerSignedFactory.build(
-                        namespaces, publicKey, statusListInformation, credentialTtlMinutes);
+                        namespaces,
+                        publicKey,
+                        statusListInformation,
+                        credentialTtlMinutes,
+                        docType);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
                 .withoutPadding()
