@@ -13,7 +13,6 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -49,7 +48,7 @@ class CredentialOfferResourceTest {
     private static final String WALLET_SUBJECT_ID =
             "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i";
     private static final String ITEM_ID = "f8f7ae46-749a-4882-a426-2659fb81c9d2";
-    private static final String CREDENTIAL_TYPE = "TestCredentialType";
+    private static final String CREDENTIAL_TYPE = "Test-Credential-Type.1";
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final KmsService kmsService = mock(KmsService.class);
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
@@ -153,13 +152,12 @@ class CredentialOfferResourceTest {
     }
 
     @Test
-    @DisplayName("Should return 400 when a credentialType is not a valid value")
     void Should_Return400_When_CredentialTypeIsInvalid() {
         final Response response =
                 resource.target("/credential_offer")
                         .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
                         .queryParam("itemId", ITEM_ID)
-                        .queryParam("credentialType", "???")
+                        .queryParam("credentialType", "inv@lid_credential_type!")
                         .request()
                         .get();
         assertThat(response.getStatus(), is(400));
