@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
-import lombok.SneakyThrows;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 
 import java.security.MessageDigest;
@@ -50,7 +49,6 @@ public class ValueDigestsFactory {
      * @param namespaces A map from namespace strings to lists of {@link IssuerSignedItem}s.
      * @return A new {@link ValueDigests} instance containing the calculated digests.
      */
-    @SneakyThrows
     public ValueDigests createFromNamespaces(Namespaces namespaces) throws MdocException {
         // Map to hold the final result: namespace -> (digestId -> digest bytes)
         final Map<String, Map<Integer, byte[]>> namespaceToValueDigests = new HashMap<>();
