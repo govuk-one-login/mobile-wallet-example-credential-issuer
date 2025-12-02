@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MobileDrivingLicenceHandlerTest {
 
-    @Mock private MdocCredentialBuilder mockMobileDrivingLicenceService;
+    @Mock private MdocCredentialBuilder<DrivingLicenceDocument> mockMdocCredentialBuilder;
     @Mock private DocumentStoreRecord mockDocument;
     @Mock private ECPublicKey ecPublicKey;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
@@ -48,7 +48,7 @@ class MobileDrivingLicenceHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new MobileDrivingLicenceHandler(mockMobileDrivingLicenceService);
+        handler = new MobileDrivingLicenceHandler(mockMdocCredentialBuilder);
     }
 
     @Test
@@ -58,7 +58,7 @@ class MobileDrivingLicenceHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
-        when(mockMobileDrivingLicenceService.buildCredential(
+        when(mockMdocCredentialBuilder.buildCredential(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),
@@ -76,7 +76,8 @@ class MobileDrivingLicenceHandlerTest {
                         mockDocument, mockProofData, Optional.of(STATUS_LIST_INFORMATION));
 
         assertEquals(EXPECTED_CREDENTIAL, credential);
-        verify(mockMobileDrivingLicenceService)
+        verify(mockMapper).convertValue(documentData, DrivingLicenceDocument.class);
+        verify(mockMdocCredentialBuilder)
                 .buildCredential(
                         mockDrivingLicenceDocument,
                         ecPublicKey,
@@ -104,7 +105,7 @@ class MobileDrivingLicenceHandlerTest {
                                 spyHandler.buildCredential(
                                         mockDocument, mockProofData, emptyStatusListInformation));
         assertEquals("No value present", thrown.getMessage());
-        verifyNoInteractions(mockMobileDrivingLicenceService);
+        verifyNoInteractions(mockMdocCredentialBuilder);
     }
 
     @Test
@@ -116,7 +117,7 @@ class MobileDrivingLicenceHandlerTest {
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
-        when(mockMobileDrivingLicenceService.buildCredential(
+        when(mockMdocCredentialBuilder.buildCredential(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),
