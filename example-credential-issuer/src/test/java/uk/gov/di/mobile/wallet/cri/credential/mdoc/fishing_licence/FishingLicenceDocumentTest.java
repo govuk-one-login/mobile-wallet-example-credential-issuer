@@ -5,7 +5,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
-import java.time.Period;
 import java.time.format.DateTimeParseException;
 import java.util.Base64;
 
@@ -41,9 +40,6 @@ class FishingLicenceDocumentTest {
                         TYPE_OF_FISH,
                         NUMBER_OF_FISHING_RODS);
 
-        LocalDate birthDate = LocalDate.of(1985, 5, 24);
-        int age = Period.between(birthDate, LocalDate.now()).getYears();
-
         assertEquals(FAMILY_NAME, document.getFamilyName());
         assertEquals(GIVEN_NAME, document.getGivenName());
         assertArrayEquals(Base64.getDecoder().decode(PORTRAIT), document.getPortrait());
@@ -52,7 +48,6 @@ class FishingLicenceDocumentTest {
         assertEquals(LocalDate.of(2030, 1, 9), document.getExpiryDate());
         assertEquals(ISSUING_COUNTRY, document.getIssuingCountry());
         assertEquals(DOCUMENT_NUMBER, document.getDocumentNumber());
-        ;
         assertEquals(TYPE_OF_FISH, document.getTypeOfFish());
         assertEquals(NUMBER_OF_FISHING_RODS, document.getNumberOfFishingRods());
     }
