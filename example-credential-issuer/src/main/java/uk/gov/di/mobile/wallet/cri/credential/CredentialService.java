@@ -3,7 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
@@ -20,6 +20,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.FISHING_LICENCE;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 
 public class CredentialService {
@@ -92,7 +93,7 @@ public class CredentialService {
 
             Optional<StatusListClient.StatusListInformation> statusListInformation =
                     Optional.empty();
-            if (credentialType == MOBILE_DRIVING_LICENCE) {
+            if (credentialType == MOBILE_DRIVING_LICENCE || credentialType == FISHING_LICENCE) {
                 statusListInformation = Optional.of(statusListClient.getIndex(expiry));
             }
 
@@ -115,7 +116,7 @@ public class CredentialService {
             return new CredentialResponse(credential, notificationId);
         } catch (DataStoreException
                 | SigningException
-                | MDLException
+                | MdocException
                 | ObjectStoreException
                 | CertificateException
                 | DocumentStoreException

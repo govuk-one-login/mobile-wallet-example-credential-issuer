@@ -1,16 +1,14 @@
-package uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence;
+package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSignedFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.Namespaces;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.NamespacesFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.interfaces.ECPublicKey;
@@ -24,10 +22,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MobileDrivingLicenceBuilderTest {
+class MdocCredentialBuilderTest {
 
     @Mock private CBOREncoder cborEncoder;
-    @Mock private NamespacesFactory namespacesFactory;
+    @Mock private NamespacesFactory<DrivingLicenceDocument> namespacesFactory;
     @Mock private IssuerSignedFactory issuerSignedFactory;
     @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
     @Mock private Namespaces namespaces;
@@ -38,14 +36,15 @@ class MobileDrivingLicenceBuilderTest {
             new StatusListClient.StatusListInformation(
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final String DOC_TYPE = CredentialType.MOBILE_DRIVING_LICENCE.getType();
 
-    private MobileDrivingLicenceBuilder mobileDrivingLicenceBuilder;
+    private MdocCredentialBuilder<DrivingLicenceDocument> mdocCredentialBuilder;
 
     @BeforeEach
     void setUp() {
-        mobileDrivingLicenceBuilder =
-                new MobileDrivingLicenceBuilder(
-                        cborEncoder, namespacesFactory, issuerSignedFactory);
+        mdocCredentialBuilder =
+                new MdocCredentialBuilder<>(
+                        cborEncoder, namespacesFactory, issuerSignedFactory, DOC_TYPE);
     }
 
     @Test
@@ -61,12 +60,13 @@ class MobileDrivingLicenceBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
 
         String result =
-                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                mdocCredentialBuilder.buildCredential(
                         mockDrivingLicenceDocument,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
@@ -83,21 +83,22 @@ class MobileDrivingLicenceBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }
 
     @Test
     void Should_PropagateMDLException_When_NamespacesFactoryThrows() throws Exception {
-        MDLException expectedException =
-                new MDLException("Some error message", new RuntimeException());
+        MdocException expectedException =
+                new MdocException("Some error message", new RuntimeException());
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenThrow(expectedException);
 
-        MDLException actualException =
+        MdocException actualException =
                 assertThrows(
-                        MDLException.class,
+                        MdocException.class,
                         () ->
-                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                                mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
@@ -110,14 +111,8 @@ class MobileDrivingLicenceBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
-        verify(issuerSignedFactory, never())
-                .build(
-                        namespaces,
-                        mockEcPublicKey,
-                        STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
-
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
 
@@ -130,14 +125,15 @@ class MobileDrivingLicenceBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenThrow(expectedException);
 
         SigningException actualException =
                 assertThrows(
                         SigningException.class,
                         () ->
-                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                                mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
@@ -149,28 +145,30 @@ class MobileDrivingLicenceBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
 
     @Test
     void Should_PropagatePropagateMDLException_When_CborEncoderThrows() throws Exception {
-        MDLException expectedException =
-                new MDLException("Some error message", new RuntimeException());
+        MdocException expectedException =
+                new MdocException("Some error message", new RuntimeException());
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
         when(issuerSignedFactory.build(
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES))
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
 
-        MDLException actualException =
+        MdocException actualException =
                 assertThrows(
-                        MDLException.class,
+                        MdocException.class,
                         () ->
-                                mobileDrivingLicenceBuilder.createMobileDrivingLicence(
+                                mdocCredentialBuilder.buildCredential(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
@@ -183,7 +181,8 @@ class MobileDrivingLicenceBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }
 }

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.IssuerSigned;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 
 import java.io.IOException;
 
@@ -20,7 +20,7 @@ class CBOREncoderTest {
     @Mock private CBORMapper mockMapper;
 
     @Test
-    void Should_ReturnEncodedBytes() throws IOException, MDLException {
+    void Should_ReturnEncodedBytes() throws IOException, MdocException {
         IssuerSigned valueToEncode = mock(IssuerSigned.class);
         byte[] expectedEncodedBytes = {1, 2, 3, 4};
         when(mockMapper.writeValueAsBytes(valueToEncode)).thenReturn(expectedEncodedBytes);

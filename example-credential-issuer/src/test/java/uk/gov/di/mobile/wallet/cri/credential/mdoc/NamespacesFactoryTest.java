@@ -9,7 +9,6 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.NamespaceTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.Code;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingPrivilege;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.time.LocalDate;
 import java.util.Base64;
@@ -75,7 +74,7 @@ class NamespacesFactoryTest {
      */
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_ISONamespace()
-            throws MDLException {
+            throws MdocException {
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument();
@@ -114,7 +113,7 @@ class NamespacesFactoryTest {
      */
     @Test
     void Should_BuildIssuerSignedItemsForEachFieldInDrivingLicence_GBNamespace()
-            throws MDLException {
+            throws MdocException {
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);
         DrivingLicenceDocument drivingLicenceDocument =
@@ -139,7 +138,7 @@ class NamespacesFactoryTest {
      */
     @Test
     void Should_NotBuildIssuerSignedItemForProvisionalDrivingPrivileges_WhenItsValueIsNull()
-            throws MDLException {
+            throws MdocException {
         DrivingLicenceDocument drivingLicenceDocument = createTestDrivingLicenceDocument(null);
         IssuerSignedItem issuerSignedItem = mock(IssuerSignedItem.class);
         when(mockIssuerSignedItemFactory.build(anyString(), any())).thenReturn(issuerSignedItem);

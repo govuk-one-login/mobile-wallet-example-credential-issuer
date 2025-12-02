@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -13,15 +12,17 @@ import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.DigitalVe
 import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.VeteranCardCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceHandler;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("CredentialHandlerFactory Tests")
 class CredentialHandlerFactoryTest {
 
     @Mock private CredentialBuilder<BasicCheckCredentialSubject> mockBasicCheckCredentialBuilder;
@@ -30,7 +31,9 @@ class CredentialHandlerFactoryTest {
     private CredentialBuilder<SocialSecurityCredentialSubject> mockSocialSecurityCredentialBuilder;
 
     @Mock private CredentialBuilder<VeteranCardCredentialSubject> mockDigitalVeteranCardBuilder;
-    @Mock private MobileDrivingLicenceBuilder mockMobileDrivingLicenceBuilder;
+    @Mock private MdocCredentialBuilder<DrivingLicenceDocument> mockMobileDrivingLicenceBuilder;
+    @Mock private MdocCredentialBuilder<FishingLicenceDocument> mockFishingLicenceBuilder;
+
     private CredentialHandlerFactory factory;
 
     @BeforeEach
@@ -40,7 +43,8 @@ class CredentialHandlerFactoryTest {
                         mockBasicCheckCredentialBuilder,
                         mockSocialSecurityCredentialBuilder,
                         mockDigitalVeteranCardBuilder,
-                        mockMobileDrivingLicenceBuilder);
+                        mockMobileDrivingLicenceBuilder,
+                        mockFishingLicenceBuilder);
     }
 
     @Test
@@ -49,8 +53,9 @@ class CredentialHandlerFactoryTest {
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof BasicCheckCredentialHandler,
+        assertInstanceOf(
+                BasicCheckCredentialHandler.class,
+                handler,
                 "Handler should be instance of BasicCheckCredentialHandler");
     }
 
@@ -60,8 +65,9 @@ class CredentialHandlerFactoryTest {
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof SocialSecurityCredentialHandler,
+        assertInstanceOf(
+                SocialSecurityCredentialHandler.class,
+                handler,
                 "Handler should be instance of SocialSecurityCredentialHandler");
     }
 
@@ -71,8 +77,9 @@ class CredentialHandlerFactoryTest {
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof DigitalVeteranCardHandler,
+        assertInstanceOf(
+                DigitalVeteranCardHandler.class,
+                handler,
                 "Handler should be instance of DigitalVeteranCardHandler");
     }
 
@@ -82,9 +89,22 @@ class CredentialHandlerFactoryTest {
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof MobileDrivingLicenceHandler,
+        assertInstanceOf(
+                MobileDrivingLicenceHandler.class,
+                handler,
                 "Handler should be instance of MobileDrivingLicenceHandler");
+    }
+
+    @Test
+    void Should_CreateFishingLicenceHandler() {
+        String vcType = "uk.gov.account.mobile.example-cri.fishinglicence.1";
+
+        CredentialHandler handler = factory.createHandler(vcType);
+
+        assertInstanceOf(
+                FishingLicenceHandler.class,
+                handler,
+                "Handler should be instance of FishingLicenceHandler");
     }
 
     @Test

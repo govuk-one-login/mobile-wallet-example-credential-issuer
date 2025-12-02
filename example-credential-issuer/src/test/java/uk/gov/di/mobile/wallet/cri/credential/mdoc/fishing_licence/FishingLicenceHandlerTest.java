@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence;
+package uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,14 +31,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MobileDrivingLicenceHandlerTest {
+class FishingLicenceHandlerTest {
 
-    @Mock private MdocCredentialBuilder<DrivingLicenceDocument> mockMdocCredentialBuilder;
+    @Mock private MdocCredentialBuilder<FishingLicenceDocument> mockMdocCredentialBuilder;
     @Mock private DocumentStoreRecord mockDocument;
     @Mock private ECPublicKey ecPublicKey;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
-    @Mock private DrivingLicenceDocument mockDrivingLicenceDocument;
-    private MobileDrivingLicenceHandler handler;
+    @Mock private FishingLicenceDocument mockFishingLicenceDocument;
+    private FishingLicenceHandler handler;
 
     private static final StatusListClient.StatusListInformation STATUS_LIST_INFORMATION =
             new StatusListClient.StatusListInformation(
@@ -48,26 +48,26 @@ class MobileDrivingLicenceHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new MobileDrivingLicenceHandler(mockMdocCredentialBuilder);
+        handler = new FishingLicenceHandler(mockMdocCredentialBuilder);
     }
 
     @Test
-    void Should_ReturnMobileDrivingLicence()
+    void Should_ReturnFishingLicence()
             throws SigningException, ObjectStoreException, CertificateException {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         when(mockMdocCredentialBuilder.buildCredential(
-                        any(DrivingLicenceDocument.class),
+                        any(FishingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),
                         anyLong()))
                 .thenReturn(EXPECTED_CREDENTIAL);
-        MobileDrivingLicenceHandler spyHandler = spy(handler);
+        FishingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(documentData, DrivingLicenceDocument.class))
-                .thenReturn(mockDrivingLicenceDocument);
+        when(mockMapper.convertValue(documentData, FishingLicenceDocument.class))
+                .thenReturn(mockFishingLicenceDocument);
 
         setMapperField(spyHandler, mockMapper);
 
@@ -76,10 +76,10 @@ class MobileDrivingLicenceHandlerTest {
                         mockDocument, mockProofData, Optional.of(STATUS_LIST_INFORMATION));
 
         assertEquals(EXPECTED_CREDENTIAL, credential);
-        verify(mockMapper).convertValue(documentData, DrivingLicenceDocument.class);
+        verify(mockMapper).convertValue(documentData, FishingLicenceDocument.class);
         verify(mockMdocCredentialBuilder)
                 .buildCredential(
-                        mockDrivingLicenceDocument,
+                        mockFishingLicenceDocument,
                         ecPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_MINUTES);
@@ -90,10 +90,10 @@ class MobileDrivingLicenceHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
-        MobileDrivingLicenceHandler spyHandler = spy(handler);
+        FishingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(documentData, DrivingLicenceDocument.class))
-                .thenReturn(mockDrivingLicenceDocument);
+        when(mockMapper.convertValue(documentData, FishingLicenceDocument.class))
+                .thenReturn(mockFishingLicenceDocument);
         setMapperField(spyHandler, mockMapper);
         Optional<StatusListClient.StatusListInformation> emptyStatusListInformation =
                 Optional.empty();
@@ -118,15 +118,15 @@ class MobileDrivingLicenceHandlerTest {
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockMdocCredentialBuilder.buildCredential(
-                        any(DrivingLicenceDocument.class),
+                        any(FishingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),
                         anyLong()))
                 .thenThrow(signingException);
-        MobileDrivingLicenceHandler spyHandler = spy(handler);
+        FishingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
-        when(mockMapper.convertValue(documentData, DrivingLicenceDocument.class))
-                .thenReturn(mockDrivingLicenceDocument);
+        when(mockMapper.convertValue(documentData, FishingLicenceDocument.class))
+                .thenReturn(mockFishingLicenceDocument);
         setMapperField(spyHandler, mockMapper);
 
         SigningException thrown =
@@ -140,9 +140,9 @@ class MobileDrivingLicenceHandlerTest {
         assertEquals("Some signing error", thrown.getMessage());
     }
 
-    private void setMapperField(MobileDrivingLicenceHandler handler, ObjectMapper mapper) {
+    private void setMapperField(FishingLicenceHandler handler, ObjectMapper mapper) {
         try {
-            var mapperField = MobileDrivingLicenceHandler.class.getDeclaredField("mapper");
+            var mapperField = FishingLicenceHandler.class.getDeclaredField("mapper");
             mapperField.setAccessible(true);
             mapperField.set(handler, mapper);
         } catch (Exception exception) {

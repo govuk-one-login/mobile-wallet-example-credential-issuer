@@ -5,13 +5,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.DocumentTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.constants.COSEEllipticCurves;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.constants.COSEKeyTypes;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
@@ -39,6 +39,7 @@ class MobileSecurityObjectFactoryTest {
     private static final String STATUS_LIST_URI = "https://example.gov.uk/t/ABC123";
     private static final StatusListClient.StatusListInformation STATUS_LIST_INFORMATION =
             new StatusListClient.StatusListInformation(STATUS_LIST_INDEX, STATUS_LIST_URI);
+    private static final String DOC_TYPE = CredentialType.MOBILE_DRIVING_LICENCE.getType();
 
     @Mock private ValueDigestsFactory valueDigestsFactory;
     @Mock private ValidityInfoFactory validityInfoFactory;
@@ -55,7 +56,7 @@ class MobileSecurityObjectFactoryTest {
     }
 
     @Test
-    void Should_ConstructMobileSecurityObject_With_ExpectedFields() throws MDLException {
+    void Should_ConstructMobileSecurityObject_With_ExpectedFields() throws MdocException {
         Namespaces namespaces = getTestNamespaces();
         ValueDigests valueDigests = getTestValueDigests();
         when(valueDigestsFactory.createFromNamespaces(namespaces)).thenReturn(valueDigests);
@@ -67,7 +68,11 @@ class MobileSecurityObjectFactoryTest {
 
         MobileSecurityObject mso =
                 factory.build(
-                        namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_MINUTES);
+                        namespaces,
+                        publicKey,
+                        STATUS_LIST_INFORMATION,
+                        CREDENTIAL_TTL_MINUTES,
+                        DOC_TYPE);
 
         assertAll(
                 () -> assertEquals("1.0", mso.version()),
@@ -87,20 +92,21 @@ class MobileSecurityObjectFactoryTest {
     }
 
     @Test
-    void Should_CallValueDigestsFactory_With_Namespaces() throws MDLException {
+    void Should_CallValueDigestsFactory_With_Namespaces() throws MdocException {
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
                 .thenReturn(getTestValueDigests());
         when(validityInfoFactory.build(anyLong())).thenReturn(getTestValidityInfo());
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
-        factory.build(namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_MINUTES);
+        factory.build(
+                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_MINUTES, DOC_TYPE);
 
         verify(valueDigestsFactory).createFromNamespaces(namespaces);
     }
 
     @Test
-    void Should_UseProvidedCredentialTtl_When_BuildingValidityInfo() throws MDLException {
+    void Should_UseProvidedCredentialTtl_When_BuildingValidityInfo() throws MdocException {
         long ttl = 5000L;
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
@@ -108,20 +114,21 @@ class MobileSecurityObjectFactoryTest {
         when(validityInfoFactory.build(ttl)).thenReturn(getTestValidityInfo());
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
-        factory.build(namespaces, publicKey, STATUS_LIST_INFORMATION, ttl);
+        factory.build(namespaces, publicKey, STATUS_LIST_INFORMATION, ttl, DOC_TYPE);
 
         verify(validityInfoFactory).build(ttl);
     }
 
     @Test
-    void Should_ConvertPublicKey_Via_CoseKeyFactory() throws MDLException {
+    void Should_ConvertPublicKey_Via_CoseKeyFactory() throws MdocException {
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
                 .thenReturn(getTestValueDigests());
         when(validityInfoFactory.build(anyLong())).thenReturn(getTestValidityInfo());
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
-        factory.build(namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_MINUTES);
+        factory.build(
+                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_MINUTES, DOC_TYPE);
 
         verify(coseKeyFactory).fromECPublicKey(publicKey);
     }

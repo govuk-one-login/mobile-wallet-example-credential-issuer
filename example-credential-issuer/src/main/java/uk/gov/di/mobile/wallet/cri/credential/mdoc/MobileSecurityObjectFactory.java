@@ -1,24 +1,17 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.DocumentTypes;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 
 import java.security.interfaces.ECPublicKey;
 import java.util.Set;
 
-/** Creates {@link MobileSecurityObject} instances for mobile driver's licenses. */
+/** Creates {@link MobileSecurityObject} instances. */
 public class MobileSecurityObjectFactory {
 
     /** Version for the {@link MobileSecurityObject}. */
     private static final String MSO_VERSION = "1.0";
-
-    /**
-     * Document type identifier for a mobile driver's license (mDL), as specified by ISO 18013-5.
-     */
-    private static final String DOC_TYPE = DocumentTypes.MDL;
 
     /** Factory for creating {@link ValueDigests} instances. */
     private final ValueDigestsFactory valueDigestsFactory;
@@ -57,15 +50,17 @@ public class MobileSecurityObjectFactory {
      *     revocation or status checking.
      * @param credentialTtlMinutes The credential time-to-live, in minutes, used to determine its
      *     validity period.
+     * @param docType Document type for the {@link MobileSecurityObject}
      * @return {@link MobileSecurityObject}
-     * @throws MDLException If an error occurs when building the {@link ValueDigests}
+     * @throws MdocException If an error occurs when building the {@link ValueDigests}
      */
     public MobileSecurityObject build(
             Namespaces nameSpaces,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
-            long credentialTtlMinutes)
-            throws MDLException {
+            long credentialTtlMinutes,
+            String docType)
+            throws MdocException {
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
         Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
         KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
@@ -81,7 +76,7 @@ public class MobileSecurityObjectFactory {
                 valueDigestsFactory.getDigestAlgorithm(),
                 deviceKeyInfo,
                 valueDigests,
-                DOC_TYPE,
+                docType,
                 validityInfo,
                 status);
     }

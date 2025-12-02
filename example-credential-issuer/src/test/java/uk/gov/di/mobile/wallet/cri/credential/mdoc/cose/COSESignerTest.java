@@ -14,8 +14,8 @@ import software.amazon.awssdk.services.kms.model.MessageType;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -207,7 +207,7 @@ class COSESignerTest {
         // Arrange: Setup certificate encoding to succeed but CBOR encoding to fail
         when(certificate.getEncoded()).thenReturn(TEST_CERTIFICATE_ENCODED);
         when(cborEncoder.encode(any()))
-                .thenThrow(new MDLException("CBOR encoding failed", new Exception()));
+                .thenThrow(new MdocException("CBOR encoding failed", new Exception()));
 
         // Act & Assert: Execute and verify MDLException is thrown
         assertThrows(RuntimeException.class, () -> coseSigner.sign(TEST_PAYLOAD, certificate));

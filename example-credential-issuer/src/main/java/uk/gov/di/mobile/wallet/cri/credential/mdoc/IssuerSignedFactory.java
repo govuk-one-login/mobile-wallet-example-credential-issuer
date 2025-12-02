@@ -4,7 +4,6 @@ import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESigner;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
 import uk.gov.di.mobile.wallet.cri.services.certificate.CertificateProvider;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
@@ -38,11 +37,16 @@ public class IssuerSignedFactory {
             Namespaces namespaces,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
-            long credentialTtlMinutes)
-            throws MDLException, SigningException, CertificateException, ObjectStoreException {
+            long credentialTtlMinutes,
+            String docType)
+            throws MdocException, SigningException, CertificateException, ObjectStoreException {
         MobileSecurityObject mobileSecurityObject =
                 mobileSecurityObjectFactory.build(
-                        namespaces, publicKey, statusListInformation, credentialTtlMinutes);
+                        namespaces,
+                        publicKey,
+                        statusListInformation,
+                        credentialTtlMinutes,
+                        docType);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 
         String certificateId = ArnUtil.extractKeyId(documentSigningKey1Arn);

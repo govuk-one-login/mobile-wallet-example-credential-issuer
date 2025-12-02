@@ -11,7 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
 import testUtils.MockProofBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MDLException;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocException;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
@@ -322,14 +322,14 @@ class CredentialServiceTest {
         when(mockStatusListClient.getIndex(EXPIRY_TIME)).thenReturn(STATUS_LIST_INFORMATION);
         when(mockHandler.buildCredential(
                         eq(mockDocument), eq(mockProofJwtData), any(Optional.class)))
-                .thenThrow(new MDLException("Some mDL error", new RuntimeException()));
+                .thenThrow(new MdocException("Some mDL error", new RuntimeException()));
 
         CredentialServiceException exception =
                 assertThrows(
                         CredentialServiceException.class,
                         () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
         assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
-        assertEquals(MDLException.class, exception.getCause().getClass());
+        assertEquals(MdocException.class, exception.getCause().getClass());
         assertEquals("Some mDL error", exception.getCause().getMessage());
     }
 
