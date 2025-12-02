@@ -56,8 +56,8 @@ public class FishingLicenceDocument {
             @JsonProperty("expiry_date") String expiryDate,
             @JsonProperty("issuing_country") String issuingCountry,
             @JsonProperty("document_number") String documentNumber,
-            String typeOfFish,
-            int numberOfFishingRods) {
+            @JsonProperty("type_of_fish") String typeOfFish,
+            @JsonProperty("number_of_fishing_rods") int numberOfFishingRods) {
         this.familyName = Objects.requireNonNull(familyName, "family_name is required");
         this.givenName = Objects.requireNonNull(givenName, "given_name is required");
         this.portrait =
