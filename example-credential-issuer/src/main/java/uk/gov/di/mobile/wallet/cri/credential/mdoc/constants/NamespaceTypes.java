@@ -9,7 +9,7 @@ public final class NamespaceTypes {
 
     /** Fishing Licence namespace */
     public static final String FISHING_LICENCE =
-            "uk.gov.account.mobile.example-credential-issuer.fishinglicence.1";
+            "uk.gov.account.mobile.example-cri.fishinglicence.1";
 
     private NamespaceTypes() {}
 }

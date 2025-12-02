@@ -97,7 +97,7 @@ class CredentialHandlerFactoryTest {
 
     @Test
     void Should_CreateFishingLicenceHandler() {
-        String vcType = "uk.gov.account.mobile.example-credential-issuer.fishinglicence.1";
+        String vcType = "uk.gov.account.mobile.example-cri.fishinglicence.1";
 
         CredentialHandler handler = factory.createHandler(vcType);
 
