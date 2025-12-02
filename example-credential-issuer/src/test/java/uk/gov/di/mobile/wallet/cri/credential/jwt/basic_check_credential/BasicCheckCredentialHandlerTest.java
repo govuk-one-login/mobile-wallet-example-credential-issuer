@@ -55,7 +55,7 @@ class BasicCheckCredentialHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockBasicCheckDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
         when(mockCredentialBuilder.buildCredential(
                         any(BasicCheckCredentialSubject.class),
                         eq(BASIC_DISCLOSURE_CREDENTIAL),
@@ -92,7 +92,7 @@ class BasicCheckCredentialHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockBasicCheckDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockCredentialBuilder.buildCredential(

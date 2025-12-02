@@ -25,18 +25,20 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
 
     @Override
     public String buildCredential(
-            DocumentStoreRecord document,
+            DocumentStoreRecord documentStoreRecord,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException {
-        BasicCheckDocument basicCheckDocument =
-                mapper.convertValue(document.getData(), BasicCheckDocument.class);
+        BasicCheckDocument document =
+                mapper.convertValue(documentStoreRecord.getData(), BasicCheckDocument.class);
 
         BasicCheckCredentialSubject subject =
                 CredentialSubjectMapper.buildBasicCheckCredentialSubject(
-                        basicCheckDocument, proofData.didKey());
+                        document, proofData.didKey());
 
         return credentialBuilder.buildCredential(
-                subject, BASIC_DISCLOSURE_CREDENTIAL, basicCheckDocument.getCredentialTtlMinutes());
+                subject,
+                BASIC_DISCLOSURE_CREDENTIAL,
+                documentStoreRecord.getCredentialTtlMinutes());
     }
 }

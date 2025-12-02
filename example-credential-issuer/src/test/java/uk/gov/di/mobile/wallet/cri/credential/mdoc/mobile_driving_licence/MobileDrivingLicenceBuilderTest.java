@@ -64,19 +64,19 @@ class MobileDrivingLicenceBuilderTest {
                         CREDENTIAL_TTL_MINUTES))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
-        when(mockDrivingLicenceDocument.getCredentialTtlMinutes())
-                .thenReturn(CREDENTIAL_TTL_MINUTES);
 
         String result =
                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
-                        mockDrivingLicenceDocument, mockEcPublicKey, STATUS_LIST_INFORMATION);
+                        mockDrivingLicenceDocument,
+                        mockEcPublicKey,
+                        STATUS_LIST_INFORMATION,
+                        CREDENTIAL_TTL_MINUTES);
 
         assertEquals(
                 expectedBase64,
                 result,
                 "The actual base64url encoded string should match the expected result");
         assertFalse(result.contains("="), "Base64url encoded string should not contain padding");
-        assertEquals(CREDENTIAL_TTL_MINUTES, mockDrivingLicenceDocument.getCredentialTtlMinutes());
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
         verify(issuerSignedFactory)
                 .build(
@@ -100,7 +100,8 @@ class MobileDrivingLicenceBuilderTest {
                                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
-                                        STATUS_LIST_INFORMATION));
+                                        STATUS_LIST_INFORMATION,
+                                        CREDENTIAL_TTL_MINUTES));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
@@ -125,8 +126,6 @@ class MobileDrivingLicenceBuilderTest {
         SigningException expectedException =
                 new SigningException("Some error message", new RuntimeException());
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
-        when(mockDrivingLicenceDocument.getCredentialTtlMinutes())
-                .thenReturn(CREDENTIAL_TTL_MINUTES);
         when(issuerSignedFactory.build(
                         namespaces,
                         mockEcPublicKey,
@@ -141,7 +140,8 @@ class MobileDrivingLicenceBuilderTest {
                                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
-                                        STATUS_LIST_INFORMATION));
+                                        STATUS_LIST_INFORMATION,
+                                        CREDENTIAL_TTL_MINUTES));
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
         verify(issuerSignedFactory)
@@ -164,8 +164,6 @@ class MobileDrivingLicenceBuilderTest {
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_MINUTES))
                 .thenReturn(issuerSigned);
-        when(mockDrivingLicenceDocument.getCredentialTtlMinutes())
-                .thenReturn(CREDENTIAL_TTL_MINUTES);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
 
         MDLException actualException =
@@ -175,7 +173,8 @@ class MobileDrivingLicenceBuilderTest {
                                 mobileDrivingLicenceBuilder.createMobileDrivingLicence(
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
-                                        STATUS_LIST_INFORMATION));
+                                        STATUS_LIST_INFORMATION,
+                                        CREDENTIAL_TTL_MINUTES));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);

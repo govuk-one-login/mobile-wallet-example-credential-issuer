@@ -25,20 +25,18 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
 
     @Override
     public String buildCredential(
-            DocumentStoreRecord document,
+            DocumentStoreRecord documentStoreRecord,
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws SigningException {
-        SocialSecurityDocument socialSecurityDocument =
-                mapper.convertValue(document.getData(), SocialSecurityDocument.class);
+        SocialSecurityDocument document =
+                mapper.convertValue(documentStoreRecord.getData(), SocialSecurityDocument.class);
 
         SocialSecurityCredentialSubject subject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
-                        socialSecurityDocument, proofData.didKey());
+                        document, proofData.didKey());
 
         return credentialBuilder.buildCredential(
-                subject,
-                SOCIAL_SECURITY_CREDENTIAL,
-                socialSecurityDocument.getCredentialTtlMinutes());
+                subject, SOCIAL_SECURITY_CREDENTIAL, documentStoreRecord.getCredentialTtlMinutes());
     }
 }

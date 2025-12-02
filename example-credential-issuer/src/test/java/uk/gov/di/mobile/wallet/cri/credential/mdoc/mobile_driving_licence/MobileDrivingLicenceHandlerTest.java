@@ -22,9 +22,11 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,6 +43,7 @@ class MobileDrivingLicenceHandlerTest {
             new StatusListClient.StatusListInformation(
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final String EXPECTED_CREDENTIAL = "signed-mdoc-credential-string";
+    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @BeforeEach
     void setUp() {
@@ -52,11 +55,13 @@ class MobileDrivingLicenceHandlerTest {
             throws SigningException, ObjectStoreException, CertificateException {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
-                        any(StatusListClient.StatusListInformation.class)))
+                        any(StatusListClient.StatusListInformation.class),
+                        anyLong()))
                 .thenReturn(EXPECTED_CREDENTIAL);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -72,7 +77,10 @@ class MobileDrivingLicenceHandlerTest {
         assertEquals(EXPECTED_CREDENTIAL, credential);
         verify(mockMobileDrivingLicenceService)
                 .createMobileDrivingLicence(
-                        mockDrivingLicenceDocument, ecPublicKey, STATUS_LIST_INFORMATION);
+                        mockDrivingLicenceDocument,
+                        ecPublicKey,
+                        STATUS_LIST_INFORMATION,
+                        CREDENTIAL_TTL_MINUTES);
     }
 
     @Test
@@ -95,6 +103,7 @@ class MobileDrivingLicenceHandlerTest {
                                 spyHandler.buildCredential(
                                         mockDocument, mockProofData, emptyStatusListInformation));
         assertEquals("No value present", thrown.getMessage());
+        verifyNoInteractions(mockMobileDrivingLicenceService);
     }
 
     @Test
@@ -102,13 +111,15 @@ class MobileDrivingLicenceHandlerTest {
             throws SigningException, ObjectStoreException, CertificateException {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockMobileDrivingLicenceService.createMobileDrivingLicence(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
-                        any(StatusListClient.StatusListInformation.class)))
+                        any(StatusListClient.StatusListInformation.class),
+                        anyLong()))
                 .thenThrow(signingException);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);

@@ -41,7 +41,6 @@ class DrivingLicenceDocumentTest {
     private static final String UN_DISTINGUISHING_SIGN = "UK";
     private static final List<DrivingPrivilege> PROVISIONAL_DRIVING_PRIVILEGES =
             Arrays.asList(mock(DrivingPrivilege.class), mock(DrivingPrivilege.class));
-    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
 
     @Test
     void Should_CreateInstance_When_DataIsValid() {
@@ -64,7 +63,6 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
                         UN_DISTINGUISHING_SIGN,
-                        CREDENTIAL_TTL_MINUTES,
                         PROVISIONAL_DRIVING_PRIVILEGES);
 
         LocalDate birthDate = LocalDate.of(1985, 5, 24);
@@ -114,7 +112,6 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
                         UN_DISTINGUISHING_SIGN,
-                        CREDENTIAL_TTL_MINUTES,
                         PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals("123 Main St", document.getResidentAddress());
@@ -143,7 +140,6 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
                         UN_DISTINGUISHING_SIGN,
-                        CREDENTIAL_TTL_MINUTES,
                         PROVISIONAL_DRIVING_PRIVILEGES);
 
         assertEquals("123 Main St, Floor 2, Suite 301", document.getResidentAddress());
@@ -172,7 +168,6 @@ class DrivingLicenceDocumentTest {
                         RESIDENT_CITY,
                         DRIVING_PRIVILEGES,
                         UN_DISTINGUISHING_SIGN,
-                        CREDENTIAL_TTL_MINUTES,
                         provisionalDrivingPrivileges);
 
         assertEquals(Optional.empty(), document.getProvisionalDrivingPrivileges());
@@ -201,7 +196,6 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
                                 UN_DISTINGUISHING_SIGN,
-                                CREDENTIAL_TTL_MINUTES,
                                 PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
@@ -229,7 +223,6 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_CITY,
                                 emptyDrivingPrivileges,
                                 UN_DISTINGUISHING_SIGN,
-                                CREDENTIAL_TTL_MINUTES,
                                 PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
@@ -257,7 +250,6 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
                                 UN_DISTINGUISHING_SIGN,
-                                CREDENTIAL_TTL_MINUTES,
                                 PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
@@ -285,7 +277,6 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
                                 UN_DISTINGUISHING_SIGN,
-                                CREDENTIAL_TTL_MINUTES,
                                 PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
@@ -313,7 +304,6 @@ class DrivingLicenceDocumentTest {
                                 RESIDENT_CITY,
                                 DRIVING_PRIVILEGES,
                                 UN_DISTINGUISHING_SIGN,
-                                CREDENTIAL_TTL_MINUTES,
                                 PROVISIONAL_DRIVING_PRIVILEGES));
     }
 
@@ -364,7 +354,6 @@ class DrivingLicenceDocumentTest {
                 RESIDENT_CITY,
                 DRIVING_PRIVILEGES,
                 UN_DISTINGUISHING_SIGN,
-                CREDENTIAL_TTL_MINUTES,
                 PROVISIONAL_DRIVING_PRIVILEGES);
     }
 }

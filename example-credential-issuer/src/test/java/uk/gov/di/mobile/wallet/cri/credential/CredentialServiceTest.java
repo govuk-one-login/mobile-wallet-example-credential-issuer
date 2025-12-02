@@ -439,20 +439,11 @@ class CredentialServiceTest {
 
     public static DocumentStoreRecord getMockSocialSecurityDocument() {
         HashMap<String, Object> data = new HashMap<>();
-        data.put("familyName", "Edwards Green");
-        data.put("givenName", "Sarah Elizabeth");
-        data.put("nino", NINO);
-        data.put("title", "Miss");
-        data.put("credentialTtlMinutes", "43200");
-        return new DocumentStoreRecord(ITEM_ID, NINO, data, "SocialSecurityCredential");
+        return new DocumentStoreRecord(ITEM_ID, NINO, data, "SocialSecurityCredential", 43200L);
     }
 
     public static DocumentStoreRecord getMockMobileDrivingLicenceDocument() {
         HashMap<String, Object> data = new HashMap<>();
-        data.put("family_name", "Edwards Green");
-        data.put("given_name", "Sarah Elizabeth");
-        data.put("document_number", DOCUMENT_NUMBER);
-        data.put("credentialTtlMinutes", 43200L);
-        return new DocumentStoreRecord(ITEM_ID, DOCUMENT_NUMBER, data, MDL_VC_TYPE);
+        return new DocumentStoreRecord(ITEM_ID, DOCUMENT_NUMBER, data, MDL_VC_TYPE, 43200L);
     }
 }

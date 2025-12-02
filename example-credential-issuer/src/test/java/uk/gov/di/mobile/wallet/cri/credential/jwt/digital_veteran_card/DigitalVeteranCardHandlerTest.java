@@ -55,7 +55,7 @@ class DigitalVeteranCardHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockVeteranCardDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
         when(mockCredentialBuilder.buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(DIGITAL_VETERAN_CARD),
@@ -91,7 +91,7 @@ class DigitalVeteranCardHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockVeteranCardDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockCredentialBuilder.buildCredential(
