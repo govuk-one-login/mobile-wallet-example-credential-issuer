@@ -1,13 +1,11 @@
 package uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class BasicCheckDocument {
     @JsonProperty("issuance-day")
     private String issuanceDay;
