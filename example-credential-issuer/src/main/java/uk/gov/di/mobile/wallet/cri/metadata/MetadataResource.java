@@ -31,7 +31,7 @@ public class MetadataResource {
      * Creates a new MetadataResource instance.
      *
      * @param configurationService Service for accessing application configuration.
-     * @param metadataBuilder Builder for constructing metadata responses.
+     * @param metadataBuilder Builder for constructing the issuer metadata.
      */
     public MetadataResource(
             ConfigurationService configurationService, MetadataBuilder metadataBuilder) {
@@ -42,9 +42,15 @@ public class MetadataResource {
     /**
      * Returns the OID4VCI credential issuer metadata.
      *
-     * <p>This endpoint provides metadata about the credential issuer including: - Credential issuer
-     * identifier - Authorization server URLs - Service endpoints (credential, notification, IACAs)
-     * - Supported credential configurations
+     * <p>This endpoint provides metadata about the credential issuer:
+     *
+     * <ul>
+     *   <li>Credential issuer URL
+     *   <li>Authorization server URLs
+     *   <li>Service endpoints (credential, notification, IACAs)
+     *   <li>Supported credential configurations
+     *   <li>Display information
+     * </ul>
      *
      * @return HTTP 200 with metadata JSON on success, HTTP 500 on error.
      */
@@ -77,9 +83,9 @@ public class MetadataResource {
     /**
      * Constructs the IACAs (Issuing Authority Certificate Authority) endpoint URL.
      *
-     * <p>This special handling of the IACAs required because the Private Certificate Authority is
-     * not deployed to the staging environment, only to dev and build environments. When running in
-     * staging, the Example CRI points to the build instance of the Private Certificate Authority.
+     * <p>Special handling is required because the Private Certificate Authority is deployed to the
+     * development and build environments onlu. When running in staging, this service points to the
+     * build instance of the Private Certificate Authority instead.
      *
      * @param selfUrl The base URL of this credential issuer service.
      * @return The IACAs endpoint URL.
@@ -95,7 +101,7 @@ public class MetadataResource {
     /**
      * Determines if the application is running in the staging environment.
      *
-     * @return True if running in staging environment, false otherwise.
+     * @return True if running in the staging environment, false otherwise.
      */
     private boolean isRunningInStaging() {
         String environment = configurationService.getEnvironment();
