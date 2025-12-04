@@ -83,38 +83,17 @@ public class MetadataResource {
     /**
      * Constructs the IACAs (Issuing Authority Certificate Authority) endpoint URL.
      *
-     * <p>Special handling is required because the Private Certificate Authority is deployed to the
-     * development and build environments onlu. When running in staging, this service points to the
-     * build instance of the Private Certificate Authority instead.
+     * <p>Special handling is required because the Private Certificate Authority is not deployed to
+     * the staging environment - only to development and build. When running in staging, this
+     * service points to the build instance of the Private Certificate Authority instead.
      *
      * @param selfUrl The base URL of this credential issuer service.
      * @return The IACAs endpoint URL.
      */
     private String getIacasEndpoint(String selfUrl) {
-        if (isRunningInStaging() && isStagingUrl(selfUrl)) {
-            String buildUrl = selfUrl.replace(STAGING, BUILD);
-            return buildUrl + IACAS_ENDPOINT;
+        if (STAGING.equals(configurationService.getEnvironment()) && selfUrl.contains(STAGING)) {
+            return selfUrl.replace(STAGING, BUILD) + IACAS_ENDPOINT;
         }
         return selfUrl + IACAS_ENDPOINT;
-    }
-
-    /**
-     * Determines if the application is running in the staging environment.
-     *
-     * @return True if running in the staging environment, false otherwise.
-     */
-    private boolean isRunningInStaging() {
-        String environment = configurationService.getEnvironment();
-        return STAGING.equals(environment);
-    }
-
-    /**
-     * Determines if the given URL is a staging environment URL.
-     *
-     * @param url The URL to check
-     * @return True if the URL contains the staging identifier, false otherwise.
-     */
-    private boolean isStagingUrl(String url) {
-        return url != null && url.contains(STAGING);
     }
 }
