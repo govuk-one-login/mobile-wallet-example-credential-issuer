@@ -18,6 +18,7 @@ public class MetadataResource {
     private static final String CREDENTIAL_ENDPOINT = "/credential";
     private static final String NOTIFICATION_ENDPOINT = "/notification";
     private static final String IACAS_ENDPOINT = "/iacas";
+    private static final String LOGO_ENDPOINT = "/logo.png";
     private static final String CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME =
             "credential_configurations_supported.json";
 
@@ -63,6 +64,7 @@ public class MetadataResource {
                             .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
+                            .setDisplay(selfUrl + LOGO_ENDPOINT)
                             .build();
 
             return ResponseUtil.ok(metadata, true);
