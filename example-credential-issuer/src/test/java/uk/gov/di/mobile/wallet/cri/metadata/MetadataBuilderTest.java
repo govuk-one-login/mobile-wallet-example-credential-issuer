@@ -35,7 +35,7 @@ class MetadataBuilderTest {
                         .setNotificationEndpoint(notification)
                         .setIacasEndpoint(iacas)
                         .setCredentialConfigurationsSupported(
-                                "test_valid_credential_configurations_supported.json")
+                                "credential_configurations_supported.json")
                         .setDisplay(issuer + "/test-logo.png")
                         .build();
 
