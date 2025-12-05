@@ -3,6 +3,10 @@ package uk.gov.di.mobile.wallet.cri.logo;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -46,5 +50,33 @@ class LogoResourceTest {
         assertEquals((byte) 0x0A, logoBytes[5]);
         assertEquals((byte) 0x1A, logoBytes[6]);
         assertEquals((byte) 0x0A, logoBytes[7]);
+    }
+
+    @Test
+    void Should_Return404_When_LogoNotFound() {
+        LogoResource resource = new LogoResource(() -> null);
+
+        Response response = resource.getLogo();
+
+        assertEquals(Response.Status.NOT_FOUND.getStatusCode(), response.getStatus());
+        assertEquals(ResponseUtil.NO_STORE, response.getHeaderString("Cache-Control"));
+    }
+
+    @Test
+    void Should_Return500_When_ExceptionOccursReadingLogo() {
+        LogoResource resource =
+                new LogoResource(
+                        () ->
+                                new InputStream() {
+                                    @Override
+                                    public int read() throws IOException {
+                                        throw new IOException("Some error");
+                                    }
+                                });
+
+        Response response = resource.getLogo();
+
+        assertEquals(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), response.getStatus());
+        assertEquals(ResponseUtil.NO_STORE, response.getHeaderString("Cache-Control"));
     }
 }
