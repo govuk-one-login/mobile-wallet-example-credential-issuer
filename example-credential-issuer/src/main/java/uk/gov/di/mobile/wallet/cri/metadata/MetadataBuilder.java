@@ -6,9 +6,17 @@ import com.google.common.io.Resources;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MetadataBuilder {
+
+    private static final String LOCALE_EN = "en";
+    private static final String LOCALE_CY = "cy";
+    private static final String ISSUER_NAME_EN = "GOV.UK Wallet Example Credential Issuer";
+    private static final String ISSUER_NAME_CY = "ISSUER_NAME_WELSH";
 
     String credentialIssuer;
     String authorizationServers;
@@ -16,6 +24,7 @@ public class MetadataBuilder {
     String notificationEndpoint;
     String iacasEndpoint;
     Map<String, Object> credentialConfigurationsSupported;
+    List<Map<String, Object>> display;
 
     public MetadataBuilder setCredentialIssuer(String credentialIssuer)
             throws IllegalArgumentException {
@@ -86,6 +95,32 @@ public class MetadataBuilder {
         return this;
     }
 
+    public MetadataBuilder setDisplay(String logoEndpoint) throws IllegalArgumentException {
+        if (logoEndpoint == null) {
+            throw new IllegalArgumentException("logoEndpoint must not be null");
+        }
+
+        this.display = new ArrayList<>();
+
+        Map<String, Object> englishDisplay = new HashMap<>();
+        englishDisplay.put("locale", LOCALE_EN);
+        englishDisplay.put("name", ISSUER_NAME_EN);
+
+        Map<String, Object> welshDisplay = new HashMap<>();
+        welshDisplay.put("locale", LOCALE_CY);
+        welshDisplay.put("name", ISSUER_NAME_CY);
+
+        Map<String, Object> logo = new HashMap<>();
+        logo.put("uri", logoEndpoint);
+        welshDisplay.put("logo", logo);
+        englishDisplay.put("logo", logo);
+
+        this.display.add(englishDisplay);
+        this.display.add(welshDisplay);
+
+        return this;
+    }
+
     public Metadata build() {
         return new Metadata(
                 credentialIssuer,
@@ -93,6 +128,7 @@ public class MetadataBuilder {
                 credentialEndpoint,
                 notificationEndpoint,
                 iacasEndpoint,
-                credentialConfigurationsSupported);
+                credentialConfigurationsSupported,
+                display);
     }
 }

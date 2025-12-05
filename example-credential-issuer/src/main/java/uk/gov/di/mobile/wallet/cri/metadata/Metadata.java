@@ -2,6 +2,9 @@ package uk.gov.di.mobile.wallet.cri.metadata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+import java.util.Map;
+
 public class Metadata {
 
     public Metadata(
@@ -10,14 +13,15 @@ public class Metadata {
             String credentialEndpoint,
             String notificationEndpoint,
             String iacasEndpoint,
-            Object credentialConfigurationsSupported) {
+            Map<String, Object> credentialConfigurationsSupported,
+            List<Map<String, Object>> display) {
         this.credentialIssuer = credentialIssuer;
         this.authorizationServers = new String[] {authorizationServers};
         this.credentialEndpoint = credentialEndpoint;
         this.iacasEndpoint = iacasEndpoint;
         this.notificationEndpoint = notificationEndpoint;
-
         this.credentialConfigurationsSupported = credentialConfigurationsSupported;
+        this.display = display;
     }
 
     String credentialIssuer;
@@ -25,7 +29,8 @@ public class Metadata {
     String credentialEndpoint;
     String notificationEndpoint;
     String iacasEndpoint;
-    Object credentialConfigurationsSupported;
+    Map<String, Object> credentialConfigurationsSupported;
+    List<Map<String, Object>> display;
 
     @JsonProperty("credential_issuer")
     public String getCredentialIssuer() {
@@ -55,5 +60,10 @@ public class Metadata {
     @JsonProperty("credential_configurations_supported")
     public Object getCredentialsSupported() {
         return credentialConfigurationsSupported;
+    }
+
+    @JsonProperty("display")
+    public List<Map<String, Object>> getDisplay() {
+        return display;
     }
 }
