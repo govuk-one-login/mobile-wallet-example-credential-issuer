@@ -8,7 +8,7 @@ public enum CredentialType {
     BASIC_DISCLOSURE_CREDENTIAL("BasicDisclosureCredential", "Basic DBS check result"),
     DIGITAL_VETERAN_CARD("DigitalVeteranCard", "HM Armed Forces Veteran Card"),
     MOBILE_DRIVING_LICENCE("org.iso.18013.5.1.mDL", null),
-    FISHING_LICENCE("uk.gov.account.mobile.example-cri.fishinglicence.1", null);
+    EXAMPLE_MDOC("uk.gov.account.mobile.example-credential-issuer.examplemdoc.1", null);
 
     private final String type;
     private final String name;

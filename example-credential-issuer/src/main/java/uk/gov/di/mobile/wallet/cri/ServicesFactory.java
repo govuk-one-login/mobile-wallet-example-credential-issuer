@@ -26,7 +26,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESigner;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.example_document.ExampleDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
@@ -143,14 +143,14 @@ public class ServicesFactory {
                         issuerSignedFactory,
                         CredentialType.MOBILE_DRIVING_LICENCE.getType());
 
-        NamespacesFactory<FishingLicenceDocument> fishingLicenceNamespacesFactory =
+        NamespacesFactory<ExampleDocument> exampleMdocNamespacesFactory =
                 new NamespacesFactory<>(issuerSignedItemFactory);
-        MdocCredentialBuilder<FishingLicenceDocument> fishingLicenceMdocCredentialBuilder =
+        MdocCredentialBuilder<ExampleDocument> exampleDocumentMdocBuilder =
                 new MdocCredentialBuilder<>(
                         cborEncoder,
-                        fishingLicenceNamespacesFactory,
+                        exampleMdocNamespacesFactory,
                         issuerSignedFactory,
-                        CredentialType.FISHING_LICENCE.getType());
+                        CredentialType.EXAMPLE_MDOC.getType());
 
         CredentialHandlerFactory credentialHandlerFactory =
                 new CredentialHandlerFactory(
@@ -158,7 +158,7 @@ public class ServicesFactory {
                         socialSecurityCredentialBuilder,
                         digitalVeteranCardCredentialBuilder,
                         drivingLicenceMdocCredentialBuilder,
-                        fishingLicenceMdocCredentialBuilder);
+                        exampleDocumentMdocBuilder);
 
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);

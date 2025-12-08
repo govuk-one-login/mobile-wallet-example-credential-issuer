@@ -13,8 +13,8 @@ import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.VeteranCa
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceHandler;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.example_document.ExampleDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.example_document.ExampleDocumentHandler;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceHandler;
 
@@ -32,7 +32,7 @@ class CredentialHandlerFactoryTest {
 
     @Mock private CredentialBuilder<VeteranCardCredentialSubject> mockDigitalVeteranCardBuilder;
     @Mock private MdocCredentialBuilder<DrivingLicenceDocument> mockMobileDrivingLicenceBuilder;
-    @Mock private MdocCredentialBuilder<FishingLicenceDocument> mockFishingLicenceBuilder;
+    @Mock private MdocCredentialBuilder<ExampleDocument> mockExampleMdocBuilder;
 
     private CredentialHandlerFactory factory;
 
@@ -44,7 +44,7 @@ class CredentialHandlerFactoryTest {
                         mockSocialSecurityCredentialBuilder,
                         mockDigitalVeteranCardBuilder,
                         mockMobileDrivingLicenceBuilder,
-                        mockFishingLicenceBuilder);
+                        mockExampleMdocBuilder);
     }
 
     @Test
@@ -96,15 +96,15 @@ class CredentialHandlerFactoryTest {
     }
 
     @Test
-    void Should_CreateFishingLicenceHandler() {
-        String vcType = "uk.gov.account.mobile.example-cri.fishinglicence.1";
+    void Should_CreateExampleDocumentHandler() {
+        String vcType = "uk.gov.account.mobile.example-credential-issuer.examplemdoc.1";
 
         CredentialHandler handler = factory.createHandler(vcType);
 
         assertInstanceOf(
-                FishingLicenceHandler.class,
+                ExampleDocumentHandler.class,
                 handler,
-                "Handler should be instance of FishingLicenceHandler");
+                "Handler should be instance of ExampleDocumentHandler");
     }
 
     @Test

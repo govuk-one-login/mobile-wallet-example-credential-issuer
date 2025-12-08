@@ -20,7 +20,7 @@ import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
-import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.FISHING_LICENCE;
+import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.EXAMPLE_MDOC;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 
 public class CredentialService {
@@ -93,7 +93,7 @@ public class CredentialService {
 
             Optional<StatusListClient.StatusListInformation> statusListInformation =
                     Optional.empty();
-            if (credentialType == MOBILE_DRIVING_LICENCE || credentialType == FISHING_LICENCE) {
+            if (credentialType == MOBILE_DRIVING_LICENCE || credentialType == EXAMPLE_MDOC) {
                 statusListInformation = Optional.of(statusListClient.getIndex(expiry));
             }
 

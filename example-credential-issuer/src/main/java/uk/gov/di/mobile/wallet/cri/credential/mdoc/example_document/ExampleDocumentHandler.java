@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence;
+package uk.gov.di.mobile.wallet.cri.credential.mdoc.example_document;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandler;
@@ -12,13 +12,12 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.security.cert.CertificateException;
 import java.util.Optional;
 
-public class FishingLicenceHandler implements CredentialHandler {
+public class ExampleDocumentHandler implements CredentialHandler {
 
-    private final MdocCredentialBuilder<FishingLicenceDocument> mdocCredentialBuilder;
+    private final MdocCredentialBuilder<ExampleDocument> mdocCredentialBuilder;
     private final ObjectMapper mapper = new ObjectMapper();
 
-    public FishingLicenceHandler(
-            MdocCredentialBuilder<FishingLicenceDocument> mdocCredentialBuilder) {
+    public ExampleDocumentHandler(MdocCredentialBuilder<ExampleDocument> mdocCredentialBuilder) {
         this.mdocCredentialBuilder = mdocCredentialBuilder;
     }
 
@@ -27,8 +26,8 @@ public class FishingLicenceHandler implements CredentialHandler {
             ProofJwtService.ProofJwtData proofData,
             Optional<StatusListClient.StatusListInformation> statusListInformation)
             throws ObjectStoreException, SigningException, CertificateException {
-        FishingLicenceDocument document =
-                mapper.convertValue(documentStoreRecord.getData(), FishingLicenceDocument.class);
+        ExampleDocument document =
+                mapper.convertValue(documentStoreRecord.getData(), ExampleDocument.class);
 
         return mdocCredentialBuilder.buildCredential(
                 document,
