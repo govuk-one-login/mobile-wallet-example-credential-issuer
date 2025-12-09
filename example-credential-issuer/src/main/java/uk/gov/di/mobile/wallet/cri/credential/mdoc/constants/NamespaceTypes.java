@@ -7,9 +7,9 @@ public final class NamespaceTypes {
     /** Domestic (GB) namespace for Mobile Driving Licence documents */
     public static final String GB = "org.iso.18013.5.1.GB";
 
-    /** Fishing Licence namespace */
-    public static final String FISHING_LICENCE =
-            "uk.gov.account.mobile.example-cri.fishinglicence.1";
+    /** Simple mDoc namespace */
+    public static final String SIMPLE_MDOC =
+            "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1";
 
     private NamespaceTypes() {}
 }
