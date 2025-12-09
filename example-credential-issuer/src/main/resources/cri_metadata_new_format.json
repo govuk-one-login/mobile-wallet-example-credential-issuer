@@ -91,9 +91,9 @@
       "credential_validity_period_max_days": 30,
       "credential_refresh_web_journey_url": "https://example-credential-issuer.mobile.build.account.gov.uk/refresh/org.iso.18013.5.1.mDL"
     },
-    "uk.gov.account.mobile.example-cri.fishinglicence.1": {
+    "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1": {
       "format": "mso_mdoc",
-      "doctype": "uk.gov.account.mobile.example-cri.fishinglicence.1",
+      "doctype": "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
       "cryptographic_binding_methods_supported": [
         "cose_key"
       ],
@@ -101,12 +101,12 @@
         "ES256"
       ],
       "credential_validity_period_max_days": 30,
-      "credential_refresh_web_journey_url": "https://example-credential-issuer.mobile.staging.account.gov.uk/refresh/uk.gov.account.mobile.example-cri.fishinglicence.1",
+      "credential_refresh_web_journey_url": "https://example-credential-issuer.mobile.staging.account.gov.uk/refresh/uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
       "credential_metadata": {
         "display": [
           {
             "locale": "en",
-            "name": "Fishing License",
+            "name": "Simple Document",
             "background_color_1": "#74ebd5",
             "background_color_2": "#acb6e5"
           },
@@ -194,7 +194,7 @@
             ]
           },
           {
-            "path": ["uk.gov.account.mobile.example-credential-issuer.fishinglicence.1", "type_of_fish"],
+            "path": ["uk.gov.account.mobile.example-credential-issuer.simplemdoc.1", "type_of_fish"],
             "mandatory": true,
             "value_type": "string",
             "display": [
@@ -209,7 +209,7 @@
             ]
           },
           {
-            "path": ["uk.gov.account.mobile.example-credential-issuer.fishinglicence.1", "number_of_fishing_rods"],
+            "path": ["uk.gov.account.mobile.example-credential-issuer.simplemdoc.1", "number_of_fishing_rods"],
             "mandatory": true,
             "value_type": "string",
             "display": [
