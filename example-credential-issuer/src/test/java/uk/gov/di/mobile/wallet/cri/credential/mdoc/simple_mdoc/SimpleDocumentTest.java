@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mdoc.example_document;
+package uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ExampleDocumentTest {
+class SimpleDocumentTest {
 
     private static final String FAMILY_NAME = "Doe";
     private static final String GIVEN_NAME = "John";
@@ -27,8 +27,8 @@ class ExampleDocumentTest {
 
     @Test
     void Should_CreateInstance_When_DataIsValid() {
-        ExampleDocument document =
-                new ExampleDocument(
+        SimpleDocument document =
+                new SimpleDocument(
                         FAMILY_NAME,
                         GIVEN_NAME,
                         PORTRAIT,
@@ -57,7 +57,7 @@ class ExampleDocumentTest {
         assertThrows(
                 NullPointerException.class,
                 () ->
-                        new ExampleDocument(
+                        new SimpleDocument(
                                 null,
                                 GIVEN_NAME,
                                 PORTRAIT,
@@ -76,7 +76,7 @@ class ExampleDocumentTest {
         assertThrows(
                 DateTimeParseException.class,
                 () ->
-                        new ExampleDocument(
+                        new SimpleDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 PORTRAIT,
@@ -95,7 +95,7 @@ class ExampleDocumentTest {
         assertThrows(
                 DateTimeParseException.class,
                 () ->
-                        new ExampleDocument(
+                        new SimpleDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 PORTRAIT,
@@ -114,7 +114,7 @@ class ExampleDocumentTest {
         assertThrows(
                 DateTimeParseException.class,
                 () ->
-                        new ExampleDocument(
+                        new SimpleDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 PORTRAIT,

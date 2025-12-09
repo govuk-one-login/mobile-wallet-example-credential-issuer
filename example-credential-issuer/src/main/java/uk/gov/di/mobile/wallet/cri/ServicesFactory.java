@@ -26,8 +26,8 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.JacksonCBOREncoderProvider;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESigner;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.example_document.ExampleDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc.SimpleDocument;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtService;
 import uk.gov.di.mobile.wallet.cri.credential.util.CredentialExpiryCalculator;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferService;
@@ -143,14 +143,14 @@ public class ServicesFactory {
                         issuerSignedFactory,
                         CredentialType.MOBILE_DRIVING_LICENCE.getType());
 
-        NamespacesFactory<ExampleDocument> exampleMdocNamespacesFactory =
+        NamespacesFactory<SimpleDocument> simpleMdocNamespacesFactory =
                 new NamespacesFactory<>(issuerSignedItemFactory);
-        MdocCredentialBuilder<ExampleDocument> exampleDocumentMdocBuilder =
+        MdocCredentialBuilder<SimpleDocument> simpleDocumentMdocBuilder =
                 new MdocCredentialBuilder<>(
                         cborEncoder,
-                        exampleMdocNamespacesFactory,
+                        simpleMdocNamespacesFactory,
                         issuerSignedFactory,
-                        CredentialType.EXAMPLE_MDOC.getType());
+                        CredentialType.SIMPLE_MDOC.getType());
 
         CredentialHandlerFactory credentialHandlerFactory =
                 new CredentialHandlerFactory(
@@ -158,7 +158,7 @@ public class ServicesFactory {
                         socialSecurityCredentialBuilder,
                         digitalVeteranCardCredentialBuilder,
                         drivingLicenceMdocCredentialBuilder,
-                        exampleDocumentMdocBuilder);
+                        simpleDocumentMdocBuilder);
 
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);

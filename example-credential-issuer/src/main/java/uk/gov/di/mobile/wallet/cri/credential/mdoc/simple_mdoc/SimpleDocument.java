@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mdoc.example_document;
+package uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -14,7 +14,7 @@ import java.util.Objects;
 
 @Setter
 @Getter
-public class ExampleDocument {
+public class SimpleDocument {
 
     @Namespace(NamespaceTypes.ISO)
     private final String familyName;
@@ -40,14 +40,14 @@ public class ExampleDocument {
     @Namespace(NamespaceTypes.ISO)
     private final String documentNumber;
 
-    @Namespace(NamespaceTypes.EXAMPLE_MDOC)
+    @Namespace(NamespaceTypes.SIMPLE_MDOC)
     private final String typeOfFish;
 
-    @Namespace(NamespaceTypes.EXAMPLE_MDOC)
+    @Namespace(NamespaceTypes.SIMPLE_MDOC)
     private final int numberOfFishingRods;
 
     @JsonCreator
-    public ExampleDocument(
+    public SimpleDocument(
             @JsonProperty("family_name") String familyName,
             @JsonProperty("given_name") String givenName,
             @JsonProperty("portrait") String portrait,
