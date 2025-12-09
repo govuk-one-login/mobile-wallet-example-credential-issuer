@@ -1,4 +1,4 @@
-package uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence;
+package uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class FishingLicenceDocumentTest {
+class SimpleDocumentTest {
 
     private static final String FAMILY_NAME = "Doe";
     private static final String GIVEN_NAME = "John";
@@ -27,8 +27,8 @@ class FishingLicenceDocumentTest {
 
     @Test
     void Should_CreateInstance_When_DataIsValid() {
-        FishingLicenceDocument document =
-                new FishingLicenceDocument(
+        SimpleDocument document =
+                new SimpleDocument(
                         FAMILY_NAME,
                         GIVEN_NAME,
                         PORTRAIT,
@@ -57,7 +57,7 @@ class FishingLicenceDocumentTest {
         assertThrows(
                 NullPointerException.class,
                 () ->
-                        new FishingLicenceDocument(
+                        new SimpleDocument(
                                 null,
                                 GIVEN_NAME,
                                 PORTRAIT,
@@ -76,7 +76,7 @@ class FishingLicenceDocumentTest {
         assertThrows(
                 DateTimeParseException.class,
                 () ->
-                        new FishingLicenceDocument(
+                        new SimpleDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 PORTRAIT,
@@ -95,7 +95,7 @@ class FishingLicenceDocumentTest {
         assertThrows(
                 DateTimeParseException.class,
                 () ->
-                        new FishingLicenceDocument(
+                        new SimpleDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 PORTRAIT,
@@ -114,7 +114,7 @@ class FishingLicenceDocumentTest {
         assertThrows(
                 DateTimeParseException.class,
                 () ->
-                        new FishingLicenceDocument(
+                        new SimpleDocument(
                                 FAMILY_NAME,
                                 GIVEN_NAME,
                                 PORTRAIT,

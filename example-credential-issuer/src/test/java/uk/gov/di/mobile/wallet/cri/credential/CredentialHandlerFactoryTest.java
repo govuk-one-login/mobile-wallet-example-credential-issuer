@@ -13,10 +13,10 @@ import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.VeteranCa
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialHandler;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceDocument;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.fishing_licence.FishingLicenceHandler;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceHandler;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc.SimpleDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc.SimpleMdocHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -25,14 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class CredentialHandlerFactoryTest {
 
-    @Mock private CredentialBuilder<BasicCheckCredentialSubject> mockBasicCheckCredentialBuilder;
+    @Mock
+    private CredentialBuilder<BasicCheckCredentialSubject> mockBasicDisclosureCredentialBuilder;
 
     @Mock
     private CredentialBuilder<SocialSecurityCredentialSubject> mockSocialSecurityCredentialBuilder;
 
     @Mock private CredentialBuilder<VeteranCardCredentialSubject> mockDigitalVeteranCardBuilder;
     @Mock private MdocCredentialBuilder<DrivingLicenceDocument> mockMobileDrivingLicenceBuilder;
-    @Mock private MdocCredentialBuilder<FishingLicenceDocument> mockFishingLicenceBuilder;
+    @Mock private MdocCredentialBuilder<SimpleDocument> mockSimpleMdocBuilder;
 
     private CredentialHandlerFactory factory;
 
@@ -40,15 +41,15 @@ class CredentialHandlerFactoryTest {
     void setUp() {
         factory =
                 new CredentialHandlerFactory(
-                        mockBasicCheckCredentialBuilder,
+                        mockBasicDisclosureCredentialBuilder,
                         mockSocialSecurityCredentialBuilder,
                         mockDigitalVeteranCardBuilder,
                         mockMobileDrivingLicenceBuilder,
-                        mockFishingLicenceBuilder);
+                        mockSimpleMdocBuilder);
     }
 
     @Test
-    void Should_CreateBasicCheckCredentialHandler() {
+    void Should_CreateBasicDisclosureCredentialHandler() {
         String vcType = "BasicDisclosureCredential";
 
         CredentialHandler handler = factory.createHandler(vcType);
@@ -96,15 +97,15 @@ class CredentialHandlerFactoryTest {
     }
 
     @Test
-    void Should_CreateFishingLicenceHandler() {
-        String vcType = "uk.gov.account.mobile.example-cri.fishinglicence.1";
+    void Should_CreateSimpleMdocHandler() {
+        String vcType = "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1";
 
         CredentialHandler handler = factory.createHandler(vcType);
 
         assertInstanceOf(
-                FishingLicenceHandler.class,
+                SimpleMdocHandler.class,
                 handler,
-                "Handler should be instance of FishingLicenceHandler");
+                "Handler should be instance of SimpleMdocHandler");
     }
 
     @Test
