@@ -51,7 +51,7 @@ public class ConfigurationService extends Configuration {
      * @return The LocalStack endpoint URL
      */
     public String getLocalstackEndpoint() {
-        return getEnvOrDefault("AWS_ENDPOINT", "http://localhost:4560");
+        return getEnvOrDefault("LOCALSTACK_ENDPOINT", "http://localhost:4560");
     }
 
     /**

@@ -28,7 +28,7 @@ services:
       - AWS_ACCESS_KEY_ID=na
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_REGION=eu-west-2
-      - AWS_ENDPOINT=http://localstack:4566
+      - LOCALSTACK_ENDPOINT=http://localstack:4566
       - ONE_LOGIN_AUTH_SERVER_URL=http://test-harness:3001
       - SELF_URL=http://example-cri:8080
       - CREDENTIAL_STORE_URL=http://imposter-mock:8080
