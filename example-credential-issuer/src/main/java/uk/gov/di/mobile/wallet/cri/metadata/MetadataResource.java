@@ -18,6 +18,7 @@ public class MetadataResource {
     private static final String CREDENTIAL_ENDPOINT = "/credential";
     private static final String NOTIFICATION_ENDPOINT = "/notification";
     private static final String IACAS_ENDPOINT = "/iacas";
+    private static final String LOGO_ENDPOINT = "/logo.png";
     private static final String CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME =
             "credential_configurations_supported.json";
 
@@ -30,7 +31,7 @@ public class MetadataResource {
      * Creates a new MetadataResource instance.
      *
      * @param configurationService Service for accessing application configuration.
-     * @param metadataBuilder Builder for constructing metadata responses.
+     * @param metadataBuilder Builder for constructing the issuer metadata.
      */
     public MetadataResource(
             ConfigurationService configurationService, MetadataBuilder metadataBuilder) {
@@ -41,16 +42,22 @@ public class MetadataResource {
     /**
      * Returns the OID4VCI credential issuer metadata.
      *
-     * <p>This endpoint provides metadata about the credential issuer including: - Credential issuer
-     * identifier - Authorization server URLs - Service endpoints (credential, notification, IACAs)
-     * - Supported credential configurations
+     * <p>This endpoint provides metadata about the credential issuer:
+     *
+     * <ul>
+     *   <li>Credential issuer URL
+     *   <li>Authorization server URLs
+     *   <li>Service endpoints (credential, notification, IACAs)
+     *   <li>Supported credential configurations
+     *   <li>Display information
+     * </ul>
      *
      * @return HTTP 200 with metadata JSON on success, HTTP 500 on error.
      */
     @GET
     public Response getMetadata() {
         try {
-            String selfUrl = configurationService.getSelfUrl();
+            String selfUrl = configurationService.getSelfUrl().toString();
             String iacasEndpoint = getIacasEndpoint(selfUrl);
 
             Metadata metadata =
@@ -63,6 +70,7 @@ public class MetadataResource {
                             .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(
                                     CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
+                            .setDisplay(selfUrl + LOGO_ENDPOINT)
                             .build();
 
             return ResponseUtil.ok(metadata, true);
@@ -75,38 +83,17 @@ public class MetadataResource {
     /**
      * Constructs the IACAs (Issuing Authority Certificate Authority) endpoint URL.
      *
-     * <p>This special handling of the IACAs required because the Private Certificate Authority is
-     * not deployed to the staging environment, only to dev and build environments. When running in
-     * staging, the Example CRI points to the build instance of the Private Certificate Authority.
+     * <p>Special handling is required because the Private Certificate Authority is not deployed to
+     * the staging environment - only to development and build. When running in staging, this
+     * service points to the build instance of the Private Certificate Authority instead.
      *
      * @param selfUrl The base URL of this credential issuer service.
      * @return The IACAs endpoint URL.
      */
     private String getIacasEndpoint(String selfUrl) {
-        if (isRunningInStaging() && isStagingUrl(selfUrl)) {
-            String buildUrl = selfUrl.replace(STAGING, BUILD);
-            return buildUrl + IACAS_ENDPOINT;
+        if (STAGING.equals(configurationService.getEnvironment()) && selfUrl.contains(STAGING)) {
+            return selfUrl.replace(STAGING, BUILD) + IACAS_ENDPOINT;
         }
         return selfUrl + IACAS_ENDPOINT;
-    }
-
-    /**
-     * Determines if the application is running in the staging environment.
-     *
-     * @return True if running in staging environment, false otherwise.
-     */
-    private boolean isRunningInStaging() {
-        String environment = configurationService.getEnvironment();
-        return STAGING.equals(environment);
-    }
-
-    /**
-     * Determines if the given URL is a staging environment URL.
-     *
-     * @param url The URL to check
-     * @return True if the URL contains the staging identifier, false otherwise.
-     */
-    private boolean isStagingUrl(String url) {
-        return url != null && url.contains(STAGING);
     }
 }

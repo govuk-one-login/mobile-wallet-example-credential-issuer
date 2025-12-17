@@ -1,55 +1,62 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialHandler;
-import uk.gov.di.mobile.wallet.cri.credential.basic_check_credential.BasicCheckCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.DigitalVeteranCardHandler;
-import uk.gov.di.mobile.wallet.cri.credential.digital_veteran_card.VeteranCardCredentialSubject;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceBuilder;
-import uk.gov.di.mobile.wallet.cri.credential.mobile_driving_licence.MobileDrivingLicenceHandler;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialHandler;
-import uk.gov.di.mobile.wallet.cri.credential.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialHandler;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.basic_check_credential.BasicCheckCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.DigitalVeteranCardHandler;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card.VeteranCardCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialHandler;
+import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityCredentialSubject;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.MdocCredentialBuilder;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.DrivingLicenceDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.MobileDrivingLicenceHandler;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc.SimpleDocument;
+import uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc.SimpleMdocHandler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("CredentialHandlerFactory Tests")
 class CredentialHandlerFactoryTest {
 
-    @Mock private CredentialBuilder<BasicCheckCredentialSubject> mockBasicCheckCredentialBuilder;
+    @Mock
+    private CredentialBuilder<BasicCheckCredentialSubject> mockBasicDisclosureCredentialBuilder;
 
     @Mock
     private CredentialBuilder<SocialSecurityCredentialSubject> mockSocialSecurityCredentialBuilder;
 
     @Mock private CredentialBuilder<VeteranCardCredentialSubject> mockDigitalVeteranCardBuilder;
-    @Mock private MobileDrivingLicenceBuilder mockMobileDrivingLicenceBuilder;
+    @Mock private MdocCredentialBuilder<DrivingLicenceDocument> mockMobileDrivingLicenceBuilder;
+    @Mock private MdocCredentialBuilder<SimpleDocument> mockSimpleMdocBuilder;
+
     private CredentialHandlerFactory factory;
 
     @BeforeEach
     void setUp() {
         factory =
                 new CredentialHandlerFactory(
-                        mockBasicCheckCredentialBuilder,
+                        mockBasicDisclosureCredentialBuilder,
                         mockSocialSecurityCredentialBuilder,
                         mockDigitalVeteranCardBuilder,
-                        mockMobileDrivingLicenceBuilder);
+                        mockMobileDrivingLicenceBuilder,
+                        mockSimpleMdocBuilder);
     }
 
     @Test
-    void Should_CreateBasicCheckCredentialHandler() {
+    void Should_CreateBasicDisclosureCredentialHandler() {
         String vcType = "BasicDisclosureCredential";
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof BasicCheckCredentialHandler,
+        assertInstanceOf(
+                BasicCheckCredentialHandler.class,
+                handler,
                 "Handler should be instance of BasicCheckCredentialHandler");
     }
 
@@ -59,8 +66,9 @@ class CredentialHandlerFactoryTest {
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof SocialSecurityCredentialHandler,
+        assertInstanceOf(
+                SocialSecurityCredentialHandler.class,
+                handler,
                 "Handler should be instance of SocialSecurityCredentialHandler");
     }
 
@@ -70,8 +78,9 @@ class CredentialHandlerFactoryTest {
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof DigitalVeteranCardHandler,
+        assertInstanceOf(
+                DigitalVeteranCardHandler.class,
+                handler,
                 "Handler should be instance of DigitalVeteranCardHandler");
     }
 
@@ -81,9 +90,22 @@ class CredentialHandlerFactoryTest {
 
         CredentialHandler handler = factory.createHandler(vcType);
 
-        assertTrue(
-                handler instanceof MobileDrivingLicenceHandler,
+        assertInstanceOf(
+                MobileDrivingLicenceHandler.class,
+                handler,
                 "Handler should be instance of MobileDrivingLicenceHandler");
+    }
+
+    @Test
+    void Should_CreateSimpleMdocHandler() {
+        String vcType = "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1";
+
+        CredentialHandler handler = factory.createHandler(vcType);
+
+        assertInstanceOf(
+                SimpleMdocHandler.class,
+                handler,
+                "Handler should be instance of SimpleMdocHandler");
     }
 
     @Test

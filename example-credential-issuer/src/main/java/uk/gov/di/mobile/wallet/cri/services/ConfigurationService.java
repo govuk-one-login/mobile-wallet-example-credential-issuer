@@ -141,23 +141,14 @@ public class ConfigurationService extends Configuration {
      *
      * @return The service's own URL as a string
      */
-    public String getSelfUrl() {
-        return createValidatedUri("SELF_URL", "http://localhost:8080").toString();
-    }
-
-    /**
-     * Gets the DID controller.
-     *
-     * @return The DID controller
-     */
-    public String getDidController() {
-        return getEnvOrDefault("DID_CONTROLLER", "localhost");
+    public URI getSelfUrl() {
+        return createValidatedUri("SELF_URL", "http://localhost:8080");
     }
 
     /**
      * Gets the wallet mobile app deep link URL.
      *
-     * @return The wallet deep link URL as a string
+     * @return The wallet deep link URL
      */
     public String getWalletDeepLinkUrl() {
         return createValidatedUri(
@@ -202,7 +193,7 @@ public class ConfigurationService extends Configuration {
      * @return The TTL in seconds
      */
     public int getPreAuthorizedCodeTtlInSecs() {
-        return 300;
+        return 900;
     }
 
     /**
@@ -251,10 +242,7 @@ public class ConfigurationService extends Configuration {
      */
     public URI getStatusListUrl() {
         String key = "STATUS_LIST_URL";
-        String uriString = getEnvOrDefault(key, null);
-        if (uriString == null || uriString.isBlank()) {
-            throw new IllegalArgumentException("Missing required environment variable: " + key);
-        }
+        String uriString = getEnvOrDefault(key, "http://localhost:3000");
         return createValidatedUri(key, uriString);
     }
 

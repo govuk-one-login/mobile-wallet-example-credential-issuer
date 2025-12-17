@@ -63,7 +63,7 @@ public class PreAuthorizedCodeBuilder {
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
                         .audience(configurationService.getOneLoginAuthServerUrl())
-                        .issuer(configurationService.getSelfUrl())
+                        .issuer(configurationService.getSelfUrl().toString())
                         .issueTime(Date.from(now))
                         .expirationTime(
                                 Date.from(

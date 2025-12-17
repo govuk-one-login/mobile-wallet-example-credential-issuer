@@ -168,30 +168,16 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ReturnExampleCriUrlDefaultValue_When_EnvVarNotSet() {
-        assertEquals("http://localhost:8080", configurationService.getSelfUrl());
+    void Should_ReturnSelfUrlDefaultValue_When_EnvVarNotSet() {
+        assertEquals(URI.create("http://localhost:8080"), configurationService.getSelfUrl());
     }
 
     @Test
-    void Should_ReturnExampleCriUrlEnvVarValue() {
-        environmentVariables.set(
-                "SELF_URL", "https://example-credential-issuer.mobile.test.account.gov.uk");
+    void Should_ReturnSelfUrlEnvVarValue() {
+        environmentVariables.set("SELF_URL", "https://example-credential-issuer.gov.uk");
         assertEquals(
-                "https://example-credential-issuer.mobile.test.account.gov.uk",
+                URI.create("https://example-credential-issuer.gov.uk"),
                 configurationService.getSelfUrl());
-    }
-
-    @Test
-    void Should_ReturnDidControllerDefaultValue_When_EnvVarNotSet() {
-        assertEquals("localhost", configurationService.getDidController());
-    }
-
-    @Test
-    void Should_ReturnDidControllerEnvVarValue() {
-        environmentVariables.set("DID_CONTROLLER", "https://example-credential-issuer.gov.uk");
-        assertEquals(
-                "https://example-credential-issuer.gov.uk",
-                configurationService.getDidController());
     }
 
     @Test
@@ -236,7 +222,7 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnPreAuthorizedCodeTtl() {
-        assertEquals(300, configurationService.getPreAuthorizedCodeTtlInSecs());
+        assertEquals(900, configurationService.getPreAuthorizedCodeTtlInSecs());
     }
 
     @Test
@@ -250,33 +236,19 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ThrowIllegalArgumentException_When_StatusListUrlEnvVarNotSet() {
-        IllegalArgumentException thrown =
-                assertThrows(
-                        IllegalArgumentException.class,
-                        () -> configurationService.getStatusListUrl());
-        assertEquals("Missing required environment variable: STATUS_LIST_URL", thrown.getMessage());
+    void Should_ReturnStatusListDefaultValue_When_EnvVarNotSet() throws URISyntaxException {
+        assertEquals(new URI("http://localhost:3000"), configurationService.getStatusListUrl());
     }
 
     @Test
-    void Should_ReturnStatusListUrlEnvVarValue() throws URISyntaxException {
+    void Should_ReturnStatusListEnvVarValue() throws URISyntaxException {
         environmentVariables.set("STATUS_LIST_URL", "https://status-list.test.com");
         assertEquals(
                 new URI("https://status-list.test.com"), configurationService.getStatusListUrl());
     }
 
     @Test
-    void Should_ReturnsDefault_WhenEnvVarIsNull() {
-        environmentVariables.set("ENVIRONMENT", "local");
-        String expectedDefaultValue = "eu-west-2";
-
-        String result = configurationService.getAwsRegion();
-
-        assertEquals(expectedDefaultValue, result);
-    }
-
-    @Test
-    void Should_ThrowException_When_InvalidUri() {
+    void Should_ThrowException_When_UrlIsInvalid() {
         environmentVariables.set("CREDENTIAL_STORE_URL", "invalid://uri with spaces");
 
         IllegalArgumentException exception =

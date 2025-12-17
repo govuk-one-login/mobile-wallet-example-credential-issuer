@@ -13,8 +13,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import uk.gov.di.mobile.wallet.cri.models.CachedCredentialOffer;
-import uk.gov.di.mobile.wallet.cri.models.CredentialOfferCacheItemBuilder;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -39,7 +37,7 @@ public class CredentialOfferResource {
     private static final String WALLET_SUBJECT_ID_PATTERN =
             "^urn:fdc:wallet\\.account\\.gov\\.uk:2024:[a-zA-Z0-9_-]{43}$";
     private static final String ITEM_ID_PATTERN = "^[a-zA-Z0-9_-]{10,50}$";
-    private static final String CREDENTIAL_TYPE_PATTERN = "^[a-zA-Z0-9.]{10,100}$";
+    private static final String CREDENTIAL_TYPE_PATTERN = "^[a-zA-Z0-9.-]{10,100}$";
 
     public CredentialOfferResource(
             CredentialOfferService credentialOfferService,

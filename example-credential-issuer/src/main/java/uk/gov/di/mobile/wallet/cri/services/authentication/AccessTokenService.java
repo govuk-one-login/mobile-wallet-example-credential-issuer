@@ -118,7 +118,7 @@ public class AccessTokenService {
         try {
 
             String expectedIssuer = configurationService.getOneLoginAuthServerUrl();
-            String expectedAudience = configurationService.getSelfUrl();
+            String expectedAudience = configurationService.getSelfUrl().toString();
             JWTClaimsSet expectedClaimValues =
                     new JWTClaimsSet.Builder()
                             .issuer(expectedIssuer)

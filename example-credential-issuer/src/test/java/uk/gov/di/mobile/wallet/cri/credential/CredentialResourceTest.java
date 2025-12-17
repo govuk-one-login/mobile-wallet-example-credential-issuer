@@ -16,6 +16,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
