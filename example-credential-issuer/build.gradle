@@ -133,7 +133,7 @@ tasks.withType(Test).configureEach {
 tasks.register("dockerUp") {
 	group = "docker"
 	description = "Starts the LocalStack container to emulate AWS services"
-			doLast {
+	doLast {
 		exec {
 			commandLine "sh", "-c", "docker compose -f docker-compose.yml up --build -d --wait"
 		}
