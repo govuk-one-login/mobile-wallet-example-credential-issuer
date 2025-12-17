@@ -12,14 +12,14 @@ services:
     volumes:
       - ../localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
   imposter:
-    container_name: imposter_mock
+    container_name: imposter-mock
     image: outofcoffee/imposter
     ports:
       - "8001:8080"
     volumes:
       - ./mocks/config:/opt/imposter/config
   cri:
-    container_name: example_cri
+    container_name: example-cri
     platform: linux/amd64
     build:
       context: ..
@@ -30,11 +30,15 @@ services:
       - AWS_REGION=eu-west-2
       - AWS_ENDPOINT=http://localstack:4566
       - ONE_LOGIN_AUTH_SERVER_URL=http://test-harness:3001
-      - SELF_URL=http://example_cri:8080
-      - CREDENTIAL_STORE_URL=http://imposter_mock:8080
-      - STATUS_LIST_URL=http://imposter_mock:8080
+      - SELF_URL=http://example-cri:8080
+      - CREDENTIAL_STORE_URL=http://imposter-mock:8080
+      - STATUS_LIST_URL=http://imposter-mock:8080
     ports:
       - "8080:8080"
     depends_on:
       - localstack
       - imposter
+
+networks:
+  default:
+    name: integration-tests
