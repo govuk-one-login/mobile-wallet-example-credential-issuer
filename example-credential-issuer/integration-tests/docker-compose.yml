@@ -31,7 +31,6 @@ services:
       - AWS_ENDPOINT=http://localstack:4566
       - ONE_LOGIN_AUTH_SERVER_URL=http://test-harness:3001
       - SELF_URL=http://example_cri:8080
-      - DID_CONTROLLER=example_cri
       - CREDENTIAL_STORE_URL=http://imposter_mock:8080
       - STATUS_LIST_URL=http://imposter_mock:8080
     ports:
