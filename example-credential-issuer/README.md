@@ -79,7 +79,7 @@ This app uses LocalStack to run AWS services (DynamoDB and KMS) locally on port 
 To start the LocalStack container and emulate the services, run:
 
 ```
-docker compose -f docker-compose.yml up --build -d --wait
+./gradlew dockerUp
 ```
 
 ##### Run the Application

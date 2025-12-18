@@ -128,3 +128,24 @@ tasks.withType(Test).configureEach {
 	jvmArgs "-Xshare:off"
 	finalizedBy jacocoTestReport
 }
+
+
+tasks.register("dockerUp") {
+	group = "docker"
+	description = "Starts the LocalStack container to emulate AWS services"
+	doLast {
+		exec {
+			commandLine "sh", "-c", "docker compose -f docker-compose.yml up --build -d --wait"
+		}
+	}
+}
+
+tasks.register("dockerDown") {
+	group = "docker"
+	description = "Stops and removes LocalStack container"
+	doLast {
+		exec {
+			commandLine "sh", "-c", "docker compose -f docker-compose.yml down"
+		}
+	}
+}
