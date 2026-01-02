@@ -46,13 +46,12 @@ public class ConfigurationService extends Configuration {
     }
 
     /**
-     * Gets the LocalStack endpoint URL for local development. This is hardcoded as it's only used
-     * in local development environments.
+     * Gets the LocalStack endpoint URL for local development.
      *
      * @return The LocalStack endpoint URL
      */
     public String getLocalstackEndpoint() {
-        return "http://localhost:4560";
+        return getEnvOrDefault("LOCALSTACK_ENDPOINT", "http://localhost:4560");
     }
 
     /**

@@ -69,8 +69,14 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ReturnLocalStackEndpointEnvVarValue() {
+    void Should_ReturnLocalStackEndpointDefaultValue_When_EnvVarNotSet() {
         assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
+    }
+
+    @Test
+    void Should_ReturnLocalStackEndpointEnvVarValue() {
+        environmentVariables.set("LOCALSTACK_ENDPOINT", "http://localhost:test");
+        assertEquals("http://localhost:test", configurationService.getLocalstackEndpoint());
     }
 
     @Test
