@@ -24,17 +24,6 @@ import uk.gov.di.mobile.wallet.cri.services.authentication.AuthorizationHeaderMi
 
 import java.util.Objects;
 
-//As per the OID4VCI specification, the request body should include either
-//'credential_configuration_id' or 'credential_identifier',
-// depending on what is returned in the response body from the authorization server token response.
-// However, the One Login authorization server works slightly differently
-// and does not return those values in the token response body.
-// Instead, it returns 'credential_identifiers' (an array containing one 'credential_identifier')
-// as part of the access token payload. Since the Wallet includes this access token in the credential request,
-// the credential can be uniquely identified, making it unnecessary to include these parameters
-// in the request body.
-//https://govukverify.atlassian.net/browse/DCMAW-13558?focusedCommentId=279751
-
 @Singleton
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
