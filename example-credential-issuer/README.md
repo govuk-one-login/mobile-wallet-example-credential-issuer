@@ -58,7 +58,7 @@ You must install:
 
 > Ensure that you are using the Java/Gradle versions specified in `.sdkmanrc`.
 
-> Ensure you are running [status-list-mock](...) at the same time.
+> Ensure you are running [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time.
 
 #### Format
 
