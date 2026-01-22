@@ -58,6 +58,8 @@ You must install:
 
 > Ensure that you are using the Java/Gradle versions specified in `.sdkmanrc`.
 
+> Ensure you are running [status-list-mock](...) at the same time.
+
 #### Format
 
 Check with `./gradlew spotlessCheck`
