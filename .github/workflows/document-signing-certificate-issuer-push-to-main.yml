@@ -99,7 +99,7 @@ jobs:
 
       - name: Deploy SAM app
         # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
-        uses: govuk-one-login/devplatform-upload-action@ac4a243a86c2017f5360b83d737dea4268dcf38a # v3.11.1
+        uses: govuk-one-login/devplatform-upload-action@dd7275b28541a8960514ea2f2eb5cafe6f4d5854 # v3.12.0
         with:
           artifact-bucket-name: ${{ secrets.BUILD_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.SIGNING_PROFILE_NAME }}
