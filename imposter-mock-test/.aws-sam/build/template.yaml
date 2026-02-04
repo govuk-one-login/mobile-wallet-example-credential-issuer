@@ -1,0 +1,274 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Imposter Mock Server
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+  VpcStackName:
+    Type: String
+    Default: platform-vpc
+Resources:
+  ImposterLoadBalancerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Imposter LoadBalancer Security Group
+      SecurityGroupIngress:
+      - CidrIp: '0.0.0.0/0'
+        FromPort: 80
+        ToPort: 80
+        IpProtocol: tcp
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: ${VpcStackName}-VpcId
+  ImposterLoadBalancerSGEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId:
+        Fn::GetAtt:
+        - ImposterLoadBalancerSG
+        - GroupId
+      IpProtocol: tcp
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - ImposterECSSecurityGroup
+        - GroupId
+      FromPort: 8080
+      ToPort: 8080
+  ImposterECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Imposter ECS Security Group
+      SecurityGroupEgress:
+      - CidrIp: '0.0.0.0/0'
+        IpProtocol: -1
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: ${VpcStackName}-VpcId
+  ImposterECSSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      GroupId:
+        Fn::GetAtt:
+        - ImposterECSSecurityGroup
+        - GroupId
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - ImposterLoadBalancerSG
+        - GroupId
+  ImposterLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName:
+        Fn::Sub: /ecs/${AWS::StackName}
+      RetentionInDays: 7
+  ImposterLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+      - Fn::GetAtt:
+        - ImposterLoadBalancerSG
+        - GroupId
+      Subnets:
+      - Fn::ImportValue:
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+      - Fn::ImportValue:
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+      - Fn::ImportValue:
+          Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+      Type: application
+  ImposterTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /health
+      Port: 8080
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: ${VpcStackName}-VpcId
+  ImposterListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+      - TargetGroupArn:
+          Ref: ImposterTargetGroup
+        Type: forward
+      LoadBalancerArn:
+        Ref: ImposterLoadBalancer
+      Port: 80
+      Protocol: HTTP
+  ImposterApiGwHttpEndpoint:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name:
+        Fn::Sub: imposter-mock-${Environment}-${AWS::StackName}
+      ProtocolType: HTTP
+  ImposterApiGwHttpEndpointIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId:
+        Ref: ImposterApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue:
+          Fn::Sub: ${VpcStackName}-VpcLinkId
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri:
+        Ref: ImposterListener
+      PayloadFormatVersion: '1.0'
+  ImposterAPIGWRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId:
+        Ref: ImposterApiGwHttpEndpoint
+      RouteKey: ANY /{proxy+}
+      Target:
+        Fn::Join:
+        - /
+        - - integrations
+          - Ref: ImposterApiGwHttpEndpointIntegration
+  ImposterAPIStageDefault:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId:
+        Ref: ImposterApiGwHttpEndpoint
+      StageName: $default
+      AutoDeploy: true
+  ImposterCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName:
+        Fn::Sub: ${AWS::StackName}-cluster
+  ImposterService:
+    Type: AWS::ECS::Service
+    DependsOn: ImposterListener
+    Properties:
+      ServiceName:
+        Fn::Sub: ${AWS::StackName}-service
+      Cluster:
+        Ref: ImposterCluster
+      TaskDefinition:
+        Ref: ImposterTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+      - ContainerName: imposter
+        ContainerPort: 8080
+        TargetGroupArn:
+          Ref: ImposterTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets:
+          - Fn::ImportValue:
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdA
+          - Fn::ImportValue:
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdB
+          - Fn::ImportValue:
+              Fn::Sub: ${VpcStackName}-ProtectedSubnetIdC
+          SecurityGroups:
+          - Ref: ImposterECSSecurityGroup
+  ImposterTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family:
+        Fn::Sub: ${AWS::StackName}-task
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+      - FARGATE
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn:
+        Fn::GetAtt:
+        - ImposterExecutionRole
+        - Arn
+      TaskRoleArn:
+        Fn::GetAtt:
+        - ImposterTaskRole
+        - Arn
+      ContainerDefinitions:
+      - Name: imposter
+        Image: 671524980203.dkr.ecr.eu-west-2.amazonaws.com/imposter-mock-test:ahickmann3
+        Environment:
+        - Name: AWS_REGION
+          Value:
+            Ref: AWS::Region
+        - Name: KMS_KEY_ID
+          Value:
+            Ref: SigningKey
+        - Name: MOCK_ISSUER
+          Value: https://example.com
+        - Name: MOCK_AUDIENCE
+          Value: test-audience
+        PortMappings:
+        - ContainerPort: 8080
+          Protocol: tcp
+        LogConfiguration:
+          LogDriver: awslogs
+          Options:
+            awslogs-group:
+              Ref: ImposterLogGroup
+            awslogs-region:
+              Ref: AWS::Region
+            awslogs-stream-prefix: imposter
+  ImposterExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+          Action: sts:AssumeRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+  SigningKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: Key for signing payloads in Imposter mock
+      KeyPolicy:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            AWS:
+              Fn::Sub: arn:aws:iam::${AWS::AccountId}:root
+          Action: kms:*
+          Resource: '*'
+      KeySpec: ECC_NIST_P256
+      KeyUsage: SIGN_VERIFY
+  ImposterTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service: ecs-tasks.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: KMSSignPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - kms:Sign
+            - kms:DescribeKey
+            Resource:
+              Fn::GetAtt:
+              - SigningKey
+              - Arn
+Outputs:
+  ApiGatewayUrl:
+    Description: URL of the Imposter mock server via API Gateway
+    Value:
+      Fn::Sub: https://${ImposterApiGwHttpEndpoint}.execute-api.${AWS::Region}.amazonaws.com
