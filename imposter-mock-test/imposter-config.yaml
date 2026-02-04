@@ -1,0 +1,17 @@
+plugin: openapi
+specFile: openapi.yaml
+validation:
+  request: true
+resources:
+  - path: /authorize
+    method: GET
+    response:
+      scriptFile: authorize.groovy
+  - path: /redirect
+    method: GET
+    response:
+      scriptFile: redirect.groovy
+  - path: /token
+    method: POST
+    response:
+      scriptFile: token.groovy

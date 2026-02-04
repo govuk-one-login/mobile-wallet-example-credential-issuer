@@ -1,0 +1,215 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: STS Imposter Mock Server
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+  VpcStackName:
+    Type: String
+    Default: platform-vpc
+
+Resources:
+  ImposterLoadBalancerSG:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Imposter LoadBalancer Security Group
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          FromPort: 80
+          ToPort: 80
+          IpProtocol: tcp
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+
+  ImposterLoadBalancerSGEgress:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      GroupId: !GetAtt ImposterLoadBalancerSG.GroupId
+      IpProtocol: tcp
+      DestinationSecurityGroupId: !GetAtt ImposterECSSecurityGroup.GroupId
+      FromPort: 8080
+      ToPort: 8080
+
+  ImposterECSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Imposter ECS Security Group
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+
+  ImposterECSSecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 8080
+      ToPort: 8080
+      GroupId: !GetAtt ImposterECSSecurityGroup.GroupId
+      SourceSecurityGroupId: !GetAtt ImposterLoadBalancerSG.GroupId
+
+  ImposterLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/ecs/${AWS::StackName}"
+      RetentionInDays: 7
+
+  ImposterLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt ImposterLoadBalancerSG.GroupId
+      Subnets:
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
+      Type: application
+
+  ImposterTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      HealthCheckEnabled: true
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /health
+      Port: 8080
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+
+  ImposterListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref ImposterTargetGroup
+          Type: forward
+      LoadBalancerArn: !Ref ImposterLoadBalancer
+      Port: 80
+      Protocol: HTTP
+
+  ImposterApiGwHttpEndpoint:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: !Sub imposter-mock-${Environment}-${AWS::StackName}
+      ProtocolType: HTTP
+
+  ImposterApiGwHttpEndpointIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ImposterApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref ImposterListener
+      PayloadFormatVersion: '1.0'
+
+  ImposterAPIGWRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ImposterApiGwHttpEndpoint
+      RouteKey: 'ANY /{proxy+}'
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref ImposterApiGwHttpEndpointIntegration
+
+  ImposterAPIStageDefault:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      ApiId: !Ref ImposterApiGwHttpEndpoint
+      StageName: $default
+      AutoDeploy: true
+
+  ImposterCluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Sub "${AWS::StackName}-cluster"
+
+  ImposterService:
+    Type: AWS::ECS::Service
+    DependsOn: ImposterListener
+    Properties:
+      ServiceName: !Sub "${AWS::StackName}-service"
+      Cluster: !Ref ImposterCluster
+      TaskDefinition: !Ref ImposterTaskDefinition
+      DesiredCount: 1
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: imposter
+          ContainerPort: 8080
+          TargetGroupArn: !Ref ImposterTargetGroup
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          Subnets:
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
+          SecurityGroups:
+            - !Ref ImposterECSSecurityGroup
+
+  ImposterTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      Family: !Sub "${AWS::StackName}-task"
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      Cpu: 256
+      Memory: 512
+      ExecutionRoleArn: !GetAtt ImposterExecutionRole.Arn
+      TaskRoleArn: !GetAtt ImposterTaskRole.Arn
+      ContainerDefinitions:
+        - Name: imposter
+          Image: 671524980203.dkr.ecr.eu-west-2.amazonaws.com/imposter-mock-test:ahickmann3
+          Environment:
+            - Name: AWS_REGION
+              Value: !Ref AWS::Region
+            - Name: ISSUER_URL
+              Value: ''
+            - Name: SELF_URL
+              Value: ''
+            - Name: WALLET_REDIRECT_URI
+              Value: ''
+          PortMappings:
+            - ContainerPort: 8080
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref ImposterLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: imposter
+
+  ImposterExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy
+
+  ImposterTaskRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+            Action: sts:AssumeRole
+
+Outputs:
+  ApiGatewayUrl:
+    Description: URL of the STS Imposter mock server via API Gateway
+    Value: !Sub "https://${ImposterApiGwHttpEndpoint}.execute-api.${AWS::Region}.amazonaws.com"
