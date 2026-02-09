@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static testUtils.EcKeyHelper.getEcKey;
 
@@ -190,6 +193,7 @@ class AccessTokenServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_SignatureVerificationFails()
             throws JOSEException, ParseException {
+        when(configurationService.getEnvironment()).thenReturn("staging");
         JWK publicKey =
                 JWK.parse(
                         "{\"kty\":\"EC\",\"crv\":\"P-256\",\"kid\":\"cb5a1a8b-809a-4f32-944d-caae1a57ed91\",\"x\":\"sSdmBkED2EfjTdX-K2_cT6CfBwXQFt-DJ6v8-6tr_n8\",\"y\":\"WTXmQdqLwrmHN5tiFsTFUtNAvDYhhTQB4zyfteCrWIE\",\"alg\":\"ES256\"}");
@@ -221,9 +225,10 @@ class AccessTokenServiceTest {
     @Test
     void Should_ReturnTokenData_When_JwtVerificationSucceeds()
             throws JOSEException, ParseException, AccessTokenValidationException {
+        when(configurationService.getEnvironment()).thenReturn("staging");
         JWK publicKey = getEcKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
-        SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
+        SignedJWT mockAccessToken = spy(new MockAccessTokenBuilder("ES256").build());
         mockAccessToken.sign(ecSigner);
 
         AccessTokenService.AccessTokenData response =
@@ -234,5 +239,20 @@ class AccessTokenServiceTest {
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                 response.walletSubjectId());
         assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
+        verify(mockAccessToken).verify(any());
+    }
+
+    @Test
+    void Should_SkipSignatureVerification_When_EnvironmentIsNotStaging()
+            throws JOSEException, ParseException, AccessTokenValidationException {
+        when(configurationService.getEnvironment()).thenReturn("test");
+        JWK publicKey = getEcKey().toPublicJWK();
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
+        SignedJWT mockAccessToken = spy(new MockAccessTokenBuilder("ES256").build());
+        mockAccessToken.sign(ecSigner);
+
+        accessTokenService.verifyAccessToken(mockAccessToken);
+
+        verify(mockAccessToken, never()).verify(any());
     }
 }
