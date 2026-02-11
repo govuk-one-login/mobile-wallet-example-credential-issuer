@@ -69,7 +69,8 @@ public class MetadataResource {
                             .setNotificationEndpoint(selfUrl + NOTIFICATION_ENDPOINT)
                             .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(
-                                    CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME)
+                                    CREDENTIAL_CONFIGURATION_SUPPORTED_FILE_NAME,
+                                    configurationService.getCredentialStoreUrl().toString())
                             .setDisplay(selfUrl + LOGO_ENDPOINT)
                             .build();
 

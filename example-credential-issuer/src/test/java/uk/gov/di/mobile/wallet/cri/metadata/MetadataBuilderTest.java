@@ -12,6 +12,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class MetadataBuilderTest {
 
+    private static final String CREDENTIAL_STORE_URL = "https://credential-store.test.gov.uk";
+
     private MetadataBuilder metadataBuilder;
 
     @BeforeEach
@@ -35,7 +37,7 @@ class MetadataBuilderTest {
                         .setNotificationEndpoint(notification)
                         .setIacasEndpoint(iacas)
                         .setCredentialConfigurationsSupported(
-                                "credential_configurations_supported.json")
+                                "credential_configurations_supported.json", CREDENTIAL_STORE_URL)
                         .setDisplay(issuer + "/test-logo.png")
                         .build();
 
@@ -45,7 +47,7 @@ class MetadataBuilderTest {
         assertEquals(notification, metadata.notificationEndpoint);
         assertEquals(iacas, metadata.iacasEndpoint);
         String expectedCredentialConfigurationsSupported =
-                "{SocialSecurityCredential={format=jwt_vc_json, credential_definition={type=[VerifiableCredential, SocialSecurityCredential]}, cryptographic_binding_methods_supported=[did:key], credential_signing_alg_values_supported=[ES256], proof_types_supported={jwt={proof_signing_alg_values_supported=[ES256]}}, credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://test-credential-issuer.gov.uk/refresh/SocialSecurityCredential}, BasicDisclosureCredential={format=jwt_vc_json, credential_definition={type=[VerifiableCredential, BasicDisclosureCredential]}, cryptographic_binding_methods_supported=[did:key], credential_signing_alg_values_supported=[ES256], proof_types_supported={jwt={proof_signing_alg_values_supported=[ES256]}}, credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://test-credential-issuer.gov.uk/refresh/BasicDisclosureCredential}, DigitalVeteranCard={format=jwt_vc_json, credential_definition={type=[VerifiableCredential, DigitalVeteranCard]}, cryptographic_binding_methods_supported=[did:key], credential_signing_alg_values_supported=[ES256], proof_types_supported={jwt={proof_signing_alg_values_supported=[ES256]}}, credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://test-credential-issuer.gov.uk/refresh/DigitalVeteranCard}, org.iso.18013.5.1.mDL={format=mso_mdoc, doctype=org.iso.18013.5.1.mDL, cryptographic_binding_methods_supported=[cose_key], credential_signing_alg_values_supported=[ES256], credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://test-credential-issuer.gov.uk/refresh/org.iso.18013.5.1.mDL}, uk.gov.account.mobile.example-credential-issuer.simplemdoc.1={format=mso_mdoc, doctype=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1, cryptographic_binding_methods_supported=[cose_key], credential_signing_alg_values_supported=[ES256], credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://example-credential-issuer.mobile.staging.account.gov.uk/refresh/uk.gov.account.mobile.example-credential-issuer.simplemdoc.1, credential_metadata={display=[{locale=en, name=Simple Document, background_color_1=#74ebd5, background_color_2=#acb6e5}, {locale=cy, name=CREDENTIAL_TITLE_WELSH, background_color_1=#74ebd5, background_color_2=#acb6e5}], claims=[{path=[org.iso.18013.5.1, document_number], mandatory=true, value_type=string, display=[{locale=en, name=License number}, {locale=cy, name=LICENSE_NUMBER_WELSH}]}, {path=[org.iso.18013.5.1, portrait], mandatory=true, value_type=jpeg, display=[{locale=en, name=Portrait}, {locale=cy, name=Portrait_WELSH}]}, {path=[org.iso.18013.5.1, given_name], mandatory=true, value_type=string, display=[{locale=en, name=Given Name}, {locale=cy, name=GIVEN_NAME_WELSH}]}, {path=[org.iso.18013.5.1, family_name], mandatory=true, value_type=string, display=[{locale=en, name=Surname}, {locale=cy, name=SURNAME_WELSH}]}, {path=[org.iso.18013.5.1, birth_date], mandatory=true, value_type=full-date, display=[{locale=en, name=DoB}, {locale=cy, name=DOB_WELSH}]}, {path=[uk.gov.account.mobile.example-credential-issuer.simplemdoc.1, type_of_fish], mandatory=true, value_type=string, display=[{locale=en, name=Type of fish}, {locale=cy, name=TYPE_OF_FISH_WELSH}]}, {path=[uk.gov.account.mobile.example-credential-issuer.simplemdoc.1, number_of_fishing_rods], mandatory=true, value_type=string, display=[{locale=en, name=Number of fishing rods}, {locale=cy, name=NUMBER_OF_FISHING_RODS_WELSH}]}, {path=[org.iso.18013.5.1, expiry_date], mandatory=true, value_type=string}, {path=[org.iso.18013.5.1, issue_date], mandatory=true, value_type=full-date}, {path=[org.iso.18013.5.1, issuing_country], mandatory=true, value_type=string}]}}}";
+                "{SocialSecurityCredential={format=jwt_vc_json, credential_definition={type=[VerifiableCredential, SocialSecurityCredential]}, cryptographic_binding_methods_supported=[did:key], credential_signing_alg_values_supported=[ES256], proof_types_supported={jwt={proof_signing_alg_values_supported=[ES256]}}, credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://credential-store.test.gov.uk/refresh/SocialSecurityCredential}, BasicDisclosureCredential={format=jwt_vc_json, credential_definition={type=[VerifiableCredential, BasicDisclosureCredential]}, cryptographic_binding_methods_supported=[did:key], credential_signing_alg_values_supported=[ES256], proof_types_supported={jwt={proof_signing_alg_values_supported=[ES256]}}, credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://credential-store.test.gov.uk/refresh/BasicDisclosureCredential}, DigitalVeteranCard={format=jwt_vc_json, credential_definition={type=[VerifiableCredential, DigitalVeteranCard]}, cryptographic_binding_methods_supported=[did:key], credential_signing_alg_values_supported=[ES256], proof_types_supported={jwt={proof_signing_alg_values_supported=[ES256]}}, credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://credential-store.test.gov.uk/refresh/DigitalVeteranCard}, org.iso.18013.5.1.mDL={format=mso_mdoc, doctype=org.iso.18013.5.1.mDL, cryptographic_binding_methods_supported=[cose_key], credential_signing_alg_values_supported=[ES256], credential_validity_period_max_days=30, credential_refresh_web_journey_url=https://credential-store.test.gov.uk/refresh/org.iso.18013.5.1.mDL}, uk.gov.account.mobile.example-credential-issuer.simplemdoc.1={format=mso_mdoc, doctype=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1, cryptographic_binding_methods_supported=[cose_key], credential_signing_alg_values_supported=[ES256], credential_validity_period_max_days=30, credential_metadata={display=[{locale=en, name=Simple Document, background_color_1=#74ebd5, background_color_2=#acb6e5}, {locale=cy, name=CREDENTIAL_TITLE_WELSH, background_color_1=#74ebd5, background_color_2=#acb6e5}], claims=[{path=[org.iso.18013.5.1, document_number], mandatory=true, value_type=string, display=[{locale=en, name=License number}, {locale=cy, name=LICENSE_NUMBER_WELSH}]}, {path=[org.iso.18013.5.1, portrait], mandatory=true, value_type=jpeg, display=[{locale=en, name=Portrait}, {locale=cy, name=Portrait_WELSH}]}, {path=[org.iso.18013.5.1, given_name], mandatory=true, value_type=string, display=[{locale=en, name=Given Name}, {locale=cy, name=GIVEN_NAME_WELSH}]}, {path=[org.iso.18013.5.1, family_name], mandatory=true, value_type=string, display=[{locale=en, name=Surname}, {locale=cy, name=SURNAME_WELSH}]}, {path=[org.iso.18013.5.1, birth_date], mandatory=true, value_type=full-date, display=[{locale=en, name=DoB}, {locale=cy, name=DOB_WELSH}]}, {path=[uk.gov.account.mobile.example-credential-issuer.simplemdoc.1, type_of_fish], mandatory=true, value_type=string, display=[{locale=en, name=Type of fish}, {locale=cy, name=TYPE_OF_FISH_WELSH}]}, {path=[uk.gov.account.mobile.example-credential-issuer.simplemdoc.1, number_of_fishing_rods], mandatory=true, value_type=string, display=[{locale=en, name=Number of fishing rods}, {locale=cy, name=NUMBER_OF_FISHING_RODS_WELSH}]}, {path=[org.iso.18013.5.1, expiry_date], mandatory=true, value_type=string}, {path=[org.iso.18013.5.1, issue_date], mandatory=true, value_type=full-date}, {path=[org.iso.18013.5.1, issuing_country], mandatory=true, value_type=string}]}, credential_refresh_web_journey_url=https://credential-store.test.gov.uk/refresh/uk.gov.account.mobile.example-credential-issuer.simplemdoc.1}}";
         assertEquals(
                 expectedCredentialConfigurationsSupported,
                 metadata.credentialConfigurationsSupported.toString());
@@ -60,7 +62,8 @@ class MetadataBuilderTest {
                 JsonParseException.class,
                 () ->
                         metadataBuilder.setCredentialConfigurationsSupported(
-                                "test_invalid_credential_configurations_supported.json"));
+                                "test_invalid_credential_configurations_supported.json",
+                                CREDENTIAL_STORE_URL));
     }
 
     @Test
@@ -70,7 +73,7 @@ class MetadataBuilderTest {
                         IllegalArgumentException.class,
                         () ->
                                 metadataBuilder.setCredentialConfigurationsSupported(
-                                        "notARealFile.json"));
+                                        "notARealFile.json", CREDENTIAL_STORE_URL));
         assertEquals("resource notARealFile.json not found.", exceptionThrown.getMessage());
     }
 
@@ -79,7 +82,9 @@ class MetadataBuilderTest {
         IllegalArgumentException exceptionThrown =
                 assertThrows(
                         IllegalArgumentException.class,
-                        () -> metadataBuilder.setCredentialConfigurationsSupported(null));
+                        () ->
+                                metadataBuilder.setCredentialConfigurationsSupported(
+                                        null, CREDENTIAL_STORE_URL));
         assertEquals("fileName must not be null", exceptionThrown.getMessage());
     }
 

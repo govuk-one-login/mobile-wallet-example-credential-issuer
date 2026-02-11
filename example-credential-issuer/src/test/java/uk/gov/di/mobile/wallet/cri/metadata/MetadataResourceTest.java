@@ -26,6 +26,7 @@ class MetadataResourceTest {
 
     private static final String SELF_URL = "https://credential-issuer.test.gov.uk";
     private static final String AUTH_SERVER_URL = "https://authorization-server.test.gov.uk";
+    private static final String CREDENTIAL_STORE_URL = "https://credential-store.test.gov.uk";
 
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
@@ -38,6 +39,8 @@ class MetadataResourceTest {
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getEnvironment()).thenReturn("test");
+        when(configurationService.getCredentialStoreUrl())
+                .thenReturn(URI.create(CREDENTIAL_STORE_URL));
         when(metadataBuilder.build()).thenReturn(metadata);
 
         metadataResource = new MetadataResource(configurationService, metadataBuilder);
@@ -72,7 +75,8 @@ class MetadataResourceTest {
         verify(metadataBuilder).setNotificationEndpoint(SELF_URL + "/notification");
         verify(metadataBuilder).setIacasEndpoint(SELF_URL + "/iacas");
         verify(metadataBuilder)
-                .setCredentialConfigurationsSupported("credential_configurations_supported.json");
+                .setCredentialConfigurationsSupported(
+                        "credential_configurations_supported.json", CREDENTIAL_STORE_URL);
         verify(metadataBuilder).setDisplay(SELF_URL + "/logo.png");
         verify(metadataBuilder).build();
     }

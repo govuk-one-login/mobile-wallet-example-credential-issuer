@@ -70,8 +70,8 @@ public class MetadataBuilder {
         return this;
     }
 
-    public MetadataBuilder setCredentialConfigurationsSupported(String fileName)
-            throws IOException, IllegalArgumentException {
+    public MetadataBuilder setCredentialConfigurationsSupported(
+            String fileName, String credentialStore) throws IOException, IllegalArgumentException {
         if (fileName == null) {
             throw new IllegalArgumentException("fileName must not be null");
         }
@@ -89,7 +89,7 @@ public class MetadataBuilder {
             Map<String, Object> perCredential = (Map<String, Object>) credentialValue;
             perCredential.putIfAbsent(
                     "credential_refresh_web_journey_url",
-                    this.credentialIssuer + "/refresh/" + credentialName);
+                    credentialStore + "/refresh/" + credentialName);
         }
 
         return this;
