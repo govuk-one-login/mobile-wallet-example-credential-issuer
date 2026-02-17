@@ -253,7 +253,7 @@ Resources:
           - Sid: AllowWalletBEECSTaskRoleToGetObject
             Effect: Allow
             Principal:
-              AWS: 
+              AWS:
                 - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
                 - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
             Action: 's3:GetObject'
@@ -279,7 +279,7 @@ Resources:
           - Sid: AllowWalletBEECSTaskRoleToSign
             Effect: Allow
             Principal:
-              AWS: 
+              AWS:
                 - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
                 - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
             Action:
