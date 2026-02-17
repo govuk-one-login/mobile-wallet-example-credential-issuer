@@ -12,7 +12,7 @@ Parameters:
   Environment:
     Description: The environment type
     Type: String
-    Default: build
+    Default: dev
     AllowedValues:
       - dev
       - build
