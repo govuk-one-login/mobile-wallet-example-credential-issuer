@@ -243,21 +243,21 @@ Resources:
               NoncurrentDays: 14
             Status: Enabled
 
-  DocSigningCertificateBucketPolicy:
-    Type: 'AWS::S3::BucketPolicy'
-    Properties:
-      Bucket: !Ref DocSigningCertificateBucket
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: AllowWalletBEECSTaskRoleToGetObject
-            Effect: Allow
-            Principal:
-              AWS:
-                - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
-                - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
-            Action: 's3:GetObject'
-            Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
+  # DocSigningCertificateBucketPolicy:
+  #   Type: 'AWS::S3::BucketPolicy'
+  #   Properties:
+  #     Bucket: !Ref DocSigningCertificateBucket
+  #     PolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Sid: AllowWalletBEECSTaskRoleToGetObject
+  #           Effect: Allow
+  #           Principal:
+  #             AWS:
+  #               - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
+  #               - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
+  #           Action: 's3:GetObject'
+  #           Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
 
   DocumentSigningKey1:
     Type: AWS::KMS::Key
@@ -276,16 +276,16 @@ Resources:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
             Action: 'kms:*'
             Resource: '*'
-          - Sid: AllowWalletBEECSTaskRoleToSign
-            Effect: Allow
-            Principal:
-              AWS:
-                - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
-                - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
-            Action:
-              - 'kms:Sign'
-              - 'kms:DescribeKey'
-            Resource: '*'
+          # - Sid: AllowWalletBEECSTaskRoleToSign
+          #   Effect: Allow
+          #   Principal:
+          #     AWS:
+          #       - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
+          #       - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
+          #   Action:
+          #     - 'kms:Sign'
+          #     - 'kms:DescribeKey'
+          #   Resource: '*'
 
   DocumentSigningKeyAlias1:
     Type: AWS::KMS::Alias
