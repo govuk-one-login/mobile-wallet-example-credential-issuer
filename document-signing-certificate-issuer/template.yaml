@@ -16,6 +16,7 @@ Parameters:
     AllowedValues:
       - dev
       - build
+      - integration
 
   PermissionsBoundary:
     Description: |
@@ -27,7 +28,7 @@ Parameters:
     Description: |
       The stack name of the VPC where Issue Document Signing Certificate Lambda will be deployed
     Type: String
-    Default: platform-vpc
+    Default: vpc
 
 Conditions:
   UsePermissionsBoundary: !Not
@@ -57,6 +58,18 @@ Mappings:
     build:
       DocumentSigningKeyParameterPrefix: '/iaca/'
       DocumentSigningKeyCommonName: 'Example Issuer DSC (BUILD)'
+      DocumentSigningKeyCountryName: 'GB'
+      PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
+      PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
+      RootCertificate: '/platform-ca/iaca/root-certificate'
+      CloudwatchLogRetentionDays: 3653 # 10 years, since the underlying CA root will likely have a 9 year lifecycle
+      DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
+      LambdaLogLevel: INFO
+      CertificateValidityPeriodInDays: 458 # 366 (1 year) + 92 (3 months), worse case
+      CertificateRetentionPeriodInDays: 488 # validity period + 30 days
+    integration:
+      DocumentSigningKeyParameterPrefix: '/iaca/'
+      DocumentSigningKeyCommonName: 'Example Issuer DSC (INTEGRATION)'
       DocumentSigningKeyCountryName: 'GB'
       PlatformCaArnParameter: '/platform-ca/iaca/certificate-authority-arn'
       PlatformCaIssuerAlternativeName: '/platform-ca/iaca/issuer-alternative-name'
@@ -230,19 +243,21 @@ Resources:
               NoncurrentDays: 14
             Status: Enabled
 
-  DocSigningCertificateBucketPolicy:
-    Type: 'AWS::S3::BucketPolicy'
-    Properties:
-      Bucket: !Ref DocSigningCertificateBucket
-      PolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Sid: AllowWalletBEECSTaskRoleToGetObject
-            Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::921104553881:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA
-            Action: 's3:GetObject'
-            Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
+  # DocSigningCertificateBucketPolicy:
+  #   Type: 'AWS::S3::BucketPolicy'
+  #   Properties:
+  #     Bucket: !Ref DocSigningCertificateBucket
+  #     PolicyDocument:
+  #       Version: '2012-10-17'
+  #       Statement:
+  #         - Sid: AllowWalletBEECSTaskRoleToGetObject
+  #           Effect: Allow
+  #           Principal:
+  #             AWS:
+  #               - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
+  #               - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
+  #           Action: 's3:GetObject'
+  #           Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
 
   DocumentSigningKey1:
     Type: AWS::KMS::Key
@@ -261,14 +276,16 @@ Resources:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
             Action: 'kms:*'
             Resource: '*'
-          - Sid: AllowWalletBEECSTaskRoleToSign
-            Effect: Allow
-            Principal:
-              AWS: arn:aws:iam::921104553881:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA
-            Action:
-              - 'kms:Sign'
-              - 'kms:DescribeKey'
-            Resource: '*'
+          # - Sid: AllowWalletBEECSTaskRoleToSign
+          #   Effect: Allow
+          #   Principal:
+          #     AWS:
+          #       - arn:aws:iam::219494607463:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in dev by ExCRI
+          #       - arn:aws:iam::804878519326:role/wallet-cred-issuer-be-WalletBEECSTaskRole-bSAppwk9KqvA # role deployed in staging by ExCRI
+          #   Action:
+          #     - 'kms:Sign'
+          #     - 'kms:DescribeKey'
+          #   Resource: '*'
 
   DocumentSigningKeyAlias1:
     Type: AWS::KMS::Alias
