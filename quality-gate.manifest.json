@@ -1,0 +1,149 @@
+{
+    "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.1.0/schemas/schema.json",
+      "services": [
+        {
+          "service-tag": "document-signing-certificate-issuer",
+          "quality-gates": [
+            {
+              "phase": "pre-merge",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+                "path": "jobs.check-conventional-commits"
+              },
+              "check-types": [
+                "code style and linting"
+              ]
+            },
+            {
+              "phase": "pre-merge",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+                "path": "jobs.run-code-analysis"
+              },
+              "check-types": [
+                "code style and linting",
+                "unit test coverage",
+                "unit",
+                "code quality"
+              ]
+            },
+            {
+              "phase": "pre-upload",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+                "path": "jobs.run-code-analysis"
+              },
+              "check-types": [
+                "unit test coverage",
+                "unit",
+                "code quality",
+                "code style and linting"
+              ]
+            },
+            {
+              "phase": "pre-upload",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+                "path": "jobs.deploy"
+              },
+              "check-types": [
+                "code style and linting"
+              ]
+            }
+          ]
+        },
+        {
+          "service-tag": "example-credential-issuer",
+          "quality-gates": [
+            {
+              "phase": "pre-merge",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
+                "path": "jobs.check-conventional-commits"
+              },
+              "check-types": [
+                "code style and linting"
+              ]
+            },
+            {
+              "phase": "pre-merge",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
+                "path": "jobs.run-code-analysis"
+              },
+              "check-types": [
+                "code style and linting",
+                "unit test coverage",
+                "unit",
+                "code quality"
+              ]
+            },
+            {
+              "phase": "pre-merge",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
+                "path": "jobs.run-wallet-integration-tests"
+              },
+              "check-types": [
+                "integration"
+              ]
+            },
+            {
+              "phase": "pre-merge",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
+                "path": "jobs.check-conventional-commits"
+              },
+              "check-types": [
+                "code style and linting"
+              ]
+            },
+            {
+              "phase": "pre-upload",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
+                "path": "jobs.run-code-analysis"
+              },
+              "check-types": [
+                "unit test coverage",
+                "unit",
+                "code quality",
+                "code style and linting"
+              ]
+            },
+            {
+              "phase": "pre-upload",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
+                "path": "jobs.run-wallet-integration-tests"
+              },
+              "check-types": [
+                "integration"
+              ]
+            },
+            {
+              "phase": "pre-upload",
+              "provider": "GitHub",
+              "config": {
+                "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
+                "path": "jobs.deploy"
+              },
+              "check-types": [
+                "code style and linting"
+              ]
+            }
+          ]
+        }
+      ]
+
+}
