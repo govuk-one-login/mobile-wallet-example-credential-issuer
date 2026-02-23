@@ -102,7 +102,7 @@ The [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-har
 
 ### Deploy application to `dev`
 
-> You must be logged into the Mobile Platform `dev` AWS account.
+> You must be logged into the Onboarding Products `dev` AWS account.
 
 You can deploy the application to the `dev` AWS account by following these steps.
 
@@ -111,10 +111,10 @@ You can deploy the application to the `dev` AWS account by following these steps
 Run the script to build and push the Example CRI docker image. Make sure to specify:
 
 * an image tag
-* the name of your AWS profile for the Mobile Platform `dev` AWS account (which can be found in your `~/.aws/credentials` file)
+* the name of your AWS profile for the Onboarding Products `dev` AWS account (which can be found in your `~/.aws/credentials` file)
 
 ```shell
-./build-and-deploy-image.sh <your-chosen-tag> <your-mobile-platform-dev-profile> 
+./build-and-deploy-image.sh <your-chosen-tag> <your-onboarding-products-dev-profile>
 ```
 
 This will:
@@ -132,8 +132,8 @@ If using your own deployed version of the [Document Builder](https://github.com/
 Mappings:
   EnvironmentVariables:
     dev:
-      CredentialStoreUrl: "<stack-name->stub-credential-issuer.mobile.dev.account.gov.uk"
-      AuthServerUrl: "<stack-name->stub-credential-issuer.mobile.dev.account.gov.uk"
+      CredentialStoreUrl: "<stack-name->stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
+      AuthServerUrl: "<stack-name->stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
 ```
 
 #### Build and deploy the stack
