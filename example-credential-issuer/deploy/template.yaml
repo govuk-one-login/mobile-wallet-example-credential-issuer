@@ -160,13 +160,14 @@ Resources:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Back-ECS
       RetentionInDays: 14
 
-  WalletBEECSAccessLogsGroupSubscriptionFilter:
-    Type: AWS::Logs::SubscriptionFilter
-    Condition: IsBuildOrStagingOrInt
-    Properties:
-      DestinationArn: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython-2
-      FilterPattern: ""
-      LogGroupName: !Ref WalletBEECSAccessLogsGroup
+# Commenting out WalletBEECSAccessLogsGroupSubscriptionFilter as onboarding to CSLS/Splunk is blocked for now
+#  WalletBEECSAccessLogsGroupSubscriptionFilter:
+#    Type: AWS::Logs::SubscriptionFilter
+#    Condition: IsBuildOrStagingOrInt
+#    Properties:
+#      DestinationArn: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython-2
+#      FilterPattern: ""
+#      LogGroupName: !Ref WalletBEECSAccessLogsGroup
 
   WalletBEAccessLogsBucket:
     Type: AWS::S3::Bucket
