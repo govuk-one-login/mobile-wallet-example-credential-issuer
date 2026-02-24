@@ -33,7 +33,7 @@
               "phase": "pre-upload",
               "provider": "GitHub",
               "config": {
-                "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+                "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
                 "path": "jobs.run-code-analysis"
               },
               "check-types": [
@@ -47,7 +47,7 @@
               "phase": "pre-upload",
               "provider": "GitHub",
               "config": {
-                "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+                "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
                 "path": "jobs.deploy"
               },
               "check-types": [
@@ -96,7 +96,7 @@
               ]
             },
             {
-              "phase": "pre-merge",
+              "phase": "pre-upload",
               "provider": "GitHub",
               "config": {
                 "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
