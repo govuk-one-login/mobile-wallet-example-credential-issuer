@@ -78,7 +78,6 @@
                 "path": "jobs.run-code-analysis"
               },
               "check-types": [
-                "code style and linting",
                 "unit test coverage",
                 "unit",
                 "code quality"
@@ -100,24 +99,12 @@
               "provider": "GitHub",
               "config": {
                 "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
-                "path": "jobs.check-conventional-commits"
-              },
-              "check-types": [
-                "code style and linting"
-              ]
-            },
-            {
-              "phase": "pre-upload",
-              "provider": "GitHub",
-              "config": {
-                "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
                 "path": "jobs.run-code-analysis"
               },
               "check-types": [
                 "unit test coverage",
                 "unit",
-                "code quality",
-                "code style and linting"
+                "code quality"
               ]
             },
             {
