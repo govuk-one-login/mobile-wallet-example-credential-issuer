@@ -26,7 +26,9 @@
                 "code style and linting",
                 "unit test coverage",
                 "unit",
-                "code quality"
+                "code quality",
+                "secret scanning",
+                "vulnerability detection"
               ]
             },
             {
@@ -40,7 +42,9 @@
                 "unit test coverage",
                 "unit",
                 "code quality",
-                "code style and linting"
+                "code style and linting",
+                "secret scanning",
+                "vulnerability detection"
               ]
             },
             {
@@ -80,7 +84,9 @@
               "check-types": [
                 "unit test coverage",
                 "unit",
-                "code quality"
+                "code quality",
+                "secret scanning",
+                "vulnerability detection"
               ]
             },
             {
@@ -104,7 +110,9 @@
               "check-types": [
                 "unit test coverage",
                 "unit",
-                "code quality"
+                "code quality",
+                "secret scanning",
+                "vulnerability detection"
               ]
             },
             {
