@@ -48,7 +48,7 @@ public class MobileSecurityObjectFactory {
      *     key.
      * @param statusListInformation Status list data containing index and URI information for
      *     revocation or status checking.
-     * @param credentialTtlMinutes The credential time-to-live, in minutes, used to determine its
+     * @param credentialTtlSeconds The credential time-to-live, in minutes, used to determine its
      *     validity period.
      * @param docType Document type for the {@link MobileSecurityObject}
      * @return {@link MobileSecurityObject}
@@ -58,7 +58,7 @@ public class MobileSecurityObjectFactory {
             Namespaces nameSpaces,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
-            long credentialTtlMinutes,
+            long credentialTtlSeconds,
             String docType)
             throws MdocException {
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
@@ -66,7 +66,7 @@ public class MobileSecurityObjectFactory {
         KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
         DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
-        ValidityInfo validityInfo = validityInfoFactory.build(credentialTtlMinutes);
+        ValidityInfo validityInfo = validityInfoFactory.build(credentialTtlSeconds);
         StatusList statusList =
                 new StatusList(statusListInformation.idx(), statusListInformation.uri());
         Status status = new Status(statusList);

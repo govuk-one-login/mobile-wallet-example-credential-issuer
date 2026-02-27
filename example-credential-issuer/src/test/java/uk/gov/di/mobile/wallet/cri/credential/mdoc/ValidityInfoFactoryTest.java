@@ -13,19 +13,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidityInfoFactoryTest {
     private static final Instant FIXED_INSTANT = Instant.parse("2024-01-15T10:30:00Z");
-    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final long CREDENTIAL_TTL_SECONDS = 2592000L;
+    private static final Instant EXPECTED_VALID_UNTIL = Instant.parse("2024-02-14T10:30:00Z");
 
     @Test
     void Should_CreateValidityInfoWithProvidedClock() {
         Clock fixedClock = Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC);
 
         ValidityInfoFactory factory = new ValidityInfoFactory(fixedClock);
-        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_MINUTES);
+        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_SECONDS);
 
         assertEquals(FIXED_INSTANT, validityInfo.signed(), "signed should be current time");
         assertEquals(FIXED_INSTANT, validityInfo.validFrom(), "validFrom should be current time");
         assertEquals(
-                FIXED_INSTANT.plus(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES)),
+                EXPECTED_VALID_UNTIL,
                 validityInfo.validUntil(),
                 "validUntil should be 30 days later");
     }
@@ -35,7 +36,7 @@ class ValidityInfoFactoryTest {
         Instant beforeCreation = Instant.now();
 
         ValidityInfoFactory factory = new ValidityInfoFactory(Clock.systemDefaultZone());
-        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_MINUTES);
+        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_SECONDS);
 
         assertNotNull(validityInfo);
         Instant afterCreation = Instant.now();
@@ -49,7 +50,6 @@ class ValidityInfoFactoryTest {
         // Verify the duration is exactly 30 days
         Duration actualDuration =
                 Duration.between(validityInfo.validFrom(), validityInfo.validUntil());
-
-        assertEquals(Duration.ofMinutes(CREDENTIAL_TTL_MINUTES), actualDuration);
+        assertEquals(Duration.ofSeconds(CREDENTIAL_TTL_SECONDS), actualDuration);
     }
 }

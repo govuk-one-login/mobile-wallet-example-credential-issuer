@@ -35,8 +35,8 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
         SocialSecurityCredentialSubject subject =
                 CredentialSubjectMapper.buildSocialSecurityCredentialSubject(
                         document, proofData.didKey());
-
+        System.out.println(documentStoreRecord.getCredentialTtlSeconds());
         return credentialBuilder.buildCredential(
-                subject, SOCIAL_SECURITY_CREDENTIAL, documentStoreRecord.getCredentialTtlMinutes());
+                subject, SOCIAL_SECURITY_CREDENTIAL, documentStoreRecord.getCredentialTtlSeconds());
     }
 }

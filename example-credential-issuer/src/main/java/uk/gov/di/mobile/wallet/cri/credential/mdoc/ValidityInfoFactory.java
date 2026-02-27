@@ -40,9 +40,9 @@ public class ValidityInfoFactory {
      * @return A {@link ValidityInfo} object with current time as signed/valid from and current time
      *     plus 365 days as valid until.
      */
-    public ValidityInfo build(long credentialTtlMinutes) {
+    public ValidityInfo build(long credentialTtlSeconds) {
         Instant currentTimestamp = clock.instant();
-        Instant validUntil = currentTimestamp.plus(Duration.ofMinutes(credentialTtlMinutes));
+        Instant validUntil = currentTimestamp.plus(Duration.ofSeconds(credentialTtlSeconds));
         return new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);
     }
 }

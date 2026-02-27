@@ -20,7 +20,7 @@ public class CredentialExpiryCalculator {
 
     public long calculateExpiry(DocumentStoreRecord documentStoreRecord) {
         return Instant.now(clock)
-                .plus(documentStoreRecord.getCredentialTtlMinutes(), ChronoUnit.MINUTES)
+                .plus(documentStoreRecord.getCredentialTtlSeconds(), ChronoUnit.SECONDS)
                 .getEpochSecond();
     }
 }
