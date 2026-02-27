@@ -83,13 +83,13 @@ public class CredentialBuilder<T extends CredentialSubject> {
             T credentialSubject, CredentialType credentialType, long credentialTtlSeconds) {
         Instant now = clock.instant();
         Instant expiry = now.plus(credentialTtlSeconds, ChronoUnit.SECONDS);
-        System.out.println(expiry);
+
         Date nowDate = Date.from(now);
         Date expiryDate = Date.from(expiry);
 
         String validFromISO = ISO_FORMATTER.format(now);
         String validUntilISO = ISO_FORMATTER.format(expiry);
-        System.out.println(validUntilISO);
+
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
                         .issuer(configurationService.getSelfUrl().toString())
