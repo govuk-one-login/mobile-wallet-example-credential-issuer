@@ -43,7 +43,7 @@ Conditions:
   IsBuildOrStagingOrInt: !Or
     - !Equals [!Ref Environment, build]
     - !Equals [!Ref Environment, staging]
-    - !Equals [ !Ref Environment, integration ]
+    - !Equals [!Ref Environment, integration]
 
   UsePermissionsBoundary:
     Fn::Not:
