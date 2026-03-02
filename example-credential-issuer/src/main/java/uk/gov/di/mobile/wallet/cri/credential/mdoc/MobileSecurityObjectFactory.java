@@ -48,7 +48,7 @@ public class MobileSecurityObjectFactory {
      *     key.
      * @param statusListInformation Status list data containing index and URI information for
      *     revocation or status checking.
-     * @param credentialTtlSeconds The credential time-to-live, in minutes, used to determine its
+     * @param credentialTtlSeconds The credential time-to-live, in seconds, used to determine its
      *     validity period.
      * @param docType Document type for the {@link MobileSecurityObject}
      * @return {@link MobileSecurityObject}

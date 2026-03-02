@@ -33,7 +33,7 @@ class CredentialExpiryCalculatorTest {
         DocumentStoreRecord document =
                 new DocumentStoreRecord(
                         ITEM_ID, DOCUMENT_ID, data, "org.iso.18013.5.1.mDL", credentialTtlSeconds);
-        // Expected: 2024-01-15T10:30:00Z + 43200 minutes = 2024-02-14T10:30:00Z
+        // Expected: 2024-01-15T10:30:00Z + 2592000 seconds = 2024-02-14T10:30:00Z
         long expectedEpochSecond =
                 ZonedDateTime.of(2024, 2, 14, 10, 30, 0, 0, UTC_ZONE).toInstant().getEpochSecond();
 
