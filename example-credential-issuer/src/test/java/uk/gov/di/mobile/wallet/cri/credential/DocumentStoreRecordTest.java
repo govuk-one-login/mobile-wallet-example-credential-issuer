@@ -26,13 +26,14 @@ class DocumentStoreRecordTest {
                 }
                 """;
 
-        DocumentStoreRecord record = objectMapper.readValue(json, DocumentStoreRecord.class);
+        DocumentStoreRecord documentStoreRecord =
+                objectMapper.readValue(json, DocumentStoreRecord.class);
 
-        assertEquals("123", record.getItemId());
-        assertEquals("456", record.getDocumentId());
-        assertEquals("value", record.getData().get("key"));
-        assertEquals("ExampleCredentialType", record.getVcType());
-        assertEquals(60, record.getCredentialTtlSeconds());
+        assertEquals("123", documentStoreRecord.getItemId());
+        assertEquals("456", documentStoreRecord.getDocumentId());
+        assertEquals("value", documentStoreRecord.getData().get("key"));
+        assertEquals("ExampleCredentialType", documentStoreRecord.getVcType());
+        assertEquals(60, documentStoreRecord.getCredentialTtlSeconds());
     }
 
     @ParameterizedTest
