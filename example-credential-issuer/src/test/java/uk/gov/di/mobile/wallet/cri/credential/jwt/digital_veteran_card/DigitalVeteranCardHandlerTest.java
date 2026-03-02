@@ -41,7 +41,7 @@ class DigitalVeteranCardHandlerTest {
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
-    private static final long TTL_MINUTES = 1440L;
+    private static final long TTL_SECONDS = 1440L;
     private static final Optional<StatusListClient.StatusListInformation> STATUS_LIST_INFORMATION =
             Optional.empty();
 
@@ -55,11 +55,11 @@ class DigitalVeteranCardHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlSeconds()).thenReturn(TTL_SECONDS);
         when(mockCredentialBuilder.buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(DIGITAL_VETERAN_CARD),
-                        eq(TTL_MINUTES)))
+                        eq(TTL_SECONDS)))
                 .thenReturn(EXPECTED_CREDENTIAL);
         DigitalVeteranCardHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -81,7 +81,7 @@ class DigitalVeteranCardHandlerTest {
 
             assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
-                    .buildCredential(mockCredentialSubject, DIGITAL_VETERAN_CARD, TTL_MINUTES);
+                    .buildCredential(mockCredentialSubject, DIGITAL_VETERAN_CARD, TTL_SECONDS);
         }
     }
 
@@ -91,13 +91,13 @@ class DigitalVeteranCardHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlSeconds()).thenReturn(TTL_SECONDS);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockCredentialBuilder.buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(DIGITAL_VETERAN_CARD),
-                        eq(TTL_MINUTES)))
+                        eq(TTL_SECONDS)))
                 .thenThrow(signingException);
         DigitalVeteranCardHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);

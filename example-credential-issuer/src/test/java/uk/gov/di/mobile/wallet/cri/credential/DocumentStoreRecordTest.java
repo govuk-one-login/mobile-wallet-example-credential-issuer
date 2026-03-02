@@ -22,7 +22,7 @@ class DocumentStoreRecordTest {
                     "documentId": "456",
                     "data": {"key": "value"},
                     "vcType": "ExampleCredentialType",
-                    "credentialTtlMinutes": 60
+                    "credentialTtlSeconds": 60
                 }
                 """;
 
@@ -32,7 +32,7 @@ class DocumentStoreRecordTest {
         assertEquals("456", record.getDocumentId());
         assertEquals("value", record.getData().get("key"));
         assertEquals("ExampleCredentialType", record.getVcType());
-        assertEquals(60, record.getCredentialTtlMinutes());
+        assertEquals(60, record.getCredentialTtlSeconds());
     }
 
     @ParameterizedTest
@@ -43,7 +43,7 @@ class DocumentStoreRecordTest {
                     "documentId": "456",
                     "data": {"key": "value"},
                     "vcType": "ExampleCredentialType",
-                    "credentialTtlMinutes": 60
+                    "credentialTtlSeconds": 60
                 }
                 """,
                 """
@@ -51,7 +51,7 @@ class DocumentStoreRecordTest {
                     "itemId": "123",
                     "data": {"key": "value"},
                     "vcType": "ExampleCredentialType",
-                    "credentialTtlMinutes": 60
+                    "credentialTtlSeconds": 60
                 }
                 """,
                 """
@@ -59,7 +59,7 @@ class DocumentStoreRecordTest {
                     "itemId": "123",
                     "documentId": "456",
                     "vcType": "ExampleCredentialType",
-                    "credentialTtlMinutes": 60
+                    "credentialTtlSeconds": 60
                 }
                 """,
                 """
@@ -67,7 +67,7 @@ class DocumentStoreRecordTest {
                     "itemId": "123",
                     "documentId": "456",
                     "data": {"key": "value"},
-                    "credentialTtlMinutes": 60
+                    "credentialTtlSeconds": 60
                 }
                 """,
                 """

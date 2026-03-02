@@ -41,7 +41,7 @@ class SocialSecurityCredentialHandlerTest {
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
-    private static final long TTL_MINUTES = 1440L;
+    private static final long TTL_SECONDS = 1440L;
     private static final Optional<StatusListClient.StatusListInformation> STATUS_LIST_INFORMATION =
             Optional.empty();
 
@@ -55,11 +55,11 @@ class SocialSecurityCredentialHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlSeconds()).thenReturn(TTL_SECONDS);
         when(mockCredentialBuilder.buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(SOCIAL_SECURITY_CREDENTIAL),
-                        eq(TTL_MINUTES)))
+                        eq(TTL_SECONDS)))
                 .thenReturn(EXPECTED_CREDENTIAL);
         SocialSecurityCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -82,7 +82,7 @@ class SocialSecurityCredentialHandlerTest {
             assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
                     .buildCredential(
-                            mockCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, TTL_MINUTES);
+                            mockCredentialSubject, SOCIAL_SECURITY_CREDENTIAL, TTL_SECONDS);
         }
     }
 
@@ -92,13 +92,13 @@ class SocialSecurityCredentialHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
-        when(mockDocument.getCredentialTtlMinutes()).thenReturn(TTL_MINUTES);
+        when(mockDocument.getCredentialTtlSeconds()).thenReturn(TTL_SECONDS);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockCredentialBuilder.buildCredential(
                         any(SocialSecurityCredentialSubject.class),
                         eq(SOCIAL_SECURITY_CREDENTIAL),
-                        eq(TTL_MINUTES)))
+                        eq(TTL_SECONDS)))
                 .thenThrow(signingException);
         SocialSecurityCredentialHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);

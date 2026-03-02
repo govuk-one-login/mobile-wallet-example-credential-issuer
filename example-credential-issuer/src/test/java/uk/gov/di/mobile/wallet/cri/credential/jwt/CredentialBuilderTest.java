@@ -59,7 +59,7 @@ class CredentialBuilderTest {
 
     private static Instant fixedInstant;
     private static ObjectMapper objectMapper;
-    Instant expectedValidUntil = fixedInstant.plus(525600, ChronoUnit.MINUTES);
+    Instant expectedValidUntil = fixedInstant.plus(2592000, ChronoUnit.SECONDS);
 
     private static final String KMS_KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String DID_KEY_ID =
@@ -146,7 +146,7 @@ class CredentialBuilderTest {
                         credentialBuilderSocialSecurity.buildCredential(
                                 socialSecurityCredentialSubject,
                                 CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                                525600));
+                                2592000));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -162,7 +162,7 @@ class CredentialBuilderTest {
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
                 credential.getJWTClaimsSet().getExpirationTime().toString(),
-                equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
+                equalTo(Date.from(fixedInstant.plus(30, ChronoUnit.DAYS)).toString()));
         assertThat(
                 credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
@@ -204,7 +204,7 @@ class CredentialBuilderTest {
                         credentialBuilderBasicCheck.buildCredential(
                                 basicCheckCredentialSubject,
                                 CredentialType.BASIC_DISCLOSURE_CREDENTIAL,
-                                525600));
+                                2592000));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -220,7 +220,7 @@ class CredentialBuilderTest {
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
                 credential.getJWTClaimsSet().getExpirationTime().toString(),
-                equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
+                equalTo(Date.from(fixedInstant.plus(30, ChronoUnit.DAYS)).toString()));
         assertThat(
                 credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
@@ -262,7 +262,7 @@ class CredentialBuilderTest {
                         credentialBuilderVeteranCard.buildCredential(
                                 veteranCardCredentialSubject,
                                 CredentialType.DIGITAL_VETERAN_CARD,
-                                525600));
+                                2592000));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -278,7 +278,7 @@ class CredentialBuilderTest {
                 equalTo(Date.from(fixedInstant).toString()));
         assertThat(
                 credential.getJWTClaimsSet().getExpirationTime().toString(),
-                equalTo(Date.from(fixedInstant.plus(365, ChronoUnit.DAYS)).toString()));
+                equalTo(Date.from(fixedInstant.plus(30, ChronoUnit.DAYS)).toString()));
         assertThat(
                 credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));

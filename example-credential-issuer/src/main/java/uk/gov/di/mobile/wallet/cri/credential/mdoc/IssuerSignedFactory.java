@@ -37,7 +37,7 @@ public class IssuerSignedFactory {
             Namespaces namespaces,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
-            long credentialTtlMinutes,
+            long credentialTtlSeconds,
             String docType)
             throws MdocException, SigningException, CertificateException, ObjectStoreException {
         MobileSecurityObject mobileSecurityObject =
@@ -45,7 +45,7 @@ public class IssuerSignedFactory {
                         namespaces,
                         publicKey,
                         statusListInformation,
-                        credentialTtlMinutes,
+                        credentialTtlSeconds,
                         docType);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 

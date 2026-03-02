@@ -21,8 +21,8 @@ public class DocumentStoreRecord {
     @JsonProperty("vcType")
     private String vcType;
 
-    @JsonProperty("credentialTtlMinutes")
-    private long credentialTtlMinutes;
+    @JsonProperty("credentialTtlSeconds")
+    private long credentialTtlSeconds;
 
     @ExcludeFromGeneratedCoverageReport
     public DocumentStoreRecord() {
@@ -35,12 +35,12 @@ public class DocumentStoreRecord {
             @JsonProperty(value = "documentId", required = true) String documentId,
             @JsonProperty(value = "data", required = true) Map<String, Object> data,
             @JsonProperty(value = "vcType", required = true) String vcType,
-            @JsonProperty(value = "credentialTtlMinutes", required = true)
-                    long credentialTtlMinutes) {
+            @JsonProperty(value = "credentialTtlSeconds", required = true)
+                    long credentialTtlSeconds) {
         this.itemId = itemId;
         this.documentId = documentId;
         this.data = data;
         this.vcType = vcType;
-        this.credentialTtlMinutes = credentialTtlMinutes;
+        this.credentialTtlSeconds = credentialTtlSeconds;
     }
 }

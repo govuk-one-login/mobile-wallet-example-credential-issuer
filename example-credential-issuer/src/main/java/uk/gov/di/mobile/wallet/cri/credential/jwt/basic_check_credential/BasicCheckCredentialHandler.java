@@ -39,6 +39,6 @@ public class BasicCheckCredentialHandler implements CredentialHandler {
         return credentialBuilder.buildCredential(
                 subject,
                 BASIC_DISCLOSURE_CREDENTIAL,
-                documentStoreRecord.getCredentialTtlMinutes());
+                documentStoreRecord.getCredentialTtlSeconds());
     }
 }

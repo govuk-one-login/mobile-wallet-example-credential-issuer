@@ -51,7 +51,7 @@ public class MdocCredentialBuilder<T> {
      * @param document Typed credential document
      * @param publicKey Device public key
      * @param statusListInformation Status list information (URI and index)
-     * @param credentialTtlMinutes Credential validity period in minutes
+     * @param credentialTtlSeconds Credential validity period in seconds
      * @return Base64URL string of the CBOR-encoded {@link IssuerSigned}
      * @throws ObjectStoreException When persistence interactions fail
      * @throws SigningException When signing fails
@@ -61,7 +61,7 @@ public class MdocCredentialBuilder<T> {
             T document,
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
-            long credentialTtlMinutes)
+            long credentialTtlSeconds)
             throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(document);
         IssuerSigned issuerSigned =
@@ -69,7 +69,7 @@ public class MdocCredentialBuilder<T> {
                         namespaces,
                         publicKey,
                         statusListInformation,
-                        credentialTtlMinutes,
+                        credentialTtlSeconds,
                         docType);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()

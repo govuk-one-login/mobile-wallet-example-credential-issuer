@@ -51,12 +51,12 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     public String buildCredential(
-            T credentialSubject, CredentialType credentialType, long credentialTtlMinutes)
+            T credentialSubject, CredentialType credentialType, long credentialTtlSeconds)
             throws SigningException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         var encodedHeader = getEncodedHeader(keyId);
         var encodedClaims =
-                getEncodedClaims(credentialSubject, credentialType, credentialTtlMinutes);
+                getEncodedClaims(credentialSubject, credentialType, credentialTtlSeconds);
         var message = encodedHeader + "." + encodedClaims;
 
         byte[] encodedHash = sha256(message);
@@ -80,9 +80,9 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     private Base64URL getEncodedClaims(
-            T credentialSubject, CredentialType credentialType, long credentialTtlMinutes) {
+            T credentialSubject, CredentialType credentialType, long credentialTtlSeconds) {
         Instant now = clock.instant();
-        Instant expiry = now.plus(credentialTtlMinutes, ChronoUnit.MINUTES);
+        Instant expiry = now.plus(credentialTtlSeconds, ChronoUnit.SECONDS);
 
         Date nowDate = Date.from(now);
         Date expiryDate = Date.from(expiry);

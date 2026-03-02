@@ -32,17 +32,18 @@ public class ValidityInfoFactory {
     }
 
     /**
-     * Creates a {@link ValidityInfo} object with a one-year validity period.
+     * Creates a {@link ValidityInfo} object with the specified validity period.
      *
-     * <p>The validity period starts from the current time and extends for 365 days. Both the signed
-     * and valid from timestamps are set to the current time.
+     * <p>The validity period starts from the current time and extends for the specified duration.
+     * Both the signed and valid from timestamps are set to the current time.
      *
+     * @param credentialTtlSeconds The time-to-live in seconds for the credential validity period.
      * @return A {@link ValidityInfo} object with current time as signed/valid from and current time
-     *     plus 365 days as valid until.
+     *     plus the specified duration as valid until.
      */
-    public ValidityInfo build(long credentialTtlMinutes) {
+    public ValidityInfo build(long credentialTtlSeconds) {
         Instant currentTimestamp = clock.instant();
-        Instant validUntil = currentTimestamp.plus(Duration.ofMinutes(credentialTtlMinutes));
+        Instant validUntil = currentTimestamp.plus(Duration.ofSeconds(credentialTtlSeconds));
         return new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);
     }
 }
