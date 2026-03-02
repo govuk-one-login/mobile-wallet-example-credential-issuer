@@ -1,14 +1,13 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.Setter;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 
 import java.util.Map;
 
 @Getter
-@Setter
 public class DocumentStoreRecord {
     @JsonProperty("itemId")
     private String itemId;
@@ -30,12 +29,14 @@ public class DocumentStoreRecord {
         // Empty constructor required for deserialization
     }
 
+    @JsonCreator
     public DocumentStoreRecord(
-            String itemId,
-            String documentId,
-            Map<String, Object> data,
-            String vcType,
-            long credentialTtlMinutes) {
+            @JsonProperty(value = "itemId", required = true) String itemId,
+            @JsonProperty(value = "documentId", required = true) String documentId,
+            @JsonProperty(value = "data", required = true) Map<String, Object> data,
+            @JsonProperty(value = "vcType", required = true) String vcType,
+            @JsonProperty(value = "credentialTtlMinutes", required = true)
+                    long credentialTtlMinutes) {
         this.itemId = itemId;
         this.documentId = documentId;
         this.data = data;
