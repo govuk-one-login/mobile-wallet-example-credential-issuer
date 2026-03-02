@@ -17,7 +17,7 @@ Parameters:
     Description: >
       The name of the stack that defines the VPC in which this container will run.
     Type: String
-    Default: vpc
+    Default: platform-vpc
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
     Type: String
@@ -30,7 +30,7 @@ Parameters:
   DocumentBuilderStackName:
     Description: The cloudformation stack name of the Document Builder.
     Type: String
-    Default: "wallet-doc-builder"
+    Default: "wallet-doc-builder-fe"
   DocumentSigningCertificateIssuerStackName:
     Type: String
     Description: >
@@ -38,12 +38,11 @@ Parameters:
     Default: "wallet-dsc-issuer"
 
 Conditions:
-  StackNameIsWalletCredIssuerBE: !Equals [!Ref "AWS::StackName", wallet-cred-issuer]
+  StackNameIsWalletCredIssuerBE: !Equals [!Ref "AWS::StackName", wallet-cred-issuer-be]
 
-  IsBuildOrStagingOrInt: !Or
+  IsBuildOrStaging: !Or
     - !Equals [!Ref Environment, build]
     - !Equals [!Ref Environment, staging]
-    - !Equals [ !Ref Environment, integration ]
 
   UsePermissionsBoundary:
     Fn::Not:
@@ -54,51 +53,43 @@ Conditions:
 Mappings:
   EnvironmentVariables:
     dev:
-      SelfUrl: "example-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-      CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-      AuthServerUrl: "stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
+      SelfUrl: "example-credential-issuer.mobile.dev.account.gov.uk"
+      CredentialStoreUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
+      AuthServerUrl: "stub-credential-issuer.mobile.dev.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.dev.account.gov.uk/wallet"
-      CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:219494607463:repository/cred-issuer-image-repo-containerrepository-7qtvqf9sk6lf
-      CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
-      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
-      StatusListUrl: "status-list-mock.wallet-onboarding.dev.account.gov.uk"
+      BackImageRepository: arn:aws:ecr:eu-west-2:671524980203:repository/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli
+      CertificatesBucketName: "wallet-dsc-issuer-671524980203-certificates"
+      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:671524980203:key/72b0ed1b-9fa6-43ae-ba8f-14693868ce72
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:671524980203:certificate-authority/dc8de818-634f-4d96-b3ba-fb865cd3776f
+      StatusListUrl: "status-list-mock.mobile.dev.account.gov.uk"
     build:
-      SelfUrl: "example-credential-issuer.wallet-onboarding.build.account.gov.uk"
-      CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.build.account.gov.uk"
-      AuthServerUrl: "stub-credential-issuer.wallet-onboarding.build.account.gov.uk"
+      SelfUrl: "example-credential-issuer.mobile.build.account.gov.uk"
+      CredentialStoreUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
+      AuthServerUrl: "stub-credential-issuer.mobile.build.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.build.account.gov.uk/wallet"
-      CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/cred-issuer-image-repo-containerrepository-g8ydsvmkc2et
-      CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
-      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
-      StatusListUrl: "status-list-mock.wallet-onboarding.build.account.gov.uk"
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+      CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
+      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
+      StatusListUrl: "status-list-mock.mobile.build.account.gov.uk"
     staging:
-      SelfUrl: "example-credential-issuer.wallet-onboarding.staging.account.gov.uk"
-      CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.staging.account.gov.uk"
+      SelfUrl: "example-credential-issuer.mobile.staging.account.gov.uk"
+      CredentialStoreUrl: "stub-credential-issuer.mobile.staging.account.gov.uk"
       AuthServerUrl: "token.staging.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.staging.account.gov.uk/wallet"
-      CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/cred-issuer-image-repo-containerrepository-g8ydsvmkc2et
-      CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
-      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
+      BackImageRepository: arn:aws:ecr:eu-west-2:497065468681:repository/wallet-cred-issuer-be-ecr-containerrepository-ikbt4gtnl9ew
+      CertificatesBucketName: "wallet-dsc-issuer-497065468681-certificates"
+      DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:497065468681:key/125a9328-f653-4f8a-bf0b-ad53acbfdf78
+      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:497065468681:certificate-authority/f030bd98-ec3d-4ce9-8adf-4106a7028731
       StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
-    integration:
-      SelfUrl: "example-credential-issuer.wallet-onboarding.integration.account.gov.uk"
-      CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.integration.account.gov.uk"
-      AuthServerUrl: "mock-sts.wallet-onboarding.integration.account.gov.uk"
-      WalletAppDeepLinkUrl: "mobile.integration.account.gov.uk/wallet"
-      CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/cred-issuer-image-repo-containerrepository-g8ydsvmkc2et
-      CertificatesBucketName: "wallet-dsc-issuer-228170791542-certificates"
-      DocumentSigningKey1Arn: "arn:aws:kms:eu-west-2:228170791542:key/PLACEHOLDER"
-      CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:228170791542:certificate-authority/PLACEHOLDER
-      StatusListUrl: "status-list-mock.wallet-onboarding.integration.account.gov.uk"
   ElasticLoadBalancerAccountIds:
     eu-west-2:
       AccountId: 652711504416
 
 Resources:
+
   # SECURITY GROUPS
+
   WalletBELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -148,6 +139,7 @@ Resources:
       SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSG.GroupId
 
   # ACCESS LOGS
+
   WalletBEAPIGWAccessLogsGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -160,14 +152,13 @@ Resources:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Back-ECS
       RetentionInDays: 14
 
-# Commenting out WalletBEECSAccessLogsGroupSubscriptionFilter as onboarding to CSLS/Splunk is blocked for now
-#  WalletBEECSAccessLogsGroupSubscriptionFilter:
-#    Type: AWS::Logs::SubscriptionFilter
-#    Condition: IsBuildOrStagingOrInt
-#    Properties:
-#      DestinationArn: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython-2
-#      FilterPattern: ""
-#      LogGroupName: !Ref WalletBEECSAccessLogsGroup
+  WalletBEECSAccessLogsGroupSubscriptionFilter:
+    Type: AWS::Logs::SubscriptionFilter
+    Condition: IsBuildOrStaging
+    Properties:
+      DestinationArn: arn:aws:logs:eu-west-2:885513274347:destination:csls_cw_logs_destination_prodpython-2
+      FilterPattern: ""
+      LogGroupName: !Ref WalletBEECSAccessLogsGroup
 
   WalletBEAccessLogsBucket:
     Type: AWS::S3::Bucket
@@ -212,7 +203,8 @@ Resources:
               Bool:
                 "aws:SecureTransport": false
 
-  # LOAD BALANCER
+  # LOADBALANCER RESOURCES
+
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
@@ -232,7 +224,7 @@ Resources:
         - Key: access_logs.s3.prefix
           Value: !Sub wallet-stub-back-${Environment}
         - Key: idle_timeout.timeout_seconds
-          Value: 60
+          Value: 60 # N.B, this is 1 second less than the nodeJS app is configured in server.ts
 
   WalletBELoadBalancerListenerTargetGroupECS:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
@@ -264,7 +256,8 @@ Resources:
       Port: 80
       Protocol: HTTP
 
-  # API GATEWAY
+  # APIGW RESOURCES
+
   WalletBEApiGwHttpEndpoint:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
@@ -344,7 +337,8 @@ Resources:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       Stage: !Ref WalletBEAPIStageDefault
 
-  # ECS
+  # ECS RESOURCES
+
   WalletBECluster:
     Type: 'AWS::ECS::Cluster'
     Properties:
@@ -398,12 +392,16 @@ Resources:
         - Key: Environment
           Value: !Sub "${Environment}"
 
+  #  The ECR container for overriding in development, if you want to target a specific version/tag
+  #  for development use, change the value of the 'Image' property value to:
+  #  "671524980203.dkr.ecr.eu-west-2.amazonaws.com/wallet-cred-issuer-be-ecr-containerrepository-ta87rf6hloli:<image_tag>"
+  #  To deploy the latest version of the image, use the git sha from the most recent commit, as the <image tag>, found using ‘git log’
+
   WalletBEECSServiceTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
       ContainerDefinitions:
         - Essential: true
-          # Image is replaced by ./build-and-deploy-image.sh (manual dev deployment) or GitHub Actions (pipeline deployments).
           Image: CONTAINER-IMAGE-PLACEHOLDER
           Name: app
           Environment:
@@ -499,7 +497,7 @@ Resources:
                   - "ecr:GetDownloadUrlForLayer"
                   - "ecr:BatchCheckLayerAvailability"
                 Resource:
-                  - !FindInMap [EnvironmentVariables, !Ref Environment, CredentialIssuerImageRepository]
+                  - !FindInMap [EnvironmentVariables, !Ref Environment, BackImageRepository]
               - Effect: Allow
                 Action:
                   - "ecr:GetAuthorizationToken"
@@ -575,7 +573,8 @@ Resources:
         - !Ref PermissionsBoundary
         - !Ref AWS::NoValue
 
-  # KMS
+  # KMS RESOURCES
+
   CredentialIssuerSigningKey:
     Type: AWS::KMS::Key
     Properties:
@@ -629,10 +628,11 @@ Resources:
   CRIDatabaseKmsKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub "alias/database-encryption-key-${AWS::StackName}"
+      AliasName: !Sub "alias/${AWS::StackName}/${Environment}/CRIDatabaseKmsKey"
       TargetKeyId: !Ref CRIDatabaseKmsKey
 
-  # DYNAMODB
+  # DYNAMODB RESOURCES
+
   CredentialOfferTable:
     Type: AWS::DynamoDB::Table
     DeletionPolicy: Delete
@@ -707,8 +707,9 @@ Resources:
           Value: !Ref "Environment"
 
   # ALARMS
+
   ExampleCredIssuerLowContainerTaskCountAlarm:
-    Condition: IsBuildOrStagingOrInt
+    Condition: IsBuildOrStaging
     DependsOn:
       - WalletBECluster
       - WalletBEECSService
@@ -717,6 +718,10 @@ Resources:
       AlarmName: !Sub "${AWS::StackName}-EgCredIssuerLowContainerTaskCountAlarm"
       AlarmDescription: Trigger a warning if the running container task count drops below 1
       ActionsEnabled: false
+      # OKActions: - commented until we create sns topics for wallet alarms
+      #   - !ImportValue platform-alarm-topic-critical-alert
+      # AlarmActions:
+      #   - !ImportValue platform-alarm-topic-critical-alert
       InsufficientDataActions: []
       Dimensions: []
       EvaluationPeriods: 1
@@ -740,12 +745,16 @@ Resources:
             Stat: Minimum
 
   FE4XXErrorAlarm:
-    Condition: IsBuildOrStagingOrInt
+    Condition: IsBuildOrStaging
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub "${AWS::StackName}-FE4XXErrorAlarm"
       AlarmDescription: Trigger the alarm if errorThreshold exceeds 50% with a minimum of 5 invocations in the last 30 minutes
       ActionsEnabled: false
+      # OKActions:
+      #   - !ImportValue platform-alarm-topic-slack-warning-alert
+      # AlarmActions:
+      #   - !ImportValue platform-alarm-topic-slack-warning-alert
       InsufficientDataActions: []
       Dimensions: []
       EvaluationPeriods: 1
