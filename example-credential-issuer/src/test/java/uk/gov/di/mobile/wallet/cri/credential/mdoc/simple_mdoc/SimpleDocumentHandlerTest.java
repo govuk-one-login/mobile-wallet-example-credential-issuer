@@ -44,7 +44,7 @@ class SimpleDocumentHandlerTest {
             new StatusListClient.StatusListInformation(
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final String EXPECTED_CREDENTIAL = "signed-mdoc-credential-string";
-    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final long CREDENTIAL_TTL_SECONDS = 43200L;
 
     @BeforeEach
     void setUp() {
@@ -56,7 +56,7 @@ class SimpleDocumentHandlerTest {
             throws SigningException, ObjectStoreException, CertificateException {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
-        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
+        when(mockDocument.getCredentialTtlSeconds()).thenReturn(CREDENTIAL_TTL_SECONDS);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         when(mdocBuilder.buildCredential(
                         any(SimpleDocument.class),
@@ -82,7 +82,7 @@ class SimpleDocumentHandlerTest {
                         mockSimpleDocument,
                         ecPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES);
+                        CREDENTIAL_TTL_SECONDS);
     }
 
     @Test
@@ -113,7 +113,7 @@ class SimpleDocumentHandlerTest {
             throws SigningException, ObjectStoreException, CertificateException {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
-        when(mockDocument.getCredentialTtlMinutes()).thenReturn(CREDENTIAL_TTL_MINUTES);
+        when(mockDocument.getCredentialTtlSeconds()).thenReturn(CREDENTIAL_TTL_SECONDS);
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());

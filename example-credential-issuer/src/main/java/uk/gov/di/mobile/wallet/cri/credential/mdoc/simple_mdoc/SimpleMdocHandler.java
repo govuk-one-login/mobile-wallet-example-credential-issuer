@@ -33,6 +33,6 @@ public class SimpleMdocHandler implements CredentialHandler {
                 document,
                 proofData.publicKey(),
                 statusListInformation.orElseThrow(),
-                documentStoreRecord.getCredentialTtlMinutes());
+                documentStoreRecord.getCredentialTtlSeconds());
     }
 }

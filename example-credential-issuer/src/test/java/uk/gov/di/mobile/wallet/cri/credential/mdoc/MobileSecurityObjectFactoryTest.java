@@ -31,7 +31,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MobileSecurityObjectFactoryTest {
 
-    private static final long CREDENTIAL_TTL_MINUTES = 43200L;
+    private static final long CREDENTIAL_TTL_SECONDS = 43200L;
     private static final String DIGEST_ALGORITHM = "SHA-256";
     private static final Set<String> NAMESPACE_NAMES =
             new HashSet<>(Arrays.asList("testNamespaceName1", "testNamespaceName2"));
@@ -62,7 +62,7 @@ class MobileSecurityObjectFactoryTest {
         when(valueDigestsFactory.createFromNamespaces(namespaces)).thenReturn(valueDigests);
         when(valueDigestsFactory.getDigestAlgorithm()).thenReturn(DIGEST_ALGORITHM);
         ValidityInfo validityInfo = getTestValidityInfo();
-        when(validityInfoFactory.build(CREDENTIAL_TTL_MINUTES)).thenReturn(validityInfo);
+        when(validityInfoFactory.build(CREDENTIAL_TTL_SECONDS)).thenReturn(validityInfo);
         COSEKey coseKey = getTestCoseKey();
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(coseKey);
 
@@ -71,7 +71,7 @@ class MobileSecurityObjectFactoryTest {
                         namespaces,
                         publicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_MINUTES,
+                        CREDENTIAL_TTL_SECONDS,
                         DOC_TYPE);
 
         assertAll(
@@ -100,7 +100,7 @@ class MobileSecurityObjectFactoryTest {
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
         factory.build(
-                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_MINUTES, DOC_TYPE);
+                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_SECONDS, DOC_TYPE);
 
         verify(valueDigestsFactory).createFromNamespaces(namespaces);
     }
@@ -128,7 +128,7 @@ class MobileSecurityObjectFactoryTest {
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
         factory.build(
-                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_MINUTES, DOC_TYPE);
+                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_SECONDS, DOC_TYPE);
 
         verify(coseKeyFactory).fromECPublicKey(publicKey);
     }

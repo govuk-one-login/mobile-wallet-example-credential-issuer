@@ -37,6 +37,6 @@ public class SocialSecurityCredentialHandler implements CredentialHandler {
                         document, proofData.didKey());
 
         return credentialBuilder.buildCredential(
-                subject, SOCIAL_SECURITY_CREDENTIAL, documentStoreRecord.getCredentialTtlMinutes());
+                subject, SOCIAL_SECURITY_CREDENTIAL, documentStoreRecord.getCredentialTtlSeconds());
     }
 }
