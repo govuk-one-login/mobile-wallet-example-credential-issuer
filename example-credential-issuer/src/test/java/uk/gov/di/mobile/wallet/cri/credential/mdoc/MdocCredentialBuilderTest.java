@@ -60,7 +60,7 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                CREDENTIAL_TTL_SECONDS,
+                        CREDENTIAL_TTL_SECONDS,
                         DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
@@ -125,7 +125,7 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                CREDENTIAL_TTL_SECONDS,
+                        CREDENTIAL_TTL_SECONDS,
                         DOC_TYPE))
                 .thenThrow(expectedException);
 
@@ -159,7 +159,7 @@ class MdocCredentialBuilderTest {
                         namespaces,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                CREDENTIAL_TTL_SECONDS,
+                        CREDENTIAL_TTL_SECONDS,
                         DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
