@@ -1,7 +1,7 @@
 [
   {
     "itemId": "24f79283-7aae-43d8-9ed9-58f28c05ce63",
-    "credentialTtlMinutes": 43200,
+    "credentialTtlSeconds": 2592000,
     "vcType": "DigitalVeteranCard",
     "documentId": "25057386",
     "data": {
@@ -21,7 +21,7 @@
   },
   {
     "itemId": "03266ff7-2cbc-4e26-874d-5a80eb6daf7d",
-    "credentialTtlMinutes": 43200,
+    "credentialTtlSeconds": 2592000,
     "vcType": "org.iso.18013.5.1.mDL",
     "documentId": "EDWAR711042SE5RO",
     "data": {
