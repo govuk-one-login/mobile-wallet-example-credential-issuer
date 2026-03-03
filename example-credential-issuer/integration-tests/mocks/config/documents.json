@@ -1,7 +1,6 @@
 [
   {
     "itemId": "24f79283-7aae-43d8-9ed9-58f28c05ce63",
-    "credentialTtlSeconds": 2592000,
     "vcType": "DigitalVeteranCard",
     "documentId": "25057386",
     "data": {
