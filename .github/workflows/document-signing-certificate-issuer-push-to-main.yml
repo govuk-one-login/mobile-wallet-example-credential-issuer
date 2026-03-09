@@ -59,6 +59,7 @@ jobs:
     name: Deploy
     runs-on: ubuntu-24.04
     timeout-minutes: 60
+    needs: run-code-analysis
     permissions:
       id-token: write
       contents: read
@@ -111,7 +112,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
-    needs: [ deploy ]
+    needs: deploy
     steps:
       - name: Check out repository code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
