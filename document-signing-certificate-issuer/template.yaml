@@ -279,19 +279,19 @@ Resources:
               AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
             Action: 'kms:*'
             Resource: '*'
-          - Sid: AllowWalletBEECSTaskRoleToSign
-            Effect: Allow
-            Principal:
-              AWS:
-                - arn:aws:iam::219494607463:role/wallet-cred-issuer-WalletBEECSTaskRole-O010722dkNCi # role deployed in dev
-                - arn:aws:iam::804878519326:role/wallet-cred-issuer-WalletBEECSTaskRole-HvjrqZ6Gz3YJ # role deployed in staging
-            Action:
-              - 'kms:Sign'
-              - 'kms:DescribeKey'
-            Resource: '*'
-            Condition:
-              Bool:
-                IsBuild: true
+          - !If
+            - IsBuild
+            - Sid: AllowWalletBEECSTaskRoleToSign
+              Effect: Allow
+              Principal:
+                AWS:
+                  - arn:aws:iam::219494607463:role/wallet-cred-issuer-WalletBEECSTaskRole-O010722dkNCi # role deployed in dev
+                  - arn:aws:iam::804878519326:role/wallet-cred-issuer-WalletBEECSTaskRole-HvjrqZ6Gz3YJ # role deployed in staging
+              Action:
+                - 'kms:Sign'
+                - 'kms:DescribeKey'
+              Resource: '*'
+            - !Ref "AWS::NoValue"
 
   DocumentSigningKeyAlias1:
     Type: AWS::KMS::Alias
