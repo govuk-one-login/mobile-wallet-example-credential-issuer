@@ -41,8 +41,7 @@ Conditions:
       - !Ref CodeSigningConfigArn
       - none
 
-  IsBuild:
-    - !Equals [!Ref Environment, build]
+  IsBuild: !Equals [!Ref Environment, build]
 
 Mappings:
   EnvironmentVariables:
@@ -248,13 +247,13 @@ Resources:
 
   DocSigningCertificateBucketPolicy:
     Type: 'AWS::S3::BucketPolicy'
+    Condition: IsBuild
     Properties:
       Bucket: !Ref DocSigningCertificateBucket
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Sid: AllowWalletBEECSTaskRoleToGetObject
-            Condition: IsBuild
             Effect: Allow
             Principal:
               AWS:
@@ -281,7 +280,6 @@ Resources:
             Action: 'kms:*'
             Resource: '*'
           - Sid: AllowWalletBEECSTaskRoleToSign
-            Condition: IsBuild
             Effect: Allow
             Principal:
               AWS:
@@ -291,6 +289,9 @@ Resources:
               - 'kms:Sign'
               - 'kms:DescribeKey'
             Resource: '*'
+            Condition:
+              Bool:
+                IsBuild: true
 
   DocumentSigningKeyAlias1:
     Type: AWS::KMS::Alias
