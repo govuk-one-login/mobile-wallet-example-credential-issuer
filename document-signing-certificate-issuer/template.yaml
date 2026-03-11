@@ -291,7 +291,7 @@ Resources:
                 - 'kms:Sign'
                 - 'kms:DescribeKey'
               Resource: '*'
-            - !Ref "AWS::NoValue"
+            - !Ref 'AWS::NoValue'
 
   DocumentSigningKeyAlias1:
     Type: AWS::KMS::Alias
