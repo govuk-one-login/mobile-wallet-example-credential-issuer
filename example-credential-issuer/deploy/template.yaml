@@ -264,6 +264,8 @@ Resources:
       LoadBalancerArn: !Ref WalletBELoadBalancer
       Port: 80
       Protocol: HTTPS
+      Certificates: 
+        - CertificateArn: "arn:aws:acm:eu-west-2:219494607463:certificate/4d435f13-b65d-48f9-80bd-7b52ba241e15"
 
   # API GATEWAY
   WalletBEApiGwHttpEndpoint:
