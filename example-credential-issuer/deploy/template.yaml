@@ -215,6 +215,7 @@ Resources:
   # LOAD BALANCER
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    DeletionPolicy: Retain
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -262,7 +263,7 @@ Resources:
           Type: forward
       LoadBalancerArn: !Ref WalletBELoadBalancer
       Port: 80
-      Protocol: HTTP
+      Protocol: HTTPS
 
   # API GATEWAY
   WalletBEApiGwHttpEndpoint:
