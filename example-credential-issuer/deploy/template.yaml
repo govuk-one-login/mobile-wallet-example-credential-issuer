@@ -111,7 +111,7 @@ Resources:
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
           Description: Allow from anyone on port 80
-          FromPort: 80
+          FromPort: 443
           IpProtocol: tcp
           ToPort: 80
       VpcId:
@@ -267,7 +267,7 @@ Resources:
         - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
           Type: forward
       LoadBalancerArn: !Ref WalletBELoadBalancer
-      Port: 80
+      Port: 443
       Protocol: HTTPS
       Certificates: 
         - CertificateArn: !FindInMap [EnvironmentVariables, !Ref Environment, SSLCertificateArn]
