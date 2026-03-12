@@ -63,6 +63,7 @@ Mappings:
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
       StatusListUrl: "status-list-mock.wallet-onboarding.dev.account.gov.uk"
+      SSLCertificateArn: "arn:aws:acm:eu-west-2:219494607463:certificate/4d435f13-b65d-48f9-80bd-7b52ba241e15"
     build:
       SelfUrl: "example-credential-issuer.wallet-onboarding.build.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.build.account.gov.uk"
@@ -73,6 +74,7 @@ Mappings:
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
       StatusListUrl: "status-list-mock.wallet-onboarding.build.account.gov.uk"
+      SSLCertificateArn: "arn:aws:acm:eu-west-2:899032468188:certificate/b6695276-178f-458e-b138-7cf03b5ba9ad"
     staging:
       SelfUrl: "example-credential-issuer.wallet-onboarding.staging.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.staging.account.gov.uk"
@@ -83,6 +85,7 @@ Mappings:
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
       StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
+      SSLCertificateArn: "arn:aws:acm:eu-west-2:804878519326:certificate/3b4f7876-e857-4966-aa7f-69ed8c4e0d98"
     integration:
       SelfUrl: "example-credential-issuer.wallet-onboarding.integration.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.integration.account.gov.uk"
@@ -93,6 +96,7 @@ Mappings:
       DocumentSigningKey1Arn: "arn:aws:kms:eu-west-2:228170791542:key/PLACEHOLDER"
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:228170791542:certificate-authority/PLACEHOLDER
       StatusListUrl: "status-list-mock.wallet-onboarding.integration.account.gov.uk"
+      SSLCertificateArn: "arn:aws:acm:eu-west-2:228170791542:certificate/6300e19a-d8a4-4f2e-965d-a97bd495245b"
   ElasticLoadBalancerAccountIds:
     eu-west-2:
       AccountId: 652711504416
@@ -216,6 +220,7 @@ Resources:
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -265,7 +270,7 @@ Resources:
       Port: 80
       Protocol: HTTPS
       Certificates: 
-        - CertificateArn: "arn:aws:acm:eu-west-2:219494607463:certificate/4d435f13-b65d-48f9-80bd-7b52ba241e15"
+        - CertificateArn: !FindInMap [EnvironmentVariables, !Ref Environment, SSLCertificateArn]
 
   # API GATEWAY
   WalletBEApiGwHttpEndpoint:
