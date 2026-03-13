@@ -249,8 +249,8 @@ Resources:
       HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-499
-      Port: 443
-      Protocol: HTTPS
+      Port: 80
+      Protocol: HTTP
       TargetType: ip
       VpcId:
         Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
