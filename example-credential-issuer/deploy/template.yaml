@@ -215,6 +215,8 @@ Resources:
   # LOAD BALANCER
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -233,6 +235,8 @@ Resources:
           Value: !Sub wallet-stub-back-${Environment}
         - Key: idle_timeout.timeout_seconds
           Value: 60
+        - Key: deletion_protection.enabled
+          Value: true
 
   WalletBELoadBalancerListenerTargetGroupECS:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
