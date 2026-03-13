@@ -106,10 +106,10 @@ Resources:
         Wallet Stub BE LoadBalancer Security Group
       SecurityGroupIngress:
         - CidrIp: 0.0.0.0/0
-          Description: Allow from anyone on port 80
-          FromPort: 80
+          Description: Allow from anyone on port 443
+          FromPort: 443
           IpProtocol: tcp
-          ToPort: 80
+          ToPort: 443
       VpcId:
         Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
@@ -249,8 +249,8 @@ Resources:
       HealthyThresholdCount: 2
       Matcher:
         HttpCode: 200-499
-      Port: 80
-      Protocol: HTTP
+      Port: 443
+      Protocol: HTTPS
       TargetType: ip
       VpcId:
         Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
@@ -265,8 +265,11 @@ Resources:
         - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
           Type: forward
       LoadBalancerArn: !Ref WalletBELoadBalancer
-      Port: 80
-      Protocol: HTTP
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
 
   # API GATEWAY
   WalletBEApiGwHttpEndpoint:
@@ -289,6 +292,9 @@ Resources:
       PayloadFormatVersion: '1.0'
       RequestParameters:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletBECustomDomain
+
 
   WalletBEAPIGWRoute:
     Type: 'AWS::ApiGatewayV2::Route'
