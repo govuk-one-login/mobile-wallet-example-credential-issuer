@@ -295,7 +295,6 @@ Resources:
       TlsConfig:
         ServerNameToVerify: !Ref WalletBECustomDomain
 
-
   WalletBEAPIGWRoute:
     Type: 'AWS::ApiGatewayV2::Route'
     Properties:
