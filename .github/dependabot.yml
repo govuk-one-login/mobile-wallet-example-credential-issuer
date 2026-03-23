@@ -46,7 +46,7 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "npm"
-    directories: "/document-signing-certificate-issuer"
+    directory: "/document-signing-certificate-issuer"
     schedule:
       interval: "weekly"
       day: "monday"
