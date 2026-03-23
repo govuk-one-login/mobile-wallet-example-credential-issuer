@@ -1,7 +1,21 @@
 version: 2
 updates:
-  - package-ecosystem: "gradle"
+  - package-ecosystem: "github-actions"
     directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      github-actions-updates:
+        patterns:
+          - "*"
+  - package-ecosystem: "gradle"
+    directory: "/example-credential-issuer"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -18,7 +32,7 @@ updates:
           - "minor"
           - "patch"
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/example-credential-issuer"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -31,23 +45,8 @@ updates:
       docker-updates:
         patterns:
           - "*"
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
-    labels:
-      - dependencies
-    commit-message:
-      prefix: chore
-    groups:
-      github-actions-updates:
-        patterns:
-          - "*"
   - package-ecosystem: "npm"
-    directories:
-      - /doc-signing-cert
+    directories: "/document-signing-certificate-issuer"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -59,7 +58,7 @@ updates:
     open-pull-requests-limit: 5
     versioning-strategy: increase
     groups:
-      nam-updates:
+      npm-updates:
         patterns:
           - "*"
         update-types:
