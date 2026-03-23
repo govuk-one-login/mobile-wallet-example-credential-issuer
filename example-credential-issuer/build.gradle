@@ -10,7 +10,7 @@ defaultTasks "clean", "spotlessApply", "build"
 
 repositories {
 	maven {
-		url "https://gds.jfrog.io/artifactory/di-allowed-repos"
+		url = "https://gds.jfrog.io/artifactory/di-allowed-repos"
 	}
 }
 
@@ -72,7 +72,7 @@ jar {
 		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 	}
 
-	duplicatesStrategy(DuplicatesStrategy.EXCLUDE)
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 run {
@@ -120,7 +120,7 @@ jacocoTestReport {
 
 tasks.withType(Test).configureEach {
 	testLogging {
-		exceptionFormat "full"
+		exceptionFormat = "full"
 		events "skipped", "passed", "failed"
 	}
 
