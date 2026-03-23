@@ -13,6 +13,7 @@ Parameters:
       - "dev"
       - "build"
       - "staging"
+      - "integration"
   VpcStackName:
     Description: >
       The name of the stack that defines the VPC in which this container will run.
