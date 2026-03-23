@@ -11,23 +11,23 @@
   },
   "description": "",
   "dependencies": {
-    "@aws-lambda-powertools/logger": "^2.16.0",
-    "@aws-sdk/client-acm-pca": "^3.981.0",
-    "@aws-sdk/client-kms": "^3.981.0",
-    "@aws-sdk/client-s3": "^3.981.0",
-    "@aws-sdk/client-ssm": "^3.981.0",
-    "@peculiar/asn1-csr": "^2.3.15",
+    "@aws-lambda-powertools/logger": "^2.32.0",
+    "@aws-sdk/client-acm-pca": "^3.1014.0",
+    "@aws-sdk/client-kms": "^3.1014.0",
+    "@aws-sdk/client-s3": "^3.1014.0",
+    "@aws-sdk/client-ssm": "^3.1014.0",
+    "@peculiar/asn1-csr": "^2.6.1",
     "@peculiar/asn1-schema": "^2.3.15",
     "@peculiar/asn1-x509": "^2.3.15",
-    "@peculiar/x509": "^1.12.3",
-    "esbuild": "^0.25.1"
+    "@peculiar/x509": "^1.14.3",
+    "esbuild": "^0.27.4"
   },
   "engines": {
     "node": ">=22.0.0 <23.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
-    "@types/aws-lambda": "^8.10.109",
+    "@types/aws-lambda": "^8.10.161",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.13.10",
     "aws-sdk-client-mock": "^4.1.0",
@@ -35,11 +35,11 @@
     "eslint": "^9.33.0",
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
-    "prettier": "^3.5.3",
-    "ts-jest": "^29.2.6",
+    "prettier": "^3.8.1",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.1",
-    "typescript": "^5.8.2",
-    "typescript-eslint": "^8.26.1"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.57.1"
   },
   "type": "module",
   "overrides": {
