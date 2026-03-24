@@ -104,9 +104,7 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(mockProof));
 
-        assertEquals(
-                "JWT aud claim has value [invalid-audience], must be [https://issuer-url.gov.uk]",
-                exception.getMessage());
+        assertEquals("JWT aud claim value rejected", exception.getMessage());
     }
 
     @Test
@@ -118,9 +116,7 @@ class ProofJwtServiceTest {
                         ProofJwtValidationException.class,
                         () -> proofJwtService.verifyProofJwt(mockProof));
 
-        assertEquals(
-                "JWT iss claim has value invalid-issuer, must be urn:fdc:gov:uk:wallet",
-                exception.getMessage());
+        assertEquals("JWT iss claim value rejected", exception.getMessage());
     }
 
     @Test

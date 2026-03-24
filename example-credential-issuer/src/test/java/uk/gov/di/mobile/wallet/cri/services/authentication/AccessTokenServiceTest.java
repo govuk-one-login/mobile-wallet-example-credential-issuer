@@ -151,9 +151,7 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals(
-                "JWT aud claim has value [invalid-audience], must be [https://issuer-url.gov.uk]",
-                exception.getMessage());
+        assertEquals("JWT aud claim value rejected", exception.getMessage());
     }
 
     @Test
@@ -165,9 +163,7 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals(
-                "JWT iss claim has value invalid-issuer, must be https://auth-url.gov.uk",
-                exception.getMessage());
+        assertEquals("JWT iss claim value rejected", exception.getMessage());
     }
 
     @Test
