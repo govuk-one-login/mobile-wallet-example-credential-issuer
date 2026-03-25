@@ -22,9 +22,6 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 
-// Temporary comment to trigger deployment after updating SSM parameter
-// (/wallet-cred-issuer/Config/StatusList/Client/Id)
-
 /**
  * Main application class for the Example CRI.
  *
