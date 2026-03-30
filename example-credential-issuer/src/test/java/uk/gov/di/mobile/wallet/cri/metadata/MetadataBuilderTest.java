@@ -5,8 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -25,7 +25,7 @@ class MetadataBuilderTest {
     void Should_ReturnMetadata() throws IOException {
         String issuer = "https://test-credential-issuer.gov.uk";
         String credential = issuer + "/credential";
-        String auth = "https://test-authorization-server.gov.uk/auth-server";
+        List<String> auth = List.of("https://test-authorization-server.gov.uk/auth-server");
         String notification = issuer + "/notification";
         String iacas = issuer + "/iacas";
 
@@ -42,7 +42,7 @@ class MetadataBuilderTest {
                         .build();
 
         assertEquals(issuer, metadata.credentialIssuer);
-        assertArrayEquals(new String[] {auth}, metadata.authorizationServers);
+        assertEquals(auth, metadata.authorizationServers);
         assertEquals(credential, metadata.credentialEndpoint);
         assertEquals(notification, metadata.notificationEndpoint);
         assertEquals(iacas, metadata.iacasEndpoint);

@@ -9,14 +9,14 @@ public class Metadata {
 
     public Metadata(
             String credentialIssuer,
-            String authorizationServers,
+            List<String> authorizationServers,
             String credentialEndpoint,
             String notificationEndpoint,
             String iacasEndpoint,
             Map<String, Object> credentialConfigurationsSupported,
             List<Map<String, Object>> display) {
         this.credentialIssuer = credentialIssuer;
-        this.authorizationServers = new String[] {authorizationServers};
+        this.authorizationServers = authorizationServers;
         this.credentialEndpoint = credentialEndpoint;
         this.iacasEndpoint = iacasEndpoint;
         this.notificationEndpoint = notificationEndpoint;
@@ -25,7 +25,7 @@ public class Metadata {
     }
 
     String credentialIssuer;
-    String[] authorizationServers;
+    List<String> authorizationServers;
     String credentialEndpoint;
     String notificationEndpoint;
     String iacasEndpoint;
@@ -38,7 +38,7 @@ public class Metadata {
     }
 
     @JsonProperty("authorization_servers")
-    public String[] getAuthorizationServers() {
+    public List<String> getAuthorizationServers() {
         return authorizationServers;
     }
 

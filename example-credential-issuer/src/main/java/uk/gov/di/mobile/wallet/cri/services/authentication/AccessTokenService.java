@@ -21,6 +21,8 @@ import javax.management.InvalidAttributeValueException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
 
 /** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
@@ -72,7 +74,13 @@ public class AccessTokenService {
             throws AccessTokenValidationException {
         verifyTokenHeader(accessToken);
         verifyTokenClaims(accessToken);
-        if (!verifyTokenSignature(accessToken)) {
+
+        String environment = configurationService.getEnvironment();
+        boolean skipSignatureVerification =
+                Objects.equals(environment, "dev")
+                        || Objects.equals(environment, "build")
+                        || Objects.equals(environment, "integration");
+        if (!skipSignatureVerification && !verifyTokenSignature(accessToken)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
         return extractAccessTokenData(accessToken);
@@ -116,14 +124,9 @@ public class AccessTokenService {
      */
     private void verifyTokenClaims(SignedJWT accessToken) throws AccessTokenValidationException {
         try {
-
-            String expectedIssuer = configurationService.getOneLoginAuthServerUrl();
             String expectedAudience = configurationService.getSelfUrl().toString();
             JWTClaimsSet expectedClaimValues =
-                    new JWTClaimsSet.Builder()
-                            .issuer(expectedIssuer)
-                            .audience(expectedAudience)
-                            .build();
+                    new JWTClaimsSet.Builder().audience(expectedAudience).build();
             HashSet<String> requiredClaims =
                     new HashSet<>(
                             Arrays.asList(
@@ -137,6 +140,12 @@ public class AccessTokenService {
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
 
             verifier.verify(jwtClaimsSet, null);
+
+            List<String> expectedIssuers = configurationService.getOneLoginAuthServerUrls();
+            if (!expectedIssuers.contains(jwtClaimsSet.getIssuer())) {
+                throw new BadJWTException(
+                        "Access token issuer not in expected issuers: " + jwtClaimsSet.getIssuer());
+            }
 
             if (jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).isEmpty()) {
                 throw new InvalidAttributeValueException("Empty credential_identifiers claim");
