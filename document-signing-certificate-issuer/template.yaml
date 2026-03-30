@@ -257,7 +257,7 @@ Resources:
             Effect: Allow
             Principal:
               AWS:
-                - arn:aws:iam::219494607463:role/wallet-cred-issuer-WalletBEECSTaskRole-O010722dkNCi # role deployed in dev
+                - arn:aws:iam::219494607463:role/wallet-cred-issuer-WalletBEECSTaskRole-m5E12bUcRtWE # role deployed in dev
                 - arn:aws:iam::804878519326:role/wallet-cred-issuer-WalletBEECSTaskRole-HvjrqZ6Gz3YJ # role deployed in staging
             Action: 's3:GetObject'
             Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
@@ -285,7 +285,7 @@ Resources:
               Effect: Allow
               Principal:
                 AWS:
-                  - arn:aws:iam::219494607463:role/wallet-cred-issuer-WalletBEECSTaskRole-O010722dkNCi # role deployed in dev
+                  - arn:aws:iam::219494607463:role/wallet-cred-issuer-WalletBEECSTaskRole-m5E12bUcRtWE # role deployed in dev
                   - arn:aws:iam::804878519326:role/wallet-cred-issuer-WalletBEECSTaskRole-HvjrqZ6Gz3YJ # role deployed in staging
               Action:
                 - 'kms:Sign'
