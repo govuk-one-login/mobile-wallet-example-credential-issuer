@@ -4,6 +4,7 @@
  */
 
 export default {
+  setupFiles: ['reflect-metadata'],
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
