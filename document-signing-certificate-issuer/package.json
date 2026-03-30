@@ -12,15 +12,16 @@
   "description": "",
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.32.0",
-    "@aws-sdk/client-acm-pca": "^3.1014.0",
-    "@aws-sdk/client-kms": "^3.1014.0",
-    "@aws-sdk/client-s3": "^3.1014.0",
-    "@aws-sdk/client-ssm": "^3.1014.0",
+    "@aws-sdk/client-acm-pca": "^3.1019.0",
+    "@aws-sdk/client-kms": "^3.1019.0",
+    "@aws-sdk/client-s3": "^3.1019.0",
+    "@aws-sdk/client-ssm": "^3.1019.0",
     "@peculiar/asn1-csr": "^2.6.1",
     "@peculiar/asn1-schema": "^2.3.15",
     "@peculiar/asn1-x509": "^2.3.15",
-    "@peculiar/x509": "^1.12.3",
-    "esbuild": "^0.27.4"
+    "@peculiar/x509": "^2.0.0",
+    "esbuild": "^0.27.4",
+    "reflect-metadata": "^0.2.2"
   },
   "engines": {
     "node": ">=22.0.0 <23.0.0"
@@ -39,7 +40,7 @@
     "ts-jest": "^29.4.6",
     "ts-node": "^10.9.1",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.57.1"
+    "typescript-eslint": "^8.57.2"
   },
   "type": "module",
   "overrides": {
