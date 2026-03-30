@@ -13,7 +13,7 @@ repositories {
 }
 
 ext {
-	awsSdkVersion = "2.42.18"
+	awsSdkVersion = "2.42.23"
 	dropwizardVersion = "5.0.1"
 	jacksonVersion = "2.21.2"
 	lombokVersion = "1.18.44"
@@ -32,7 +32,7 @@ dependencies {
 	implementation "io.dropwizard:dropwizard-core"
 	implementation "io.dropwizard:dropwizard-json-logging"
 
-	implementation "com.nimbusds:oauth2-oidc-sdk:11.34"
+	implementation "com.nimbusds:oauth2-oidc-sdk:11.37"
 	implementation "org.bouncycastle:bcpkix-jdk18on:1.83"
 
 	implementation "org.jetbrains:annotations:26.1.0"
