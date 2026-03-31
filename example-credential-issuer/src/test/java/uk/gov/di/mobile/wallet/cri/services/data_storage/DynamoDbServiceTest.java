@@ -291,6 +291,7 @@ class DynamoDbServiceTest {
     void Should_GetClientForNonLocalEnvironment() {
         ConfigurationService config = mock(ConfigurationService.class);
         when(config.getEnvironment()).thenReturn("dev");
+        when(config.getAwsRegion()).thenReturn("eu-west-2");
 
         DynamoDbEnhancedClient client = DynamoDbService.getClient(config);
 
