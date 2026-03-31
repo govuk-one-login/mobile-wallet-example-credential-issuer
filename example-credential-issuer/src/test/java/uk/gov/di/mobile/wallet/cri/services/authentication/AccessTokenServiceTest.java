@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
@@ -39,10 +41,18 @@ class AccessTokenServiceTest {
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
     private final JwksService jwksService = mock(JwksService.class);
 
+    @Mock private Logger mockLogger;
+
     @BeforeEach
     void setup() throws ParseException, JOSEException {
         ecSigner = new ECDSASigner(getEcKey());
-        accessTokenService = new AccessTokenService(jwksService, configurationService);
+        accessTokenService =
+                new AccessTokenService(jwksService, configurationService) {
+                    @Override
+                    protected Logger getLogger() {
+                        return mockLogger;
+                    }
+                };
         when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
         when(configurationService.getOneLoginAuthServerUrls())
                 .thenReturn(List.of("https://auth-url.gov.uk"));
@@ -243,6 +253,7 @@ class AccessTokenServiceTest {
                 response.walletSubjectId());
         assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
         verify(mockAccessToken).verify(any());
+        verify(mockLogger, never()).warn(any());
     }
 
     @ParameterizedTest
@@ -256,5 +267,6 @@ class AccessTokenServiceTest {
         accessTokenService.verifyAccessToken(mockAccessToken);
 
         verify(mockAccessToken, never()).verify(any());
+        verify(mockLogger).warn("Signature verification skipped for environment: {}", environment);
     }
 }

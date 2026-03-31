@@ -13,6 +13,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
@@ -22,7 +24,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 
 /** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
@@ -38,6 +40,8 @@ public class AccessTokenService {
 
     private static final String REQUIRED_KEY_TYPE = "EC";
     private static final Curve REQUIRED_CURVE = Curve.P_256;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccessTokenService.class);
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
@@ -75,16 +79,20 @@ public class AccessTokenService {
         verifyTokenHeader(accessToken);
         verifyTokenClaims(accessToken);
 
-        String environment = configurationService.getEnvironment();
-        boolean skipSignatureVerification =
-                Objects.equals(environment, "local")
-                        || Objects.equals(environment, "dev")
-                        || Objects.equals(environment, "build")
-                        || Objects.equals(environment, "integration");
-        if (!skipSignatureVerification && !verifyTokenSignature(accessToken)) {
+        if (isSignatureVerificationSkipped()) {
+            getLogger()
+                    .warn(
+                            "Signature verification skipped for environment: {}",
+                            configurationService.getEnvironment());
+        } else if (!verifyTokenSignature(accessToken)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
         return extractAccessTokenData(accessToken);
+    }
+
+    private boolean isSignatureVerificationSkipped() {
+        return Set.of("local", "dev", "build", "integration")
+                .contains(configurationService.getEnvironment());
     }
 
     /**
@@ -217,5 +225,9 @@ public class AccessTokenService {
         } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
+    }
+
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }
