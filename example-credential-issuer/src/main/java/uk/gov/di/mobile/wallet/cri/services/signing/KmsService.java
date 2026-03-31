@@ -17,7 +17,6 @@ import software.amazon.awssdk.services.kms.model.GetPublicKeyResponse;
 import software.amazon.awssdk.services.kms.model.NotFoundException;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
-import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
@@ -35,29 +34,26 @@ public class KmsService implements KeyProvider {
     private final KmsClient kmsClient;
     private static final Logger LOGGER = LoggerFactory.getLogger(KmsService.class);
 
-    @ExcludeFromGeneratedCoverageReport
-    public KmsService(ConfigurationService configurationService) {
-        this(
-                configurationService.getLocalstackEndpoint(),
-                configurationService.getAwsRegion(),
-                configurationService.getEnvironment());
+    public KmsService(KmsClient kmsClient) {
+        this.kmsClient = kmsClient;
     }
 
-    public KmsService(String localstackEndpoint, String awsRegion, String environment) {
-        if (environment.equals("local") || environment.equals("ci")) {
-            this.kmsClient =
-                    KmsClient.builder()
-                            .endpointOverride(URI.create(localstackEndpoint))
-                            .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                            .region(Region.of(awsRegion))
-                            .build();
-        } else {
-            this.kmsClient =
-                    KmsClient.builder()
-                            .region(Region.of(awsRegion))
-                            .credentialsProvider(DefaultCredentialsProvider.builder().build())
-                            .build();
-        }
+    public static KmsClient getClient(ConfigurationService configurationService) {
+        String environment = configurationService.getEnvironment();
+        return (environment.equals("local") || environment.equals("ci"))
+                ? getLocalClient(configurationService)
+                : KmsClient.builder()
+                        .credentialsProvider(DefaultCredentialsProvider.builder().build())
+                        .region(Region.of(configurationService.getAwsRegion()))
+                        .build();
+    }
+
+    private static KmsClient getLocalClient(ConfigurationService configurationService) {
+        return KmsClient.builder()
+                .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
+                .credentialsProvider(DefaultCredentialsProvider.builder().build())
+                .region(Region.of(configurationService.getAwsRegion()))
+                .build();
     }
 
     public SignResponse sign(SignRequest signRequest) {
