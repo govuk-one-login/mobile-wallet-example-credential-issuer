@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class ConfigurationService extends Configuration {
 
-    private static final String LOCAL_DOCUMENT_BUILDER_URL = "http://localhost:8001";
+    private static final String LOCAL_STS_MOCK_URL = "http://localhost:9090";
 
     private JerseyClientConfiguration httpClient = new JerseyClientConfiguration();
 
@@ -134,13 +134,11 @@ public class ConfigurationService extends Configuration {
      * @return The authentication server URL as a string
      */
     public String getOneLoginAuthServerUrl() {
-        return createValidatedUri("ONE_LOGIN_AUTH_SERVER_URL", LOCAL_DOCUMENT_BUILDER_URL)
-                .toString();
+        return createValidatedUri("ONE_LOGIN_AUTH_SERVER_URL", LOCAL_STS_MOCK_URL).toString();
     }
 
     public List<String> getOneLoginAuthServerUrls() {
-        String urisString =
-                getEnvOrDefault("ONE_LOGIN_AUTH_SERVER_URLS", LOCAL_DOCUMENT_BUILDER_URL);
+        String urisString = getEnvOrDefault("ONE_LOGIN_AUTH_SERVER_URLS", LOCAL_STS_MOCK_URL);
         return Arrays.stream(urisString.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -186,7 +184,7 @@ public class ConfigurationService extends Configuration {
      * @return The credential store URL as a URI object
      */
     public URI getCredentialStoreUrl() {
-        return createValidatedUri("CREDENTIAL_STORE_URL", LOCAL_DOCUMENT_BUILDER_URL);
+        return createValidatedUri("CREDENTIAL_STORE_URL", "http://localhost:8001");
     }
 
     /**

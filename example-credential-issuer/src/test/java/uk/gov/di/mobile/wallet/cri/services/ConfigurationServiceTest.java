@@ -161,7 +161,7 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnAuthServerUrlDefaultValue_When_EnvVarNotSet() {
-        assertEquals("http://localhost:8001", configurationService.getOneLoginAuthServerUrl());
+        assertEquals("http://localhost:9090", configurationService.getOneLoginAuthServerUrl());
     }
 
     @Test
@@ -320,7 +320,7 @@ class ConfigurationServiceTest {
         var result = configurationService.getOneLoginAuthServerUrls();
 
         assertEquals(1, result.size());
-        assertEquals("http://localhost:8001", result.get(0));
+        assertEquals("http://localhost:9090", result.get(0));
     }
 
     @Test
