@@ -34,6 +34,7 @@ public class ConfigurationService extends Configuration {
      * @return The current environment name
      */
     public String getEnvironment() {
+        System.out.println("ENV: " + getEnvOrDefault("ENVIRONMENT", "local"));
         return getEnvOrDefault("ENVIRONMENT", "local");
     }
 
