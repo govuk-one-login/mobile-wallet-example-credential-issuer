@@ -77,7 +77,8 @@ public class AccessTokenService {
 
         String environment = configurationService.getEnvironment();
         boolean skipSignatureVerification =
-                Objects.equals(environment, "dev")
+                Objects.equals(environment, "local")
+                        || Objects.equals(environment, "dev")
                         || Objects.equals(environment, "build")
                         || Objects.equals(environment, "integration");
         if (!skipSignatureVerification && !verifyTokenSignature(accessToken)) {

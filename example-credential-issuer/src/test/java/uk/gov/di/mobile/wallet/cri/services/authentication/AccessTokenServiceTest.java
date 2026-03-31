@@ -246,7 +246,7 @@ class AccessTokenServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"dev", "build", "integration"})
+    @ValueSource(strings = {"local", "dev", "build", "integration"})
     void Should_SkipSignatureVerification_When_EnvironmentSkipsVerification(String environment)
             throws JOSEException, AccessTokenValidationException {
         when(configurationService.getEnvironment()).thenReturn(environment);
