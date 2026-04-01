@@ -85,7 +85,7 @@ class S3ServiceTest {
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, never()).getLocalstackEndpoint(); // Not called for non-local client
+        verify(config, never()).getLocalstackEndpoint();
         verify(config, times(1)).getAwsRegion();
         assertEquals(Region.of("eu-west-2"), client.serviceClientConfiguration().region());
     }

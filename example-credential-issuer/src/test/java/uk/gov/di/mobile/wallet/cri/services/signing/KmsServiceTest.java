@@ -77,6 +77,7 @@ class KmsServiceTest {
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
         verify(config, never()).getLocalstackEndpoint();
+        verify(config, times(1)).getAwsRegion();
     }
 
     @Test
