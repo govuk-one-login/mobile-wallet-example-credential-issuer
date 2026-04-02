@@ -161,7 +161,7 @@ class ConfigurationServiceTest {
 
     @Test
     void Should_ReturnAuthServerUrlDefaultValue_When_EnvVarNotSet() {
-        assertEquals("http://localhost:8001", configurationService.getOneLoginAuthServerUrl());
+        assertEquals("http://localhost:9090", configurationService.getOneLoginAuthServerUrl());
     }
 
     @Test
@@ -263,6 +263,78 @@ class ConfigurationServiceTest {
                         () -> configurationService.getCredentialStoreUrl());
         assertEquals(
                 "Invalid URI for CREDENTIAL_STORE_URL: invalid://uri with spaces",
+                exception.getMessage());
+    }
+
+    @Test
+    void Should_ReturnSingleUrl_When_OneLoginAuthServerUrlsHasSingleValue() {
+        environmentVariables.set("ONE_LOGIN_AUTH_SERVER_URLS", "https://auth.example.com");
+
+        var result = configurationService.getOneLoginAuthServerUrls();
+
+        assertEquals(1, result.size());
+        assertEquals("https://auth.example.com", result.get(0));
+    }
+
+    @Test
+    void Should_ReturnMultipleUrls_When_OneLoginAuthServerUrlsHasCommaSeparatedValues() {
+        environmentVariables.set(
+                "ONE_LOGIN_AUTH_SERVER_URLS",
+                "https://auth1.example.com,https://auth2.example.com");
+
+        var result = configurationService.getOneLoginAuthServerUrls();
+
+        assertEquals(2, result.size());
+        assertEquals("https://auth1.example.com", result.get(0));
+        assertEquals("https://auth2.example.com", result.get(1));
+    }
+
+    @Test
+    void Should_TrimWhitespace_When_OneLoginAuthServerUrlsHasSpaces() {
+        environmentVariables.set(
+                "ONE_LOGIN_AUTH_SERVER_URLS",
+                " https://auth1.example.com , https://auth2.example.com ");
+
+        var result = configurationService.getOneLoginAuthServerUrls();
+
+        assertEquals(2, result.size());
+        assertEquals("https://auth1.example.com", result.get(0));
+        assertEquals("https://auth2.example.com", result.get(1));
+    }
+
+    @Test
+    void Should_FilterEmptyValues_When_OneLoginAuthServerUrlsHasEmptySegments() {
+        environmentVariables.set(
+                "ONE_LOGIN_AUTH_SERVER_URLS",
+                "https://auth1.example.com,,https://auth2.example.com");
+
+        var result = configurationService.getOneLoginAuthServerUrls();
+
+        assertEquals(2, result.size());
+        assertEquals("https://auth1.example.com", result.get(0));
+        assertEquals("https://auth2.example.com", result.get(1));
+    }
+
+    @Test
+    void Should_ReturnDefaultValue_When_OneLoginAuthServerUrlsNotSet() {
+        var result = configurationService.getOneLoginAuthServerUrls();
+
+        assertEquals(1, result.size());
+        assertEquals("http://localhost:9090", result.get(0));
+    }
+
+    @Test
+    void Should_ThrowException_When_OneLoginAuthServerUrlsContainsInvalidUrl() {
+        environmentVariables.set(
+                "ONE_LOGIN_AUTH_SERVER_URLS", "https://valid.com,invalid://uri with spaces");
+
+        IllegalArgumentException exception =
+                assertThrows(
+                        IllegalArgumentException.class,
+                        () -> configurationService.getOneLoginAuthServerUrls());
+
+        assertEquals(
+                "Invalid URI for ONE_LOGIN_AUTH_SERVER_URLS: invalid://uri with spaces",
                 exception.getMessage());
     }
 }

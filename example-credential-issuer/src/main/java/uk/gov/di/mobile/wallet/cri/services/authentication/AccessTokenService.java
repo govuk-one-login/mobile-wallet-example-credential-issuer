@@ -13,6 +13,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.jwt.proc.BadJWTException;
 import com.nimbusds.jwt.proc.DefaultJWTClaimsVerifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 
@@ -21,6 +23,8 @@ import javax.management.InvalidAttributeValueException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
@@ -36,6 +40,8 @@ public class AccessTokenService {
 
     private static final String REQUIRED_KEY_TYPE = "EC";
     private static final Curve REQUIRED_CURVE = Curve.P_256;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccessTokenService.class);
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
@@ -72,10 +78,21 @@ public class AccessTokenService {
             throws AccessTokenValidationException {
         verifyTokenHeader(accessToken);
         verifyTokenClaims(accessToken);
-        if (!verifyTokenSignature(accessToken)) {
+
+        if (isSignatureVerificationSkipped()) {
+            getLogger()
+                    .warn(
+                            "Signature verification skipped for environment: {}",
+                            configurationService.getEnvironment());
+        } else if (!verifyTokenSignature(accessToken)) {
             throw new AccessTokenValidationException("Access token signature verification failed");
         }
         return extractAccessTokenData(accessToken);
+    }
+
+    private boolean isSignatureVerificationSkipped() {
+        return Set.of("local", "dev", "build", "integration")
+                .contains(configurationService.getEnvironment());
     }
 
     /**
@@ -116,14 +133,9 @@ public class AccessTokenService {
      */
     private void verifyTokenClaims(SignedJWT accessToken) throws AccessTokenValidationException {
         try {
-
-            String expectedIssuer = configurationService.getOneLoginAuthServerUrl();
             String expectedAudience = configurationService.getSelfUrl().toString();
             JWTClaimsSet expectedClaimValues =
-                    new JWTClaimsSet.Builder()
-                            .issuer(expectedIssuer)
-                            .audience(expectedAudience)
-                            .build();
+                    new JWTClaimsSet.Builder().audience(expectedAudience).build();
             HashSet<String> requiredClaims =
                     new HashSet<>(
                             Arrays.asList(
@@ -137,6 +149,12 @@ public class AccessTokenService {
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
 
             verifier.verify(jwtClaimsSet, null);
+
+            List<String> expectedIssuers = configurationService.getOneLoginAuthServerUrls();
+            if (!expectedIssuers.contains(jwtClaimsSet.getIssuer())) {
+                throw new BadJWTException(
+                        "Access token issuer not in expected issuers: " + jwtClaimsSet.getIssuer());
+            }
 
             if (jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).isEmpty()) {
                 throw new InvalidAttributeValueException("Empty credential_identifiers claim");
@@ -207,5 +225,9 @@ public class AccessTokenService {
         } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
+    }
+
+    protected Logger getLogger() {
+        return LOGGER;
     }
 }

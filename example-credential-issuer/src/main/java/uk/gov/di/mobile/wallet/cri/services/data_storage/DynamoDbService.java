@@ -40,11 +40,13 @@ public class DynamoDbService implements DataStore {
     }
 
     public static DynamoDbEnhancedClient getClient(ConfigurationService configurationService) {
+        String environment = configurationService.getEnvironment();
         DynamoDbClient client =
-                configurationService.getEnvironment().equals("local")
+                (environment.equals("local") || environment.equals("ci"))
                         ? getLocalClient(configurationService)
                         : DynamoDbClient.builder()
                                 .httpClient(UrlConnectionHttpClient.create())
+                                .region(Region.of(configurationService.getAwsRegion()))
                                 .build();
 
         return DynamoDbEnhancedClient.builder().dynamoDbClient(client).build();

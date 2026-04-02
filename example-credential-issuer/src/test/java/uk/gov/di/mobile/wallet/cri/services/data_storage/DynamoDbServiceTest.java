@@ -17,6 +17,7 @@ import software.amazon.awssdk.enhanced.dynamodb.model.QueryEnhancedRequest;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.StoredCredential;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CachedCredentialOffer;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,6 +32,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -251,5 +255,49 @@ class DynamoDbServiceTest {
 
         assertEquals("Error fetching credentials by documentId", exception.getMessage());
         assertEquals("Some DynamoDB error", exception.getCause().getMessage());
+    }
+
+    @Test
+    void Should_GetClientForLocalEnvironment() {
+        ConfigurationService config = mock(ConfigurationService.class);
+        when(config.getEnvironment()).thenReturn("local");
+        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4566");
+        when(config.getAwsRegion()).thenReturn("eu-west-2");
+
+        DynamoDbEnhancedClient client = DynamoDbService.getClient(config);
+
+        assertNotNull(client);
+        verify(config, times(1)).getEnvironment();
+        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getAwsRegion();
+    }
+
+    @Test
+    void Should_GetClientForCiEnvironment() {
+        ConfigurationService config = mock(ConfigurationService.class);
+        when(config.getEnvironment()).thenReturn("ci");
+        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4566");
+        when(config.getAwsRegion()).thenReturn("eu-west-2");
+
+        DynamoDbEnhancedClient client = DynamoDbService.getClient(config);
+
+        assertNotNull(client);
+        verify(config, times(1)).getEnvironment();
+        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getAwsRegion();
+    }
+
+    @Test
+    void Should_GetClientForNonLocalEnvironment() {
+        ConfigurationService config = mock(ConfigurationService.class);
+        when(config.getEnvironment()).thenReturn("dev");
+        when(config.getAwsRegion()).thenReturn("eu-west-2");
+
+        DynamoDbEnhancedClient client = DynamoDbService.getClient(config);
+
+        assertNotNull(client);
+        verify(config, times(1)).getEnvironment();
+        verify(config, never()).getLocalstackEndpoint();
+        verify(config, times(1)).getAwsRegion();
     }
 }
