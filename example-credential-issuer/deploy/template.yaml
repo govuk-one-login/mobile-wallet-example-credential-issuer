@@ -90,8 +90,8 @@ Mappings:
       AuthServerUrl: "mock-sts.wallet-onboarding.integration.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.integration.account.gov.uk/wallet"
       CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/cred-issuer-image-repo-containerrepository-g8ydsvmkc2et
-      CertificatesBucketName: "wallet-dsc-issuer-228170791542-certificates"
-      DocumentSigningKey1Arn: "arn:aws:kms:eu-west-2:228170791542:key/PLACEHOLDER"
+      CertificatesBucketName: "wallet-doc-sign-cert-228170791542-certificates"
+      DocumentSigningKey1Arn: "arn:aws:kms:eu-west-2:228170791542:key/112cc5ff-e83c-4985-8e52-6ae39433210a"
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:228170791542:certificate-authority/a25b18b1-2a1f-4ff0-91c0-cd65a49c948e
       StatusListUrl: "status-list-mock.wallet-onboarding.integration.account.gov.uk"
   ElasticLoadBalancerAccountIds:
