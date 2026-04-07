@@ -28,10 +28,12 @@ services:
       - AWS_ACCESS_KEY_ID=na
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_REGION=eu-west-2
+      - CREDENTIAL_STORE_URL=http://imposter-mock:8080
+      - ENVIRONMENT=ci
       - LOCALSTACK_ENDPOINT=http://localstack:4566
       - ONE_LOGIN_AUTH_SERVER_URL=http://test-harness:3001
+      - ONE_LOGIN_AUTH_SERVER_URLS=http://test-harness:3001
       - SELF_URL=http://example-cri:8080
-      - CREDENTIAL_STORE_URL=http://imposter-mock:8080
       - STATUS_LIST_URL=http://imposter-mock:8080
     ports:
       - "8080:8080"

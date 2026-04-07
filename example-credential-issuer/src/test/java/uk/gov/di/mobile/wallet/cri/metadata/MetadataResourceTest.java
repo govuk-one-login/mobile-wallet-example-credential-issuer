@@ -12,6 +12,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,7 +26,8 @@ import static org.mockito.Mockito.when;
 class MetadataResourceTest {
 
     private static final String SELF_URL = "https://credential-issuer.test.gov.uk";
-    private static final String AUTH_SERVER_URL = "https://authorization-server.test.gov.uk";
+    private static final List<String> AUTH_SERVER_URL =
+            List.of("https://authorization-server.test.gov.uk");
     private static final String CREDENTIAL_STORE_URL = "https://credential-store.test.gov.uk";
 
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
@@ -36,7 +38,7 @@ class MetadataResourceTest {
 
     @BeforeEach
     void setUp() {
-        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        when(configurationService.getOneLoginAuthServerUrls()).thenReturn(AUTH_SERVER_URL);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getEnvironment()).thenReturn("test");
         when(configurationService.getCredentialStoreUrl())

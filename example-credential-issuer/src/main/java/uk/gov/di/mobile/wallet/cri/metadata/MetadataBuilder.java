@@ -19,7 +19,7 @@ public class MetadataBuilder {
     private static final String ISSUER_NAME_CY = "ISSUER_NAME_WELSH";
 
     String credentialIssuer;
-    String authorizationServers;
+    List<String> authorizationServers;
     String credentialEndpoint;
     String notificationEndpoint;
     String iacasEndpoint;
@@ -35,7 +35,7 @@ public class MetadataBuilder {
         return this;
     }
 
-    public MetadataBuilder setAuthorizationServers(String authorizationServers)
+    public MetadataBuilder setAuthorizationServers(List<String> authorizationServers)
             throws IllegalArgumentException {
         if (authorizationServers == null) {
             throw new IllegalArgumentException("authorizationServers must not be null");

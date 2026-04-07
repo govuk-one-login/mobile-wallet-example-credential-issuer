@@ -19,7 +19,8 @@ public class S3Service implements ObjectStore {
 
     public static S3Client getClient(ConfigurationService configurationService) {
         S3Client client;
-        if (configurationService.getEnvironment().equals("local")) {
+        String environment = configurationService.getEnvironment();
+        if (environment.equals("local") || environment.equals("ci")) {
             client = getLocalClient(configurationService);
         } else {
             client =

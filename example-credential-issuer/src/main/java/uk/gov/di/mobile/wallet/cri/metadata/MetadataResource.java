@@ -65,7 +65,7 @@ public class MetadataResource {
                             .setCredentialIssuer(selfUrl)
                             .setCredentialEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
                             .setAuthorizationServers(
-                                    configurationService.getOneLoginAuthServerUrl())
+                                    configurationService.getOneLoginAuthServerUrls())
                             .setNotificationEndpoint(selfUrl + NOTIFICATION_ENDPOINT)
                             .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(

@@ -73,7 +73,7 @@ public class ServicesFactory {
             ConfigurationService configurationService, Environment environment)
             throws MalformedURLException, NoSuchAlgorithmException {
 
-        KmsService kmsService = new KmsService(configurationService);
+        KmsService kmsService = new KmsService(KmsService.getClient(configurationService));
         PreAuthorizedCodeBuilder preAuthorizedCodeBuilder =
                 new PreAuthorizedCodeBuilder(configurationService, kmsService);
 

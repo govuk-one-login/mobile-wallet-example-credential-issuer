@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.SdkBytes;
+import software.amazon.awssdk.services.kms.KmsClient;
 import software.amazon.awssdk.services.kms.model.*;
+import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
@@ -18,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,8 +37,47 @@ class KmsServiceTest {
     private static final String TEST_KEY_ALIAS = "test-signing-key";
 
     @Test
-    void should_Create_Kms_Service() {
-        assertNotNull(kmsService);
+    void Should_GetClientForLocalEnvironment() {
+        ConfigurationService config = mock(ConfigurationService.class);
+        when(config.getEnvironment()).thenReturn("local");
+        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4560");
+        when(config.getAwsRegion()).thenReturn("eu-west-2");
+
+        KmsClient client = KmsService.getClient(config);
+
+        assertNotNull(client);
+        verify(config, times(1)).getEnvironment();
+        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getAwsRegion();
+    }
+
+    @Test
+    void Should_GetClientForCiEnvironment() {
+        ConfigurationService config = mock(ConfigurationService.class);
+        when(config.getEnvironment()).thenReturn("ci");
+        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4560");
+        when(config.getAwsRegion()).thenReturn("eu-west-2");
+
+        KmsClient client = KmsService.getClient(config);
+
+        assertNotNull(client);
+        verify(config, times(1)).getEnvironment();
+        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getAwsRegion();
+    }
+
+    @Test
+    void Should_GetClientForNonLocalEnvironment() {
+        ConfigurationService config = mock(ConfigurationService.class);
+        when(config.getEnvironment()).thenReturn("dev");
+        when(config.getAwsRegion()).thenReturn("eu-west-2");
+
+        KmsClient client = KmsService.getClient(config);
+
+        assertNotNull(client);
+        verify(config, times(1)).getEnvironment();
+        verify(config, never()).getLocalstackEndpoint();
+        verify(config, times(1)).getAwsRegion();
     }
 
     @Test
