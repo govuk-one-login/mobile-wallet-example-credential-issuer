@@ -32,7 +32,4 @@ flowchart LR
     ddb1 -- kms:Decrypt\n kms:Encrypt --> kms2
     ddb2 -- kms:Decrypt\n kms:Encrypt --> kms2
 
-    kms1@{ shape: hex}
-    kms2@{ shape: hex}
-
     ```
