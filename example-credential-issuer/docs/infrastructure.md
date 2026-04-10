@@ -13,7 +13,7 @@ flowchart LR
         ecs
   end
  subgraph aws["AWS — eu-west-2"]
-        dns["Route53\n example-credential-issuer.wallet-onboarding.${ENV}.account.gov.uk"]
+        dns["Route53"]
         agw["API Gateway V2\n ANY /{proxy+}"]
         vpc
         ecr[("ECR")]
@@ -22,6 +22,12 @@ flowchart LR
         kms1["KMS\n CredentialIssuerSigningKey"]
         kms2["KMS\n CRIDatabaseKey"]
   end
+  subgraph dsc["Document Signing Certificate Issuer"]
+        dscs3["DocSigningCerificate\n s3Bucket"]
+  end
+  subgraph platCA["Platform CA"]
+        cert["Root CA Certificate"]
+  end
     client(["Client"]) --> dns
     dns --> agw
     agw -- VPC Link --> alb
@@ -29,7 +35,9 @@ flowchart LR
     ecr -- image pull --> container
     container -- dynamodb:PutItem\n dynamodb:GetItem\n dynamodb:DeleteItem --> ddb1 & ddb2
     container -- kms:Sign\n kms:GetPublicKey --> kms1
+    container <-- s3:GetObject --> dscs3
+    cert -- s3:putObject  --> dscs3
     ddb1 -- kms:Decrypt\n kms:Encrypt --> kms2
     ddb2 -- kms:Decrypt\n kms:Encrypt --> kms2
 
-    ```
+```
