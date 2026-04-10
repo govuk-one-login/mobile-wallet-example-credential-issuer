@@ -1,4 +1,4 @@
-# Infrastructure Overview
+# Example Credential Issuer Infrastructure
 
 Mobile Wallet Example Credential Issuer runs as an ECS Fargate container in AWS eu-west-2.
 
