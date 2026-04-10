@@ -13,6 +13,7 @@ repos:
             language: system
             entry: bash -c 'cd example-credential-issuer && ./gradlew spotlessApply && ./gradlew spotlessCheck -q'
             files: \.(java|md)$
+            stages: [pre-commit]
             pass_filenames: false
 
         -   id: java - tests
@@ -30,6 +31,7 @@ repos:
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run lint'
             files: \.(ts|md)$
+            stages: [pre-commit]
             pass_filenames: false
 
         -   id: prettier-ts
@@ -37,6 +39,7 @@ repos:
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run format:check'
             files: \.(ts|md)$
+            stages: [pre-commit]
             pass_filenames: false
 
         -   id: jest-tests
