@@ -12,14 +12,14 @@ repos:
             name: Spotless - Java format check
             language: system
             entry: bash -c 'cd example-credential-issuer && ./gradlew spotlessCheck -q'
-            files: ^example-credential-service/.*$
+            files: \.(java|md)$
             pass_filenames: false
 
         -   id: java - tests
             name: Gradle - unit tests
             language: system
             entry: bash -c 'cd example-credential-issuer && ./gradlew test -q'
-            files: ^example-credential-service/.*$
+            files: \.java$
             stages: [pre-push]
             pass_filenames: false
 
@@ -29,20 +29,20 @@ repos:
             name: ESLint- Typescript lint
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run lint'
-            files: ^document-signing-certificate/.*$
+            files: \.(ts|md)$
             pass_filenames: false
 
         -   id: prettier-ts
             name: Prettier - format check
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run format:check'
-            files: ^document-signing-certificate/.*$
+            files: \.(ts|md)$
             pass_filenames: false
 
         -   id: jest-tests
             name: Jest - unit tests
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run test -- --watchAll=false'
-            files: ^document-signing-certificate/.*$
+            files: \.ts$
             stages: [pre-push]
             pass_filenames: false
