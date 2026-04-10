@@ -33,5 +33,7 @@ public class VeteranCardDocument {
 
     private String serviceNumber;
     private String serviceBranch;
+
+    @JsonProperty("portrait")
     private String photo;
 }
