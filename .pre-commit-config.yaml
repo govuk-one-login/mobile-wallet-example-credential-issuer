@@ -11,7 +11,7 @@ repos:
         -   id: spotless-java
             name: Spotless - Java format check
             language: system
-            entry: bash -c 'cd example-credential-issuer && ./gradlew spotlessApply && ./gradlew spotlessCheck -q'
+            entry: bash -c 'cd example-credential-issuer && ./gradlew spotlessCheck -q'
             files: ^example-credential-issuer/.*\.(java|md)$
             stages: [pre-commit]
             pass_filenames: false
