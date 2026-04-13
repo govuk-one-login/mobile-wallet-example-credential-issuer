@@ -25,9 +25,6 @@ flowchart LR
   subgraph dsc["Document Signing Certificate Issuer"]
         dscs3["DocSigningCerificate\n s3Bucket"]
   end
-  subgraph platCA["Platform CA"]
-        cert["Root CA Certificate"]
-  end
     client(["Client"]) --> dns
     dns --> agw
     agw -- VPC Link --> alb
