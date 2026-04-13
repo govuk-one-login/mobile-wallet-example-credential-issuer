@@ -27,4 +27,3 @@ export const getRequiredEnvironmentVariables = <T extends string>(
   }
   return success(config) as Success<Config<T>>;
 };
-// testing out pre-commit hooks
