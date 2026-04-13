@@ -33,7 +33,6 @@ flowchart LR
     container -- dynamodb:PutItem\n dynamodb:GetItem\n dynamodb:DeleteItem --> ddb1 & ddb2
     container -- kms:Sign\n kms:GetPublicKey --> kms1
     container <-- s3:GetObject --> dscs3
-    cert -- s3:putObject  --> dscs3
     ddb1 -- kms:Decrypt\n kms:Encrypt --> kms2
     ddb2 -- kms:Decrypt\n kms:Encrypt --> kms2
 
