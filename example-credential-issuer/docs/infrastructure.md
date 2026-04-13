@@ -37,3 +37,8 @@ flowchart LR
     ddb2 -- kms:Decrypt\n kms:Encrypt --> kms2
 
 ```
+Note: before an instance of the Example Credential Issuer can be deployed both stacks Platform CA, and Document Signing Certificate Issuer (DSC), need to be deployed.
+
+This can happen within the same environment.
+
+If Platform CA and DSC are deployed in a separate environment from the Example Credential Issuer stack - then permissions on the DSC need to allow access on both S3 Bucket Policy and the Signing Key.
