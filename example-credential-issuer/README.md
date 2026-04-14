@@ -108,51 +108,12 @@ The [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-har
 
 `ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run`.
 
-## Deploy application to `dev`
+## Deployment
 
-> You must be logged into the Onboarding Products `dev` AWS account.
+This service is deployed via GitHub Actions.
 
-You can deploy the application to the `dev` AWS account by following these steps.
+Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
 
-#### Build and push the docker image
-
-Run the script to build and push the Example CRI docker image. Make sure to specify:
-
-* an image tag
-* the name of your AWS profile for the Onboarding Products `dev` AWS account (which can be found in your `~/.aws/credentials` file)
-
-```shell
-./build-and-deploy-image.sh <your-chosen-tag> <your-onboarding-products-dev-profile>
-```
-
-This will:
-
-* build the docker image
-* log into ECR
-* push the image to ECR
-* update the `template.yaml` to specify this image for the Example CRI ECS task
-
-#### Update the SAM template
-
-If using your own deployed version of the [Document Builder](https://github.com/govuk-one-login/mobile-wallet-document-builder), you must update the following mapping values in the template:
-
-```yaml
-Mappings:
-  EnvironmentVariables:
-    dev:
-      CredentialStoreUrl: "<stack-name->stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-      AuthServerUrl: "<stack-name->stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-```
-
-#### Build and deploy the stack
-Run:
-
-```bash
-sam build && sam deploy --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
-
-```
 ## Further Documentation
 
-| Document                                           | Description |
-|----------------------------------------------------|---|
-| [`docs/infrastructure.md`](docs/infrastructure.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
+You can find more about [example-credential-issuer](mobile-wallet-example-credential-issuer)'s infrastructure diagram on: [`docs/infrastructure.md`](docs/infrastructure.md).
