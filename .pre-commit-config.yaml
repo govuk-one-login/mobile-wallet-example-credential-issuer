@@ -1,0 +1,46 @@
+repos:
+  -   repo: https://github.com/compilerla/conventional-pre-commit
+      rev: v3.4.0
+      hooks:
+        -   id: conventional-pre-commit
+            stages: [commit-msg]
+            args: [feat, fix, chore, docs, style, refactor, test, build, ci, perf, revert]
+
+  -   repo: local
+      hooks:
+        -   id: spotless-java
+            name: Spotless - Java format check
+            language: system
+            entry: bash -c 'cd example-credential-issuer && ./gradlew spotlessCheck -q'
+            files: ^example-credential-issuer/.*\.(java|md)$
+            stages: [pre-commit]
+
+        -   id: java - tests
+            name: Gradle - unit tests
+            language: system
+            entry: bash -c 'cd example-credential-issuer && ./gradlew test -q'
+            files: ^example-credential-issuer/.*\.java$
+            stages: [pre-push]
+
+  -   repo: local
+      hooks:
+        -   id: eslint-ts
+            name: ESLint- Typescript lint
+            language: system
+            entry: bash -c 'cd document-signing-certificate-issuer && npm run lint'
+            files: ^document-signing-certificate-issuer/.*\.(ts|md)$
+            stages: [pre-commit]
+
+        -   id: prettier-ts
+            name: Prettier - format check
+            language: system
+            entry: bash -c 'cd document-signing-certificate-issuer && npm run format:check'
+            files: ^document-signing-certificate-issuer/.*\.(ts|md)$
+            stages: [pre-commit]
+
+        -   id: jest-tests
+            name: Jest - unit tests
+            language: system
+            entry: bash -c 'cd document-signing-certificate-issuer && npm run test'
+            files: ^document-signing-certificate-issuer/.*\.ts$
+            stages: [pre-push]

@@ -130,6 +130,7 @@ describe('issueDocumentSigningCertificate handler', () => {
       'DOC_SIGNING_KEY_COUNTRY_NAME',
     ])('should emit an error and reject if env var %s is missing', async (envVar) => {
       // ARRANGE
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete dependencies.env[envVar];
 
       // ACT
