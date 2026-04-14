@@ -45,7 +45,7 @@ If you have questions or suggestions, contact us on [govukwallet-queries@digital
 
 These instructions are for GOV.UK Wallet developers who are maintaining this service.
 
-### Prerequisites
+## Prerequisites
 
 * Java 17
 * Gradle 8.8
