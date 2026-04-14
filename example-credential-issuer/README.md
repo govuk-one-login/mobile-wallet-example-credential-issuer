@@ -45,11 +45,9 @@ If you have questions or suggestions, contact us on [govukwallet-queries@digital
 
 These instructions are for GOV.UK Wallet developers who are maintaining this service.
 
-### Before you start
+### Prerequisites
 
-You must install:
-
-* Java
+* Java 17
 * Gradle
 * a tool for running docker applications locally, like [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 *[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
