@@ -40,3 +40,4 @@ public class CredentialOffer {
         this.grants = grants;
     }
 }
+// comment for testing
