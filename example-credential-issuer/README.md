@@ -60,6 +60,18 @@ These instructions are for GOV.UK Wallet developers who are maintaining this ser
 
 > Ensure you are running [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time.
 
+### Pre-commit hooks
+
+```bash
+brew install pre-commit
+```
+
+```bash
+pre-commit install 
+pre-commit install --hook-type commit-msg
+pre-commit install --hook-type pre-push
+```
+
 #### Format
 
 Check with `./gradlew spotlessCheck`
