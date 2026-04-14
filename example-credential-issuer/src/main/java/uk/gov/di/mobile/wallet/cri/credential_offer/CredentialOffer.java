@@ -40,4 +40,3 @@ public class CredentialOffer {
         this.grants = grants;
     }
 }
-// blah
