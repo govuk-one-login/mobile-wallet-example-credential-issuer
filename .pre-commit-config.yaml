@@ -14,7 +14,7 @@ repos:
             entry: bash -c 'cd example-credential-issuer && ./gradlew spotlessCheck -q'
             files: ^example-credential-issuer/.*\.(java|md)$
             stages: [pre-commit]
-            pass_filenames: false
+            pass_filenames: true
 
         -   id: java - tests
             name: Gradle - unit tests
@@ -22,7 +22,7 @@ repos:
             entry: bash -c 'cd example-credential-issuer && ./gradlew test -q'
             files: ^example-credential-issuer/.*\.java$
             stages: [pre-push]
-            pass_filenames: false
+            pass_filenames: true
 
   -   repo: local
       hooks:
@@ -32,7 +32,7 @@ repos:
             entry: bash -c 'cd document-signing-certificate-issuer && npm run lint'
             files: ^document-signing-certificate-issuer/.*\.(ts|md)$
             stages: [pre-commit]
-            pass_filenames: false
+            pass_filenames: true
 
         -   id: prettier-ts
             name: Prettier - format check
@@ -40,7 +40,7 @@ repos:
             entry: bash -c 'cd document-signing-certificate-issuer && npm run format:check'
             files: ^document-signing-certificate-issuer/.*\.(ts|md)$
             stages: [pre-commit]
-            pass_filenames: false
+            pass_filenames: true
 
         -   id: jest-tests
             name: Jest - unit tests
@@ -48,4 +48,4 @@ repos:
             entry: bash -c 'cd document-signing-certificate-issuer && npm run test'
             files: ^document-signing-certificate-issuer/.*\.ts$
             stages: [pre-push]
-            pass_filenames: false
+            pass_filenames: true
