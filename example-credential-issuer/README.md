@@ -114,6 +114,15 @@ This service is deployed via GitHub Actions.
 
 Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
 
+## Contributing
+
+This project uses [pre-commit](https://pre-commit.com/) to enforce code quality and validate commit messages against [Conventional Commits](https://github.com/conventional-changelog/commitlint) standards - non-conforming messages will be rejected.
+
+Ensure your branch is up to date and all hooks pass before opening a pull request. Avoid using the git `--no-verify` flag to skip these checks unless absolutely necessary.
+
+
 ## Further Documentation
 
-You can find more about [example-credential-issuer](mobile-wallet-example-credential-issuer)'s infrastructure diagram on: [`docs/infrastructure.md`](docs/infrastructure.md).
+| Document                                           | Description |
+|----------------------------------------------------|---|
+| [`docs/infrastructure.md`](docs/infrastructure.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
