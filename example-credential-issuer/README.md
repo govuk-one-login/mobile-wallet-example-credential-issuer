@@ -141,4 +141,10 @@ Run:
 
 ```bash
 sam build && sam deploy --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
+
 ```
+## Further Documentation
+
+| Document                                           | Description |
+|----------------------------------------------------|---|
+| [`docs/infrastructure.md`](docs/infrastructure.md) | Infrastructure diagram — AWS architecture, API routes, data flow |
