@@ -52,6 +52,8 @@ These instructions are for GOV.UK Wallet developers who are maintaining this ser
 * a tool for running docker applications locally, like [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 *[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 
+## Local Setup
+
 ### Run the credential issuer
 
 > Ensure that you are using the Java/Gradle versions specified in `.sdkmanrc`.
