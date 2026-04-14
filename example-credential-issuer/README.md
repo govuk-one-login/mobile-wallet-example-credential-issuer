@@ -72,39 +72,35 @@ pre-commit install --hook-type commit-msg
 pre-commit install --hook-type pre-push
 ```
 
-#### Format
+### Format
 
 Check with `./gradlew spotlessCheck`
 
 Apply with `./gradlew spotlessApply`
 
-#### Build
+### Build
 
 Build with `./gradlew`
 
 By default, this also calls `clean`, `spotlessApply` and `test`.
 
-#### Run
+### Run
 
-##### Set up LocalStack
-
-This app uses LocalStack to run AWS services (DynamoDB and KMS) locally on port `4560`.
-
-To start the LocalStack container and emulate the services, run:
+Start LocalStack to emulate AWS services (DynamoDB and KMS) locally on port `4560`.
 
 ```
 ./gradlew localstackUp
 ```
 
-##### Run the Application
+Run the application:
 
-Run with `./gradlew run`
+`./gradlew run`
 
-#### Test
+### Test
 
-##### Unit Tests
+Run unit tests with:
 
-Run unit tests with `./gradlew test`
+`./gradlew test`
 
 ##### Testing with the Example CRI Test Harness
 
@@ -112,7 +108,7 @@ The [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-har
 
 `ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run`.
 
-### Deploy application to `dev`
+## Deploy application to `dev`
 
 > You must be logged into the Onboarding Products `dev` AWS account.
 
