@@ -56,7 +56,7 @@ This service is built with Java using Gradle, containerised with Docker, and dep
 
 ### Format
 
-`./gradlew spotlessCheck`
+`./gradlew spotlessApply`
 
 ### Build
 
