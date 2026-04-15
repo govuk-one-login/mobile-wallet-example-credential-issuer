@@ -74,12 +74,9 @@ Start LocalStack to emulate AWS services (DynamoDB and KMS) locally on port `456
 ./gradlew localstackUp
 ```
 
-#### Running locally also requires:
+Running locally also requires a mock of STS and status list for end-to-end journey functionality.
 
->  [sts-mock](https://github.com/govuk-one-login/mobile-wallet-onboarding-products-mocks/tree/main/sts-mock) 
-> and [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time when you want to issue a credential for an mdl document.
-
-Run the application:
+Start the application:
 
 `./gradlew run`
 
