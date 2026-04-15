@@ -20,10 +20,10 @@ There is more guidance on GOV.UK Wallet in the [technical documentation](https:/
 ## What is supported/not supported
 
 | Feature                                                                                                                  | Support                        |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
-| Issuing an [ISO_mDL](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅  Yes                         |
+|--------------------------------------------------------------------------------------------------------------------------| ------------------------------ |
+| Issuing an [ISO mDL](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅  Yes                         |
 | Issuing a [W3C VCDM](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅ Yes                          |
-| Issuing a SD-JWT-VC credential                                                                                           | ❌ This format is not supported |
+| Issuing a SD-JWT VC credential                                                                                           | ❌ This format is not supported |
 | Revoking a credential with the status list                                                                               | ✅ Yes                          |
 
 This example credential issuer does not connect to any real data sources. To use this example credential issuer, you need to modify its code to connect to your existing data sources and systems that contain the information required for the credentials you wish to issue.
@@ -41,58 +41,48 @@ You must not use this example credential issuer in production.
 
 If you have questions or suggestions, contact us on [govukwallet-queries@digital.cabinet-office.gov.uk](mailto:govukwallet-queries@digital.cabinet-office.gov.uk) or use #govuk-wallet in x-gov Slack.
 
-## Maintain the credential issuer
+## Tech Stack
 
-These instructions are for GOV.UK Wallet developers who are maintaining this service.
+This service is built with Java using Gradle, containerised with Docker, and deployed to ECS Fargate behind an API Gateway. It uses DynamoDB for storage and KMS for signing and encryption, with infrastructure managed via AWS SAM.
 
-### Before you start
+## Prerequisites
 
-You must install:
+* Java 17
+* Gradle 8.8
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run LocalStack locally and to build the app image
+* [Pre-commit](https://pre-commit.com/)
 
-* Java
-* Gradle
-* a tool for running docker applications locally, like [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-*[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+## Local Setup
 
-### Run the credential issuer
+### Format
 
-> Ensure that you are using the Java/Gradle versions specified in `.sdkmanrc`.
+`./gradlew spotlessApply`
 
-> Ensure you are running [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time.
+### Build
 
-#### Format
-
-Check with `./gradlew spotlessCheck`
-
-Apply with `./gradlew spotlessApply`
-
-#### Build
-
-Build with `./gradlew`
+`./gradlew`
 
 By default, this also calls `clean`, `spotlessApply` and `test`.
 
-#### Run
+### Run
 
-##### Set up LocalStack
-
-This app uses LocalStack to run AWS services (DynamoDB and KMS) locally on port `4560`.
-
-To start the LocalStack container and emulate the services, run:
+Start LocalStack to emulate AWS services (DynamoDB and KMS) locally on port `4560`.
 
 ```
 ./gradlew localstackUp
 ```
 
-##### Run the Application
+Running locally also requires a mock of STS and status list for end-to-end journey functionality.
 
-Run with `./gradlew run`
+Start the application:
 
-#### Test
+`./gradlew run`
 
-##### Unit Tests
+The service will be available at http://localhost:8080.
 
-Run unit tests with `./gradlew test`
+### Test
+
+`./gradlew test`
 
 ##### Testing with the Example CRI Test Harness
 
@@ -100,49 +90,16 @@ The [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-har
 
 `ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ./gradlew run`.
 
-### Deploy application to `dev`
+## Deployment
 
-> You must be logged into the Onboarding Products `dev` AWS account.
+This service is deployed via GitHub Actions.
 
-You can deploy the application to the `dev` AWS account by following these steps.
+Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
 
-#### Build and push the docker image
+## Contributing
 
-Run the script to build and push the Example CRI docker image. Make sure to specify:
+[README.md](../README.md)
 
-* an image tag
-* the name of your AWS profile for the Onboarding Products `dev` AWS account (which can be found in your `~/.aws/credentials` file)
-
-```shell
-./build-and-deploy-image.sh <your-chosen-tag> <your-onboarding-products-dev-profile>
-```
-
-This will:
-
-* build the docker image
-* log into ECR
-* push the image to ECR
-* update the `template.yaml` to specify this image for the Example CRI ECS task
-
-#### Update the SAM template
-
-If using your own deployed version of the [Document Builder](https://github.com/govuk-one-login/mobile-wallet-document-builder), you must update the following mapping values in the template:
-
-```yaml
-Mappings:
-  EnvironmentVariables:
-    dev:
-      CredentialStoreUrl: "<stack-name->stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-      AuthServerUrl: "<stack-name->stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-```
-
-#### Build and deploy the stack
-Run:
-
-```bash
-sam build && sam deploy --capabilities CAPABILITY_IAM --stack-name <your_stack_name>
-
-```
 ## Further Documentation
 
 | Document                                           | Description |

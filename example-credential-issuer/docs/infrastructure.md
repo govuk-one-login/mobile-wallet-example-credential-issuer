@@ -5,7 +5,7 @@ Mobile Wallet Example Credential Issuer runs as an ECS Fargate container in AWS 
 ```mermaid
 flowchart LR
  subgraph ecs["ECS Fargate"]
-        container["examplecri\gradlew\n Port 8000"]
+        container["examplecri\gradlew\n Port 8080"]
   end
  subgraph vpc["VPC"]
         alb["ALB (internal)"]
