@@ -58,8 +58,6 @@ This service is built with Java using Gradle, containerised with Docker, and dep
 
 `./gradlew spotlessCheck`
 
-`./gradlew spotlessApply`
-
 ### Build
 
 `./gradlew`
