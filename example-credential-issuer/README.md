@@ -51,26 +51,11 @@ This service is built with Java using Gradle, containerised with Docker, and dep
 * Gradle 8.8
 * a tool for running docker applications locally, like [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 *[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+* [Pre-commit](https://pre-commit.com/)
+
+> Ensure you are running [sts-mock](https://github.com/govuk-one-login/mobile-wallet-onboarding-products-mocks/tree/main/sts-mock) and [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time when you want to issue a credential for an mdl document.
 
 ## Local Setup
-
-### Run the credential issuer
-
-> Ensure that you are using the Java/Gradle versions specified in `.sdkmanrc`.
-
-> Ensure you are running [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time.
-
-### Pre-commit hooks
-
-```bash
-brew install pre-commit
-```
-
-```bash
-pre-commit install 
-pre-commit install --hook-type commit-msg
-pre-commit install --hook-type pre-push
-```
 
 ### Format
 
@@ -96,6 +81,8 @@ Run the application:
 
 `./gradlew run`
 
+The service will be available at http://localhost:8080.
+
 ### Test
 
 Run unit tests with:
@@ -116,10 +103,7 @@ Automated deployments to `build` are triggered on push to `main` after PR approv
 
 ## Contributing
 
-This project uses [pre-commit](https://pre-commit.com/) to enforce code quality and validate commit messages against [Conventional Commits](https://github.com/conventional-changelog/commitlint) standards - non-conforming messages will be rejected.
-
-Ensure your branch is up to date and all hooks pass before opening a pull request. Avoid using the git `--no-verify` flag to skip these checks unless absolutely necessary.
-
+[README.md](../README.md)
 
 ## Further Documentation
 
