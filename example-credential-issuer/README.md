@@ -49,8 +49,7 @@ This service is built with Java using Gradle, containerised with Docker, and dep
 
 * Java 17
 * Gradle 8.8
-* a tool for running docker applications locally, like [Docker Desktop](https://www.docker.com/products/docker-desktop/)
-*[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run LocalStack locally and to build the app image
 * [Pre-commit](https://pre-commit.com/)
 
 ## Local Setup
