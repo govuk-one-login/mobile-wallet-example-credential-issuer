@@ -53,19 +53,17 @@ This service is built with Java using Gradle, containerised with Docker, and dep
 *[AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/install-sam-cli.html)
 * [Pre-commit](https://pre-commit.com/)
 
-> Ensure you are running [sts-mock](https://github.com/govuk-one-login/mobile-wallet-onboarding-products-mocks/tree/main/sts-mock) and [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time when you want to issue a credential for an mdl document.
-
 ## Local Setup
 
 ### Format
 
-Check with `./gradlew spotlessCheck`
+`./gradlew spotlessCheck`
 
-Apply with `./gradlew spotlessApply`
+`./gradlew spotlessApply`
 
 ### Build
 
-Build with `./gradlew`
+`./gradlew`
 
 By default, this also calls `clean`, `spotlessApply` and `test`.
 
@@ -77,6 +75,11 @@ Start LocalStack to emulate AWS services (DynamoDB and KMS) locally on port `456
 ./gradlew localstackUp
 ```
 
+#### Running locally also requires:
+
+>  [sts-mock](https://github.com/govuk-one-login/mobile-wallet-onboarding-products-mocks/tree/main/sts-mock) 
+> and [status-list-mock](https://github.com/govuk-one-login/mobile-wallet-status-list-mock) at the same time when you want to issue a credential for an mdl document.
+
 Run the application:
 
 `./gradlew run`
@@ -84,8 +87,6 @@ Run the application:
 The service will be available at http://localhost:8080.
 
 ### Test
-
-Run unit tests with:
 
 `./gradlew test`
 
