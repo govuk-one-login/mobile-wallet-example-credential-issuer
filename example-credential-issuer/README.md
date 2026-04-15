@@ -20,8 +20,8 @@ There is more guidance on GOV.UK Wallet in the [technical documentation](https:/
 ## What is supported/not supported
 
 | Feature                                                                                                                  | Support                        |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
-| Issuing an [ISO_mDL](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅  Yes                         |
+|--------------------------------------------------------------------------------------------------------------------------| ------------------------------ |
+| Issuing an [ISO mDL](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅  Yes                         |
 | Issuing a [W3C VCDM](https://openid.net/specs/openid-4-verifiable-credential-issuance-1_0-ID2.html#section-1) credential | ✅ Yes                          |
 | Issuing a SD-JWT-VC credential                                                                                           | ❌ This format is not supported |
 | Revoking a credential with the status list                                                                               | ✅ Yes                          |
