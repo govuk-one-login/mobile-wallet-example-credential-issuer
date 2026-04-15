@@ -43,7 +43,7 @@ If you have questions or suggestions, contact us on [govukwallet-queries@digital
 
 ## Tech Stack
 
-This service is built with Java using Gradle, containerised with Docker, and deployed to ECS Fargate behind an API Gateway. It uses DynamoDB and S3 for storage and KMS for signing and encryption, with infrastructure managed via AWS SAM.
+This service is built with Java using Gradle, containerised with Docker, and deployed to ECS Fargate behind an API Gateway. It uses DynamoDB for storage and KMS for signing and encryption, with infrastructure managed via AWS SAM.
 
 ## Prerequisites
 
