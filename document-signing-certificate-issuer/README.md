@@ -17,6 +17,10 @@ This code is for government departments and service teams who want to issue cred
 
 If you have questions or suggestions, contact us on [govukwallet-queries@digital.cabinet-office.gov.uk](mailto:govukwallet-queries@digital.cabinet-office.gov.uk) or use #govuk-wallet in x-gov Slack.
 
+## Tech Stack
+
+This service is built with TypeScript and Node.js, deployed as AWS Lambda functions. It uses S3 for storage, KMS for encryprion, and SSM for configuration management.
+
 ## Maintaining the issuer
 
 These instructions are for GOV.UK Wallet developers who are maintaining this service.
