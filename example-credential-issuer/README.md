@@ -41,9 +41,9 @@ You must not use this example credential issuer in production.
 
 If you have questions or suggestions, contact us on [govukwallet-queries@digital.cabinet-office.gov.uk](mailto:govukwallet-queries@digital.cabinet-office.gov.uk) or use #govuk-wallet in x-gov Slack.
 
-## Maintain the credential issuer
+## Tech Stack
 
-These instructions are for GOV.UK Wallet developers who are maintaining this service.
+This service is built with Java using Gradle, containerised with Docker, and deployed to ECS Fargate behind an API Gateway. It uses DynamoDB and S3 for storage and KMS for signing and encryption, with infrastructure managed via AWS SAM.
 
 ## Prerequisites
 
