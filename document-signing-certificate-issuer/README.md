@@ -68,12 +68,6 @@ npm run lint:fix
 npm run format
 ```
 
-### Build
-
-### Run
-
-Start the application:
-
 ### Test
 
 ```bash
