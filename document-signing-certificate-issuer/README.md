@@ -46,7 +46,7 @@ If you have questions or suggestions, contact us on [govukwallet-queries@digital
 
 ## Tech Stack
 
-This service is built with TypeScript and Node.js, deployed as AWS Lambda functions. It uses S3 for storage, KMS for encryprion, and SSM for configuration management.
+This service is built with TypeScript and Node.js, deployed as an AWS Lambda function via AWS SAM. It uses S3 for certificate storage, KMS for signing, and SSM Parameter Store for configuration management.
 
 ## Prerequisites
 
@@ -82,4 +82,4 @@ Automated deployments to `build` are triggered on push to `main` after PR approv
 
 ## Contributing
 
-[READ.ME](../README.md)
+[README](../README.md)
