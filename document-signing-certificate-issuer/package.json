@@ -6,6 +6,7 @@
     "test": "node_modules/.bin/jest",
     "test:cov": "jest --coverage",
     "lint": "node_modules/.bin/eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "node_modules/.bin/prettier --write .",
     "format:check": "node_modules/.bin/prettier --check ."
   },
