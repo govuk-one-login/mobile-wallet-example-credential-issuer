@@ -100,3 +100,7 @@ The certificate issuer uploads the root certificate to the same bucket with the 
 This service is deployed via GitHub Actions, or using the AWS SAM CLI.
 
 Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
+
+## Contributing
+
+[READ.ME](../README.md)
