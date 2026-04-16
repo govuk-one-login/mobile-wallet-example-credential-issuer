@@ -31,10 +31,6 @@ The `template.yaml` in this project deploys:
 - an asymmetric ECC_NIST_P256 key management service (KMS) key to act as the document signing key and securely manage the key material and signing function
 - an S3 bucket to store the root certificate and the issued document signing certificates in PEM format so they can be accessed by the [example credential issuer](https://github.com/govuk-one-login/mobile-wallet-example-credential-issuer/tree/main/example-credential-issuer)
 
-### Before you start
-
-You can only deploy this stack into an account which already has the `mobile-platform-infra/platform-ca` CloudFormation stack deployed. The dependency provides the AWS Private CA resource, root certificate and references to it as SSM parameters.
-
 ### Deploying the stack
 
 You can deploy via GitHub actions, or using the AWS SAM CLI.
@@ -98,3 +94,9 @@ The certificate issuer stores the certificates it outputs in an S3 bucket with t
 - `certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation
 
 The certificate issuer uploads the root certificate to the same bucket with the key `<keyId>/certificate.pem`, where `<keyId>` is the certificate authority ID (in the form of a UUIDv4 string).
+
+## Deployment
+
+This service is deployed via GitHub Actions, or using the AWS SAM CLI.
+
+Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
