@@ -70,18 +70,9 @@ npm run format
 
 ### Build
 
-```bash
-npm run build
-```
-
 ### Run
 
 Start the application:
-
-```bash
-npm run start     # production mode
-npm run dev       # development mode with hot reload
-```
 
 ### Test
 
