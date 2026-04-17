@@ -180,6 +180,12 @@ Resources:
       BucketName: !Sub wallet-stub-back-${AWS::StackName}-${Environment}-access-logs
       VersioningConfiguration:
         Status: "Enabled"
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
