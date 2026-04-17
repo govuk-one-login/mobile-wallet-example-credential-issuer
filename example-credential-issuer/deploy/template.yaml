@@ -159,6 +159,7 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
             comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-WalletBE-API-GW-AccessLogs
@@ -170,6 +171,7 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
             comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Back-ECS
