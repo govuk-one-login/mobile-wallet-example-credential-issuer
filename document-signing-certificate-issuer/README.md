@@ -8,7 +8,7 @@ This code is for government departments and service teams who want to issue cred
 
 The `template.yaml` in this project deploys:
 
-- a Lambda function to issue an X.509 document signing certificate using an AWS Private CA instance deployed by the `mobile-platform-infra/platform-ca` CloudFormation stack in the account
+- a Lambda function to issue an X.509 document signing certificate using an AWS Private CA instance deployed by the `mobile-wallet-onboarding-products-infra/platform-ca` CloudFormation stack in the account
 - an asymmetric ECC_NIST_P256 key management service (KMS) key to act as the document signing key and securely manage the key material and signing function
 - an S3 bucket to store the root certificate and the issued document signing certificates in PEM format so they can be accessed by the [example credential issuer](https://github.com/govuk-one-login/mobile-wallet-example-credential-issuer/tree/main/example-credential-issuer)
 
@@ -26,12 +26,12 @@ When no more documents should be issued signed by a key, you should remove the a
 
 ### Output
 
-The certificate issuer stores the certificates it outputs in an S3 bucket with the key `<keyId>/certificate.pem`, where:
+The certificate issuer stores the certificates it outputs in an S3 bucket with the key `sign/<keyId>/certificate.pem`, where:
 
 - `<keyId>` is the KMS key ID in the form of a UUIDv4 string
 - `certificate.pem` is the canonical representation of the certificate and should be used in certificate path validation
 
-The certificate issuer uploads the root certificate to the same bucket with the key `<keyId>/certificate.pem`, where `<keyId>` is the certificate authority ID (in the form of a UUIDv4 string).
+The certificate issuer uploads the root certificate to the same bucket with the key `root/<keyId>/certificate.pem`, where `<keyId>` is the certificate authority ID (in the form of a UUIDv4 string).
 
 ## Disclaimers
 
