@@ -31,8 +31,15 @@ pre-commit install --hook-type commit-msg
 pre-commit install --hook-type pre-push
 ```
 
+Checkov
+
+We use Checkov for static analysis of our IaC. Following can be used to run a Checkov analysis locally.
+
 ```bash
 brew install checkov
+
+# Running Checkov analysis
+checkov ----file <PATH_TO_TEMPLATE>/template.yaml
 ```
 
 ## Getting Started
