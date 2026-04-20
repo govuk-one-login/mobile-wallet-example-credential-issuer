@@ -158,7 +158,7 @@ Resources:
     Metadata:
       checkov:
         skip:
-          - id: CKV_AWS_1589
+          - id: CKV_AWS_158
             rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
             comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:

@@ -20,7 +20,7 @@ repos:
             language: system
             entry: bash -c 'cd example-credential-issuer && checkov --file deploy/template.yaml'
             files: ^example-credential-issuer/deploy/template.yaml
-            stages: [ pre-push ]
+            stages: [ pre-commit ]
 
         -   id: java - tests
             name: Gradle - unit tests
@@ -32,7 +32,7 @@ repos:
   -   repo: local
       hooks:
         -   id: eslint-ts
-            name: ESLint- Typescript lint
+            name: ESLint - Typescript lint
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run lint'
             files: ^document-signing-certificate-issuer/.*\.(ts|md)$
