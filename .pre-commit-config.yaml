@@ -15,12 +15,12 @@ repos:
             files: ^example-credential-issuer/.*\.(java|md)$
             stages: [pre-commit]
 
-        - id: example-credential-issuer checkov
-          name: Infrastructure static analysis
-          language: system
-          entry: bash -c 'cd example-credential-issuer && checkov --file deploy/template.yaml'
-          files: ^example-credential-issuer/deploy/.*\.yaml
-          stages: [ pre-push ]
+        -   id: example-credential-issuer checkov
+            name: Infrastructure static analysis
+            language: system
+            entry: bash -c 'cd example-credential-issuer && checkov --file deploy/template.yaml'
+            files: ^example-credential-issuer/deploy/template.yaml
+            stages: [ pre-push ]
 
         -   id: java - tests
             name: Gradle - unit tests
