@@ -8,15 +8,22 @@ repos:
 
   -   repo: local
       hooks:
-        -   id: spotless-java
-            name: Spotless - Java format check
+        -   id: cri-spotless
+            name: CRI - Java format check
             language: system
             entry: bash -c 'cd example-credential-issuer && ./gradlew spotlessCheck -q'
             files: ^example-credential-issuer/.*\.(java|md)$
             stages: [pre-commit]
 
-        -   id: java - tests
-            name: Gradle - unit tests
+        -   id: cri-checkov
+            name: CRI - Infrastructure static analysis
+            language: system
+            entry: bash -c 'cd example-credential-issuer && checkov --file deploy/template.yaml'
+            files: ^example-credential-issuer/deploy/template.yaml
+            stages: [ pre-commit ]
+
+        -   id: cri-tests
+            name: CRI - Gradle unit tests
             language: system
             entry: bash -c 'cd example-credential-issuer && ./gradlew test -q'
             files: ^example-credential-issuer/.*\.java$
@@ -24,22 +31,22 @@ repos:
 
   -   repo: local
       hooks:
-        -   id: eslint-ts
-            name: ESLint- Typescript lint
+        -   id: dsc-eslint-ts
+            name: DSC - ESLint linter
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run lint'
             files: ^document-signing-certificate-issuer/.*\.(ts|md)$
             stages: [pre-commit]
 
-        -   id: prettier-ts
-            name: Prettier - format check
+        -   id: dsc-prettier-ts
+            name: DSC - Prettier format check
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run format:check'
             files: ^document-signing-certificate-issuer/.*\.(ts|md)$
             stages: [pre-commit]
 
-        -   id: jest-tests
-            name: Jest - unit tests
+        -   id: dsc-jest-tests
+            name: DSC - Jest unit tests
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run test'
             files: ^document-signing-certificate-issuer/.*\.ts$

@@ -155,12 +155,24 @@ Resources:
   # ACCESS LOGS
   WalletBEAPIGWAccessLogsGroup:
     Type: AWS::Logs::LogGroup
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-WalletBE-API-GW-AccessLogs
       RetentionInDays: 14
 
   WalletBEECSAccessLogsGroup:
     Type: AWS::Logs::LogGroup
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Properties:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Back-ECS
       RetentionInDays: 14
@@ -180,6 +192,12 @@ Resources:
       BucketName: !Sub wallet-stub-back-${AWS::StackName}-${Environment}-access-logs
       VersioningConfiguration:
         Status: "Enabled"
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
       PublicAccessBlockConfiguration:
         BlockPublicAcls: true
         BlockPublicPolicy: true
@@ -241,6 +259,8 @@ Resources:
         - Key: idle_timeout.timeout_seconds
           Value: 60
         - Key: deletion_protection.enabled
+          Value: true
+        - Key: routing.http.drop_invalid_header_fields.enabled
           Value: true
 
   WalletBELoadBalancerListenerTargetGroupECS:
