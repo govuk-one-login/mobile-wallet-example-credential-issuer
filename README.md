@@ -39,7 +39,7 @@ We use Checkov for static analysis of our IaC. Following can be used to run a Ch
 brew install checkov
 
 # Running Checkov analysis
-checkov ----file <PATH_TO_TEMPLATE>/template.yaml
+checkov --file <PATH_TO_TEMPLATE>/template.yaml
 ```
 
 ## Getting Started
