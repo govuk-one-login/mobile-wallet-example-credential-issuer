@@ -42,7 +42,7 @@ repos:
             name: DSC - Prettier format check
             language: system
             entry: bash -c 'cd document-signing-certificate-issuer && npm run format:check'
-            files: ^document-signing-certificate-issuer/.*\.(ts|md)$
+            files: ^document-signing-certificate-issuer/.*\.(ts|md|yaml)$
             stages: [pre-commit]
 
         -   id: dsc-jest-tests

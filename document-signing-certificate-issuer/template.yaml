@@ -208,11 +208,11 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_116
-            rule: "Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)"
-            comment: "Cannot have a Dead Letter Queue for a function invoked by an API Gateway."
+            rule: 'Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)'
+            comment: 'Cannot have a Dead Letter Queue for a function invoked by an API Gateway.'
           - id: CKV_AWS_173
-            rule: "Check encryption settings for Lambda environment variable"
-            comment: "Env vars in the lambda do not require encryption."
+            rule: 'Check encryption settings for Lambda environment variable'
+            comment: 'Env vars in the lambda do not require encryption.'
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -225,7 +225,7 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_158
-            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            rule: 'Ensure that CloudWatch Log Group is encrypted by KMS'
             comment: KMS encryption not required as log group will not contain sensitive data.
     Type: AWS::Logs::LogGroup
     Properties:
