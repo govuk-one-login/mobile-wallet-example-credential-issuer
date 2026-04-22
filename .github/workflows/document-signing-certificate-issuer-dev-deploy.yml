@@ -27,6 +27,13 @@ jobs:
           # Check out the repository at the specific branch, tag, or commit
           ref: ${{ inputs.gitRef }}
 
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@de2bfaecd21d58ef232e0d2a3391c33c32c460d7 # v12.3096.0
+        with:
+          file: "document-signing-certificate-issuer/template.yaml"
+          quiet: true
+          soft_fail: false
+
       - name: Set up Node.js
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6.3.0
         with:
