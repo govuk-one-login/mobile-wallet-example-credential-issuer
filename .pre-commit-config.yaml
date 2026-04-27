@@ -56,5 +56,5 @@ repos:
         name: DSC - Infrastructure static analysis
         language: system
         entry: bash -c 'cd document-signing-certificate-issuer && npm run checkov'
-        files: ^example-credential-issuer/deploy/template.yaml
+        files: ^document-signing-certificate-issuer/template.yaml
         stages: [pre-commit]
