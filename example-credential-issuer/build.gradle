@@ -142,6 +142,6 @@ tasks.register("localstackDown", Exec) {
 
 tasks.register("checkov", Exec) {
 	group = "checkov"
-	description = "Runs static analysis on Cloudformation template"
+	description = "Runs static analysis on CloudFormation template"
 	commandLine "sh", "-c", "checkov --file ./deploy/template.yaml"
 }
