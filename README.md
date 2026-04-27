@@ -42,6 +42,8 @@ brew install checkov
 checkov --file <PATH_TO_TEMPLATE>/template.yaml
 ```
 
+Individual project READMEs have specific commands to run checkov analysis.
+
 ## Getting Started
 
 See the README files in each module directory for further information on each service.

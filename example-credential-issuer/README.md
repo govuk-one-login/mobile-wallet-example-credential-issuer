@@ -84,6 +84,10 @@ The service will be available at http://localhost:8080.
 
 `./gradlew test`
 
+### Infrastructure static analysis
+
+`./gradlew checkov`
+
 ##### Testing with the Example CRI Test Harness
 
 The [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-harness) contains a mock of the GOV.UK One Login authorization server. You must configure your authorization server URL to point to the mock:

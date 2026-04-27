@@ -8,7 +8,8 @@
     "lint": "node_modules/.bin/eslint .",
     "lint:fix": "eslint . --fix",
     "format": "node_modules/.bin/prettier --write .",
-    "format:check": "node_modules/.bin/prettier --check ."
+    "format:check": "node_modules/.bin/prettier --check .",
+    "checkov": "checkov --file ./template.yaml"
   },
   "description": "",
   "dependencies": {
