@@ -68,6 +68,12 @@ npm run lint:fix
 npm run format
 ```
 
+### Infrastructure static analysis
+
+```bash
+npm run checkov
+```
+
 ### Test
 
 ```bash
