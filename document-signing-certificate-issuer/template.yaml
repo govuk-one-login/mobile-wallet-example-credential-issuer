@@ -205,6 +205,14 @@ Resources:
           - !ImportValue
             Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
     Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_116
+            rule: 'Ensure that AWS Lambda function is configured for a Dead Letter Queue(DLQ)'
+            comment: 'Cannot have a Dead Letter Queue for a function invoked by an API Gateway.'
+          - id: CKV_AWS_173
+            rule: 'Check encryption settings for Lambda environment variable'
+            comment: 'Env vars in the lambda do not require encryption.'
       BuildMethod: esbuild
       BuildProperties:
         Minify: true
@@ -213,6 +221,12 @@ Resources:
           - src/issueDocumentSigningCertificate.ts
 
   IssueDocSigningCertificateFunctionLogGroup:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: 'Ensure that CloudWatch Log Group is encrypted by KMS'
+            comment: KMS encryption not required as log group will not contain sensitive data.
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: !Sub /aws/lambda/${AWS::StackName}-issue-doc-signing-certificate
@@ -244,6 +258,12 @@ Resources:
             NoncurrentVersionExpiration:
               NoncurrentDays: 14
             Status: Enabled
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
 
   DocSigningCertificateBucketPolicy:
     Type: 'AWS::S3::BucketPolicy'

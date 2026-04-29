@@ -139,3 +139,9 @@ tasks.register("localstackDown", Exec) {
 	description = "Stops and removes LocalStack container"
 	commandLine "sh", "-c", "docker compose -f docker-compose.yml down"
 }
+
+tasks.register("checkov", Exec) {
+	group = "checkov"
+	description = "Runs static analysis on CloudFormation template"
+	commandLine "sh", "-c", "checkov --file ./deploy/template.yaml"
+}
