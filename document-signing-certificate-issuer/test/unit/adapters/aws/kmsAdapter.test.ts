@@ -18,7 +18,7 @@ describe('kmsAdapter', () => {
       });
 
       // ACT
-      const response = await signWithEcdsaSha256('KEYID', Buffer.from('BUFFER_TO_SIGN'));
+      const response = await signWithEcdsaSha256('KEYID', Buffer.from('BUFFER_TO_SIGN').buffer);
 
       // ASSERT
       expect(response).toEqual(Buffer.from('SIGNED_BUFFER'));
@@ -34,7 +34,7 @@ describe('kmsAdapter', () => {
       mockKmsClient.on(SignCommand).rejects('REJECTED');
 
       // ACT
-      const promise = signWithEcdsaSha256('KEYID', Buffer.from('BUFFER_TO_SIGN'));
+      const promise = signWithEcdsaSha256('KEYID', Buffer.from('BUFFER_TO_SIGN').buffer);
 
       // ASSERT
       expect(mockKmsClient).toHaveReceivedCommandTimes(SignCommand, 1);
@@ -48,7 +48,7 @@ describe('kmsAdapter', () => {
       });
 
       // ACT
-      const promise = signWithEcdsaSha256('KEYID', Buffer.from('BUFFER_TO_SIGN'));
+      const promise = signWithEcdsaSha256('KEYID', Buffer.from('BUFFER_TO_SIGN').buffer);
 
       // ASSERT
       expect(mockKmsClient).toHaveReceivedCommandTimes(SignCommand, 1);
