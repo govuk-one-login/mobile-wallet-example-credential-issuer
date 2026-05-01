@@ -1,14 +1,14 @@
 {
   "compilerOptions": {
     "rootDir": ".",
-    "target": "es2025",
-    "lib": ["esnext"],
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "strict": true,
     "preserveConstEnums": true,
     "noEmit": true,
     "sourceMap": true,
-    "module": "ESNext",
-    "moduleResolution": "nodenext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
