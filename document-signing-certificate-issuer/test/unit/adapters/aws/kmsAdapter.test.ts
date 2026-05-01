@@ -24,7 +24,7 @@ describe('kmsAdapter', () => {
       expect(response).toEqual(Buffer.from('SIGNED_BUFFER'));
       expect(mockKmsClient).toHaveReceivedCommandWith(SignCommand, {
         KeyId: 'KEYID',
-        Message: Buffer.from('BUFFER_TO_SIGN'),
+        Message: Buffer.from(Buffer.from('BUFFER_TO_SIGN').buffer),
         SigningAlgorithm: 'ECDSA_SHA_256',
       });
     });
