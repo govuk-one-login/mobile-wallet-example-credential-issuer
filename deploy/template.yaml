@@ -1,0 +1,772 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Transform:
+  - AWS::Serverless-2016-10-31
+Description: >-
+  Wallet Stub FE
+Parameters:
+  Environment:
+    Description: "The environment type"
+    Type: "String"
+    Default: dev
+    AllowedValues:
+      - "dev"
+      - "build"
+      - "staging"
+      - "integration"
+  VpcStackName:
+    Description: >
+      The name of the stack that defines the VPC in which this container will run.
+    Type: String
+    Default: vpc
+  PermissionsBoundary:
+    Description: "The ARN of the permissions boundary to apply when creating IAM roles"
+    Type: String
+    Default: "none"
+  ContainerPort:
+    Description: >
+      The port on which the container is running
+    Type: Number
+    Default: 8000
+
+Conditions:
+  StackNameIsWalletDocBuilderFE: !Equals [!Ref "AWS::StackName", wallet-doc-builder]
+
+  IsStagingOrInt: !Or
+    - !Equals [!Ref Environment, staging]
+    - !Equals [!Ref Environment, integration]
+
+  UsePermissionsBoundary:
+    Fn::Not:
+      - Fn::Equals:
+          - !Ref PermissionsBoundary
+          - "none"
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      CredentialIssuerUrl: "example-credential-issuer.wallet-onboarding.dev.account.gov.uk"
+      SelfUrl: "stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
+      DocumentBuilderImageRepository: arn:aws:ecr:eu-west-2:219494607463:repository/doc-builder-image-repo-containerrepository-lc2jfleeqwvq
+      OidcIssuerEndpoint: "https://auth-stub.mobile.dev.account.gov.uk"
+      WalletApps: "govuk-build,wallet-test-dev,wallet-test-build"
+      OneLoginAuthServerUrl: "sts-mock.wallet-onboarding.dev.account.gov.uk"
+    build:
+      CredentialIssuerUrl: "example-credential-issuer.wallet-onboarding.build.account.gov.uk"
+      SelfUrl: "stub-credential-issuer.wallet-onboarding.build.account.gov.uk"
+      DocumentBuilderImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/doc-builder-image-repo-containerrepository-edrvcvwivlcg
+      OidcIssuerEndpoint: "https://auth-stub.mobile.build.account.gov.uk"
+      WalletApps: "govuk-build,wallet-test-dev,wallet-test-build"
+      OneLoginAuthServerUrl: "sts-mock.wallet-onboarding.build.account.gov.uk"
+    staging:
+      CredentialIssuerUrl: "example-credential-issuer.wallet-onboarding.staging.account.gov.uk"
+      SelfUrl: "stub-credential-issuer.wallet-onboarding.staging.account.gov.uk"
+      DocumentBuilderImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/doc-builder-image-repo-containerrepository-edrvcvwivlcg
+      OidcIssuerEndpoint: "https://oidc.staging.account.gov.uk"
+      WalletApps: "govuk-staging,wallet-test-staging"
+      OneLoginAuthServerUrl: "" # Not required as functionality to issue credential without the wallet isn't available in staging
+    integration:
+      CredentialIssuerUrl: "example-credential-issuer.wallet-onboarding.integration.account.gov.uk"
+      SelfUrl: "stub-credential-issuer.wallet-onboarding.integration.account.gov.uk"
+      DocumentBuilderImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/doc-builder-image-repo-containerrepository-edrvcvwivlcg
+      OidcIssuerEndpoint: "" # Not required as the DVS flow doesn't require authentication
+      WalletApps: "wallet-test-verifier-integration"
+      OneLoginAuthServerUrl: "" # Not required as functionality to issue credential without the wallet isn't available in integration
+  ElasticLoadBalancerAccountIds:
+    eu-west-2:
+      AccountId: 652711504416
+
+Resources:
+  # SECURITY GROUPS
+  WalletFELoadBalancerSG:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub Front LoadBalancer Security Group
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+
+  WalletFELoadBalancerSGEgressToECSSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !GetAtt WalletFELoadBalancerSG.GroupId
+      IpProtocol: tcp
+      Description: >-
+        Egress between the Wallet Stub FE Front load balancer and the Wallet Stub FE Front ECS security group
+      DestinationSecurityGroupId: !GetAtt WalletFEECSSecurityGroup.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+
+  WalletFEECSSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub Front ECS Security Group permitting outbound to anywhere.
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow all outbound traffic by default
+          IpProtocol: '-1'
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+
+  WalletFEECSSecurityGroupIngressFromLoadBalancer:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      IpProtocol: tcp
+      Description: >-
+        Wallet Stub FE ECS permits inbound from the Wallet Stub Front load balancer.
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt WalletFEECSSecurityGroup.GroupId
+      SourceSecurityGroupId: !GetAtt WalletFELoadBalancerSG.GroupId
+
+  # ACCESS LOGS
+  WalletFEAPIGWAccessLogsGroup:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            comment: KMS encryption not required as log group will not contain sensitive data.
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/apigateway/${AWS::StackName}-WalletFE-API-GW-AccessLogs
+      RetentionInDays: 14
+
+  WalletFEECSAccessLogsGroup:
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_158
+            rule: "Ensure that CloudWatch Log Group is encrypted by KMS"
+            comment: KMS encryption not required as log group will not contain sensitive data.
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Front-ECS
+      RetentionInDays: 14
+
+  WalletFEAccessLogsBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub wallet-stub-front-${AWS::StackName}-${Environment}-access-logs
+      VersioningConfiguration:
+        Status: "Enabled"
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  WalletFEAccessLogsBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref WalletFEAccessLogsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub
+                - "arn:aws:iam::${ElbAccountId}:root"
+                - ElbAccountId: !FindInMap [ElasticLoadBalancerAccountIds, !Ref 'AWS::Region', AccountId]
+            Action:
+              - s3:PutObject
+            Resource:
+              - !Sub arn:aws:s3:::${WalletFEAccessLogsBucket}/wallet-stub-front-${Environment}/AWSLogs/${AWS::AccountId}/*
+          - Effect: Deny
+            Sid: AllowSSLRequestsOnly
+            Principal: "*"
+            Action: s3:*
+            Resource:
+              - !Sub arn:aws:s3:::${WalletFEAccessLogsBucket}/wallet-stub-front-${Environment}/AWSLogs/${AWS::AccountId}/*
+            Condition:
+              Bool:
+                aws:SecureTransport": false
+
+  # LOAD BALANCER
+  WalletFELoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt WalletFELoadBalancerSG.GroupId
+      Subnets:
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
+      Type: application
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: true
+        - Key: access_logs.s3.bucket
+          Value: !Ref WalletFEAccessLogsBucket
+        - Key: access_logs.s3.prefix
+          Value: !Sub wallet-stub-front-${Environment}
+        - Key: idle_timeout.timeout_seconds
+          Value: 60
+        - Key: deletion_protection.enabled
+          Value: true
+        - Key: routing.http.drop_invalid_header_fields.enabled
+          Value: true
+
+  WalletFELoadBalancerListenerTargetGroupECS:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Properties:
+      HealthCheckEnabled: TRUE
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: "/healthcheck"
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 60
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-499
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+
+  WalletFELoadBalancerListener:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECS
+          Type: forward
+      LoadBalancerArn: !Ref WalletFELoadBalancer
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+
+  # API GATEWAY
+  WalletFEApiGwHttpEndpoint:
+    Type: 'AWS::ApiGatewayV2::Api'
+    Properties:
+      Name: !Sub wallet-stub-front-${Environment}-${AWS::StackName}
+      Description: !Sub "Wallet Stub Frontend API. ${AWS::StackName}"
+      ProtocolType: HTTP
+
+  WalletFEApiGwHttpEndpointIntegration:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Properties:
+      ApiId: !Ref WalletFEApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref WalletFELoadBalancerListener
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletFEFrontCustomDomain
+
+  WalletFEAPIGWRoute:
+    Type: 'AWS::ApiGatewayV2::Route'
+    Properties:
+      ApiId: !Ref WalletFEApiGwHttpEndpoint
+      RouteKey: 'ANY /{proxy+}'
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref WalletFEApiGwHttpEndpointIntegration
+
+  WalletFEAPIStageDefault:
+    Type: 'AWS::ApiGatewayV2::Stage'
+    Properties:
+      ApiId: !Ref WalletFEApiGwHttpEndpoint
+      StageName: $default
+      AutoDeploy: true
+      DefaultRouteSettings:
+        DataTraceEnabled: false
+        DetailedMetricsEnabled: true
+        ThrottlingBurstLimit: 400
+        ThrottlingRateLimit: 1200
+      AccessLogSettings:
+        DestinationArn: !GetAtt WalletFEAPIGWAccessLogsGroup.Arn
+        Format: >-
+          { "requestId":"$context.requestId", "ip": "$context.identity.sourceIp", "requestTime":"$context.requestTime", "httpMethod":"$context.httpMethod", "path": "$context.path", "routeKey":"$context.routeKey", "status":"$context.status", "protocol":"$context.protocol", "responseLength":"$context.responseLength" }
+
+  WalletFEFrontCustomDomain:
+    Type: AWS::ApiGatewayV2::DomainName
+    Properties:
+      DomainName: !If
+        - StackNameIsWalletDocBuilderFE
+        - !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+        - !Sub
+          - "${AWS::StackName}-${SelfUrl}"
+          - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+      DomainNameConfigurations:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+          EndpointType: REGIONAL
+          SecurityPolicy: TLS_1_2
+
+  WalletFEFrontApiRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Ref WalletFEFrontCustomDomain
+      Type: A
+      HostedZoneId: !Sub "{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}"
+      AliasTarget:
+        DNSName: !GetAtt WalletFEFrontCustomDomain.RegionalDomainName
+        HostedZoneId: !GetAtt WalletFEFrontCustomDomain.RegionalHostedZoneId
+        EvaluateTargetHealth: false
+
+  WallFEFrontApiMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Ref WalletFEFrontCustomDomain
+      ApiId: !Ref WalletFEApiGwHttpEndpoint
+      Stage: !Ref WalletFEAPIStageDefault
+
+  # ECS
+  WalletFECluster:
+    Type: 'AWS::ECS::Cluster'
+    Properties:
+      ClusterSettings:
+        - Name: containerInsights
+          Value: enabled
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletECSCluster"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet Stub FE"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+  WalletFEECSService:
+    DependsOn:
+      - WalletFELoadBalancerListener
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref WalletFECluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECS
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt WalletFEECSSecurityGroup.GroupId
+          Subnets:
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
+      TaskDefinition: !Ref WalletFEECSServiceTaskDefinition
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletECS"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet FE Stub"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+  WalletFEECSServiceTaskDefinition:
+    Type: 'AWS::ECS::TaskDefinition'
+    Properties:
+      ContainerDefinitions:
+        - Essential: true
+          # Image is replaced by ./build-and-deploy-image.sh (manual dev deployment) or GitHub Actions (pipeline deployments).
+          Image: CONTAINER-IMAGE-PLACEHOLDER
+          Name: app
+          Environment:
+            - Name: PORT
+              Value: !Ref ContainerPort
+            - Name: DOCUMENTS_TABLE_NAME
+              Value: !Ref DocumentDatabase
+            - Name: PHOTOS_BUCKET_NAME
+              Value: !Ref PhotosBucket
+            - Name: ENVIRONMENT
+              Value: !Sub "${Environment}"
+            - Name: CREDENTIAL_ISSUER_URL
+              Value: !Sub
+                - "https://${CredentialIssuerUrl}"
+                - CredentialIssuerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, CredentialIssuerUrl]
+            - Name: STS_SIGNING_KEY_ID
+              Value: !Ref StsStubSigningKey
+            - Name: SELF
+              Value: !If
+                - StackNameIsWalletDocBuilderFE
+                - !Sub
+                  - "https://${SelfUrl}"
+                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+                - !Sub
+                  - "https://${AWS::StackName}-${SelfUrl}"
+                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+            - Name: OIDC_CLIENT_ID
+              Value: !Sub "{{resolve:ssm:/${AWS::StackName}/Config/OIDC/Client/Id}}"
+            - Name: CLIENT_SIGNING_KEY_ID
+              Value: !Ref ClientSigningKey
+            - Name: OIDC_ISSUER_DISCOVERY_ENDPOINT
+              Value: !FindInMap [EnvironmentVariables, !Ref Environment, OidcIssuerEndpoint]
+            - Name: WALLET_APPS
+              Value: !FindInMap [EnvironmentVariables, !Ref Environment, WalletApps]
+            - Name: ONE_LOGIN_AUTH_SERVER_URL
+              Value: !Sub
+                - "https://${OneLoginAuthServerUrl}"
+                - OneLoginAuthServerUrl: !FindInMap [ EnvironmentVariables, !Ref Environment, OneLoginAuthServerUrl ]
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-group: !Ref WalletFEECSAccessLogsGroup
+              awslogs-region: !Sub ${AWS::Region}
+              awslogs-stream-prefix: !Sub wallet-stub-front-${Environment}
+      Cpu: '1024' # Increased to use 1 CPU unit
+      ExecutionRoleArn: !GetAtt WalletFEECSTaskExecutionRole.Arn
+      Memory: '2048' # Upgraded memory value to match with increased CPU
+      NetworkMode: awsvpc
+      RequiresCompatibilities:
+        - FARGATE
+      TaskRoleArn: !GetAtt WalletFEECSTaskRole.Arn
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletTaskDefinition"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet Stub FE"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+  WalletFEECSTaskExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      Policies:
+        - PolicyName: ECSTaskExecutionPermissions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "ecr:BatchGetImage"
+                  - "ecr:GetDownloadUrlForLayer"
+                  - "ecr:BatchCheckLayerAvailability"
+                Resource:
+                  - !FindInMap [EnvironmentVariables, !Ref Environment, DocumentBuilderImageRepository]
+              - Effect: Allow
+                Action:
+                  - "ecr:GetAuthorizationToken"
+                Resource:
+                  - "*"
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource:
+                  - !GetAtt "WalletFEECSAccessLogsGroup.Arn"
+                  - !Sub "${WalletFEECSAccessLogsGroup.Arn}:*"
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  WalletFEECSTaskRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: 'sts:AssumeRole'
+            Effect: Allow
+            Principal:
+              Service: ecs-tasks.amazonaws.com
+        Version: 2012-10-17
+      Policies:
+        - PolicyName: AccessDynamoDb
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:GetItem'
+                Resource: !GetAtt DocumentDatabase.Arn
+              - Effect: Allow
+                Action:
+                  - 'kms:Decrypt'
+                  - 'kms:Encrypt'
+                  - 'kms:GenerateDataKey'
+                Resource: !GetAtt DocumentDatabaseKmsKey.Arn
+        - PolicyName: AccessS3
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:PutObject'
+                  - 's3:GetObject'
+                Resource:
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}/*
+                    - TargetBucket: !Ref PhotosBucket
+                  - !Sub
+                    - arn:aws:s3:::${TargetBucket}
+                    - TargetBucket: !Ref PhotosBucket
+      PermissionsBoundary: !If
+        - UsePermissionsBoundary
+        - !Ref PermissionsBoundary
+        - !Ref AWS::NoValue
+
+  # KMS
+  StsStubSigningKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: ECC asymmetric key for signing tokens
+      Enabled: true
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action:
+              - "kms:*"
+            Resource:
+              - "*"
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt WalletFEECSTaskRole.Arn
+            Action:
+              - 'kms:Sign'
+              - 'kms:GetPublicKey'
+            Resource:
+              - "*"
+      KeySpec: ECC_NIST_P256
+      KeyUsage: SIGN_VERIFY
+      MultiRegion: false
+
+  StsStubSigningKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/sts-stub-signing-key-${AWS::StackName}"
+      TargetKeyId: !Ref StsStubSigningKey
+
+  ClientSigningKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: RSA asymmetric key for signing tokens
+      Enabled: true
+      EnableKeyRotation: false
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+            Action:
+              - "kms:*"
+            Resource:
+              - "*"
+          - Effect: Allow
+            Principal:
+              AWS: !GetAtt WalletFEECSTaskRole.Arn
+            Action:
+              - 'kms:Sign'
+              - 'kms:GetPublicKey'
+            Resource:
+              - "*"
+      KeySpec: RSA_2048
+      KeyUsage: SIGN_VERIFY
+      MultiRegion: false
+
+  ClientSigningKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/client-assertion-signing-key-${AWS::StackName}"
+      TargetKeyId: !Ref ClientSigningKey
+
+  DocumentDatabaseKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS: !Sub arn:aws:iam::${AWS::AccountId}:root
+            Action:
+              - kms:*
+            Resource:
+              - "*"
+
+  DocumentDatabaseKmsKeyAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: !Sub "alias/database-encryption-key-${AWS::StackName}"
+      TargetKeyId: !Ref DocumentDatabaseKmsKey
+
+  # DYNAMODB
+  DocumentDatabase:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      AttributeDefinitions:
+        - AttributeName: itemId
+          AttributeType: S
+      BillingMode: PAY_PER_REQUEST
+      TableName: !Sub "${AWS::StackName}-documents"
+      KeySchema:
+        - AttributeName: itemId
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: timeToLive
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
+        SSEType: KMS
+        KMSMasterKeyId: !GetAtt DocumentDatabaseKmsKey.Arn
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Mobile Wallet
+        - Key: Owner
+          Value: Mobile Wallet Team
+        - Key: Environment
+          Value: !Ref "Environment"
+
+  # S3
+  PhotosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "${AWS::StackName}-${Environment}-photos"
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
+      Tags:
+        - Key: Product
+          Value: GOV.UK Sign In
+        - Key: System
+          Value: Mobile Wallet
+        - Key: Owner
+          Value: Mobile Wallet Team
+        - Key: Environment
+          Value: !Ref Environment
+
+  PhotosBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref PhotosBucket
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Sid: AllowSSLRequestsOnly
+            Effect: Deny
+            Principal:
+              AWS: "*"
+            Action: "*"
+            Resource: !Sub
+              - "arn:aws:s3:::${bucketName}/*"
+              - bucketName: !Ref PhotosBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+
+  # ALARMS
+  DocBuilderLowContainerTaskCountAlarm:
+    Condition: IsStagingOrInt
+    DependsOn:
+      - WalletFECluster
+      - WalletFEECSService
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${AWS::StackName}-DocBuilderLowContainerTaskCountAlarm"
+      AlarmDescription: Trigger the alarm if the running container task count drops below 1
+      ActionsEnabled: true
+      AlarmActions:
+        - !ImportValue alarm-sns-topic-warning
+      OKActions:
+        - !ImportValue alarm-sns-topic-warning
+      InsufficientDataActions: []
+      Dimensions: []
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: breaching
+      Metrics:
+        - Id: containerTaskCount
+          ReturnData: true
+          MetricStat:
+            Metric:
+              Namespace: ECS/ContainerInsights
+              MetricName: RunningTaskCount
+              Dimensions:
+                - Name: ClusterName
+                  Value: !Ref WalletFECluster
+                - Name: ServiceName
+                  Value: !GetAtt WalletFEECSService.Name
+            Period: 60
+            Stat: Minimum
+
+Outputs:
+  DocBuilderFriendlyUrl:
+    Description: Friendly URL for the deployed doc builder service
+    Value: !If
+      - StackNameIsWalletDocBuilderFE
+      - !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+      - !Sub
+        - "${AWS::StackName}-${SelfUrl}"
+        - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]

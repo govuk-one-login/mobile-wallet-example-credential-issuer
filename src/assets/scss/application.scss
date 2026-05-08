@@ -1,0 +1,44 @@
+@import "../../../node_modules/govuk-frontend/dist/govuk/index";
+
+.govuk-header__navigation-list {
+  display: flex;
+  justify-content: right;
+}
+
+.govuk-body {
+  overflow-wrap: break-word;
+  hyphens: manual;
+}
+
+.govuk-notification-banner--error {
+  border-color: #d4351c;
+}
+
+.govuk-notification-banner__heading {
+  max-width: none;
+}
+
+.govuk-disable-max-width {
+  max-width: none;
+  margin-left: 10px;
+  margin-right: 10px;
+}
+
+.monospace {
+  max-width: 100%;
+  min-width: 100px;
+  background: #f4f4f4;
+  border: 1px solid #ddd;
+  border-left: 3px solid #f36d33;
+  color: #666;
+  page-break-inside: avoid;
+  font-family: monospace;
+  font-size: 15px;
+  line-height: 1.6;
+  margin-bottom: 1.6em;
+  overflow-x: auto;
+  padding: 1em 1.5em;
+  display: block;
+  word-wrap: anywhere;
+  white-space: pre-wrap;
+}
