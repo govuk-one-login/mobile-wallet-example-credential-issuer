@@ -1,0 +1,98 @@
+{% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% extends "base.njk" %}
+{% set pageTitle = "Enter the NINO document details" %}
+{% block content %}
+    <form action="/build-nino-document" method="post">
+        {% call govukFieldset({
+            legend: {
+            text: pageTitle,
+            classes: "govuk-fieldset__legend--m",
+            isPageHeading: true
+            } }) %}
+            {{ govukButton({"text": "Continue", "type": "Submit", "preventDoubleClick": true}) }}
+            {{ govukInput({
+                "label": {
+                    "text": "Title",
+                    "classes": "govuk-label--s"
+                },
+                "classes": "govuk-input--width-5",
+                "id": "title",
+                "name": "title",
+                "spellcheck": false,
+                "value": "Mr"
+            }) }}
+            {{ govukInput({
+                "label": {
+                    "text": "Given name",
+                    "classes": "govuk-label--s"
+                },
+                "classes": "govuk-input--width-20",
+                "id": "given-name",
+                "name": "givenName",
+                "autocomplete": "given-name",
+                "spellcheck": false,
+                "value": "Sarah Elizabeth"
+            }) }}
+            {{ govukInput({
+                "label": {
+                    "text": "Family name",
+                    "classes": "govuk-label--s"
+                },
+                "classes": "govuk-input--width-20",
+                "id": "family-name",
+                "name": "familyName",
+                "autocomplete": "family-name",
+                "spellcheck": false,
+                "value": "Edwards"
+            }) }}
+            {{ govukInput({
+                "label": {
+                    "text": "National Insurance Number",
+                    "classes": "govuk-label--s"
+                },
+                "classes": "govuk-input--width-10",
+                "id": "nino",
+                "name": "nino",
+                "spellcheck": false,
+                "value": "QQ123456C"
+            }) }}
+            {{ govukRadios({
+                classes: "govuk-radios--small",
+                name: "credentialTtl",
+                fieldset: {
+                    legend: {
+                        text: "When should the credential expire?",
+                        classes: "govuk-fieldset__legend--s"
+                    }
+                },
+                items: [
+                    {
+                        value: "2592000",
+                        text: "30 days",
+                        checked: true
+                    },
+                    {
+                        value: "20",
+                        text: "20 seconds"
+                    }
+                ]
+            }) }}
+            {% if showThrowError %}
+            {{ govukSelect({
+                "id": "throw-error",
+                "name": "throwError",
+                "label": {
+                    "text": "Throw an error from the STS pre-authorised code exchange",
+                    "classes": "govuk-label--s"
+                },
+                "items": errorChoices
+            }) }}
+        {% endif %}
+        {% endcall %}
+        {{ govukButton({"text": "Continue", "type": "Submit", "preventDoubleClick": true}) }}
+    </form>
+{% endblock %}

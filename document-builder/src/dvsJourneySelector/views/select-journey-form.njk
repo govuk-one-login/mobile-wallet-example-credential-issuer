@@ -1,0 +1,23 @@
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% extends "base.njk" %}
+{% set pageTitle = "What do you want to do with the test digital driving licence?" %}
+{% block content %}
+    <form action="/dvs/select-journey" method="post">
+        {{ govukRadios({
+                name: "journey",
+                fieldset: {
+                legend: {
+                text: pageTitle,
+                classes: "govuk-fieldset__legend--m",
+                isPageHeading: true
+                }
+                },
+                items: journeyOptions,
+                errorMessage: {
+                text: errors['journey'].text
+                } if (errors['journey'])
+                }) }}
+        {{ govukButton({text: "Continue", preventDoubleClick: true}) }}
+    </form>
+{% endblock %}

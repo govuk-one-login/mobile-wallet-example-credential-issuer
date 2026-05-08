@@ -1,0 +1,274 @@
+{% extends "base.njk" %}
+{% from "govuk/components/fieldset/macro.njk" import govukFieldset %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/select/macro.njk" import govukSelect %}
+{% from "govuk/components/date-input/macro.njk" import govukDateInput %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% set pageTitle = "Enter the Simple Document details" %}
+{% block content %}
+    <form action="/build-simple-document" method="post">
+        {% call govukFieldset({
+            legend: {
+            text: pageTitle,
+            classes: "govuk-fieldset__legend--m",
+            isPageHeading: true
+            }
+            }) %}
+            {{ govukButton({"text": "Continue", "type": "Submit", "preventDoubleClick": true}) }}
+            {{ govukInput({
+                "label": {
+                    "text": "Given name",
+                    "classes": "govuk-label--s"
+                },
+                "classes": "govuk-!-width-one-third",
+                "id": "given_name",
+                "name": "given_name",
+                "autocomplete": "given-name",
+                "spellcheck": false,
+                "value": "John"
+            }) }}
+            {{ govukInput({
+                "label": {
+                    "text": "Family name",
+                    "classes": "govuk-label--s"
+                },
+                "classes": "govuk-!-width-one-third",
+                "id": "family_name",
+                "name": "family_name",
+                "autocomplete": "family-name",
+                "spellcheck": false,
+                "value": "Fisher"
+            }) }}
+            {% if errors['birth_date'] %}
+                {% set dobError = { text: errors['birth_date'] } %}
+            {% endif %}
+            {{ govukDateInput({
+                        "id": "birth_date",
+                        "namePrefix": "birth",
+                        "fieldset": {
+                        "legend": {
+                        "text": "Date of birth",
+                        "classes": "govuk-fieldset__legend--s"
+                        }
+                        },
+                        "errorMessage": dobError,
+                        "items": [
+                        {
+                        "classes": "govuk-input--width-2",
+                        "name": "day",
+                        "value": "15"
+                        },
+                        {
+                        "classes": "govuk-input--width-2",
+                        "name": "month",
+                        "value": "08"
+                        },
+                        {
+                        "classes": "govuk-input--width-3",
+                        "name": "year",
+                        "value": "1980"
+                        }
+                        ]
+                        }) }}
+            {{ govukSelect({
+                "id": "portrait",
+                "name": "portrait",
+                "label": {
+                    "text": "Choose a photo",
+                    "classes": "govuk-label--s"
+                },
+                "items": [
+                    {
+                        "value": "100x125.jpg",
+                        "text": "JPEG 1 - 100x125",
+                        "selected": true
+                    },
+                    {
+                        "value": "140x175.jpg",
+                        "text": "JPEG 2 - 140x175"
+                    },
+                    {
+                        "value": "300x375.jpg",
+                        "text": "JPEG 3 - 300x375"
+                    },
+                    {
+                        "value": "420x525.jpg",
+                        "text": "JPEG 4 - 420x525"
+                    },
+                    {
+                        "value": "600x750.jpg",
+                        "text": "JPEG 5 - 600x750"
+                    },
+                    {
+                        "value": "600x910.jpg",
+                        "text": "JPEG 6 - 600x910"
+                    },
+                    {
+                        "value": "760x750.jpg",
+                        "text": "JPEG 7 - 760x750"
+                    },
+                    {
+                        "value": "100x125.png",
+                        "text": "PNG 1 - 100x125"
+                    },
+                    {
+                        "value": "140x175.png",
+                        "text": "PNG 2 - 140x175"
+                    },
+                    {
+                        "value": "300x375.png",
+                        "text": "PNG 3 - 300x375"
+                    },
+                    {
+                        "value": "420x525.png",
+                        "text": "PNG 4 - 420x525"
+                    },
+                    {
+                        "value": "600x750.png",
+                        "text": "PNG 5 - 600x750"
+                    },
+                    {
+                        "value": "600x910.png",
+                        "text": "PNG 6 - 600x910"
+                    },
+                    {
+                        "value": "760x750.png",
+                        "text": "PNG 7 - 760x750"
+                    },
+                    {
+                        "value": "140x175.jp2",
+                        "text": "JPEG-2000 - 140x175"
+                    },
+                    {
+                        "value": "JFIF.jfif",
+                        "text": "JFIF"
+                    },
+                    {
+                        "value": "EXIF.jpg",
+                        "text": "EXIF"
+                    }
+                ]
+            }) }}
+            {{ govukInput({
+                        "label": {
+                        "text": "Document number",
+                        "classes": "govuk-label--s"
+                        },
+                        "classes": "govuk-!-width-one-third",
+                        "id": "document_number",
+                        "name": "document_number",
+                        "autocomplete": "document_number",
+                        "spellcheck": false,
+                        "value": documentNumber
+                        }) }}
+            {% if errors['issue_date'] %}
+                {% set issuanceError = { text: errors['issue_date'] } %}
+            {% endif %}
+            {{ govukDateInput({
+                        id: "issue_date",
+                        namePrefix: "issue",
+                        fieldset: {
+                        legend: {
+                        text: "Issue date",
+                        classes: "govuk-fieldset__legend--s"
+                        }
+                        },
+                        "errorMessage": issuanceError,
+                        items: [
+                        { classes: "govuk-input--width-2", name: "day", value: defaultIssueDate.day },
+                        { classes: "govuk-input--width-2", name: "month", value: defaultIssueDate.month },
+                        { classes: "govuk-input--width-3", name: "year", value: defaultIssueDate.year}
+                        ]
+                        }) }}
+            {% if errors['expiry_date'] %}
+                {% set expiryError = { text: errors['expiry_date'] } %}
+            {% endif %}
+            {{ govukDateInput({
+                        id: "expiry_date",
+                        namePrefix: "expiry",
+                        fieldset: {
+                        legend: { text: "Expiry date", classes: "govuk-fieldset__legend--s" }
+                        },
+                        "errorMessage": expiryError,
+                        items: [
+                        { classes: "govuk-input--width-2", name: "day", value: defaultExpiryDate.day },
+                        { classes: "govuk-input--width-2", name: "month", value: defaultExpiryDate.month },
+                        { classes: "govuk-input--width-3", name: "year", value: defaultExpiryDate.year }
+                        ]
+                        }) }}
+            {{ govukInput({
+                "label": {
+                    "text": "Issuing country",
+                    "classes": "govuk-label--s"
+                },
+                "classes": "govuk-!-width-one-third",
+                "id": "issuing_country",
+                "name": "issuing_country",
+                "spellcheck": false,
+                "value": "GB"
+            }) }}
+            {% if errors['type_of_fish'] %}
+                {% set typeOfFishError = { text: errors['type_of_fish'] } %}
+            {% endif %}
+            {{ govukSelect({
+                        "id": "type_of_fish",
+                        "name": "type_of_fish",
+                        "label": {
+                        "text": "Type of fish you can catch",
+                        "classes": "govuk-label--s"
+                        },
+                        "items": fishTypeOptions,
+                        "errorMessage": typeOfFishError
+                        }) }}
+            {{ govukInput({
+                "label": {
+                    "text": "Number of fishing rods",
+                    "classes": "govuk-label--s"
+                },
+                "hint": {
+                    "text": "Enter how many rods your licence allows."
+                },
+                "classes": "govuk-input--width-5",
+                "id": "number_of_fishing_rods",
+                "name": "number_of_fishing_rods",
+                "type": "number",
+                "value": "2"
+            }) }}
+            {{ govukRadios({
+                "classes": "govuk-radios--small",
+                "name": "credentialTtl",
+                "fieldset": {
+                    "legend": {
+                        "text": "When should the credential expire?",
+                        "classes": "govuk-fieldset__legend--s"
+                    }
+                },
+                "items": [
+                    {
+                        "value": "2592000",
+                        "text": "30 days",
+                        "checked": true
+                    },
+                    {
+                        "value": "20",
+                        "text": "20 seconds"
+                    }
+                ]
+            }) }}
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+            {% if showThrowError %}
+            {{ govukSelect({
+                        "id": "throw-error",
+                        "name": "throwError",
+                        "label": {
+                        "text": "Throw an error from the STS pre-authorised code exchange",
+                        "classes": "govuk-label--s"
+                        },
+                        "items": errorChoices
+                        }) }}
+        {% endif %}
+        {% endcall %}
+        {{ govukButton({"text": "Continue", "type": "Submit", "preventDoubleClick": true}) }}
+    </form>
+{% endblock %}
