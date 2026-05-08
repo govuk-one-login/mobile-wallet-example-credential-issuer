@@ -1,0 +1,27 @@
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% extends "base.njk" %}
+{% set pageTitle = "Create a test GOV.UK Wallet document" %}
+{% block content %}
+<h1 class="govuk-heading-m">Create a test GOV.UK Wallet document</h1>
+<p class="govuk-body">
+    This tool is a document builder that allows you to issue and test different documents to a developer version of the GOV.UK Wallet.
+    It is only for use by staff at GDS.</p>
+<p class="govuk-body">
+    The document builder allows you to create a range of documents that can be issued to iOS or Android.</p>
+<hr class="govuk-section-break govuk-section-break--xl govuk-section-break--visible">
+
+<h3 class="govuk-heading-m">Before you start</h3>
+<p class="govuk-body">To use this service you should have:</p>
+
+<ul class="govuk-list govuk-list--bullet">
+    <li>been given access the Wallet build tools and testing cohorts from Mobile Pod</li>
+    <li>for iOS: a TestFlight account and the TestFlight app installed on your mobile device, with the GOV.UK Wallet Build / Staging app</li>
+    <li>for Android: turned on developer mode on your device, and installed the GOV.UK Wallet app</li>
+</ul>
+
+{{ govukButton({
+  text: "Start now",
+  href: "/select-app",
+  isStartButton: true
+}) }}
+{% endblock %}
