@@ -1,0 +1,24 @@
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/radios/macro.njk" import govukRadios %}
+{% extends "base.njk" %}
+{% set pageTitle = "What app do you want to create a document in?" %}
+{% block content %}
+    <form action="/select-app" method="post">
+        <input type="hidden" name="credentialType" value="{{ credentialType }}">
+        {{ govukRadios({
+                name: "app",
+                fieldset: {
+                legend: {
+                text: pageTitle,
+                classes: "govuk-fieldset__legend--m",
+                isPageHeading: true
+                }
+                },
+                items: apps,
+                errorMessage: {
+                text: errors['app'].text
+                } if (errors['app'])
+                }) }}
+        {{ govukButton({text: "Continue", type: "Submit", "preventDoubleClick": true}) }}
+    </form>
+{% endblock %}

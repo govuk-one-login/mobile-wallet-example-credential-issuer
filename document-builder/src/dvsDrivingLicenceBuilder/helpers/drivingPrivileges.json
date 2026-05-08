@@ -1,0 +1,127 @@
+{
+  "drivingPrivileges": [
+    {
+      "vehicle_category_code": "AM",
+      "codes": ["01", "02"]
+    },
+    {
+      "vehicle_category_code": "P",
+      "codes": ["15", "20", "25", "30"]
+    },
+    {
+      "vehicle_category_code": "Q"
+    },
+    {
+      "vehicle_category_code": "A1"
+    },
+    {
+      "vehicle_category_code": "A2",
+      "codes": ["44", "44(1)", "44(2)"]
+    },
+    {
+      "vehicle_category_code": "A",
+      "codes": ["44(12)", "45"]
+    },
+    {
+      "vehicle_category_code": "B",
+      "codes": ["45"]
+    },
+    {
+      "vehicle_category_code": "B auto"
+    },
+    {
+      "vehicle_category_code": "BE",
+      "codes": ["71"]
+    },
+    {
+      "vehicle_category_code": "B1",
+      "codes": ["96", "97", "101", "102", "103"]
+    },
+    {
+      "vehicle_category_code": "C1"
+    },
+    {
+      "vehicle_category_code": "C1E"
+    },
+    {
+      "vehicle_category_code": "C",
+      "codes": [
+        "79(3)",
+        "96",
+        "97",
+        "101",
+        "102",
+        "103",
+        "105",
+        "106",
+        "107",
+        "108",
+        "110",
+        "111"
+      ]
+    },
+    {
+      "vehicle_category_code": "CE",
+      "codes": ["01", "02", "10", "15"]
+    },
+    {
+      "vehicle_category_code": "D1"
+    },
+    {
+      "vehicle_category_code": "D1E",
+      "codes": [
+        "79",
+        "79(2)",
+        "79(3)",
+        "96",
+        "97",
+        "101",
+        "102",
+        "103",
+        "105",
+        "106",
+        "107",
+        "108",
+        "110",
+        "111",
+        "113"
+      ]
+    },
+    {
+      "vehicle_category_code": "D",
+      "codes": ["01"]
+    },
+    {
+      "vehicle_category_code": "DE"
+    },
+    {
+      "vehicle_category_code": "F",
+      "codes": ["01", "02"]
+    },
+    {
+      "vehicle_category_code": "G"
+    },
+    {
+      "vehicle_category_code": "H"
+    },
+    {
+      "vehicle_category_code": "K"
+    },
+    {
+      "vehicle_category_code": "L"
+    },
+    {
+      "vehicle_category_code": "M"
+    },
+    {
+      "vehicle_category_code": "N",
+      "codes": ["01", "02"]
+    }
+  ],
+  "provisionalDrivingPrivileges": [
+    {
+      "vehicle_category_code": "AM",
+      "codes": ["01", "02"]
+    }
+  ]
+}
