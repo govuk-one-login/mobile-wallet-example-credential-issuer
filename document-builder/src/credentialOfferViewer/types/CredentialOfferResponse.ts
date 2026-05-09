@@ -1,13 +1,13 @@
 export interface CredentialOffer {
-    credentials: string[];
-    grants: Grants;
-    credentialIssuer: string;
+  credentials: string[];
+  grants: Grants;
+  credentialIssuer: string;
 }
 
 export interface Grants {
-    "urn:ietf:params:oauth:grant-type:pre-authorized_code": PreAuthorizedCode;
+  "urn:ietf:params:oauth:grant-type:pre-authorized_code": PreAuthorizedCode;
 }
 
 export interface PreAuthorizedCode {
-    "pre-authorized_code": string;
+  "pre-authorized_code": string;
 }

@@ -1,7 +1,7 @@
 import express from "express";
 import {
-    dvsJourneySelectorGetController,
-    dvsJourneySelectorPostController,
+  dvsJourneySelectorGetController,
+  dvsJourneySelectorPostController,
 } from "./controller";
 import { guardRouteByEnvironment } from "../middleware/guardRouteByEnvironment";
 import { ROUTES } from "../config/routes";
@@ -9,14 +9,14 @@ import { ROUTES } from "../config/routes";
 const router = express.Router();
 
 router.get(
-    ROUTES.DVS_SELECT_JOURNEY,
-    guardRouteByEnvironment(),
-    dvsJourneySelectorGetController,
+  ROUTES.DVS_SELECT_JOURNEY,
+  guardRouteByEnvironment(),
+  dvsJourneySelectorGetController,
 );
 router.post(
-    ROUTES.DVS_SELECT_JOURNEY,
-    guardRouteByEnvironment(),
-    dvsJourneySelectorPostController,
+  ROUTES.DVS_SELECT_JOURNEY,
+  guardRouteByEnvironment(),
+  dvsJourneySelectorPostController,
 );
 
 export { router as dvsJourneySelectorRouter };

@@ -6,9 +6,9 @@ import { guardRouteByEnvironment } from "../middleware/guardRouteByEnvironment";
 const router = express.Router();
 
 router.post(
-    ROUTES.TOKEN,
-    guardRouteByEnvironment(),
-    stsStubAccessTokenController,
+  ROUTES.TOKEN,
+  guardRouteByEnvironment(),
+  stsStubAccessTokenController,
 );
 
 export { router as stsStubAccessTokenRouter };

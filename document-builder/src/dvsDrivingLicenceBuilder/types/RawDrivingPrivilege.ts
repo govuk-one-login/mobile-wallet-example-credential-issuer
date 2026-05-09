@@ -1,4 +1,4 @@
 export interface RawDrivingPrivilege {
-    vehicle_category_code: string;
-    codes?: string[];
+  vehicle_category_code: string;
+  codes?: string[];
 }

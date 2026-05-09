@@ -9,15 +9,15 @@ import { CredentialData } from "../types";
  * @returns Decoded JWT payload or undefined if decoding fails
  */
 export function safeDecodeJwt(
-    token: string,
-    errorMessage: string,
+  token: string,
+  errorMessage: string,
 ): JWTPayload | undefined {
-    try {
-        return decodeJwt(token);
-    } catch (error) {
-        logger.error(error, errorMessage);
-        return undefined;
-    }
+  try {
+    return decodeJwt(token);
+  } catch (error) {
+    logger.error(error, errorMessage);
+    return undefined;
+  }
 }
 
 /**
@@ -26,16 +26,16 @@ export function safeDecodeJwt(
  * @returns Credential data with JWT-specific properties
  */
 export function decodeCredentialAsJwt(credential: string): CredentialData {
-    const credentialClaims = safeDecodeJwt(
-        credential,
-        "An error occurred whilst decoding a JWT credential",
-    );
-    if (credentialClaims) logger.info("Decoded JWT credential");
+  const credentialClaims = safeDecodeJwt(
+    credential,
+    "An error occurred whilst decoding a JWT credential",
+  );
+  if (credentialClaims) logger.info("Decoded JWT credential");
 
-    return {
-        credentialClaims,
-        credentialClaimsTitle: "VCDM credential",
-        x5chain: "",
-        x5chainHex: "",
-    };
+  return {
+    credentialClaims,
+    credentialClaimsTitle: "VCDM credential",
+    x5chain: "",
+    x5chainHex: "",
+  };
 }

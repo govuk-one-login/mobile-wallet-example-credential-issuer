@@ -4,17 +4,17 @@ import { logger } from "./logger";
 import { ROUTES } from "../config/routes";
 
 export function requiresAppSelected(
-    req: Request,
-    res: Response,
-    next: NextFunction,
+  req: Request,
+  res: Response,
+  next: NextFunction,
 ): void {
-    const selectedApp = req.cookies["app"];
+  const selectedApp = req.cookies["app"];
 
-    logger.info(`selectedApp: ${selectedApp}`);
+  logger.info(`selectedApp: ${selectedApp}`);
 
-    if (selectedApp === undefined) {
-        res.redirect(getSelfUrl() + ROUTES.SELECT_APP);
-    } else {
-        next();
-    }
+  if (selectedApp === undefined) {
+    res.redirect(getSelfUrl() + ROUTES.SELECT_APP);
+  } else {
+    next();
+  }
 }

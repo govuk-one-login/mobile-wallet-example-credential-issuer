@@ -8,11 +8,11 @@ import { requiresAppSelected } from "../middleware/requiresAppSelected";
 const router = express.Router();
 
 router.get(
-    ROUTES.VIEW_CREDENTIAL,
-    guardRouteByEnvironment(),
-    requiresAuth,
-    requiresAppSelected,
-    credentialViewerController,
+  ROUTES.VIEW_CREDENTIAL,
+  guardRouteByEnvironment(),
+  requiresAuth,
+  requiresAppSelected,
+  credentialViewerController,
 );
 
 export { router as credentialViewerRouter };

@@ -7,15 +7,15 @@ import { SimpleDocumentData } from "../simpleDocumentBuilder/types/SimpleDocumen
 import { DrivingLicenceData } from "./DrivingLicenceData";
 
 export interface TableItem {
-    itemId: UUID;
-    documentId: string;
-    data:
-        | NinoData
-        | DbsData
-        | VeteranCardData
-        | DrivingLicenceData
-        | SimpleDocumentData;
-    vcType: CredentialType;
-    credentialTtlSeconds: number;
-    timeToLive: number;
+  itemId: UUID;
+  documentId: string;
+  data:
+    | NinoData
+    | DbsData
+    | VeteranCardData
+    | DrivingLicenceData
+    | SimpleDocumentData;
+  vcType: CredentialType;
+  credentialTtlSeconds: number;
+  timeToLive: number;
 }

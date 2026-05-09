@@ -1,5 +1,5 @@
 export interface AuthMiddlewareConfiguration {
-    clientId: string;
-    discoveryEndpoint: string;
-    redirectUri: string;
+  clientId: string;
+  discoveryEndpoint: string;
+  redirectUri: string;
 }

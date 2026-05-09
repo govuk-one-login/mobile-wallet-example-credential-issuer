@@ -14,7 +14,7 @@
  * formatDate("15", "11", "1999"); // "15-11-1999"
  */
 export function formatDate(day: string, month: string, year: string): string {
-    const paddedDay = day.padStart(2, "0");
-    const paddedMonth = month.padStart(2, "0");
-    return `${paddedDay}-${paddedMonth}-${year}`;
+  const paddedDay = day.padStart(2, "0");
+  const paddedMonth = month.padStart(2, "0");
+  return `${paddedDay}-${paddedMonth}-${year}`;
 }

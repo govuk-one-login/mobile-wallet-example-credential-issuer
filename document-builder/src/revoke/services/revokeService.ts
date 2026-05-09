@@ -10,14 +10,14 @@ const REVOKE_PATH = "/revoke";
  * @returns A promise that resolves to the HTTP status code of the response.
  */
 export async function revoke(
-    criUrl: string,
-    documentId: string,
+  criUrl: string,
+  documentId: string,
 ): Promise<number> {
-    const revokeUrl = criUrl + REVOKE_PATH + "/" + documentId;
+  const revokeUrl = criUrl + REVOKE_PATH + "/" + documentId;
 
-    const response = await axios.post(revokeUrl, null, {
-        validateStatus: () => true,
-    });
+  const response = await axios.post(revokeUrl, null, {
+    validateStatus: () => true,
+  });
 
-    return response.status;
+  return response.status;
 }

@@ -22,29 +22,29 @@ import { SimpleDocumentRequestBody } from "../../simpleDocumentBuilder/types/Sim
  * validateDateFields(body); // { birth_date: "Enter a valid birth date" }
  */
 export function validateDateFields(
-    body: DrivingLicenceRequestBody | SimpleDocumentRequestBody,
+  body: DrivingLicenceRequestBody | SimpleDocumentRequestBody,
 ): Record<string, string> {
-    const errors: Record<string, string> = {};
+  const errors: Record<string, string> = {};
 
-    if (
-        !isValidDate(body["birth-day"], body["birth-month"], body["birth-year"])
-    ) {
-        errors["birth_date"] = "Enter a valid birth date";
-    }
+  if (
+    !isValidDate(body["birth-day"], body["birth-month"], body["birth-year"])
+  ) {
+    errors["birth_date"] = "Enter a valid birth date";
+  }
 
-    if (
-        !isValidDate(body["issue-day"], body["issue-month"], body["issue-year"])
-    ) {
-        errors["issue_date"] = "Enter a valid issue date";
-    }
+  if (
+    !isValidDate(body["issue-day"], body["issue-month"], body["issue-year"])
+  ) {
+    errors["issue_date"] = "Enter a valid issue date";
+  }
 
-    if (
-        !isValidDate(body["expiry-day"], body["expiry-month"], body["expiry-year"])
-    ) {
-        errors["expiry_date"] = "Enter a valid expiry date";
-    }
+  if (
+    !isValidDate(body["expiry-day"], body["expiry-month"], body["expiry-year"])
+  ) {
+    errors["expiry_date"] = "Enter a valid expiry date";
+  }
 
-    return errors;
+  return errors;
 }
 
 /**
@@ -66,21 +66,21 @@ export function validateDateFields(
  * isValidDate("abc", "2", "2023"); // false (Invalid day)
  */
 export function isValidDate(
-    dayStr: string,
-    monthStr: string,
-    yearStr: string,
+  dayStr: string,
+  monthStr: string,
+  yearStr: string,
 ): boolean {
-    const dayNum = Number.parseInt(dayStr);
-    const monthNum = Number.parseInt(monthStr);
-    const yearNum = Number.parseInt(yearStr);
+  const dayNum = Number.parseInt(dayStr);
+  const monthNum = Number.parseInt(monthStr);
+  const yearNum = Number.parseInt(yearStr);
 
-    const date = new Date(yearNum, monthNum - 1, dayNum); // Month is 0-indexed in JavaScript
+  const date = new Date(yearNum, monthNum - 1, dayNum); // Month is 0-indexed in JavaScript
 
-    if (Number.isNaN(date.getTime())) return false;
+  if (Number.isNaN(date.getTime())) return false;
 
-    return (
-        date.getFullYear() === yearNum &&
-        date.getMonth() === monthNum - 1 &&
-        date.getDate() === dayNum
-    );
+  return (
+    date.getFullYear() === yearNum &&
+    date.getMonth() === monthNum - 1 &&
+    date.getDate() === dayNum
+  );
 }

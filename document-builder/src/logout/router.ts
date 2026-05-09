@@ -8,11 +8,11 @@ import { requiresAppSelected } from "../middleware/requiresAppSelected";
 const router = express.Router();
 
 router.get(
-    ROUTES.LOGOUT,
-    guardRouteByEnvironment(),
-    requiresAuth,
-    requiresAppSelected,
-    logoutGetController(),
+  ROUTES.LOGOUT,
+  guardRouteByEnvironment(),
+  requiresAuth,
+  requiresAppSelected,
+  logoutGetController(),
 );
 
 export { router as logoutRouter };

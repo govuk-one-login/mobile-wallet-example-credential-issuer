@@ -8,7 +8,7 @@ import { decodeCredentialAsCbor } from "./mdocDecoder";
  * @returns True if credential appears to be JWT format
  */
 export function isJwtFormat(credential: string): boolean {
-    return credential.startsWith("eyJ");
+  return credential.startsWith("eyJ");
 }
 
 /**
@@ -17,7 +17,7 @@ export function isJwtFormat(credential: string): boolean {
  * @returns Decoded credential data
  */
 export function processCredential(credential: string): CredentialData {
-    return isJwtFormat(credential)
-        ? decodeCredentialAsJwt(credential)
-        : decodeCredentialAsCbor(credential);
+  return isJwtFormat(credential)
+    ? decodeCredentialAsJwt(credential)
+    : decodeCredentialAsCbor(credential);
 }

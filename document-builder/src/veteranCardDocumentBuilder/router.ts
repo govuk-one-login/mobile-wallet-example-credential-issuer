@@ -1,7 +1,7 @@
 import express from "express";
 import {
-    veteranCardDocumentBuilderGetController,
-    veteranCardDocumentBuilderPostController,
+  veteranCardDocumentBuilderGetController,
+  veteranCardDocumentBuilderPostController,
 } from "./controller";
 import { requiresAuth } from "../middleware/requiresAuth";
 import { guardRouteByEnvironment } from "../middleware/guardRouteByEnvironment";
@@ -11,18 +11,18 @@ import { requiresAppSelected } from "../middleware/requiresAppSelected";
 const router = express.Router();
 
 router.get(
-    ROUTES.BUILD_VETERAN_CARD_DOCUMENT,
-    guardRouteByEnvironment(),
-    requiresAuth,
-    requiresAppSelected,
-    veteranCardDocumentBuilderGetController(),
+  ROUTES.BUILD_VETERAN_CARD_DOCUMENT,
+  guardRouteByEnvironment(),
+  requiresAuth,
+  requiresAppSelected,
+  veteranCardDocumentBuilderGetController(),
 );
 router.post(
-    ROUTES.BUILD_VETERAN_CARD_DOCUMENT,
-    guardRouteByEnvironment(),
-    requiresAuth,
-    requiresAppSelected,
-    veteranCardDocumentBuilderPostController,
+  ROUTES.BUILD_VETERAN_CARD_DOCUMENT,
+  guardRouteByEnvironment(),
+  requiresAuth,
+  requiresAppSelected,
+  veteranCardDocumentBuilderPostController,
 );
 
 export { router as veteranCardDocumentBuilderRouter };

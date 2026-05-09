@@ -1,7 +1,7 @@
 interface DateParts {
-    day: string;
-    month: string;
-    year: string;
+  day: string;
+  month: string;
+  year: string;
 }
 
 /**
@@ -18,18 +18,18 @@ interface DateParts {
  * // { defaultIssueDate: { day: "16", month: "05", year: "2025" }, defaultExpiryDate: { day: "15", month: "05", year: "2035" } }
  */
 export function getDefaultDates(): {
-    defaultIssueDate: DateParts;
-    defaultExpiryDate: DateParts;
+  defaultIssueDate: DateParts;
+  defaultExpiryDate: DateParts;
 } {
-    const issueDate = new Date();
-    const expiryDate = new Date(issueDate);
-    expiryDate.setFullYear(expiryDate.getFullYear() + 10);
-    expiryDate.setDate(expiryDate.getDate() - 1);
+  const issueDate = new Date();
+  const expiryDate = new Date(issueDate);
+  expiryDate.setFullYear(expiryDate.getFullYear() + 10);
+  expiryDate.setDate(expiryDate.getDate() - 1);
 
-    return {
-        defaultIssueDate: getDateParts(issueDate),
-        defaultExpiryDate: getDateParts(expiryDate),
-    };
+  return {
+    defaultIssueDate: getDateParts(issueDate),
+    defaultExpiryDate: getDateParts(expiryDate),
+  };
 }
 
 /**
@@ -42,9 +42,9 @@ export function getDefaultDates(): {
  * getDateParts(new Date("2025-05-16")); // { day: "16", month: "05", year: "2025" }
  */
 export function getDateParts(date: Date): DateParts {
-    return {
-        day: String(date.getDate()).padStart(2, "0"),
-        month: String(date.getMonth() + 1).padStart(2, "0"),
-        year: date.getFullYear().toString(),
-    };
+  return {
+    day: String(date.getDate()).padStart(2, "0"),
+    month: String(date.getMonth() + 1).padStart(2, "0"),
+    year: date.getFullYear().toString(),
+  };
 }
