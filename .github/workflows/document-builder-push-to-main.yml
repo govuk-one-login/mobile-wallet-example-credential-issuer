@@ -1,0 +1,104 @@
+name: Doc-Builder Issuer - Push to Main
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - document-builder/**
+      - .github/workflows/document-builder-push-to-main.yml
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  upload-s3-artifact-to-build:
+    name: Validate & upload S3 artifact to build
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: ./document-builder
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v3
+        with:
+          fetch-depth: '0'
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@20fb358293b0af0188f25cf7658b69d49ec12c9a # v12.3100.0
+        with:
+          file: "document-builder/deploy/template.yaml"
+          quiet: true
+          soft_fail: false
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@299e4b793aaa83bf2aba7c9c14bedbb485688ec4 # v7.1.0
+        with:
+          projectBaseDir: ./document-builder
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: SonarQube Quality Gate check
+        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: document-builder/.scannerwork/report-task.txt
+
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@f84ec7d548307efafe33230528756de3c5841a17 # pin@v2
+        with:
+          version: 1.90.0
+          use-installer: true
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # pin@v4
+        with:
+          role-to-assume: ${{ secrets.BUILD_DOC_BUILDER_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7 # pin@v1
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
+        with:
+          cosign-release: 'v2.5.2'
+
+      - name: Generate coverage report
+        run: npm run test:cov
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: "${{ secrets.BUILD_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com"
+          ECR_REPOSITORY: ${{ secrets.BUILD_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+          CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_DOC_BUILDER_CONTAINER_SIGNER_KMS_KEY_ARN }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+
+      - name: Update SAM template
+        env:
+          ECR_REGISTRY: "${{ secrets.BUILD_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com"
+          ECR_REPOSITORY: ${{ secrets.BUILD_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+        run: |
+          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA|" template.yaml
+
+      - name: Sam Build & Validate
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          sam validate
+          sam build --cached
+
+      - name: Deploy SAM app
+        uses: govuk-one-login/devplatform-upload-action@5879c30205266ad61e8299a4fcea76364530c9c1 # pin@v3.9.3
+        with:
+          artifact-bucket-name: ${{ secrets.BUILD_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          working-directory: ./document-builder/deploy/.aws-sam/build
