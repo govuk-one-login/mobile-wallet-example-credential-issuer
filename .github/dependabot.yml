@@ -72,3 +72,47 @@ updates:
         update-types:
           - "minor"
           - "patch"
+  - package-ecosystem: "npm"
+    directory: "/document-builder"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
+    ignore:
+      - dependency-name: "jose"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "openid-client"
+        update-types: [ "version-update:semver-major" ]
+    commit-message:
+      prefix: chore
+    groups:
+      npm-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "docker"
+    directory: "/document-builder"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    cooldown:
+      default-days: 7
+    labels:
+      - dependencies
+    ignore:
+      - dependency-name: "node"
+        update-types:
+          - "version-update:semver-major"
+    commit-message:
+      prefix: chore
+    groups:
+      docker-updates:
+        patterns:
+          - "*"
