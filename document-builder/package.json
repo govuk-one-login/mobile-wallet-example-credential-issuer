@@ -24,8 +24,7 @@
     "format": "prettier --ignore-path .gitignore --write \"*/**/*.{ts,json}\"",
     "format:check": "prettier --ignore-path .gitignore --check \"*/**/*.{ts,json}\"",
     "localstack:up": "docker compose -f docker-compose.yml up --build -d --wait",
-    "localstack:down": "docker compose -f docker-compose.yml down",
-    "setup-hooks": "husky"
+    "localstack:down": "docker compose -f docker-compose.yml down"
   },
   "author": "",
   "license": "MIT",
