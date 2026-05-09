@@ -2,12 +2,12 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { healthcheckGetController } from "../../src/healthcheck/controller";
 
 describe("healthcheck", () => {
-    it("should return 200 status", () => {
-        const req = getMockReq();
-        const { res } = getMockRes();
+  it("should return 200 status", () => {
+    const req = getMockReq();
+    const { res } = getMockRes();
 
-        healthcheckGetController(req, res);
+    healthcheckGetController(req, res);
 
-        expect(res.status).toHaveBeenCalledWith(200);
-    });
+    expect(res.status).toHaveBeenCalledWith(200);
+  });
 });

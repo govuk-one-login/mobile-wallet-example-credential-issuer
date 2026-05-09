@@ -4,11 +4,11 @@
  * @returns Pre-authorized code string
  */
 export function extractPreAuthCode(credentialOfferUri: string): string {
-    const credentialOfferString = credentialOfferUri.split(
-        "add?credential_offer=",
-    )[1];
-    const credentialOffer = JSON.parse(credentialOfferString);
-    return credentialOffer.grants[
-        "urn:ietf:params:oauth:grant-type:pre-authorized_code"
-        ]["pre-authorized_code"];
+  const credentialOfferString = credentialOfferUri.split(
+    "add?credential_offer=",
+  )[1];
+  const credentialOffer = JSON.parse(credentialOfferString);
+  return credentialOffer.grants[
+    "urn:ietf:params:oauth:grant-type:pre-authorized_code"
+  ]["pre-authorized_code"];
 }

@@ -4,50 +4,50 @@ import { proofJwtController } from "../../src/proofJwt/controller";
 import { getMockReq, getMockRes } from "@jest-mock/express";
 
 describe("controller.ts", () => {
-    beforeEach(() => {
-        jest.clearAllMocks();
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should return 200 and proof JWT when request is successful", async () => {
+    jest
+      .spyOn(appConfig, "getStsSigningKeyId")
+      .mockReturnValue("mock_signing_key_id");
+    const mockSignedJwt = "signed jwt token";
+    jest.spyOn(proofJwt, "getProofJwt").mockResolvedValue(mockSignedJwt);
+
+    const req = getMockReq({
+      query: {
+        nonce: "test-nonce",
+        audience: "test-audience",
+      },
     });
+    const { res } = getMockRes();
 
-    it("should return 200 and proof JWT when request is successful", async () => {
-        jest
-            .spyOn(appConfig, "getStsSigningKeyId")
-            .mockReturnValue("mock_signing_key_id");
-        const mockSignedJwt = "signed jwt token";
-        jest.spyOn(proofJwt, "getProofJwt").mockResolvedValue(mockSignedJwt);
+    await proofJwtController(req, res);
 
-        const req = getMockReq({
-            query: {
-                nonce: "test-nonce",
-                audience: "test-audience",
-            },
-        });
-        const { res } = getMockRes();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({ proofJwt: mockSignedJwt });
+  });
 
-        await proofJwtController(req, res);
+  it("should return 500 and server_error when signing fails", async () => {
+    jest
+      .spyOn(appConfig, "getStsSigningKeyId")
+      .mockReturnValue("mock_signing_key_id");
+    jest
+      .spyOn(proofJwt, "getProofJwt")
+      .mockRejectedValue(new Error("Signing failed"));
 
-        expect(res.status).toHaveBeenCalledWith(200);
-        expect(res.json).toHaveBeenCalledWith({ proofJwt: mockSignedJwt });
+    const req = getMockReq({
+      query: {
+        nonce: "test-nonce",
+        audience: "test-audience",
+      },
     });
+    const { res } = getMockRes();
 
-    it("should return 500 and server_error when signing fails", async () => {
-        jest
-            .spyOn(appConfig, "getStsSigningKeyId")
-            .mockReturnValue("mock_signing_key_id");
-        jest
-            .spyOn(proofJwt, "getProofJwt")
-            .mockRejectedValue(new Error("Signing failed"));
+    await proofJwtController(req, res);
 
-        const req = getMockReq({
-            query: {
-                nonce: "test-nonce",
-                audience: "test-audience",
-            },
-        });
-        const { res } = getMockRes();
-
-        await proofJwtController(req, res);
-
-        expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ error: "server_error" });
-    });
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({ error: "server_error" });
+  });
 });

@@ -1,8 +1,8 @@
 import axios from "axios";
 import {
-    getCriEndpoint,
-    getOneLoginAuthServerUrl,
-    getSelfUrl,
+  getCriEndpoint,
+  getOneLoginAuthServerUrl,
+  getSelfUrl,
 } from "../../config/appConfig";
 import { GrantType } from "../../stsStubAccessToken/token/validateTokenRequest";
 
@@ -12,21 +12,21 @@ import { GrantType } from "../../stsStubAccessToken/token/validateTokenRequest";
  * @returns Access token string
  */
 export async function getAccessToken(
-    preAuthorizedCode: string,
+  preAuthorizedCode: string,
 ): Promise<string> {
-    const response = await axios.post(
-        `${getOneLoginAuthServerUrl()}/token`,
-        {
-            grant_type: GrantType.PREAUTHORIZED_CODE,
-            "pre-authorized_code": preAuthorizedCode,
-        },
-        {
-            headers: {
-                "Content-Type": "application/x-www-form-urlencoded",
-            },
-        },
-    );
-    return response.data.access_token;
+  const response = await axios.post(
+    `${getOneLoginAuthServerUrl()}/token`,
+    {
+      grant_type: GrantType.PREAUTHORIZED_CODE,
+      "pre-authorized_code": preAuthorizedCode,
+    },
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    },
+  );
+  return response.data.access_token;
 }
 
 /**
@@ -36,13 +36,13 @@ export async function getAccessToken(
  * @returns Proof JWT string
  */
 export async function getProofJwt(
-    c_nonce: string,
-    audience: string,
+  c_nonce: string,
+  audience: string,
 ): Promise<string> {
-    const proofJwtResponse = await axios.get(
-        `${getSelfUrl()}/proof-jwt?nonce=${c_nonce}&audience=${audience}`,
-    );
-    return proofJwtResponse.data.proofJwt;
+  const proofJwtResponse = await axios.get(
+    `${getSelfUrl()}/proof-jwt?nonce=${c_nonce}&audience=${audience}`,
+  );
+  return proofJwtResponse.data.proofJwt;
 }
 
 /**
@@ -52,25 +52,25 @@ export async function getProofJwt(
  * @returns Credential string
  */
 export async function getCredential(
-    accessToken: string,
-    proofJwt: string,
+  accessToken: string,
+  proofJwt: string,
 ): Promise<string> {
-    const criUrl = getCriEndpoint();
-    const credentialUrl = criUrl + "/credential";
+  const criUrl = getCriEndpoint();
+  const credentialUrl = criUrl + "/credential";
 
-    const response = await axios.post(
-        credentialUrl,
-        {
-            proof: {
-                proof_type: "jwt",
-                jwt: proofJwt,
-            },
-        },
-        {
-            headers: {
-                Authorization: `BEARER ${accessToken}`,
-            },
-        },
-    );
-    return response.data.credentials[0].credential;
+  const response = await axios.post(
+    credentialUrl,
+    {
+      proof: {
+        proof_type: "jwt",
+        jwt: proofJwt,
+      },
+    },
+    {
+      headers: {
+        Authorization: `BEARER ${accessToken}`,
+      },
+    },
+  );
+  return response.data.credentials[0].credential;
 }

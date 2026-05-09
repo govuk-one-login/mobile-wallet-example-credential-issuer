@@ -6,9 +6,9 @@ import { guardRouteByEnvironment } from "../middleware/guardRouteByEnvironment";
 const router = express.Router();
 
 router.get(
-    ROUTES.DVS_CREDENTIAL_OFFER_VIEWER,
-    guardRouteByEnvironment(),
-    dvsCredentialOfferViewerController(),
+  ROUTES.DVS_CREDENTIAL_OFFER_VIEWER,
+  guardRouteByEnvironment(),
+  dvsCredentialOfferViewerController(),
 );
 
 export { router as dvsCredentialOfferViewerRouter };

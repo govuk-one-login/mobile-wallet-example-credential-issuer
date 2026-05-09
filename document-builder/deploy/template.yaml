@@ -30,7 +30,8 @@ Parameters:
     Default: 8000
 
 Conditions:
-  StackNameIsWalletDocBuilderFE: !Equals [!Ref "AWS::StackName", wallet-doc-builder]
+  StackNameIsWalletDocBuilderFE:
+    !Equals [!Ref "AWS::StackName", wallet-doc-builder]
 
   IsStagingOrInt: !Or
     - !Equals [!Ref Environment, staging]
@@ -79,7 +80,7 @@ Mappings:
 Resources:
   # SECURITY GROUPS
   WalletFELoadBalancerSG:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription: >-
         Wallet Stub Front LoadBalancer Security Group
@@ -93,7 +94,7 @@ Resources:
         Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletFELoadBalancerSGEgressToECSSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroupEgress'
+    Type: "AWS::EC2::SecurityGroupEgress"
     Properties:
       GroupId: !GetAtt WalletFELoadBalancerSG.GroupId
       IpProtocol: tcp
@@ -104,19 +105,19 @@ Resources:
       ToPort: !Ref ContainerPort
 
   WalletFEECSSecurityGroup:
-    Type: 'AWS::EC2::SecurityGroup'
+    Type: "AWS::EC2::SecurityGroup"
     Properties:
       GroupDescription: >-
         Wallet Stub Front ECS Security Group permitting outbound to anywhere.
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
           Description: Allow all outbound traffic by default
-          IpProtocol: '-1'
+          IpProtocol: "-1"
       VpcId:
         Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletFEECSSecurityGroupIngressFromLoadBalancer:
-    Type: 'AWS::EC2::SecurityGroupIngress'
+    Type: "AWS::EC2::SecurityGroupIngress"
     Properties:
       IpProtocol: tcp
       Description: >-
@@ -184,7 +185,12 @@ Resources:
             Principal:
               AWS: !Sub
                 - "arn:aws:iam::${ElbAccountId}:root"
-                - ElbAccountId: !FindInMap [ElasticLoadBalancerAccountIds, !Ref 'AWS::Region', AccountId]
+                - ElbAccountId:
+                    !FindInMap [
+                      ElasticLoadBalancerAccountIds,
+                      !Ref "AWS::Region",
+                      AccountId,
+                    ]
             Action:
               - s3:PutObject
             Resource:
@@ -201,7 +207,7 @@ Resources:
 
   # LOAD BALANCER
   WalletFELoadBalancer:
-    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
     DeletionPolicy: Retain
     UpdateReplacePolicy: Retain
     Properties:
@@ -228,7 +234,7 @@ Resources:
           Value: true
 
   WalletFELoadBalancerListenerTargetGroupECS:
-    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
@@ -248,7 +254,7 @@ Resources:
           Value: 60
 
   WalletFELoadBalancerListener:
-    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Type: "AWS::ElasticLoadBalancingV2::Listener"
     Properties:
       DefaultActions:
         - TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECS
@@ -262,14 +268,14 @@ Resources:
 
   # API GATEWAY
   WalletFEApiGwHttpEndpoint:
-    Type: 'AWS::ApiGatewayV2::Api'
+    Type: "AWS::ApiGatewayV2::Api"
     Properties:
       Name: !Sub wallet-stub-front-${Environment}-${AWS::StackName}
       Description: !Sub "Wallet Stub Frontend API. ${AWS::StackName}"
       ProtocolType: HTTP
 
   WalletFEApiGwHttpEndpointIntegration:
-    Type: 'AWS::ApiGatewayV2::Integration'
+    Type: "AWS::ApiGatewayV2::Integration"
     Properties:
       ApiId: !Ref WalletFEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
@@ -278,24 +284,24 @@ Resources:
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletFELoadBalancerListener
-      PayloadFormatVersion: '1.0'
+      PayloadFormatVersion: "1.0"
       RequestParameters:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
       TlsConfig:
         ServerNameToVerify: !Ref WalletFEFrontCustomDomain
 
   WalletFEAPIGWRoute:
-    Type: 'AWS::ApiGatewayV2::Route'
+    Type: "AWS::ApiGatewayV2::Route"
     Properties:
       ApiId: !Ref WalletFEApiGwHttpEndpoint
-      RouteKey: 'ANY /{proxy+}'
+      RouteKey: "ANY /{proxy+}"
       Target: !Join
         - /
         - - integrations
           - !Ref WalletFEApiGwHttpEndpointIntegration
 
   WalletFEAPIStageDefault:
-    Type: 'AWS::ApiGatewayV2::Stage'
+    Type: "AWS::ApiGatewayV2::Stage"
     Properties:
       ApiId: !Ref WalletFEApiGwHttpEndpoint
       StageName: $default
@@ -318,7 +324,8 @@ Resources:
         - !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
         - !Sub
           - "${AWS::StackName}-${SelfUrl}"
-          - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+          - SelfUrl:
+              !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
       DomainNameConfigurations:
         - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
           EndpointType: REGIONAL
@@ -344,7 +351,7 @@ Resources:
 
   # ECS
   WalletFECluster:
-    Type: 'AWS::ECS::Cluster'
+    Type: "AWS::ECS::Cluster"
     Properties:
       ClusterSettings:
         - Name: containerInsights
@@ -362,7 +369,7 @@ Resources:
   WalletFEECSService:
     DependsOn:
       - WalletFELoadBalancerListener
-    Type: 'AWS::ECS::Service'
+    Type: "AWS::ECS::Service"
     Properties:
       Cluster: !Ref WalletFECluster
       DeploymentConfiguration:
@@ -397,7 +404,7 @@ Resources:
           Value: !Sub "${Environment}"
 
   WalletFEECSServiceTaskDefinition:
-    Type: 'AWS::ECS::TaskDefinition'
+    Type: "AWS::ECS::TaskDefinition"
     Properties:
       ContainerDefinitions:
         - Essential: true
@@ -416,7 +423,12 @@ Resources:
             - Name: CREDENTIAL_ISSUER_URL
               Value: !Sub
                 - "https://${CredentialIssuerUrl}"
-                - CredentialIssuerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, CredentialIssuerUrl]
+                - CredentialIssuerUrl:
+                    !FindInMap [
+                      EnvironmentVariables,
+                      !Ref Environment,
+                      CredentialIssuerUrl,
+                    ]
             - Name: STS_SIGNING_KEY_ID
               Value: !Ref StsStubSigningKey
             - Name: SELF
@@ -424,22 +436,43 @@ Resources:
                 - StackNameIsWalletDocBuilderFE
                 - !Sub
                   - "https://${SelfUrl}"
-                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+                  - SelfUrl:
+                      !FindInMap [
+                        EnvironmentVariables,
+                        !Ref Environment,
+                        SelfUrl,
+                      ]
                 - !Sub
                   - "https://${AWS::StackName}-${SelfUrl}"
-                  - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
+                  - SelfUrl:
+                      !FindInMap [
+                        EnvironmentVariables,
+                        !Ref Environment,
+                        SelfUrl,
+                      ]
             - Name: OIDC_CLIENT_ID
               Value: !Sub "{{resolve:ssm:/${AWS::StackName}/Config/OIDC/Client/Id}}"
             - Name: CLIENT_SIGNING_KEY_ID
               Value: !Ref ClientSigningKey
             - Name: OIDC_ISSUER_DISCOVERY_ENDPOINT
-              Value: !FindInMap [EnvironmentVariables, !Ref Environment, OidcIssuerEndpoint]
+              Value:
+                !FindInMap [
+                  EnvironmentVariables,
+                  !Ref Environment,
+                  OidcIssuerEndpoint,
+                ]
             - Name: WALLET_APPS
-              Value: !FindInMap [EnvironmentVariables, !Ref Environment, WalletApps]
+              Value:
+                !FindInMap [EnvironmentVariables, !Ref Environment, WalletApps]
             - Name: ONE_LOGIN_AUTH_SERVER_URL
               Value: !Sub
                 - "https://${OneLoginAuthServerUrl}"
-                - OneLoginAuthServerUrl: !FindInMap [ EnvironmentVariables, !Ref Environment, OneLoginAuthServerUrl ]
+                - OneLoginAuthServerUrl:
+                    !FindInMap [
+                      EnvironmentVariables,
+                      !Ref Environment,
+                      OneLoginAuthServerUrl,
+                    ]
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
@@ -449,9 +482,9 @@ Resources:
               awslogs-group: !Ref WalletFEECSAccessLogsGroup
               awslogs-region: !Sub ${AWS::Region}
               awslogs-stream-prefix: !Sub wallet-stub-front-${Environment}
-      Cpu: '1024' # Increased to use 1 CPU unit
+      Cpu: "1024" # Increased to use 1 CPU unit
       ExecutionRoleArn: !GetAtt WalletFEECSTaskExecutionRole.Arn
-      Memory: '2048' # Upgraded memory value to match with increased CPU
+      Memory: "2048" # Upgraded memory value to match with increased CPU
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
@@ -467,11 +500,11 @@ Resources:
           Value: !Sub "${Environment}"
 
   WalletFEECSTaskExecutionRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: 'sts:AssumeRole'
+          - Action: "sts:AssumeRole"
             Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
@@ -487,7 +520,11 @@ Resources:
                   - "ecr:GetDownloadUrlForLayer"
                   - "ecr:BatchCheckLayerAvailability"
                 Resource:
-                  - !FindInMap [EnvironmentVariables, !Ref Environment, DocumentBuilderImageRepository]
+                  - !FindInMap [
+                      EnvironmentVariables,
+                      !Ref Environment,
+                      DocumentBuilderImageRepository,
+                    ]
               - Effect: Allow
                 Action:
                   - "ecr:GetAuthorizationToken"
@@ -506,11 +543,11 @@ Resources:
         - !Ref AWS::NoValue
 
   WalletFEECSTaskRole:
-    Type: 'AWS::IAM::Role'
+    Type: "AWS::IAM::Role"
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-          - Action: 'sts:AssumeRole'
+          - Action: "sts:AssumeRole"
             Effect: Allow
             Principal:
               Service: ecs-tasks.amazonaws.com
@@ -522,14 +559,14 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 'dynamodb:PutItem'
-                  - 'dynamodb:GetItem'
+                  - "dynamodb:PutItem"
+                  - "dynamodb:GetItem"
                 Resource: !GetAtt DocumentDatabase.Arn
               - Effect: Allow
                 Action:
-                  - 'kms:Decrypt'
-                  - 'kms:Encrypt'
-                  - 'kms:GenerateDataKey'
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:GenerateDataKey"
                 Resource: !GetAtt DocumentDatabaseKmsKey.Arn
         - PolicyName: AccessS3
           PolicyDocument:
@@ -537,8 +574,8 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                  - 's3:PutObject'
-                  - 's3:GetObject'
+                  - "s3:PutObject"
+                  - "s3:GetObject"
                 Resource:
                   - !Sub
                     - arn:aws:s3:::${TargetBucket}/*
@@ -563,7 +600,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
             Action:
               - "kms:*"
             Resource:
@@ -572,8 +609,8 @@ Resources:
             Principal:
               AWS: !GetAtt WalletFEECSTaskRole.Arn
             Action:
-              - 'kms:Sign'
-              - 'kms:GetPublicKey'
+              - "kms:Sign"
+              - "kms:GetPublicKey"
             Resource:
               - "*"
       KeySpec: ECC_NIST_P256
@@ -597,7 +634,7 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
             Action:
               - "kms:*"
             Resource:
@@ -606,8 +643,8 @@ Resources:
             Principal:
               AWS: !GetAtt WalletFEECSTaskRole.Arn
             Action:
-              - 'kms:Sign'
-              - 'kms:GetPublicKey'
+              - "kms:Sign"
+              - "kms:GetPublicKey"
             Resource:
               - "*"
       KeySpec: RSA_2048

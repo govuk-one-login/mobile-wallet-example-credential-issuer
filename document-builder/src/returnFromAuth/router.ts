@@ -6,9 +6,9 @@ import { guardRouteByEnvironment } from "../middleware/guardRouteByEnvironment";
 const router = express.Router();
 
 router.get(
-    ROUTES.RETURN_FROM_AUTH,
-    guardRouteByEnvironment(),
-    returnFromAuthGetController,
+  ROUTES.RETURN_FROM_AUTH,
+  guardRouteByEnvironment(),
+  returnFromAuthGetController,
 );
 
 export { router as returnFromAuthRouter };

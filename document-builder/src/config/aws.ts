@@ -9,45 +9,45 @@ const LOCALSTACK_ENDPOINT = "http://localhost:4561";
 const LOCALSTACK_S3_ENDPOINT = "http://s3.localhost.localstack.cloud:4561";
 
 export function getLocalStackAwsConfig(endpoint: string): LocalStackAwsConfig {
-    return {
-        endpoint: endpoint,
-        credentials: {
-            accessKeyId: "accessKeyId",
-            secretAccessKey: "secretAccessKey",
-        },
-        region: getAwsRegion(),
-    };
+  return {
+    endpoint: endpoint,
+    credentials: {
+      accessKeyId: "accessKeyId",
+      secretAccessKey: "secretAccessKey",
+    },
+    region: getAwsRegion(),
+  };
 }
 
 export function getDatabaseConfig(): DynamoDBClientConfig {
-    if (getEnvironment() === "local") {
-        logger.info("Running database locally");
-        return getLocalStackAwsConfig(LOCALSTACK_ENDPOINT);
-    }
+  if (getEnvironment() === "local") {
+    logger.info("Running database locally");
+    return getLocalStackAwsConfig(LOCALSTACK_ENDPOINT);
+  }
 
-    return {
-        region: getAwsRegion(),
-    };
+  return {
+    region: getAwsRegion(),
+  };
 }
 
 export function getKmsConfig(): KMSClientConfig {
-    if (getEnvironment() === "local") {
-        logger.info("Running KMS locally");
-        return getLocalStackAwsConfig(LOCALSTACK_ENDPOINT);
-    }
+  if (getEnvironment() === "local") {
+    logger.info("Running KMS locally");
+    return getLocalStackAwsConfig(LOCALSTACK_ENDPOINT);
+  }
 
-    return {
-        region: getAwsRegion(),
-    };
+  return {
+    region: getAwsRegion(),
+  };
 }
 
 export function getS3Config(): S3ClientConfig {
-    if (getEnvironment() === "local") {
-        logger.info("Running S3 locally");
-        return getLocalStackAwsConfig(LOCALSTACK_S3_ENDPOINT);
-    }
+  if (getEnvironment() === "local") {
+    logger.info("Running S3 locally");
+    return getLocalStackAwsConfig(LOCALSTACK_S3_ENDPOINT);
+  }
 
-    return {
-        region: getAwsRegion(),
-    };
+  return {
+    region: getAwsRegion(),
+  };
 }

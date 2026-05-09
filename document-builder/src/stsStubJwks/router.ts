@@ -6,9 +6,9 @@ import { guardRouteByEnvironment } from "../middleware/guardRouteByEnvironment";
 const router = express.Router();
 
 router.get(
-    ROUTES.WELL_KNOWN_JWKS,
-    guardRouteByEnvironment(),
-    stsStubJwksController,
+  ROUTES.WELL_KNOWN_JWKS,
+  guardRouteByEnvironment(),
+  stsStubJwksController,
 );
 
 export { router as stsStubJwksRouter };

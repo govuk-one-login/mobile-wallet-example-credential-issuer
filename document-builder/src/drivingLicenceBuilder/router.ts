@@ -1,7 +1,7 @@
 import express from "express";
 import {
-    drivingLicenceBuilderGetController,
-    drivingLicenceBuilderPostController,
+  drivingLicenceBuilderGetController,
+  drivingLicenceBuilderPostController,
 } from "./controller";
 import { requiresAuth } from "../middleware/requiresAuth";
 import { ROUTES } from "../config/routes";
@@ -11,18 +11,18 @@ import { requiresAppSelected } from "../middleware/requiresAppSelected";
 const router = express.Router();
 
 router.get(
-    ROUTES.BUILD_DRIVING_LICENCE_DOCUMENT,
-    guardRouteByEnvironment(),
-    requiresAuth,
-    requiresAppSelected,
-    drivingLicenceBuilderGetController(),
+  ROUTES.BUILD_DRIVING_LICENCE_DOCUMENT,
+  guardRouteByEnvironment(),
+  requiresAuth,
+  requiresAppSelected,
+  drivingLicenceBuilderGetController(),
 );
 router.post(
-    ROUTES.BUILD_DRIVING_LICENCE_DOCUMENT,
-    guardRouteByEnvironment(),
-    requiresAuth,
-    requiresAppSelected,
-    drivingLicenceBuilderPostController(),
+  ROUTES.BUILD_DRIVING_LICENCE_DOCUMENT,
+  guardRouteByEnvironment(),
+  requiresAuth,
+  requiresAppSelected,
+  drivingLicenceBuilderPostController(),
 );
 
 export { router as drivingLicenceBuilderRouter };
