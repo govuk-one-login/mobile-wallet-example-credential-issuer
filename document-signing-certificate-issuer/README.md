@@ -61,18 +61,6 @@ This service is built with TypeScript and Node.js, deployed as an AWS Lambda fun
 npm install
 ```
 
-### Pre-commit hooks
-
-```bash
-brew install pre-commit
-```
-
-```bash
-pre-commit install
-pre-commit install --hook-type commit-msg
-pre-commit install --hook-type pre-push
-```
-
 ### Lint and format
 
 ```bash

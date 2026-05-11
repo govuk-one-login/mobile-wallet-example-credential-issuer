@@ -19,18 +19,6 @@ This service is built with TypeScript and Node.js/Express, using Nunjucks for se
 npm install
 ```
 
-### Pre-commit hooks
-
-```bash
-brew install pre-commit
-```
-
-```bash
-pre-commit install
-pre-commit install --hook-type commit-msg
-pre-commit install --hook-type pre-push
-```
-
 ### Checkov
 
 We use Checkov for static analysis of our IaC. Following can be used to run a Checkov analysis locally.
