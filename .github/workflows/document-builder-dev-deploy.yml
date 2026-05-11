@@ -1,25 +1,17 @@
-name: DOC Builder - Deploy to Dev
+name: Document Builder - Deploy to Dev
 
 on:
   workflow_dispatch:
     inputs:
-      refType:
-        type: choice
-        description: "Find branch name or commit SHA?"
-        options:
-          - Branch name
-          - Commit SHA
-        default: Branch name
       gitRef:
-        description: "Input branch name or commit SHA"
+        description: Input branch name or commit SHA
         required: true
         type: string
         default: main
 
 jobs:
-
-  deploy_artifacts:
-    name: "Deploy Image & Template to Dev"
+  deploy:
+    name: Deploy
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
@@ -29,8 +21,10 @@ jobs:
       run:
         working-directory: ./document-builder
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # pin@v3
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
+          # Check out the repository at the specific branch, tag, or commit
           ref: ${{ inputs.gitRef }}
 
       - name: Setup SAM CLI
