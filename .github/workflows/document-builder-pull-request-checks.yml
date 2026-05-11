@@ -65,6 +65,8 @@ jobs:
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: document-builder/.scannerwork/report-task.txt
 
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@9201a8e6eaa919e3444d7c4ca691896efde4f033 # v12.3101.0

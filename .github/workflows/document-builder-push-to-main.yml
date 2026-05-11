@@ -45,6 +45,8 @@ jobs:
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: document-builder/.scannerwork/report-task.txt
 
       - name: Setup SAM CLI
         uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # pin@v3
