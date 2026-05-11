@@ -27,32 +27,8 @@ jobs:
           # Check out the repository at the specific branch, tag, or commit
           ref: ${{ inputs.gitRef }}
 
-      - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@f84ec7d548307efafe33230528756de3c5841a17 # pin@v2
-        with:
-          version: 1.90.0
-          use-installer: true
-
-      - name: Fetch Commit SHA
-        id: gitRefSHA
-        if: ${{ github.event.inputs.choice == 'Commit SHA' }}
-        env:
-          USER_GIT_REF: ${{ inputs.gitRef }}
-        run: echo GIT_REF_SHA=$USER_GIT_REF >> $GITHUB_ENV
-
-      - name: Fetch Commit SHA by Branch name
-        id: gitRefBranch
-        if: ${{ github.event.inputs.choice == 'Branch name'}}
-        env:
-          USER_GIT_REF: ${{ inputs.gitRef }}
-        run: echo GIT_REF_SHA=$(git log -1 $USER_GIT_REF --pretty=format:%H) >> $GITHUB_ENV
-
-      - name: Set tag
-        id: vars
-        run: echo "tag=${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
-
-      - name: Set up AWS creds
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # pin@v1-node16
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
         with:
           role-to-assume: ${{ secrets.DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
@@ -61,32 +37,41 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@19d944daaa35f0fa1d3f7f8af1d3f2e5de25c5b7 # pin@v1
 
-      - name: Build & Publish Docker Image as latest
-        id: build-image
+      - name: Set GIT_REF_SHA
+        # Set GIT_REF_SHA to the checked-out commit SHA
+        run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Build, tag and push image to ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+          ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME}}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GIT_REF_SHA .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GIT_REF_SHA
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Upload SAM Template to Bucket
-        id: publish-template
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
+        with:
+          version: 1.131.0
+          use-installer: true
+
+      - name: Deploy SAM app
+        working-directory: ./deploy
         env:
           ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
         run: |
-          echo "Running sam build on template file"
+          echo "Running `SAM validate` and `SAM build`"
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          cd ${GITHUB_WORKSPACE}/deploy || exit 1
           sam validate
           sam build
           mv .aws-sam/build/template.yaml cf-template.yaml
-          echo "Replacing 'CONTAINER-IMAGE-PLACEHOLDER' with new ECR image ref"
-          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$GIT_REF_SHA|" cf-template.yaml
+          echo "Replacing `CONTAINER-IMAGE-PLACEHOLDER` with new ECR image"
+          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
+          echo "Compressing SAM template"
           zip template.zip cf-template.yaml
-          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$GIT_REF_SHA"
-
-      - name: "Delegated Deployment via AWS CodeDeploy"
-        run: echo "Deployment has been delegated to AWS CodeDeploy"
+          echo "Uploading the built SAM application artifacts to the deployment pipeline S3 bucket"
+          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$IMAGE_TAG"
