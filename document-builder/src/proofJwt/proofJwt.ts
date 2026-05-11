@@ -114,10 +114,10 @@ const compress = (publicKey: Uint8Array): Uint8Array => {
 function compressEcPoint(x: Uint8Array, y: Uint8Array) {
   const compressedKey = new Uint8Array(x.length + 1);
   /*
-    Suppressing this code smell because 'array.at(-1)' is only supported starting from ES2022, whereas this
-    project currently targets ES2016. We plan to address this issue when transitioning to ES modules and
-    updating the ECMAScript target version in https://govukverify.atlassian.net/browse/DCMAW-11776.
-    */
+  Suppressing this code smell because 'array.at(-1)' is only supported starting from ES2022, whereas this
+  project currently targets ES2016. We plan to address this issue when transitioning to ES modules and
+  updating the ECMAScript target version in https://govukverify.atlassian.net/browse/DCMAW-11776.
+  */
   compressedKey[0] = 2 + (y[y.length - 1] & 1); // NOSONAR
 
   compressedKey.set(x, 1);

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A service for filling in the content of documents, storing them and, through integration with a wallet credential issuer, providing the links needed to load those documents into the GOV.UK Wallet",
-  "repository": "https://github.com/govuk-one-login/mobile-wallet-document-builder",
+  "repository": "https://github.com/govuk-one-login/mobile-wallet-example-credential-issuer",
   "scripts": {
     "build": "npm run typecheck && npm run build:esbuild && npm run build-sass && npm run copy-scripts && npm run copy-templates && npm run copy-govuk-assets && npm run copy-jsontree && npm run copy-resources",
     "build:esbuild": "esbuild src/server.ts --bundle --platform=node --format=esm --outfile=dist/server.js --packages=external --sourcemap",
@@ -31,11 +31,11 @@
   "dependencies": {
     "@auth0/cose": "^1.0.2",
     "@auth0/mdl": "^3.0.1",
-    "@aws-sdk/client-dynamodb": "^3.1037.0",
-    "@aws-sdk/client-kms": "^3.1037.0",
-    "@aws-sdk/client-s3": "^3.1037.0",
-    "@aws-sdk/lib-dynamodb": "^3.1037.0",
-    "axios": "^1.15.2",
+    "@aws-sdk/client-dynamodb": "^3.1041.0",
+    "@aws-sdk/client-kms": "^3.1041.0",
+    "@aws-sdk/client-s3": "^3.1041.0",
+    "@aws-sdk/lib-dynamodb": "^3.1041.0",
+    "axios": "^1.16.0",
     "bs58": "^6.0.0",
     "cbor2": "^2.3.0",
     "cookie-parser": "^1.4.7",
@@ -60,13 +60,13 @@
     "@types/node": "^25.6.0",
     "@types/nunjucks": "^3.2.6",
     "@types/qrcode": "^1.5.6",
-    "@typescript-eslint/eslint-plugin": "^8.59.0",
-    "@typescript-eslint/parser": "^8.59.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
     "dotenv": "^17.4.2",
     "esbuild": "^0.28.0",
-    "eslint": "10.2.1",
+    "eslint": "10.3.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-prettier": "^5.5.5",
     "jest": "^30.3.0",
@@ -77,6 +77,6 @@
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.0"
+    "typescript-eslint": "^8.59.1"
   }
 }
