@@ -1,0 +1,25 @@
+name: Document Builder - Deploy to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+        with:
+          # Check out the repository at the specific branch, tag, or commit
+          ref: ${{ inputs.gitRef }}
