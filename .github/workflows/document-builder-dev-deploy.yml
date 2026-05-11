@@ -17,9 +17,6 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    defaults:
-      run:
-        working-directory: ./document-builder
     steps:
       - name: Check out repository code
         uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
@@ -42,6 +39,7 @@ jobs:
         run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Build, tag and push image to ECR
+        working-directory: ./document-builder
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME}}
@@ -57,7 +55,7 @@ jobs:
           use-installer: true
 
       - name: Deploy SAM app
-        working-directory: ./deploy
+        working-directory: ./document-builder/deploy
         env:
           ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
