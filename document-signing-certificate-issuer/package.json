@@ -14,11 +14,11 @@
   "description": "",
   "dependencies": {
     "@aws-lambda-powertools/logger": "^2.33.0",
-    "@aws-sdk/client-acm-pca": "^3.1037.0",
-    "@aws-sdk/client-kms": "^3.1037.0",
-    "@aws-sdk/client-s3": "^3.1037.0",
-    "@aws-sdk/client-ssm": "^3.1037.0",
-    "@peculiar/asn1-csr": "^2.6.1",
+    "@aws-sdk/client-acm-pca": "^3.1041.0",
+    "@aws-sdk/client-kms": "^3.1041.0",
+    "@aws-sdk/client-s3": "^3.1041.0",
+    "@aws-sdk/client-ssm": "^3.1041.0",
+    "@peculiar/asn1-csr": "^2.7.0",
     "@peculiar/asn1-schema": "^2.3.15",
     "@peculiar/asn1-x509": "^2.3.15",
     "@peculiar/x509": "^2.0.0",
@@ -35,14 +35,14 @@
     "@types/node": "^25.6.0",
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
-    "eslint": "^10.2.1",
+    "eslint": "^10.3.0",
     "jest": "^30.3.0",
     "jest-junit": "^17.0.0",
     "prettier": "^3.8.3",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.1",
     "typescript": "^5.8.2",
-    "typescript-eslint": "^8.59.0"
+    "typescript-eslint": "^8.59.1"
   },
   "type": "module",
   "overrides": {
