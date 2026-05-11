@@ -6,7 +6,7 @@ This project contains example issuers that will help you build your own implemen
 
 * [`document-signing-certificate-issuer`](./document-signing-certificate-issuer/) - An issuer of mDL document signing certificates. Written in Node.js.
 * [`example-credential-issuer`](./example-credential-issuer/) - A reference implementation credential issuer to issue credentials into GOV.UK Wallet. Written in Java.
-* [`document-builder`](./document-builder) - A service for creating and storing test documents used by the GOV.UK Wallet credential issuer to issue the corresponding digital credentials.
+* [`document-builder`](./document-builder) - A service for creating and storing test documents used by the GOV.UK Wallet credential issuer to issue the corresponding digital credentials. Written in Node.js.
 
 ## Contributing
 
