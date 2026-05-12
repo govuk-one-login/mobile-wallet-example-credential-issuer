@@ -1,4 +1,4 @@
-name: Doc-Builder Issuer - Push to Main
+name: Document Builder - Push to Main
 
 on:
   workflow_dispatch:

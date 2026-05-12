@@ -1,4 +1,4 @@
-name: DOC Builder - Pull Request Checks
+name: Document Builder - Pull Request Checks
 
 on:
   pull_request:
