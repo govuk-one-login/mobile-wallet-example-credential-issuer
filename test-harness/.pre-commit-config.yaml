@@ -1,0 +1,43 @@
+repos:
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args:
+          [
+            feat,
+            fix,
+            chore,
+            docs,
+            style,
+            refactor,
+            test,
+            build,
+            ci,
+            perf,
+            revert,
+          ]
+
+  - repo: local
+    hooks:
+      - id: eslint-ts
+        name: ESLint- Typescript lint
+        language: system
+        entry: bash -c 'npm run lint'
+        files: \.(ts|md)$
+        stages: [pre-commit]
+
+      - id: prettier-ts
+        name: Prettier - format check
+        language: system
+        entry: bash -c 'npm run format:check'
+        files: \.(ts|md)$
+        stages: [pre-commit]
+
+      - id: jest-tests
+        name: Jest - unit tests
+        language: system
+        entry: bash -c 'npm run test:unit'
+        files: \.ts$
+        stages: [pre-push]

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.1.0/schemas/schema.json",
+  "services": [
+    {
+      "service-tag": "cri-test-harness",
+      "quality-gates": [
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/pull-request.yml",
+            "path": "jobs.check-conventional-commits"
+          },
+          "check-types": ["code style and linting"]
+        },
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/pull-request.yml",
+            "path": "jobs.build-lint-and-test"
+          },
+          "check-types": ["code style and linting", "unit"]
+        },
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/sonarqube.yml",
+            "path": "jobs.run-code-quality-and-security-analysis"
+          },
+          "check-types": [
+            "unit",
+            "unit test coverage",
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"
+          ]
+        },
+        {
+          "phase": "pre-upload",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/sonarqube.yml",
+            "path": "jobs.run-code-quality-and-security-analysis"
+          },
+          "check-types": [
+            "unit",
+            "unit test coverage",
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4 @@
+# This is the CODEOWNERS file. These owners will be the default owners for everything in the mobile-wallet-cri-test-harness repository
+# The following below will be requested for review when someone opens a pull request.
+
+* @govuk-one-login/mobile-wallet-onboarding-products @govuk-one-login/mobile-leads

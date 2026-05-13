@@ -1,0 +1,51 @@
+{
+  "name": "mobile-wallet-cri-test-harness",
+  "version": "1.0.0",
+  "description": "A service for testing a Wallet credential issuer",
+  "author": "",
+  "license": "MIT",
+  "main": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "execute": "node ./dist/src/server.js",
+    "start": "npm run build && npm run execute",
+    "lint": "eslint . ",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --ignore-path .gitignore --write \"*/**/*.{ts,json}\"",
+    "format:check": "node_modules/.bin/prettier --check .",
+    "format:fix": "prettier --ignore-path .gitignore --write \"*/**/*.{ts,json}\"",
+    "test": "node_modules/.bin/jest --testPathPatterns=test/credential-issuer-tests.test.ts --coverage=false",
+    "test:unit": "TZ=UTC jest node_modules/.bin/jest --testPathPatterns=test/helpers src/config --silent"
+  },
+  "dependencies": {
+    "@peculiar/x509": "^2.0.0",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "axios": "^1.16.0",
+    "bs58": "^6.0.0",
+    "cbor2": "^2.3.0",
+    "ecdsa-sig-formatter": "^1.0.11",
+    "express": "^5.2.1",
+    "jose": "^6.0.13",
+    "reflect-metadata": "^0.2.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^25.6.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "eslint": "10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "jest": "^30.3.0",
+    "jest-junit": "^17.0.0",
+    "prettier": "^3.8.3",
+    "ts-jest": "^29.4.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.1"
+  }
+}
