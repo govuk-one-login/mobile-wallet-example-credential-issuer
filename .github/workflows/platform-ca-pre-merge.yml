@@ -2,6 +2,9 @@ name: Platform CA - Pull Request Checks
 
 on:
   pull_request:
+    paths:
+      - platform-ca/**
+      - .github/workflows/platform-ca-pull-request-checks.yml
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
