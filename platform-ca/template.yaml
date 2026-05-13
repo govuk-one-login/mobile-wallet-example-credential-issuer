@@ -1,0 +1,344 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: Private CA to act as the Issuing Authority Certificate Authority
+
+Parameters:
+  Environment:
+    Description: The environment type
+    Type: String
+    AllowedValues:
+      - dev
+      - build
+      - integration
+    Default: dev
+
+  IssuerAlternativeNameOverride:
+    Description: The base64 encoded ASN1 string of the Issuer Alt Name to use when deploying to a branch in DEV
+    Type: String
+    Default: MC6GLGh0dHBzOi8vd2FsbGV0LW9uYm9hcmRpbmcuZGV2LmFjY291bnQuZ292LnVr # base64 ASN.1 encoding of "https://wallet-onboarding.dev.account.gov.uk/"
+
+Mappings:
+  EnvironmentVariables:
+    dev:
+      IssuerAlternativeName: MC6GLGh0dHBzOi8vd2FsbGV0LW9uYm9hcmRpbmcuZGV2LmFjY291bnQuZ292LnVr # base64 ASN.1 encoding of "https://wallet-onboarding.dev.account.gov.uk"
+      RootCertificateParameter: /platform-ca/iaca/root-certificate
+      IssuerAlternativeNameParameter: /platform-ca/iaca/issuer-alternative-name
+      CertificateAuthorityArnParameter: /platform-ca/iaca/certificate-authority-arn
+      RootCertificateArnParameter: /platform-ca/iaca/root-certificate-arn
+      RootCertificateLifetime: 3288 # (9 years, assuming 3 are leap years)
+      CommonName: mDL Example IACA Root - DEV environment
+      CloudFrontCertArn: arn:aws:acm:us-east-1:219494607463:certificate/bcb44a38-4982-4046-b178-b8d4b2b5ad75
+    build:
+      IssuerAlternativeName: MDCGLmh0dHBzOi8vd2FsbGV0LW9uYm9hcmRpbmcuYnVpbGQuYWNjb3VudC5nb3YudWs= # base64 ASN.1 encoding of "https://wallet-onboarding.build.account.gov.uk"
+      RootCertificateParameter: /platform-ca/iaca/root-certificate
+      IssuerAlternativeNameParameter: /platform-ca/iaca/issuer-alternative-name
+      CertificateAuthorityArnParameter: /platform-ca/iaca/certificate-authority-arn
+      RootCertificateArnParameter: /platform-ca/iaca/root-certificate-arn
+      RootCertificateLifetime: 3288 # (9 years, assuming 3 are leap years)
+      CommonName: mDL Example IACA Root - BUILD environment
+      CloudFrontCertArn: arn:aws:acm:us-east-1:899032468188:certificate/7ded5c91-5de9-4d50-82ba-b24160e913b5
+    integration:
+      IssuerAlternativeName: MDaGNGh0dHBzOi8vd2FsbGV0LW9uYm9hcmRpbmcuaW50ZWdyYXRpb24uYWNjb3VudC5nb3YudWs= # base64 ASN.1 encoding of "https://wallet-onboarding.integration.account.gov.uk"
+      RootCertificateParameter: /platform-ca/iaca/root-certificate
+      IssuerAlternativeNameParameter: /platform-ca/iaca/issuer-alternative-name
+      CertificateAuthorityArnParameter: /platform-ca/iaca/certificate-authority-arn
+      RootCertificateArnParameter: /platform-ca/iaca/root-certificate-arn
+      RootCertificateLifetime: 3288 # (9 years, assuming 3 are leap years)
+      CommonName: mDL Example IACA Root - INT environment
+      CloudFrontCertArn: arn:aws:acm:us-east-1:228170791542:certificate/8ed5941d-7068-49f2-b31f-31cc54cbc3ad
+
+Conditions:
+  StackNameIsWalletCredIssuerCA: !Equals
+    - !Ref AWS::StackName
+    - platform-ca
+
+Transform: AWS::Serverless-2016-10-31
+
+Resources:
+  RootCA:
+    Type: AWS::ACMPCA::CertificateAuthority
+    DependsOn: CRLBucketPolicy
+    Properties:
+      Type: ROOT
+      KeyAlgorithm: EC_prime256v1
+      SigningAlgorithm: SHA256WITHECDSA
+      Subject:
+        Country: GB
+        CommonName: !FindInMap
+          - EnvironmentVariables
+          - !Ref Environment
+          - CommonName
+      RevocationConfiguration:
+        CrlConfiguration:
+          Enabled: true
+          CrlType: COMPLETE
+          CustomCname: !Sub ${AWS::StackName}-crl.wallet-onboarding.${Environment}.account.gov.uk
+          S3ObjectAcl: BUCKET_OWNER_FULL_CONTROL
+          S3BucketName: !Ref CRLBucket
+          ExpirationInDays: 2
+
+  RootCAAuditReportBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-ca-audit-report-bucket
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
+      LifecycleConfiguration:
+        Rules:
+          - Id: RetainAuditReportsFor7Days
+            Prefix: results/
+            ExpirationInDays: 7
+            NoncurrentVersionExpiration:
+              NoncurrentDays: 7
+            Status: Enabled
+
+  RootCAAuditReportBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref RootCAAuditReportBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowPrivateCAPrincipalReadWrite
+            Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+              - s3:GetBucketAcl
+              - s3:GetBucketLocation
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-ca-audit-report-bucket
+              - !Sub arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-ca-audit-report-bucket/*
+            Principal:
+              Service: acm-pca.amazonaws.com
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+
+  CRLBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub ${AWS::StackName}-${AWS::AccountId}-crl
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LoggingConfiguration:
+        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        LogFilePrefix: !Sub ${AWS::StackName}-crl/
+        TargetObjectKeyFormat:
+          PartitionedPrefix:
+            PartitionDateSource: EventTime
+
+  CRLBucketPolicy:
+    Type: AWS::S3::BucketPolicy
+    Properties:
+      Bucket: !Ref CRLBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: AllowPrivateCAPrincipalReadWrite
+            Action:
+              - s3:PutObject
+              - s3:PutObjectAcl
+              - s3:GetBucketAcl
+              - s3:GetBucketLocation
+            Effect: Allow
+            Resource:
+              - !Sub arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-crl
+              - !Sub arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-crl/*
+            Principal:
+              Service: acm-pca.amazonaws.com
+            Condition:
+              StringEquals:
+                aws:SourceAccount: !Ref AWS::AccountId
+          - Sid: AllowCloudFrontServicePrincipalReadOnly
+            Action:
+              - s3:GetObject
+            Resource:
+              - !Sub arn:aws:s3:::${AWS::StackName}-${AWS::AccountId}-crl/*
+            Principal:
+              Service: cloudfront.amazonaws.com
+            Effect: Allow
+            Condition:
+              StringEquals:
+                AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CRLDistribution}
+
+  CRLOriginAccessControl:
+    Type: AWS::CloudFront::OriginAccessControl
+    Properties:
+      OriginAccessControlConfig:
+        Name: !Sub ${AWS::StackName}-crl-bucket
+        OriginAccessControlOriginType: s3
+        SigningBehavior: always
+        SigningProtocol: sigv4
+
+  CRLDomainRecordSet:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Sub ${AWS::StackName}-crl.wallet-onboarding.${Environment}.account.gov.uk.
+      Type: A
+      HostedZoneId: !Sub '{{resolve:ssm:/${Environment}/Platform/Route53/PrimaryZoneID}}'
+      AliasTarget:
+        DNSName: !GetAtt CRLDistribution.DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+
+  CRLDistribution:
+    Type: AWS::CloudFront::Distribution
+    Metadata:
+      checkov:
+        skip:
+          - comment: WAF enabled via AWS Firewall Manager (AWS FMS) rather than it's own standalone system.
+            id: CKV_AWS_68
+            rule: AWS CloudFront web distribution with AWS Web Application Firewall (AWS WAF) service disabled
+          - comment: CRLs are by convention distributed using http - see https://security.stackexchange.com/questions/72570/is-publishing-crls-over-http-a-potential-vulnerability
+            id: CKV_AWS_34
+            rule: Ensure CloudFront Distribution ViewerProtocolPolicy is set to HTTPS
+    Properties:
+      DistributionConfig:
+        Enabled: true
+        Comment: !Sub ${AWS::StackName} CRL Cloudfront Distribution
+        DefaultRootObject: index.html
+        HttpVersion: http1.1
+        Origins:
+          - DomainName: !Sub ${CRLBucket}.s3.${AWS::Region}.amazonaws.com
+            Id: bucketOrigin
+            OriginAccessControlId: !Ref CRLOriginAccessControl
+            S3OriginConfig:
+              OriginAccessIdentity: ""
+        DefaultCacheBehavior:
+          CachedMethods:
+            - GET
+            - HEAD
+          AllowedMethods:
+            - GET
+            - HEAD
+          TargetOriginId: bucketOrigin
+          CachePolicyId: 4135ea2d-6df8-44a3-9df3-4b5a84be39ad # see https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/using-managed-cache-policies.html#managed-cache-policy-caching-disabled
+          ViewerProtocolPolicy: allow-all
+        PriceClass: PriceClass_All
+        Logging:
+          Bucket: log-archive-cloudfront-logs-523017967436-eu-west-2.s3.amazonaws.com
+          Prefix: !Sub ${AWS::AccountId}/${AWS::StackName}/
+        Aliases:
+          - !Sub ${AWS::StackName}-crl.wallet-onboarding.${Environment}.account.gov.uk
+        ViewerCertificate:
+          AcmCertificateArn: !FindInMap
+            - EnvironmentVariables
+            - !Ref Environment
+            - CloudFrontCertArn
+          MinimumProtocolVersion: TLSv1.2_2018
+          SslSupportMethod: sni-only
+
+  RootCACertificate:
+    Type: AWS::ACMPCA::Certificate
+    Properties:
+      CertificateAuthorityArn: !Ref RootCA
+      CertificateSigningRequest: !GetAtt RootCA.CertificateSigningRequest
+      SigningAlgorithm: SHA256WITHECDSA
+      TemplateArn: arn:aws:acm-pca:::template/BlankRootCACertificate_PathLen0_APIPassthrough/V1
+      Validity:
+        Type: DAYS
+        Value: !FindInMap
+          - EnvironmentVariables
+          - !Ref Environment
+          - RootCertificateLifetime
+      ApiPassthrough:
+        Extensions:
+          CustomExtensions:
+            - ObjectIdentifier: 2.5.29.18 # Issuer Alternative Name
+              Value: !If
+                - StackNameIsWalletCredIssuerCA
+                - !FindInMap
+                  - EnvironmentVariables
+                  - !Ref Environment
+                  - IssuerAlternativeName
+                - !Ref IssuerAlternativeNameOverride
+          KeyUsage:
+            KeyCertSign: true
+            CRLSign: true
+
+  RootCAActivation:
+    Type: AWS::ACMPCA::CertificateAuthorityActivation
+    Properties:
+      CertificateAuthorityArn: !Ref RootCA
+      Certificate: !GetAtt RootCACertificate.Certificate
+      Status: ACTIVE
+
+  RootCertificateParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - RootCertificateParameter
+      Type: String
+      Value: !GetAtt RootCAActivation.CompleteCertificateChain
+
+  IssuerAlternativeNameParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - IssuerAlternativeNameParameter
+      Type: String
+      Value: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - IssuerAlternativeName
+
+  CertificateAuthorityArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - CertificateAuthorityArnParameter
+      Type: String
+      Value: !Ref RootCA
+
+  RootCertificateArnParameter:
+    Type: AWS::SSM::Parameter
+    Properties:
+      Name: !FindInMap
+        - EnvironmentVariables
+        - !Ref Environment
+        - RootCertificateArnParameter
+      Type: String
+      Value: !GetAtt RootCACertificate.Arn
+
+Outputs:
+  RootCertificateArn:
+    Description: The ARN for the root certificate for the deployed Issuing Authority Certificate Authority
+    Value: !GetAtt RootCACertificate.Arn
+    Export:
+      Name: !Sub ${AWS::StackName}-root-certificate-arn
+
+  CertificateAuthorityArn:
+    Description: The ARN for the IACA Private CA AWS resource
+    Value: !Ref RootCA
+    Export:
+      Name: !Sub ${AWS::StackName}-certificate-authority-arn

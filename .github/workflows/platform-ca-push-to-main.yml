@@ -1,0 +1,60 @@
+name: Platform-ca push to main
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - platform-ca/**
+      - .github/workflows/platform-ca-push-to-main.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: ./platform-ca
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          ref: ${{ inputs.gitRef }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
+        with:
+          role-to-assume: ${{ secrets.BUILD_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
+        with:
+          version: 1.153.1
+          use-installer: true
+
+      - name: Validate SAM template
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate --lint
+
+      - name: Build SAM template
+        run: sam build --parallel
+
+      - name: Upload SAM artifacts
+        # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
+        uses: govuk-one-login/devplatform-upload-action@5879c30205266ad61e8299a4fcea76364530c9c1 # v3.14.0
+        with:
+          artifact-bucket-name: ${{ secrets.BUILD_ARTIFACT_SOURCE_BUCKET_NAME }}
+          signing-profile-name: ${{ secrets.BUILD_SIGNING_PROFILE_NAME }}
+          working-directory: ./platform-ca
+          template-file: .aws-sam/build/template.yaml
