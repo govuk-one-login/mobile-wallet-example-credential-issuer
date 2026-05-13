@@ -4,7 +4,7 @@
 
 The Platform CA is a private certificate authority that acts as the Issuing Authority Certificate Authority (IACA) for the example mdoc-based credentials issued by the example credential issuer.
 It is deployed to the `build` and `integration` environments only.
-On deployment, the Platform CA creates a self-signed root CA certificate and stores  it — along with the CA ARN, root certificate ARN, and issuer alternative name — in  SSM Parameter Store.
+On deployment, the Platform CA creates a self-signed root CA certificate and stores it — along with the CA ARN, root certificate ARN, and issuer alternative name — in SSM Parameter Store.
 
 ## Tech stack
 
