@@ -44,7 +44,7 @@ The certificate issuer uploads the root certificate to the same bucket with the 
 
 If you have questions or suggestions, contact us on [govukwallet-queries@digital.cabinet-office.gov.uk](mailto:govukwallet-queries@digital.cabinet-office.gov.uk) or use #govuk-wallet in x-gov Slack.
 
-## Tech Stack
+## Tech stack
 
 This service is built with TypeScript and Node.js, deployed as an AWS Lambda function via AWS SAM. It uses S3 for certificate storage, KMS for signing, and SSM Parameter Store for configuration management.
 
@@ -53,7 +53,7 @@ This service is built with TypeScript and Node.js, deployed as an AWS Lambda fun
 - [Node.js](https://nodejs.org/en) — we recommend managing versions with [nvm](https://github.com/nvm-sh/nvm)
 - [Pre-commit](https://pre-commit.com/)
 
-## Local Setup
+## Set up locally
 
 ### Install
 
@@ -61,7 +61,7 @@ This service is built with TypeScript and Node.js, deployed as an AWS Lambda fun
 npm install
 ```
 
-### Lint & Format
+### Lint and format
 
 ```bash
 npm run lint:fix
@@ -80,12 +80,12 @@ npm run checkov
 npm run test
 ```
 
-## Deployment
+## Deploy
 
 This service is deployed via GitHub Actions, or using the AWS SAM CLI.
 
 Automated deployments to `build` are triggered on push to `main` after PR approval. Manual deployments to `dev` can be triggered from the GitHub Actions menu, where you can specify a branch name or commit SHA.
 
-## Contributing
+## Contribute
 
 [README](../README.md)
