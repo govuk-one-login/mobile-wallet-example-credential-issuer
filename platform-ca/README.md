@@ -1,25 +1,23 @@
-# mDL - Issuing Authority Certificate Authority - IACA
+# Platform CA – Issuing Authority Certificate Authority (IACA)
 
 ## Overview
 
 The Platform CA is a private certificate authority that acts as the Issuing Authority Certificate Authority (IACA) for the example mdoc-based credentials issued by the example credential issuer.
 It is deployed to the `build` and `integration` environments only.
-On deployment, the Platform CA creates a self-signed root CA certificate and stores
-it — along with the CA ARN, root certificate ARN, and issuer alternative name — in 
-SSM Parameter Store.
+On deployment, the Platform CA creates a self-signed root CA certificate and stores  it — along with the CA ARN, root certificate ARN, and issuer alternative name — in  SSM Parameter Store.
 
 ## Tech stack
 
 This service is defined as a CloudFormation stack (`template.yaml`) that provisions AWS resources. A small TypeScript utility is included under `utils/`.
 
-The template.yaml in this repo deploys:
+The template.yaml in this project deploys:
 
 - a Private Certificate Authority
-- a brand new root certificate for the new root keypair embedded with the Private CA
+- a new root certificate for the new root keypair embedded with the Private CA
 - a bucket to hold the Certificate Revocation List for the new Certificate Authority
 - a CloudFront distribution to sit in front of the bucket, so it is served via a CDN
-- a domain name for the CloudFront distribution so the Certificate Revocation List (CRL) link in the certificates has a stable and controlled DNS name
-- a bucket to store any audit reports generated from that Private CA - reports expire after 7 days
+- a domain name for the CloudFront distribution, so the Certificate Revocation List (CRL) link in the certificates has a stable and controlled DNS name
+- a bucket to store any audit reports generated from that Private CA – reports expire after 7 days
 
 The AWS architecture implemented is shown in the left-hand cream-coloured box below:
 
@@ -40,20 +38,7 @@ All `npm` commands should be run from the `utils/` directory.
 npm install
 ```
 
-### Pre-commit hooks
-
-This project uses [pre-commit](https://pre-commit.com/) to run checks before commits and pushes. Set it up with:
-
-```bash
-brew install pre-commit
-```
-
-```bash
-pre-commit install
-pre-commit install --hook-type commit-msg
-```
-
-### Lint and Format
+### Lint and format
 
 ```bash
 npm run lint:fix
@@ -79,6 +64,4 @@ A separate development stack from a branch can be deployed into `dev` when worki
 
 ## Contribute
 
-We use pre-commit hooks to maintain code quality and validate commit messages against the [Conventional Commits](https://github.com/conventional-changelog/commitlint) standard. If your message does not conform to these standards, it will be rejected.
-
-Ensure your branch is up to date and all hooks pass before opening a pull request. Avoid using the git `--no-verify` flag to skip these checks unless absolutely necessary.
+See the main project [README](../README.md) for contributing guidelines and pre-commit setup.
