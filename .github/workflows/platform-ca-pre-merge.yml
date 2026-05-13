@@ -1,4 +1,4 @@
-name: Platform-ca pre merge
+name: Platform CA - Pull Request Checks
 
 on:
   pull_request:
