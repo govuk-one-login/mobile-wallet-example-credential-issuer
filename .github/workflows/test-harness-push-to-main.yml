@@ -15,7 +15,7 @@ concurrency:
 jobs:
   run-sonarqube-scan:
     name: Run SonarQube Scan
-    uses: ./.github/workflows/sonarqube.yml
+    uses: ./.github/workflows/test-harness-sonarqube.yml
     permissions:
       contents: read
     secrets:

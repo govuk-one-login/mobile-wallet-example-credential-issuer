@@ -42,7 +42,7 @@ jobs:
 
   run-sonarqube-scan:
     name: Run SonarQube Scan
-    uses: ./.github/workflows/sonarqube.yml
+    uses: ./.github/workflows/test-harness-sonarqube.yml
     permissions:
       contents: read
     with:
@@ -71,6 +71,7 @@ jobs:
         with:
           node-version-file: test-harness/.nvmrc
           cache: npm
+          cache-dependency-path: test-harness/package-lock.json
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
