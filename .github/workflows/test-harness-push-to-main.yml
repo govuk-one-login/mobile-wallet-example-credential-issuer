@@ -1,4 +1,4 @@
-name: Test Harness - Release
+name: Test Harness - Push to Main
 
 on:
   push:
