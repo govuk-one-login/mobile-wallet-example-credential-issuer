@@ -115,7 +115,13 @@
             "file": ".github/workflows/test-harness-pull-request-checks.yml",
             "path": "jobs.build-lint-and-test"
           },
-          "check-types": ["code style and linting", "unit"]
+          "check-types": [
+            "code style and linting",
+            "unit",
+            "unit test coverage",
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"]
         },
         {
           "phase": "pre-merge",

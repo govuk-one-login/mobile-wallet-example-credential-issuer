@@ -84,19 +84,3 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
 
-#      - name: SonarQube Scan
-#        uses: sonarsource/sonarqube-scan-action@59db25f34e16620e48ab4bb9e4a5dce155cb5432 # v8.0.0
-#        env:
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          projectBaseDir: ./test-harness
-#
-#      - name: SonarQube Quality Gate check
-#        uses: SonarSource/sonarqube-quality-gate-action@cf038b0e0cdecfa9e56c198bbb7d21d751d62c3b # v1.2.0
-#        timeout-minutes: 5
-#        env:
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-#        with:
-#          scanMetadataReportFile: test-harness/.scannerwork/report-task.txt
-
