@@ -86,7 +86,7 @@ jobs:
           node-version-file: document-signing-certificate-issuer/.nvmrc
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 # v6.1.0
+        uses: aws-actions/configure-aws-credentials@d979d5b3a71173a29b74b5b88418bfda9437d885 # v6.1.1
         with:
           role-to-assume: ${{ secrets.BUILD_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
@@ -110,7 +110,7 @@ jobs:
         uses: govuk-one-login/devplatform-upload-action@5879c30205266ad61e8299a4fcea76364530c9c1 # v3.14.0
         with:
           artifact-bucket-name: ${{ secrets.BUILD_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
-          signing-profile-name: ${{ secrets.SIGNING_PROFILE_NAME }}
+          signing-profile-name: ${{ secrets.BUILD_SIGNING_PROFILE_NAME }}
           working-directory: ./document-signing-certificate-issuer
           template-file: .aws-sam/build/template.yaml
 

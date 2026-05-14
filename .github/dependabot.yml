@@ -117,6 +117,27 @@ updates:
         patterns:
           - "*"
   - package-ecosystem: "npm"
+    directory: "/platform-ca/utils"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      npm-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    - package-ecosystem: "npm"
     directory: "/test-harness"
     cooldown:
       default-days: 7
@@ -138,7 +159,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
-  - package-ecosystem: "docker"
+    - package-ecosystem: "docker"
     directory: "/test-harness"
     cooldown:
       default-days: 7
