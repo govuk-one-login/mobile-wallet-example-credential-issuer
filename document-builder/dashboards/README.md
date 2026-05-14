@@ -20,7 +20,7 @@ The following DQL functions are used to isolate the desired metric in Dynatrace:
 
 Dynatrace JSON can be copied from the 'Configure/Dashboard JSON' tab for the dashboard. or the 'Export' tab once inside the dashboard.
 
-Everytime an reviewed and agreed permanent change is made to a dashboard, this file should be updated.
+Everytime a reviewed and agreed permanent change is made to a dashboard, this file should be updated.
 
 ### How to Upload
 
