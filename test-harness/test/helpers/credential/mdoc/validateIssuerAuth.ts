@@ -275,14 +275,16 @@ async function validateDeviceKey(
       "INVALID_DEVICE_KEY",
     );
   }
+  const x = deviceKey.get(COSE_KEY_PARAMETERS.EC2_X);
+  const y = deviceKey.get(COSE_KEY_PARAMETERS.EC2_Y);
 
-  if (!(deviceKey.get(COSE_KEY_PARAMETERS.EC2_X) instanceof Uint8Array)) {
+  if (!(x instanceof Uint8Array)) {
     throw new MDLValidationError(
       "DeviceKey x-coordinate (-2) must be a Uint8Array",
       "INVALID_DEVICE_KEY",
     );
   }
-  if (!(deviceKey.get(COSE_KEY_PARAMETERS.EC2_Y) instanceof Uint8Array)) {
+  if (!(y instanceof Uint8Array)) {
     throw new MDLValidationError(
       "DeviceKey y-coordinate (-3) must be a Uint8Array",
       "INVALID_DEVICE_KEY",
@@ -293,8 +295,8 @@ async function validateDeviceKey(
     const jwk = {
       kty: "EC",
       crv: "P-256",
-      x: Buffer.from(deviceKey.get(-2) as Uint8Array).toString("base64url"),
-      y: Buffer.from(deviceKey.get(-3) as Uint8Array).toString("base64url"),
+      x: Buffer.from(x).toString("base64url"),
+      y: Buffer.from(y).toString("base64url"),
     };
 
     await crypto.subtle.importKey(

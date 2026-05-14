@@ -5,26 +5,15 @@ on:
     - cron: "0 0 * * 1-5"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  sonarqube-scan:
-    name: SonarQube scan
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+  run-sonarqube-scan:
+    name: Run SonarQube Scan
     permissions:
       contents: read
-    defaults:
-      run:
-        working-directory: ./test-harness
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-        with:
-          fetch-depth: 0
-
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@59db25f34e16620e48ab4bb9e4a5dce155cb5432 # v8.0.0
-        with:
-          projectBaseDir: ./test-harness
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/sonarqube.yml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
