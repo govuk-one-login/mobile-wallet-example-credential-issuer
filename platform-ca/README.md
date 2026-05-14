@@ -21,7 +21,7 @@ The template.yaml in this project deploys:
 
 The AWS architecture implemented is shown in the left-hand cream-coloured box below:
 
-![AWS Solution Architecture Diagram](docs/private-ca-and-doc-signing-cert-infra.drawio.png)
+![AWS Solution Architecture Diagram](docs/infrastructure.drawio.png)
 
 ## Prerequisites
 
