@@ -97,6 +97,59 @@
       ]
     },
     {
+      "service-tag": "test-harness",
+      "quality-gates": [
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/test-harness-pull-request-checks.yml",
+            "path": "jobs.check-conventional-commits"
+          },
+          "check-types": ["code style and linting"]
+        },
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/test-harness-pull-request-checks.yml",
+            "path": "jobs.build-lint-and-test"
+          },
+          "check-types": ["code style and linting", "unit"]
+        },
+        {
+          "phase": "pre-merge",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/sonarqube.yml",
+            "path": "jobs.run-code-quality-and-security-analysis"
+          },
+          "check-types": [
+            "unit",
+            "unit test coverage",
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"
+          ]
+        },
+        {
+          "phase": "pre-upload",
+          "provider": "GitHub",
+          "config": {
+            "file": ".github/workflows/sonarqube.yml",
+            "path": "jobs.run-code-quality-and-security-analysis"
+          },
+          "check-types": [
+            "unit",
+            "unit test coverage",
+            "code quality",
+            "vulnerability detection",
+            "secret scanning"
+          ]
+        }
+      ]
+    },
+    {
       "service-tag": "example-credential-issuer",
       "quality-gates": [
         {
