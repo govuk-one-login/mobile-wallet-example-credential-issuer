@@ -1,6 +1,6 @@
 ## Wallet - OP - Document Builder
 
-The file: doc-builder-non-prod-dashboard.json, is a back-up of our Dynatrace non-production dashboard. This file is directly exported from our Dynatrace dashboards, after they have been designed.
+The file [doc-builder-non-prod-dashboard.json](doc-builder-non-prod-dashboard.json), is a back-up of our Dynatrace non-production dashboard. This file is directly exported from our Dynatrace dashboards, after they have been designed.
 
 Dynatrace uses Dynatrace Query Language (DQL) to express metrics so that we can isolate and manipulate them in graphical form.
 
