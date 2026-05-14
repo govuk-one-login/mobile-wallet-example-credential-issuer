@@ -88,3 +88,26 @@
           entry: bash -c 'cd document-builder && npm run checkov'
           files: ^document-builder/template.yaml
           stages: [pre-commit]
+
+    - repo: local
+      hooks:
+        - id: platform-ca-eslint-ts
+          name: Platform CA - ESLint linter
+          language: system
+          entry: bash -c 'cd platform-ca/utils && npm run lint'
+          files: ^platform-ca/utils/.*\.ts$
+          stages: [ pre-commit ]
+
+        - id: platform-ca-prettier-ts
+          name: Platform CA - Prettier format check
+          language: system
+          entry: bash -c 'cd platform-ca/utils && npm run format:check'
+          files: ^platform-ca/utils/.*\.ts$
+          stages: [ pre-commit ]
+
+        - id: platform-ca-checkov
+          name: Platform CA - Infrastructure static analysis
+          language: system
+          entry: bash -c 'cd platform-ca && checkov --file template.yaml'
+          files: ^platform-ca/template.yaml
+          stages: [ pre-commit ]

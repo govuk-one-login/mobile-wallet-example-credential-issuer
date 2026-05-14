@@ -2,6 +2,9 @@ name: Document Builder - Pull Request Checks
 
 on:
   pull_request:
+    paths:
+      - document-builder/**
+      - .github/workflows/document-builder-pull-request-checks.yml
 
 permissions:
   id-token: write
