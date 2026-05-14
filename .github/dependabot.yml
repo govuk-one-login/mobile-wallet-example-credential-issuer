@@ -137,7 +137,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    - package-ecosystem: "npm"
+  - package-ecosystem: "npm"
     directory: "/test-harness"
     cooldown:
       default-days: 7
@@ -159,7 +159,7 @@ updates:
         update-types:
           - "minor"
           - "patch"
-    - package-ecosystem: "docker"
+  - package-ecosystem: "docker"
     directory: "/test-harness"
     cooldown:
       default-days: 7
