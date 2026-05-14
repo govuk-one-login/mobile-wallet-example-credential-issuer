@@ -116,3 +116,41 @@ updates:
       docker-updates:
         patterns:
           - "*"
+  - package-ecosystem: "npm"
+    directory: "/test-harness"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    ignore:
+      - dependency-name: "jose"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: chore
+    groups:
+      npm-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "docker"
+    directory: "/test-harness"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    commit-message:
+      prefix: chore
+    groups:
+      docker-updates:
+        patterns:
+          - "*"
