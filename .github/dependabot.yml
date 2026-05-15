@@ -169,6 +169,10 @@ updates:
       time: "06:00"
     labels:
       - dependencies
+    ignore:
+      - dependency-name: "node"
+        update-types:
+          - "version-update:semver-major"
     commit-message:
       prefix: chore
     groups:
