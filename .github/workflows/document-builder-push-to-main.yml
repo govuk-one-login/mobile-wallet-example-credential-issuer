@@ -25,6 +25,18 @@ jobs:
         with:
           fetch-depth: '0'
 
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+        with:
+          node-version-file: document-builder/.nvmrc
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+
+      - name: Generate coverage report
+        run: npm run test:cov
+
       - name: Run Checkov
         uses: bridgecrewio/checkov-action@4048c972aae68d0b983a48bb3479aab2d877b898 # v12.3102.0
         with:
@@ -68,9 +80,6 @@ jobs:
         uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
         with:
           cosign-release: 'v2.5.2'
-
-      - name: Generate coverage report
-        run: npm run test:cov
 
       - name: Build, tag, and push image to Amazon ECR
         env:
