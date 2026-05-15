@@ -2,12 +2,12 @@
 
 ## Project structure
 
-This project contains example issuers that will help you build your own implementation and make sure it meets the standards required by GOV.UK Wallet. This project contains five modules:
+This project contains example issuers that will help you build your own implementation and make sure it meets the standards required by GOV.UK Wallet. This project contains the following modules:
 
 * [`document-signing-certificate-issuer`](./document-signing-certificate-issuer/) - An issuer of mDL document signing certificates. Written in Node.js.
 * [`example-credential-issuer`](./example-credential-issuer/) - A reference implementation credential issuer to issue credentials into GOV.UK Wallet. Written in Java.
 * [`document-builder`](./document-builder) - A service for creating and storing test documents used by the GOV.UK Wallet credential issuer to issue the corresponding digital credentials. Written in Node.js.
-* [`test-harness`](./test-harness) - The GOV.UK Wallet test harness lets you validate your credential issuance implementation without using the GOV.UK One Login app.
+* [`test-harness`](./test-harness) - The GOV.UK Wallet Test Harness lets you validate your credential issuance implementation without using the GOV.UK One Login app.
 * [`platform-ca`](./platform-ca/) - A private certificate authority that acts as the Issuing Authority Certificate Authority (IACA) for example mdoc-based credentials. Deployed as a CloudFormation stack.
 
 ## Contributing
