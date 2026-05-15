@@ -89,6 +89,8 @@ updates:
         update-types: [ "version-update:semver-major" ]
     commit-message:
       prefix: chore
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
     groups:
       npm-updates:
         patterns:
@@ -152,6 +154,8 @@ updates:
         update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
     groups:
       npm-updates:
         patterns:
