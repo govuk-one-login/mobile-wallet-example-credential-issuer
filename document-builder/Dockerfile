@@ -1,8 +1,7 @@
 FROM node:lts-alpine AS builder
 WORKDIR /app
-COPY src/ src/
+ADD src/ src/
 COPY package.json package-lock.json tsconfig.json .npmrc ./
-RUN npm install --ignore-scripts && npm run build
 RUN npm install --ignore-scripts && npm run build
 
 FROM node:lts-alpine
