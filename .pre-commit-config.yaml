@@ -131,7 +131,7 @@
         - id: test-harness-jest-tests
           name: Test Harness - Jest unit tests
           language: system
-          entry: bash -c 'cd tes-harness && npm run test'
+          entry: bash -c 'cd test-harness && npm run test'
           files: ^test-harness/.*\.ts$
           stages: [pre-push]
 
