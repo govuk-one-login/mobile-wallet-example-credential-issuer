@@ -40,8 +40,8 @@ export function decodeMDocCredential(credential: string): {
   });
 
   // @ts-expect-error credential structure is known
-  const rawMso1 = credentialClaims.issuerAuth;
-  const credentialSignature = Sign1.decode(getEncoded(rawMso1)!);
+  const rawMso = credentialClaims.issuerAuth;
+  const credentialSignature = Sign1.decode(getEncoded(rawMso)!);
   const credentialSignaturePayload = decodeCbor(
     Buffer.from(credentialSignature.payload),
   );
