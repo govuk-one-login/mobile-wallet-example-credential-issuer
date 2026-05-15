@@ -117,21 +117,21 @@
         - id: test-harness-eslint-ts
           name: Test Harness - ESLint linter
           language: system
-          entry: bash -c 'npm run lint'
-          files: \.(ts|md)$
+          entry: bash -c 'cd test-harness && npm run lint'
+          files: ^test-harness/.*\.(ts|md)$
           stages: [pre-commit]
 
         - id: test-harness-prettier-ts
           name: Test Harness - Prettier format check
           language: system
-          entry: bash -c 'npm run format:check'
-          files: \.(ts|md)$
+          entry: bash -c 'cd test-harness && npm run format:check'
+          files: ^test-harness/.*\.(ts|md|yaml)$
           stages: [pre-commit]
 
         - id: test-harness-jest-tests
           name: Test Harness - Jest unit tests
           language: system
-          entry: bash -c 'npm run test:unit'
-          files: \.ts$
+          entry: bash -c 'cd tes-harness && npm run test'
+          files: ^test-harness/.*\.ts$
           stages: [pre-push]
 
