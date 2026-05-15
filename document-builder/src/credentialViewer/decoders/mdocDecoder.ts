@@ -45,6 +45,7 @@ export function decodeMDocCredential(credential: string): {
     Buffer.from(credentialSignature.payload),
   );
 
+  // test
   return {
     credentialClaims,
     credentialSignature,
