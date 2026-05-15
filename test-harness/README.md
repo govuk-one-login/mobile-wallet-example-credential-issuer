@@ -145,3 +145,5 @@ npm run test:unit
 We use pre-commit hooks to maintain code quality and validate commit messages against the [Conventional Commits](https://github.com/conventional-changelog/commitlint) standard. If your message does not conform to these standards, it will be rejected.
 
 Ensure your branch is up to date and all hooks pass before opening a pull request. Avoid using the git `--no-verify` flag to skip these checks unless absolutely necessary.
+
+//blah
