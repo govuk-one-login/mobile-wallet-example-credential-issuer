@@ -22,8 +22,7 @@ describe("getAjvInstance", () => {
       type: "object",
       properties: {
         name: { type: "string", minLength: 1 },
-        age: { type: "number", minimum: 0 },
-      },
+        age: { 
       required: ["name", "age"],
     };
     const validate = ajv.compile(schema);
