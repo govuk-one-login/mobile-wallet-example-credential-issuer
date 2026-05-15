@@ -8,9 +8,14 @@ export interface Photo {
 }
 
 export function getPhoto(selectedPhoto: string): Photo {
+  const ext = path.extname(selectedPhoto);
+  if (!MIME_TYPES[ext] || path.basename(selectedPhoto) !== selectedPhoto) {
+    throw new Error("Invalid photo");
+  }
+
   const filePath = path.resolve(process.cwd(), "dist/resources", selectedPhoto);
   const photoBuffer = readFileSync(filePath);
-  const ext = path.extname(selectedPhoto);
   const mimeType = MIME_TYPES[ext];
+
   return { photoBuffer, mimeType };
 }
