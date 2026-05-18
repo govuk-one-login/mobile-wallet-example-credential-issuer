@@ -12,8 +12,8 @@
     "strict": true,
     "skipLibCheck": true,
     "sourceMap": true,
-    "types": ["jest"]
+    "types": ["jest", "node"]
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "test/**/*"],
   "exclude": ["node_modules"]
 }

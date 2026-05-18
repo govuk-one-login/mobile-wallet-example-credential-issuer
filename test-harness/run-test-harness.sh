@@ -168,6 +168,8 @@ else
   exit 1
 fi
 
+mkdir -p output && chmod o+w output # NOSONAR - world-write required so the non-root container user can write test reports to the host-mounted volume
+
 # Run container
 log_info "Starting test harness container..."
 docker run --rm \

@@ -38,9 +38,6 @@ jobs:
       - name: Run the linter
         run: npm run lint
 
-      - name: Run unit tests
-        run: npm run test
-
       - name: Generate coverage report
         run: npm run test:cov
 

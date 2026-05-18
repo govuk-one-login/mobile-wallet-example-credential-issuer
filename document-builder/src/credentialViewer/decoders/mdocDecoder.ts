@@ -38,6 +38,7 @@ export function decodeMDocCredential(credential: string): {
   const credentialClaims = decodeCbor(base64UrlDecoder(credential), {
     saveOriginal: true,
   });
+
   // @ts-expect-error credential structure is known
   const rawMso = credentialClaims.issuerAuth;
   const credentialSignature = Sign1.decode(getEncoded(rawMso)!);

@@ -9,7 +9,6 @@
   "scripts": {
     "build": "tsc",
     "execute": "node ./dist/src/server.js",
-    "start": "npm run build && npm run execute",
     "lint": "eslint . ",
     "lint:fix": "eslint . --fix",
     "format": "prettier --ignore-path .gitignore --write \"*/**/*.{ts,json}\"",
