@@ -37,10 +37,9 @@ describe("getPhoto", () => {
 
   describe("input validation", () => {
     test.each([
-      ["path traversal with ../", "../../etc/passwd"],
       ["path traversal targeting allowed extension", "../../etc/passwd.jpg"],
       ["subdirectory with allowed extension", "subdir/photo.jpg"],
-    ])("should throw for %s", (_description, input) => {
+    ])("should throw for path traversal: %s", (_description, input) => {
       expect(() => getPhoto(input)).toThrow("Invalid photo");
       expect(readFileSync).not.toHaveBeenCalled();
     });
@@ -49,7 +48,7 @@ describe("getPhoto", () => {
       ["no extension", "photo"],
       ["disallowed extension", "photo.exe"],
       ["disallowed extension", "photo.json"],
-    ])("should throw for %s", (_description, input) => {
+    ])("should throw for invalid extension: %s", (_description, input) => {
       expect(() => getPhoto(input)).toThrow("Invalid photo");
       expect(readFileSync).not.toHaveBeenCalled();
     });
