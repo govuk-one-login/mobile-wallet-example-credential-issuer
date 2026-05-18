@@ -4,7 +4,6 @@ import { generateKeyPair, exportJWK, JWK } from "jose";
 import { writeFileSync } from "node:fs";
 
 const app: Application = express();
-app.disable("x-powered-by");
 const port = getPortNumber();
 
 let publicKey;
