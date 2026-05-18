@@ -168,6 +168,9 @@ else
   exit 1
 fi
 
+# Ensure output directory exists and is writable by the non-root container user
+mkdir -p output && chmod o+w output
+
 # Run container
 log_info "Starting test harness container..."
 docker run --rm \
