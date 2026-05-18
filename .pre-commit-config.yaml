@@ -96,18 +96,42 @@
           language: system
           entry: bash -c 'cd platform-ca/utils && npm run lint'
           files: ^platform-ca/utils/.*\.ts$
-          stages: [ pre-commit ]
+          stages: [pre-commit]
 
         - id: platform-ca-prettier-ts
           name: Platform CA - Prettier format check
           language: system
           entry: bash -c 'cd platform-ca/utils && npm run format:check'
           files: ^platform-ca/utils/.*\.ts$
-          stages: [ pre-commit ]
+          stages: [pre-commit]
 
         - id: platform-ca-checkov
           name: Platform CA - Infrastructure static analysis
           language: system
           entry: bash -c 'cd platform-ca && checkov --file template.yaml'
           files: ^platform-ca/template.yaml
-          stages: [ pre-commit ]
+          stages: [pre-commit]
+
+    - repo: local
+      hooks:
+        - id: test-harness-eslint-ts
+          name: Test Harness - ESLint linter
+          language: system
+          entry: bash -c 'cd test-harness && npm run lint'
+          files: ^test-harness/.*\.(ts|md)$
+          stages: [pre-commit]
+
+        - id: test-harness-prettier-ts
+          name: Test Harness - Prettier format check
+          language: system
+          entry: bash -c 'cd test-harness && npm run format:check'
+          files: ^test-harness/.*\.(ts|md|yaml)$
+          stages: [pre-commit]
+
+        - id: test-harness-jest-tests
+          name: Test Harness - Jest unit tests
+          language: system
+          entry: bash -c 'cd test-harness && npm run test'
+          files: ^test-harness/.*\.ts$
+          stages: [pre-push]
+

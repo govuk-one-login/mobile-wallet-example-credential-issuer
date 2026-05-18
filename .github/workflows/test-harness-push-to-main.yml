@@ -1,0 +1,81 @@
+name: Test Harness - Push to Main
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - test-harness/**
+      - .github/workflows/test-harness-push-to-main.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-sonarqube-scan:
+    name: Run SonarQube Scan
+    uses: ./.github/workflows/test-harness-sonarqube.yml
+    permissions:
+      contents: read
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  create-release:
+    name: Create release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    defaults:
+      run:
+        working-directory: ./test-harness
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get_tag
+        run: echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+
+      - name: Create semantic release
+        uses: cocogitto/cocogitto-action@52d0023b4396897f1815648e553db2ab8d782f3a # v4.2.0
+        id: release
+        with:
+          command: bump
+          args: --auto
+          git-user: "github-actions[bot]"
+          git-user-email: "github-actions[bot]@users.noreply.github.com"
+
+      - name: Check if version was bumped
+        id: created
+        run: |
+          prev=${{ steps.get_tag.outputs.version }}
+          new=${{ steps.release.outputs.version }}
+
+          if [ "$prev" = "$new" ]; then
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "bump=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push semantic version tag
+        if: steps.created.outputs.bump == 'true'
+        run: git push --follow-tags && git push --tags
+        shell: bash
+
+      - name: Create GitHub release
+        if: steps.created.outputs.bump == 'true'
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda # v3.0.0
+        with:
+          tag_name: ${{ steps.release.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+      - name: Log release info
+        if: steps.created.outputs.bump == 'true'
+        run: |
+          echo "New release created: ${{ steps.release.outputs.version }}"

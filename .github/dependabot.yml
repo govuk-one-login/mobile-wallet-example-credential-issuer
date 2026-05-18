@@ -89,6 +89,8 @@ updates:
         update-types: [ "version-update:semver-major" ]
     commit-message:
       prefix: chore
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
     groups:
       npm-updates:
         patterns:
@@ -137,3 +139,47 @@ updates:
         update-types:
           - "minor"
           - "patch"
+  - package-ecosystem: "npm"
+    directory: "/test-harness"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    ignore:
+      - dependency-name: "jose"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: chore
+    open-pull-requests-limit: 5
+    versioning-strategy: increase
+    groups:
+      npm-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+  - package-ecosystem: "docker"
+    directory: "/test-harness"
+    cooldown:
+      default-days: 7
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+    labels:
+      - dependencies
+    ignore:
+      - dependency-name: "node"
+        update-types:
+          - "version-update:semver-major"
+    commit-message:
+      prefix: chore
+    groups:
+      docker-updates:
+        patterns:
+          - "*"
