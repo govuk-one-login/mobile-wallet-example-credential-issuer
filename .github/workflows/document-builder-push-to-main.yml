@@ -95,13 +95,13 @@ jobs:
           ECR_REGISTRY: "${{ secrets.BUILD_ACCOUNT_ID }}.dkr.ecr.eu-west-2.amazonaws.com"
           ECR_REPOSITORY: ${{ secrets.BUILD_DOC_BUILDER_ECR_REPOSITORY_NAME }}
         run: |
-          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          cd ${GITHUB_WORKSPACE}/document-builder/deploy || exit 1
           sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA|" template.yaml
 
       - name: Sam Build & Validate
         run: |
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          cd ${GITHUB_WORKSPACE}/deploy || exit 1
+          cd ${GITHUB_WORKSPACE}/document-builder/deploy || exit 1
           sam validate
           sam build --cached
 
