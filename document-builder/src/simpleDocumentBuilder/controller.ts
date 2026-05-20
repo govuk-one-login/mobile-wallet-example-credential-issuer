@@ -49,16 +49,14 @@ export function simpleDocumentBuilderGetController({
   return async function (req: Request, res: Response): Promise<void> {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-      const documentNumber = "FLN" + getRandomIntInclusive();
-      const showThrowError = environment !== "staging";
       res.render("simple-document-details-form.njk", {
         defaultIssueDate,
         defaultExpiryDate,
-        documentNumber,
+        documentNumber: "FLN" + getRandomIntInclusive(),
         fishTypeOptions: FISH_TYPE_UI_OPTIONS,
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError,
+        showThrowError: environment !== "staging",
       });
     } catch (error) {
       logger.error(
@@ -97,26 +95,25 @@ export function simpleDocumentBuilderPostController({
       if (!FISH_TYPES.includes(body.type_of_fish)) {
         errors.type_of_fish = "Select a valid type of fish";
       }
+
       if (Object.keys(errors).length > 0) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-        const documentNumber = body.document_number;
-        const showThrowError = environment !== "staging";
         return res.render("simple-document-details-form.njk", {
           defaultIssueDate,
           defaultExpiryDate,
-          documentNumber,
+          documentNumber: body.document_number,
           fishTypeOptions: FISH_TYPE_UI_OPTIONS,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError,
+          showThrowError: environment !== "staging",
           errors,
         });
       }
 
-      const bucketName = getPhotosBucketName();
       const itemId = randomUUID();
-      const s3Uri = `s3://${bucketName}/${itemId}`;
 
+      const bucketName = getPhotosBucketName();
+      const s3Uri = `s3://${bucketName}/${itemId}`;
       const { photoBuffer, mimeType } = getPhoto(body.portrait);
       await uploadPhoto(photoBuffer, itemId, bucketName, mimeType);
 
