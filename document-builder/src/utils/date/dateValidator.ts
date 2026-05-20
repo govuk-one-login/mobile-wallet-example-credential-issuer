@@ -31,6 +31,17 @@ export function validateExpiryDate(
   return {};
 }
 
+export function validateCredentialExpiryDate(
+  day: string,
+  month: string,
+  year: string,
+): Record<string, string> {
+  if (!isValidDate(day, month, year)) {
+    return { credential_expiry_date: "Enter a valid credential expiry date" };
+  }
+  return {};
+}
+
 /**
  * Checks if the provided day, month, and year strings represent a valid calendar date.
  *
