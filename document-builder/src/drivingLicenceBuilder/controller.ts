@@ -24,7 +24,13 @@ import { DrivingLicenceRequestBody } from "./types/DrivingLicenceRequestBody";
 import { DrivingLicenceData } from "../types/DrivingLicenceData";
 import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
-import { validateDrivingLicenceForm } from "./helpers/validation";
+import {
+  validateBirthDate,
+  validateIssueDate,
+  validateExpiryDate,
+  validateCredentialExpiryDate,
+} from "../utils/date/dateValidator";
+import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
 
@@ -37,16 +43,16 @@ export function drivingLicenceBuilderGetController({
 }: DrivingLicenceBuilderControllerConfig = {}): ExpressRouteFunction {
   return async function (req: Request, res: Response): Promise<void> {
     try {
-      const showThrowError = environment !== "staging";
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
       const drivingLicenceNumber = "EDWAR" + getRandomIntInclusive() + "SE5RO";
       res.render("driving-licence-form.njk", {
         defaultIssueDate,
         defaultExpiryDate,
         drivingLicenceNumber,
+        credentialTtl: "2592000",
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError,
+        showThrowError: environment !== "staging",
       });
     } catch (error) {
       logger.error(
@@ -65,36 +71,73 @@ export function drivingLicenceBuilderPostController({
     try {
       const body: DrivingLicenceRequestBody = req.body;
 
-      const errors = validateDrivingLicenceForm(body);
+      const birthErrors = validateBirthDate(
+        body["birth-day"],
+        body["birth-month"],
+        body["birth-year"],
+      );
+      const issueErrors = validateIssueDate(
+        body["issue-day"],
+        body["issue-month"],
+        body["issue-year"],
+      );
+      const expiryErrors = validateExpiryDate(
+        body["expiry-day"],
+        body["expiry-month"],
+        body["expiry-year"],
+      );
+      let credentialExpiryErrors: Record<string, string> = {};
+      if (body.credentialTtl === "other") {
+        credentialExpiryErrors = validateCredentialExpiryDate(
+          body["credentialExpiry-day"],
+          body["credentialExpiry-month"],
+          body["credentialExpiry-year"],
+        );
+      }
+      const errors = {
+        ...birthErrors,
+        ...issueErrors,
+        ...expiryErrors,
+        ...credentialExpiryErrors,
+      };
+
       if (Object.keys(errors).length > 0) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-        const drivingLicenceNumber = body.document_number;
-        const showThrowError = environment !== "staging";
         return res.render("driving-licence-form.njk", {
           defaultIssueDate,
           defaultExpiryDate,
-          drivingLicenceNumber,
+          drivingLicenceNumber: body.document_number,
+          credentialTtl: body.credentialTtl,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError,
+          showThrowError: environment !== "staging",
           errors,
         });
       }
 
       const itemId = randomUUID();
+
       const bucketName = getPhotosBucketName();
       const s3Uri = `s3://${bucketName}/${itemId}`;
-
       const { photoBuffer, mimeType } = getPhoto(body.portrait);
       await uploadPhoto(photoBuffer, itemId, bucketName, mimeType);
 
       const data = buildDataFromRequestBody(body, s3Uri);
+      const credentialTtlSeconds =
+        body.credentialTtl === "other"
+          ? calculateCredentialTtlSeconds(
+              body.credentialTtl,
+              body["credentialExpiry-day"],
+              body["credentialExpiry-month"],
+              body["credentialExpiry-year"],
+            )
+          : Number(body.credentialTtl);
       await saveDocument(getDocumentsTableName(), {
         itemId,
         documentId: data.document_number,
         data,
         vcType: CREDENTIAL_TYPE,
-        credentialTtlSeconds: Number(body.credentialTtl),
+        credentialTtlSeconds,
         timeToLive: getTimeToLiveEpoch(getTableItemTtl()),
       });
 
