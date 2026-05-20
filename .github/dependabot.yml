@@ -116,6 +116,9 @@ updates:
       - dependency-name: "node"
         update-types:
           - "version-update:semver-major"
+      - dependency-name: "localstack/localstack"
+        versions:
+          - "> 4.14.0" # Cannot be updated past 4.14.0 due to LocalStack’s move to a paid‑only license.
     commit-message:
       prefix: chore
     groups:
