@@ -56,6 +56,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
 
         Services services = ServicesFactory.create(configurationService, environment);
 
+        // test
+
         environment.healthChecks().register("ping", new Ping());
         environment.jersey().register(new HealthCheckResource(environment));
         environment
