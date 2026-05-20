@@ -11,5 +11,8 @@ export interface VeteranCardRequestBody {
   serviceBranch: string;
   portrait: string;
   credentialTtl: string;
+  "credentialExpiry-day": string;
+  "credentialExpiry-month": string;
+  "credentialExpiry-year": string;
   throwError: string;
 }
