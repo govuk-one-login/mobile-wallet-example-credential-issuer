@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
-import { formatDate, getDefaultDates, validateDateFields } from "../utils/date";
+import { validateSimpleDocumentForm } from "./helpers/validation";
+import { formatDate, getDefaultDates } from "../utils/date";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { ERROR_CHOICES } from "../utils/errorChoices";
 import { logger } from "../middleware/logger";
@@ -72,7 +73,7 @@ export function simpleDocumentBuilderPostController({
     try {
       const body: SimpleDocumentRequestBody = req.body;
 
-      const errors = validateDateFields(body);
+      const errors = validateSimpleDocumentForm(body);
       if (!FISH_TYPES.includes(body.type_of_fish)) {
         errors.type_of_fish = "Select a valid type of fish";
       }

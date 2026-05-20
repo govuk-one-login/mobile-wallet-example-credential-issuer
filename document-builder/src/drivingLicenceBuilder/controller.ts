@@ -10,7 +10,7 @@ import { isAuthenticated } from "../utils/isAuthenticated";
 import { logger } from "../middleware/logger";
 import { randomUUID } from "node:crypto";
 import { saveDocument } from "../services/databaseService";
-import { validateDateFields, getDefaultDates, formatDate } from "../utils/date";
+import { getDefaultDates, formatDate } from "../utils/date";
 import {
   getFullDrivingPrivileges,
   getProvisionalDrivingPrivileges,
@@ -24,6 +24,7 @@ import { DrivingLicenceRequestBody } from "./types/DrivingLicenceRequestBody";
 import { DrivingLicenceData } from "../types/DrivingLicenceData";
 import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
+import { validateDrivingLicenceForm } from "./helpers/validation";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
 
@@ -64,7 +65,7 @@ export function drivingLicenceBuilderPostController({
     try {
       const body: DrivingLicenceRequestBody = req.body;
 
-      const errors = validateDateFields(body);
+      const errors = validateDrivingLicenceForm(body);
       if (Object.keys(errors).length > 0) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
         const drivingLicenceNumber = body.document_number;
