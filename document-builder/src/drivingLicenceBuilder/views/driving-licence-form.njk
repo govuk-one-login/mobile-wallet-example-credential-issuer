@@ -360,24 +360,51 @@
                     }
                 ]
             }) }}
+            {% if errors['credentialExpiry'] %}
+                 {% set credentialExpiryError = { text: errors['credentialExpiry'] } %}
+            {% endif %}
+            {% set otherHtml %}
+            {{ govukDateInput({
+              id: "credential-expiry",
+              namePrefix: "credentialExpiry",
+              fieldset: {
+                legend: {
+                  text: "Credential expiry"
+                }
+              },
+             "errorMessage": credentialExpiryError,
+              hint: {
+                text: "For example, 27 3 2027"
+              }
+            }) }}
+            {% endset -%}
             {{ govukRadios({
-                "classes": "govuk-radios--small",
-                "name": "credentialTtl",
-                "fieldset": {
-                    "legend": {
-                        "text": "When should the credential expire?",
-                        "classes": "govuk-fieldset__legend--s"
+                classes: "govuk-radios--small",
+                name: "credentialTtl",
+                fieldset: {
+                    legend: {
+                        text: "When should the credential expire?",
+                        classes: "govuk-fieldset__legend--s"
                     }
                 },
-                "items": [
+                items: [
                     {
-                        "value": "2592000",
-                        "text": "30 days",
-                        "checked": true
+                        value: "2592000",
+                        text: "30 days",
+                        checked: credentialTtl === "2592000"
                     },
                     {
-                        "value": "20",
-                        "text": "20 seconds"
+                        value: "20",
+                        text: "20 seconds",
+                        checked: credentialTtl === "20"
+                    },
+                    {
+                        value: "other",
+                        text: "Other",
+                        checked: credentialTtl === "other",
+                        conditional: {
+                            html: otherHtml
+                        }
                     }
                 ]
             }) }}

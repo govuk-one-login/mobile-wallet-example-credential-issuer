@@ -192,6 +192,24 @@
                     }
                 ]
             }) }}
+            {% if errors['credentialExpiry'] %}
+                 {% set credentialExpiryError = { text: errors['credentialExpiry'] } %}
+            {% endif %}
+            {% set otherHtml %}
+            {{ govukDateInput({
+              id: "credential-expiry",
+              namePrefix: "credentialExpiry",
+              fieldset: {
+                legend: {
+                  text: "Credential expiry"
+                }
+              },
+             "errorMessage": credentialExpiryError,
+              hint: {
+                text: "For example, 27 3 2027"
+              }
+            }) }}
+            {% endset -%}
             {{ govukRadios({
                 classes: "govuk-radios--small",
                 name: "credentialTtl",
@@ -205,13 +223,22 @@
                     {
                         value: "2592000",
                         text: "30 days",
-                        checked: true
+                        checked: credentialTtl === "2592000"
                     },
                     {
                         value: "20",
-                        text: "20 seconds"
+                        text: "20 seconds",
+                        checked: credentialTtl === "20"
+                    },
+                    {
+                        value: "other",
+                        text: "Other",
+                        checked: credentialTtl === "other",
+                        conditional: {
+                            html: otherHtml
+                        }
                     }
-               ]
+                ]
             }) }}
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
             {% if showThrowError %}
