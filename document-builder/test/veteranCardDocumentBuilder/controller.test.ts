@@ -8,7 +8,11 @@ import * as s3Service from "../../src/services/s3Service";
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import * as path from "path";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
+import { VeteranCardFormValidator } from "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator";
 
+jest.mock(
+  "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator",
+);
 jest.mock("node:crypto", () => ({
   randomUUID: jest.fn().mockReturnValue("2e0fac05-4b38-480f-9cbd-b046eabe1e46"),
 }));
@@ -44,6 +48,7 @@ describe("controller.ts", () => {
           authenticated: false,
           errorChoices: ERROR_CHOICES,
           showThrowError: false,
+          credentialTtl: "2592000",
         },
       );
     });
@@ -68,6 +73,7 @@ describe("controller.ts", () => {
             authenticated: false,
             errorChoices: ERROR_CHOICES,
             showThrowError: expectedShowThrowError,
+            credentialTtl: "2592000",
           },
         );
       },
@@ -97,6 +103,41 @@ describe("controller.ts", () => {
 
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
+    const mockValidate = jest.fn();
+
+    beforeEach(() => {
+      (VeteranCardFormValidator as jest.Mock).mockImplementation(() => ({
+        validate: mockValidate,
+      }));
+      mockValidate.mockReturnValue({ isValid: true, errors: {} });
+    });
+
+    describe("given validation fails", () => {
+      it("should re-render the form with errors", async () => {
+        const validationErrors = { some_field: "some error" };
+        mockValidate.mockReturnValueOnce({
+          isValid: false,
+          errors: validationErrors,
+        });
+        const req = getMockReq({ body: requestBody });
+        const { res } = getMockRes();
+
+        await veteranCardDocumentBuilderPostController(config)(req, res);
+
+        expect(res.render).toHaveBeenCalledWith(
+          "veteran-card-document-details-form.njk",
+
+          {
+            authenticated: false,
+            credentialTtl: "43200",
+            showThrowError: false,
+            errorChoices: ERROR_CHOICES,
+            errors: validationErrors,
+          },
+        );
+        expect(saveDocument).not.toHaveBeenCalled();
+      });
+    });
 
     describe("given an error happens trying to process the request", () => {
       it("should render the error page", async () => {
@@ -106,7 +147,7 @@ describe("controller.ts", () => {
         });
         const { res } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res);
 
         expect(res.render).toHaveBeenCalledWith("500.njk");
       });
@@ -128,7 +169,7 @@ describe("controller.ts", () => {
           });
           const { res } = getMockRes();
 
-          await veteranCardDocumentBuilderPostController(req, res);
+          await veteranCardDocumentBuilderPostController(config)(req, res);
 
           const expectedPath = path.resolve(
             process.cwd(),
@@ -153,7 +194,7 @@ describe("controller.ts", () => {
         });
         const { res } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res);
 
         expect(saveDocument).toHaveBeenCalledWith("testTable", {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -186,7 +227,7 @@ describe("controller.ts", () => {
           });
           const { res } = getMockRes();
 
-          await veteranCardDocumentBuilderPostController(req, res);
+          await veteranCardDocumentBuilderPostController(config)(req, res);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard",
@@ -201,7 +242,7 @@ describe("controller.ts", () => {
           });
           const { res } = getMockRes();
 
-          await veteranCardDocumentBuilderPostController(req, res);
+          await veteranCardDocumentBuilderPostController(config)(req, res);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard",
@@ -217,7 +258,7 @@ describe("controller.ts", () => {
               body: { ...requestBody, ...{ throwError: selectedError } },
             });
             const { res } = getMockRes();
-            await veteranCardDocumentBuilderPostController(req, res);
+            await veteranCardDocumentBuilderPostController(config)(req, res);
 
             expect(res.redirect).toHaveBeenCalledWith(
               `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard&error=${selectedError}`,
