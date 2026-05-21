@@ -1,97 +1,55 @@
 import {
   isValidDate,
-  validateDateFields,
-} from "../../../src/utils/date/dateValidator";
-import { DrivingLicenceRequestBody } from "../../../src/drivingLicenceBuilder/types/DrivingLicenceRequestBody";
+  validateBirthDate,
+  validateIssueDate,
+  validateExpiryDate,
+  validateCredentialExpiryDate,
+} from "../../../src/utils/date";
 
-describe("validateDateFields", () => {
-  it("should return no errors if all dates are valid", () => {
-    const body = {
-      "birth-day": "01",
-      "birth-month": "01",
-      "birth-year": "2025",
-      "issue-day": "14",
-      "issue-month": "05",
-      "issue-year": "2025",
-      "expiry-day": "16",
-      "expiry-month": "06",
-      "expiry-year": "2025",
-    } as DrivingLicenceRequestBody;
-
-    expect(validateDateFields(body)).toEqual({});
+describe("validateBirthDate", () => {
+  it("should return no errors for a valid date", () => {
+    expect(validateBirthDate("01", "01", "2025")).toEqual({});
   });
 
-  it("should return an error for an invalid birth date", () => {
-    const body = {
-      "birth-day": "32", // 32 is not a valid day
-      "birth-month": "01",
-      "birth-year": "2025",
-      "issue-day": "14",
-      "issue-month": "05",
-      "issue-year": "2025",
-      "expiry-day": "16",
-      "expiry-month": "06",
-      "expiry-year": "2025",
-    } as DrivingLicenceRequestBody;
-
-    expect(validateDateFields(body)).toEqual({
+  it("should return an error for an invalid date", () => {
+    expect(validateBirthDate("32", "01", "2025")).toEqual({
       birth_date: "Enter a valid birth date",
     });
   });
+});
 
-  it("should return an error for an invalid issue date", () => {
-    const body = {
-      "birth-day": "01",
-      "birth-month": "01",
-      "birth-year": "2025",
-      "issue-day": "99", // 99 is not a valid day
-      "issue-month": "05",
-      "issue-year": "2025",
-      "expiry-day": "16",
-      "expiry-month": "06",
-      "expiry-year": "2025",
-    } as DrivingLicenceRequestBody;
+describe("validateIssueDate", () => {
+  it("should return no errors for a valid date", () => {
+    expect(validateIssueDate("14", "05", "2025")).toEqual({});
+  });
 
-    expect(validateDateFields(body)).toEqual({
+  it("should return an error for an invalid date", () => {
+    expect(validateIssueDate("99", "05", "2025")).toEqual({
       issue_date: "Enter a valid issue date",
     });
   });
+});
 
-  it("should return an error for an invalid expiry date", () => {
-    const body = {
-      "birth-day": "01",
-      "birth-month": "01",
-      "birth-year": "2025",
-      "issue-day": "15",
-      "issue-month": "05",
-      "issue-year": "2025",
-      "expiry-day": "00", // 00 is not a valid day
-      "expiry-month": "06",
-      "expiry-year": "2025",
-    } as DrivingLicenceRequestBody;
+describe("validateExpiryDate", () => {
+  it("should return no errors for a valid date", () => {
+    expect(validateExpiryDate("16", "06", "2025")).toEqual({});
+  });
 
-    expect(validateDateFields(body)).toEqual({
+  it("should return an error for an invalid date", () => {
+    expect(validateExpiryDate("00", "06", "2025")).toEqual({
       expiry_date: "Enter a valid expiry date",
     });
   });
+});
 
-  it("should return errors for multiple invalid dates", () => {
-    const body = {
-      "birth-day": "32", // 32 is not a valid day
-      "birth-month": "01",
-      "birth-year": "2025",
-      "issue-day": "aa", // aa is not a valid day
-      "issue-month": "05",
-      "issue-year": "2025",
-      "expiry-day": "$$", // $$ is not a valid day
-      "expiry-month": "06",
-      "expiry-year": "2025",
-    } as DrivingLicenceRequestBody;
+describe("validateCredentialExpiryDate", () => {
+  it("should return no errors for a valid date", () => {
+    expect(validateCredentialExpiryDate("01", "01", "2025")).toEqual({});
+  });
 
-    expect(validateDateFields(body)).toEqual({
-      birth_date: "Enter a valid birth date",
-      issue_date: "Enter a valid issue date",
-      expiry_date: "Enter a valid expiry date",
+  it("should return an error for an invalid date", () => {
+    expect(validateCredentialExpiryDate("aa", "01", "2025")).toEqual({
+      credential_expiry_date: "Enter a valid credential expiry date",
     });
   });
 });
@@ -124,12 +82,12 @@ describe("isValidDate", () => {
     expect(isValidDate("10", "10", "24")).toBe(false);
   });
 
-  it("should return false for non-leap year when date is February 29", () => {
+  it("should return false for February 29 in a non-leap year", () => {
     expect(isValidDate("29", "02", "2023")).toBe(false);
     expect(isValidDate("29", "02", "1900")).toBe(false); // 1900 is not a leap year
   });
 
-  it("should return true for leap year when date is February 29", () => {
+  it("should return true for February 29 in a leap year", () => {
     expect(isValidDate("29", "02", "2024")).toBe(true);
     expect(isValidDate("29", "02", "2000")).toBe(true); // 2000 is a leap year
   });
