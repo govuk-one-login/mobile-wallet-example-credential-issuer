@@ -2,6 +2,11 @@ name: Platform CA - Pull Request Checks
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
     paths:
       - platform-ca/**
       - .github/workflows/platform-ca-pull-request-checks.yml

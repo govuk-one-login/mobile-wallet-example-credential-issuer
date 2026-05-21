@@ -7,12 +7,15 @@ on:
       - reopened
       - ready_for_review
       - synchronize
+    paths:
+      - test-harness-/**
+      - .github/workflows/test-harness-pull-request-checks.yml
   workflow_dispatch:
-        inputs:
-          gitRef:
-            description: Branch name or commit SHA
-            required: false
-            default: main
+    inputs:
+      gitRef:
+        description: Branch name or commit SHA
+        required: false
+        default: main
 
 permissions:
   id-token: write

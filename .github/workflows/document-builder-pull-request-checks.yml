@@ -2,6 +2,11 @@ name: Document Builder - Pull Request Checks
 
 on:
   pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
     paths:
       - document-builder/**
       - .github/workflows/document-builder-pull-request-checks.yml
