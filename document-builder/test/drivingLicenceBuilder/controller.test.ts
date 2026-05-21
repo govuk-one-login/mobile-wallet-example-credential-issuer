@@ -57,6 +57,7 @@ describe("controller.ts", () => {
         },
         errorChoices: ERROR_CHOICES,
         drivingLicenceNumber: "EDWAR550000SE5RO",
+        credentialTtl: "2592000",
         showThrowError: false,
       });
     });
@@ -86,6 +87,7 @@ describe("controller.ts", () => {
           },
           errorChoices: ERROR_CHOICES,
           drivingLicenceNumber: "EDWAR550000SE5RO",
+          credentialTtl: "2592000",
           showThrowError: expectedShowThrowError,
         });
       },
@@ -162,6 +164,27 @@ describe("controller.ts", () => {
         });
       },
     );
+
+    describe("given credentialTtl is 'other'", () => {
+      it("should calculate credentialTtlSeconds from the expiry date fields", async () => {
+        const req = getMockReq({
+          body: buildDrivingLicenceRequestBody({
+            credentialTtl: "other",
+            "credentialExpiry-day": "02",
+            "credentialExpiry-month": "05",
+            "credentialExpiry-year": "2026",
+          }),
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({ credentialTtlSeconds: 31532400 }),
+        );
+      });
+    });
 
     describe("given the photo has been stored successfully", () => {
       describe("when there are no provisional driving privileges", () => {
@@ -327,7 +350,7 @@ describe("controller.ts", () => {
     });
 
     describe("given invalid date fields", () => {
-      it("should render an error when the birthdate has empty fields", async () => {
+      it("should re-render the form with errors when the birth date is invalid", async () => {
         const body = buildDrivingLicenceRequestBody({
           "birth-day": "29",
           "birth-month": "02",
@@ -340,10 +363,9 @@ describe("controller.ts", () => {
         const { res } = getMockRes();
 
         await drivingLicenceBuilderPostController(config)(req, res);
+
         expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
-          errors: expect.objectContaining({
-            birth_date: "Enter a valid birth date",
-          }),
+          errors: { birth_date: "Enter a valid birth date" },
           authenticated: true,
           defaultIssueDate: {
             day: "02",
@@ -357,9 +379,11 @@ describe("controller.ts", () => {
           },
           errorChoices: ERROR_CHOICES,
           drivingLicenceNumber: "EDWAR550000SE5RO",
+          credentialTtl: "43200",
           showThrowError: false,
         });
         expect(res.redirect).not.toHaveBeenCalled();
+        expect(saveDocument).not.toHaveBeenCalled();
       });
     });
   });
@@ -407,6 +431,9 @@ export function buildDrivingLicenceRequestBody(
     "provisionalPrivilegeExpiry-month": "03",
     "provisionalPrivilegeExpiry-year": "2033",
     credentialTtl: "43200",
+    "credentialExpiry-day": "",
+    "credentialExpiry-month": "",
+    "credentialExpiry-year": "",
   };
   return { ...defaults, ...overrides };
 }
