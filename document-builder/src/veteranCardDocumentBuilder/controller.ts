@@ -18,8 +18,8 @@ import { getViewCredentialOfferRedirectUrl } from "../utils/getViewCredentialOff
 import { randomUUID } from "node:crypto";
 import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
-import { validateCredentialExpiryDate } from "../utils/date/dateValidator";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
+import { VeteranCardFormValidator } from "./helpers/VeteranCardFormValidator";
 
 const CREDENTIAL_TYPE = CredentialType.DigitalVeteranCard;
 
@@ -55,22 +55,15 @@ export function veteranCardDocumentBuilderPostController({
     try {
       const body: VeteranCardRequestBody = req.body;
 
-      let errors: Record<string, string> = {};
-      if (body.credentialTtl === "other") {
-        errors = validateCredentialExpiryDate(
-          body["credentialExpiry-day"],
-          body["credentialExpiry-month"],
-          body["credentialExpiry-year"],
-        );
-      }
-
-      if (Object.keys(errors).length > 0) {
+      const validator = new VeteranCardFormValidator();
+      const result = validator.validate(body);
+      if (!result.isValid) {
         return res.render("veteran-card-document-details-form.njk", {
           credentialTtl: body.credentialTtl,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
           showThrowError: environment !== "staging",
-          errors,
+          errors: result.errors,
         });
       }
 

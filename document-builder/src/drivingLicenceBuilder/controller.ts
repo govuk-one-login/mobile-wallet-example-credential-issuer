@@ -24,13 +24,8 @@ import { DrivingLicenceRequestBody } from "./types/DrivingLicenceRequestBody";
 import { DrivingLicenceData } from "../types/DrivingLicenceData";
 import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
-import {
-  validateBirthDate,
-  validateIssueDate,
-  validateExpiryDate,
-  validateCredentialExpiryDate,
-} from "../utils/date/dateValidator";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
+import { DrivingLicenceFormValidator } from "./helpers/DrivingLicenceFormValidator";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
 
@@ -71,37 +66,9 @@ export function drivingLicenceBuilderPostController({
     try {
       const body: DrivingLicenceRequestBody = req.body;
 
-      const birthErrors = validateBirthDate(
-        body["birth-day"],
-        body["birth-month"],
-        body["birth-year"],
-      );
-      const issueErrors = validateIssueDate(
-        body["issue-day"],
-        body["issue-month"],
-        body["issue-year"],
-      );
-      const expiryErrors = validateExpiryDate(
-        body["expiry-day"],
-        body["expiry-month"],
-        body["expiry-year"],
-      );
-      let credentialExpiryErrors: Record<string, string> = {};
-      if (body.credentialTtl === "other") {
-        credentialExpiryErrors = validateCredentialExpiryDate(
-          body["credentialExpiry-day"],
-          body["credentialExpiry-month"],
-          body["credentialExpiry-year"],
-        );
-      }
-      const errors = {
-        ...birthErrors,
-        ...issueErrors,
-        ...expiryErrors,
-        ...credentialExpiryErrors,
-      };
-
-      if (Object.keys(errors).length > 0) {
+      const validator = new DrivingLicenceFormValidator();
+      const result = validator.validate(body);
+      if (!result.isValid) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
         return res.render("driving-licence-form.njk", {
           defaultIssueDate,
@@ -111,7 +78,7 @@ export function drivingLicenceBuilderPostController({
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
           showThrowError: environment !== "staging",
-          errors,
+          errors: result.errors,
         });
       }
 

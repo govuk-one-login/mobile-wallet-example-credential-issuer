@@ -1,9 +1,4 @@
 import { Request, Response } from "express";
-import {
-  validateBirthDate,
-  validateIssueDate,
-  validateExpiryDate,
-} from "../utils/date";
 import { formatDate, getDefaultDates } from "../utils/date";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { ERROR_CHOICES } from "../utils/errorChoices";
@@ -25,6 +20,7 @@ import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
 import { getViewCredentialOfferRedirectUrl } from "../utils/getViewCredentialOfferRedirectUrl";
 import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
+import { SimpleDocumentFormValidator } from "./helpers/SimpleDocumentFormValidator";
 
 const CREDENTIAL_TYPE = CredentialType.SimpleDocument;
 const FISH_TYPES = [
@@ -75,28 +71,9 @@ export function simpleDocumentBuilderPostController({
     try {
       const body: SimpleDocumentRequestBody = req.body;
 
-      const birthErrors = validateBirthDate(
-        body["birth-day"],
-        body["birth-month"],
-        body["birth-year"],
-      );
-      const issueErrors = validateIssueDate(
-        body["issue-day"],
-        body["issue-month"],
-        body["issue-year"],
-      );
-      const expiryErrors = validateExpiryDate(
-        body["expiry-day"],
-        body["expiry-month"],
-        body["expiry-year"],
-      );
-
-      const errors = { ...birthErrors, ...issueErrors, ...expiryErrors };
-      if (!FISH_TYPES.includes(body.type_of_fish)) {
-        errors.type_of_fish = "Select a valid type of fish";
-      }
-
-      if (Object.keys(errors).length > 0) {
+      const validator = new SimpleDocumentFormValidator();
+      const result = validator.validate(body);
+      if (!result.isValid) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
         return res.render("simple-document-details-form.njk", {
           defaultIssueDate,
@@ -106,7 +83,7 @@ export function simpleDocumentBuilderPostController({
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
           showThrowError: environment !== "staging",
-          errors,
+          errors: result.errors,
         });
       }
 
