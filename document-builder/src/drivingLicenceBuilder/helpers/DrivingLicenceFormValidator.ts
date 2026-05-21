@@ -4,12 +4,8 @@ import {
   validateIssueDate,
   validateExpiryDate,
   validateCredentialExpiryDate,
-} from "../../utils/date/dateValidator";
-
-export interface ValidationResult {
-  isValid: boolean;
-  errors: Record<string, string>;
-}
+} from "../../utils/date";
+import { ValidationResult } from "../../types/ValidationResult";
 
 export class DrivingLicenceFormValidator {
   validate(body: DrivingLicenceRequestBody): ValidationResult {

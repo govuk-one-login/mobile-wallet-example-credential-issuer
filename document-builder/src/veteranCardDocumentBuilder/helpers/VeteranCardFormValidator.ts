@@ -1,10 +1,6 @@
 import { VeteranCardRequestBody } from "../types/VeteranCardRequestBody";
 import { validateCredentialExpiryDate } from "../../utils/date";
-
-export interface ValidationResult {
-  isValid: boolean;
-  errors: Record<string, string>;
-}
+import { ValidationResult } from "../../types/ValidationResult";
 
 export class VeteranCardFormValidator {
   validate(body: VeteranCardRequestBody): ValidationResult {

@@ -4,11 +4,7 @@ import {
   validateIssueDate,
   validateExpiryDate,
 } from "../../utils/date";
-
-export interface ValidationResult {
-  isValid: boolean;
-  errors: Record<string, string>;
-}
+import { ValidationResult } from "../../types/ValidationResult";
 
 const FISH_TYPES = [
   "Coarse fish",
