@@ -78,7 +78,6 @@ export function veteranCardDocumentBuilderPostController({
       const credentialTtlSeconds =
         body.credentialTtl === "other"
           ? calculateCredentialTtlSeconds(
-              body.credentialTtl,
               body["credentialExpiry-day"],
               body["credentialExpiry-month"],
               body["credentialExpiry-year"],
