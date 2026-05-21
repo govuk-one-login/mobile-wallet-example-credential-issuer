@@ -9,7 +9,11 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import * as path from "path";
 import { DrivingLicenceRequestBody } from "../../src/drivingLicenceBuilder/types/DrivingLicenceRequestBody";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
+import { DrivingLicenceFormValidator } from "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator";
 
+jest.mock(
+  "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator",
+);
 jest.mock("node:crypto", () => ({
   randomUUID: jest.fn().mockReturnValue("2e0fac05-4b38-480f-9cbd-b046eabe1e46"),
 }));
@@ -116,6 +120,54 @@ describe("controller.ts", () => {
 
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
+    const mockValidate = jest.fn();
+
+    beforeEach(() => {
+      (DrivingLicenceFormValidator as jest.Mock).mockImplementation(() => ({
+        validate: mockValidate,
+      }));
+      mockValidate.mockReturnValue({ isValid: true, errors: {} });
+    });
+
+    describe("given validation fails", () => {
+      it("should re-render the form with errors", async () => {
+        const validationErrors = { some_field: "some error" };
+        mockValidate.mockReturnValueOnce({
+          isValid: false,
+          errors: validationErrors,
+        });
+        const req = getMockReq({
+          body: requestBody,
+          cookies: { id_token: "id_token" },
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
+          errors: validationErrors,
+          authenticated: true,
+          defaultIssueDate: {
+            day: "02",
+            month: "05",
+            year: "2025",
+          },
+          defaultExpiryDate: {
+            day: "01",
+            month: "05",
+            year: "2035",
+          },
+          errorChoices: ERROR_CHOICES,
+          drivingLicenceNumber: "EDWAR550000SE5RO",
+          credentialTtl: "43200",
+          showThrowError: false,
+        });
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(saveDocument).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
+        expect(saveDocument).not.toHaveBeenCalled();
+      });
+    });
 
     describe("given an error happens trying to process the request", () => {
       it("should render the error page", async () => {
@@ -346,44 +398,6 @@ describe("controller.ts", () => {
             );
           },
         );
-      });
-    });
-
-    describe("given invalid date fields", () => {
-      it("should re-render the form with errors when the birth date is invalid", async () => {
-        const body = buildDrivingLicenceRequestBody({
-          "birth-day": "29",
-          "birth-month": "02",
-          "birth-year": "2019",
-        });
-        const req = getMockReq({
-          body,
-          cookies: { id_token: "id_token" },
-        });
-        const { res } = getMockRes();
-
-        await drivingLicenceBuilderPostController(config)(req, res);
-
-        expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
-          errors: { birth_date: "Enter a valid birth date" },
-          authenticated: true,
-          defaultIssueDate: {
-            day: "02",
-            month: "05",
-            year: "2025",
-          },
-          defaultExpiryDate: {
-            day: "01",
-            month: "05",
-            year: "2035",
-          },
-          errorChoices: ERROR_CHOICES,
-          drivingLicenceNumber: "EDWAR550000SE5RO",
-          credentialTtl: "43200",
-          showThrowError: false,
-        });
-        expect(res.redirect).not.toHaveBeenCalled();
-        expect(saveDocument).not.toHaveBeenCalled();
       });
     });
   });
