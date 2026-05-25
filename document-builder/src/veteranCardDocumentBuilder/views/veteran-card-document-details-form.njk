@@ -247,6 +247,9 @@
                 "name": "credentialValidity",
                 "classes": "govuk-input--width-2",
                 "value": "10",
+                "errorMessage": {
+                    "text": errorMessage
+                } if errorMessage else undefined,
                 "formGroup": {
                     "beforeInput": {
                         "html": "<span class=\"govuk-body\" style=\"margin-right: 10px; margin-bottom: 0;\">In</span>"
