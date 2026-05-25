@@ -1,4 +1,4 @@
-FROM gradle:9.4-jdk17-alpine@sha256:0cf1585fde964bdcd4551019c52b9f4f4a611d5b031d6599aa60d4ea19f5d096
+FROM gradle:9.5.1-jdk17-alpine@sha256:ba0ed0695be942cab210cbdcf2095dded443ec19aa6bdc73c0dc7c0cbd95ad93
 
 RUN apk update && apk upgrade busybox
 
