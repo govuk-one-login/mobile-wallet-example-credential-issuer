@@ -16,7 +16,7 @@
     "@peculiar/asn1-x509": "^2.7.0",
     "commander": "^14.0.3",
     "esbuild": "^0.28.0",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.1",
     "typescript": "^6.0.3"
   },
   "engines": {
