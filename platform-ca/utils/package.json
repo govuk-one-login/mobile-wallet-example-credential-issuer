@@ -16,7 +16,7 @@
     "@peculiar/asn1-x509": "^2.7.0",
     "commander": "^14.0.3",
     "esbuild": "^0.28.0",
-    "tsx": "^4.21.0",
+    "tsx": "^4.22.1",
     "typescript": "^6.0.3"
   },
   "engines": {
@@ -25,7 +25,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.7.0",
+    "@types/node": "^25.8.0",
     "eslint": "9.39.2",
     "eslint-config-prettier": "10.1.8",
     "jest": "30.4.2",
