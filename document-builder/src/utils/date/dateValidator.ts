@@ -60,7 +60,6 @@ export function validateCredentialExpiryDate(
  * isValidDate("15", "13", "2023"); // false (Invalid month)
  * isValidDate("abc", "2", "2023"); // false (Invalid day)
  */
-
 export function isValidDate(
   dayStr: string,
   monthStr: string,
