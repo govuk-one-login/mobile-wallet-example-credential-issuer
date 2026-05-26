@@ -10,6 +10,6 @@ describe("calculateCredentialTtlSeconds", () => {
   });
 
   it("should return the seconds between now and the expiry date", () => {
-    expect(calculateCredentialTtlSeconds("02", "05", "2026")).toBe(31532400);
+    expect(calculateCredentialTtlSeconds("02", "05", "2026")).toBe(31536000);
   });
 });

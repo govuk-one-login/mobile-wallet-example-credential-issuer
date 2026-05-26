@@ -5,9 +5,11 @@ export function calculateCredentialTtlSeconds(
 ): number {
   const now = new Date();
   const expiryDate = new Date(
-    parseInt(expiryYear),
-    parseInt(expiryMonth) - 1,
-    parseInt(expiryDay),
+    Date.UTC(
+      parseInt(expiryYear),
+      parseInt(expiryMonth) - 1,
+      parseInt(expiryDay),
+    ),
   );
 
   return Math.floor((expiryDate.getTime() - now.getTime()) / 1000);
