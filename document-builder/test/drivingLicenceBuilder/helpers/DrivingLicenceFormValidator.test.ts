@@ -43,24 +43,28 @@ describe("DrivingLicenceFormValidator", () => {
 
   it("should return valid when all dates are valid", () => {
     const result = validator.validate(validBody);
+
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
   it("should return an error for an invalid birth date", () => {
     const result = validator.validate({ ...validBody, "birth-day": "99" });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ birth_date: "Enter a valid birth date" });
   });
 
   it("should return an error for an invalid issue date", () => {
     const result = validator.validate({ ...validBody, "issue-day": "99" });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ issue_date: "Enter a valid issue date" });
   });
 
   it("should return an error for an invalid expiry date", () => {
     const result = validator.validate({ ...validBody, "expiry-day": "99" });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ expiry_date: "Enter a valid expiry date" });
   });
@@ -73,6 +77,7 @@ describe("DrivingLicenceFormValidator", () => {
       "credentialExpiry-month": "01",
       "credentialExpiry-year": "2030",
     });
+
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
@@ -85,6 +90,7 @@ describe("DrivingLicenceFormValidator", () => {
       "credentialExpiry-month": "01",
       "credentialExpiry-year": "2030",
     });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({
       credential_expiry_date: "Enter a valid credential expiry date",
@@ -100,6 +106,7 @@ describe("DrivingLicenceFormValidator", () => {
       credentialTtl: "other",
       "credentialExpiry-day": "99",
     });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({
       birth_date: "Enter a valid birth date",

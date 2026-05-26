@@ -17,23 +17,23 @@ export class SimpleDocumentFormValidator {
   validate(body: SimpleDocumentRequestBody): ValidationResult {
     const errors: Record<string, string> = {};
 
-    const birthErrors = validateBirthDate(
+    const birthDateErrors = validateBirthDate(
       body["birth-day"],
       body["birth-month"],
       body["birth-year"],
     );
-    const issueErrors = validateIssueDate(
+    const issueDateErrors = validateIssueDate(
       body["issue-day"],
       body["issue-month"],
       body["issue-year"],
     );
-    const expiryErrors = validateExpiryDate(
+    const expiryDateErrors = validateExpiryDate(
       body["expiry-day"],
       body["expiry-month"],
       body["expiry-year"],
     );
 
-    Object.assign(errors, birthErrors, issueErrors, expiryErrors);
+    Object.assign(errors, birthDateErrors, issueDateErrors, expiryDateErrors);
 
     if (!FISH_TYPES.includes(body.type_of_fish)) {
       errors.type_of_fish = "Select a valid type of fish";

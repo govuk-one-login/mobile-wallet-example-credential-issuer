@@ -27,24 +27,28 @@ describe("SimpleDocumentFormValidator", () => {
 
   it("should return valid when all fields are valid", () => {
     const result = validator.validate(validBody);
+
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
   it("should return an error for an invalid birth date", () => {
     const result = validator.validate({ ...validBody, "birth-day": "99" });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ birth_date: "Enter a valid birth date" });
   });
 
   it("should return an error for an invalid issue date", () => {
     const result = validator.validate({ ...validBody, "issue-day": "99" });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ issue_date: "Enter a valid issue date" });
   });
 
   it("should return an error for an invalid expiry date", () => {
     const result = validator.validate({ ...validBody, "expiry-day": "99" });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ expiry_date: "Enter a valid expiry date" });
   });
@@ -54,6 +58,7 @@ describe("SimpleDocumentFormValidator", () => {
       ...validBody,
       type_of_fish: "Invalid fish",
     });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({
       type_of_fish: "Select a valid type of fish",
@@ -66,6 +71,7 @@ describe("SimpleDocumentFormValidator", () => {
       "birth-day": "99",
       type_of_fish: "Invalid fish",
     });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({
       birth_date: "Enter a valid birth date",

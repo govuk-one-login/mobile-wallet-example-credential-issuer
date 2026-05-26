@@ -25,6 +25,7 @@ describe("VeteranCardFormValidator", () => {
 
   it("should return valid when credentialTtl is not 'other'", () => {
     const result = validator.validate(validBody);
+
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
@@ -37,6 +38,7 @@ describe("VeteranCardFormValidator", () => {
       "credentialExpiry-month": "01",
       "credentialExpiry-year": "2030",
     });
+
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
@@ -49,6 +51,7 @@ describe("VeteranCardFormValidator", () => {
       "credentialExpiry-month": "01",
       "credentialExpiry-year": "2030",
     });
+
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({
       credential_expiry_date: "Enter a valid credential expiry date",
