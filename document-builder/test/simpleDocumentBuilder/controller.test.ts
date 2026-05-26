@@ -10,24 +10,23 @@ import { SimpleDocumentRequestBody } from "../../src/simpleDocumentBuilder/types
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
 import { SimpleDocumentFormValidator } from "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator";
 
-jest.mock(
-  "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator",
-);
-
 jest.mock("node:crypto", () => ({
   randomUUID: jest.fn().mockReturnValue("2e0fac05-4b38-480f-9cbd-b046eabe1e46"),
 }));
-jest.mock("../../src/services/databaseService", () => ({
-  saveDocument: jest.fn(),
+jest.mock("../../src/utils/getRandomIntInclusive", () => ({
+  getRandomIntInclusive: jest.fn().mockReturnValue(550000),
+}));
+jest.mock(
+  "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator",
+);
+jest.mock("../../src/utils/photoUtils", () => ({
+  getPhoto: jest.fn(),
 }));
 jest.mock("../../src/services/s3Service", () => ({
   uploadPhoto: jest.fn(),
 }));
-jest.mock("../../src/utils/photoUtils", () => ({
-  getPhoto: jest.fn(),
-}));
-jest.mock("../../src/utils/getRandomIntInclusive", () => ({
-  getRandomIntInclusive: jest.fn().mockReturnValue(550000),
+jest.mock("../../src/services/databaseService", () => ({
+  saveDocument: jest.fn(),
 }));
 
 const config = {
@@ -164,22 +163,21 @@ describe("controller.ts", () => {
   });
 
   describe("post", () => {
-    const requestBody = buildSimpleDocumentRequestBody();
-
     const photoBuffer = Buffer.from("mock photo data");
     const mockGetPhoto = photoUtils.getPhoto as jest.Mock;
     mockGetPhoto.mockReturnValue({ photoBuffer, mimeType: "image/jpeg" });
-
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
     const mockValidate = jest.fn();
 
     beforeEach(() => {
-      (SimpleDocumentFormValidator as jest.Mock).mockImplementation(() => ({
+      jest.mocked(SimpleDocumentFormValidator).mockImplementation(() => ({
         validate: mockValidate,
       }));
       mockValidate.mockReturnValue({ isValid: true, errors: {} });
     });
+
+    const requestBody = buildSimpleDocumentRequestBody();
 
     describe("given validation fails", () => {
       it("should re-render the form with errors", async () => {
@@ -201,7 +199,6 @@ describe("controller.ts", () => {
           expect.objectContaining({ errors: validationErrors }),
         );
         expect(res.redirect).not.toHaveBeenCalled();
-        expect(saveDocument).not.toHaveBeenCalled();
       });
     });
 

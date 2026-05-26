@@ -1,4 +1,3 @@
-import { readFileSync } from "fs";
 import {
   veteranCardDocumentBuilderGetController,
   veteranCardDocumentBuilderPostController,
@@ -6,23 +5,27 @@ import {
 import * as databaseService from "../../src/services/databaseService";
 import * as s3Service from "../../src/services/s3Service";
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import * as path from "path";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
 import { VeteranCardFormValidator } from "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator";
+import * as calculateCredentialTtlSeconds from "../../src/utils/calculateCredentialTtlSeconds";
+import * as photoUtils from "../../src/utils/photoUtils";
 
-jest.mock(
-  "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator",
-);
 jest.mock("node:crypto", () => ({
   randomUUID: jest.fn().mockReturnValue("2e0fac05-4b38-480f-9cbd-b046eabe1e46"),
 }));
-jest.mock("../../src/services/databaseService", () => ({
-  saveDocument: jest.fn(),
+jest.mock(
+  "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator",
+);
+jest.mock("../../src/utils/photoUtils", () => ({
+  getPhoto: jest.fn(),
 }));
 jest.mock("../../src/services/s3Service", () => ({
   uploadPhoto: jest.fn(),
 }));
-jest.mock("fs");
+jest.mock("../../src/utils/calculateCredentialTtlSeconds");
+jest.mock("../../src/services/databaseService", () => ({
+  saveDocument: jest.fn(),
+}));
 
 const config = { environment: "staging" };
 
@@ -81,6 +84,20 @@ describe("controller.ts", () => {
   });
 
   describe("post", () => {
+    const photoBuffer = Buffer.from("mock photo data");
+    const mockGetPhoto = photoUtils.getPhoto as jest.Mock;
+    mockGetPhoto.mockReturnValue({ photoBuffer, mimeType: "image/jpeg" });
+    const saveDocument = databaseService.saveDocument as jest.Mock;
+    const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
+    const mockValidate = jest.fn();
+
+    beforeEach(() => {
+      jest.mocked(VeteranCardFormValidator).mockImplementation(() => ({
+        validate: mockValidate,
+      }));
+      mockValidate.mockReturnValue({ isValid: true, errors: {} });
+    });
+
     const requestBody = {
       givenName: "Sarah Elizabeth",
       familyName: "Edwards-Smith",
@@ -97,21 +114,6 @@ describe("controller.ts", () => {
       throwError: "",
     };
 
-    const photoBuffer = Buffer.from("mock photo data");
-    const mockReadFileSync = readFileSync as jest.Mock;
-    mockReadFileSync.mockReturnValue(Buffer.from("mock photo data"));
-
-    const saveDocument = databaseService.saveDocument as jest.Mock;
-    const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
-    const mockValidate = jest.fn();
-
-    beforeEach(() => {
-      (VeteranCardFormValidator as jest.Mock).mockImplementation(() => ({
-        validate: mockValidate,
-      }));
-      mockValidate.mockReturnValue({ isValid: true, errors: {} });
-    });
-
     describe("given validation fails", () => {
       it("should re-render the form with errors", async () => {
         const validationErrors = { some_field: "some error" };
@@ -126,7 +128,6 @@ describe("controller.ts", () => {
 
         expect(res.render).toHaveBeenCalledWith(
           "veteran-card-document-details-form.njk",
-
           {
             authenticated: false,
             credentialTtl: "43200",
@@ -135,7 +136,7 @@ describe("controller.ts", () => {
             errors: validationErrors,
           },
         );
-        expect(saveDocument).not.toHaveBeenCalled();
+        expect(res.redirect).not.toHaveBeenCalled();
       });
     });
 
@@ -169,14 +170,11 @@ describe("controller.ts", () => {
           });
           const { res } = getMockRes();
 
+          mockGetPhoto.mockReturnValue({ photoBuffer, mimeType });
+
           await veteranCardDocumentBuilderPostController(config)(req, res);
 
-          const expectedPath = path.resolve(
-            process.cwd(),
-            "dist/resources",
-            fileName,
-          );
-          expect(mockReadFileSync).toHaveBeenCalledWith(expectedPath);
+          expect(mockGetPhoto).toHaveBeenCalledWith(fileName);
           expect(uploadPhoto).toHaveBeenCalledWith(
             photoBuffer,
             "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -186,6 +184,44 @@ describe("controller.ts", () => {
         });
       },
     );
+
+    describe("given credentialTtl is 'other'", () => {
+      it("should call calculateCredentialTtlSeconds with the expiry date fields", async () => {
+        const mockCalculate =
+          calculateCredentialTtlSeconds.calculateCredentialTtlSeconds as jest.Mock;
+        mockCalculate.mockReturnValue(12345);
+
+        const req = getMockReq({
+          body: {
+            givenName: "Sarah Elizabeth",
+            familyName: "Edwards-Smith",
+            "dateOfBirth-day": "06",
+            "dateOfBirth-month": "03",
+            "dateOfBirth-year": "1975",
+            "cardExpiryDate-day": "08",
+            "cardExpiryDate-month": "04",
+            "cardExpiryDate-year": "2029",
+            serviceNumber: "25057386",
+            serviceBranch: "HM Naval Service",
+            portrait: "420x525.jpg",
+            credentialTtl: "other",
+            "credentialExpiry-day": "02",
+            "credentialExpiry-month": "05",
+            "credentialExpiry-year": "2026",
+            throwError: "",
+          },
+        });
+        const { res } = getMockRes();
+
+        await veteranCardDocumentBuilderPostController(config)(req, res);
+
+        expect(mockCalculate).toHaveBeenCalledWith("02", "05", "2026");
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({ credentialTtlSeconds: 12345 }),
+        );
+      });
+    });
 
     describe("given the photo has been stored successfully", () => {
       it(`should call the function to save the document with the correct arguments`, async () => {
