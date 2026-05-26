@@ -190,22 +190,11 @@ describe("controller.ts", () => {
 
         const req = getMockReq({
           body: {
-            givenName: "Sarah Elizabeth",
-            familyName: "Edwards-Smith",
-            "dateOfBirth-day": "06",
-            "dateOfBirth-month": "03",
-            "dateOfBirth-year": "1975",
-            "cardExpiryDate-day": "08",
-            "cardExpiryDate-month": "04",
-            "cardExpiryDate-year": "2029",
-            serviceNumber: "25057386",
-            serviceBranch: "HM Naval Service",
-            portrait: "420x525.jpg",
+            ...requestBody,
             credentialTtl: "other",
             "credentialExpiry-day": "02",
             "credentialExpiry-month": "05",
             "credentialExpiry-year": "2026",
-            throwError: "",
           },
         });
         const { res } = getMockRes();
