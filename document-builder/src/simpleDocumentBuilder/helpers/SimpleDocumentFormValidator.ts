@@ -6,12 +6,12 @@ import {
 } from "../../utils/date";
 import { ValidationResult } from "../../types/ValidationResult";
 
-const FISH_TYPES = [
+const FISH_TYPES = new Set<string>([
   "Coarse fish",
   "Salmon and trout",
   "Sea fishing",
   "All freshwater fish",
-];
+]);
 
 export class SimpleDocumentFormValidator {
   validate(body: SimpleDocumentRequestBody): ValidationResult {
@@ -35,7 +35,7 @@ export class SimpleDocumentFormValidator {
 
     Object.assign(errors, birthDateErrors, issueDateErrors, expiryDateErrors);
 
-    if (!FISH_TYPES.includes(body.type_of_fish)) {
+    if (!FISH_TYPES.has(body.type_of_fish)) {
       errors.type_of_fish = "Select a valid type of fish";
     }
 
