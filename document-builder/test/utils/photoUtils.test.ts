@@ -14,6 +14,7 @@ describe("getPhoto", () => {
 
   test.each([
     [".jpg", "100x125.jpg", "image/jpeg"],
+    [".jpeg", "100x125.jpeg", "image/jpeg"],
     [".png", "100x125.png", "image/png"],
     [".jfif", "JFIF.jfif", "image/jpeg"],
     [".jp2", "140x175.jp2", "image/jp2"],
