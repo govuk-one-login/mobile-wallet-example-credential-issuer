@@ -213,6 +213,7 @@
             {{ govukRadios({
                 classes: "govuk-radios--small",
                 name: "credentialTtl",
+                value: credentialTtl if credentialTtl else "2592000",
                 fieldset: {
                     legend: {
                         text: "When should the credential expire?",
@@ -222,18 +223,15 @@
                 items: [
                     {
                         value: "2592000",
-                        text: "30 days",
-                        checked: credentialTtl === "2592000"
+                        text: "30 days"
                     },
                     {
                         value: "20",
-                        text: "20 seconds",
-                        checked: credentialTtl === "20"
+                        text: "20 seconds"
                     },
                     {
                         value: "other",
                         text: "Other",
-                        checked: credentialTtl === "other",
                         conditional: {
                             html: credentialExpiryDateHtml
                         }

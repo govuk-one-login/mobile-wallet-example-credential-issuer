@@ -64,7 +64,6 @@ describe("controller.ts", () => {
         },
         errorChoices: ERROR_CHOICES,
         drivingLicenceNumber: "EDWAR550000SE5RO",
-        credentialTtl: "2592000",
         showThrowError: false,
       });
     });
@@ -94,7 +93,6 @@ describe("controller.ts", () => {
           },
           errorChoices: ERROR_CHOICES,
           drivingLicenceNumber: "EDWAR550000SE5RO",
-          credentialTtl: "2592000",
           showThrowError: expectedShowThrowError,
         });
       },
@@ -161,7 +159,6 @@ describe("controller.ts", () => {
           },
           errorChoices: ERROR_CHOICES,
           drivingLicenceNumber: "EDWAR550000SE5RO",
-          credentialTtl: "43200",
           showThrowError: false,
         });
         expect(res.redirect).not.toHaveBeenCalled();

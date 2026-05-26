@@ -36,7 +36,6 @@ export function veteranCardDocumentBuilderGetController({
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
         showThrowError: environment !== "staging",
-        credentialTtl: "2592000",
       });
     } catch (error) {
       logger.error(
@@ -59,7 +58,6 @@ export function veteranCardDocumentBuilderPostController({
       const result = validator.validate(body);
       if (!result.isValid) {
         return res.render("veteran-card-document-details-form.njk", {
-          credentialTtl: body.credentialTtl,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
           showThrowError: environment !== "staging",

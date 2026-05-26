@@ -51,7 +51,6 @@ describe("controller.ts", () => {
           authenticated: false,
           errorChoices: ERROR_CHOICES,
           showThrowError: false,
-          credentialTtl: "2592000",
         },
       );
     });
@@ -76,7 +75,6 @@ describe("controller.ts", () => {
             authenticated: false,
             errorChoices: ERROR_CHOICES,
             showThrowError: expectedShowThrowError,
-            credentialTtl: "2592000",
           },
         );
       },
@@ -130,7 +128,6 @@ describe("controller.ts", () => {
           "veteran-card-document-details-form.njk",
           {
             authenticated: false,
-            credentialTtl: "43200",
             showThrowError: false,
             errorChoices: ERROR_CHOICES,
             errors: validationErrors,

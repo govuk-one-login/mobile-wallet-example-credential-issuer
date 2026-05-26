@@ -379,33 +379,31 @@
             }) }}
             {% endset -%}
             {{ govukRadios({
-                classes: "govuk-radios--small",
-                name: "credentialTtl",
-                fieldset: {
-                    legend: {
-                        text: "When should the credential expire?",
-                        classes: "govuk-fieldset__legend--s"
+                "classes": "govuk-radios--small",
+                "name": "credentialTtl",
+                "value": credentialTtl if credentialTtl else "2592000",
+                "fieldset": {
+                    "legend": {
+                        "text": "When should the credential expire?",
+                        "classes": "govuk-fieldset__legend--s"
                     }
                 },
-                items: [
+                "items": [
                     {
-                        value: "2592000",
-                        text: "30 days",
-                        checked: credentialTtl === "2592000"
+                        "value": "2592000",
+                        "text": "30 days",
                     },
                     {
-                        value: "20",
-                        text: "20 seconds",
-                        checked: credentialTtl === "20"
+                        "value": "20",
+                        "text": "20 seconds"
                     },
                     {
-                        value: "other",
-                        text: "Other",
-                        checked: credentialTtl === "other",
-                        conditional: {
-                            html: credentialExpiryDateHtml
-                        }
-                    }
+                         "value": "other",
+                         "text": "Other",
+                         "conditional": {
+                              html: credentialExpiryDateHtml
+                         }
+                     }
                 ]
             }) }}
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
