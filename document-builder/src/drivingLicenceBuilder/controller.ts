@@ -76,6 +76,7 @@ export function drivingLicenceBuilderPostController({
           errorChoices: ERROR_CHOICES,
           showThrowError: environment !== "staging",
           errors: result.errors,
+          credentialTtl: body.credentialTtl,
         });
       }
 

@@ -147,6 +147,7 @@ describe("controller.ts", () => {
         expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
           errors: validationErrors,
           authenticated: true,
+          credentialTtl: "43200",
           defaultIssueDate: {
             day: "02",
             month: "05",
