@@ -196,7 +196,45 @@ describe("controller.ts", () => {
 
         expect(res.render).toHaveBeenCalledWith(
           "simple-document-details-form.njk",
-          expect.objectContaining({ errors: validationErrors }),
+          {
+            errors: validationErrors,
+            defaultIssueDate: {
+              day: "02",
+              month: "05",
+              year: "2025",
+            },
+            defaultExpiryDate: {
+              day: "01",
+              month: "05",
+              year: "2035",
+            },
+            errorChoices: ERROR_CHOICES,
+            documentNumber: "FLN550000",
+            fishTypeOptions: [
+              {
+                selected: true,
+                text: "Coarse fish",
+                value: "Coarse fish",
+              },
+              {
+                selected: false,
+                text: "Salmon and trout",
+                value: "Salmon and trout",
+              },
+              {
+                selected: false,
+                text: "Sea fishing",
+                value: "Sea fishing",
+              },
+              {
+                selected: false,
+                text: "All freshwater fish",
+                value: "All freshwater fish",
+              },
+            ],
+            authenticated: true,
+            showThrowError: true,
+          },
         );
         expect(res.redirect).not.toHaveBeenCalled();
       });
