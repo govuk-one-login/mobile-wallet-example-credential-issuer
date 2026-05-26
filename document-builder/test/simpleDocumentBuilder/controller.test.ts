@@ -8,6 +8,11 @@ import * as photoUtils from "../../src/utils/photoUtils";
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import { SimpleDocumentRequestBody } from "../../src/simpleDocumentBuilder/types/SimpleDocumentRequestBody";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
+import { SimpleDocumentFormValidator } from "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator";
+
+jest.mock(
+  "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator",
+);
 
 jest.mock("node:crypto", () => ({
   randomUUID: jest.fn().mockReturnValue("2e0fac05-4b38-480f-9cbd-b046eabe1e46"),
@@ -167,122 +172,36 @@ describe("controller.ts", () => {
 
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
+    const mockValidate = jest.fn();
 
-    describe("should re-render the form with an error", () => {
-      it("when a date has empty fields", async () => {
-        const body = buildSimpleDocumentRequestBody({
-          "birth-day": "",
-          "birth-month": "08",
-          "birth-year": "",
+    beforeEach(() => {
+      (SimpleDocumentFormValidator as jest.Mock).mockImplementation(() => ({
+        validate: mockValidate,
+      }));
+      mockValidate.mockReturnValue({ isValid: true, errors: {} });
+    });
+
+    describe("given validation fails", () => {
+      it("should re-render the form with errors", async () => {
+        const validationErrors = { some_field: "some error" };
+        mockValidate.mockReturnValueOnce({
+          isValid: false,
+          errors: validationErrors,
         });
         const req = getMockReq({
-          body,
+          body: requestBody,
           cookies: { id_token: "id_token" },
         });
         const { res } = getMockRes();
-        await simpleDocumentBuilderPostController(config)(req, res);
-        expect(res.render).toHaveBeenCalledWith(
-          "simple-document-details-form.njk",
-          {
-            errors: expect.objectContaining({
-              birth_date: "Enter a valid birth date",
-            }),
-            defaultIssueDate: {
-              day: "02",
-              month: "05",
-              year: "2025",
-            },
-            defaultExpiryDate: {
-              day: "01",
-              month: "05",
-              year: "2035",
-            },
-            errorChoices: ERROR_CHOICES,
-            documentNumber: "FLN550000",
-            fishTypeOptions: [
-              {
-                selected: true,
-                text: "Coarse fish",
-                value: "Coarse fish",
-              },
-              {
-                selected: false,
-                text: "Salmon and trout",
-                value: "Salmon and trout",
-              },
-              {
-                selected: false,
-                text: "Sea fishing",
-                value: "Sea fishing",
-              },
-              {
-                selected: false,
-                text: "All freshwater fish",
-                value: "All freshwater fish",
-              },
-            ],
-            authenticated: true,
-            showThrowError: true,
-          },
-        );
-        expect(res.redirect).not.toHaveBeenCalled();
-      });
 
-      it("when the type of fish selected is unknown", async () => {
-        const body = buildSimpleDocumentRequestBody({
-          type_of_fish: "Unknwon fish type",
-        });
-        const req = getMockReq({
-          body,
-          cookies: { id_token: "id_token" },
-        });
-        const { res } = getMockRes();
         await simpleDocumentBuilderPostController(config)(req, res);
+
         expect(res.render).toHaveBeenCalledWith(
           "simple-document-details-form.njk",
-          {
-            errors: expect.objectContaining({
-              type_of_fish: "Select a valid type of fish",
-            }),
-            defaultIssueDate: {
-              day: "02",
-              month: "05",
-              year: "2025",
-            },
-            defaultExpiryDate: {
-              day: "01",
-              month: "05",
-              year: "2035",
-            },
-            errorChoices: ERROR_CHOICES,
-            documentNumber: "FLN550000",
-            fishTypeOptions: [
-              {
-                selected: true,
-                text: "Coarse fish",
-                value: "Coarse fish",
-              },
-              {
-                selected: false,
-                text: "Salmon and trout",
-                value: "Salmon and trout",
-              },
-              {
-                selected: false,
-                text: "Sea fishing",
-                value: "Sea fishing",
-              },
-              {
-                selected: false,
-                text: "All freshwater fish",
-                value: "All freshwater fish",
-              },
-            ],
-            authenticated: true,
-            showThrowError: true,
-          },
+          expect.objectContaining({ errors: validationErrors }),
         );
         expect(res.redirect).not.toHaveBeenCalled();
+        expect(saveDocument).not.toHaveBeenCalled();
       });
     });
 
