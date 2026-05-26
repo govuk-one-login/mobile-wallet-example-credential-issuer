@@ -195,7 +195,7 @@
             {% if errors['credential_expiry_date'] %}
                  {% set credentialExpiryError = { text: errors['credential_expiry_date'] } %}
             {% endif %}
-            {% set otherHtml %}
+            {% set credentialExpiryDateHtml %}
             {{ govukDateInput({
               id: "credential-expiry",
               namePrefix: "credentialExpiry",
@@ -235,7 +235,7 @@
                         text: "Other",
                         checked: credentialTtl === "other",
                         conditional: {
-                            html: otherHtml
+                            html: credentialExpiryDateHtml
                         }
                     }
                 ]
