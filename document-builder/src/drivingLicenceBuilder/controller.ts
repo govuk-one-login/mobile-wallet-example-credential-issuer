@@ -39,11 +39,10 @@ export function drivingLicenceBuilderGetController({
   return async function (req: Request, res: Response): Promise<void> {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-      const drivingLicenceNumber = "EDWAR" + getRandomIntInclusive() + "SE5RO";
       res.render("driving-licence-form.njk", {
         defaultIssueDate,
         defaultExpiryDate,
-        drivingLicenceNumber,
+        drivingLicenceNumber: "EDWAR" + getRandomIntInclusive() + "SE5RO",
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
         showThrowError: environment !== "staging",
