@@ -192,8 +192,8 @@
                     }
                 ]
             }) }}
-            {% if errors['credentialExpiry'] %}
-                 {% set credentialExpiryError = { text: errors['credentialExpiry'] } %}
+            {% if errors['credential_expiry_date'] %}
+                 {% set credentialExpiryError = { text: errors['credential_expiry_date'] } %}
             {% endif %}
             {% set otherHtml %}
             {{ govukDateInput({
