@@ -7,6 +7,7 @@ async function get(criUrl: string, path: string): Promise<AxiosResponse> {
   } catch (error) {
     throw new Error(
       `API_ERROR: Error trying to fetch ${path} - ${JSON.stringify(error)}`,
+      { cause: error },
     );
   }
 }
