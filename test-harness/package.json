@@ -15,7 +15,7 @@
     "format:check": "node_modules/.bin/prettier --check .",
     "format:fix": "prettier --ignore-path .gitignore --write \"*/**/*.{ts,json}\"",
     "test": "node_modules/.bin/jest --testPathPatterns=test/credential-issuer-tests.test.ts --coverage=false",
-    "test:unit": "TZ=UTC jest node_modules/.bin/jest --testPathPatterns=test/helpers src/config --silent"
+    "test:unit": "TZ=UTC jest node_modules/.bin/jest --testPathPatterns=test/helpers src --silent"
   },
   "dependencies": {
     "@peculiar/x509": "^2.0.0",
