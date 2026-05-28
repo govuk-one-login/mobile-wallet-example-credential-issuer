@@ -34,6 +34,7 @@ function getHeaderClaims(jwt: string): ProtectedHeaderParameters {
   } catch (error) {
     throw new Error(
       `INVALID_HEADER: Failed to decode credential header. ${error}`,
+      { cause: error },
     );
   }
 
@@ -70,6 +71,7 @@ async function verifySignature(
   } catch (error) {
     throw new Error(
       `INVALID_SIGNATURE: Credential verification failed. ${JSON.stringify(error)}`,
+      { cause: error },
     );
   }
 }
