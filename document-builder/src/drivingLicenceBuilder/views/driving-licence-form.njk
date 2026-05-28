@@ -406,8 +406,8 @@
                      }
                 ]
             }) }}
-            {% if errors['credential_validity'] %}
-                {% set credentialValidityError = { text: errors['credential_validity'] } %}
+            {% if errors['expected_update'] %}
+                {% set expectedUpdateError = { text: errors['expected_update'] } %}
             {% endif %}
             {{ govukInput({
                 "label": {
@@ -415,11 +415,11 @@
                     "classes": "govuk-label--s"
                 },
                 "id": "updated-credential",
-                "name": "credentialValidity",
+                "name": "expectedUpdate",
                 "classes": "govuk-input--width-2",
                 "inputMode": "numeric",
                 "value": "10",
-                "errorMessage": credentialValidityError,
+                "errorMessage": expectedUpdateError,
                 "formGroup": {
                     "beforeInput": {
                         "html": "<span class=\"govuk-body\" style=\"margin-right: 10px; margin-bottom: 0;\">In</span>"
