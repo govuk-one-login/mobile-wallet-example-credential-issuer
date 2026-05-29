@@ -39,5 +39,6 @@ export interface DrivingLicenceRequestBody {
   "credentialExpiry-day": string;
   "credentialExpiry-month": string;
   "credentialExpiry-year": string;
+  "expectedUpdateDays"?: string;
   throwError: string;
 }
