@@ -6,7 +6,7 @@ import * as databaseService from "../../src/services/databaseService";
 import * as s3Service from "../../src/services/s3Service";
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
-import { VeteranCardFormValidator } from "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator";
+import * as veteranCardFormValidator from "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator";
 import * as calculateCredentialTtlSeconds from "../../src/utils/calculateCredentialTtlSeconds";
 import * as photoUtils from "../../src/utils/photoUtils";
 
@@ -15,6 +15,9 @@ jest.mock("node:crypto", () => ({
 }));
 jest.mock(
   "../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator",
+  () => ({
+    validateVeteranCardForm: jest.fn(),
+  }),
 );
 jest.mock("../../src/utils/photoUtils", () => ({
   getPhoto: jest.fn(),
@@ -87,12 +90,10 @@ describe("controller.ts", () => {
     mockGetPhoto.mockReturnValue({ photoBuffer, mimeType: "image/jpeg" });
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
-    const mockValidate = jest.fn();
+    const mockValidate =
+      veteranCardFormValidator.validateVeteranCardForm as jest.Mock;
 
     beforeEach(() => {
-      jest.mocked(VeteranCardFormValidator).mockImplementation(() => ({
-        validate: mockValidate,
-      }));
       mockValidate.mockReturnValue({ isValid: true, errors: {} });
     });
 

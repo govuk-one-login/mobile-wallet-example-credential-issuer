@@ -8,7 +8,7 @@ import * as photoUtils from "../../src/utils/photoUtils";
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import { SimpleDocumentRequestBody } from "../../src/simpleDocumentBuilder/types/SimpleDocumentRequestBody";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
-import { SimpleDocumentFormValidator } from "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator";
+import * as simpleDocumentFormValidator from "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator";
 
 jest.mock("node:crypto", () => ({
   randomUUID: jest.fn().mockReturnValue("2e0fac05-4b38-480f-9cbd-b046eabe1e46"),
@@ -18,6 +18,9 @@ jest.mock("../../src/utils/getRandomIntInclusive", () => ({
 }));
 jest.mock(
   "../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator",
+  () => ({
+    validateSimpleDocumentForm: jest.fn(),
+  }),
 );
 jest.mock("../../src/utils/photoUtils", () => ({
   getPhoto: jest.fn(),
@@ -168,12 +171,10 @@ describe("controller.ts", () => {
     mockGetPhoto.mockReturnValue({ photoBuffer, mimeType: "image/jpeg" });
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
-    const mockValidate = jest.fn();
+    const mockValidate =
+      simpleDocumentFormValidator.validateSimpleDocumentForm as jest.Mock;
 
     beforeEach(() => {
-      jest.mocked(SimpleDocumentFormValidator).mockImplementation(() => ({
-        validate: mockValidate,
-      }));
       mockValidate.mockReturnValue({ isValid: true, errors: {} });
     });
 

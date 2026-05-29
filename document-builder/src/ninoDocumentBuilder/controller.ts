@@ -15,6 +15,7 @@ import { ERROR_CHOICES } from "../utils/errorChoices";
 import { getTimeToLiveEpoch } from "../utils/getTimeToLiveEpoch";
 import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
 import { getViewCredentialOfferRedirectUrl } from "../utils/getViewCredentialOfferRedirectUrl";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.SocialSecurityCredential;
 
@@ -27,7 +28,7 @@ export function ninoDocumentBuilderGetController({
 }: NinoDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
   return async function (req: Request, res: Response): Promise<void> {
     try {
-      const showThrowError = environment !== "staging";
+      const showThrowError = environment !== ENVIRONMENTS.STAGE;
       res.render("nino-document-details-form.njk", {
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,

@@ -25,7 +25,9 @@ import { DrivingLicenceData } from "../types/DrivingLicenceData";
 import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
-import { DrivingLicenceFormValidator } from "./helpers/DrivingLicenceFormValidator";
+import { validateDrivingLicenceForm } from "./helpers/DrivingLicenceFormValidator";
+import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
 
@@ -45,7 +47,7 @@ export function drivingLicenceBuilderGetController({
         drivingLicenceNumber: "EDWAR" + getRandomIntInclusive() + "SE5RO",
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError: environment !== "staging",
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -64,8 +66,7 @@ export function drivingLicenceBuilderPostController({
     try {
       const body: DrivingLicenceRequestBody = req.body;
 
-      const validator = new DrivingLicenceFormValidator();
-      const result = validator.validate(body);
+      const result = validateDrivingLicenceForm(body);
       if (!result.isValid) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
         return res.render("driving-licence-form.njk", {
@@ -74,7 +75,7 @@ export function drivingLicenceBuilderPostController({
           drivingLicenceNumber: body.document_number,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError: environment !== "staging",
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
           errors: result.errors,
           credentialTtl: body.credentialTtl,
         });
@@ -89,7 +90,7 @@ export function drivingLicenceBuilderPostController({
 
       const data = buildDataFromRequestBody(body, s3Uri);
       const credentialTtlSeconds =
-        body.credentialTtl === "other"
+        body.credentialTtl === CUSTOM_CREDENTIAL_TTL
           ? calculateCredentialTtlSeconds(
               body["credentialExpiry-day"],
               body["credentialExpiry-month"],

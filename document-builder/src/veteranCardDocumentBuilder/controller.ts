@@ -19,7 +19,9 @@ import { randomUUID } from "node:crypto";
 import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
-import { VeteranCardFormValidator } from "./helpers/VeteranCardFormValidator";
+import { validateVeteranCardForm } from "./helpers/VeteranCardFormValidator";
+import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.DigitalVeteranCard;
 
@@ -35,7 +37,7 @@ export function veteranCardDocumentBuilderGetController({
       res.render("veteran-card-document-details-form.njk", {
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError: environment !== "staging",
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -54,13 +56,12 @@ export function veteranCardDocumentBuilderPostController({
     try {
       const body: VeteranCardRequestBody = req.body;
 
-      const validator = new VeteranCardFormValidator();
-      const result = validator.validate(body);
+      const result = validateVeteranCardForm(body);
       if (!result.isValid) {
         return res.render("veteran-card-document-details-form.njk", {
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError: environment !== "staging",
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
           errors: result.errors,
           credentialTtl: body.credentialTtl,
         });
@@ -75,7 +76,7 @@ export function veteranCardDocumentBuilderPostController({
 
       const data = buildVeteranCardDataFromRequestBody(body, s3Uri);
       const credentialTtlSeconds =
-        body.credentialTtl === "other"
+        body.credentialTtl === CUSTOM_CREDENTIAL_TTL
           ? calculateCredentialTtlSeconds(
               body["credentialExpiry-day"],
               body["credentialExpiry-month"],

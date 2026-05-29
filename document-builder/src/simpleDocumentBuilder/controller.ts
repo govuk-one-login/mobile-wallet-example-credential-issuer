@@ -20,7 +20,8 @@ import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
 import { getViewCredentialOfferRedirectUrl } from "../utils/getViewCredentialOfferRedirectUrl";
 import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
-import { SimpleDocumentFormValidator } from "./helpers/SimpleDocumentFormValidator";
+import { validateSimpleDocumentForm } from "./helpers/SimpleDocumentFormValidator";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.SimpleDocument;
 const FISH_TYPES = [
@@ -52,7 +53,7 @@ export function simpleDocumentBuilderGetController({
         fishTypeOptions: FISH_TYPE_UI_OPTIONS,
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError: environment !== "staging",
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -71,8 +72,7 @@ export function simpleDocumentBuilderPostController({
     try {
       const body: SimpleDocumentRequestBody = req.body;
 
-      const validator = new SimpleDocumentFormValidator();
-      const result = validator.validate(body);
+      const result = validateSimpleDocumentForm(body);
       if (!result.isValid) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
         return res.render("simple-document-details-form.njk", {
@@ -82,7 +82,7 @@ export function simpleDocumentBuilderPostController({
           fishTypeOptions: FISH_TYPE_UI_OPTIONS,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError: environment !== "staging",
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
           errors: result.errors,
         });
       }

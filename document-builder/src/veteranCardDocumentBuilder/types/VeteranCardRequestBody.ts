@@ -14,6 +14,6 @@ export interface VeteranCardRequestBody {
   "credentialExpiry-day": string;
   "credentialExpiry-month": string;
   "credentialExpiry-year": string;
-  "expectedUpdateDays"?: string;
+  expectedUpdateDays?: string;
   throwError: string;
 }

@@ -1,5 +1,5 @@
 import { VeteranCardRequestBody } from "../../../src/veteranCardDocumentBuilder/types/VeteranCardRequestBody";
-import { VeteranCardFormValidator } from "../../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator";
+import { validateVeteranCardForm } from "../../../src/veteranCardDocumentBuilder/helpers/VeteranCardFormValidator";
 
 const validBody: VeteranCardRequestBody = {
   givenName: "John",
@@ -20,18 +20,16 @@ const validBody: VeteranCardRequestBody = {
   throwError: "",
 };
 
-describe("VeteranCardFormValidator", () => {
-  const validator = new VeteranCardFormValidator();
-
+describe("validateVeteranCardForm", () => {
   it("should return valid when credentialTtl is not 'other'", () => {
-    const result = validator.validate(validBody);
+    const result = validateVeteranCardForm(validBody);
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
   it("should return valid when credentialTtl is 'other' and expiry date is valid", () => {
-    const result = validator.validate({
+    const result = validateVeteranCardForm({
       ...validBody,
       credentialTtl: "other",
       "credentialExpiry-day": "01",
@@ -44,7 +42,7 @@ describe("VeteranCardFormValidator", () => {
   });
 
   it("should return an error when credentialTtl is 'other' and expiry date is invalid", () => {
-    const result = validator.validate({
+    const result = validateVeteranCardForm({
       ...validBody,
       credentialTtl: "other",
       "credentialExpiry-day": "99",
@@ -59,7 +57,7 @@ describe("VeteranCardFormValidator", () => {
   });
 
   it("should return an error when expectedUpdateDays is not a number", () => {
-    const result = validator.validate({
+    const result = validateVeteranCardForm({
       ...validBody,
       expectedUpdateDays: "abc",
     });
@@ -71,7 +69,7 @@ describe("VeteranCardFormValidator", () => {
   });
 
   it("should return valid when expectedUpdateDays is a valid number", () => {
-    const result = validator.validate({
+    const result = validateVeteranCardForm({
       ...validBody,
       expectedUpdateDays: "10",
     });
@@ -81,7 +79,7 @@ describe("VeteranCardFormValidator", () => {
   });
 
   it("should return valid when expectedUpdateDays is empty", () => {
-    const result = validator.validate({
+    const result = validateVeteranCardForm({
       ...validBody,
       expectedUpdateDays: "",
     });
@@ -91,7 +89,7 @@ describe("VeteranCardFormValidator", () => {
   });
 
   it("should return valid when expectedUpdateDays is undefined", () => {
-    const result = validator.validate(validBody);
+    const result = validateVeteranCardForm(validBody);
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
