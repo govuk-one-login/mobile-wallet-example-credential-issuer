@@ -38,6 +38,10 @@ export class DrivingLicenceFormValidator {
       Object.assign(errors, credentialExpiryErrors);
     }
 
+    if (body.expectedUpdateDays && isNaN(Number(body.expectedUpdateDays))) {
+      errors.expected_update = "Enter a number";
+    }
+
     return {
       isValid: Object.keys(errors).length === 0,
       errors,

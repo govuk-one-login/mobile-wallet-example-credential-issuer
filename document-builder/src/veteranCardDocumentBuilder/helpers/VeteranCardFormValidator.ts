@@ -15,6 +15,10 @@ export class VeteranCardFormValidator {
       Object.assign(errors, expiryErrors);
     }
 
+    if (body.expectedUpdateDays && isNaN(Number(body.expectedUpdateDays))) {
+      errors.expected_update = "Enter a number";
+    }
+
     return {
       isValid: Object.keys(errors).length === 0,
       errors,

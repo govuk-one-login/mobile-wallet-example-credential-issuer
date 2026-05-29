@@ -399,6 +399,90 @@ describe("controller.ts", () => {
         );
       });
     });
+
+    describe("expectedUpdate calculation", () => {
+      it("should include expectedUpdate in saved document data when expectedUpdateDays has a value", async () => {
+        const req = getMockReq({
+          body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "5" }),
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            data: expect.objectContaining({
+              expectedUpdate: 43200 - 5 * 86400,
+            }),
+          }),
+        );
+      });
+
+      it("should calculate expectedUpdate using calculateCredentialTtlSeconds when credentialTtl is 'other'", async () => {
+        const mockCalculate =
+          calculateCredentialTtlSeconds.calculateCredentialTtlSeconds as jest.Mock;
+        mockCalculate.mockReturnValue(2592000);
+
+        const req = getMockReq({
+          body: buildDrivingLicenceRequestBody({
+            credentialTtl: "other",
+            "credentialExpiry-day": "02",
+            "credentialExpiry-month": "05",
+            "credentialExpiry-year": "2026",
+            expectedUpdateDays: "10",
+          }),
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            data: expect.objectContaining({
+              expectedUpdate: 2592000 - 10 * 86400,
+            }),
+          }),
+        );
+      });
+
+      it("should not include expectedUpdate in saved document data when expectedUpdateDays is empty", async () => {
+        const req = getMockReq({
+          body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "" }),
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            data: expect.not.objectContaining({
+              expectedUpdate: expect.anything(),
+            }),
+          }),
+        );
+      });
+
+      it("should not include expectedUpdate in saved document data when expectedUpdateDays is not provided", async () => {
+        const req = getMockReq({
+          body: requestBody,
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            data: expect.not.objectContaining({
+              expectedUpdate: expect.anything(),
+            }),
+          }),
+        );
+      });
+    });
   });
 });
 
