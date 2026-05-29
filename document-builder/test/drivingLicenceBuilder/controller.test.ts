@@ -7,7 +7,7 @@ import * as s3Service from "../../src/services/s3Service";
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import { DrivingLicenceRequestBody } from "../../src/drivingLicenceBuilder/types/DrivingLicenceRequestBody";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
-import { DrivingLicenceFormValidator } from "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator";
+import * as drivingLicenceFormValidator from "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator";
 import * as calculateCredentialTtlSeconds from "../../src/utils/calculateCredentialTtlSeconds";
 import * as photoUtils from "../../src/utils/photoUtils";
 
@@ -19,6 +19,9 @@ jest.mock("../../src/utils/getRandomIntInclusive", () => ({
 }));
 jest.mock(
   "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator",
+  () => ({
+    validateDrivingLicenceForm: jest.fn(),
+  }),
 );
 jest.mock("../../src/utils/photoUtils", () => ({
   getPhoto: jest.fn(),
@@ -118,12 +121,10 @@ describe("controller.ts", () => {
     mockGetPhoto.mockReturnValue({ photoBuffer, mimeType: "image/jpeg" });
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
-    const mockValidate = jest.fn();
+    const mockValidate =
+      drivingLicenceFormValidator.validateDrivingLicenceForm as jest.Mock;
 
     beforeEach(() => {
-      jest.mocked(DrivingLicenceFormValidator).mockImplementation(() => ({
-        validate: mockValidate,
-      }));
       mockValidate.mockReturnValue({ isValid: true, errors: {} });
     });
 

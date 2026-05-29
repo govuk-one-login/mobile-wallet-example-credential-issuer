@@ -25,7 +25,7 @@ import { DrivingLicenceData } from "../types/DrivingLicenceData";
 import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
-import { DrivingLicenceFormValidator } from "./helpers/DrivingLicenceFormValidator";
+import { validateDrivingLicenceForm } from "./helpers/DrivingLicenceFormValidator";
 import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
 import { ENVIRONMENTS } from "../config/environments";
 
@@ -66,8 +66,7 @@ export function drivingLicenceBuilderPostController({
     try {
       const body: DrivingLicenceRequestBody = req.body;
 
-      const validator = new DrivingLicenceFormValidator();
-      const result = validator.validate(body);
+      const result = validateDrivingLicenceForm(body);
       if (!result.isValid) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
         return res.render("driving-licence-form.njk", {

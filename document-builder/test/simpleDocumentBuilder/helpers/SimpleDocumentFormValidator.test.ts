@@ -1,4 +1,4 @@
-import { SimpleDocumentFormValidator } from "../../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator";
+import { validateSimpleDocumentForm } from "../../../src/simpleDocumentBuilder/helpers/SimpleDocumentFormValidator";
 import { SimpleDocumentRequestBody } from "../../../src/simpleDocumentBuilder/types/SimpleDocumentRequestBody";
 
 const validBody: SimpleDocumentRequestBody = {
@@ -22,39 +22,46 @@ const validBody: SimpleDocumentRequestBody = {
   throwError: "",
 };
 
-describe("SimpleDocumentFormValidator", () => {
-  const validator = new SimpleDocumentFormValidator();
-
+describe("validateSimpleDocumentForm", () => {
   it("should return valid when all fields are valid", () => {
-    const result = validator.validate(validBody);
+    const result = validateSimpleDocumentForm(validBody);
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
   it("should return an error for an invalid birth date", () => {
-    const result = validator.validate({ ...validBody, "birth-day": "99" });
+    const result = validateSimpleDocumentForm({
+      ...validBody,
+      "birth-day": "99",
+    });
 
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ birth_date: "Enter a valid birth date" });
   });
 
   it("should return an error for an invalid issue date", () => {
-    const result = validator.validate({ ...validBody, "issue-day": "99" });
+    const result = validateSimpleDocumentForm({
+      ...validBody,
+      "issue-day": "99",
+    });
 
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ issue_date: "Enter a valid issue date" });
   });
 
   it("should return an error for an invalid expiry date", () => {
-    const result = validator.validate({ ...validBody, "expiry-day": "99" });
+    const result = validateSimpleDocumentForm({
+      ...validBody,
+      "expiry-day": "99",
+    });
 
     expect(result.isValid).toBe(false);
     expect(result.errors).toEqual({ expiry_date: "Enter a valid expiry date" });
   });
 
   it("should return an error for an invalid fish type", () => {
-    const result = validator.validate({
+    const result = validateSimpleDocumentForm({
       ...validBody,
       type_of_fish: "Invalid fish",
     });
@@ -66,7 +73,7 @@ describe("SimpleDocumentFormValidator", () => {
   });
 
   it("should return multiple errors for multiple invalid fields", () => {
-    const result = validator.validate({
+    const result = validateSimpleDocumentForm({
       ...validBody,
       "birth-day": "99",
       type_of_fish: "Invalid fish",

@@ -19,7 +19,7 @@ import { randomUUID } from "node:crypto";
 import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
-import { VeteranCardFormValidator } from "./helpers/VeteranCardFormValidator";
+import { validateVeteranCardForm } from "./helpers/VeteranCardFormValidator";
 import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
 import { ENVIRONMENTS } from "../config/environments";
 
@@ -56,8 +56,7 @@ export function veteranCardDocumentBuilderPostController({
     try {
       const body: VeteranCardRequestBody = req.body;
 
-      const validator = new VeteranCardFormValidator();
-      const result = validator.validate(body);
+      const result = validateVeteranCardForm(body);
       if (!result.isValid) {
         return res.render("veteran-card-document-details-form.njk", {
           authenticated: isAuthenticated(req),
