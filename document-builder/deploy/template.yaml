@@ -36,6 +36,8 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
+  IsIntegration: !Equals [!Ref Environment, integration]
+
   UsePermissionsBoundary:
     Fn::Not:
       - Fn::Equals:
@@ -762,7 +764,7 @@ Resources:
             Stat: Minimum
 
   DocBuilderHeartbeatAlarm:
-#    Condition: IsIntegration
+    Condition: IsIntegration
     Type: AWS::CloudWatch::Alarm  
     Properties:
       AlarmName: !Sub "${AWS::StackName}-DocBuilderHeartbeatAlarm"
