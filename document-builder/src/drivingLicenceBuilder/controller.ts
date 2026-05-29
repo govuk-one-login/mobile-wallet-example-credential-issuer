@@ -26,6 +26,7 @@ import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { DrivingLicenceFormValidator } from "./helpers/DrivingLicenceFormValidator";
+import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
 
@@ -89,7 +90,7 @@ export function drivingLicenceBuilderPostController({
 
       const data = buildDataFromRequestBody(body, s3Uri);
       const credentialTtlSeconds =
-        body.credentialTtl === "other"
+        body.credentialTtl === CUSTOM_CREDENTIAL_TTL
           ? calculateCredentialTtlSeconds(
               body["credentialExpiry-day"],
               body["credentialExpiry-month"],

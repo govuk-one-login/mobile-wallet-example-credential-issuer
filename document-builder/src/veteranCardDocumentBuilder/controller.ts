@@ -20,6 +20,7 @@ import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { VeteranCardFormValidator } from "./helpers/VeteranCardFormValidator";
+import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
 
 const CREDENTIAL_TYPE = CredentialType.DigitalVeteranCard;
 
@@ -75,7 +76,7 @@ export function veteranCardDocumentBuilderPostController({
 
       const data = buildVeteranCardDataFromRequestBody(body, s3Uri);
       const credentialTtlSeconds =
-        body.credentialTtl === "other"
+        body.credentialTtl === CUSTOM_CREDENTIAL_TTL
           ? calculateCredentialTtlSeconds(
               body["credentialExpiry-day"],
               body["credentialExpiry-month"],

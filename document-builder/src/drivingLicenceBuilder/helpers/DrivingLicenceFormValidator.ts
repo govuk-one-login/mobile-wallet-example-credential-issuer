@@ -6,6 +6,7 @@ import {
   validateCredentialExpiryDate,
 } from "../../utils/date";
 import { ValidationResult } from "../../types/ValidationResult";
+import { CUSTOM_CREDENTIAL_TTL } from "../../config/credentialTtl";
 
 export class DrivingLicenceFormValidator {
   validate(body: DrivingLicenceRequestBody): ValidationResult {
@@ -29,7 +30,7 @@ export class DrivingLicenceFormValidator {
 
     Object.assign(errors, birthDateErrors, issueDateErrors, expiryDateErrors);
 
-    if (body.credentialTtl === "other") {
+    if (body.credentialTtl === CUSTOM_CREDENTIAL_TTL) {
       const credentialExpiryErrors = validateCredentialExpiryDate(
         body["credentialExpiry-day"],
         body["credentialExpiry-month"],
