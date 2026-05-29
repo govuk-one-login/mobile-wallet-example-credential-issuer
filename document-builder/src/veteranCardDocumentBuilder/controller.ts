@@ -119,6 +119,7 @@ function buildVeteranCardDataFromRequestBody(
   const {
     throwError: _throwError,
     credentialTtl: _credentialTtl,
+    expectedUpdateDays: _expectedUpdateDays,
     ...newObject
   } = body;
 
