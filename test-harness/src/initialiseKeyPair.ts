@@ -1,6 +1,6 @@
 import { exportJWK, generateKeyPair } from "jose";
 import { writeFile } from "node:fs/promises";
-import { getKeyId } from "./config";
+import { getKeyId } from "./config.js";
 
 export async function initialiseKeyPair() {
   const keyPair = await generateKeyPair("ES256", {
