@@ -21,6 +21,7 @@ import { getViewCredentialOfferRedirectUrl } from "../utils/getViewCredentialOff
 import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
 import { SimpleDocumentFormValidator } from "./helpers/SimpleDocumentFormValidator";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.SimpleDocument;
 const FISH_TYPES = [
@@ -52,7 +53,7 @@ export function simpleDocumentBuilderGetController({
         fishTypeOptions: FISH_TYPE_UI_OPTIONS,
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError: environment !== "staging",
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -82,7 +83,7 @@ export function simpleDocumentBuilderPostController({
           fishTypeOptions: FISH_TYPE_UI_OPTIONS,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError: environment !== "staging",
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
           errors: result.errors,
         });
       }

@@ -27,6 +27,7 @@ import { getPhoto } from "../utils/photoUtils";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { DrivingLicenceFormValidator } from "./helpers/DrivingLicenceFormValidator";
 import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
 
@@ -46,7 +47,7 @@ export function drivingLicenceBuilderGetController({
         drivingLicenceNumber: "EDWAR" + getRandomIntInclusive() + "SE5RO",
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError: environment !== "staging",
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -75,7 +76,7 @@ export function drivingLicenceBuilderPostController({
           drivingLicenceNumber: body.document_number,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError: environment !== "staging",
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
           errors: result.errors,
           credentialTtl: body.credentialTtl,
         });

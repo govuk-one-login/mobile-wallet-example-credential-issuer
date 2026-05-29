@@ -21,6 +21,7 @@ import { uploadPhoto } from "../services/s3Service";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { VeteranCardFormValidator } from "./helpers/VeteranCardFormValidator";
 import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.DigitalVeteranCard;
 
@@ -36,7 +37,7 @@ export function veteranCardDocumentBuilderGetController({
       res.render("veteran-card-document-details-form.njk", {
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError: environment !== "staging",
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -61,7 +62,7 @@ export function veteranCardDocumentBuilderPostController({
         return res.render("veteran-card-document-details-form.njk", {
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError: environment !== "staging",
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
           errors: result.errors,
           credentialTtl: body.credentialTtl,
         });
