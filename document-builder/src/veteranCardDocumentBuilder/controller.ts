@@ -86,7 +86,6 @@ export function veteranCardDocumentBuilderPostController({
         data.expectedUpdate =
           credentialTtlSeconds - Number(body.expectedUpdateDays) * 86400;
       }
-
       await saveDocument(getDocumentsTableName(), {
         itemId,
         documentId: data.serviceNumber,
