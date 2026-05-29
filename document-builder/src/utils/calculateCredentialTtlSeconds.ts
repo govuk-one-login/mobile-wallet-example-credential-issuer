@@ -9,7 +9,7 @@ export function calculateCredentialTtlSeconds(
   const expiryDate = new Date(
     Date.UTC(
       Number.parseInt(expiryYear),
-      Number.parseInt(expiryMonth) - 1,
+      Number.parseInt(expiryMonth) - 1, // Date.UTC months are 0-indexed
       Number.parseInt(expiryDay),
     ),
   );
