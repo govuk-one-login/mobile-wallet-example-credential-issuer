@@ -192,9 +192,28 @@
                     }
                 ]
             }) }}
+            {% if errors['credential_expiry_date'] %}
+                 {% set credentialExpiryError = { text: errors['credential_expiry_date'] } %}
+            {% endif %}
+            {% set credentialExpiryDateHtml %}
+            {{ govukDateInput({
+              id: "credential-expiry",
+              namePrefix: "credentialExpiry",
+              fieldset: {
+                legend: {
+                  text: "Credential expiry"
+                }
+              },
+             "errorMessage": credentialExpiryError,
+              hint: {
+                text: "For example, 27 3 2027"
+              }
+            }) }}
+            {% endset -%}
             {{ govukRadios({
                 classes: "govuk-radios--small",
                 name: "credentialTtl",
+                value: credentialTtl if credentialTtl else "2592000",
                 fieldset: {
                     legend: {
                         text: "When should the credential expire?",
@@ -204,14 +223,20 @@
                 items: [
                     {
                         value: "2592000",
-                        text: "30 days",
-                        checked: true
+                        text: "30 days"
                     },
                     {
                         value: "20",
                         text: "20 seconds"
+                    },
+                    {
+                        value: "other",
+                        text: "Other",
+                        conditional: {
+                            html: credentialExpiryDateHtml
+                        }
                     }
-               ]
+                ]
             }) }}
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
             {% if showThrowError %}

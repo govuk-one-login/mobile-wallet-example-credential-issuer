@@ -10,7 +10,7 @@ import { isAuthenticated } from "../utils/isAuthenticated";
 import { logger } from "../middleware/logger";
 import { randomUUID } from "node:crypto";
 import { saveDocument } from "../services/databaseService";
-import { validateDateFields, getDefaultDates, formatDate } from "../utils/date";
+import { getDefaultDates, formatDate } from "../utils/date";
 import {
   getFullDrivingPrivileges,
   getProvisionalDrivingPrivileges,
@@ -24,6 +24,10 @@ import { DrivingLicenceRequestBody } from "./types/DrivingLicenceRequestBody";
 import { DrivingLicenceData } from "../types/DrivingLicenceData";
 import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
+import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
+import { validateDrivingLicenceForm } from "./helpers/DrivingLicenceFormValidator";
+import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
 
@@ -36,16 +40,14 @@ export function drivingLicenceBuilderGetController({
 }: DrivingLicenceBuilderControllerConfig = {}): ExpressRouteFunction {
   return async function (req: Request, res: Response): Promise<void> {
     try {
-      const showThrowError = environment !== "staging";
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-      const drivingLicenceNumber = "EDWAR" + getRandomIntInclusive() + "SE5RO";
       res.render("driving-licence-form.njk", {
         defaultIssueDate,
         defaultExpiryDate,
-        drivingLicenceNumber,
+        drivingLicenceNumber: "EDWAR" + getRandomIntInclusive() + "SE5RO",
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError,
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -64,36 +66,43 @@ export function drivingLicenceBuilderPostController({
     try {
       const body: DrivingLicenceRequestBody = req.body;
 
-      const errors = validateDateFields(body);
-      if (Object.keys(errors).length > 0) {
+      const result = validateDrivingLicenceForm(body);
+      if (!result.isValid) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-        const drivingLicenceNumber = body.document_number;
-        const showThrowError = environment !== "staging";
         return res.render("driving-licence-form.njk", {
           defaultIssueDate,
           defaultExpiryDate,
-          drivingLicenceNumber,
+          drivingLicenceNumber: body.document_number,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError,
-          errors,
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
+          errors: result.errors,
+          credentialTtl: body.credentialTtl,
         });
       }
 
       const itemId = randomUUID();
+
       const bucketName = getPhotosBucketName();
       const s3Uri = `s3://${bucketName}/${itemId}`;
-
       const { photoBuffer, mimeType } = getPhoto(body.portrait);
       await uploadPhoto(photoBuffer, itemId, bucketName, mimeType);
 
       const data = buildDataFromRequestBody(body, s3Uri);
+      const credentialTtlSeconds =
+        body.credentialTtl === CUSTOM_CREDENTIAL_TTL
+          ? calculateCredentialTtlSeconds(
+              body["credentialExpiry-day"],
+              body["credentialExpiry-month"],
+              body["credentialExpiry-year"],
+            )
+          : Number(body.credentialTtl);
       await saveDocument(getDocumentsTableName(), {
         itemId,
         documentId: data.document_number,
         data,
         vcType: CREDENTIAL_TYPE,
-        credentialTtlSeconds: Number(body.credentialTtl),
+        credentialTtlSeconds,
         timeToLive: getTimeToLiveEpoch(getTableItemTtl()),
       });
 
