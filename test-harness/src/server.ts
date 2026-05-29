@@ -1,5 +1,5 @@
-import { getPortNumber } from "./config";
-import { createApp } from "./app";
+import { getPortNumber } from "./config.js";
+import { createApp } from "./app.js";
 
 const port = getPortNumber();
 const app = await createApp();
