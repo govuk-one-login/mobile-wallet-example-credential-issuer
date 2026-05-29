@@ -37,6 +37,7 @@ function getHeaderClaims(jwt: string): ProtectedHeaderParameters {
   } catch (error) {
     throw new Error(
       `INVALID_HEADER: Failed to decode pre-authorized code header. ${error}`,
+      { cause: error },
     );
   }
 
@@ -67,6 +68,7 @@ async function verifySignature(
   } catch (error) {
     throw new Error(
       `INVALID_SIGNATURE: Pre-authorized code verification failed. ${JSON.stringify(error)}`,
+      { cause: error },
     );
   }
 }

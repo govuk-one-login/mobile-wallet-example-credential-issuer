@@ -35,6 +35,7 @@ export function parseAsJson(inputString: string) {
   } catch (error) {
     throw new Error(
       `INVALID_CREDENTIAL_OFFER: Not a valid JSON. ${JSON.stringify(error)}`,
+      { cause: error },
     );
   }
 }
@@ -44,7 +45,9 @@ export function extractCredentialOffer(urlString: string) {
   try {
     url = new URL(urlString);
   } catch (error) {
-    throw new Error(`INVALID_DEEP_LINK: ${JSON.stringify(error)}`);
+    throw new Error(`INVALID_DEEP_LINK: ${JSON.stringify(error)}`, {
+      cause: error,
+    });
   }
   const credentialOffer = url.searchParams.get("credential_offer");
   if (credentialOffer == null) {
