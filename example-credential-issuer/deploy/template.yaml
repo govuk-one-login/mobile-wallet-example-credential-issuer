@@ -46,6 +46,8 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
+  IsIntegration: !Equals [!Ref Environment, integration]
+
   UsePermissionsBoundary:
     Fn::Not:
       - Fn::Equals:
@@ -826,7 +828,7 @@ Resources:
           Expression: (error/invocations) * 100
 
   ECRIHeartbeatAlarm:
-#    Condition: IsIntegration - to test in dev
+    Condition: IsIntegration - to test in dev
     Type: AWS::CloudWatch::Alarm  
     Properties:
       AlarmName: !Sub "${AWS::StackName}-ECRIHeartbeatAlarm"
