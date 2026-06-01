@@ -776,7 +776,7 @@ Resources:
           Value: document_builder_heartbeat  
       Period: 3600  # max evaluation period: 1 hour. The canary runs every 3 hours.
       EvaluationPeriods: 1  
-      Statistic: Average  
+      Statistic: Maximum  
       ComparisonOperator: GreaterThanOrEqualToThreshold  
       Threshold: 1.0  
       TreatMissingData: notBreaching  
@@ -785,8 +785,6 @@ Resources:
         - !ImportValue alarm-sns-topic-warning
       OKActions:
         - !ImportValue alarm-sns-topic-warning
-      InsufficientDataActions: []
-
 
 Outputs:
   DocBuilderFriendlyUrl:
