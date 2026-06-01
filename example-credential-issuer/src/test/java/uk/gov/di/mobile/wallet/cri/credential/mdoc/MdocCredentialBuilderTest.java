@@ -12,6 +12,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.Drivin
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.security.interfaces.ECPublicKey;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -61,6 +62,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
@@ -70,7 +72,8 @@ class MdocCredentialBuilderTest {
                         mockDrivingLicenceDocument,
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_SECONDS);
+                        CREDENTIAL_TTL_SECONDS,
+                        Optional.empty());
 
         assertEquals(
                 expectedBase64,
@@ -84,6 +87,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }
@@ -102,7 +106,8 @@ class MdocCredentialBuilderTest {
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
-                                        CREDENTIAL_TTL_SECONDS));
+                                        CREDENTIAL_TTL_SECONDS,
+                                        Optional.empty()));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
@@ -112,6 +117,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
@@ -126,6 +132,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenThrow(expectedException);
 
@@ -137,7 +144,8 @@ class MdocCredentialBuilderTest {
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
-                                        CREDENTIAL_TTL_SECONDS));
+                                        CREDENTIAL_TTL_SECONDS,
+                                        Optional.empty()));
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
         verify(issuerSignedFactory)
@@ -146,6 +154,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
@@ -160,6 +169,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
@@ -172,7 +182,8 @@ class MdocCredentialBuilderTest {
                                         mockDrivingLicenceDocument,
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
-                                        CREDENTIAL_TTL_SECONDS));
+                                        CREDENTIAL_TTL_SECONDS,
+                                        Optional.empty()));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
@@ -182,6 +193,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }

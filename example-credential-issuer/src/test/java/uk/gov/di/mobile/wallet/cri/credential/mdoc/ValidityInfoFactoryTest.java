@@ -6,6 +6,7 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -21,7 +22,7 @@ class ValidityInfoFactoryTest {
         Clock fixedClock = Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC);
 
         ValidityInfoFactory factory = new ValidityInfoFactory(fixedClock);
-        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_SECONDS);
+        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_SECONDS, Optional.empty());
 
         assertEquals(FIXED_INSTANT, validityInfo.signed(), "signed should be current time");
         assertEquals(FIXED_INSTANT, validityInfo.validFrom(), "validFrom should be current time");
@@ -29,6 +30,21 @@ class ValidityInfoFactoryTest {
                 EXPECTED_VALID_UNTIL,
                 validityInfo.validUntil(),
                 "validUntil should be 30 days later");
+        assertEquals(Optional.empty(), validityInfo.expectedUpdate());
+    }
+
+    @Test
+    void Should_IncludeExpectedUpdate_When_ExpectedUpdateSecondsProvided() {
+        Clock fixedClock = Clock.fixed(FIXED_INSTANT, ZoneOffset.UTC);
+        long expectedUpdateSeconds = 86400L;
+
+        ValidityInfoFactory factory = new ValidityInfoFactory(fixedClock);
+        ValidityInfo validityInfo =
+                factory.build(CREDENTIAL_TTL_SECONDS, Optional.of(expectedUpdateSeconds));
+
+        assertEquals(
+                Optional.of(FIXED_INSTANT.plus(Duration.ofSeconds(expectedUpdateSeconds))),
+                validityInfo.expectedUpdate());
     }
 
     @Test
@@ -36,7 +52,7 @@ class ValidityInfoFactoryTest {
         Instant beforeCreation = Instant.now();
 
         ValidityInfoFactory factory = new ValidityInfoFactory(Clock.systemDefaultZone());
-        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_SECONDS);
+        ValidityInfo validityInfo = factory.build(CREDENTIAL_TTL_SECONDS, Optional.empty());
 
         assertNotNull(validityInfo);
         Instant afterCreation = Instant.now();

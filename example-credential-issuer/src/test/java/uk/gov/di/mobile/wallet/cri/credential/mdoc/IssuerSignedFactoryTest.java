@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,6 +84,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
@@ -97,6 +99,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
 
         // Assert
@@ -107,6 +110,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
         verify(mockCborEncoder).encode(mockMobileSecurityObject);
         verify(mockCertificateProvider).getSigningCertificate(CERTIFICATE_ID);
@@ -122,6 +126,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenThrow(expectedException);
 
@@ -135,6 +140,7 @@ class IssuerSignedFactoryTest {
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
                                         CREDENTIAL_TTL_SECONDS,
+                                        Optional.empty(),
                                         DOC_TYPE));
         assertEquals("MSO creation failed", exception.getMessage());
 
@@ -144,6 +150,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
         verifyNoInteractions(mockCoseSigner, mockCertificateProvider);
     }
@@ -158,6 +165,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenThrow(expectedException);
@@ -172,6 +180,7 @@ class IssuerSignedFactoryTest {
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
                                         CREDENTIAL_TTL_SECONDS,
+                                        Optional.empty(),
                                         DOC_TYPE));
         assertEquals("CBOR encoding failed", exception.getMessage());
 
@@ -181,6 +190,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
         verify(mockCborEncoder).encode(mockMobileSecurityObject);
         verifyNoInteractions(mockCoseSigner, mockCertificateProvider);
@@ -198,6 +208,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
@@ -214,6 +225,7 @@ class IssuerSignedFactoryTest {
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
                                         CREDENTIAL_TTL_SECONDS,
+                                        Optional.empty(),
                                         DOC_TYPE));
         assertEquals("Certificate error", exception.getMessage());
 
@@ -234,6 +246,7 @@ class IssuerSignedFactoryTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE))
                 .thenReturn(mockMobileSecurityObject);
         when(mockCborEncoder.encode(mockMobileSecurityObject)).thenReturn(msoBytes);
@@ -251,6 +264,7 @@ class IssuerSignedFactoryTest {
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
                                         CREDENTIAL_TTL_SECONDS,
+                                        Optional.empty(),
                                         DOC_TYPE));
         assertEquals("Signing failed", exception.getMessage());
 

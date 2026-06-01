@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.mockito.Mockito.inOrder;
@@ -75,7 +76,8 @@ class MobileSecurityObjectWriterTest {
                 new ValidityInfo(
                         Instant.parse("2025-06-27T12:00:00Z"),
                         Instant.parse("2025-06-27T12:00:00Z"),
-                        Instant.parse("2026-06-27T12:00:00Z"));
+                        Instant.parse("2026-06-27T12:00:00Z"),
+                        Optional.empty());
 
         StatusList statusList = new StatusList(0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
         Status status = new Status(statusList);

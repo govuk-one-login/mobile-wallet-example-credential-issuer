@@ -12,6 +12,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.ValidityInfo;
 
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,7 +31,8 @@ class ValidityInfoSerializerTest {
         Instant signed = Instant.parse("2025-01-01T00:00:00Z");
         Instant validFrom = Instant.parse("2025-01-01T00:00:00Z");
         Instant validUntil = Instant.parse("2025-01-01T00:00:00Z");
-        ValidityInfo valueToSerialize = new ValidityInfo(signed, validFrom, validUntil);
+        ValidityInfo valueToSerialize =
+                new ValidityInfo(signed, validFrom, validUntil, Optional.empty());
 
         serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
@@ -42,6 +44,30 @@ class ValidityInfoSerializerTest {
         inOrder.verify(cborGenerator).writeObject(validFrom);
         inOrder.verify(cborGenerator).writeFieldName("validUntil");
         inOrder.verify(cborGenerator).writeObject(validUntil);
+        cborGenerator.writeEndObject();
+    }
+
+    @Test
+    void Should_SerializeValidityInfoWithExpectedUpdate() throws IOException {
+        Instant signed = Instant.parse("2025-01-01T00:00:00Z");
+        Instant validFrom = Instant.parse("2025-01-01T00:00:00Z");
+        Instant validUntil = Instant.parse("2026-01-01T00:00:00Z");
+        Instant expectedUpdate = Instant.parse("2025-07-01T00:00:00Z");
+        ValidityInfo valueToSerialize =
+                new ValidityInfo(signed, validFrom, validUntil, Optional.of(expectedUpdate));
+
+        serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
+
+        InOrder inOrder = inOrder(cborGenerator);
+        inOrder.verify(cborGenerator).writeStartObject(4);
+        inOrder.verify(cborGenerator).writeFieldName("signed");
+        inOrder.verify(cborGenerator).writeObject(signed);
+        inOrder.verify(cborGenerator).writeFieldName("validFrom");
+        inOrder.verify(cborGenerator).writeObject(validFrom);
+        inOrder.verify(cborGenerator).writeFieldName("validUntil");
+        inOrder.verify(cborGenerator).writeObject(validUntil);
+        inOrder.verify(cborGenerator).writeFieldName("expectedUpdate");
+        inOrder.verify(cborGenerator).writeObject(expectedUpdate);
         cborGenerator.writeEndObject();
     }
 
