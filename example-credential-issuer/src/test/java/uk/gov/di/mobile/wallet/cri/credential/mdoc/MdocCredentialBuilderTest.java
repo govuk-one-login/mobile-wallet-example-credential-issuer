@@ -37,6 +37,7 @@ class MdocCredentialBuilderTest {
             new StatusListClient.StatusListInformation(
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final long CREDENTIAL_TTL_SECONDS = 43200L;
+    private static final Optional<Long> NO_EXPECTED_UPDATE = Optional.empty();
     private static final String DOC_TYPE = CredentialType.MOBILE_DRIVING_LICENCE.getType();
 
     private MdocCredentialBuilder<DrivingLicenceDocument> mdocCredentialBuilder;
@@ -62,7 +63,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty(),
+                        NO_EXPECTED_UPDATE,
                         DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenReturn(mockCborData);
@@ -73,7 +74,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty());
+                        NO_EXPECTED_UPDATE);
 
         assertEquals(
                 expectedBase64,
@@ -87,7 +88,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty(),
+                        NO_EXPECTED_UPDATE,
                         DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }
@@ -107,7 +108,7 @@ class MdocCredentialBuilderTest {
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
                                         CREDENTIAL_TTL_SECONDS,
-                                        Optional.empty()));
+                                        NO_EXPECTED_UPDATE));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
@@ -117,7 +118,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty(),
+                        NO_EXPECTED_UPDATE,
                         DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
@@ -132,7 +133,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty(),
+                        NO_EXPECTED_UPDATE,
                         DOC_TYPE))
                 .thenThrow(expectedException);
 
@@ -145,7 +146,7 @@ class MdocCredentialBuilderTest {
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
                                         CREDENTIAL_TTL_SECONDS,
-                                        Optional.empty()));
+                                        NO_EXPECTED_UPDATE));
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
         verify(issuerSignedFactory)
@@ -154,7 +155,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty(),
+                        NO_EXPECTED_UPDATE,
                         DOC_TYPE);
         verify(cborEncoder, never()).encode(any());
     }
@@ -169,7 +170,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty(),
+                        NO_EXPECTED_UPDATE,
                         DOC_TYPE))
                 .thenReturn(issuerSigned);
         when(cborEncoder.encode(issuerSigned)).thenThrow(expectedException);
@@ -183,7 +184,7 @@ class MdocCredentialBuilderTest {
                                         mockEcPublicKey,
                                         STATUS_LIST_INFORMATION,
                                         CREDENTIAL_TTL_SECONDS,
-                                        Optional.empty()));
+                                        NO_EXPECTED_UPDATE));
 
         assertEquals(expectedException, actualException);
         verify(namespacesFactory).build(mockDrivingLicenceDocument);
@@ -193,7 +194,7 @@ class MdocCredentialBuilderTest {
                         mockEcPublicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
-                        Optional.empty(),
+                        NO_EXPECTED_UPDATE,
                         DOC_TYPE);
         verify(cborEncoder).encode(issuerSigned);
     }
