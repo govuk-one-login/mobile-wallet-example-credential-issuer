@@ -828,7 +828,7 @@ Resources:
           Expression: (error/invocations) * 100
 
   ECRIHeartbeatAlarm:
-    Condition: IsIntegration - to test in dev
+    Condition: IsIntegration
     Type: AWS::CloudWatch::Alarm  
     Properties:
       AlarmName: !Sub "${AWS::StackName}-ECRIHeartbeatAlarm"
