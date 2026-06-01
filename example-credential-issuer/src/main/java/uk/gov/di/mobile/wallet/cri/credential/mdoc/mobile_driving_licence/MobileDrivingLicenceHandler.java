@@ -34,6 +34,7 @@ public class MobileDrivingLicenceHandler implements CredentialHandler {
                 document,
                 proofData.publicKey(),
                 statusListInformation.orElseThrow(),
-                documentStoreRecord.getCredentialTtlSeconds());
+                documentStoreRecord.getCredentialTtlSeconds(),
+                documentStoreRecord.getExpectedUpdateSeconds());
     }
 }

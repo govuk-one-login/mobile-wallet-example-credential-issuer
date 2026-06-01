@@ -12,6 +12,7 @@ import uk.gov.di.mobile.wallet.cri.util.ArnUtil;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.ECPublicKey;
+import java.util.Optional;
 
 public class IssuerSignedFactory {
     private final MobileSecurityObjectFactory mobileSecurityObjectFactory;
@@ -38,6 +39,7 @@ public class IssuerSignedFactory {
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
             long credentialTtlSeconds,
+            Optional<Long> expectedUpdateSeconds,
             String docType)
             throws MdocException, SigningException, CertificateException, ObjectStoreException {
         MobileSecurityObject mobileSecurityObject =
@@ -46,6 +48,7 @@ public class IssuerSignedFactory {
                         publicKey,
                         statusListInformation,
                         credentialTtlSeconds,
+                        expectedUpdateSeconds,
                         docType);
         byte[] mobileSecurityObjectBytes = cborEncoder.encode(mobileSecurityObject);
 

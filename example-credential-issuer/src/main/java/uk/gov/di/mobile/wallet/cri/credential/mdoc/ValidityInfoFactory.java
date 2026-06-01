@@ -3,6 +3,7 @@ package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * Factory for creating {@link ValidityInfo} objects.
@@ -38,12 +39,17 @@ public class ValidityInfoFactory {
      * Both the signed and valid from timestamps are set to the current time.
      *
      * @param credentialTtlSeconds The time-to-live in seconds for the credential validity period.
+     * @param expectedUpdateSeconds Optional duration in seconds from now when the credential is
+     *     expected to be updated.
      * @return A {@link ValidityInfo} object with current time as signed/valid from and current time
      *     plus the specified duration as valid until.
      */
-    public ValidityInfo build(long credentialTtlSeconds) {
+    public ValidityInfo build(long credentialTtlSeconds, Optional<Long> expectedUpdateSeconds) {
         Instant currentTimestamp = clock.instant();
         Instant validUntil = currentTimestamp.plus(Duration.ofSeconds(credentialTtlSeconds));
-        return new ValidityInfo(currentTimestamp, currentTimestamp, validUntil);
+        Optional<Instant> expectedUpdate =
+                expectedUpdateSeconds.map(
+                        seconds -> currentTimestamp.plus(Duration.ofSeconds(seconds)));
+        return new ValidityInfo(currentTimestamp, currentTimestamp, validUntil, expectedUpdate);
     }
 }

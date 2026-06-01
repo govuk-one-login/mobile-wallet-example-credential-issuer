@@ -8,6 +8,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.security.cert.CertificateException;
 import java.security.interfaces.ECPublicKey;
 import java.util.Base64;
+import java.util.Optional;
 
 /**
  * Builds an {@link IssuerSigned} mDoc structure from the given document and returns it as
@@ -63,6 +64,32 @@ public class MdocCredentialBuilder<T> {
             StatusListClient.StatusListInformation statusListInformation,
             long credentialTtlSeconds)
             throws ObjectStoreException, SigningException, CertificateException {
+        return buildCredential(
+                document, publicKey, statusListInformation, credentialTtlSeconds, Optional.empty());
+    }
+
+    /**
+     * Creates an {@link IssuerSigned} structure with an optional expected update claim and returns
+     * it as Base64URL-encoded CBOR.
+     *
+     * @param document Typed credential document
+     * @param publicKey Device public key
+     * @param statusListInformation Status list information (URI and index)
+     * @param credentialTtlSeconds Credential validity period in seconds
+     * @param expectedUpdateSeconds Optional duration in seconds from now when the credential is
+     *     expected to be updated.
+     * @return Base64URL string of the CBOR-encoded {@link IssuerSigned}
+     * @throws ObjectStoreException When persistence interactions fail
+     * @throws SigningException When signing fails
+     * @throws CertificateException When certificate material cannot be processed
+     */
+    public String buildCredential(
+            T document,
+            ECPublicKey publicKey,
+            StatusListClient.StatusListInformation statusListInformation,
+            long credentialTtlSeconds,
+            Optional<Long> expectedUpdateSeconds)
+            throws ObjectStoreException, SigningException, CertificateException {
         Namespaces namespaces = namespacesFactory.build(document);
         IssuerSigned issuerSigned =
                 issuerSignedFactory.build(
@@ -70,6 +97,7 @@ public class MdocCredentialBuilder<T> {
                         publicKey,
                         statusListInformation,
                         credentialTtlSeconds,
+                        expectedUpdateSeconds,
                         docType);
         byte[] cborEncodedMobileDrivingLicence = cborEncoder.encode(issuerSigned);
         return Base64.getUrlEncoder()
