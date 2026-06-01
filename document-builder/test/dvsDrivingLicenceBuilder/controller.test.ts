@@ -107,6 +107,7 @@ describe("controller.ts", () => {
         timeToLive: 1748736000,
         vcType: "org.iso.18013.5.1.mDL",
         credentialTtlSeconds: 172800,
+        expectedUpdate: null,
         data: {
           document_number: "TEST1769688000000",
           family_name: "Test FirstName",

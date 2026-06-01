@@ -55,6 +55,7 @@ export async function ninoDocumentBuilderPostController(
       data,
       vcType: CREDENTIAL_TYPE,
       credentialTtlSeconds: Number(body.credentialTtl),
+      expectedUpdate: null,
       timeToLive: getTimeToLiveEpoch(getTableItemTtl()),
     });
 

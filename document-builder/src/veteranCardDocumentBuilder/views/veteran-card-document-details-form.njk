@@ -246,17 +246,15 @@
                     "text": "When should the credential be updated?",
                     "classes": "govuk-label--s"
                 },
+                "hint": {
+                    "text": "Enter the number of days before the credential expires"
+                },
                 "id": "updated-credential",
                 "name": "expectedUpdateDays",
                 "classes": "govuk-input--width-2",
                 "inputMode": "numeric",
                 "value": "",
-                "errorMessage": expectedUpdateError,
-                "formGroup": {
-                    "afterInput": {
-                        "html": "<span class=\"govuk-body\" style=\"margin-left: 10px; margin-bottom: 0;\">days before the credential expires</span>"
-                    }
-                }
+                "errorMessage": expectedUpdateError
             }) }}
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
             {% if showThrowError %}

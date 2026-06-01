@@ -10,5 +10,4 @@ export interface VeteranCardData {
   serviceNumber: string;
   serviceBranch: string;
   portrait: string;
-  expectedUpdate?: number;
 }

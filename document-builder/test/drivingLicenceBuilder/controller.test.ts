@@ -9,6 +9,7 @@ import { DrivingLicenceRequestBody } from "../../src/drivingLicenceBuilder/types
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
 import * as drivingLicenceFormValidator from "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator";
 import * as calculateCredentialTtlSeconds from "../../src/utils/calculateCredentialTtlSeconds";
+import { SECONDS_IN_A_DAY } from "../../src/config/credentialTtl";
 import * as photoUtils from "../../src/utils/photoUtils";
 
 jest.mock("node:crypto", () => ({
@@ -214,9 +215,9 @@ describe("controller.ts", () => {
 
     describe("given credentialTtl is 'other'", () => {
       it("should call calculateCredentialTtlSeconds with the expiry date fields", async () => {
-        const mockCalculate =
+        const mockCalculateTtlSeconds =
           calculateCredentialTtlSeconds.calculateCredentialTtlSeconds as jest.Mock;
-        mockCalculate.mockReturnValue(12345);
+        mockCalculateTtlSeconds.mockReturnValue(12345);
 
         const req = getMockReq({
           body: buildDrivingLicenceRequestBody({
@@ -230,7 +231,7 @@ describe("controller.ts", () => {
 
         await drivingLicenceBuilderPostController(config)(req, res);
 
-        expect(mockCalculate).toHaveBeenCalledWith("02", "05", "2026");
+        expect(mockCalculateTtlSeconds).toHaveBeenCalledWith("02", "05", "2026");
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({ credentialTtlSeconds: 12345 }),
@@ -256,6 +257,7 @@ describe("controller.ts", () => {
             vcType: "org.iso.18013.5.1.mDL",
             timeToLive: 1748736000,
             credentialTtlSeconds: 43200,
+            expectedUpdate: null,
             data: {
               family_name: "Edwards-Smith",
               given_name: "Sarah Elizabeth",
@@ -307,6 +309,7 @@ describe("controller.ts", () => {
             vcType: "org.iso.18013.5.1.mDL",
             timeToLive: 1748736000,
             credentialTtlSeconds: 43200,
+            expectedUpdate: null,
             data: {
               family_name: "Edwards-Smith",
               given_name: "Sarah Elizabeth",
@@ -402,7 +405,10 @@ describe("controller.ts", () => {
     });
 
     describe("expectedUpdate calculation", () => {
-      it("should include expectedUpdate in saved document data when expectedUpdateDays has a value", async () => {
+      const DEFAULT_CREDENTIAL_TTL_SECONDS = 43200; // 12 hours
+      const CUSTOM_CREDENTIAL_TTL_SECONDS = 2592000; // 30 days
+
+      it("should include expectedUpdate at record level when expectedUpdateDays has a value", async () => {
         const req = getMockReq({
           body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "5" }),
         });
@@ -413,17 +419,15 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            data: expect.objectContaining({
-              expectedUpdate: 43200 - 5 * 86400,
-            }),
+            expectedUpdate: DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
           }),
         );
       });
 
-      it("should calculate expectedUpdate using calculateCredentialTtlSeconds when credentialTtl is 'other'", async () => {
-        const mockCalculate =
+      it("should include expectedUpdate at record level when credentialTtl is 'other'", async () => {
+        const mockCalculateTtlSeconds =
           calculateCredentialTtlSeconds.calculateCredentialTtlSeconds as jest.Mock;
-        mockCalculate.mockReturnValue(2592000);
+        mockCalculateTtlSeconds.mockReturnValue(CUSTOM_CREDENTIAL_TTL_SECONDS);
 
         const req = getMockReq({
           body: buildDrivingLicenceRequestBody({
@@ -441,14 +445,12 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            data: expect.objectContaining({
-              expectedUpdate: 2592000 - 10 * 86400,
-            }),
+            expectedUpdate: CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
           }),
         );
       });
 
-      it("should not include expectedUpdate in saved document data when expectedUpdateDays is empty", async () => {
+      it("should not include expectedUpdate when expectedUpdateDays is empty", async () => {
         const req = getMockReq({
           body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "" }),
         });
@@ -459,14 +461,12 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            data: expect.not.objectContaining({
-              expectedUpdate: expect.anything(),
-            }),
+            expectedUpdate: null,
           }),
         );
       });
 
-      it("should not include expectedUpdate in saved document data when expectedUpdateDays is not provided", async () => {
+      it("should not include expectedUpdate when expectedUpdateDays is not provided", async () => {
         const req = getMockReq({
           body: requestBody,
         });
@@ -477,9 +477,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            data: expect.not.objectContaining({
-              expectedUpdate: expect.anything(),
-            }),
+            expectedUpdate: null,
           }),
         );
       });
