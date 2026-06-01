@@ -16,6 +16,7 @@ export interface ValidityInfo {
   signed: string;
   validFrom: string;
   validUntil: string;
+  expectedUpdate?: string;
 }
 
 export interface MobileSecurityObject {
@@ -41,5 +42,6 @@ export interface TaggedMobileSecurityObject extends Omit<
     signed: Tag;
     validFrom: Tag;
     validUntil: Tag;
+    expectedUpdate?: Tag;
   };
 }
