@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { formatDate, getDefaultDates, validateDateFields } from "../utils/date";
+import { formatDate, getDefaultDates } from "../utils/date";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { ERROR_CHOICES } from "../utils/errorChoices";
 import { logger } from "../middleware/logger";
@@ -20,6 +20,8 @@ import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
 import { getViewCredentialOfferRedirectUrl } from "../utils/getViewCredentialOfferRedirectUrl";
 import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
+import { validateSimpleDocumentForm } from "./helpers/SimpleDocumentFormValidator";
+import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.SimpleDocument;
 const FISH_TYPES = [
@@ -44,16 +46,14 @@ export function simpleDocumentBuilderGetController({
   return async function (req: Request, res: Response): Promise<void> {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-      const documentNumber = "FLN" + getRandomIntInclusive();
-      const showThrowError = environment !== "staging";
       res.render("simple-document-details-form.njk", {
         defaultIssueDate,
         defaultExpiryDate,
-        documentNumber,
+        documentNumber: "FLN" + getRandomIntInclusive(),
         fishTypeOptions: FISH_TYPE_UI_OPTIONS,
         authenticated: isAuthenticated(req),
         errorChoices: ERROR_CHOICES,
-        showThrowError,
+        showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
       logger.error(
@@ -72,30 +72,25 @@ export function simpleDocumentBuilderPostController({
     try {
       const body: SimpleDocumentRequestBody = req.body;
 
-      const errors = validateDateFields(body);
-      if (!FISH_TYPES.includes(body.type_of_fish)) {
-        errors.type_of_fish = "Select a valid type of fish";
-      }
-      if (Object.keys(errors).length > 0) {
+      const result = validateSimpleDocumentForm(body);
+      if (!result.isValid) {
         const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
-        const documentNumber = body.document_number;
-        const showThrowError = environment !== "staging";
         return res.render("simple-document-details-form.njk", {
           defaultIssueDate,
           defaultExpiryDate,
-          documentNumber,
+          documentNumber: body.document_number,
           fishTypeOptions: FISH_TYPE_UI_OPTIONS,
           authenticated: isAuthenticated(req),
           errorChoices: ERROR_CHOICES,
-          showThrowError,
-          errors,
+          showThrowError: environment !== ENVIRONMENTS.STAGE,
+          errors: result.errors,
         });
       }
 
-      const bucketName = getPhotosBucketName();
       const itemId = randomUUID();
-      const s3Uri = `s3://${bucketName}/${itemId}`;
 
+      const bucketName = getPhotosBucketName();
+      const s3Uri = `s3://${bucketName}/${itemId}`;
       const { photoBuffer, mimeType } = getPhoto(body.portrait);
       await uploadPhoto(photoBuffer, itemId, bucketName, mimeType);
 

@@ -1,7 +1,11 @@
 export default {
   setupFiles: ["reflect-metadata"],
+  moduleNameMapper: {
+    "^(\\.{1,2}/.*)\\.js$": "$1",
+  },
   transform: {
-    "^.+\\.(js)$": ["ts-jest"],
+    "^.+\\.tsx?$": ["ts-jest", {}],
+    "^.+\\.js$": ["ts-jest", { diagnostics: false }],
   },
   reporters: [
     "default",

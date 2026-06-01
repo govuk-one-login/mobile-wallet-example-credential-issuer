@@ -2,26 +2,36 @@ import {
   drivingLicenceBuilderGetController,
   drivingLicenceBuilderPostController,
 } from "../../src/drivingLicenceBuilder/controller";
-import { readFileSync } from "fs";
 import * as databaseService from "../../src/services/databaseService";
 import * as s3Service from "../../src/services/s3Service";
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import * as path from "path";
 import { DrivingLicenceRequestBody } from "../../src/drivingLicenceBuilder/types/DrivingLicenceRequestBody";
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
+import * as drivingLicenceFormValidator from "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator";
+import * as calculateCredentialTtlSeconds from "../../src/utils/calculateCredentialTtlSeconds";
+import * as photoUtils from "../../src/utils/photoUtils";
 
 jest.mock("node:crypto", () => ({
   randomUUID: jest.fn().mockReturnValue("2e0fac05-4b38-480f-9cbd-b046eabe1e46"),
 }));
-jest.mock("../../src/services/databaseService", () => ({
-  saveDocument: jest.fn(),
+jest.mock("../../src/utils/getRandomIntInclusive", () => ({
+  getRandomIntInclusive: jest.fn().mockReturnValue(550000),
+}));
+jest.mock(
+  "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator",
+  () => ({
+    validateDrivingLicenceForm: jest.fn(),
+  }),
+);
+jest.mock("../../src/utils/photoUtils", () => ({
+  getPhoto: jest.fn(),
 }));
 jest.mock("../../src/services/s3Service", () => ({
   uploadPhoto: jest.fn(),
 }));
-jest.mock("fs");
-jest.mock("../../src/utils/getRandomIntInclusive", () => ({
-  getRandomIntInclusive: jest.fn().mockReturnValue(550000),
+jest.mock("../../src/utils/calculateCredentialTtlSeconds");
+jest.mock("../../src/services/databaseService", () => ({
+  saveDocument: jest.fn(),
 }));
 
 const config = { environment: "staging" };
@@ -106,14 +116,56 @@ describe("controller.ts", () => {
   });
 
   describe("post", () => {
-    const requestBody = buildDrivingLicenceRequestBody();
-
     const photoBuffer = Buffer.from("mock photo data");
-    const mockReadFileSync = readFileSync as jest.Mock;
-    mockReadFileSync.mockReturnValue(photoBuffer);
-
+    const mockGetPhoto = photoUtils.getPhoto as jest.Mock;
+    mockGetPhoto.mockReturnValue({ photoBuffer, mimeType: "image/jpeg" });
     const saveDocument = databaseService.saveDocument as jest.Mock;
     const uploadPhoto = s3Service.uploadPhoto as jest.Mock;
+    const mockValidate =
+      drivingLicenceFormValidator.validateDrivingLicenceForm as jest.Mock;
+
+    beforeEach(() => {
+      mockValidate.mockReturnValue({ isValid: true, errors: {} });
+    });
+
+    const requestBody = buildDrivingLicenceRequestBody();
+
+    describe("given validation fails", () => {
+      it("should re-render the form with errors", async () => {
+        const validationErrors = { some_field: "some error" };
+        mockValidate.mockReturnValueOnce({
+          isValid: false,
+          errors: validationErrors,
+        });
+        const req = getMockReq({
+          body: requestBody,
+          cookies: { id_token: "id_token" },
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
+          errors: validationErrors,
+          authenticated: true,
+          credentialTtl: "43200",
+          defaultIssueDate: {
+            day: "02",
+            month: "05",
+            year: "2025",
+          },
+          defaultExpiryDate: {
+            day: "01",
+            month: "05",
+            year: "2035",
+          },
+          errorChoices: ERROR_CHOICES,
+          drivingLicenceNumber: "EDWAR550000SE5RO",
+          showThrowError: false,
+        });
+        expect(res.redirect).not.toHaveBeenCalled();
+      });
+    });
 
     describe("given an error happens trying to process the request", () => {
       it("should render the error page", async () => {
@@ -145,14 +197,11 @@ describe("controller.ts", () => {
           });
           const { res } = getMockRes();
 
+          mockGetPhoto.mockReturnValue({ photoBuffer, mimeType });
+
           await drivingLicenceBuilderPostController(config)(req, res);
 
-          const expectedPath = path.resolve(
-            process.cwd(),
-            "dist/resources",
-            fileName,
-          );
-          expect(mockReadFileSync).toHaveBeenCalledWith(expectedPath);
+          expect(mockGetPhoto).toHaveBeenCalledWith(fileName);
           expect(uploadPhoto).toHaveBeenCalledWith(
             photoBuffer,
             "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -162,6 +211,32 @@ describe("controller.ts", () => {
         });
       },
     );
+
+    describe("given credentialTtl is 'other'", () => {
+      it("should call calculateCredentialTtlSeconds with the expiry date fields", async () => {
+        const mockCalculate =
+          calculateCredentialTtlSeconds.calculateCredentialTtlSeconds as jest.Mock;
+        mockCalculate.mockReturnValue(12345);
+
+        const req = getMockReq({
+          body: buildDrivingLicenceRequestBody({
+            credentialTtl: "other",
+            "credentialExpiry-day": "02",
+            "credentialExpiry-month": "05",
+            "credentialExpiry-year": "2026",
+          }),
+        });
+        const { res } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res);
+
+        expect(mockCalculate).toHaveBeenCalledWith("02", "05", "2026");
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({ credentialTtlSeconds: 12345 }),
+        );
+      });
+    });
 
     describe("given the photo has been stored successfully", () => {
       describe("when there are no provisional driving privileges", () => {
@@ -325,43 +400,6 @@ describe("controller.ts", () => {
         );
       });
     });
-
-    describe("given invalid date fields", () => {
-      it("should render an error when the birthdate has empty fields", async () => {
-        const body = buildDrivingLicenceRequestBody({
-          "birth-day": "29",
-          "birth-month": "02",
-          "birth-year": "2019",
-        });
-        const req = getMockReq({
-          body,
-          cookies: { id_token: "id_token" },
-        });
-        const { res } = getMockRes();
-
-        await drivingLicenceBuilderPostController(config)(req, res);
-        expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
-          errors: expect.objectContaining({
-            birth_date: "Enter a valid birth date",
-          }),
-          authenticated: true,
-          defaultIssueDate: {
-            day: "02",
-            month: "05",
-            year: "2025",
-          },
-          defaultExpiryDate: {
-            day: "01",
-            month: "05",
-            year: "2035",
-          },
-          errorChoices: ERROR_CHOICES,
-          drivingLicenceNumber: "EDWAR550000SE5RO",
-          showThrowError: false,
-        });
-        expect(res.redirect).not.toHaveBeenCalled();
-      });
-    });
   });
 });
 
@@ -407,6 +445,9 @@ export function buildDrivingLicenceRequestBody(
     "provisionalPrivilegeExpiry-month": "03",
     "provisionalPrivilegeExpiry-year": "2033",
     credentialTtl: "43200",
+    "credentialExpiry-day": "",
+    "credentialExpiry-month": "",
+    "credentialExpiry-year": "",
   };
   return { ...defaults, ...overrides };
 }

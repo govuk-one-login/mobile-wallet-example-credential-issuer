@@ -1,50 +1,45 @@
-import { DrivingLicenceRequestBody } from "../../drivingLicenceBuilder/types/DrivingLicenceRequestBody";
-import { SimpleDocumentRequestBody } from "../../simpleDocumentBuilder/types/SimpleDocumentRequestBody";
-
-/**
- * Validates the date fields in a request body and returns error messages for any invalid dates.
- *
- * This function checks three date fields: birth date, issue date, and expiry date.
- * For each date, it uses the `isValidDate` function to determine if the provided day, month, and year
- * values form a valid calendar date. If a date is invalid, an error message is added to the returned object
- * under a corresponding key.
- *
- * @param {MdlRequestBody | SimpleDocumentRequestBody} body The request body object containing date fields as strings.
- * @returns {Record<string, string>} An object mapping field names to error messages for any invalid dates.
- * If all dates are valid, the returned object will be empty.
- *
- * @example
- * const body = {
- *   "birth-day": "31", "birth-month": "2", "birth-year": "2023",
- *   "issue-day": "15", "issue-month": "4", "issue-year": "2022",
- *   "expiry-day": "30", "expiry-month": "6", "expiry-year": "2030"
- * };
- * validateDateFields(body); // { birth_date: "Enter a valid birth date" }
- */
-export function validateDateFields(
-  body: DrivingLicenceRequestBody | SimpleDocumentRequestBody,
+export function validateBirthDate(
+  day: string,
+  month: string,
+  year: string,
 ): Record<string, string> {
-  const errors: Record<string, string> = {};
-
-  if (
-    !isValidDate(body["birth-day"], body["birth-month"], body["birth-year"])
-  ) {
-    errors["birth_date"] = "Enter a valid birth date";
+  if (!isValidDate(day, month, year)) {
+    return { birth_date: "Enter a valid birth date" };
   }
+  return {};
+}
 
-  if (
-    !isValidDate(body["issue-day"], body["issue-month"], body["issue-year"])
-  ) {
-    errors["issue_date"] = "Enter a valid issue date";
+export function validateIssueDate(
+  day: string,
+  month: string,
+  year: string,
+): Record<string, string> {
+  if (!isValidDate(day, month, year)) {
+    return { issue_date: "Enter a valid issue date" };
   }
+  return {};
+}
 
-  if (
-    !isValidDate(body["expiry-day"], body["expiry-month"], body["expiry-year"])
-  ) {
-    errors["expiry_date"] = "Enter a valid expiry date";
+export function validateExpiryDate(
+  day: string,
+  month: string,
+  year: string,
+): Record<string, string> {
+  if (!isValidDate(day, month, year)) {
+    return { expiry_date: "Enter a valid expiry date" };
   }
+  return {};
+}
 
-  return errors;
+export function validateCredentialExpiryDate(
+  day: string,
+  month: string,
+  year: string,
+): Record<string, string> {
+  if (!isValidDate(day, month, year)) {
+    return { credential_expiry_date: "Enter a valid credential expiry date" };
+  }
+  return {};
 }
 
 /**

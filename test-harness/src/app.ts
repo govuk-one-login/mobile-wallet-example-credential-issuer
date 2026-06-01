@@ -1,6 +1,6 @@
 import express, { Application } from "express";
-import { initialiseKeyPair } from "./initialiseKeyPair";
-import { buildJwksResponse } from "./buildJwksResponse";
+import { initialiseKeyPair } from "./initialiseKeyPair.js";
+import { buildJwksResponse } from "./buildJwksResponse.js";
 
 const JWKS_ROUTE = "/.well-known/jwks.json";
 

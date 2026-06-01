@@ -22,7 +22,7 @@ router.post(
   guardRouteByEnvironment(),
   requiresAuth,
   requiresAppSelected,
-  veteranCardDocumentBuilderPostController,
+  veteranCardDocumentBuilderPostController(),
 );
 
 export { router as veteranCardDocumentBuilderRouter };

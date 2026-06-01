@@ -36,5 +36,8 @@ export interface DrivingLicenceRequestBody {
   "provisionalPrivilegeExpiry-month"?: string | string[];
   "provisionalPrivilegeExpiry-year"?: string | string[];
   credentialTtl: string;
+  "credentialExpiry-day": string;
+  "credentialExpiry-month": string;
+  "credentialExpiry-year": string;
   throwError: string;
 }
