@@ -1158,6 +1158,45 @@ h6XK6xERRLkY5jjINTt8TkU=
           );
         }
       });
+
+      it("should throw MDLValidationError when 'expectedUpdate' is after 'validUntil'", async () => {
+        const credential = new TestMDLBuilder()
+          .withValidityInfo({
+            expectedUpdate: new Tag(0, "2027-01-01T00:00:00Z"),
+            validUntil: new Tag(0, "2026-09-10T15:20:00Z"),
+          })
+          .build();
+
+        expect.assertions(2);
+        try {
+          await isValidCredential(credential, rootCertificate);
+        } catch (error) {
+          expect(error).toBeInstanceOf(MDLValidationError);
+          expect((error as Error).message).toBe(
+            "One or more dates are invalid - 'expectedUpdate' (2027-01-01T00:00:00Z) must be less than or equal to 'validUntil' (2026-09-10T15:20:00Z)",
+          );
+        }
+      });
+
+      it("should not throw when 'expectedUpdate' is before 'validUntil'", async () => {
+        const credential = new TestMDLBuilder()
+          .withValidityInfo({
+            expectedUpdate: new Tag(0, "2026-01-01T00:00:00Z"),
+          })
+          .build();
+
+        expect(await isValidCredential(credential, rootCertificate)).toBe(true);
+      });
+
+      it("should not throw when 'expectedUpdate' equals 'validUntil'", async () => {
+        const credential = new TestMDLBuilder()
+          .withValidityInfo({
+            expectedUpdate: new Tag(0, "2026-09-10T15:20:00Z"),
+          })
+          .build();
+
+        expect(await isValidCredential(credential, rootCertificate)).toBe(true);
+      });
     });
   });
 

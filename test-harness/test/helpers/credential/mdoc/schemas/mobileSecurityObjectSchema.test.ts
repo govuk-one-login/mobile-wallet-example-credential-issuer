@@ -52,6 +52,43 @@ describe("mobileSecurityObjectSchema", () => {
 
     expect(isValid).toBe(true);
   });
+
+  describe("validityInfo.expectedUpdate", () => {
+    it("should return true when expectedUpdate is a valid date-time", () => {
+      const data = {
+        ...defaultData,
+        validityInfo: {
+          ...defaultData.validityInfo,
+          expectedUpdate: "2024-06-01T00:00:00Z",
+        },
+      };
+
+      expect(validate(data)).toBe(true);
+    });
+
+    it("should return false when expectedUpdate is not a valid date-time", () => {
+      const data = {
+        ...defaultData,
+        validityInfo: {
+          ...defaultData.validityInfo,
+          expectedUpdate: "not-a-date",
+        },
+      };
+
+      expect(validate(data)).toBe(false);
+      expect(validate.errors).toContainEqual(
+        expect.objectContaining({
+          instancePath: "/validityInfo/expectedUpdate",
+          keyword: "format",
+          params: { format: "date-time" },
+        }),
+      );
+    });
+
+    it("should return true when expectedUpdate is absent", () => {
+      expect(validate(defaultData)).toBe(true);
+    });
+  });
 });
 
 const defaultData: MobileSecurityObject = {
