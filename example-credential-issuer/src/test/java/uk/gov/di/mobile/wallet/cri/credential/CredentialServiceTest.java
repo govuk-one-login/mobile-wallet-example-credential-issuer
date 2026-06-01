@@ -439,11 +439,12 @@ class CredentialServiceTest {
 
     public static DocumentStoreRecord getMockSocialSecurityDocument() {
         HashMap<String, Object> data = new HashMap<>();
-        return new DocumentStoreRecord(ITEM_ID, NINO, data, "SocialSecurityCredential", 43200L);
+        return new DocumentStoreRecord(
+                ITEM_ID, NINO, data, "SocialSecurityCredential", 43200L, null);
     }
 
     public static DocumentStoreRecord getMockMobileDrivingLicenceDocument() {
         HashMap<String, Object> data = new HashMap<>();
-        return new DocumentStoreRecord(ITEM_ID, DOCUMENT_NUMBER, data, MDL_VC_TYPE, 43200L);
+        return new DocumentStoreRecord(ITEM_ID, DOCUMENT_NUMBER, data, MDL_VC_TYPE, 43200L, null);
     }
 }
