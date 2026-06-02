@@ -86,7 +86,7 @@
           name: Document Builder - Infrastructure static analysis
           language: system
           entry: bash -c 'cd document-builder && npm run checkov'
-          files: ^document-builder/template.yaml
+          files: ^document-builder/deploy/template.yaml
           stages: [pre-commit]
 
     - repo: local
