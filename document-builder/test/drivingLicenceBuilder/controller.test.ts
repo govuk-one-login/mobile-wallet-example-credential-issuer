@@ -9,7 +9,6 @@ import { DrivingLicenceRequestBody } from "../../src/drivingLicenceBuilder/types
 import { ERROR_CHOICES } from "../../src/utils/errorChoices";
 import * as drivingLicenceFormValidator from "../../src/drivingLicenceBuilder/helpers/DrivingLicenceFormValidator";
 import * as calculateCredentialTtlSeconds from "../../src/utils/calculateCredentialTtlSeconds";
-import { SECONDS_IN_A_DAY } from "../../src/config/credentialTtl";
 import * as photoUtils from "../../src/utils/photoUtils";
 
 jest.mock("node:crypto", () => ({
@@ -406,11 +405,12 @@ describe("controller.ts", () => {
 
     describe("expectedUpdate calculation", () => {
       const DEFAULT_CREDENTIAL_TTL_SECONDS = 43200; // 12 hours
+      const SECONDS_IN_A_DAY = 86400;
       const CUSTOM_CREDENTIAL_TTL_SECONDS = 2592000; // 30 days
 
-      it("should include expectedUpdate at record level when expectedUpdateDays has a value", async () => {
+      it("should include expectedUpdate at record level when expectedUpdateSeconds has a value", async () => {
         const req = getMockReq({
-          body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "5" }),
+          body: buildDrivingLicenceRequestBody({ expectedUpdateSeconds: "5" }),
         });
         const { res } = getMockRes();
 
@@ -435,7 +435,7 @@ describe("controller.ts", () => {
             "credentialExpiry-day": "02",
             "credentialExpiry-month": "05",
             "credentialExpiry-year": "2026",
-            expectedUpdateDays: "10",
+            expectedUpdateSeconds: "10",
           }),
         });
         const { res } = getMockRes();
@@ -450,9 +450,9 @@ describe("controller.ts", () => {
         );
       });
 
-      it("should not include expectedUpdate when expectedUpdateDays is empty", async () => {
+      it("should not include expectedUpdate when expectedUpdateSeconds is empty", async () => {
         const req = getMockReq({
-          body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "" }),
+          body: buildDrivingLicenceRequestBody({ expectedUpdateSeconds: "" }),
         });
         const { res } = getMockRes();
 
@@ -466,7 +466,7 @@ describe("controller.ts", () => {
         );
       });
 
-      it("should not include expectedUpdate when expectedUpdateDays is not provided", async () => {
+      it("should not include expectedUpdate when expectedUpdateSeconds is not provided", async () => {
         const req = getMockReq({
           body: requestBody,
         });

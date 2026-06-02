@@ -56,10 +56,10 @@ describe("validateVeteranCardForm", () => {
     });
   });
 
-  it("should return an error when expectedUpdateDays is not a number", () => {
+  it("should return an error when expectedUpdateSeconds is not a number", () => {
     const result = validateVeteranCardForm({
       ...validBody,
-      expectedUpdateDays: "abc",
+      expectedUpdateSeconds: "abc",
     });
 
     expect(result.isValid).toBe(false);
@@ -68,27 +68,27 @@ describe("validateVeteranCardForm", () => {
     });
   });
 
-  it("should return valid when expectedUpdateDays is a valid number", () => {
+  it("should return valid when expectedUpdateSeconds is a valid number", () => {
     const result = validateVeteranCardForm({
       ...validBody,
-      expectedUpdateDays: "10",
+      expectedUpdateSeconds: "10",
     });
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
-  it("should return valid when expectedUpdateDays is empty", () => {
+  it("should return valid when expectedUpdateSeconds is empty", () => {
     const result = validateVeteranCardForm({
       ...validBody,
-      expectedUpdateDays: "",
+      expectedUpdateSeconds: "",
     });
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
-  it("should return valid when expectedUpdateDays is undefined", () => {
+  it("should return valid when expectedUpdateSeconds is undefined", () => {
     const result = validateVeteranCardForm(validBody);
 
     expect(result.isValid).toBe(true);

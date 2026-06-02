@@ -17,7 +17,7 @@ export function validateVeteranCardForm(
     Object.assign(errors, expiryErrors);
   }
 
-  if (body.expectedUpdateDays && Number.isNaN(Number(body.expectedUpdateDays))) {
+  if (body.expectedUpdateSeconds && Number.isNaN(Number(body.expectedUpdateSeconds))) {
     errors.expected_update = "Enter a number";
   }
 

@@ -97,8 +97,8 @@ export function drivingLicenceBuilderPostController({
               body["credentialExpiry-year"],
             )
           : Number(body.credentialTtl);
-      const expectedUpdate = body.expectedUpdateDays
-        ? credentialTtlSeconds - Number(body.expectedUpdateDays) * SECONDS_IN_A_DAY
+      const expectedUpdate = body.expectedUpdateSeconds
+        ? credentialTtlSeconds - Number(body.expectedUpdateSeconds) * SECONDS_IN_A_DAY
         : null;
       await saveDocument(getDocumentsTableName(), {
         itemId,

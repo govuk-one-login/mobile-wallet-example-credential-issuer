@@ -123,10 +123,10 @@ describe("validateDrivingLicenceForm", () => {
     });
   });
 
-  it("should return an error when expectedUpdateDays is not a number", () => {
+  it("should return an error when expectedUpdateSeconds is not a number", () => {
     const result = validateDrivingLicenceForm({
       ...validBody,
-      expectedUpdateDays: "abc",
+      expectedUpdateSeconds: "abc",
     });
 
     expect(result.isValid).toBe(false);
@@ -135,27 +135,27 @@ describe("validateDrivingLicenceForm", () => {
     });
   });
 
-  it("should return valid when expectedUpdateDays is a valid number", () => {
+  it("should return valid when expectedUpdateSeconds is a valid number", () => {
     const result = validateDrivingLicenceForm({
       ...validBody,
-      expectedUpdateDays: "10",
+      expectedUpdateSeconds: "10",
     });
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
-  it("should return valid when expectedUpdateDays is empty", () => {
+  it("should return valid when expectedUpdateSeconds is empty", () => {
     const result = validateDrivingLicenceForm({
       ...validBody,
-      expectedUpdateDays: "",
+      expectedUpdateSeconds: "",
     });
 
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
 
-  it("should return valid when expectedUpdateDays is undefined", () => {
+  it("should return valid when expectedUpdateSeconds is undefined", () => {
     const result = validateDrivingLicenceForm(validBody);
 
     expect(result.isValid).toBe(true);
