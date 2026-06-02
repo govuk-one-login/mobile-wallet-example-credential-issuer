@@ -21,8 +21,6 @@ import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import javax.management.InvalidAttributeValueException;
 
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 
 /** Service for validating and extracting data from access tokens. */
@@ -139,14 +137,13 @@ public class AccessTokenService {
                             .issuer(expectedIssuer)
                             .audience(expectedAudience)
                             .build();
-            HashSet<String> requiredClaims =
-                    new HashSet<>(
-                            Arrays.asList(
-                                    CLAIM_SUBJECT,
-                                    CLAIM_C_NONCE,
-                                    CLAIM_CREDENTIAL_IDENTIFIERS,
-                                    CLAIM_EXPIRATION_TIME,
-                                    CLAIM_JWT_ID));
+            Set<String> requiredClaims =
+                    Set.of(
+                            CLAIM_SUBJECT,
+                            CLAIM_C_NONCE,
+                            CLAIM_CREDENTIAL_IDENTIFIERS,
+                            CLAIM_EXPIRATION_TIME,
+                            CLAIM_JWT_ID);
             JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
             DefaultJWTClaimsVerifier<?> verifier =
                     new DefaultJWTClaimsVerifier<>(expectedClaimValues, requiredClaims);
