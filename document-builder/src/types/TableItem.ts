@@ -17,5 +17,6 @@ export interface TableItem {
     | SimpleDocumentData;
   vcType: CredentialType;
   credentialTtlSeconds: number;
+  expectedUpdateSeconds: number | null;
   timeToLive: number;
 }

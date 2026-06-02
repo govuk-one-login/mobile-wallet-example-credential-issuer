@@ -122,4 +122,43 @@ describe("validateDrivingLicenceForm", () => {
       expiry_date: "Enter a valid expiry date",
     });
   });
+
+  it("should return an error when expectedUpdateSeconds is not a number", () => {
+    const result = validateDrivingLicenceForm({
+      ...validBody,
+      expectedUpdateDays: "abc",
+    });
+
+    expect(result.isValid).toBe(false);
+    expect(result.errors).toEqual({
+      expected_update: "Enter a number",
+    });
+  });
+
+  it("should return valid when expectedUpdateSeconds is a valid number", () => {
+    const result = validateDrivingLicenceForm({
+      ...validBody,
+      expectedUpdateDays: "10",
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toEqual({});
+  });
+
+  it("should return valid when expectedUpdateSeconds is empty", () => {
+    const result = validateDrivingLicenceForm({
+      ...validBody,
+      expectedUpdateDays: "",
+    });
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toEqual({});
+  });
+
+  it("should return valid when expectedUpdateSeconds is undefined", () => {
+    const result = validateDrivingLicenceForm(validBody);
+
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toEqual({});
+  });
 });

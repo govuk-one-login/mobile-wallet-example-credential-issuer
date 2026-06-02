@@ -186,9 +186,9 @@ describe("controller.ts", () => {
 
     describe("given credentialTtl is 'other'", () => {
       it("should call calculateCredentialTtlSeconds with the expiry date fields", async () => {
-        const mockCalculate =
+        const mockCalculateTtlSeconds =
           calculateCredentialTtlSeconds.calculateCredentialTtlSeconds as jest.Mock;
-        mockCalculate.mockReturnValue(12345);
+        mockCalculateTtlSeconds.mockReturnValue(12345);
 
         const req = getMockReq({
           body: {
@@ -203,7 +203,7 @@ describe("controller.ts", () => {
 
         await veteranCardDocumentBuilderPostController(config)(req, res);
 
-        expect(mockCalculate).toHaveBeenCalledWith("02", "05", "2026");
+        expect(mockCalculateTtlSeconds).toHaveBeenCalledWith("02", "05", "2026");
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({ credentialTtlSeconds: 12345 }),
@@ -224,6 +224,7 @@ describe("controller.ts", () => {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
           documentId: "25057386",
           credentialTtlSeconds: 43200,
+          expectedUpdateSeconds: null,
           data: {
             givenName: "Sarah Elizabeth",
             familyName: "Edwards-Smith",
@@ -288,6 +289,87 @@ describe("controller.ts", () => {
               `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard&error=${selectedError}`,
             );
           },
+        );
+      });
+    });
+
+    describe("expectedUpdate calculation", () => {
+      const DEFAULT_CREDENTIAL_TTL_SECONDS = 43200; // 12 hours
+      const SECONDS_IN_A_DAY = 86400;
+      const CUSTOM_CREDENTIAL_TTL_SECONDS = 2592000; // 30 days
+
+      it("should include expectedUpdate at record level when expectedUpdateSeconds has a value", async () => {
+        const req = getMockReq({
+          body: { ...requestBody, expectedUpdateDays: "5" },
+        });
+        const { res } = getMockRes();
+
+        await veteranCardDocumentBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            expectedUpdateSeconds: DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
+          }),
+        );
+      });
+
+      it("should include expectedUpdate at record level when credentialTtl is 'other'", async () => {
+        const mockCalculateTtlSeconds =
+          calculateCredentialTtlSeconds.calculateCredentialTtlSeconds as jest.Mock;
+        mockCalculateTtlSeconds.mockReturnValue(CUSTOM_CREDENTIAL_TTL_SECONDS);
+
+        const req = getMockReq({
+          body: {
+            ...requestBody,
+            credentialTtl: "other",
+            "credentialExpiry-day": "02",
+            "credentialExpiry-month": "05",
+            "credentialExpiry-year": "2026",
+            expectedUpdateDays: "10",
+          },
+        });
+        const { res } = getMockRes();
+
+        await veteranCardDocumentBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            expectedUpdateSeconds: CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
+          }),
+        );
+      });
+
+      it("should not include expectedUpdate when expectedUpdateSeconds is empty", async () => {
+        const req = getMockReq({
+          body: { ...requestBody, expectedUpdateDays: "" },
+        });
+        const { res } = getMockRes();
+
+        await veteranCardDocumentBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            expectedUpdateSeconds: null,
+          }),
+        );
+      });
+
+      it("should not include expectedUpdate when expectedUpdateSeconds is not provided", async () => {
+        const req = getMockReq({
+          body: requestBody,
+        });
+        const { res } = getMockRes();
+
+        await veteranCardDocumentBuilderPostController(config)(req, res);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            expectedUpdateSeconds: null,
+          }),
         );
       });
     });

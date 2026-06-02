@@ -20,7 +20,7 @@ import { getPhoto } from "../utils/photoUtils";
 import { uploadPhoto } from "../services/s3Service";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { validateVeteranCardForm } from "./helpers/VeteranCardFormValidator";
-import { CUSTOM_CREDENTIAL_TTL } from "../config/credentialTtl";
+import { CUSTOM_CREDENTIAL_TTL, SECONDS_IN_A_DAY } from "../config/credentialTtl";
 import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.DigitalVeteranCard;
@@ -83,12 +83,16 @@ export function veteranCardDocumentBuilderPostController({
               body["credentialExpiry-year"],
             )
           : Number(body.credentialTtl);
+      const expectedUpdateSeconds = body.expectedUpdateDays
+        ? credentialTtlSeconds - Number(body.expectedUpdateDays) * SECONDS_IN_A_DAY
+        : null;
       await saveDocument(getDocumentsTableName(), {
         itemId,
         documentId: data.serviceNumber,
         data,
         vcType: CREDENTIAL_TYPE,
-        credentialTtlSeconds: credentialTtlSeconds,
+        credentialTtlSeconds,
+        expectedUpdateSeconds,
         timeToLive: getTimeToLiveEpoch(getTableItemTtl()),
       });
 
@@ -115,6 +119,10 @@ function buildVeteranCardDataFromRequestBody(
   const {
     throwError: _throwError,
     credentialTtl: _credentialTtl,
+    expectedUpdateDays: _expectedUpdateDays,
+    "credentialExpiry-day": _credentialExpiryDay,
+    "credentialExpiry-month": _credentialExpiryMonth,
+    "credentialExpiry-year": _credentialExpiryYear,
     ...newObject
   } = body;
 
