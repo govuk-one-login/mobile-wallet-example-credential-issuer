@@ -52,7 +52,8 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     /**
-     * Builds a signed credential without an expected update claim.
+     * Builds a signed credential without an expected update claim. Used by credential types that do
+     * not support the expectedUpdate concept (e.g. BasicCheckCredential, SocialSecurityCredential).
      *
      * @param credentialSubject The credential subject containing claims to include.
      * @param credentialType The type of credential being issued.
@@ -68,13 +69,14 @@ public class CredentialBuilder<T extends CredentialSubject> {
     }
 
     /**
-     * Builds a signed credential with an optional expected update claim.
+     * Builds a signed credential with an optional expected update claim. Used by credential types
+     * that support expectedUpdate (e.g. DigitalVeteranCard).
      *
      * @param credentialSubject The credential subject containing claims to include.
      * @param credentialType The type of credential being issued.
      * @param credentialTtlSeconds The credential validity period in seconds.
-     * @param expectedUpdateSeconds Optional duration in seconds from now when the credential is
-     *     expected to be updated. When present, an {@code expectedUpdate} claim is added to the
+     * @param expectedUpdateSeconds Optional duration in seconds from issuance when the credential
+     *     is expected to be updated. When present, an {@code expectedUpdate} claim is added to the
      *     payload.
      * @return The signed credential as a compact JWS string.
      * @throws SigningException If signing fails.
