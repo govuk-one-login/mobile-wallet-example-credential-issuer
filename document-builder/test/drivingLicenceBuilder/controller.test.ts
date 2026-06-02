@@ -410,7 +410,7 @@ describe("controller.ts", () => {
 
       it("should include expectedUpdate at record level when expectedUpdateSeconds has a value", async () => {
         const req = getMockReq({
-          body: buildDrivingLicenceRequestBody({ expectedUpdateSeconds: "5" }),
+          body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "5" }),
         });
         const { res } = getMockRes();
 
@@ -435,7 +435,7 @@ describe("controller.ts", () => {
             "credentialExpiry-day": "02",
             "credentialExpiry-month": "05",
             "credentialExpiry-year": "2026",
-            expectedUpdateSeconds: "10",
+            expectedUpdateDays: "10",
           }),
         });
         const { res } = getMockRes();
@@ -452,7 +452,7 @@ describe("controller.ts", () => {
 
       it("should not include expectedUpdate when expectedUpdateSeconds is empty", async () => {
         const req = getMockReq({
-          body: buildDrivingLicenceRequestBody({ expectedUpdateSeconds: "" }),
+          body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "" }),
         });
         const { res } = getMockRes();
 
