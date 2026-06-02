@@ -46,6 +46,8 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
+  IsIntegration: !Equals [!Ref Environment, integration]
+
   UsePermissionsBoundary:
     Fn::Not:
       - Fn::Equals:
@@ -824,6 +826,29 @@ Resources:
           Label: errorPercentage
           ReturnData: false
           Expression: (error/invocations) * 100
+
+  ECRIHeartbeatAlarm:
+    Condition: IsIntegration
+    Type: AWS::CloudWatch::Alarm  
+    Properties:
+      AlarmName: !Sub "${AWS::StackName}-ECRIHeartbeatAlarm"
+      AlarmDescription: "ExampleCRI-Heartbeat Synthetic-Canary Alarm: Failed  GreaterThanOrEqualToThreshold 1"
+      MetricName: Failed  
+      Namespace: CloudWatchSynthetics  
+      Dimensions:  
+        - Name: CanaryName  
+          Value: example_cri_heartbeat  
+      Period: 10800  # 3 hours in seconds, as the canary runs every 3 hours
+      EvaluationPeriods: 1  
+      Statistic: Maximum  
+      ComparisonOperator: GreaterThanOrEqualToThreshold  
+      Threshold: 1.0  
+      TreatMissingData: notBreaching  
+      ActionsEnabled: true
+      AlarmActions:
+        - !ImportValue alarm-sns-topic-warning
+      OKActions:
+        - !ImportValue alarm-sns-topic-warning
 
 Outputs:
   CredIssuerFriendlyUrl:
