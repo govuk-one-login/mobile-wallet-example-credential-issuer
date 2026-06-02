@@ -54,8 +54,7 @@ class AccessTokenServiceTest {
                     }
                 };
         when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
-        when(configurationService.getOneLoginAuthServerUrls())
-                .thenReturn(List.of("https://auth-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
     }
 
     @Test
@@ -124,7 +123,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
-                "JWT missing required claims: [aud, c_nonce, credential_identifiers, exp, jti, sub]",
+                "JWT missing required claims: [aud, c_nonce, credential_identifiers, exp, iss, jti, sub]",
                 exception.getMessage());
     }
 
@@ -179,9 +178,7 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals(
-                "Access token issuer not in expected issuers: invalid-issuer",
-                exception.getMessage());
+        assertEquals("JWT iss claim value rejected", exception.getMessage());
     }
 
     @Test
