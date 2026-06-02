@@ -828,7 +828,7 @@ Resources:
           Expression: (error/invocations) * 100
 
   ECRIHeartbeatAlarm:
-    #Condition: IsIntegration
+    Condition: IsIntegration
     Type: AWS::CloudWatch::Alarm  
     Properties:
       AlarmName: !Sub "${AWS::StackName}-ECRIHeartbeatAlarm"
@@ -838,7 +838,7 @@ Resources:
       Dimensions:  
         - Name: CanaryName  
           Value: example_cri_heartbeat  
-      Period: 10800  # max evaluation period: 1 hour. The canary runs every 3 hours.
+      Period: 10800  # 3 hours in seconds
       EvaluationPeriods: 1  
       Statistic: Maximum  
       ComparisonOperator: GreaterThanOrEqualToThreshold  
