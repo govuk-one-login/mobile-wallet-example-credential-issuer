@@ -17,12 +17,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
-import uk.gov.di.mobile.wallet.cri.credential.proof.did_key.AddressFormatException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
-import java.net.MalformedURLException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -58,14 +56,11 @@ class JwksServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(configurationService.getOneLoginAuthServerUrl())
-                .thenReturn("https://test-authorization-server.gov.uk");
         when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key");
     }
 
     @Test
-    void should_Return_Jwk_When_Found()
-            throws AddressFormatException, KeySourceException, ParseException {
+    void should_Return_Jwk_When_Found() throws KeySourceException, ParseException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         JWK publicKey =
                 JWK.parse(
@@ -80,8 +75,7 @@ class JwksServiceTest {
 
     @Test
     @DisplayName("Should Throw KeySource Exception When Jwk not found")
-    void should_ThrowException_When_Jwk_Not_Found()
-            throws AddressFormatException, KeySourceException {
+    void should_ThrowException_When_Jwk_Not_Found() throws KeySourceException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         final List<JWK> jwkList = Collections.emptyList();
         when(jwkSource.get(any(JWKSelector.class), isNull())).thenReturn(jwkList);
@@ -97,18 +91,30 @@ class JwksServiceTest {
     }
 
     @Test
-    void should_Test_Additional_Class_Constructor()
-            throws AddressFormatException, MalformedURLException {
+    void should_Construct_JwksService_Without_Throwing() {
         jwksService = new JwksService(configurationService, kmsService);
 
         assertThat(jwksService, instanceOf(JwksService.class));
     }
 
     @Test
+    @DisplayName("Should throw KeySourceException when JWKS URL is malformed")
+    void should_ThrowException_When_JwksUrlIsMalformed() {
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("not a valid url");
+        when(configurationService.getJwksEndpoint()).thenReturn("/.well-known/jwks.json");
+        jwksService = new JwksService(configurationService, kmsService);
+
+        KeySourceException exception =
+                assertThrows(
+                        KeySourceException.class,
+                        () -> jwksService.retrieveJwkFromURLWithKeyId(TEST_KEY_ID));
+
+        assertEquals("Failed to build JWKS URL", exception.getMessage());
+    }
+
+    @Test
     void should_Return_PublicKey_As_Jwks()
-            throws AddressFormatException,
-                    MalformedURLException,
-                    InvalidAlgorithmParameterException,
+            throws InvalidAlgorithmParameterException,
                     NoSuchAlgorithmException,
                     PEMException,
                     KeyNotActiveException {

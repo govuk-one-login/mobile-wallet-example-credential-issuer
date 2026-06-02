@@ -18,25 +18,13 @@ import java.security.NoSuchAlgorithmException;
 
 public class JwksService {
 
-    private final JWKSource<SecurityContext> jwkSource;
+    private JWKSource<SecurityContext> jwkSource;
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
 
-    public JwksService(ConfigurationService configurationService, KeyProvider keyProvider)
-            throws MalformedURLException {
+    public JwksService(ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
         this.keyProvider = keyProvider;
-        URL url =
-                new URL(
-                        configurationService.getOneLoginAuthServerUrl()
-                                + configurationService.getJwksEndpoint());
-        this.jwkSource =
-                JWKSourceBuilder.create(url)
-                        .retrying(true)
-                        .refreshAheadCache(false)
-                        .cache(false)
-                        .rateLimited(false)
-                        .build();
     }
 
     public JwksService(
@@ -50,7 +38,7 @@ public class JwksService {
 
     public JWK retrieveJwkFromURLWithKeyId(String keyId) throws KeySourceException {
         JWKSelector selector = new JWKSelector(new JWKMatcher.Builder().keyID(keyId).build());
-        return jwkSource.get(selector, null).stream()
+        return getJwkSource().get(selector, null).stream()
                 .findFirst()
                 .orElseThrow(() -> new KeySourceException("No key found with key ID: " + keyId));
     }
@@ -64,5 +52,26 @@ public class JwksService {
         }
 
         return new JWKSet(keyProvider.getPublicKey(keyAlias));
+    }
+
+    private JWKSource<SecurityContext> getJwkSource() throws KeySourceException {
+        if (jwkSource == null) {
+            try {
+                URL url =
+                        new URL(
+                                configurationService.getOneLoginAuthServerUrl()
+                                        + configurationService.getJwksEndpoint());
+                jwkSource =
+                        JWKSourceBuilder.create(url)
+                                .retrying(true)
+                                .refreshAheadCache(false)
+                                .cache(false)
+                                .rateLimited(false)
+                                .build();
+            } catch (MalformedURLException e) {
+                throw new KeySourceException("Failed to build JWKS URL", e);
+            }
+        }
+        return jwkSource;
     }
 }
