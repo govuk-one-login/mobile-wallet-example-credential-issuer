@@ -774,7 +774,7 @@ Resources:
       Dimensions:  
         - Name: CanaryName  
           Value: document_builder_heartbeat  
-      Period: 3600  # max evaluation period: 1 hour. The canary runs every 3 hours.
+      Period: 10800  # 3 hours in seconds, as the canary runs every 3 hours
       EvaluationPeriods: 1  
       Statistic: Maximum  
       ComparisonOperator: GreaterThanOrEqualToThreshold  
