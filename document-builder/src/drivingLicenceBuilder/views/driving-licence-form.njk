@@ -406,6 +406,28 @@
                      }
                 ]
             }) }}
+            {% if errors['expected_update'] %}
+                {% set expectedUpdateError = { text: errors['expected_update'] } %}
+            {% endif %}
+            {{ govukDateInput({
+                "id": "updated-credential",
+                "fieldset": {
+                    "legend": {
+                        "text": "How many days before expiry should the credential be updated?",
+                        "classes": "govuk-fieldset__legend--s"
+                    }
+                },
+                "errorMessage": expectedUpdateError,
+                "items": [
+                    {
+                        "label": "Days",
+                        "id": "updated-credential",
+                        "name": "expectedUpdateDays",
+                        "classes": "govuk-input--width-2",
+                        "inputMode": "numeric"
+                    }
+                ]
+            }) }}
             <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
             {% if showThrowError %}
             {{ govukSelect({

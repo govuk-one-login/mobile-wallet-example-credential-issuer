@@ -17,6 +17,10 @@ export function validateVeteranCardForm(
     Object.assign(errors, expiryErrors);
   }
 
+  if (body.expectedUpdateDays && Number.isNaN(Number(body.expectedUpdateDays))) {
+    errors.expected_update = "Enter a number";
+  }
+
   return {
     isValid: Object.keys(errors).length === 0,
     errors,

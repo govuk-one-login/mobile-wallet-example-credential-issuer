@@ -38,6 +38,7 @@ export async function dvsDrivingLicenceBuilderGetController(
       data: drivingLicenceData,
       vcType: CREDENTIAL_TYPE,
       credentialTtlSeconds: CREDENTIAL_TTL_SECONDS,
+      expectedUpdateSeconds: null,
       timeToLive: getTimeToLiveEpoch(getTableItemTtl()),
     });
 

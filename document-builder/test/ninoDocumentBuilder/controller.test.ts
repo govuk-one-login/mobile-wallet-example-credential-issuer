@@ -104,6 +104,7 @@ describe("controller.ts", () => {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
           documentId: "QQ123456A",
           credentialTtlSeconds: 43200,
+          expectedUpdateSeconds: null,
           data: {
             title: "Ms",
             givenName: "Irene",
