@@ -256,7 +256,7 @@ describe("controller.ts", () => {
             vcType: "org.iso.18013.5.1.mDL",
             timeToLive: 1748736000,
             credentialTtlSeconds: 43200,
-            expectedUpdate: null,
+            expectedUpdateSeconds: null,
             data: {
               family_name: "Edwards-Smith",
               given_name: "Sarah Elizabeth",
@@ -308,7 +308,7 @@ describe("controller.ts", () => {
             vcType: "org.iso.18013.5.1.mDL",
             timeToLive: 1748736000,
             credentialTtlSeconds: 43200,
-            expectedUpdate: null,
+            expectedUpdateSeconds: null,
             data: {
               family_name: "Edwards-Smith",
               given_name: "Sarah Elizabeth",
@@ -419,7 +419,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
+            expectedUpdateSeconds: DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
           }),
         );
       });
@@ -445,7 +445,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
+            expectedUpdateSeconds: CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
           }),
         );
       });
@@ -461,7 +461,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: null,
+            expectedUpdateSeconds: null,
           }),
         );
       });
@@ -477,7 +477,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: null,
+            expectedUpdateSeconds: null,
           }),
         );
       });

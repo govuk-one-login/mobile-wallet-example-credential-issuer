@@ -83,8 +83,8 @@ export function veteranCardDocumentBuilderPostController({
               body["credentialExpiry-year"],
             )
           : Number(body.credentialTtl);
-      const expectedUpdate = body.expectedUpdateSeconds
-        ? credentialTtlSeconds - Number(body.expectedUpdateSeconds) * SECONDS_IN_A_DAY
+      const expectedUpdateSeconds = body.expectedUpdateDays
+        ? credentialTtlSeconds - Number(body.expectedUpdateDays) * SECONDS_IN_A_DAY
         : null;
       await saveDocument(getDocumentsTableName(), {
         itemId,
@@ -92,7 +92,7 @@ export function veteranCardDocumentBuilderPostController({
         data,
         vcType: CREDENTIAL_TYPE,
         credentialTtlSeconds,
-        expectedUpdate,
+        expectedUpdateSeconds,
         timeToLive: getTimeToLiveEpoch(getTableItemTtl()),
       });
 
@@ -119,7 +119,7 @@ function buildVeteranCardDataFromRequestBody(
   const {
     throwError: _throwError,
     credentialTtl: _credentialTtl,
-    expectedUpdateSeconds: _expectedUpdateSeconds,
+    expectedUpdateDays: _expectedUpdateDays,
     "credentialExpiry-day": _credentialExpiryDay,
     "credentialExpiry-month": _credentialExpiryMonth,
     "credentialExpiry-year": _credentialExpiryYear,

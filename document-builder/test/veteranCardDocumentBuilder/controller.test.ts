@@ -224,7 +224,7 @@ describe("controller.ts", () => {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
           documentId: "25057386",
           credentialTtlSeconds: 43200,
-          expectedUpdate: null,
+          expectedUpdateSeconds: null,
           data: {
             givenName: "Sarah Elizabeth",
             familyName: "Edwards-Smith",
@@ -300,7 +300,7 @@ describe("controller.ts", () => {
 
       it("should include expectedUpdate at record level when expectedUpdateSeconds has a value", async () => {
         const req = getMockReq({
-          body: { ...requestBody, expectedUpdateSeconds: "5" },
+          body: { ...requestBody, expectedUpdateDays: "5" },
         });
         const { res } = getMockRes();
 
@@ -309,7 +309,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
+            expectedUpdateSeconds: DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
           }),
         );
       });
@@ -326,7 +326,7 @@ describe("controller.ts", () => {
             "credentialExpiry-day": "02",
             "credentialExpiry-month": "05",
             "credentialExpiry-year": "2026",
-            expectedUpdateSeconds: "10",
+            expectedUpdateDays: "10",
           },
         });
         const { res } = getMockRes();
@@ -336,14 +336,14 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
+            expectedUpdateSeconds: CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
           }),
         );
       });
 
       it("should not include expectedUpdate when expectedUpdateSeconds is empty", async () => {
         const req = getMockReq({
-          body: { ...requestBody, expectedUpdateSeconds: "" },
+          body: { ...requestBody, expectedUpdateDays: "" },
         });
         const { res } = getMockRes();
 
@@ -352,7 +352,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: null,
+            expectedUpdateSeconds: null,
           }),
         );
       });
@@ -368,7 +368,7 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdate: null,
+            expectedUpdateSeconds: null,
           }),
         );
       });
