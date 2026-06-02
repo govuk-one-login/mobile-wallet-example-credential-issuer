@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -57,6 +58,12 @@ public class CredentialOfferResource {
             @QueryParam("credentialType") @NotEmpty @Pattern(regexp = CREDENTIAL_TYPE_PATTERN)
                     String credentialType)
             throws JsonProcessingException {
+
+        try {
+            CredentialType.fromType(credentialType);
+        } catch (IllegalArgumentException e) {
+            return ResponseUtil.badRequest("credential_configuration_ids not found in issuer metadata");
+        }
 
         String credentialOfferId = UUID.randomUUID().toString();
 
