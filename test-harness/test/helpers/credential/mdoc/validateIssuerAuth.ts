@@ -372,6 +372,14 @@ function validateValidityInfo(validityInfo: ValidityInfo): void {
       `'validFrom' (${validUntil}) must be equal or later than 'signed' (${signed})`,
     );
 
+  if (validityInfo.expectedUpdate) {
+    const expectedUpdateDate = new Date(validityInfo.expectedUpdate);
+    if (expectedUpdateDate > validUntilDate)
+      errors.push(
+        `'expectedUpdate' (${validityInfo.expectedUpdate}) must be less than or equal to 'validUntil' (${validUntil})`,
+      );
+  }
+
   if (errors.length !== 0) {
     throw new MDLValidationError(
       `One or more dates are invalid - ${errorMessage(errors)}`,

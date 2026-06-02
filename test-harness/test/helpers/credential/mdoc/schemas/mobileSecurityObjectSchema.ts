@@ -76,6 +76,7 @@ export const mobileSecurityObjectSchema = {
         signed: { type: "string", format: "date-time" },
         validFrom: { type: "string", format: "date-time" },
         validUntil: { type: "string", format: "date-time" },
+        expectedUpdate: { type: "string", format: "date-time" },
       },
       additionalProperties: false,
     },

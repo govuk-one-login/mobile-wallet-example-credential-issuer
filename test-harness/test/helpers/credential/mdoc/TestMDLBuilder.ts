@@ -25,6 +25,7 @@ export class TestMDLBuilder {
     signed: Tag | string;
     validFrom: Tag | string;
     validUntil: Tag | string;
+    expectedUpdate?: Tag | string;
   };
   private readonly deviceKey: Map<number, any>;
   private readonly protectedHeader: any;
@@ -126,6 +127,9 @@ export class TestMDLBuilder {
         signed: this.validityInfo.signed,
         validFrom: this.validityInfo.validFrom,
         validUntil: this.validityInfo.validUntil,
+        ...(this.validityInfo.expectedUpdate && {
+          expectedUpdate: this.validityInfo.expectedUpdate,
+        }),
       },
     };
 
@@ -225,6 +229,7 @@ export class TestMDLBuilder {
       signed: Tag | string;
       validFrom: Tag | string;
       validUntil: Tag | string;
+      expectedUpdate: Tag | string;
     }>,
   ) {
     Object.assign(this.validityInfo, validityInfo);

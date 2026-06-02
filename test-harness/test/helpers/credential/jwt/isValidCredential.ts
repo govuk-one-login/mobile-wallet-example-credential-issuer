@@ -102,4 +102,14 @@ function validatePayload(
       `INVALID_PAYLOAD: Invalid "sub" value in token. Should be ${didKey} but found ${JSON.stringify(sub)}`,
     );
   }
+
+  const expectedUpdate = payload["expectedUpdate"] as string | undefined;
+  const validUntil = payload.validUntil as string;
+  if (expectedUpdate) {
+    if (new Date(expectedUpdate) > new Date(validUntil)) {
+      throw new Error(
+        `INVALID_PAYLOAD: 'expectedUpdate' (${expectedUpdate}) must be less than or equal to 'validUntil' (${validUntil})`,
+      );
+    }
+  }
 }
