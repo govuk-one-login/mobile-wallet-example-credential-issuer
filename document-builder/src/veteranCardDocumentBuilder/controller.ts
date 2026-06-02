@@ -120,6 +120,9 @@ function buildVeteranCardDataFromRequestBody(
     throwError: _throwError,
     credentialTtl: _credentialTtl,
     expectedUpdateSeconds: _expectedUpdateSeconds,
+    "credentialExpiry-day": _credentialExpiryDay,
+    "credentialExpiry-month": _credentialExpiryMonth,
+    "credentialExpiry-year": _credentialExpiryYear,
     ...newObject
   } = body;
 
