@@ -71,7 +71,8 @@ public class PreAuthorizedCodeBuilder {
                                                         .getPreAuthorizedCodeTtlInSecs())
                                         .getEpochSecond())
                         .claim("clientId", configurationService.getOIDCClientId())
-                        .claim("credential_identifiers", new String[] {credentialIdentifier});
+                        .claim("credential_identifiers", new String[] {credentialIdentifier})
+                        .claim("credential_identifiers_id", new String[] {credentialType});
 
         return Base64URL.encode(claimsBuilder.build().toString());
     }
