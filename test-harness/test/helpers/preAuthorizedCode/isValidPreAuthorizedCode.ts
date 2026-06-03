@@ -9,7 +9,7 @@ export interface Payload {
   clientId: string;
   iss: string;
   credential_identifiers: string[];
-  credential_identifiers_ids: string[];
+  credential_configuration_ids: string[];
   iat: number;
   exp: number;
 }
