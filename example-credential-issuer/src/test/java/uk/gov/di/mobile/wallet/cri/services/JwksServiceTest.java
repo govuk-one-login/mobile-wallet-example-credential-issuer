@@ -10,7 +10,6 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,7 +59,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void should_Return_Jwk_When_Found() throws KeySourceException, ParseException {
+    void should_ReturnMatchingJwk_WhenKeyIdExists() throws KeySourceException, ParseException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         JWK publicKey =
                 JWK.parse(
@@ -74,8 +73,7 @@ class JwksServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw KeySource Exception When Jwk not found")
-    void should_ThrowException_When_Jwk_Not_Found() throws KeySourceException {
+    void should_ThrowKeySourceException_When_KeyIdNotFound() throws KeySourceException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         final List<JWK> jwkList = Collections.emptyList();
         when(jwkSource.get(any(JWKSelector.class), isNull())).thenReturn(jwkList);
@@ -91,15 +89,14 @@ class JwksServiceTest {
     }
 
     @Test
-    void should_Construct_JwksService_Without_Throwing() {
+    void should_ConstructWithoutThrowing() {
         jwksService = new JwksService(configurationService, kmsService);
 
         assertThat(jwksService, instanceOf(JwksService.class));
     }
 
     @Test
-    @DisplayName("Should throw KeySourceException when JWKS URL is malformed")
-    void should_ThrowException_When_JwksUrlIsMalformed() {
+    void should_ThrowKeySourceException_When_JwksUrlIsMalformed() {
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn("not a valid url");
         when(configurationService.getJwksEndpoint()).thenReturn("/.well-known/jwks.json");
         jwksService = new JwksService(configurationService, kmsService);
@@ -113,7 +110,7 @@ class JwksServiceTest {
     }
 
     @Test
-    void should_Return_PublicKey_As_Jwks()
+    void should_ReturnPublicKeyAsJwks_WhenKeyIsActive()
             throws InvalidAlgorithmParameterException,
                     NoSuchAlgorithmException,
                     PEMException,
