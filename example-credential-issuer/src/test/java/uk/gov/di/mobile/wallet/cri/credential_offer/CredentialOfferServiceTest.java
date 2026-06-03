@@ -72,7 +72,7 @@ class CredentialOfferServiceTest {
                 preAuthorizedCode.serialize(),
                 credentialOffer.getGrants().get(PRE_AUTH_GRANT_TYPE).get(PRE_AUTH_CODE_PARAM),
                 "Pre-authorized code parameter should contain the JWT");
-        verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER);
+        verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE);
         verify(configurationService).getSelfUrl();
     }
 
@@ -102,7 +102,7 @@ class CredentialOfferServiceTest {
                 "Some signing error",
                 exception.getMessage(),
                 "Exception message should match the expected signing error message");
-        verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER);
+        verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE);
         verifyNoInteractions(configurationService);
     }
 
