@@ -19,7 +19,7 @@ export const payloadSchema = {
       minItems: 1,
       maxItems: 1,
     },
-    credential_identifiers_id: {
+    credential_configuration_ids: {
       type: "array",
       items: { type: "string" },
       minItems: 1,
