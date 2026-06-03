@@ -46,6 +46,12 @@ public class CredentialOfferService {
     public CredentialOffer buildCredentialOffer(String credentialIdentifier, String credentialType)
             throws SigningException, NoSuchAlgorithmException {
 
+        try {
+            CredentialType.fromType(credentialType);
+        } catch (IllegalArgumentException e) {
+            throw new CredentialOfferException("credential_configuration_ids not found in issuer metadata");
+        }
+
         SignedJWT preAuthorizedCode =
                 preAuthorizedCodeBuilder.buildPreAuthorizedCode(credentialIdentifier);
         LOGGER.info(

@@ -72,6 +72,8 @@ public class CredentialOfferResource {
                     itemId,
                     exception);
             return ResponseUtil.internalServerError();
+        } catch (CredentialOfferException exception) {
+            return ResponseUtil.badRequest(exception.getMessage());
         }
 
         LOGGER.info(
