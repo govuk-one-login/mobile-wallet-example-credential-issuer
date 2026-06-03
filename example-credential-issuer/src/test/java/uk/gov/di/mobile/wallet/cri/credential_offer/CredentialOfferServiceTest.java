@@ -49,7 +49,7 @@ class CredentialOfferServiceTest {
     @Test
     void Should_BuildAndReturnCredentialOffer() throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER))
+        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
@@ -88,7 +88,7 @@ class CredentialOfferServiceTest {
     void Should_PropagateSigningException() throws Exception {
         SigningException expectedError =
                 new SigningException("Some signing error", new Exception());
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER))
+        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE))
                 .thenThrow(expectedError);
 
         Exception exception =
