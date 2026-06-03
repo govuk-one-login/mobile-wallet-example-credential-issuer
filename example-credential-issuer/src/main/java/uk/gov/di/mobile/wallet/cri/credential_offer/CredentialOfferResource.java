@@ -59,12 +59,6 @@ public class CredentialOfferResource {
                     String credentialType)
             throws JsonProcessingException {
 
-        try {
-            CredentialType.fromType(credentialType);
-        } catch (IllegalArgumentException e) {
-            return ResponseUtil.badRequest("credential_configuration_ids not found in issuer metadata");
-        }
-
         String credentialOfferId = UUID.randomUUID().toString();
 
         CredentialOffer credentialOffer;
