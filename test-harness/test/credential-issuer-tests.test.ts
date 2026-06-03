@@ -119,6 +119,7 @@ describe("Credential Issuer Tests", () => {
             CRI_URL,
             SELF_URL,
             CLIENT_ID,
+            CREDENTIAL_CONFIGURATION_ID,
           ),
         ).toBe(true);
       });
