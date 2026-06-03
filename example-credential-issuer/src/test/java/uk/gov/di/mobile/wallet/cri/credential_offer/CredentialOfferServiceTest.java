@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -40,7 +41,7 @@ class CredentialOfferServiceTest {
 
     private static final String CREDENTIAL_ISSUER = "https://test-credential-issuer.gov.uk";
     private static final String CREDENTIAL_IDENTIFIER = "e27474f5-6aef-40a4-bed6-5e4e1ec3f885";
-    private static final String CREDENTIAL_TYPE = "TestCredentialType";
+    private static final String CREDENTIAL_TYPE = "org.iso.18013.5.1.mDL";
     private static final String PRE_AUTH_GRANT_TYPE =
             "urn:ietf:params:oauth:grant-type:pre-authorized_code";
     private static final String PRE_AUTH_CODE_PARAM = "pre-authorized_code";
@@ -73,6 +74,14 @@ class CredentialOfferServiceTest {
                 "Pre-authorized code parameter should contain the JWT");
         verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER);
         verify(configurationService).getSelfUrl();
+    }
+
+    @Test
+    void Should_ThrowCredentialOfferException_When_CredentialTypeIsInvalid() {
+        assertThrows(
+                CredentialOfferException.class,
+                () ->
+                        credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, "InvalidCredentialType"));
     }
 
     @Test

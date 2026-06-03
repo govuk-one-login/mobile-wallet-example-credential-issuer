@@ -3,6 +3,8 @@ package uk.gov.di.mobile.wallet.cri.credential_offer;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
@@ -44,7 +46,7 @@ public class CredentialOfferService {
      * @throws NoSuchAlgorithmException If the required cryptographic algorithm is not available.
      */
     public CredentialOffer buildCredentialOffer(String credentialIdentifier, String credentialType)
-            throws SigningException, NoSuchAlgorithmException {
+            throws SigningException, NoSuchAlgorithmException, CredentialOfferException {
 
         try {
             CredentialType.fromType(credentialType);
