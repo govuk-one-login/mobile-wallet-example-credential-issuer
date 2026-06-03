@@ -55,7 +55,7 @@ public class CredentialOfferService {
         }
 
         SignedJWT preAuthorizedCode =
-                preAuthorizedCodeBuilder.buildPreAuthorizedCode(credentialIdentifier);
+                preAuthorizedCodeBuilder.buildPreAuthorizedCode(credentialIdentifier, credentialType);
         LOGGER.info(
                 "Pre-authorized code created for credentialOfferId {} and credentialType {}",
                 credentialIdentifier,

@@ -28,7 +28,13 @@ export async function isValidPreAuthorizedCode(
   const header: ProtectedHeaderParameters = getHeaderClaims(preAuthorizedCode);
   const verifyResult = await verifySignature(jwks, header, preAuthorizedCode);
   const payload = verifyResult.payload as unknown as Payload;
-  validatePayload(payload, criUrl, authorizationServerUrl, clientId, credentialConfigurationId);
+  validatePayload(
+    payload,
+    criUrl,
+    authorizationServerUrl,
+    clientId,
+    credentialConfigurationId,
+  );
   return true;
 }
 
