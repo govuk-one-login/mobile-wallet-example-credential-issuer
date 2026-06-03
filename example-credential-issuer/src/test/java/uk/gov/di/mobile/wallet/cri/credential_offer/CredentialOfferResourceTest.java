@@ -75,7 +75,10 @@ class CredentialOfferResourceTest {
 
     @Test
     void Should_Return200AndCredentialOfferURL()
-            throws JOSEException, DataStoreException, SigningException, NoSuchAlgorithmException,
+            throws JOSEException,
+                    DataStoreException,
+                    SigningException,
+                    NoSuchAlgorithmException,
                     CredentialOfferException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);

@@ -49,7 +49,8 @@ class CredentialOfferServiceTest {
     @Test
     void Should_BuildAndReturnCredentialOffer() throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE))
+        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
@@ -72,7 +73,8 @@ class CredentialOfferServiceTest {
                 preAuthorizedCode.serialize(),
                 credentialOffer.getGrants().get(PRE_AUTH_GRANT_TYPE).get(PRE_AUTH_CODE_PARAM),
                 "Pre-authorized code parameter should contain the JWT");
-        verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE);
+        verify(preAuthorizedCodeBuilder)
+                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE);
         verify(configurationService).getSelfUrl();
     }
 
@@ -81,14 +83,16 @@ class CredentialOfferServiceTest {
         assertThrows(
                 CredentialOfferException.class,
                 () ->
-                        credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, "InvalidCredentialType"));
+                        credentialOfferService.buildCredentialOffer(
+                                CREDENTIAL_IDENTIFIER, "InvalidCredentialType"));
     }
 
     @Test
     void Should_PropagateSigningException() throws Exception {
         SigningException expectedError =
                 new SigningException("Some signing error", new Exception());
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE))
+        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE))
                 .thenThrow(expectedError);
 
         Exception exception =
@@ -102,7 +106,8 @@ class CredentialOfferServiceTest {
                 "Some signing error",
                 exception.getMessage(),
                 "Exception message should match the expected signing error message");
-        verify(preAuthorizedCodeBuilder).buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE);
+        verify(preAuthorizedCodeBuilder)
+                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE);
         verifyNoInteractions(configurationService);
     }
 

@@ -33,7 +33,8 @@ public class PreAuthorizedCodeBuilder {
         this.keyProvider = keyProvider;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier, String credentialType) throws SigningException {
+    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier, String credentialType)
+            throws SigningException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         String hashedKeyId = sha256Hex(keyId);
         var encodedHeader = getEncodedHeader(hashedKeyId);
