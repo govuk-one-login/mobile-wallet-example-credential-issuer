@@ -34,6 +34,7 @@ import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -107,6 +108,22 @@ class JwksServiceTest {
                         () -> jwksService.retrieveJwkFromURLWithKeyId(TEST_KEY_ID));
 
         assertEquals("Failed to build JWKS URL", exception.getMessage());
+    }
+
+    @Test
+    void should_BuildJwkSourceFromConfig_WhenUrlIsValid() {
+        when(configurationService.getOneLoginAuthServerUrl())
+                .thenReturn("https://oidc.example.com");
+        when(configurationService.getJwksEndpoint()).thenReturn("/.well-known/jwks.json");
+        jwksService = new JwksService(configurationService, kmsService);
+
+        // Source is built successfully; exception comes from the subsequent network call
+        KeySourceException exception =
+                assertThrows(
+                        KeySourceException.class,
+                        () -> jwksService.retrieveJwkFromURLWithKeyId(TEST_KEY_ID));
+        assertNotEquals("Failed to build JWKS URL", exception.getMessage());
+        assertNotEquals("No key found with key ID: " + TEST_KEY_ID, exception.getMessage());
     }
 
     @Test
