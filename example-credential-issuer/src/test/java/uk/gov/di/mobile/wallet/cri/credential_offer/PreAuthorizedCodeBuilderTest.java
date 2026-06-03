@@ -106,7 +106,8 @@ class PreAuthorizedCodeBuilderTest {
                         SigningException.class,
                         () ->
                                 preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "org.iso.18013.5.1.mDL"));
+                                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885",
+                                        "org.iso.18013.5.1.mDL"));
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
 
