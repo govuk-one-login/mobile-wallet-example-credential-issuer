@@ -6,8 +6,36 @@ describe("mobileSecurityObjectSchema", () => {
   const ajv = getAjvInstance();
   const validate = ajv.compile(mobileSecurityObjectSchema);
 
+  const validData: MobileSecurityObject = {
+    version: "1.0",
+    digestAlgorithm: "SHA-256",
+    deviceKeyInfo: {
+      deviceKey: new Map(),
+      keyAuthorizations: {
+        nameSpaces: ["org.iso.18013.5.1", "org.iso.18013.5.1.GB"],
+      },
+    },
+    valueDigests: {
+      "org.iso.18013.5.1": new Map(),
+      "org.iso.18013.5.1.GB": new Map(),
+    },
+    docType: "org.iso.18013.5.1.mDL",
+    validityInfo: {
+      signed: "2023-10-10T10:10:10Z",
+      validFrom: "2023-10-10T10:10:10Z",
+      validUntil: "2024-10-10T10:10:10Z",
+      expectedUpdate: "2024-06-01T00:00:00Z",
+    },
+    status: {
+      status_list: {
+        idx: 1,
+        uri: "https://example.com/status",
+      },
+    },
+  };
+
   it("should return false when it contains additional properties", () => {
-    const data = { ...defaultData, extra: "not allowed" };
+    const data = { ...validData, extra: "not allowed" };
 
     const isValid = validate(data);
 
@@ -30,7 +58,7 @@ describe("mobileSecurityObjectSchema", () => {
     "validityInfo",
     "status",
   ])("should return false when %s is missing", (field) => {
-    const data: Record<string, unknown> = { ...defaultData };
+    const data: Record<string, unknown> = { ...validData };
     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
     delete data[field];
 
@@ -47,7 +75,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("version", () => {
     it("should return false when it is not '1.0'", () => {
-      const data = { ...defaultData, version: "2.0" };
+      const data = { ...validData, version: "2.0" };
 
       const isValid = validate(data);
 
@@ -64,7 +92,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("digestAlgorithm", () => {
     it("should return false when it is not 'SHA-256'", () => {
-      const data = { ...defaultData, digestAlgorithm: "SHA-512" };
+      const data = { ...validData, digestAlgorithm: "SHA-512" };
 
       const isValid = validate(data);
 
@@ -81,7 +109,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("docType", () => {
     it("should return false when it is not 'org.iso.18013.5.1.mDL'", () => {
-      const data = { ...defaultData, docType: "invalid.doc.type" };
+      const data = { ...validData, docType: "invalid.doc.type" };
 
       const isValid = validate(data);
 
@@ -99,9 +127,9 @@ describe("mobileSecurityObjectSchema", () => {
   describe("deviceKeyInfo", () => {
     it("should return false when deviceKey is missing", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         deviceKeyInfo: {
-          keyAuthorizations: defaultData.deviceKeyInfo.keyAuthorizations,
+          keyAuthorizations: validData.deviceKeyInfo.keyAuthorizations,
         },
       };
 
@@ -118,7 +146,7 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when keyAuthorizations is missing", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         deviceKeyInfo: {
           deviceKey: new Map(),
         },
@@ -137,9 +165,9 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when it contains additional properties", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         deviceKeyInfo: {
-          ...defaultData.deviceKeyInfo,
+          ...validData.deviceKeyInfo,
           extra: "not allowed",
         },
       };
@@ -158,10 +186,10 @@ describe("mobileSecurityObjectSchema", () => {
     describe("deviceKey", () => {
       it("should return false when it is not a Map", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           deviceKeyInfo: {
             deviceKey: {},
-            keyAuthorizations: defaultData.deviceKeyInfo.keyAuthorizations,
+            keyAuthorizations: validData.deviceKeyInfo.keyAuthorizations,
           },
         };
 
@@ -174,7 +202,7 @@ describe("mobileSecurityObjectSchema", () => {
     describe("keyAuthorizations", () => {
       it("should return false when nameSpaces is missing", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           deviceKeyInfo: {
             deviceKey: new Map(),
             keyAuthorizations: {},
@@ -195,7 +223,7 @@ describe("mobileSecurityObjectSchema", () => {
       describe("nameSpaces", () => {
         it("should return false when it contains an invalid namespace", () => {
           const data = {
-            ...defaultData,
+            ...validData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
@@ -217,7 +245,7 @@ describe("mobileSecurityObjectSchema", () => {
 
         it("should return false when it has fewer than 2 items", () => {
           const data = {
-            ...defaultData,
+            ...validData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
@@ -239,7 +267,7 @@ describe("mobileSecurityObjectSchema", () => {
 
         it("should return false when it has more than 2 items", () => {
           const data = {
-            ...defaultData,
+            ...validData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
@@ -265,7 +293,7 @@ describe("mobileSecurityObjectSchema", () => {
 
         it("should return false when items are not unique", () => {
           const data = {
-            ...defaultData,
+            ...validData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
@@ -291,7 +319,7 @@ describe("mobileSecurityObjectSchema", () => {
   describe("valueDigests", () => {
     it("should return false when org.iso.18013.5.1 is missing", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         valueDigests: {
           "org.iso.18013.5.1.GB": new Map(),
         },
@@ -310,7 +338,7 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when org.iso.18013.5.1.GB is missing", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         valueDigests: {
           "org.iso.18013.5.1": new Map(),
         },
@@ -329,9 +357,9 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when it contains additional properties", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         valueDigests: {
-          ...defaultData.valueDigests,
+          ...validData.valueDigests,
           "org.unknown.namespace": new Map(),
         },
       };
@@ -350,7 +378,7 @@ describe("mobileSecurityObjectSchema", () => {
     describe("org.iso.18013.5.1", () => {
       it("should return false when it is not a Map", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           valueDigests: {
             "org.iso.18013.5.1": {},
             "org.iso.18013.5.1.GB": new Map(),
@@ -366,7 +394,7 @@ describe("mobileSecurityObjectSchema", () => {
     describe("org.iso.18013.5.1.GB", () => {
       it("should return false when it is not a Map", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           valueDigests: {
             "org.iso.18013.5.1": new Map(),
             "org.iso.18013.5.1.GB": {},
@@ -383,8 +411,8 @@ describe("mobileSecurityObjectSchema", () => {
   describe("validityInfo", () => {
     it("should return false when signed is missing", () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { signed, ...rest } = defaultData.validityInfo;
-      const data = { ...defaultData, validityInfo: rest };
+      const { signed, ...rest } = validData.validityInfo;
+      const data = { ...validData, validityInfo: rest };
 
       const isValid = validate(data);
 
@@ -399,8 +427,8 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when validFrom is missing", () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { validFrom, ...rest } = defaultData.validityInfo;
-      const data = { ...defaultData, validityInfo: rest };
+      const { validFrom, ...rest } = validData.validityInfo;
+      const data = { ...validData, validityInfo: rest };
 
       const isValid = validate(data);
 
@@ -415,8 +443,8 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when validUntil is missing", () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { validUntil, ...rest } = defaultData.validityInfo;
-      const data = { ...defaultData, validityInfo: rest };
+      const { validUntil, ...rest } = validData.validityInfo;
+      const data = { ...validData, validityInfo: rest };
 
       const isValid = validate(data);
 
@@ -431,9 +459,9 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when it contains additional properties", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         validityInfo: {
-          ...defaultData.validityInfo,
+          ...validData.validityInfo,
           extra: "not allowed",
         },
       };
@@ -452,9 +480,9 @@ describe("mobileSecurityObjectSchema", () => {
     describe("signed", () => {
       it("should return false when it is not a valid date-time", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           validityInfo: {
-            ...defaultData.validityInfo,
+            ...validData.validityInfo,
             signed: "not-a-date",
           },
         };
@@ -475,9 +503,9 @@ describe("mobileSecurityObjectSchema", () => {
     describe("validFrom", () => {
       it("should return false when it is not a valid date-time", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           validityInfo: {
-            ...defaultData.validityInfo,
+            ...validData.validityInfo,
             validFrom: "not-a-date",
           },
         };
@@ -498,9 +526,9 @@ describe("mobileSecurityObjectSchema", () => {
     describe("validUntil", () => {
       it("should return false when it is not a valid date-time", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           validityInfo: {
-            ...defaultData.validityInfo,
+            ...validData.validityInfo,
             validUntil: "not-a-date",
           },
         };
@@ -521,9 +549,9 @@ describe("mobileSecurityObjectSchema", () => {
     describe("expectedUpdate", () => {
       it("should return false when it is not a valid date-time", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           validityInfo: {
-            ...defaultData.validityInfo,
+            ...validData.validityInfo,
             expectedUpdate: "not-a-date",
           },
         };
@@ -542,8 +570,8 @@ describe("mobileSecurityObjectSchema", () => {
 
       it("should return true when it is absent", () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { expectedUpdate, ...rest } = defaultData.validityInfo;
-        const data = { ...defaultData, validityInfo: rest };
+        const { expectedUpdate, ...rest } = validData.validityInfo;
+        const data = { ...validData, validityInfo: rest };
 
         expect(validate(data)).toBe(true);
       });
@@ -552,7 +580,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("status", () => {
     it("should return false when status_list is missing", () => {
-      const data = { ...defaultData, status: {} };
+      const data = { ...validData, status: {} };
 
       const isValid = validate(data);
 
@@ -567,7 +595,7 @@ describe("mobileSecurityObjectSchema", () => {
 
     it("should return false when it contains additional properties", () => {
       const data = {
-        ...defaultData,
+        ...validData,
         status: {
           status_list: {
             idx: 1,
@@ -591,7 +619,7 @@ describe("mobileSecurityObjectSchema", () => {
     describe("status_list", () => {
       it("should return false when idx is missing", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           status: {
             status_list: {
               uri: "https://example.com/status",
@@ -612,7 +640,7 @@ describe("mobileSecurityObjectSchema", () => {
 
       it("should return false when uri is missing", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           status: {
             status_list: {
               idx: 1,
@@ -633,7 +661,7 @@ describe("mobileSecurityObjectSchema", () => {
 
       it("should return false when it contains additional properties", () => {
         const data = {
-          ...defaultData,
+          ...validData,
           status: {
             status_list: {
               idx: 1,
@@ -657,7 +685,7 @@ describe("mobileSecurityObjectSchema", () => {
       describe("idx", () => {
         it("should return false when it is not a number", () => {
           const data = {
-            ...defaultData,
+            ...validData,
             status: {
               status_list: {
                 idx: "not-a-number",
@@ -682,7 +710,7 @@ describe("mobileSecurityObjectSchema", () => {
       describe("uri", () => {
         it("should return false when it is not a valid URI", () => {
           const data = {
-            ...defaultData,
+            ...validData,
             status: {
               status_list: {
                 idx: 1,
@@ -707,36 +735,8 @@ describe("mobileSecurityObjectSchema", () => {
   });
 
   it("should return true when data is valid", () => {
-    const isValid = validate(defaultData);
+    const isValid = validate(validData);
 
     expect(isValid).toBe(true);
   });
 });
-
-const defaultData: MobileSecurityObject = {
-  version: "1.0",
-  digestAlgorithm: "SHA-256",
-  deviceKeyInfo: {
-    deviceKey: new Map(),
-    keyAuthorizations: {
-      nameSpaces: ["org.iso.18013.5.1", "org.iso.18013.5.1.GB"],
-    },
-  },
-  valueDigests: {
-    "org.iso.18013.5.1": new Map(),
-    "org.iso.18013.5.1.GB": new Map(),
-  },
-  docType: "org.iso.18013.5.1.mDL",
-  validityInfo: {
-    signed: "2023-10-10T10:10:10Z",
-    validFrom: "2023-10-10T10:10:10Z",
-    validUntil: "2024-10-10T10:10:10Z",
-    expectedUpdate: "2024-06-01T00:00:00Z",
-  },
-  status: {
-    status_list: {
-      idx: 1,
-      uri: "https://example.com/status",
-    },
-  },
-};
