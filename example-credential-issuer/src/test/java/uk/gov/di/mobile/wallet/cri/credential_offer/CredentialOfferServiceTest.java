@@ -55,12 +55,13 @@ class CredentialOfferServiceTest {
     void Should_BuildAndReturnCredentialOffer_ForMDL() throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
         when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_MDL))
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_MDL))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_MDL);
+                credentialOfferService.buildCredentialOffer(
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_MDL);
 
         assertEquals(
                 CREDENTIAL_ISSUER,
@@ -87,12 +88,13 @@ class CredentialOfferServiceTest {
     void Should_BuildAndReturnCredentialOffer_ForNINO() throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
         when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_NINO))
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_NINO))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_NINO);
+                credentialOfferService.buildCredentialOffer(
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_NINO);
 
         assertEquals(
                 CREDENTIAL_ISSUER,
@@ -119,12 +121,13 @@ class CredentialOfferServiceTest {
     void Should_BuildAndReturnCredentialOffer_ForDBS() throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
         when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_DBS))
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_DBS))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_DBS);
+                credentialOfferService.buildCredentialOffer(
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_DBS);
 
         assertEquals(
                 CREDENTIAL_ISSUER,
@@ -151,12 +154,13 @@ class CredentialOfferServiceTest {
     void Should_BuildAndReturnCredentialOffer_ForVC() throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
         when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_VC))
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_VC))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_VC);
+                credentialOfferService.buildCredentialOffer(
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_VC);
 
         assertEquals(
                 CREDENTIAL_ISSUER,
@@ -183,12 +187,13 @@ class CredentialOfferServiceTest {
     void Should_BuildAndReturnCredentialOffer_ForSimpleMdoc() throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
         when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_SIMPLE_MDOC))
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_SIMPLE_MDOC))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_SIMPLE_MDOC);
+                credentialOfferService.buildCredentialOffer(
+                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_SIMPLE_MDOC);
 
         assertEquals(
                 CREDENTIAL_ISSUER,
