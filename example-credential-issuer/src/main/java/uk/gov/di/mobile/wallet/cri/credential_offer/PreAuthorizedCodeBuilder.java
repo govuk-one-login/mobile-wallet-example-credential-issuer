@@ -15,6 +15,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.time.Clock;
 import java.time.Instant;
 
 import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.toBase64UrlEncodedSignature;
@@ -26,11 +27,20 @@ public class PreAuthorizedCodeBuilder {
     private static final JOSEObjectType JWT = JOSEObjectType.JWT;
     private final ConfigurationService configurationService;
     private final KeyProvider keyProvider;
+    private final Clock clock;
 
     public PreAuthorizedCodeBuilder(
             ConfigurationService configurationService, KeyProvider keyProvider) {
         this.configurationService = configurationService;
         this.keyProvider = keyProvider;
+        this.clock = Clock.systemDefaultZone();
+    }
+
+    public PreAuthorizedCodeBuilder(
+            ConfigurationService configurationService, KeyProvider keyProvider, Clock clock) {
+        this.configurationService = configurationService;
+        this.keyProvider = keyProvider;
+        this.clock = clock;
     }
 
     public SignedJWT buildPreAuthorizedCode(String credentialIdentifier, String credentialType)
@@ -58,7 +68,7 @@ public class PreAuthorizedCodeBuilder {
     }
 
     private Base64URL getEncodedClaims(String credentialIdentifier, String credentialType) {
-        Instant now = Instant.now();
+        Instant now = clock.instant();
 
         var claimsBuilder =
                 new JWTClaimsSet.Builder()
