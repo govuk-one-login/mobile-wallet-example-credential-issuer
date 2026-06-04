@@ -20,10 +20,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -62,7 +64,8 @@ class MobileSecurityObjectFactoryTest {
         when(valueDigestsFactory.createFromNamespaces(namespaces)).thenReturn(valueDigests);
         when(valueDigestsFactory.getDigestAlgorithm()).thenReturn(DIGEST_ALGORITHM);
         ValidityInfo validityInfo = getTestValidityInfo();
-        when(validityInfoFactory.build(CREDENTIAL_TTL_SECONDS)).thenReturn(validityInfo);
+        when(validityInfoFactory.build(CREDENTIAL_TTL_SECONDS, Optional.empty()))
+                .thenReturn(validityInfo);
         COSEKey coseKey = getTestCoseKey();
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(coseKey);
 
@@ -72,6 +75,7 @@ class MobileSecurityObjectFactoryTest {
                         publicKey,
                         STATUS_LIST_INFORMATION,
                         CREDENTIAL_TTL_SECONDS,
+                        Optional.empty(),
                         DOC_TYPE);
 
         assertAll(
@@ -96,11 +100,16 @@ class MobileSecurityObjectFactoryTest {
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
                 .thenReturn(getTestValueDigests());
-        when(validityInfoFactory.build(anyLong())).thenReturn(getTestValidityInfo());
+        when(validityInfoFactory.build(anyLong(), any())).thenReturn(getTestValidityInfo());
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
         factory.build(
-                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_SECONDS, DOC_TYPE);
+                namespaces,
+                publicKey,
+                STATUS_LIST_INFORMATION,
+                CREDENTIAL_TTL_SECONDS,
+                Optional.empty(),
+                DOC_TYPE);
 
         verify(valueDigestsFactory).createFromNamespaces(namespaces);
     }
@@ -111,12 +120,13 @@ class MobileSecurityObjectFactoryTest {
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
                 .thenReturn(getTestValueDigests());
-        when(validityInfoFactory.build(ttl)).thenReturn(getTestValidityInfo());
+        when(validityInfoFactory.build(ttl, Optional.empty())).thenReturn(getTestValidityInfo());
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
-        factory.build(namespaces, publicKey, STATUS_LIST_INFORMATION, ttl, DOC_TYPE);
+        factory.build(
+                namespaces, publicKey, STATUS_LIST_INFORMATION, ttl, Optional.empty(), DOC_TYPE);
 
-        verify(validityInfoFactory).build(ttl);
+        verify(validityInfoFactory).build(ttl, Optional.empty());
     }
 
     @Test
@@ -124,11 +134,16 @@ class MobileSecurityObjectFactoryTest {
         Namespaces namespaces = getTestNamespaces();
         when(valueDigestsFactory.createFromNamespaces(namespaces))
                 .thenReturn(getTestValueDigests());
-        when(validityInfoFactory.build(anyLong())).thenReturn(getTestValidityInfo());
+        when(validityInfoFactory.build(anyLong(), any())).thenReturn(getTestValidityInfo());
         when(coseKeyFactory.fromECPublicKey(publicKey)).thenReturn(getTestCoseKey());
 
         factory.build(
-                namespaces, publicKey, STATUS_LIST_INFORMATION, CREDENTIAL_TTL_SECONDS, DOC_TYPE);
+                namespaces,
+                publicKey,
+                STATUS_LIST_INFORMATION,
+                CREDENTIAL_TTL_SECONDS,
+                Optional.empty(),
+                DOC_TYPE);
 
         verify(coseKeyFactory).fromECPublicKey(publicKey);
     }
@@ -148,7 +163,7 @@ class MobileSecurityObjectFactoryTest {
 
     private ValidityInfo getTestValidityInfo() {
         Instant now = Instant.parse("2024-01-01T00:00:00Z");
-        return new ValidityInfo(now, now, now.plusSeconds(3600));
+        return new ValidityInfo(now, now, now.plusSeconds(3600), Optional.empty());
     }
 
     private COSEKey getTestCoseKey() {

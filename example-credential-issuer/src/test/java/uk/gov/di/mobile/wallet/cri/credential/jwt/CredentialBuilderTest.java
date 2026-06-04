@@ -36,6 +36,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -108,7 +109,10 @@ class CredentialBuilderTest {
         when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
 
         credentialBuilderSocialSecurity.buildCredential(
-                socialSecurityCredentialSubject, CredentialType.SOCIAL_SECURITY_CREDENTIAL, 1);
+                socialSecurityCredentialSubject,
+                CredentialType.SOCIAL_SECURITY_CREDENTIAL,
+                1,
+                Optional.empty());
 
         verify(kmsService).sign(signRequestArgumentCaptor.capture());
         SignRequest capturedSignRequest = signRequestArgumentCaptor.getValue();
@@ -130,7 +134,8 @@ class CredentialBuilderTest {
                                 credentialBuilderSocialSecurity.buildCredential(
                                         socialSecurityCredentialSubject,
                                         CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                                        1));
+                                        1,
+                                        Optional.empty()));
 
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
@@ -146,7 +151,8 @@ class CredentialBuilderTest {
                         credentialBuilderSocialSecurity.buildCredential(
                                 socialSecurityCredentialSubject,
                                 CredentialType.SOCIAL_SECURITY_CREDENTIAL,
-                                2592000));
+                                2592000,
+                                Optional.empty()));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -204,7 +210,8 @@ class CredentialBuilderTest {
                         credentialBuilderBasicCheck.buildCredential(
                                 basicCheckCredentialSubject,
                                 CredentialType.BASIC_DISCLOSURE_CREDENTIAL,
-                                2592000));
+                                2592000,
+                                Optional.empty()));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -262,7 +269,8 @@ class CredentialBuilderTest {
                         credentialBuilderVeteranCard.buildCredential(
                                 veteranCardCredentialSubject,
                                 CredentialType.DIGITAL_VETERAN_CARD,
-                                2592000));
+                                2592000,
+                                Optional.empty()));
 
         assertThat(credential.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(credential.getHeader().getKeyID(), equalTo(DID_KEY_ID));
@@ -307,7 +315,32 @@ class CredentialBuilderTest {
                 equalTo(
                         "{id=did:key:MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEaUItVYrAvVK+1efrBvWDXtmapkl1PHqXUHytuK5/F7lfIXprXHD9zIdAinRrWSFeh28OJJzoSH1zqzOJ+ZhFOA==, name=[{nameParts=[{type=GivenName, value=Bonnie}, {type=FamilyName, value=Blue}]}], birthDate=[{value=1970-12-05}], veteranCard=[{expiryDate=2000-07-11, serviceNumber=25057386, serviceBranch=HM Naval Service, photo=null}]}"));
 
+        assertThat(credential.getJWTClaimsSet().getClaim("expectedUpdate"), equalTo(null));
         assertThat(credential.getState(), equalTo(JWSObject.State.SIGNED));
+    }
+
+    @Test
+    void Should_Include_ExpectedUpdate_Claim_When_ExpectedUpdateSeconds_Provided()
+            throws SigningException, JOSEException, ParseException {
+        SignResponse mockSignResponse = getMockKmsSignResponse();
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(mockSignResponse);
+        long expectedUpdateSeconds = 86400L;
+
+        SignedJWT credential =
+                SignedJWT.parse(
+                        credentialBuilderVeteranCard.buildCredential(
+                                veteranCardCredentialSubject,
+                                CredentialType.DIGITAL_VETERAN_CARD,
+                                2592000,
+                                Optional.of(expectedUpdateSeconds)));
+
+        Instant expectedExpectedUpdate =
+                fixedInstant.plus(expectedUpdateSeconds, ChronoUnit.SECONDS);
+        assertThat(
+                credential.getJWTClaimsSet().getClaim("expectedUpdate").toString(),
+                equalTo(
+                        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'")
+                                .format(expectedExpectedUpdate.atZone(ZoneOffset.UTC))));
     }
 
     private SignResponse getMockKmsSignResponse() throws JOSEException {

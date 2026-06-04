@@ -57,12 +57,14 @@ class MobileDrivingLicenceHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockDocument.getCredentialTtlSeconds()).thenReturn(CREDENTIAL_TTL_SECONDS);
+        when(mockDocument.getExpectedUpdateSeconds()).thenReturn(Optional.empty());
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         when(mockMdocCredentialBuilder.buildCredential(
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),
-                        anyLong()))
+                        anyLong(),
+                        any()))
                 .thenReturn(EXPECTED_CREDENTIAL);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -82,7 +84,8 @@ class MobileDrivingLicenceHandlerTest {
                         mockDrivingLicenceDocument,
                         ecPublicKey,
                         STATUS_LIST_INFORMATION,
-                        CREDENTIAL_TTL_SECONDS);
+                        CREDENTIAL_TTL_SECONDS,
+                        Optional.empty());
     }
 
     @Test
@@ -114,6 +117,7 @@ class MobileDrivingLicenceHandlerTest {
         Map<String, Object> documentData = new HashMap<>();
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockDocument.getCredentialTtlSeconds()).thenReturn(CREDENTIAL_TTL_SECONDS);
+        when(mockDocument.getExpectedUpdateSeconds()).thenReturn(Optional.empty());
         when(mockProofData.publicKey()).thenReturn(ecPublicKey);
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
@@ -121,7 +125,8 @@ class MobileDrivingLicenceHandlerTest {
                         any(DrivingLicenceDocument.class),
                         any(ECPublicKey.class),
                         any(StatusListClient.StatusListInformation.class),
-                        anyLong()))
+                        anyLong(),
+                        any()))
                 .thenThrow(signingException);
         MobileDrivingLicenceHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);

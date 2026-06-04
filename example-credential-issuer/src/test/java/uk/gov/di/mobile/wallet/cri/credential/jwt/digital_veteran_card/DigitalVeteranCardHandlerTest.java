@@ -56,10 +56,12 @@ class DigitalVeteranCardHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockDocument.getCredentialTtlSeconds()).thenReturn(TTL_SECONDS);
+        when(mockDocument.getExpectedUpdateSeconds()).thenReturn(Optional.empty());
         when(mockCredentialBuilder.buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(DIGITAL_VETERAN_CARD),
-                        eq(TTL_SECONDS)))
+                        eq(TTL_SECONDS),
+                        eq(Optional.empty())))
                 .thenReturn(EXPECTED_CREDENTIAL);
         DigitalVeteranCardHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);
@@ -81,7 +83,11 @@ class DigitalVeteranCardHandlerTest {
 
             assertEquals(EXPECTED_CREDENTIAL, credential);
             verify(mockCredentialBuilder)
-                    .buildCredential(mockCredentialSubject, DIGITAL_VETERAN_CARD, TTL_SECONDS);
+                    .buildCredential(
+                            mockCredentialSubject,
+                            DIGITAL_VETERAN_CARD,
+                            TTL_SECONDS,
+                            Optional.empty());
         }
     }
 
@@ -92,12 +98,14 @@ class DigitalVeteranCardHandlerTest {
         when(mockDocument.getData()).thenReturn(documentData);
         when(mockProofData.didKey()).thenReturn(DID_KEY);
         when(mockDocument.getCredentialTtlSeconds()).thenReturn(TTL_SECONDS);
+        when(mockDocument.getExpectedUpdateSeconds()).thenReturn(Optional.empty());
         SigningException signingException =
                 new SigningException("Some signing error", new RuntimeException());
         when(mockCredentialBuilder.buildCredential(
                         any(VeteranCardCredentialSubject.class),
                         eq(DIGITAL_VETERAN_CARD),
-                        eq(TTL_SECONDS)))
+                        eq(TTL_SECONDS),
+                        eq(Optional.empty())))
                 .thenThrow(signingException);
         DigitalVeteranCardHandler spyHandler = spy(handler);
         ObjectMapper mockMapper = mock(ObjectMapper.class);

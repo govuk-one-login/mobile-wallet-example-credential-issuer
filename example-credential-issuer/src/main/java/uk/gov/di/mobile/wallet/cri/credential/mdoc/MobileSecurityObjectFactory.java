@@ -5,6 +5,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 
 import java.security.interfaces.ECPublicKey;
+import java.util.Optional;
 import java.util.Set;
 
 /** Creates {@link MobileSecurityObject} instances. */
@@ -50,6 +51,8 @@ public class MobileSecurityObjectFactory {
      *     revocation or status checking.
      * @param credentialTtlSeconds The credential time-to-live, in seconds, used to determine its
      *     validity period.
+     * @param expectedUpdateSeconds Optional duration in seconds from now when the credential is
+     *     expected to be updated.
      * @param docType Document type for the {@link MobileSecurityObject}
      * @return {@link MobileSecurityObject}
      * @throws MdocException If an error occurs when building the {@link ValueDigests}
@@ -59,6 +62,7 @@ public class MobileSecurityObjectFactory {
             ECPublicKey publicKey,
             StatusListClient.StatusListInformation statusListInformation,
             long credentialTtlSeconds,
+            Optional<Long> expectedUpdateSeconds,
             String docType)
             throws MdocException {
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
@@ -66,7 +70,8 @@ public class MobileSecurityObjectFactory {
         KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
         DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
-        ValidityInfo validityInfo = validityInfoFactory.build(credentialTtlSeconds);
+        ValidityInfo validityInfo =
+                validityInfoFactory.build(credentialTtlSeconds, expectedUpdateSeconds);
         StatusList statusList =
                 new StatusList(statusListInformation.idx(), statusListInformation.uri());
         Status status = new Status(statusList);
