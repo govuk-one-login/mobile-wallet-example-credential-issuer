@@ -323,7 +323,6 @@ describe("isValidPreAuthorizedCode", () => {
       'INVALID_PAYLOAD: Invalid "credential_configuration_ids" value in token. Should be "InvalidCredentialConfigId" but found "org.iso.18013.5.1.mDL"',
     );
   });
-
 });
 
 async function getTestJwt(audience, issuer, clientId, kid, exp = "30 minutes") {

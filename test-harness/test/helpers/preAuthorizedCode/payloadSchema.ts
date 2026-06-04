@@ -33,5 +33,13 @@ export const payloadSchema = {
     },
   },
   additionalProperties: false,
-  required: ["aud", "clientId", "iss", "credential_identifiers", "credential_configuration_ids", "iat", "exp"],
+  required: [
+    "aud",
+    "clientId",
+    "iss",
+    "credential_identifiers",
+    "credential_configuration_ids",
+    "iat",
+    "exp",
+  ],
 };
