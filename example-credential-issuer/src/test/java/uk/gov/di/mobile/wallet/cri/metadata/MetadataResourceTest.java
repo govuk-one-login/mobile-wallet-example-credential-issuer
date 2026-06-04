@@ -12,6 +12,7 @@ import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -71,7 +72,7 @@ class MetadataResourceTest {
 
         verify(metadataBuilder).setCredentialIssuer(SELF_URL);
         verify(metadataBuilder).setCredentialEndpoint(SELF_URL + "/credential");
-        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        verify(metadataBuilder).setAuthorizationServers(List.of(AUTH_SERVER_URL));
         verify(metadataBuilder).setNotificationEndpoint(SELF_URL + "/notification");
         verify(metadataBuilder).setIacasEndpoint(SELF_URL + "/iacas");
         verify(metadataBuilder)
