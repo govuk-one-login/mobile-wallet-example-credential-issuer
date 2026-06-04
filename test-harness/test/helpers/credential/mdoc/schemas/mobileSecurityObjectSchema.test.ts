@@ -1,6 +1,5 @@
 import { getAjvInstance } from "../../../ajv/ajvInstance";
 import { mobileSecurityObjectSchema } from "./mobileSecurityObjectSchema";
-import { testMobileSecurityObjectBuilder } from "./testMobileSecurityObjectBuilder";
 import { MobileSecurityObject } from "../types/mobileSecurityObject";
 
 describe("mobileSecurityObjectSchema", () => {
@@ -8,9 +7,7 @@ describe("mobileSecurityObjectSchema", () => {
   const validate = ajv.compile(mobileSecurityObjectSchema);
 
   it("should return false when it contains additional properties", () => {
-    const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-      extra: "not allowed",
-    });
+    const data = { ...defaultData, extra: "not allowed" };
 
     const isValid = validate(data);
 
@@ -50,9 +47,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("version", () => {
     it("should return false when it is not '1.0'", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-        version: "2.0",
-      });
+      const data = { ...defaultData, version: "2.0" };
 
       const isValid = validate(data);
 
@@ -69,9 +64,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("digestAlgorithm", () => {
     it("should return false when it is not 'SHA-256'", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-        digestAlgorithm: "SHA-512",
-      });
+      const data = { ...defaultData, digestAlgorithm: "SHA-512" };
 
       const isValid = validate(data);
 
@@ -88,9 +81,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("docType", () => {
     it("should return false when it is not 'org.iso.18013.5.1.mDL'", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-        docType: "invalid.doc.type",
-      });
+      const data = { ...defaultData, docType: "invalid.doc.type" };
 
       const isValid = validate(data);
 
@@ -107,11 +98,12 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("deviceKeyInfo", () => {
     it("should return false when deviceKey is missing", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         deviceKeyInfo: {
           keyAuthorizations: defaultData.deviceKeyInfo.keyAuthorizations,
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -125,11 +117,12 @@ describe("mobileSecurityObjectSchema", () => {
     });
 
     it("should return false when keyAuthorizations is missing", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         deviceKeyInfo: {
           deviceKey: new Map(),
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -143,12 +136,13 @@ describe("mobileSecurityObjectSchema", () => {
     });
 
     it("should return false when it contains additional properties", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         deviceKeyInfo: {
           ...defaultData.deviceKeyInfo,
           extra: "not allowed",
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -163,14 +157,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("deviceKey", () => {
       it("should return false when it is not a Map", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            deviceKeyInfo: {
-              deviceKey: {},
-              keyAuthorizations: defaultData.deviceKeyInfo.keyAuthorizations,
-            },
+        const data = {
+          ...defaultData,
+          deviceKeyInfo: {
+            deviceKey: {},
+            keyAuthorizations: defaultData.deviceKeyInfo.keyAuthorizations,
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -180,14 +173,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("keyAuthorizations", () => {
       it("should return false when nameSpaces is missing", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            deviceKeyInfo: {
-              deviceKey: new Map(),
-              keyAuthorizations: {},
-            },
+        const data = {
+          ...defaultData,
+          deviceKeyInfo: {
+            deviceKey: new Map(),
+            keyAuthorizations: {},
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -202,16 +194,15 @@ describe("mobileSecurityObjectSchema", () => {
 
       describe("nameSpaces", () => {
         it("should return false when it contains an invalid namespace", () => {
-          const data = testMobileSecurityObjectBuilder(
-            defaultData,
-          ).withOverrides({
+          const data = {
+            ...defaultData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
                 nameSpaces: ["org.iso.18013.5.1", "invalid.namespace"],
               },
             },
-          });
+          };
 
           const isValid = validate(data);
 
@@ -225,16 +216,15 @@ describe("mobileSecurityObjectSchema", () => {
         });
 
         it("should return false when it has fewer than 2 items", () => {
-          const data = testMobileSecurityObjectBuilder(
-            defaultData,
-          ).withOverrides({
+          const data = {
+            ...defaultData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
                 nameSpaces: ["org.iso.18013.5.1"],
               },
             },
-          });
+          };
 
           const isValid = validate(data);
 
@@ -248,9 +238,8 @@ describe("mobileSecurityObjectSchema", () => {
         });
 
         it("should return false when it has more than 2 items", () => {
-          const data = testMobileSecurityObjectBuilder(
-            defaultData,
-          ).withOverrides({
+          const data = {
+            ...defaultData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
@@ -261,7 +250,7 @@ describe("mobileSecurityObjectSchema", () => {
                 ],
               },
             },
-          });
+          };
 
           const isValid = validate(data);
 
@@ -275,16 +264,15 @@ describe("mobileSecurityObjectSchema", () => {
         });
 
         it("should return false when items are not unique", () => {
-          const data = testMobileSecurityObjectBuilder(
-            defaultData,
-          ).withOverrides({
+          const data = {
+            ...defaultData,
             deviceKeyInfo: {
               deviceKey: new Map(),
               keyAuthorizations: {
                 nameSpaces: ["org.iso.18013.5.1", "org.iso.18013.5.1"],
               },
             },
-          });
+          };
 
           const isValid = validate(data);
 
@@ -302,11 +290,12 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("valueDigests", () => {
     it("should return false when org.iso.18013.5.1 is missing", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         valueDigests: {
           "org.iso.18013.5.1.GB": new Map(),
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -320,11 +309,12 @@ describe("mobileSecurityObjectSchema", () => {
     });
 
     it("should return false when org.iso.18013.5.1.GB is missing", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         valueDigests: {
           "org.iso.18013.5.1": new Map(),
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -338,12 +328,13 @@ describe("mobileSecurityObjectSchema", () => {
     });
 
     it("should return false when it contains additional properties", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         valueDigests: {
           ...defaultData.valueDigests,
           "org.unknown.namespace": new Map(),
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -358,14 +349,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("org.iso.18013.5.1", () => {
       it("should return false when it is not a Map", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            valueDigests: {
-              "org.iso.18013.5.1": {},
-              "org.iso.18013.5.1.GB": new Map(),
-            },
+        const data = {
+          ...defaultData,
+          valueDigests: {
+            "org.iso.18013.5.1": {},
+            "org.iso.18013.5.1.GB": new Map(),
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -375,14 +365,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("org.iso.18013.5.1.GB", () => {
       it("should return false when it is not a Map", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            valueDigests: {
-              "org.iso.18013.5.1": new Map(),
-              "org.iso.18013.5.1.GB": {},
-            },
+        const data = {
+          ...defaultData,
+          valueDigests: {
+            "org.iso.18013.5.1": new Map(),
+            "org.iso.18013.5.1.GB": {},
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -395,9 +384,7 @@ describe("mobileSecurityObjectSchema", () => {
     it("should return false when signed is missing", () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { signed, ...rest } = defaultData.validityInfo;
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-        validityInfo: rest,
-      });
+      const data = { ...defaultData, validityInfo: rest };
 
       const isValid = validate(data);
 
@@ -413,9 +400,7 @@ describe("mobileSecurityObjectSchema", () => {
     it("should return false when validFrom is missing", () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { validFrom, ...rest } = defaultData.validityInfo;
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-        validityInfo: rest,
-      });
+      const data = { ...defaultData, validityInfo: rest };
 
       const isValid = validate(data);
 
@@ -431,9 +416,7 @@ describe("mobileSecurityObjectSchema", () => {
     it("should return false when validUntil is missing", () => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { validUntil, ...rest } = defaultData.validityInfo;
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-        validityInfo: rest,
-      });
+      const data = { ...defaultData, validityInfo: rest };
 
       const isValid = validate(data);
 
@@ -447,12 +430,13 @@ describe("mobileSecurityObjectSchema", () => {
     });
 
     it("should return false when it contains additional properties", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         validityInfo: {
           ...defaultData.validityInfo,
           extra: "not allowed",
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -467,14 +451,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("signed", () => {
       it("should return false when it is not a valid date-time", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            validityInfo: {
-              ...defaultData.validityInfo,
-              signed: "not-a-date",
-            },
+        const data = {
+          ...defaultData,
+          validityInfo: {
+            ...defaultData.validityInfo,
+            signed: "not-a-date",
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -491,14 +474,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("validFrom", () => {
       it("should return false when it is not a valid date-time", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            validityInfo: {
-              ...defaultData.validityInfo,
-              validFrom: "not-a-date",
-            },
+        const data = {
+          ...defaultData,
+          validityInfo: {
+            ...defaultData.validityInfo,
+            validFrom: "not-a-date",
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -515,14 +497,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("validUntil", () => {
       it("should return false when it is not a valid date-time", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            validityInfo: {
-              ...defaultData.validityInfo,
-              validUntil: "not-a-date",
-            },
+        const data = {
+          ...defaultData,
+          validityInfo: {
+            ...defaultData.validityInfo,
+            validUntil: "not-a-date",
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -539,14 +520,13 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("expectedUpdate", () => {
       it("should return false when it is not a valid date-time", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            validityInfo: {
-              ...defaultData.validityInfo,
-              expectedUpdate: "not-a-date",
-            },
+        const data = {
+          ...defaultData,
+          validityInfo: {
+            ...defaultData.validityInfo,
+            expectedUpdate: "not-a-date",
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -563,11 +543,7 @@ describe("mobileSecurityObjectSchema", () => {
       it("should return true when it is absent", () => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { expectedUpdate, ...rest } = defaultData.validityInfo;
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            validityInfo: rest,
-          },
-        );
+        const data = { ...defaultData, validityInfo: rest };
 
         expect(validate(data)).toBe(true);
       });
@@ -576,9 +552,7 @@ describe("mobileSecurityObjectSchema", () => {
 
   describe("status", () => {
     it("should return false when status_list is missing", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
-        status: {},
-      });
+      const data = { ...defaultData, status: {} };
 
       const isValid = validate(data);
 
@@ -592,7 +566,8 @@ describe("mobileSecurityObjectSchema", () => {
     });
 
     it("should return false when it contains additional properties", () => {
-      const data = testMobileSecurityObjectBuilder(defaultData).withOverrides({
+      const data = {
+        ...defaultData,
         status: {
           status_list: {
             idx: 1,
@@ -600,7 +575,7 @@ describe("mobileSecurityObjectSchema", () => {
           },
           extra: "not allowed",
         },
-      });
+      };
 
       const isValid = validate(data);
 
@@ -615,15 +590,14 @@ describe("mobileSecurityObjectSchema", () => {
 
     describe("status_list", () => {
       it("should return false when idx is missing", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            status: {
-              status_list: {
-                uri: "https://example.com/status",
-              },
+        const data = {
+          ...defaultData,
+          status: {
+            status_list: {
+              uri: "https://example.com/status",
             },
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -637,15 +611,14 @@ describe("mobileSecurityObjectSchema", () => {
       });
 
       it("should return false when uri is missing", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            status: {
-              status_list: {
-                idx: 1,
-              },
+        const data = {
+          ...defaultData,
+          status: {
+            status_list: {
+              idx: 1,
             },
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -659,17 +632,16 @@ describe("mobileSecurityObjectSchema", () => {
       });
 
       it("should return false when it contains additional properties", () => {
-        const data = testMobileSecurityObjectBuilder(defaultData).withOverrides(
-          {
-            status: {
-              status_list: {
-                idx: 1,
-                uri: "https://example.com/status",
-                extra: "not allowed",
-              },
+        const data = {
+          ...defaultData,
+          status: {
+            status_list: {
+              idx: 1,
+              uri: "https://example.com/status",
+              extra: "not allowed",
             },
           },
-        );
+        };
 
         const isValid = validate(data);
 
@@ -684,16 +656,15 @@ describe("mobileSecurityObjectSchema", () => {
 
       describe("idx", () => {
         it("should return false when it is not a number", () => {
-          const data = testMobileSecurityObjectBuilder(
-            defaultData,
-          ).withOverrides({
+          const data = {
+            ...defaultData,
             status: {
               status_list: {
                 idx: "not-a-number",
                 uri: "https://example.com/status",
               },
             },
-          });
+          };
 
           const isValid = validate(data);
 
@@ -710,16 +681,15 @@ describe("mobileSecurityObjectSchema", () => {
 
       describe("uri", () => {
         it("should return false when it is not a valid URI", () => {
-          const data = testMobileSecurityObjectBuilder(
-            defaultData,
-          ).withOverrides({
+          const data = {
+            ...defaultData,
             status: {
               status_list: {
                 idx: 1,
                 uri: "not-a-uri",
               },
             },
-          });
+          };
 
           const isValid = validate(data);
 
