@@ -51,8 +51,7 @@ public class CredentialOfferService {
         try {
             CredentialType.fromType(credentialType);
         } catch (IllegalArgumentException e) {
-            throw new CredentialOfferException(
-                    "credential_configuration_ids not found in issuer metadata");
+            throw new CredentialOfferException(e.getMessage());
         }
 
         SignedJWT preAuthorizedCode =
