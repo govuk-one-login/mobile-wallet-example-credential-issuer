@@ -131,9 +131,7 @@ class AccessTokenServiceTest {
     void Should_ThrowAccessTokenValidationException_When_TokenIsExpired() {
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
-                        .withExpirationTime(
-                                Date.from(
-                                        Instant.now().minusSeconds(180))) // Expired 180 seconds ago
+                        .withExpirationTime(Date.from(Instant.parse("2026-05-07T10:00:00Z")))
                         .build();
 
         AccessTokenValidationException exception =
