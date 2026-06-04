@@ -302,6 +302,28 @@ describe("isValidPreAuthorizedCode", () => {
       'INVALID_PAYLOAD: Invalid "clientId" value in token. Should be "TEST_CLIENT_ID" but found "invalid-client-id"',
     );
   });
+
+  it("should throw 'INVALID_PAYLOAD' error when credential_configuration_ids does not match expected value", async () => {
+    const preAuthorizedCode = await getTestJwt(
+      authServerUrl,
+      criUrl,
+      clientId,
+      kid,
+    );
+    await expect(
+      isValidPreAuthorizedCode(
+        preAuthorizedCode,
+        jwks,
+        criUrl,
+        authServerUrl,
+        clientId,
+        "InvalidCredentialConfigId",
+      ),
+    ).rejects.toThrow(
+      'INVALID_PAYLOAD: Invalid "credential_configuration_ids" value in token. Should be "InvalidCredentialConfigId" but found "org.iso.18013.5.1.mDL"',
+    );
+  });
+
 });
 
 async function getTestJwt(audience, issuer, clientId, kid, exp = "30 minutes") {
