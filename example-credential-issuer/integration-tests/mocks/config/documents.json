@@ -17,7 +17,8 @@
       "dateOfBirth-day": "06",
       "dateOfBirth-month": "03"
     },
-    "timeToLive": 1768571177
+    "timeToLive": 1768571177,
+    "expectedUpdateSeconds": 1592000
   },
   {
     "itemId": "03266ff7-2cbc-4e26-874d-5a80eb6daf7d",
@@ -67,6 +68,7 @@
       "family_name": "Edwards",
       "resident_city": "London"
     },
-    "timeToLive": 1768571177
+    "timeToLive": 1768571177,
+    "expectedUpdateSeconds": null
   }
 ]

@@ -44,13 +44,18 @@ public class ValidityInfoSerializer extends StdSerializer<ValidityInfo> {
             throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
-        cborGenerator.writeStartObject(3);
+        int mapSize = value.expectedUpdate().isPresent() ? 4 : 3;
+        cborGenerator.writeStartObject(mapSize);
         cborGenerator.writeFieldName("signed");
         cborGenerator.writeObject(value.signed());
         cborGenerator.writeFieldName("validFrom");
         cborGenerator.writeObject(value.validFrom());
         cborGenerator.writeFieldName("validUntil");
         cborGenerator.writeObject(value.validUntil());
+        if (value.expectedUpdate().isPresent()) {
+            cborGenerator.writeFieldName("expectedUpdate");
+            cborGenerator.writeObject(value.expectedUpdate().get());
+        }
         cborGenerator.writeEndObject();
     }
 }
