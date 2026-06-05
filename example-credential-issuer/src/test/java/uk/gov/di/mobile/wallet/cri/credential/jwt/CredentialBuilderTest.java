@@ -34,7 +34,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -71,7 +70,7 @@ class CredentialBuilderTest {
 
     @BeforeAll
     static void beforeAll() {
-        fixedInstant = Instant.now();
+        fixedInstant = Instant.parse("2024-01-15T10:30:00Z");
         objectMapper = new ObjectMapper();
     }
 
@@ -161,14 +160,14 @@ class CredentialBuilderTest {
         assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
         assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
         assertThat(
-                credential.getJWTClaimsSet().getIssueTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
+                credential.getJWTClaimsSet().getIssueTime().toInstant(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
-                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
+                credential.getJWTClaimsSet().getNotBeforeTime().toInstant(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
-                credential.getJWTClaimsSet().getExpirationTime().toString(),
-                equalTo(Date.from(fixedInstant.plus(30, ChronoUnit.DAYS)).toString()));
+                credential.getJWTClaimsSet().getExpirationTime().toInstant(),
+                equalTo(fixedInstant.plus(30, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
                 credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
@@ -220,14 +219,14 @@ class CredentialBuilderTest {
         assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
         assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
         assertThat(
-                credential.getJWTClaimsSet().getIssueTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
+                credential.getJWTClaimsSet().getIssueTime().toInstant(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
-                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
+                credential.getJWTClaimsSet().getNotBeforeTime().toInstant(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
-                credential.getJWTClaimsSet().getExpirationTime().toString(),
-                equalTo(Date.from(fixedInstant.plus(30, ChronoUnit.DAYS)).toString()));
+                credential.getJWTClaimsSet().getExpirationTime().toInstant(),
+                equalTo(fixedInstant.plus(30, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
                 credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
@@ -279,14 +278,14 @@ class CredentialBuilderTest {
         assertThat(credential.getJWTClaimsSet().getIssuer(), equalTo(EXAMPLE_CREDENTIAL_ISSUER));
         assertThat(credential.getJWTClaimsSet().getSubject(), equalTo(DID_KEY));
         assertThat(
-                credential.getJWTClaimsSet().getIssueTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
+                credential.getJWTClaimsSet().getIssueTime().toInstant(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
-                credential.getJWTClaimsSet().getNotBeforeTime().toString(),
-                equalTo(Date.from(fixedInstant).toString()));
+                credential.getJWTClaimsSet().getNotBeforeTime().toInstant(),
+                equalTo(fixedInstant.truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
-                credential.getJWTClaimsSet().getExpirationTime().toString(),
-                equalTo(Date.from(fixedInstant.plus(30, ChronoUnit.DAYS)).toString()));
+                credential.getJWTClaimsSet().getExpirationTime().toInstant(),
+                equalTo(fixedInstant.plus(30, ChronoUnit.DAYS).truncatedTo(ChronoUnit.SECONDS)));
         assertThat(
                 credential.getJWTClaimsSet().getListClaim("@context"),
                 equalTo(List.of("https://www.w3.org/ns/credentials/v2")));
