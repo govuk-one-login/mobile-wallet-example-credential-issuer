@@ -9,7 +9,6 @@ import java.security.cert.X509Certificate;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 /**
  * Represents information extracted from an X.509 certificate.
@@ -33,8 +32,8 @@ public record CertificateData(
      *     missing.
      */
     public static CertificateData fromCertificate(X509Certificate certificate) {
-        String isoNotBefore = getIsoDate(certificate.getNotBefore());
-        String isoNotAfter = getIsoDate(certificate.getNotAfter());
+        String isoNotBefore = getIsoDate(certificate.getNotBefore().toInstant());
+        String isoNotAfter = getIsoDate(certificate.getNotAfter().toInstant());
 
         X500Name x500Name = new X500Name(certificate.getSubjectX500Principal().getName());
         String commonName = extractValue(x500Name, BCStyle.CN);
@@ -57,11 +56,9 @@ public record CertificateData(
      * @param date The date to format.
      * @return The ISO 8601 formatted date string.
      */
-    private static String getIsoDate(Date date) {
+    private static String getIsoDate(Instant instant) {
         DateTimeFormatter dateTimeFormatter =
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSX").withZone(ZoneOffset.UTC);
-
-        Instant instant = date.toInstant();
         return dateTimeFormatter.format(instant);
     }
 
