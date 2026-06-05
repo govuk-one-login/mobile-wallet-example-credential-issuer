@@ -19,7 +19,6 @@ import uk.gov.di.mobile.wallet.cri.notification.NotificationResource;
 import uk.gov.di.mobile.wallet.cri.revoke.RevokeResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 
 /**
@@ -48,11 +47,10 @@ public class ExampleCriApp extends Application<ConfigurationService> {
      *
      * @param configurationService The application's configuration.
      * @param environment The Dropwizard environment.
-     * @throws MalformedURLException If a URL used in service initialization is malformed.
      */
     @Override
     public void run(final ConfigurationService configurationService, final Environment environment)
-            throws MalformedURLException, NoSuchAlgorithmException {
+            throws NoSuchAlgorithmException {
 
         Services services = ServicesFactory.create(configurationService, environment);
 

@@ -45,7 +45,6 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
-import java.net.MalformedURLException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -67,11 +66,10 @@ public class ServicesFactory {
      * @param configurationService The application's configuration.
      * @param environment The application's environment.
      * @return A {@link Services} instance containing all initialized services.
-     * @throws MalformedURLException If a URL used in service initialization is malformed.
      */
     public static Services create(
             ConfigurationService configurationService, Environment environment)
-            throws MalformedURLException, NoSuchAlgorithmException {
+            throws NoSuchAlgorithmException {
 
         KmsService kmsService = new KmsService(KmsService.getClient(configurationService));
         PreAuthorizedCodeBuilder preAuthorizedCodeBuilder =

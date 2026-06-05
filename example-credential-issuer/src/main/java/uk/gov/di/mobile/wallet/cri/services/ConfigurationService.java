@@ -5,8 +5,6 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.Configuration;
 
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Configuration service for managing application settings. Provides environment variable-based
@@ -135,24 +133,6 @@ public class ConfigurationService extends Configuration {
      */
     public String getOneLoginAuthServerUrl() {
         return createValidatedUri("ONE_LOGIN_AUTH_SERVER_URL", LOCAL_STS_MOCK_URL).toString();
-    }
-
-    public List<String> getOneLoginAuthServerUrls() {
-        String urisString = getEnvOrDefault("ONE_LOGIN_AUTH_SERVER_URLS", LOCAL_STS_MOCK_URL);
-        return Arrays.stream(urisString.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .map(
-                        uriString -> {
-                            try {
-                                return URI.create(uriString).toString();
-                            } catch (IllegalArgumentException exception) {
-                                throw new IllegalArgumentException(
-                                        "Invalid URI for ONE_LOGIN_AUTH_SERVER_URLS: " + uriString,
-                                        exception);
-                            }
-                        })
-                .toList();
     }
 
     // ===========================================

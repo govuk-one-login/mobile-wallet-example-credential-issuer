@@ -26,8 +26,7 @@ import static org.mockito.Mockito.when;
 class MetadataResourceTest {
 
     private static final String SELF_URL = "https://credential-issuer.test.gov.uk";
-    private static final List<String> AUTH_SERVER_URL =
-            List.of("https://authorization-server.test.gov.uk");
+    private static final String AUTH_SERVER_URL = "https://authorization-server.test.gov.uk";
     private static final String CREDENTIAL_STORE_URL = "https://credential-store.test.gov.uk";
 
     private final ConfigurationService configurationService = mock(ConfigurationService.class);
@@ -38,7 +37,7 @@ class MetadataResourceTest {
 
     @BeforeEach
     void setUp() {
-        when(configurationService.getOneLoginAuthServerUrls()).thenReturn(AUTH_SERVER_URL);
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getEnvironment()).thenReturn("test");
         when(configurationService.getCredentialStoreUrl())
@@ -73,7 +72,7 @@ class MetadataResourceTest {
 
         verify(metadataBuilder).setCredentialIssuer(SELF_URL);
         verify(metadataBuilder).setCredentialEndpoint(SELF_URL + "/credential");
-        verify(metadataBuilder).setAuthorizationServers(AUTH_SERVER_URL);
+        verify(metadataBuilder).setAuthorizationServers(List.of(AUTH_SERVER_URL));
         verify(metadataBuilder).setNotificationEndpoint(SELF_URL + "/notification");
         verify(metadataBuilder).setIacasEndpoint(SELF_URL + "/iacas");
         verify(metadataBuilder)
