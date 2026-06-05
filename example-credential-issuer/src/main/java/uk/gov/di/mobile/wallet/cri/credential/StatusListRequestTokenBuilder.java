@@ -5,6 +5,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignRequest;
@@ -17,7 +18,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.time.Clock;
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
 
 import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.toBase64UrlEncodedSignature;
@@ -117,7 +117,7 @@ public class StatusListRequestTokenBuilder {
 
         return new JWTClaimsSet.Builder()
                 .issuer(configurationService.getStatusListClientId())
-                .issueTime(Date.from(now))
+                .claim(JWTClaimNames.ISSUED_AT, now.getEpochSecond())
                 .jwtID(jti);
     }
 }
