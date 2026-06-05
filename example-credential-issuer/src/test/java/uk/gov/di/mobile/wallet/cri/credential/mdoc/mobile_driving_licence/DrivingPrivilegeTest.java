@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,8 +25,8 @@ class DrivingPrivilegeTest {
     private static final String ISSUE_DATE = "02-01-2025";
     private static final String EXPIRY_DATE = "01-01-2035";
     private static final List<Code> CODES = List.of(new Code("01"), new Code("22(7)"));
-    private static final LocalDate EXPECTED_ISSUE_DATE = LocalDate.of(2025, 1, 2);
-    private static final LocalDate EXPECTED_EXPIRY_DATE = LocalDate.of(2035, 1, 1);
+    private static final LocalDate EXPECTED_ISSUE_DATE = LocalDate.of(2025, Month.JANUARY, 2);
+    private static final LocalDate EXPECTED_EXPIRY_DATE = LocalDate.of(2035, Month.JANUARY, 1);
 
     @Test
     void Should_SetAllProperties_When_InputIsValid() {
