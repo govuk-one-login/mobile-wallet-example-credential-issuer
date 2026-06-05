@@ -13,6 +13,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.mobile_driving_licence.Drivin
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +50,7 @@ class DrivingPrivilegeSerializerTest {
         inOrder.verify(cborGenerator).writeStartObject(2);
         inOrder.verify(cborGenerator).writeStringField("vehicle_category_code", "B1");
         inOrder.verify(cborGenerator).writeFieldName("issue_date");
-        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2024, 1, 1));
+        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2024, Month.JANUARY, 1));
         inOrder.verify(cborGenerator).writeEndObject();
     }
 
@@ -64,9 +65,9 @@ class DrivingPrivilegeSerializerTest {
         inOrder.verify(cborGenerator).writeStartObject(3);
         inOrder.verify(cborGenerator).writeStringField("vehicle_category_code", "B1");
         inOrder.verify(cborGenerator).writeFieldName("issue_date");
-        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2024, 1, 1));
+        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2024, Month.JANUARY, 1));
         inOrder.verify(cborGenerator).writeFieldName("expiry_date");
-        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2025, 12, 31));
+        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2025, Month.DECEMBER, 31));
         inOrder.verify(cborGenerator).writeEndObject();
     }
 
@@ -82,9 +83,9 @@ class DrivingPrivilegeSerializerTest {
         inOrder.verify(cborGenerator).writeStartObject(4);
         inOrder.verify(cborGenerator).writeStringField("vehicle_category_code", "B1");
         inOrder.verify(cborGenerator).writeFieldName("issue_date");
-        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2024, 1, 1));
+        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2024, Month.JANUARY, 1));
         inOrder.verify(cborGenerator).writeFieldName("expiry_date");
-        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2025, 12, 31));
+        inOrder.verify(cborGenerator).writeObject(LocalDate.of(2025, Month.DECEMBER, 31));
         inOrder.verify(cborGenerator).writeFieldName("codes");
         inOrder.verify(cborGenerator).writeStartArray(List.of(new Code("A"), new Code("B")), 2);
         inOrder.verify(cborGenerator).writeStartObject(1);

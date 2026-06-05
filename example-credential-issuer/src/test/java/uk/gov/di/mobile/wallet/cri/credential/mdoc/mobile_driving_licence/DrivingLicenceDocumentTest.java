@@ -5,7 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
-import java.time.Period;
+import java.time.Month;
 import java.time.format.DateTimeParseException;
 import java.util.Arrays;
 import java.util.Base64;
@@ -65,21 +65,18 @@ class DrivingLicenceDocumentTest {
                         UN_DISTINGUISHING_SIGN,
                         PROVISIONAL_DRIVING_PRIVILEGES);
 
-        LocalDate birthDate = LocalDate.of(1985, 5, 24);
-        int age = Period.between(birthDate, LocalDate.now()).getYears();
-
         assertEquals(FAMILY_NAME, document.getFamilyName());
         assertEquals(GIVEN_NAME, document.getGivenName());
         assertEquals(TITLE, document.getTitle());
         assertEquals(WELSH_LICENSE, document.isWelshLicence());
         assertArrayEquals(Base64.getDecoder().decode(PORTRAIT), document.getPortrait());
-        assertEquals(LocalDate.of(1985, 5, 24), document.getBirthDate());
-        assertEquals(age >= 18, document.getAgeOver18());
-        assertEquals(age >= 21, document.getAgeOver21());
-        assertEquals(age >= 25, document.getAgeOver25());
+        assertEquals(LocalDate.of(1985, Month.MAY, 24), document.getBirthDate());
+        assertTrue(document.getAgeOver18());
+        assertTrue(document.getAgeOver21());
+        assertTrue(document.getAgeOver25());
         assertEquals(BIRTH_PLACE, document.getBirthPlace());
-        assertEquals(LocalDate.of(2020, 1, 10), document.getIssueDate());
-        assertEquals(LocalDate.of(2030, 1, 9), document.getExpiryDate());
+        assertEquals(LocalDate.of(2020, Month.JANUARY, 10), document.getIssueDate());
+        assertEquals(LocalDate.of(2030, Month.JANUARY, 9), document.getExpiryDate());
         assertEquals(ISSUING_AUTHORITY, document.getIssuingAuthority());
         assertEquals(ISSUING_COUNTRY, document.getIssuingCountry());
         assertEquals(DOCUMENT_NUMBER, document.getDocumentNumber());

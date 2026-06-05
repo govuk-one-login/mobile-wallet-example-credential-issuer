@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.Month;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -26,7 +27,7 @@ class LocalDateCBORSerializerTest {
 
     @Test
     void Should_SerializeLocalDate() throws IOException {
-        LocalDate valueToSerialize = LocalDate.of(2025, 4, 4);
+        LocalDate valueToSerialize = LocalDate.of(2025, Month.APRIL, 4);
 
         serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
