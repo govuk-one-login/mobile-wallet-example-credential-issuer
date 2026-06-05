@@ -3,14 +3,16 @@ package testUtils;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 public class MockAccessTokenBuilder {
+
+    private static final Instant FIXED_EXPIRY = Instant.parse("2099-01-01T00:00:00Z");
 
     private final JWSHeader.Builder headerBuilder;
     private final JWTClaimsSet.Builder claimsBuilder =
@@ -20,7 +22,7 @@ public class MockAccessTokenBuilder {
                     .audience("https://issuer-url.gov.uk")
                     .issuer("https://auth-url.gov.uk")
                     .jwtID("e75b7cc0-c5ef-4075-ad22-3b239b6db89c")
-                    .expirationTime(Date.from(Instant.now().plusSeconds(180)))
+                    .claim(JWTClaimNames.EXPIRATION_TIME, FIXED_EXPIRY.getEpochSecond())
                     .claim("c_nonce", "134e0c41-a8b4-46d4-aec8-cd547e125589")
                     .claim(
                             "credential_identifiers",
@@ -53,8 +55,8 @@ public class MockAccessTokenBuilder {
         return this;
     }
 
-    public MockAccessTokenBuilder withExpirationTime(Date expirationTime) {
-        claimsBuilder.expirationTime(expirationTime);
+    public MockAccessTokenBuilder withExpirationTime(Instant expirationTime) {
+        claimsBuilder.claim(JWTClaimNames.EXPIRATION_TIME, expirationTime.getEpochSecond());
         return this;
     }
 
