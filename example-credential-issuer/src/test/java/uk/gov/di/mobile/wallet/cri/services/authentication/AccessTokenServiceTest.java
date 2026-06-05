@@ -54,8 +54,7 @@ class AccessTokenServiceTest {
                     }
                 };
         when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
-        when(configurationService.getOneLoginAuthServerUrls())
-                .thenReturn(List.of("https://auth-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
     }
 
     @Test
@@ -124,7 +123,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
-                "JWT missing required claims: [aud, c_nonce, credential_identifiers, exp, jti, sub]",
+                "JWT missing required claims: [aud, c_nonce, credential_identifiers, exp, iss, jti, sub]",
                 exception.getMessage());
     }
 
@@ -132,9 +131,7 @@ class AccessTokenServiceTest {
     void Should_ThrowAccessTokenValidationException_When_TokenIsExpired() {
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
-                        .withExpirationTime(
-                                Date.from(
-                                        Instant.now().minusSeconds(180))) // Expired 180 seconds ago
+                        .withExpirationTime(Date.from(Instant.parse("2026-05-07T10:00:00Z")))
                         .build();
 
         AccessTokenValidationException exception =
@@ -179,9 +176,7 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals(
-                "Access token issuer not in expected issuers: invalid-issuer",
-                exception.getMessage());
+        assertEquals("JWT iss claim value rejected", exception.getMessage());
     }
 
     @Test

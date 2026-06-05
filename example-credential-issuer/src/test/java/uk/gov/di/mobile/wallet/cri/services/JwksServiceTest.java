@@ -10,19 +10,16 @@ import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
 import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
 import software.amazon.awssdk.services.kms.model.KeyMetadata;
-import uk.gov.di.mobile.wallet.cri.credential.proof.did_key.AddressFormatException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
-import java.net.MalformedURLException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -37,6 +34,7 @@ import static com.nimbusds.jose.JWSAlgorithm.ES256;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
@@ -58,14 +56,11 @@ class JwksServiceTest {
 
     @BeforeEach
     void setUp() {
-        when(configurationService.getOneLoginAuthServerUrl())
-                .thenReturn("https://test-authorization-server.gov.uk");
         when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key");
     }
 
     @Test
-    void should_Return_Jwk_When_Found()
-            throws AddressFormatException, KeySourceException, ParseException {
+    void should_ReturnMatchingJwk_WhenKeyIdExists() throws KeySourceException, ParseException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         JWK publicKey =
                 JWK.parse(
@@ -79,9 +74,7 @@ class JwksServiceTest {
     }
 
     @Test
-    @DisplayName("Should Throw KeySource Exception When Jwk not found")
-    void should_ThrowException_When_Jwk_Not_Found()
-            throws AddressFormatException, KeySourceException {
+    void should_ThrowKeySourceException_When_KeyIdNotFound() throws KeySourceException {
         jwksService = new JwksService(configurationService, kmsService, jwkSource);
         final List<JWK> jwkList = Collections.emptyList();
         when(jwkSource.get(any(JWKSelector.class), isNull())).thenReturn(jwkList);
@@ -97,18 +90,45 @@ class JwksServiceTest {
     }
 
     @Test
-    void should_Test_Additional_Class_Constructor()
-            throws AddressFormatException, MalformedURLException {
+    void should_ConstructWithoutThrowing() {
         jwksService = new JwksService(configurationService, kmsService);
 
         assertThat(jwksService, instanceOf(JwksService.class));
     }
 
     @Test
-    void should_Return_PublicKey_As_Jwks()
-            throws AddressFormatException,
-                    MalformedURLException,
-                    InvalidAlgorithmParameterException,
+    void should_ThrowKeySourceException_When_JwksUrlIsMalformed() {
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("not a valid url");
+        when(configurationService.getJwksEndpoint()).thenReturn("/.well-known/jwks.json");
+        jwksService = new JwksService(configurationService, kmsService);
+
+        KeySourceException exception =
+                assertThrows(
+                        KeySourceException.class,
+                        () -> jwksService.retrieveJwkFromURLWithKeyId(TEST_KEY_ID));
+
+        assertEquals("Failed to build JWKS URL", exception.getMessage());
+    }
+
+    @Test
+    void should_BuildJwkSourceFromConfig_WhenUrlIsValid() {
+        when(configurationService.getOneLoginAuthServerUrl())
+                .thenReturn("https://oidc.example.com");
+        when(configurationService.getJwksEndpoint()).thenReturn("/.well-known/jwks.json");
+        jwksService = new JwksService(configurationService, kmsService);
+
+        // Source is built successfully; exception comes from the subsequent network call
+        KeySourceException exception =
+                assertThrows(
+                        KeySourceException.class,
+                        () -> jwksService.retrieveJwkFromURLWithKeyId(TEST_KEY_ID));
+        assertNotEquals("Failed to build JWKS URL", exception.getMessage());
+        assertNotEquals("No key found with key ID: " + TEST_KEY_ID, exception.getMessage());
+    }
+
+    @Test
+    void should_ReturnPublicKeyAsJwks_WhenKeyIsActive()
+            throws InvalidAlgorithmParameterException,
                     NoSuchAlgorithmException,
                     PEMException,
                     KeyNotActiveException {

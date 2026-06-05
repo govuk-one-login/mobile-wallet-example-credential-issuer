@@ -90,9 +90,9 @@ The service will be available at http://localhost:8080.
 
 ##### Testing with the Example CRI Test Harness
 
-The [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-harness) contains a mock of the GOV.UK One Login authorization server. You must configure your authorization server URLs to point to the mock and set the environment to `ci`:
+The [test harness](https://github.com/govuk-one-login/mobile-wallet-cri-test-harness) contains a mock of the GOV.UK One Login authorization server. You must configure your authorization server URL to point to the mock and set the environment to `ci`:
 
-`ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ONE_LOGIN_AUTH_SERVER_URLS=http://localhost:3001 ENVIRONMENT=ci ./gradlew run`.
+`ONE_LOGIN_AUTH_SERVER_URL=http://localhost:3001 ENVIRONMENT=ci ./gradlew run`.
 
 ## Deployment
 

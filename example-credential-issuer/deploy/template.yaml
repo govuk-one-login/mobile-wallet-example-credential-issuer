@@ -59,8 +59,7 @@ Mappings:
     dev:
       SelfUrl: "example-credential-issuer.wallet-onboarding.dev.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-      AuthServerUrl: "https://stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-      AuthServerUrls: "https://stub-credential-issuer.wallet-onboarding.dev.account.gov.uk,https://sts-mock.wallet-onboarding.dev.account.gov.uk"
+      AuthServerUrl: "https://sts-mock.wallet-onboarding.dev.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.dev.account.gov.uk/wallet"
       CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:219494607463:repository/cred-issuer-image-repo-containerrepository-7qtvqf9sk6lf
       CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
@@ -70,8 +69,7 @@ Mappings:
     build:
       SelfUrl: "example-credential-issuer.wallet-onboarding.build.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.build.account.gov.uk"
-      AuthServerUrl: "https://stub-credential-issuer.wallet-onboarding.build.account.gov.uk"
-      AuthServerUrls: "https://stub-credential-issuer.wallet-onboarding.build.account.gov.uk,https://sts-mock.wallet-onboarding.build.account.gov.uk"
+      AuthServerUrl: "https://sts-mock.wallet-onboarding.build.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.build.account.gov.uk/wallet"
       CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/cred-issuer-image-repo-containerrepository-g8ydsvmkc2et
       CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
@@ -82,7 +80,6 @@ Mappings:
       SelfUrl: "example-credential-issuer.wallet-onboarding.staging.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.staging.account.gov.uk"
       AuthServerUrl: "https://token.staging.account.gov.uk"
-      AuthServerUrls: "https://token.staging.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.staging.account.gov.uk/wallet"
       CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/cred-issuer-image-repo-containerrepository-g8ydsvmkc2et
       CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
@@ -93,7 +90,6 @@ Mappings:
       SelfUrl: "example-credential-issuer.wallet-onboarding.integration.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.integration.account.gov.uk"
       AuthServerUrl: "https://sts-mock.wallet-onboarding.integration.account.gov.uk"
-      AuthServerUrls: "https://sts-mock.wallet-onboarding.integration.account.gov.uk"
       WalletAppDeepLinkUrl: "mobile.integration.account.gov.uk/wallet"
       CredentialIssuerImageRepository: arn:aws:ecr:eu-west-2:899032468188:repository/cred-issuer-image-repo-containerrepository-g8ydsvmkc2et
       CertificatesBucketName: "wallet-doc-sign-cert-228170791542-certificates"
@@ -477,11 +473,6 @@ Resources:
                 - EnvironmentVariables
                 - !Ref Environment
                 - AuthServerUrl
-            - Name: ONE_LOGIN_AUTH_SERVER_URLS
-              Value: !FindInMap
-                - EnvironmentVariables
-                - !Ref Environment
-                - AuthServerUrls
             - Name: CERTIFICATE_AUTHORITY_ARN
               Value: !FindInMap [EnvironmentVariables, !Ref Environment, CertificateAuthorityArn]
             - Name: CERTIFICATES_BUCKET_NAME

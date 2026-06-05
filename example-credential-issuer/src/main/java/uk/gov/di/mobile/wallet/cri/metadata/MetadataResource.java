@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
+import java.util.List;
+
 @Singleton
 @Path("/.well-known/openid-credential-issuer")
 public class MetadataResource {
@@ -46,7 +48,7 @@ public class MetadataResource {
      *
      * <ul>
      *   <li>Credential issuer URL
-     *   <li>Authorization server URLs
+     *   <li>Authorization server URL
      *   <li>Service endpoints (credential, notification, IACAs)
      *   <li>Supported credential configurations
      *   <li>Display information
@@ -65,7 +67,7 @@ public class MetadataResource {
                             .setCredentialIssuer(selfUrl)
                             .setCredentialEndpoint(selfUrl + CREDENTIAL_ENDPOINT)
                             .setAuthorizationServers(
-                                    configurationService.getOneLoginAuthServerUrls())
+                                    List.of(configurationService.getOneLoginAuthServerUrl()))
                             .setNotificationEndpoint(selfUrl + NOTIFICATION_ENDPOINT)
                             .setIacasEndpoint(iacasEndpoint)
                             .setCredentialConfigurationsSupported(
