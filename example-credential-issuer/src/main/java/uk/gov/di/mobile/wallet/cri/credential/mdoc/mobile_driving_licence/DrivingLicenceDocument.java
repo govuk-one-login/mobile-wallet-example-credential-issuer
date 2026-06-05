@@ -10,6 +10,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.NamespaceTypes;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
@@ -145,7 +146,7 @@ public class DrivingLicenceDocument {
     }
 
     private int getAge(LocalDate birthDate) {
-        return Period.between(birthDate, LocalDate.now()).getYears();
+        return Period.between(birthDate, LocalDate.now(ZoneOffset.UTC)).getYears();
     }
 
     private byte[] getBytesFromBase64(String base64String) {
