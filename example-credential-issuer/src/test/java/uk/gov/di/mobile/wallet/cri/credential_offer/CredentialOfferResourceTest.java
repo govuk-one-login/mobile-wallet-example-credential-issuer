@@ -148,7 +148,7 @@ class CredentialOfferResourceTest {
         assertThat(response.getStatus(), is(400));
         assertThat(
                 response.readEntity(String.class),
-                is("credentialType '" + CREDENTIAL_TYPE + "' is not supported"));
+                is("{\"error\":\"credentialType '" + CREDENTIAL_TYPE + "' is not supported\"}"));
     }
 
     @Test
