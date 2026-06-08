@@ -65,14 +65,12 @@ class CredentialOfferServiceTest {
     void Should_BuildAndReturnCredentialOffer_ForEachCredentialType(String credentialType)
             throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                        CREDENTIAL_IDENTIFIER, credentialType))
+        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, credentialType))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(
-                        CREDENTIAL_IDENTIFIER, credentialType);
+                credentialOfferService.buildCredentialOffer(CREDENTIAL_IDENTIFIER, credentialType);
 
         assertEquals(
                 CREDENTIAL_ISSUER,
