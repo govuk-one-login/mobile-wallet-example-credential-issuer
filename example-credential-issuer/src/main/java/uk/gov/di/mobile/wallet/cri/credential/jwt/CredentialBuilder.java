@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.MessageType;
@@ -21,7 +22,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
 import java.util.Optional;
 
 import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.toBase64UrlEncodedSignature;
@@ -125,9 +125,6 @@ public class CredentialBuilder<T extends CredentialSubject> {
         Instant now = clock.instant();
         Instant expiry = now.plus(credentialTtlSeconds, ChronoUnit.SECONDS);
 
-        Date nowDate = Date.from(now);
-        Date expiryDate = Date.from(expiry);
-
         String validFromISO = ISO_FORMATTER.format(now);
         String validUntilISO = ISO_FORMATTER.format(expiry);
 
@@ -135,9 +132,9 @@ public class CredentialBuilder<T extends CredentialSubject> {
                 new JWTClaimsSet.Builder()
                         .issuer(configurationService.getSelfUrl().toString())
                         .subject(credentialSubject.getId())
-                        .issueTime(nowDate)
-                        .notBeforeTime(nowDate)
-                        .expirationTime(expiryDate)
+                        .claim(JWTClaimNames.ISSUED_AT, now.getEpochSecond())
+                        .claim(JWTClaimNames.NOT_BEFORE, now.getEpochSecond())
+                        .claim(JWTClaimNames.EXPIRATION_TIME, expiry.getEpochSecond())
                         .claim("@context", new String[] {"https://www.w3.org/ns/credentials/v2"})
                         .claim(
                                 "type",

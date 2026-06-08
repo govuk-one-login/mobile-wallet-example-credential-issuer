@@ -3,18 +3,20 @@ package testUtils;
 import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 
 import java.time.Instant;
-import java.util.Date;
 
 public class MockProofBuilder {
+
+    private static final Instant FIXED_ISSUE_TIME = Instant.parse("2024-01-15T10:30:00Z");
 
     private final JWSHeader.Builder headerBuilder;
     private final JWTClaimsSet.Builder claimsBuilder =
             new JWTClaimsSet.Builder()
-                    .issueTime(Date.from(Instant.now()))
+                    .claim(JWTClaimNames.ISSUED_AT, FIXED_ISSUE_TIME.getEpochSecond())
                     .audience("https://issuer-url.gov.uk")
                     .issuer("urn:fdc:gov:uk:wallet")
                     .claim("nonce", "134e0c41-a8b4-46d4-aec8-cd547e125589");

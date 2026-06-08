@@ -8,6 +8,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import javax.security.auth.x500.X500Principal;
 
 import java.security.cert.X509Certificate;
+import java.time.Instant;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -55,8 +56,10 @@ class CertificateDataTest {
     void Should_ThrowException_When_CommonNameIsMissing() {
         X500Principal subjectWithoutCN = new X500Principal("C=UK");
         when(mockCertificate.getSubjectX500Principal()).thenReturn(subjectWithoutCN);
-        when(mockCertificate.getNotBefore()).thenReturn(new Date());
-        when(mockCertificate.getNotAfter()).thenReturn(new Date());
+        when(mockCertificate.getNotBefore())
+                .thenReturn(Date.from(Instant.parse("2024-01-01T00:00:00Z")));
+        when(mockCertificate.getNotAfter())
+                .thenReturn(Date.from(Instant.parse("2025-01-01T00:00:00Z")));
 
         IllegalArgumentException exception =
                 assertThrows(
@@ -70,8 +73,10 @@ class CertificateDataTest {
     void Should_ThrowException_When_CountryIsMissing() {
         X500Principal subjectWithoutCN = new X500Principal("CN=Test CA");
         when(mockCertificate.getSubjectX500Principal()).thenReturn(subjectWithoutCN);
-        when(mockCertificate.getNotBefore()).thenReturn(new Date());
-        when(mockCertificate.getNotAfter()).thenReturn(new Date());
+        when(mockCertificate.getNotBefore())
+                .thenReturn(Date.from(Instant.parse("2024-01-01T00:00:00Z")));
+        when(mockCertificate.getNotAfter())
+                .thenReturn(Date.from(Instant.parse("2025-01-01T00:00:00Z")));
 
         IllegalArgumentException exception =
                 assertThrows(

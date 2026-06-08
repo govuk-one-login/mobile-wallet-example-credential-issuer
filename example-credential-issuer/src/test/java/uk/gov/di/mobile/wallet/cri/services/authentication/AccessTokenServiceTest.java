@@ -20,7 +20,6 @@ import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -131,7 +130,7 @@ class AccessTokenServiceTest {
     void Should_ThrowAccessTokenValidationException_When_TokenIsExpired() {
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
-                        .withExpirationTime(Date.from(Instant.parse("2026-05-07T10:00:00Z")))
+                        .withExpirationTime(Instant.parse("2026-05-07T10:00:00Z"))
                         .build();
 
         AccessTokenValidationException exception =

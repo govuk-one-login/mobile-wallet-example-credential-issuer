@@ -11,6 +11,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSESign1;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEUnprotectedHeader;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
 import java.util.Map;
 
@@ -30,7 +31,7 @@ class JacksonCBOREncoderProviderTest {
 
     @Test
     void Should_BeAbleToSerializeLocalDate() {
-        LocalDate testDate = LocalDate.of(2025, 4, 4);
+        LocalDate testDate = LocalDate.of(2025, Month.APRIL, 4);
 
         assertDoesNotThrow(() -> mapper.writeValueAsBytes(testDate));
     }

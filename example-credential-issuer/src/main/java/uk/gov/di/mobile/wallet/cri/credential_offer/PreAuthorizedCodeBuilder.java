@@ -4,6 +4,7 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.util.Base64URL;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import software.amazon.awssdk.core.SdkBytes;
@@ -15,8 +16,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import static uk.gov.di.mobile.wallet.cri.services.signing.SignatureHelper.toBase64UrlEncodedSignature;
 import static uk.gov.di.mobile.wallet.cri.util.HashUtil.sha256Hex;
@@ -64,13 +63,13 @@ public class PreAuthorizedCodeBuilder {
                 new JWTClaimsSet.Builder()
                         .audience(configurationService.getOneLoginAuthServerUrl())
                         .issuer(configurationService.getSelfUrl().toString())
-                        .issueTime(Date.from(now))
-                        .expirationTime(
-                                Date.from(
-                                        now.plus(
+                        .claim(JWTClaimNames.ISSUED_AT, now.getEpochSecond())
+                        .claim(
+                                JWTClaimNames.EXPIRATION_TIME,
+                                now.plusSeconds(
                                                 configurationService
-                                                        .getPreAuthorizedCodeTtlInSecs(),
-                                                ChronoUnit.SECONDS)))
+                                                        .getPreAuthorizedCodeTtlInSecs())
+                                        .getEpochSecond())
                         .claim("clientId", configurationService.getOIDCClientId())
                         .claim("credential_identifiers", new String[] {credentialIdentifier});
 
