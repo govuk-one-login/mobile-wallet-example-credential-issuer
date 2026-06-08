@@ -73,7 +73,13 @@ public class CredentialOfferResource {
                     exception);
             return ResponseUtil.internalServerError();
         } catch (CredentialOfferException exception) {
-            return ResponseUtil.badRequest(exception.getMessage());
+            LOGGER.error(
+                    "Bad request - unsupported credentialType '{}' for walletSubjectId: {}, itemId: {}",
+                    credentialType,
+                    walletSubjectId,
+                    itemId);
+            return ResponseUtil.badRequest(
+                    "credentialType '" + credentialType + "' is not supported");
         }
 
         LOGGER.info(

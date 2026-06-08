@@ -132,6 +132,32 @@ class CredentialOfferResourceTest {
     }
 
     @Test
+    void Should_Return400_When_CredentialTypeIsUnsupported()
+            throws SigningException, NoSuchAlgorithmException, CredentialOfferException {
+        when(credentialOfferService.buildCredentialOffer(anyString(), anyString()))
+                .thenThrow(new CredentialOfferException("Unsupported credential type"));
+
+        final Response response =
+                resource.target("/credential_offer")
+                        .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
+                        .queryParam("itemId", ITEM_ID)
+                        .queryParam("credentialType", CREDENTIAL_TYPE)
+                        .request()
+                        .get();
+
+        assertThat(response.getStatus(), is(400));
+        assertThat(
+                response.readEntity(String.class),
+                is("credentialType '" + CREDENTIAL_TYPE + "' is not supported"));
+        verify(mockLogger)
+                .error(
+                        "Bad request - unsupported credentialType '{}' for walletSubjectId: {}, itemId: {}",
+                        CREDENTIAL_TYPE,
+                        WALLET_SUBJECT_ID,
+                        ITEM_ID);
+    }
+
+    @Test
     void Should_Return400_When_WalletSubjectIdIsInvalid() {
         final Response response =
                 resource.target("/credential_offer")

@@ -25,6 +25,8 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -47,10 +49,13 @@ class PreAuthorizedCodeBuilderTest {
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String SELF_URL = "self-url.gov.uk";
     private static final String AUTH_URL = "auth-url.gov.uk";
+    private static final Instant FIXED_INSTANT = Instant.parse("2024-01-15T10:30:00Z");
+    private static final Clock FIXED_CLOCK = Clock.fixed(FIXED_INSTANT, ZoneId.of("UTC"));
 
     @BeforeEach
     void setUp() {
-        preAuthorizedCodeBuilder = new PreAuthorizedCodeBuilder(configurationService, kmsService);
+        preAuthorizedCodeBuilder =
+                new PreAuthorizedCodeBuilder(configurationService, kmsService, FIXED_CLOCK);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_URL);
         when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
@@ -99,32 +104,6 @@ class PreAuthorizedCodeBuilderTest {
         assertThat(preAuthorizedCode.getHeader().getType(), equalTo(JOSEObjectType.JWT));
     }
 
-    @Test
-    @DisplayName("Should build pre-authorized code using the clock constructor")
-    void test_It_Returns_SignedJwt_With_Clock_Constructor()
-            throws SigningException, ParseException, JOSEException {
-        var builder =
-                new PreAuthorizedCodeBuilder(
-                        configurationService, kmsService, Clock.systemDefaultZone());
-
-        SignResponse signResponse = getMockedSignResponse();
-        when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
-        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
-
-        SignedJWT preAuthorizedCode =
-                builder.buildPreAuthorizedCode(
-                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "org.iso.18013.5.1.mDL");
-
-        long issueEpoch =
-                preAuthorizedCode.getJWTClaimsSet().getIssueTime().toInstant().getEpochSecond();
-        long expiryEpoch =
-                preAuthorizedCode
-                        .getJWTClaimsSet()
-                        .getExpirationTime()
-                        .toInstant()
-                        .getEpochSecond();
-        assertThat(expiryEpoch - issueEpoch, equalTo(300L));
-    }
 
     @Test
     @DisplayName("Should throw a SigningException when KMS throws an exception")
