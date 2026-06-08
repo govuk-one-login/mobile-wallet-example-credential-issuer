@@ -24,9 +24,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
 import java.text.ParseException;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -57,6 +54,7 @@ class PreAuthorizedCodeBuilderTest {
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_URL);
         when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
         when(configurationService.getOIDCClientId()).thenReturn(AUTH_CLIENT_ID);
+        when(configurationService.getPreAuthorizedCodeTtlInSecs()).thenReturn(300);
     }
 
     @Test
@@ -81,12 +79,15 @@ class PreAuthorizedCodeBuilderTest {
                 preAuthorizedCode.getJWTClaimsSet().getClaim("credential_identifiers"),
                 equalTo(singletonList("e27474f5-6aef-40a4-bed6-5e4e1ec3f885")));
         assertThat(preAuthorizedCode.getJWTClaimsSet().getIssueTime(), notNullValue());
-        assertThat(
+        long issueEpoch =
+                preAuthorizedCode.getJWTClaimsSet().getIssueTime().toInstant().getEpochSecond();
+        long expiryEpoch =
                 preAuthorizedCode
                         .getJWTClaimsSet()
                         .getExpirationTime()
-                        .before(Date.from(Instant.now().plus(300, ChronoUnit.SECONDS))),
-                equalTo(true));
+                        .toInstant()
+                        .getEpochSecond();
+        assertThat(expiryEpoch - issueEpoch, equalTo(300L));
         assertThat(
                 preAuthorizedCode.getHeader().getKeyID(),
                 equalTo("78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274"));

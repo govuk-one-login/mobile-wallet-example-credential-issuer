@@ -5,6 +5,7 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jwt.JWTClaimNames;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
-import java.util.Date;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -100,7 +100,11 @@ class CredentialOfferServiceTest {
     private SignedJWT createMockPreAuthorizedCode() throws JOSEException, ParseException {
         JWSHeader header = new JWSHeader.Builder(JWSAlgorithm.ES256).build();
         JWTClaimsSet claims =
-                new JWTClaimsSet.Builder().issueTime(Date.from(Instant.now())).build();
+                new JWTClaimsSet.Builder()
+                        .claim(
+                                JWTClaimNames.ISSUED_AT,
+                                Instant.parse("2024-01-15T10:30:00Z").getEpochSecond())
+                        .build();
 
         SignedJWT jwt = new SignedJWT(header, claims);
         jwt.sign(new ECDSASigner(createTestPrivateKey()));

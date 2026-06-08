@@ -123,7 +123,8 @@ class DidDocumentServiceTest {
     void should_ThrowException_If_Key_Is_Due_For_Deletion() {
         when(kmsService.describeKey(any(DescribeKeyRequest.class)))
                 .thenReturn(
-                        getMockDescribeKeyResponse(TEST_ARN, true, Instant.now().plusSeconds(60)));
+                        getMockDescribeKeyResponse(
+                                TEST_ARN, true, Instant.parse("2090-01-01T00:00:00Z")));
 
         KeyNotActiveException exception =
                 assertThrows(

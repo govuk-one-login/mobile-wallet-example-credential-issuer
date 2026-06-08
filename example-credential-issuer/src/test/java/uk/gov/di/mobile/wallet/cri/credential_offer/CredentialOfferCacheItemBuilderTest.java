@@ -10,7 +10,7 @@ class CredentialOfferCacheItemBuilderTest {
 
     @Test
     void Should_BuildCredentialOfferCacheItem() {
-        Long ttl = Instant.now().plusSeconds(300).getEpochSecond();
+        Long ttl = Instant.parse("2090-01-01T00:00:00Z").getEpochSecond();
         CachedCredentialOffer cachedCredentialOffer =
                 new CredentialOfferCacheItemBuilder()
                         .credentialIdentifier("4a1b1b18-b495-45ac-b0ce-73848bd32b70")
