@@ -16,7 +16,7 @@
     "@peculiar/asn1-x509": "^2.7.0",
     "commander": "^14.0.3",
     "esbuild": "^0.28.0",
-    "tsx": "^4.22.3",
+    "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   },
   "engines": {
@@ -27,7 +27,7 @@
     "globals": "^17.6.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.1",
-    "eslint": "10.4.0",
+    "eslint": "10.4.1",
     "eslint-config-prettier": "10.1.8",
     "jest": "30.4.2",
     "jest-junit": "^17.0.0",
