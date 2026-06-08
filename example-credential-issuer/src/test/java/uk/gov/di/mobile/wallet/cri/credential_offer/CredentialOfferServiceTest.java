@@ -10,6 +10,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -51,24 +53,33 @@ class CredentialOfferServiceTest {
             "urn:ietf:params:oauth:grant-type:pre-authorized_code";
     private static final String PRE_AUTH_CODE_PARAM = "pre-authorized_code";
 
-    @Test
-    void Should_BuildAndReturnCredentialOffer_ForMDL() throws Exception {
+    @ParameterizedTest
+    @ValueSource(
+            strings = {
+                CREDENTIAL_TYPE_MDL,
+                CREDENTIAL_TYPE_NINO,
+                CREDENTIAL_TYPE_DBS,
+                CREDENTIAL_TYPE_VC,
+                CREDENTIAL_TYPE_SIMPLE_MDOC
+            })
+    void Should_BuildAndReturnCredentialOffer_ForEachCredentialType(String credentialType)
+            throws Exception {
         SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
         when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_MDL))
+                        CREDENTIAL_IDENTIFIER, credentialType))
                 .thenReturn(preAuthorizedCode);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
 
         CredentialOffer credentialOffer =
                 credentialOfferService.buildCredentialOffer(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_MDL);
+                        CREDENTIAL_IDENTIFIER, credentialType);
 
         assertEquals(
                 CREDENTIAL_ISSUER,
                 credentialOffer.getCredentialIssuer(),
                 "Credential issuer should match the configured self URL");
         assertArrayEquals(
-                new String[] {CREDENTIAL_TYPE_MDL},
+                new String[] {credentialType},
                 credentialOffer.getCredentialConfigurationIds(),
                 "Credential configuration IDs should contain the specified credential type");
         assertNotNull(credentialOffer.getGrants(), "Grants should not be null");
@@ -80,139 +91,7 @@ class CredentialOfferServiceTest {
                 credentialOffer.getGrants().get(PRE_AUTH_GRANT_TYPE).get(PRE_AUTH_CODE_PARAM),
                 "Pre-authorized code parameter should contain the JWT");
         verify(preAuthorizedCodeBuilder)
-                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_MDL);
-        verify(configurationService).getSelfUrl();
-    }
-
-    @Test
-    void Should_BuildAndReturnCredentialOffer_ForNINO() throws Exception {
-        SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_NINO))
-                .thenReturn(preAuthorizedCode);
-        when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
-
-        CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_NINO);
-
-        assertEquals(
-                CREDENTIAL_ISSUER,
-                credentialOffer.getCredentialIssuer(),
-                "Credential issuer should match the configured self URL");
-        assertArrayEquals(
-                new String[] {CREDENTIAL_TYPE_NINO},
-                credentialOffer.getCredentialConfigurationIds(),
-                "Credential configuration IDs should contain the specified credential type");
-        assertNotNull(credentialOffer.getGrants(), "Grants should not be null");
-        assertTrue(
-                credentialOffer.getGrants().containsKey(PRE_AUTH_GRANT_TYPE),
-                "Grants should contain the pre-authorized code grant type");
-        assertEquals(
-                preAuthorizedCode.serialize(),
-                credentialOffer.getGrants().get(PRE_AUTH_GRANT_TYPE).get(PRE_AUTH_CODE_PARAM),
-                "Pre-authorized code parameter should contain the JWT");
-        verify(preAuthorizedCodeBuilder)
-                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_NINO);
-        verify(configurationService).getSelfUrl();
-    }
-
-    @Test
-    void Should_BuildAndReturnCredentialOffer_ForDBS() throws Exception {
-        SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_DBS))
-                .thenReturn(preAuthorizedCode);
-        when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
-
-        CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_DBS);
-
-        assertEquals(
-                CREDENTIAL_ISSUER,
-                credentialOffer.getCredentialIssuer(),
-                "Credential issuer should match the configured self URL");
-        assertArrayEquals(
-                new String[] {CREDENTIAL_TYPE_DBS},
-                credentialOffer.getCredentialConfigurationIds(),
-                "Credential configuration IDs should contain the specified credential type");
-        assertNotNull(credentialOffer.getGrants(), "Grants should not be null");
-        assertTrue(
-                credentialOffer.getGrants().containsKey(PRE_AUTH_GRANT_TYPE),
-                "Grants should contain the pre-authorized code grant type");
-        assertEquals(
-                preAuthorizedCode.serialize(),
-                credentialOffer.getGrants().get(PRE_AUTH_GRANT_TYPE).get(PRE_AUTH_CODE_PARAM),
-                "Pre-authorized code parameter should contain the JWT");
-        verify(preAuthorizedCodeBuilder)
-                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_DBS);
-        verify(configurationService).getSelfUrl();
-    }
-
-    @Test
-    void Should_BuildAndReturnCredentialOffer_ForVC() throws Exception {
-        SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_VC))
-                .thenReturn(preAuthorizedCode);
-        when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
-
-        CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_VC);
-
-        assertEquals(
-                CREDENTIAL_ISSUER,
-                credentialOffer.getCredentialIssuer(),
-                "Credential issuer should match the configured self URL");
-        assertArrayEquals(
-                new String[] {CREDENTIAL_TYPE_VC},
-                credentialOffer.getCredentialConfigurationIds(),
-                "Credential configuration IDs should contain the specified credential type");
-        assertNotNull(credentialOffer.getGrants(), "Grants should not be null");
-        assertTrue(
-                credentialOffer.getGrants().containsKey(PRE_AUTH_GRANT_TYPE),
-                "Grants should contain the pre-authorized code grant type");
-        assertEquals(
-                preAuthorizedCode.serialize(),
-                credentialOffer.getGrants().get(PRE_AUTH_GRANT_TYPE).get(PRE_AUTH_CODE_PARAM),
-                "Pre-authorized code parameter should contain the JWT");
-        verify(preAuthorizedCodeBuilder)
-                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_VC);
-        verify(configurationService).getSelfUrl();
-    }
-
-    @Test
-    void Should_BuildAndReturnCredentialOffer_ForSimpleMdoc() throws Exception {
-        SignedJWT preAuthorizedCode = createMockPreAuthorizedCode();
-        when(preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_SIMPLE_MDOC))
-                .thenReturn(preAuthorizedCode);
-        when(configurationService.getSelfUrl()).thenReturn(URI.create(CREDENTIAL_ISSUER));
-
-        CredentialOffer credentialOffer =
-                credentialOfferService.buildCredentialOffer(
-                        CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_SIMPLE_MDOC);
-
-        assertEquals(
-                CREDENTIAL_ISSUER,
-                credentialOffer.getCredentialIssuer(),
-                "Credential issuer should match the configured self URL");
-        assertArrayEquals(
-                new String[] {CREDENTIAL_TYPE_SIMPLE_MDOC},
-                credentialOffer.getCredentialConfigurationIds(),
-                "Credential configuration IDs should contain the specified credential type");
-        assertNotNull(credentialOffer.getGrants(), "Grants should not be null");
-        assertTrue(
-                credentialOffer.getGrants().containsKey(PRE_AUTH_GRANT_TYPE),
-                "Grants should contain the pre-authorized code grant type");
-        assertEquals(
-                preAuthorizedCode.serialize(),
-                credentialOffer.getGrants().get(PRE_AUTH_GRANT_TYPE).get(PRE_AUTH_CODE_PARAM),
-                "Pre-authorized code parameter should contain the JWT");
-        verify(preAuthorizedCodeBuilder)
-                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, CREDENTIAL_TYPE_SIMPLE_MDOC);
+                .buildPreAuthorizedCode(CREDENTIAL_IDENTIFIER, credentialType);
         verify(configurationService).getSelfUrl();
     }
 
