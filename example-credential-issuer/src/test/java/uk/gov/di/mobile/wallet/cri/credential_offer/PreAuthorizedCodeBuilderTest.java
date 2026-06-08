@@ -24,6 +24,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
 import java.text.ParseException;
+import java.time.Clock;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -96,6 +97,33 @@ class PreAuthorizedCodeBuilderTest {
                 equalTo("78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274"));
         assertThat(preAuthorizedCode.getHeader().getAlgorithm(), equalTo(JWSAlgorithm.ES256));
         assertThat(preAuthorizedCode.getHeader().getType(), equalTo(JOSEObjectType.JWT));
+    }
+
+    @Test
+    @DisplayName("Should build pre-authorized code using the clock constructor")
+    void test_It_Returns_SignedJwt_With_Clock_Constructor()
+            throws SigningException, ParseException, JOSEException {
+        var builder =
+                new PreAuthorizedCodeBuilder(
+                        configurationService, kmsService, Clock.systemDefaultZone());
+
+        SignResponse signResponse = getMockedSignResponse();
+        when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
+        when(kmsService.getKeyId(any(String.class))).thenReturn(KEY_ID);
+
+        SignedJWT preAuthorizedCode =
+                builder.buildPreAuthorizedCode(
+                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "org.iso.18013.5.1.mDL");
+
+        long issueEpoch =
+                preAuthorizedCode.getJWTClaimsSet().getIssueTime().toInstant().getEpochSecond();
+        long expiryEpoch =
+                preAuthorizedCode
+                        .getJWTClaimsSet()
+                        .getExpirationTime()
+                        .toInstant()
+                        .getEpochSecond();
+        assertThat(expiryEpoch - issueEpoch, equalTo(300L));
     }
 
     @Test
