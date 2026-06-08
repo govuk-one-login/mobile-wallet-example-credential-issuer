@@ -104,7 +104,6 @@ class PreAuthorizedCodeBuilderTest {
         assertThat(preAuthorizedCode.getHeader().getType(), equalTo(JOSEObjectType.JWT));
     }
 
-
     @Test
     @DisplayName("Should throw a SigningException when KMS throws an exception")
     void test_It_Throws_SigningException() {

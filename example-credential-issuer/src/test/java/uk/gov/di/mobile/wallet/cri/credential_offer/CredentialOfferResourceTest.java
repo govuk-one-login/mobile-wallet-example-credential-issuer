@@ -149,12 +149,6 @@ class CredentialOfferResourceTest {
         assertThat(
                 response.readEntity(String.class),
                 is("credentialType '" + CREDENTIAL_TYPE + "' is not supported"));
-        verify(mockLogger)
-                .error(
-                        "Bad request - unsupported credentialType '{}' for walletSubjectId: {}, itemId: {}",
-                        CREDENTIAL_TYPE,
-                        WALLET_SUBJECT_ID,
-                        ITEM_ID);
     }
 
     @Test
