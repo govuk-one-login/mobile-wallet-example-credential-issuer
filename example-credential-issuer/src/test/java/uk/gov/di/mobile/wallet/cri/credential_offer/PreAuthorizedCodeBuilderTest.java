@@ -24,9 +24,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.net.URI;
 import java.text.ParseException;
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
 
 import static java.util.Collections.singletonList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,13 +46,11 @@ class PreAuthorizedCodeBuilderTest {
     private static final String KEY_ID = "ff275b92-0def-4dfc-b0f6-87c96b26c6c7";
     private static final String SELF_URL = "self-url.gov.uk";
     private static final String AUTH_URL = "auth-url.gov.uk";
-    private static final Instant FIXED_INSTANT = Instant.parse("2024-01-15T10:30:00Z");
-    private static final Clock FIXED_CLOCK = Clock.fixed(FIXED_INSTANT, ZoneId.of("UTC"));
 
     @BeforeEach
     void setUp() {
         preAuthorizedCodeBuilder =
-                new PreAuthorizedCodeBuilder(configurationService, kmsService, FIXED_CLOCK);
+                new PreAuthorizedCodeBuilder(configurationService, kmsService);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_URL);
         when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
