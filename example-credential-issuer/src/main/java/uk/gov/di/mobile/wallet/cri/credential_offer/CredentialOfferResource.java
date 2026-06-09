@@ -13,6 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.responses.ResponseUtil;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStore;
@@ -71,6 +72,14 @@ public class CredentialOfferResource {
                     itemId,
                     exception);
             return ResponseUtil.internalServerError();
+        } catch (CredentialOfferException exception) {
+            LOGGER.error(
+                    "Bad request - unsupported credentialType '{}' for walletSubjectId: {}, itemId: {}",
+                    credentialType,
+                    walletSubjectId,
+                    itemId);
+            return ResponseUtil.badRequest(
+                    "credentialType '" + credentialType + "' is not supported");
         }
 
         LOGGER.info(

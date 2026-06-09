@@ -9,6 +9,7 @@ export interface Payload {
   clientId: string;
   iss: string;
   credential_identifiers: string[];
+  credential_configuration_ids: string[];
   iat: number;
   exp: number;
 }
@@ -22,11 +23,18 @@ export async function isValidPreAuthorizedCode(
   criUrl: string,
   authorizationServerUrl: string,
   clientId: string,
+  credentialConfigurationId: string,
 ) {
   const header: ProtectedHeaderParameters = getHeaderClaims(preAuthorizedCode);
   const verifyResult = await verifySignature(jwks, header, preAuthorizedCode);
   const payload = verifyResult.payload as unknown as Payload;
-  validatePayload(payload, criUrl, authorizationServerUrl, clientId);
+  validatePayload(
+    payload,
+    criUrl,
+    authorizationServerUrl,
+    clientId,
+    credentialConfigurationId,
+  );
   return true;
 }
 
@@ -78,6 +86,7 @@ function validatePayload(
   criUrl: string,
   authorizationServerUrl: string,
   clientId: string,
+  credentialConfigurationId: string,
 ): void {
   const ajv = getAjvInstance();
   const rulesValidator = ajv.compile(payloadSchema);
@@ -116,6 +125,12 @@ function validatePayload(
   }
 
   const expirationTime = epochSecondsToDate(payload.exp);
+  const credentialConfigurationIds = payload.credential_configuration_ids;
+  if (credentialConfigurationIds[0] !== credentialConfigurationId) {
+    throw new Error(
+      `INVALID_PAYLOAD: Invalid "credential_configuration_ids" value in token. Should be "${credentialConfigurationId}" but found "${credentialConfigurationIds[0]}"`,
+    );
+  }
   const actualTokenDurationMinutes = getDurationInMinutes(
     issuedAt,
     expirationTime,

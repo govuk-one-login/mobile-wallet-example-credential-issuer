@@ -19,6 +19,7 @@ const jwks = [
   },
 ];
 const clientId = "TEST_CLIENT_ID";
+const credentialConfigurationId = "org.iso.18013.5.1.mDL";
 const authServerUrl = "https://test-auth-server.gov.uk";
 const criUrl = "https://test-example-cri.gov.uk";
 const kid = "78fa131d677c1ac0f172c53b47ac169a95ad0d92c38bd794a70da59032058274";
@@ -46,6 +47,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).toEqual(true);
   });
@@ -69,6 +71,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).toEqual(true);
   });
@@ -84,6 +87,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       "INVALID_HEADER: Failed to decode pre-authorized code header. TypeError: Invalid Token or Protected Header formatting",
@@ -104,6 +108,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       'INVALID_HEADER: Pre-authorized code header does not comply with the schema. [{"instancePath":"","schemaPath":"#/required","keyword":"required","params":{"missingProperty":"kid"},"message":"must have required property \'kid\'"}]',
@@ -124,6 +129,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       "INVALID_SIGNATURE: JWK not found in JWKS for provided 'kid'",
@@ -153,6 +159,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow("INVALID_SIGNATURE");
   });
@@ -171,6 +178,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       'INVALID_PAYLOAD: Pre-authorized code payload does not comply with the schema. [{"instancePath":"","schemaPath":"#/required","keyword":"required","params":{"missingProperty":"iss"},"message":"must have required property \'iss\'"}]',
@@ -193,6 +201,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       'INVALID_PAYLOAD: Invalid "iat" value in token. Should be in the past but is in the future',
@@ -220,6 +229,7 @@ describe("isValidPreAuthorizedCode", () => {
           criUrl,
           authServerUrl,
           clientId,
+          credentialConfigurationId,
         ),
       ).rejects.toThrow(
         `INVALID_PAYLOAD: Invalid "exp" value in token. Expected to be between 5 and 60, but found ${expValue}`,
@@ -242,6 +252,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       'INVALID_PAYLOAD: Invalid "iss" value in token. Should be "https://test-example-cri.gov.uk" but found "https://different-issuer.gov.uk"',
@@ -263,6 +274,7 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       'INVALID_PAYLOAD: Invalid "aud" value in token. Should be "https://test-auth-server.gov.uk" but found "https://different-audience.gov.uk"',
@@ -284,9 +296,31 @@ describe("isValidPreAuthorizedCode", () => {
         criUrl,
         authServerUrl,
         clientId,
+        credentialConfigurationId,
       ),
     ).rejects.toThrow(
       'INVALID_PAYLOAD: Invalid "clientId" value in token. Should be "TEST_CLIENT_ID" but found "invalid-client-id"',
+    );
+  });
+
+  it("should throw 'INVALID_PAYLOAD' error when credential_configuration_ids does not match expected value", async () => {
+    const preAuthorizedCode = await getTestJwt(
+      authServerUrl,
+      criUrl,
+      clientId,
+      kid,
+    );
+    await expect(
+      isValidPreAuthorizedCode(
+        preAuthorizedCode,
+        jwks,
+        criUrl,
+        authServerUrl,
+        clientId,
+        "InvalidCredentialConfigId",
+      ),
+    ).rejects.toThrow(
+      'INVALID_PAYLOAD: Invalid "credential_configuration_ids" value in token. Should be "InvalidCredentialConfigId" but found "org.iso.18013.5.1.mDL"',
     );
   });
 });
@@ -304,6 +338,7 @@ async function getTestJwt(audience, issuer, clientId, kid, exp = "30 minutes") {
 
   return await new SignJWT({
     clientId: clientId,
+    credential_configuration_ids: [credentialConfigurationId],
     credential_identifiers: ["727da4d1-0636-4951-81eb-801c1cf90dd3"],
   })
     .setProtectedHeader({ alg: "ES256", typ: "JWT", kid: kid })

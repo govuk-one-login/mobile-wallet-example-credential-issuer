@@ -24,6 +24,7 @@ import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.model.SignRequest;
 import software.amazon.awssdk.services.kms.model.SignResponse;
 import software.amazon.awssdk.services.kms.model.SigningAlgorithmSpec;
+import uk.gov.di.mobile.wallet.cri.credential.CredentialOfferException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
@@ -74,7 +75,11 @@ class CredentialOfferResourceTest {
 
     @Test
     void Should_Return200AndCredentialOfferURL()
-            throws JOSEException, DataStoreException, SigningException, NoSuchAlgorithmException {
+            throws JOSEException,
+                    DataStoreException,
+                    SigningException,
+                    NoSuchAlgorithmException,
+                    CredentialOfferException {
         SignResponse signResponse = getMockedSignResponse();
         when(kmsService.sign(any(SignRequest.class))).thenReturn(signResponse);
         CredentialOffer mockCredentialOffer = getMockCredentialOffer();
@@ -124,6 +129,26 @@ class CredentialOfferResourceTest {
 
         verify(mockDataStore, times(1)).saveCredentialOffer(any());
         assertThat(response.getStatus(), is(500));
+    }
+
+    @Test
+    void Should_Return400_When_CredentialTypeIsUnsupported()
+            throws SigningException, NoSuchAlgorithmException, CredentialOfferException {
+        when(credentialOfferService.buildCredentialOffer(anyString(), anyString()))
+                .thenThrow(new CredentialOfferException("Unsupported credential type"));
+
+        final Response response =
+                resource.target("/credential_offer")
+                        .queryParam("walletSubjectId", WALLET_SUBJECT_ID)
+                        .queryParam("itemId", ITEM_ID)
+                        .queryParam("credentialType", CREDENTIAL_TYPE)
+                        .request()
+                        .get();
+
+        assertThat(response.getStatus(), is(400));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"credentialType '" + CREDENTIAL_TYPE + "' is not supported\"}"));
     }
 
     @Test

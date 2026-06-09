@@ -19,6 +19,12 @@ export const payloadSchema = {
       minItems: 1,
       maxItems: 1,
     },
+    credential_configuration_ids: {
+      type: "array",
+      items: { type: "string" },
+      minItems: 1,
+      maxItems: 1,
+    },
     iat: {
       type: "number",
     },
@@ -27,5 +33,13 @@ export const payloadSchema = {
     },
   },
   additionalProperties: false,
-  required: ["aud", "clientId", "iss", "credential_identifiers", "iat", "exp"],
+  required: [
+    "aud",
+    "clientId",
+    "iss",
+    "credential_identifiers",
+    "credential_configuration_ids",
+    "iat",
+    "exp",
+  ],
 };

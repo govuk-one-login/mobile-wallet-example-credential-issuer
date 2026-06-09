@@ -33,11 +33,12 @@ public class PreAuthorizedCodeBuilder {
         this.keyProvider = keyProvider;
     }
 
-    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier) throws SigningException {
+    public SignedJWT buildPreAuthorizedCode(String credentialIdentifier, String credentialType)
+            throws SigningException {
         String keyId = keyProvider.getKeyId(configurationService.getSigningKeyAlias());
         String hashedKeyId = sha256Hex(keyId);
         var encodedHeader = getEncodedHeader(hashedKeyId);
-        var encodedClaims = getEncodedClaims(credentialIdentifier);
+        var encodedClaims = getEncodedClaims(credentialIdentifier, credentialType);
         var message = encodedHeader + "." + encodedClaims;
         var signRequest =
                 SignRequest.builder()
@@ -56,7 +57,7 @@ public class PreAuthorizedCodeBuilder {
         }
     }
 
-    private Base64URL getEncodedClaims(String credentialIdentifier) {
+    private Base64URL getEncodedClaims(String credentialIdentifier, String credentialType) {
         Instant now = Instant.now();
 
         var claimsBuilder =
@@ -71,7 +72,8 @@ public class PreAuthorizedCodeBuilder {
                                                         .getPreAuthorizedCodeTtlInSecs())
                                         .getEpochSecond())
                         .claim("clientId", configurationService.getOIDCClientId())
-                        .claim("credential_identifiers", new String[] {credentialIdentifier});
+                        .claim("credential_identifiers", new String[] {credentialIdentifier})
+                        .claim("credential_configuration_ids", new String[] {credentialType});
 
         return Base64URL.encode(claimsBuilder.build().toString());
     }

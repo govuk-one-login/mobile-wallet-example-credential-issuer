@@ -67,7 +67,7 @@ class PreAuthorizedCodeBuilderTest {
 
         SignedJWT preAuthorizedCode =
                 preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885");
+                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885", "org.iso.18013.5.1.mDL");
 
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getAudience(),
@@ -78,6 +78,9 @@ class PreAuthorizedCodeBuilderTest {
         assertThat(
                 preAuthorizedCode.getJWTClaimsSet().getClaim("credential_identifiers"),
                 equalTo(singletonList("e27474f5-6aef-40a4-bed6-5e4e1ec3f885")));
+        assertThat(
+                preAuthorizedCode.getJWTClaimsSet().getClaim("credential_configuration_ids"),
+                equalTo(singletonList("org.iso.18013.5.1.mDL")));
         assertThat(preAuthorizedCode.getJWTClaimsSet().getIssueTime(), notNullValue());
         long issueEpoch =
                 preAuthorizedCode.getJWTClaimsSet().getIssueTime().toInstant().getEpochSecond();
@@ -106,7 +109,8 @@ class PreAuthorizedCodeBuilderTest {
                         SigningException.class,
                         () ->
                                 preAuthorizedCodeBuilder.buildPreAuthorizedCode(
-                                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885"));
+                                        "e27474f5-6aef-40a4-bed6-5e4e1ec3f885",
+                                        "org.iso.18013.5.1.mDL"));
         assertThat(exception.getMessage(), containsString("Error signing token"));
     }
 
