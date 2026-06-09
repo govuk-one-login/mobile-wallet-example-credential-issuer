@@ -49,8 +49,7 @@ class PreAuthorizedCodeBuilderTest {
 
     @BeforeEach
     void setUp() {
-        preAuthorizedCodeBuilder =
-                new PreAuthorizedCodeBuilder(configurationService, kmsService);
+        preAuthorizedCodeBuilder = new PreAuthorizedCodeBuilder(configurationService, kmsService);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_URL);
         when(configurationService.getSigningKeyAlias()).thenReturn(KEY_ALIAS);
