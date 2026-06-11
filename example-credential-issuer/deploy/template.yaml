@@ -610,6 +610,7 @@ Resources:
 
   # KMS
   CredentialIssuerSigningKey:
+    Condition: !Not IsIntegration
     Type: AWS::KMS::Key
     Properties:
       Description: Asymmetric key for signing tokens
@@ -639,6 +640,7 @@ Resources:
       MultiRegion: false
 
   CredentialIssuerSigningKeyAlias:
+    Condition: !Not IsIntegration
     Type: AWS::KMS::Alias
     Properties:
       AliasName: !Sub "alias/credential-signing-key-${AWS::StackName}"
