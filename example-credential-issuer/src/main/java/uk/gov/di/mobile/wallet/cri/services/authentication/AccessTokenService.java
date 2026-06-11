@@ -21,12 +21,14 @@ import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import javax.management.InvalidAttributeValueException;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.Set;
 
 /** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
 
     public static final String CLAIM_CREDENTIAL_IDENTIFIERS = "credential_identifiers";
+    public static final String CLAIM_CREDENTIAL_CONFIGURATION_IDS = "credential_configuration_ids";
     public static final String CLAIM_C_NONCE = "c_nonce";
     private static final String CLAIM_SUBJECT = "sub";
     private static final String CLAIM_EXPIRATION_TIME = "exp";
@@ -141,7 +143,7 @@ public class AccessTokenService {
                     Set.of(
                             CLAIM_SUBJECT,
                             CLAIM_C_NONCE,
-                            CLAIM_CREDENTIAL_IDENTIFIERS,
+                            CLAIM_CREDENTIAL_CONFIGURATION_IDS,
                             CLAIM_EXPIRATION_TIME,
                             CLAIM_JWT_ID);
             JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
@@ -150,8 +152,22 @@ public class AccessTokenService {
 
             verifier.verify(jwtClaimsSet, null);
 
-            if (jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).isEmpty()) {
-                throw new InvalidAttributeValueException("Empty credential_identifiers claim");
+            List<String> credentialIdentifiersClaimValue =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS);
+            List<String> credentialConfigurationIdsClaimValue =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_CONFIGURATION_IDS);
+
+            // TODO: Extend tests for these if statements
+            if (credentialIdentifiersClaimValue != null
+                    && credentialIdentifiersClaimValue.size() != 1) {
+                throw new InvalidAttributeValueException(
+                        "Invalid value for " + CLAIM_CREDENTIAL_IDENTIFIERS);
+            }
+
+            // TODO: Extend tests for this if statements
+            if (credentialConfigurationIdsClaimValue.size() != 1) {
+                throw new InvalidAttributeValueException(
+                        "Invalid value for " + CLAIM_CREDENTIAL_CONFIGURATION_IDS);
             }
 
         } catch (BadJWTException | InvalidAttributeValueException | ParseException exception) {

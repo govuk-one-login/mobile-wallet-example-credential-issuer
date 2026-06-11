@@ -24,9 +24,7 @@ public class MockAccessTokenBuilder {
                     .jwtID("e75b7cc0-c5ef-4075-ad22-3b239b6db89c")
                     .claim(JWTClaimNames.EXPIRATION_TIME, FIXED_EXPIRY.getEpochSecond())
                     .claim("c_nonce", "134e0c41-a8b4-46d4-aec8-cd547e125589")
-                    .claim(
-                            "credential_identifiers",
-                            List.of("efb52887-48d6-43b7-b14c-da7896fbf54d"));
+                    .claim("credential_configuration_ids", List.of("rg.iso.18013.5.1.mDL"));
 
     public MockAccessTokenBuilder(String algorithm) {
         this.headerBuilder =

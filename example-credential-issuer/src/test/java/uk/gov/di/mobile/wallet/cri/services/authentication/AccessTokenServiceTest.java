@@ -230,23 +230,51 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void Should_ReturnTokenData_When_JwtVerificationSucceeds()
+    void Should_ReturnTokenData_When_JwtVerificationSucceeds_For_FreshIssuance()
             throws JOSEException, ParseException, AccessTokenValidationException {
         when(configurationService.getEnvironment()).thenReturn("test");
         JWK publicKey = getEcKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
-        SignedJWT mockAccessToken = spy(new MockAccessTokenBuilder("ES256").build());
-        mockAccessToken.sign(ecSigner);
+        SignedJWT mockAccessTokenForIssuance =
+                spy(
+                        new MockAccessTokenBuilder("ES256")
+                                .withClaim(
+                                        "credential_identifiers",
+                                        List.of("efb52887-48d6-43b7-b14c-da7896fbf54d"))
+                                .build());
+        mockAccessTokenForIssuance.sign(ecSigner);
 
         AccessTokenService.AccessTokenData response =
-                accessTokenService.verifyAccessToken(mockAccessToken);
+                accessTokenService.verifyAccessToken(mockAccessTokenForIssuance);
 
         assertEquals("efb52887-48d6-43b7-b14c-da7896fbf54d", response.credentialIdentifier());
         assertEquals(
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                 response.walletSubjectId());
         assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
-        verify(mockAccessToken).verify(any());
+        verify(mockAccessTokenForIssuance).verify(any());
+        verify(mockLogger, never()).warn(any());
+    }
+
+    @Test
+    void Should_ReturnTokenData_When_JwtVerificationSucceeds_For_Refresh()
+            throws JOSEException, ParseException, AccessTokenValidationException {
+        when(configurationService.getEnvironment()).thenReturn("test");
+        JWK publicKey = getEcKey().toPublicJWK();
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
+        SignedJWT mockAccessTokenForIssuance = spy(new MockAccessTokenBuilder("ES256").build());
+        mockAccessTokenForIssuance.sign(ecSigner);
+
+        AccessTokenService.AccessTokenData response =
+                accessTokenService.verifyAccessToken(mockAccessTokenForIssuance);
+
+        // TODO: this line needs to change
+        assertEquals("efb52887-48d6-43b7-b14c-da7896fbf54d", response.credentialIdentifier());
+        assertEquals(
+                "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+                response.walletSubjectId());
+        assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
+        verify(mockAccessTokenForIssuance).verify(any());
         verify(mockLogger, never()).warn(any());
     }
 
