@@ -44,6 +44,7 @@ public class AccessTokenService {
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
+    private final Set<String> supportedCredentialConfigurationIds;
 
     /**
      * Container for access token data.
@@ -51,9 +52,10 @@ public class AccessTokenService {
      * @param walletSubjectId The subject identifier from the access token.
      * @param nonce The nonce value from the access token.
      * @param credentialIdentifier The first credential identifier from the access token.
+     * @param credentialConfigurationId The credential configuration id from the access token.
      */
     public record AccessTokenData(
-            String walletSubjectId, String nonce, String credentialIdentifier) {}
+            String walletSubjectId, String nonce, String credentialIdentifier, String credentialConfigurationId) {}
 
     /**
      * Constructs a new AccessTokenService.
@@ -61,9 +63,13 @@ public class AccessTokenService {
      * @param jwksService Service to retrieve JWKs for signature validation.
      * @param configurationService Service providing configuration values.
      */
-    public AccessTokenService(JwksService jwksService, ConfigurationService configurationService) {
+    public AccessTokenService(
+            JwksService jwksService,
+            ConfigurationService configurationService,
+            Set<String> supportedCredentialConfigurationIds) {
         this.jwksService = jwksService;
         this.configurationService = configurationService;
+        this.supportedCredentialConfigurationIds = supportedCredentialConfigurationIds;
     }
 
     /**
@@ -164,10 +170,15 @@ public class AccessTokenService {
                         "Invalid value for " + CLAIM_CREDENTIAL_IDENTIFIERS);
             }
 
-            // TODO: Extend tests for this if statements
             if (credentialConfigurationIdsClaimValue.size() != 1) {
                 throw new InvalidAttributeValueException(
                         "Invalid value for " + CLAIM_CREDENTIAL_CONFIGURATION_IDS);
+            }
+
+            if (!supportedCredentialConfigurationIds.contains(
+                    credentialConfigurationIdsClaimValue.get(0))) {
+                throw new InvalidAttributeValueException(
+                        "credential_configuration_ids value not in credential_configurations_supported");
             }
 
         } catch (BadJWTException | InvalidAttributeValueException | ParseException exception) {
@@ -228,10 +239,14 @@ public class AccessTokenService {
             throws AccessTokenValidationException {
         try {
             JWTClaimsSet jwtClaimsSet = token.getJWTClaimsSet();
+            List<String> credentialIdentifiers = jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS);
+            String credentialIdentifier = credentialIdentifiers != null ? credentialIdentifiers.get(0) : null;
+            String credentialConfigurationId = jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_CONFIGURATION_IDS).get(0);
             return new AccessTokenData(
                     jwtClaimsSet.getSubject(),
                     jwtClaimsSet.getStringClaim(CLAIM_C_NONCE),
-                    jwtClaimsSet.getListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).get(0).toString());
+                    credentialIdentifier,
+                    credentialConfigurationId);
         } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }
