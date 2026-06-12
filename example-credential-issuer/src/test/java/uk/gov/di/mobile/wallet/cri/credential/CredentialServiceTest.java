@@ -422,6 +422,47 @@ class CredentialServiceTest {
         }
     }
 
+    @Test
+    void Should_ReturnCredentialResponse_When_RefreshingCredential() throws Exception {
+        when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
+                .thenReturn(new AccessTokenService.AccessTokenData(
+                        WALLET_SUBJECT_ID, NONCE, null, SOCIAL_SECURITY_VC_TYPE));
+
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
+                .thenReturn(mockHandler);
+        when(mockHandler.buildCredential(any(), eq(mockProofJwtData), eq(Optional.empty())))
+                .thenReturn(CREDENTIAL);
+
+        try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
+            mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
+
+            CredentialResponse result =
+                    credentialService.getCredential(mockAccessToken, mockProofJwt);
+
+            assertEquals(CREDENTIAL, result.getCredentials().get(0).getCredentialObj());
+            assertEquals(NOTIFICATION_ID.toString(), result.getNotificationId());
+        }
+
+        verify(mockDynamoDbService, never()).getCredentialOffer(any());
+        verify(mockDocumentStoreClient, never()).getDocument(any());
+        verify(mockDynamoDbService, never()).saveStoredCredential(any());
+    }
+
+    @Test
+    void Should_ThrowCredentialServiceException_When_RefreshCredentialFileNotFound()
+            throws Exception {
+        when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
+                .thenReturn(new AccessTokenService.AccessTokenData(
+                        WALLET_SUBJECT_ID, NONCE, null, "NonExistentCredential"));
+
+        CredentialServiceException exception =
+                assertThrows(
+                        CredentialServiceException.class,
+                        () -> credentialService.getCredential(mockAccessToken, mockProofJwt));
+        assertEquals("Failed to issue credential due to an internal error", exception.getMessage());
+    }
+
     private CachedCredentialOffer getMockCredentialOfferCacheItem(
             String walletSubjectId, Instant expiry) {
         return new CachedCredentialOffer(
@@ -432,7 +473,8 @@ class CredentialServiceTest {
         return new AccessTokenService.AccessTokenData(
                 CredentialServiceTest.WALLET_SUBJECT_ID,
                 CredentialServiceTest.NONCE,
-                CredentialServiceTest.CREDENTIAL_IDENTIFIER);
+                CredentialServiceTest.CREDENTIAL_IDENTIFIER,
+                "org.iso.18013.5.1.mDL");
     }
 
     private ProofJwtService.ProofJwtData getMockProofJwtData(String nonce) {
