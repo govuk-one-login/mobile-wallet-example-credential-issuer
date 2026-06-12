@@ -1,0 +1,18 @@
+{
+  "itemId": "refresh-simple-document",
+  "documentId": "refresh-simple-document",
+  "data": {
+    "family_name": "Doe",
+    "given_name": "Jane",
+    "portrait": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k=",
+    "birth_date": "15-06-1990",
+    "issue_date": "01-01-2024",
+    "expiry_date": "01-01-2034",
+    "issuing_country": "GB",
+    "document_number": "SIMPLE-001",
+    "type_of_fish": "Salmon",
+    "number_of_fishing_rods": 2
+  },
+  "vcType": "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
+  "credentialTtlSeconds": 2592000
+}
