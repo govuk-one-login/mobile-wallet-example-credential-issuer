@@ -20,6 +20,7 @@ export async function createAccessToken(
   const signingKeyAsKeyLike = await importJWK(signingKey, SIGNING_ALGORITHM);
   const customClaims = {
     credential_identifiers: preAuthorizedCodePayload.credential_identifiers!,
+    credential_configuration_ids: preAuthorizedCodePayload.credential_configuration_ids!,
     c_nonce: c_nonce,
   };
   const nowInSeconds = Math.floor(Date.now() / 1000);
