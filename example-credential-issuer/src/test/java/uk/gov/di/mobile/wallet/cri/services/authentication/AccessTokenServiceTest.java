@@ -21,8 +21,10 @@ import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -42,11 +44,22 @@ class AccessTokenServiceTest {
 
     @Mock private Logger mockLogger;
 
+    private static final Set<String> SUPPORTED_CREDENTIAL_CONFIGURATION_IDS =
+            Set.of(
+                    "SocialSecurityCredential",
+                    "BasicDisclosureCredential",
+                    "DigitalVeteranCard",
+                    "org.iso.18013.5.1.mDL",
+                    "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1");
+
     @BeforeEach
     void setup() throws ParseException, JOSEException {
         ecSigner = new ECDSASigner(getEcKey());
         accessTokenService =
-                new AccessTokenService(jwksService, configurationService) {
+                new AccessTokenService(
+                        jwksService,
+                        configurationService,
+                        SUPPORTED_CREDENTIAL_CONFIGURATION_IDS) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
@@ -122,7 +135,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
-                "JWT missing required claims: [aud, c_nonce, credential_identifiers, exp, iss, jti, sub]",
+                "JWT missing required claims: [aud, c_nonce, credential_configuration_ids, exp, iss, jti, sub]",
                 exception.getMessage());
     }
 
@@ -151,7 +164,7 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals("Empty credential_identifiers claim", exception.getMessage());
+        assertEquals("Invalid value for credential_identifiers", exception.getMessage());
     }
 
     @Test
@@ -268,8 +281,8 @@ class AccessTokenServiceTest {
         AccessTokenService.AccessTokenData response =
                 accessTokenService.verifyAccessToken(mockAccessTokenForIssuance);
 
-        // TODO: this line needs to change
-        assertEquals("efb52887-48d6-43b7-b14c-da7896fbf54d", response.credentialIdentifier());
+        // credential_identifiers is absent on refresh tokens
+        assertNull(response.credentialIdentifier());
         assertEquals(
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                 response.walletSubjectId());
