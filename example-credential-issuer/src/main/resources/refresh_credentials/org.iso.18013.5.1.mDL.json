@@ -1,0 +1,31 @@
+{
+  "itemId": "refresh-mobile-driving-licence",
+  "documentId": "refresh-mobile-driving-licence",
+  "data": {
+    "family_name": "Doe",
+    "given_name": "Jane",
+    "title": "Ms",
+    "welsh_licence": false,
+    "portrait": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k=",
+    "birth_date": "15-06-1990",
+    "birth_place": "London",
+    "issue_date": "01-01-2024",
+    "expiry_date": "01-01-2034",
+    "issuing_authority": "DVLA",
+    "issuing_country": "GB",
+    "document_number": "DOEJ906152JA9AZ",
+    "resident_address": ["1 Example Street", "London"],
+    "resident_postal_code": "SW1A 1AA",
+    "resident_city": "London",
+    "driving_privileges": [
+      {
+        "vehicle_category_code": "B",
+        "issue_date": "01-01-2024",
+        "expiry_date": "01-01-2034"
+      }
+    ],
+    "un_distinguishing_sign": "GBR"
+  },
+  "vcType": "org.iso.18013.5.1.mDL",
+  "credentialTtlSeconds": 2592000
+}
