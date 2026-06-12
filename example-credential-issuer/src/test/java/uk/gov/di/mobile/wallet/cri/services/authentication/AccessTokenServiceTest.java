@@ -21,8 +21,10 @@ import java.net.URI;
 import java.text.ParseException;
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -42,11 +44,20 @@ class AccessTokenServiceTest {
 
     @Mock private Logger mockLogger;
 
+    private static final Set<String> SUPPORTED_CREDENTIAL_CONFIGURATION_IDS =
+            Set.of(
+                    "SocialSecurityCredential",
+                    "BasicDisclosureCredential",
+                    "DigitalVeteranCard",
+                    "org.iso.18013.5.1.mDL",
+                    "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1");
+
     @BeforeEach
     void setup() throws ParseException, JOSEException {
         ecSigner = new ECDSASigner(getEcKey());
         accessTokenService =
-                new AccessTokenService(jwksService, configurationService) {
+                new AccessTokenService(
+                        jwksService, configurationService, SUPPORTED_CREDENTIAL_CONFIGURATION_IDS) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
@@ -122,7 +133,7 @@ class AccessTokenServiceTest {
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
         assertEquals(
-                "JWT missing required claims: [aud, c_nonce, credential_identifiers, exp, iss, jti, sub]",
+                "JWT missing required claims: [aud, c_nonce, credential_configuration_ids, exp, iss, jti, sub]",
                 exception.getMessage());
     }
 
@@ -151,7 +162,70 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals("Empty credential_identifiers claim", exception.getMessage());
+        assertEquals("Invalid value for credential_identifiers", exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_CredentialIdentifiersHasMultipleItems() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim("credential_identifiers", List.of("id1", "id2"))
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals("Invalid value for credential_identifiers", exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdsIsEmpty() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim("credential_configuration_ids", List.of())
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals("Invalid value for credential_configuration_ids", exception.getMessage());
+    }
+
+    @Test
+    void
+            Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdsHasMultipleItems() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim(
+                                "credential_configuration_ids",
+                                List.of("org.iso.18013.5.1.mDL", "SocialSecurityCredential"))
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals("Invalid value for credential_configuration_ids", exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdNotInSupported() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim(
+                                "credential_configuration_ids",
+                                List.of("UnsupportedCredentialType"))
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals(
+                "credential_configuration_ids value not in credential_configurations_supported",
+                exception.getMessage());
     }
 
     @Test
@@ -230,23 +304,51 @@ class AccessTokenServiceTest {
     }
 
     @Test
-    void Should_ReturnTokenData_When_JwtVerificationSucceeds()
+    void Should_ReturnTokenData_When_JwtVerificationSucceeds_For_FreshIssuance()
             throws JOSEException, ParseException, AccessTokenValidationException {
         when(configurationService.getEnvironment()).thenReturn("test");
         JWK publicKey = getEcKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
-        SignedJWT mockAccessToken = spy(new MockAccessTokenBuilder("ES256").build());
-        mockAccessToken.sign(ecSigner);
+        SignedJWT mockAccessTokenForIssuance =
+                spy(
+                        new MockAccessTokenBuilder("ES256")
+                                .withClaim(
+                                        "credential_identifiers",
+                                        List.of("efb52887-48d6-43b7-b14c-da7896fbf54d"))
+                                .build());
+        mockAccessTokenForIssuance.sign(ecSigner);
 
         AccessTokenService.AccessTokenData response =
-                accessTokenService.verifyAccessToken(mockAccessToken);
+                accessTokenService.verifyAccessToken(mockAccessTokenForIssuance);
 
         assertEquals("efb52887-48d6-43b7-b14c-da7896fbf54d", response.credentialIdentifier());
         assertEquals(
                 "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
                 response.walletSubjectId());
         assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
-        verify(mockAccessToken).verify(any());
+        verify(mockAccessTokenForIssuance).verify(any());
+        verify(mockLogger, never()).warn(any());
+    }
+
+    @Test
+    void Should_ReturnTokenData_When_JwtVerificationSucceeds_For_Refresh()
+            throws JOSEException, ParseException, AccessTokenValidationException {
+        when(configurationService.getEnvironment()).thenReturn("test");
+        JWK publicKey = getEcKey().toPublicJWK();
+        when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
+        SignedJWT mockAccessTokenForIssuance = spy(new MockAccessTokenBuilder("ES256").build());
+        mockAccessTokenForIssuance.sign(ecSigner);
+
+        AccessTokenService.AccessTokenData response =
+                accessTokenService.verifyAccessToken(mockAccessTokenForIssuance);
+
+        // credential_identifiers is absent on refresh tokens
+        assertNull(response.credentialIdentifier());
+        assertEquals(
+                "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i",
+                response.walletSubjectId());
+        assertEquals("134e0c41-a8b4-46d4-aec8-cd547e125589", response.nonce());
+        verify(mockAccessTokenForIssuance).verify(any());
         verify(mockLogger, never()).warn(any());
     }
 

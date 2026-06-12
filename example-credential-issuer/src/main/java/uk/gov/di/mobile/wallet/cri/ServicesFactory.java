@@ -1,5 +1,8 @@
 package uk.gov.di.mobile.wallet.cri;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
@@ -45,8 +48,12 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Factory for creating and wiring all application services.
@@ -92,8 +99,12 @@ public class ServicesFactory {
                         .build("example-cri");
 
         JwksService jwksService = new JwksService(configurationService, kmsService);
+
+        Set<String> supportedCredentialConfigurationIds = loadSupportedCredentialConfigurationIds();
+
         AccessTokenService accessTokenService =
-                new AccessTokenService(jwksService, configurationService);
+                new AccessTokenService(
+                        jwksService, configurationService, supportedCredentialConfigurationIds);
         ProofJwtService proofJwtService = new ProofJwtService(configurationService);
 
         CBOREncoder cborEncoder =
@@ -199,5 +210,19 @@ public class ServicesFactory {
                 .iacasService(iacasService)
                 .revokeService(revokeService)
                 .build();
+    }
+
+    private static Set<String> loadSupportedCredentialConfigurationIds() {
+        try {
+            File file =
+                    new File(
+                            Resources.getResource("credential_configurations_supported.json")
+                                    .getPath());
+            Map<String, Object> map = new ObjectMapper().readValue(file, new TypeReference<>() {});
+            return map.keySet();
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Failed to load credential_configurations_supported.json", e);
+        }
     }
 }

@@ -69,7 +69,7 @@ class NotificationServiceTest {
 
         AccessTokenService.AccessTokenData mockAccessTokenData =
                 new AccessTokenService.AccessTokenData(
-                        WALLET_SUBJECT_ID, NONCE, CREDENTIAL_IDENTIFIER);
+                        WALLET_SUBJECT_ID, NONCE, CREDENTIAL_IDENTIFIER, "org.iso.18013.5.1.mDL");
         when(mockAccessTokenService.verifyAccessToken(any())).thenReturn(mockAccessTokenData);
     }
 
