@@ -65,7 +65,8 @@ public class AccessTokenService {
      *
      * @param jwksService Service to retrieve JWKs for signature validation.
      * @param configurationService Service providing configuration values.
-     * @param supportedCredentialConfigurationIds — the set of valid credential configuration IDs from issuer metadata.
+     * @param supportedCredentialConfigurationIds — the set of valid credential configuration IDs
+     *     from issuer metadata.
      */
     public AccessTokenService(
             JwksService jwksService,

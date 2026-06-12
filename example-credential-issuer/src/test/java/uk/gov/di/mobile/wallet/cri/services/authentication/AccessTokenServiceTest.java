@@ -190,8 +190,7 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals(
-                "Invalid value for credential_configuration_ids", exception.getMessage());
+        assertEquals("Invalid value for credential_configuration_ids", exception.getMessage());
     }
 
     @Test
@@ -208,13 +207,11 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals(
-                "Invalid value for credential_configuration_ids", exception.getMessage());
+        assertEquals("Invalid value for credential_configuration_ids", exception.getMessage());
     }
 
     @Test
-    void
-            Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdNotInSupported() {
+    void Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdNotInSupported() {
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
                         .withClaim(
