@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -28,6 +29,14 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVI
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SIMPLE_MDOC;
 
 public class CredentialService {
+
+    private static final Map<String, String> REFRESH_CREDENTIAL_FILENAMES = Map.of(
+            "SocialSecurityCredential", "Nino",
+            "BasicDisclosureCredential", "DBS",
+            "DigitalVeteranCard", "DigitalVeteranCard",
+            "org.iso.18013.5.1.mDL", "mDL",
+            "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1", "SimpleDocument"
+    );
 
     private final DataStore dataStore;
     private final AccessTokenService accessTokenService;
@@ -166,9 +175,10 @@ public class CredentialService {
 
     private DocumentStoreRecord loadRefreshCredential(String credentialConfigurationId)
             throws IOException {
+        String filename = REFRESH_CREDENTIAL_FILENAMES.get(credentialConfigurationId);
         File file = new File(
                 Resources.getResource(
-                        "refresh_credentials/" + credentialConfigurationId + ".json").getPath());
+                        "refresh_credentials/" + filename + ".json").getPath());
         return new ObjectMapper().readValue(file, DocumentStoreRecord.class);
     }
 
