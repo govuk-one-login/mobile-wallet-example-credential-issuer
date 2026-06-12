@@ -30,13 +30,14 @@ import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SIMPLE_MDOC;
 
 public class CredentialService {
 
-    private static final Map<String, String> REFRESH_CREDENTIAL_FILENAMES = Map.of(
-            "SocialSecurityCredential", "Nino",
-            "BasicDisclosureCredential", "DBS",
-            "DigitalVeteranCard", "DigitalVeteranCard",
-            "org.iso.18013.5.1.mDL", "mDL",
-            "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1", "SimpleDocument"
-    );
+    private static final Map<String, String> REFRESH_CREDENTIAL_FILENAMES =
+            Map.of(
+                    "SocialSecurityCredential", "Nino",
+                    "BasicDisclosureCredential", "DBS",
+                    "DigitalVeteranCard", "DigitalVeteranCard",
+                    "org.iso.18013.5.1.mDL", "mDL",
+                    "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
+                            "SimpleDocument");
 
     private final DataStore dataStore;
     private final AccessTokenService accessTokenService;
@@ -149,8 +150,12 @@ public class CredentialService {
     private CredentialResponse handleRefresh(
             AccessTokenService.AccessTokenData accessTokenData,
             ProofJwtService.ProofJwtData proofJwtData)
-            throws SigningException, MdocException, ObjectStoreException, CertificateException,
-                    StatusListClientException, IOException {
+            throws SigningException,
+                    MdocException,
+                    ObjectStoreException,
+                    CertificateException,
+                    StatusListClientException,
+                    IOException {
 
         String credentialConfigurationId = accessTokenData.credentialConfigurationId();
 
@@ -166,8 +171,7 @@ public class CredentialService {
         }
 
         CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
-        String credential =
-                handler.buildCredential(document, proofJwtData, statusListInformation);
+        String credential = handler.buildCredential(document, proofJwtData, statusListInformation);
 
         String notificationId = UUID.randomUUID().toString();
         return new CredentialResponse(credential, notificationId);
@@ -176,13 +180,12 @@ public class CredentialService {
     private DocumentStoreRecord loadRefreshCredential(String credentialConfigurationId)
             throws IOException {
         String filename = REFRESH_CREDENTIAL_FILENAMES.get(credentialConfigurationId);
-        File file = new File(
-                Resources.getResource(
-                        "refresh_credentials/" + filename + ".json").getPath());
+        File file =
+                new File(
+                        Resources.getResource("refresh_credentials/" + filename + ".json")
+                                .getPath());
         return new ObjectMapper().readValue(file, DocumentStoreRecord.class);
     }
-
-
 
     private boolean isValidCredentialOffer(
             CachedCredentialOffer credentialOffer, String credentialOfferId) {

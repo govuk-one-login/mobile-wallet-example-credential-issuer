@@ -55,7 +55,10 @@ public class AccessTokenService {
      * @param credentialConfigurationId The credential configuration id from the access token.
      */
     public record AccessTokenData(
-            String walletSubjectId, String nonce, String credentialIdentifier, String credentialConfigurationId) {}
+            String walletSubjectId,
+            String nonce,
+            String credentialIdentifier,
+            String credentialConfigurationId) {}
 
     /**
      * Constructs a new AccessTokenService.
@@ -239,9 +242,12 @@ public class AccessTokenService {
             throws AccessTokenValidationException {
         try {
             JWTClaimsSet jwtClaimsSet = token.getJWTClaimsSet();
-            List<String> credentialIdentifiers = jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS);
-            String credentialIdentifier = credentialIdentifiers != null ? credentialIdentifiers.get(0) : null;
-            String credentialConfigurationId = jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_CONFIGURATION_IDS).get(0);
+            List<String> credentialIdentifiers =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS);
+            String credentialIdentifier =
+                    credentialIdentifiers != null ? credentialIdentifiers.get(0) : null;
+            String credentialConfigurationId =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_CONFIGURATION_IDS).get(0);
             return new AccessTokenData(
                     jwtClaimsSet.getSubject(),
                     jwtClaimsSet.getStringClaim(CLAIM_C_NONCE),

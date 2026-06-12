@@ -425,8 +425,9 @@ class CredentialServiceTest {
     @Test
     void Should_ReturnCredentialResponse_When_RefreshingCredential() throws Exception {
         when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
-                .thenReturn(new AccessTokenService.AccessTokenData(
-                        WALLET_SUBJECT_ID, NONCE, null, SOCIAL_SECURITY_VC_TYPE));
+                .thenReturn(
+                        new AccessTokenService.AccessTokenData(
+                                WALLET_SUBJECT_ID, NONCE, null, SOCIAL_SECURITY_VC_TYPE));
 
         CredentialHandler mockHandler = mock(CredentialHandler.class);
         when(mockCredentialHandlerFactory.createHandler(SOCIAL_SECURITY_VC_TYPE))
@@ -453,8 +454,9 @@ class CredentialServiceTest {
     void Should_ThrowCredentialServiceException_When_RefreshCredentialFileNotFound()
             throws Exception {
         when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
-                .thenReturn(new AccessTokenService.AccessTokenData(
-                        WALLET_SUBJECT_ID, NONCE, null, "NonExistentCredential"));
+                .thenReturn(
+                        new AccessTokenService.AccessTokenData(
+                                WALLET_SUBJECT_ID, NONCE, null, "NonExistentCredential"));
 
         CredentialServiceException exception =
                 assertThrows(

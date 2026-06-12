@@ -218,8 +218,7 @@ public class ServicesFactory {
                     new File(
                             Resources.getResource("credential_configurations_supported.json")
                                     .getPath());
-            Map<String, Object> map =
-                    new ObjectMapper().readValue(file, new TypeReference<>() {});
+            Map<String, Object> map = new ObjectMapper().readValue(file, new TypeReference<>() {});
             return map.keySet();
         } catch (IOException e) {
             throw new IllegalStateException(

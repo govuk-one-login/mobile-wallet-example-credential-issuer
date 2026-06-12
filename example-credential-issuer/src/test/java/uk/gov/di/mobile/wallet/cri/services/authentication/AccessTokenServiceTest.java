@@ -57,9 +57,7 @@ class AccessTokenServiceTest {
         ecSigner = new ECDSASigner(getEcKey());
         accessTokenService =
                 new AccessTokenService(
-                        jwksService,
-                        configurationService,
-                        SUPPORTED_CREDENTIAL_CONFIGURATION_IDS) {
+                        jwksService, configurationService, SUPPORTED_CREDENTIAL_CONFIGURATION_IDS) {
                     @Override
                     protected Logger getLogger() {
                         return mockLogger;
