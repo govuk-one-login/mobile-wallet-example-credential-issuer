@@ -166,6 +166,72 @@ class AccessTokenServiceTest {
     }
 
     @Test
+    void Should_ThrowAccessTokenValidationException_When_CredentialIdentifiersHasMultipleItems() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim("credential_identifiers", List.of("id1", "id2"))
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals("Invalid value for credential_identifiers", exception.getMessage());
+    }
+
+    @Test
+    void Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdsIsEmpty() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim("credential_configuration_ids", List.of())
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals(
+                "Invalid value for credential_configuration_ids", exception.getMessage());
+    }
+
+    @Test
+    void
+            Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdsHasMultipleItems() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim(
+                                "credential_configuration_ids",
+                                List.of("org.iso.18013.5.1.mDL", "SocialSecurityCredential"))
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals(
+                "Invalid value for credential_configuration_ids", exception.getMessage());
+    }
+
+    @Test
+    void
+            Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdNotInSupported() {
+        SignedJWT mockAccessToken =
+                new MockAccessTokenBuilder("ES256")
+                        .withClaim(
+                                "credential_configuration_ids",
+                                List.of("UnsupportedCredentialType"))
+                        .build();
+
+        AccessTokenValidationException exception =
+                assertThrows(
+                        AccessTokenValidationException.class,
+                        () -> accessTokenService.verifyAccessToken(mockAccessToken));
+        assertEquals(
+                "credential_configuration_ids value not in credential_configurations_supported",
+                exception.getMessage());
+    }
+
+    @Test
     void Should_ThrowAccessTokenValidationException_When_AudClaimDoesNotMatchConfig() {
         MockAccessTokenBuilder builder = new MockAccessTokenBuilder("ES256");
         SignedJWT mockAccessToken = builder.withAudience("invalid-audience").build();

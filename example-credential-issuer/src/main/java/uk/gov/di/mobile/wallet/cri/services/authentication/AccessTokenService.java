@@ -166,7 +166,6 @@ public class AccessTokenService {
             List<String> credentialConfigurationIdsClaimValue =
                     jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_CONFIGURATION_IDS);
 
-            // TODO: Extend tests for these if statements
             if (credentialIdentifiersClaimValue != null
                     && credentialIdentifiersClaimValue.size() != 1) {
                 throw new InvalidAttributeValueException(
