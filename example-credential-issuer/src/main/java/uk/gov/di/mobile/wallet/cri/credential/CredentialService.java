@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.io.File;
+import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Optional;
@@ -70,6 +74,11 @@ public class CredentialService {
             }
 
             String credentialOfferId = accessTokenData.credentialIdentifier();
+
+            if (credentialOfferId == null) {
+                return handleRefresh(accessTokenData, proofJwtData);
+            }
+
             CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
             if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
                 throw new CredentialOfferException("Credential offer validation failed");
@@ -120,11 +129,50 @@ public class CredentialService {
                 | ObjectStoreException
                 | CertificateException
                 | DocumentStoreException
-                | StatusListClientException exception) {
+                | StatusListClientException
+                | IllegalArgumentException
+                | IOException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
     }
+
+    private CredentialResponse handleRefresh(
+            AccessTokenService.AccessTokenData accessTokenData,
+            ProofJwtService.ProofJwtData proofJwtData)
+            throws SigningException, MdocException, ObjectStoreException, CertificateException,
+                    StatusListClientException, IOException {
+
+        String credentialConfigurationId = accessTokenData.credentialConfigurationId();
+
+        DocumentStoreRecord document = loadRefreshCredential(credentialConfigurationId);
+
+        String vcType = document.getVcType();
+        CredentialType credentialType = CredentialType.fromType(vcType);
+        long expiry = credentialExpiryCalculator.calculateExpiry(document);
+
+        Optional<StatusListClient.StatusListInformation> statusListInformation = Optional.empty();
+        if (credentialType == MOBILE_DRIVING_LICENCE || credentialType == SIMPLE_MDOC) {
+            statusListInformation = Optional.of(statusListClient.getIndex(expiry));
+        }
+
+        CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
+        String credential =
+                handler.buildCredential(document, proofJwtData, statusListInformation);
+
+        String notificationId = UUID.randomUUID().toString();
+        return new CredentialResponse(credential, notificationId);
+    }
+
+    private DocumentStoreRecord loadRefreshCredential(String credentialConfigurationId)
+            throws IOException {
+        File file = new File(
+                Resources.getResource(
+                        "refresh_credentials/" + credentialConfigurationId + ".json").getPath());
+        return new ObjectMapper().readValue(file, DocumentStoreRecord.class);
+    }
+
+
 
     private boolean isValidCredentialOffer(
             CachedCredentialOffer credentialOffer, String credentialOfferId) {
