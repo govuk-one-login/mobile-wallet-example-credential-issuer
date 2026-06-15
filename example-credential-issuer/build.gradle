@@ -2,7 +2,7 @@ plugins {
 	id "application"
 	id "java"
 	id "com.diffplug.spotless" version "8.6.0"
-	id "org.sonarqube" version "7.3.0.8198"
+	id "org.sonarqube" version "7.3.1.8318"
 	id "jacoco"
 }
 
@@ -13,7 +13,7 @@ repositories {
 }
 
 ext {
-	awsSdkVersion = "2.45.1"
+	awsSdkVersion = "2.46.5"
 	dropwizardVersion = "5.0.2"
 	jacksonVersion = "2.22.0"
 	lombokVersion = "1.18.46"
