@@ -17,8 +17,8 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Optional;
@@ -169,14 +169,13 @@ public class CredentialService {
 
     private DocumentStoreRecord loadRefreshCredential(String credentialConfigurationId)
             throws IOException {
-        File file =
-                new File(
+        String json =
+                Resources.toString(
                         Resources.getResource(
-                                        "refresh_credentials/"
-                                                + credentialConfigurationId
-                                                + ".json")
-                                .getPath());
-        return new ObjectMapper().readValue(file, DocumentStoreRecord.class);
+                                "refresh_credentials/" + credentialConfigurationId + ".json"),
+                        StandardCharsets.UTF_8);
+        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", UUID.randomUUID().toString());
+        return new ObjectMapper().readValue(json, DocumentStoreRecord.class);
     }
 
     private boolean isValidCredentialOffer(
