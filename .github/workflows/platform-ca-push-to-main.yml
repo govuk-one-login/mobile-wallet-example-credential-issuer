@@ -26,7 +26,7 @@ jobs:
         working-directory: ./platform-ca
     steps:
       - name: Check out repository code
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           ref: ${{ inputs.gitRef }}
 
@@ -51,7 +51,7 @@ jobs:
           aws-region: eu-west-2
 
       - name: Deploy SAM app
-        uses: govuk-one-login/devplatform-upload-action@5879c30205266ad61e8299a4fcea76364530c9c1 # v3.14.0
+        uses: govuk-one-login/devplatform-upload-action@64e46134b4108ebfa1cf2a64fee00782f8e2e8cf # v4.1.0
         with:
           artifact-bucket-name: ${{ secrets.BUILD_PLATFORM_CA_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.BUILD_SIGNING_PROFILE_NAME }}
