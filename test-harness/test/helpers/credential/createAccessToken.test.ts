@@ -69,7 +69,7 @@ describe("createAccessToken", () => {
     expect(accessTokenPayload.iss).toEqual(preAuthorizedCodePayload.aud);
     expect(accessTokenPayload.c_nonce).toEqual(c_nonce);
     expect(accessTokenPayload.credential_identifiers).toEqual(
-      preAuthorizedCodePayload.credential_configuration_ids,
+      preAuthorizedCodePayload.credential_identifiers,
     );
     expect(accessTokenPayload.credential_configuration_ids).toEqual(
       preAuthorizedCodePayload.credential_configuration_ids,
@@ -116,7 +116,7 @@ describe("createAccessToken", () => {
 
     const accessTokenPayload = decodeJwt(response.access_token);
     expect(accessTokenPayload.credential_identifiers).toEqual(
-      preAuthorizedCodePayload.credential_configuration_ids,
+      preAuthorizedCodePayload.credential_identifiers,
     );
   });
 });
