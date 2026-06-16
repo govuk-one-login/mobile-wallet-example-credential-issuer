@@ -595,7 +595,8 @@ describe("Credential Issuer Tests", () => {
       it("should return valid response body", () => {
         expect(credentialResponse.data).toHaveProperty("credentials");
         expect(credentialResponse.data.credentials.length).toEqual(1);
-        expect(credentialResponse.data.credentials[0]).toHaveProperty("credential",
+        expect(credentialResponse.data.credentials[0]).toHaveProperty(
+          "credential",
         );
       });
 
@@ -617,9 +618,9 @@ describe("Credential Issuer Tests", () => {
         const credential = credentialResponse.data.credentials[0].credential;
         const iacas: Iacas = (await getIacas(CRI_URL, IACAS_ENDPOINT)).data;
         const rootCertificatePem = iacas.data[0].certificatePem;
-        expect(await isValidMdocCredential(credential, rootCertificatePem)).toBe(
-          true,
-        );
+        expect(
+          await isValidMdocCredential(credential, rootCertificatePem),
+        ).toBe(true);
       });
     });
   });

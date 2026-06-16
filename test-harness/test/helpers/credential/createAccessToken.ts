@@ -24,12 +24,14 @@ export async function createAccessToken(
 ): Promise<AccessToken> {
   const signingKeyAsKeyLike = await importJWK(signingKey, SIGNING_ALGORITHM);
   const customClaims: Record<string, unknown> = {
-    credential_configuration_ids: preAuthorizedCodePayload.credential_configuration_ids!,
+    credential_configuration_ids:
+      preAuthorizedCodePayload.credential_configuration_ids!,
     c_nonce: c_nonce,
   };
 
   if (options.includeCredentialIdentifiers !== false) {
-    customClaims.credential_identifiers = preAuthorizedCodePayload.credential_identifiers!;
+    customClaims.credential_identifiers =
+      preAuthorizedCodePayload.credential_identifiers!;
   }
   const nowInSeconds = Math.floor(Date.now() / 1000);
   const accessToken = await new SignJWT(customClaims)
