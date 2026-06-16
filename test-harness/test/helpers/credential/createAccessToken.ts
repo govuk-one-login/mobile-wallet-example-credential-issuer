@@ -29,7 +29,7 @@ export async function createAccessToken(
   };
 
   if (options.includeCredentialIdentifiers !== false) {
-    customClaims.credential_identifiers = preAuthorizedCodePayload.credential_configuration_ids!;
+    customClaims.credential_identifiers = preAuthorizedCodePayload.credential_identifiers!;
   }
   const nowInSeconds = Math.floor(Date.now() / 1000);
   const accessToken = await new SignJWT(customClaims)
