@@ -69,7 +69,7 @@ describe("createAccessToken", () => {
     expect(accessTokenPayload.iss).toEqual(preAuthorizedCodePayload.aud);
     expect(accessTokenPayload.c_nonce).toEqual(c_nonce);
     expect(accessTokenPayload.credential_identifiers).toEqual(
-      preAuthorizedCodePayload.credential_identifiers,
+      preAuthorizedCodePayload.credential_configuration_ids,
     );
     expect(accessTokenPayload.credential_configuration_ids).toEqual(
       preAuthorizedCodePayload.credential_configuration_ids,
@@ -89,5 +89,34 @@ describe("createAccessToken", () => {
     );
     expect(accessTokenHeader.typ).toEqual("at+jwt");
     expect(accessTokenHeader.alg).toEqual("ES256");
+  });
+
+  it("should not include credential_identifiers when includeCredentialIdentifiers is false", async () => {
+    const response = await createAccessToken(
+      c_nonce,
+      walletSubjectId,
+      preAuthorizedCodePayload,
+      privateKeyJwk,
+      { includeCredentialIdentifiers: false },
+    );
+
+    const accessTokenPayload = decodeJwt(response.access_token);
+    expect(accessTokenPayload).not.toHaveProperty("credential_identifiers");
+    expect(accessTokenPayload).toHaveProperty("credential_configuration_ids");
+  });
+
+  it("should include credential_identifiers when includeCredentialIdentifiers is explicitly true", async () => {
+    const response = await createAccessToken(
+      c_nonce,
+      walletSubjectId,
+      preAuthorizedCodePayload,
+      privateKeyJwk,
+      { includeCredentialIdentifiers: true },
+    );
+
+    const accessTokenPayload = decodeJwt(response.access_token);
+    expect(accessTokenPayload.credential_identifiers).toEqual(
+      preAuthorizedCodePayload.credential_configuration_ids,
+    );
   });
 });
