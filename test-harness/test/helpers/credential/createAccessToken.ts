@@ -20,8 +20,9 @@ export async function createAccessToken(
   walletSubjectId: string,
   preAuthorizedCodePayload: JWTPayload,
   signingKey: JWK,
-  options: CreateAccessTokenOptions = { includeCredentialIdentifiers: true },
+  options?: CreateAccessTokenOptions,
 ): Promise<AccessToken> {
+  const { includeCredentialIdentifiers = true } = options ?? {};
   const signingKeyAsKeyLike = await importJWK(signingKey, SIGNING_ALGORITHM);
   const customClaims: Record<string, unknown> = {
     credential_configuration_ids:
@@ -29,7 +30,7 @@ export async function createAccessToken(
     c_nonce: c_nonce,
   };
 
-  if (options.includeCredentialIdentifiers !== false) {
+  if (includeCredentialIdentifiers) {
     customClaims.credential_identifiers =
       preAuthorizedCodePayload.credential_identifiers!;
   }
