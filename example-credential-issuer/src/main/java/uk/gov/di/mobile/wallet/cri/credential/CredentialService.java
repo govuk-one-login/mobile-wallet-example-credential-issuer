@@ -73,30 +73,39 @@ public class CredentialService {
                         "Access token c_nonce claim does not match Proof JWT nonce claim");
             }
 
-            String credentialOfferId = accessTokenData.credentialIdentifier();
+            String credentialIdentifier = accessTokenData.credentialIdentifier();
+            boolean isRefreshCredential = credentialIdentifier == null;
 
-            if (credentialOfferId == null) {
-                return handleRefresh(accessTokenData, proofJwtData);
+            DocumentStoreRecord document;
+            String walletSubjectId = null;
+
+            if (isRefreshCredential) {
+                String credentialConfigurationId = accessTokenData.credentialConfigurationId();
+                document = loadRefreshCredential(credentialConfigurationId);
+            } else {
+                CachedCredentialOffer credentialOffer =
+                        dataStore.getCredentialOffer(credentialIdentifier);
+                if (!isValidCredentialOffer(credentialOffer, credentialIdentifier)) {
+                    throw new CredentialOfferException("Credential offer validation failed");
+                }
+
+                if (!credentialOffer
+                        .getWalletSubjectId()
+                        .equals(accessTokenData.walletSubjectId())) {
+                    throw new AccessTokenValidationException(
+                            "Access token sub claim does not match cached walletSubjectId");
+                }
+
+                String itemId = credentialOffer.getItemId();
+                walletSubjectId = credentialOffer.getWalletSubjectId();
+                document = documentStoreClient.getDocument(itemId);
+
+                // Delete credential offer after redeeming it to prevent replay
+                dataStore.deleteCredentialOffer(credentialIdentifier);
             }
 
-            CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-            if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
-                throw new CredentialOfferException("Credential offer validation failed");
-            }
-
-            if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
-                throw new AccessTokenValidationException(
-                        "Access token sub claim does not match cached walletSubjectId");
-            }
-
-            String itemId = credentialOffer.getItemId();
-            DocumentStoreRecord document = documentStoreClient.getDocument(itemId);
             String notificationId = UUID.randomUUID().toString();
             String vcType = document.getVcType();
-
-            // Delete credential offer after redeeming it to prevent replay
-            dataStore.deleteCredentialOffer(credentialOfferId);
-
             CredentialType credentialType = CredentialType.fromType(vcType);
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
@@ -112,9 +121,9 @@ public class CredentialService {
 
             StoredCredential storedCredential =
                     StoredCredential.builder()
-                            .credentialIdentifier(credentialOffer.getCredentialIdentifier())
+                            .credentialIdentifier(credentialIdentifier)
                             .notificationId(notificationId)
-                            .walletSubjectId(credentialOffer.getWalletSubjectId())
+                            .walletSubjectId(walletSubjectId)
                             .timeToLive(expiry)
                             .statusList(statusListInformation)
                             .documentId(document.getDocumentId())
@@ -135,36 +144,6 @@ public class CredentialService {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
-    }
-
-    private CredentialResponse handleRefresh(
-            AccessTokenService.AccessTokenData accessTokenData,
-            ProofJwtService.ProofJwtData proofJwtData)
-            throws SigningException,
-                    MdocException,
-                    ObjectStoreException,
-                    CertificateException,
-                    StatusListClientException,
-                    IOException {
-
-        String credentialConfigurationId = accessTokenData.credentialConfigurationId();
-
-        DocumentStoreRecord document = loadRefreshCredential(credentialConfigurationId);
-
-        String vcType = document.getVcType();
-        CredentialType credentialType = CredentialType.fromType(vcType);
-        long expiry = credentialExpiryCalculator.calculateExpiry(document);
-
-        Optional<StatusListClient.StatusListInformation> statusListInformation = Optional.empty();
-        if (credentialType == MOBILE_DRIVING_LICENCE || credentialType == SIMPLE_MDOC) {
-            statusListInformation = Optional.of(statusListClient.getIndex(expiry));
-        }
-
-        CredentialHandler handler = credentialHandlerFactory.createHandler(vcType);
-        String credential = handler.buildCredential(document, proofJwtData, statusListInformation);
-
-        String notificationId = UUID.randomUUID().toString();
-        return new CredentialResponse(credential, notificationId);
     }
 
     private DocumentStoreRecord loadRefreshCredential(String credentialConfigurationId)

@@ -447,7 +447,7 @@ class CredentialServiceTest {
 
         verify(mockDynamoDbService, never()).getCredentialOffer(any());
         verify(mockDocumentStoreClient, never()).getDocument(any());
-        verify(mockDynamoDbService, never()).saveStoredCredential(any());
+        verify(mockDynamoDbService).saveStoredCredential(any());
     }
 
     @Test
