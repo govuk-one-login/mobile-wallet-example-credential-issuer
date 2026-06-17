@@ -48,8 +48,6 @@ Conditions:
 
   IsIntegration: !Equals [!Ref Environment, integration]
 
-  IsNotIntegration: !Not [!Equals [!Ref Environment, integration]]
-
   UsePermissionsBoundary:
     Fn::Not:
       - Fn::Equals:
@@ -612,7 +610,6 @@ Resources:
 
   # KMS
   CredentialIssuerSigningKey:
-    Condition: IsNotIntegration
     Type: AWS::KMS::Key
     Properties:
       Description: Asymmetric key for signing tokens
@@ -642,7 +639,6 @@ Resources:
       MultiRegion: false
 
   CredentialIssuerSigningKeyAlias:
-    Condition: IsNotIntegration
     Type: AWS::KMS::Alias
     Properties:
       AliasName: !Sub "alias/credential-signing-key-${AWS::StackName}"

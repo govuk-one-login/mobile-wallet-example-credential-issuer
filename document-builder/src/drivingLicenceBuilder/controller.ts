@@ -26,7 +26,10 @@ import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { validateDrivingLicenceForm } from "./helpers/DrivingLicenceFormValidator";
-import { CUSTOM_CREDENTIAL_TTL, SECONDS_IN_A_DAY } from "../config/credentialTtl";
+import {
+  CUSTOM_CREDENTIAL_TTL,
+  SECONDS_IN_A_DAY,
+} from "../config/credentialTtl";
 import { ENVIRONMENTS } from "../config/environments";
 
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
@@ -98,7 +101,8 @@ export function drivingLicenceBuilderPostController({
             )
           : Number(body.credentialTtl);
       const expectedUpdateSeconds = body.expectedUpdateDays
-        ? credentialTtlSeconds - Number(body.expectedUpdateDays) * SECONDS_IN_A_DAY
+        ? credentialTtlSeconds -
+          Number(body.expectedUpdateDays) * SECONDS_IN_A_DAY
         : null;
       await saveDocument(getDocumentsTableName(), {
         itemId,
