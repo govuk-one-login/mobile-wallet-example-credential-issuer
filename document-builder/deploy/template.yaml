@@ -38,6 +38,8 @@ Conditions:
 
   IsIntegration: !Equals [!Ref Environment, integration]
 
+  IsNotIntegration: !Not [!Condition IsIntegration]
+
   UsePermissionsBoundary:
     Fn::Not:
       - Fn::Equals:
@@ -432,8 +434,11 @@ Resources:
                   - SelfUrl: !FindInMap [EnvironmentVariables, !Ref Environment, SelfUrl]
             - Name: OIDC_CLIENT_ID
               Value: !Sub "{{resolve:ssm:/${AWS::StackName}/Config/OIDC/Client/Id}}"
-            - Name: CLIENT_SIGNING_KEY_ID
-              Value: !Ref ClientSigningKey
+            - !If
+              - IsNotIntegration
+              - Name: CLIENT_SIGNING_KEY_ID
+                Value: !Ref ClientSigningKey
+              - !Ref AWS::NoValue
             - Name: OIDC_ISSUER_DISCOVERY_ENDPOINT
               Value: !FindInMap [EnvironmentVariables, !Ref Environment, OidcIssuerEndpoint]
             - Name: WALLET_APPS
@@ -590,6 +595,7 @@ Resources:
 
   ClientSigningKey:
     Type: AWS::KMS::Key
+    Condition: IsNotIntegration
     Properties:
       Description: RSA asymmetric key for signing tokens
       Enabled: true
@@ -618,6 +624,7 @@ Resources:
 
   ClientSigningKeyAlias:
     Type: AWS::KMS::Alias
+    Condition: IsNotIntegration
     Properties:
       AliasName: !Sub "alias/client-assertion-signing-key-${AWS::StackName}"
       TargetKeyId: !Ref ClientSigningKey

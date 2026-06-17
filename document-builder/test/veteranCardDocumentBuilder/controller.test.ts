@@ -203,7 +203,11 @@ describe("controller.ts", () => {
 
         await veteranCardDocumentBuilderPostController(config)(req, res);
 
-        expect(mockCalculateTtlSeconds).toHaveBeenCalledWith("02", "05", "2026");
+        expect(mockCalculateTtlSeconds).toHaveBeenCalledWith(
+          "02",
+          "05",
+          "2026",
+        );
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({ credentialTtlSeconds: 12345 }),
@@ -309,7 +313,8 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdateSeconds: DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
+            expectedUpdateSeconds:
+              DEFAULT_CREDENTIAL_TTL_SECONDS - 5 * SECONDS_IN_A_DAY,
           }),
         );
       });
@@ -336,7 +341,8 @@ describe("controller.ts", () => {
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
           expect.objectContaining({
-            expectedUpdateSeconds: CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
+            expectedUpdateSeconds:
+              CUSTOM_CREDENTIAL_TTL_SECONDS - 10 * SECONDS_IN_A_DAY,
           }),
         );
       });
