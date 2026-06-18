@@ -2,8 +2,8 @@
   "itemId": "refresh-digital-veteran-card",
   "documentId": "refresh-digital-veteran-card",
   "data": {
-    "givenName": "Jane",
-    "familyName": "Doe",
+    "givenName": "Refresh FirstName",
+    "familyName": "Refresh-Surname",
     "dateOfBirth-day": "15",
     "dateOfBirth-month": "06",
     "dateOfBirth-year": "1990",
