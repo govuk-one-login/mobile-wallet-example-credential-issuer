@@ -223,9 +223,7 @@ class AccessTokenServiceTest {
                 assertThrows(
                         AccessTokenValidationException.class,
                         () -> accessTokenService.verifyAccessToken(mockAccessToken));
-        assertEquals(
-                "credential_configuration_ids value not supported",
-                exception.getMessage());
+        assertEquals("credential_configuration_ids value not supported", exception.getMessage());
     }
 
     @Test
