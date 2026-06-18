@@ -153,7 +153,7 @@ public class CredentialService {
                         Resources.getResource(
                                 "refresh_credentials/" + credentialConfigurationId + ".json"),
                         StandardCharsets.UTF_8);
-        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", UUID.randomUUID().toString());
+        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", UUID.randomUUID() + "RFH");
         return new ObjectMapper().readValue(json, DocumentStoreRecord.class);
     }
 
