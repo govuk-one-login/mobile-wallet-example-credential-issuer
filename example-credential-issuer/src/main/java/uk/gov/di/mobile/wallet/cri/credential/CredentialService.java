@@ -77,7 +77,7 @@ public class CredentialService {
             boolean isRefreshCredential = credentialIdentifier == null;
 
             DocumentStoreRecord document;
-            String walletSubjectId = null;
+            String walletSubjectId = accessTokenData.walletSubjectId();
 
             if (isRefreshCredential) {
                 String credentialConfigurationId = accessTokenData.credentialConfigurationId();
@@ -97,7 +97,6 @@ public class CredentialService {
                 }
 
                 String itemId = credentialOffer.getItemId();
-                walletSubjectId = credentialOffer.getWalletSubjectId();
                 document = documentStoreClient.getDocument(itemId);
 
                 // Delete credential offer after redeeming it to prevent replay
