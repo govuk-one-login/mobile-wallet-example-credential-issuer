@@ -82,6 +82,7 @@ public class CredentialService {
             if (isRefreshCredential) {
                 String credentialConfigurationId = accessTokenData.credentialConfigurationId();
                 document = loadRefreshCredential(credentialConfigurationId);
+                credentialIdentifier = UUID.randomUUID().toString();
             } else {
                 CachedCredentialOffer credentialOffer =
                         dataStore.getCredentialOffer(credentialIdentifier);
