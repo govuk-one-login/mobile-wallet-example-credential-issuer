@@ -182,7 +182,7 @@ public class AccessTokenService {
             if (!supportedCredentialConfigurationIds.contains(
                     credentialConfigurationIdsClaimValue.get(0))) {
                 throw new InvalidAttributeValueException(
-                        "credential_configuration_ids value not in credential_configurations_supported");
+                        CLAIM_CREDENTIAL_CONFIGURATION_IDS + " value not supported");
             }
 
         } catch (BadJWTException | InvalidAttributeValueException | ParseException exception) {
