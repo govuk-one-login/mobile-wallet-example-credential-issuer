@@ -1,0 +1,19 @@
+{
+  "itemId": "refresh-digital-veteran-card",
+  "documentId": "refresh-digital-veteran-card",
+  "data": {
+    "givenName": "Refresh FirstName",
+    "familyName": "Refresh-Surname",
+    "dateOfBirth-day": "15",
+    "dateOfBirth-month": "06",
+    "dateOfBirth-year": "1990",
+    "cardExpiryDate-day": "01",
+    "cardExpiryDate-month": "01",
+    "cardExpiryDate-year": "2030",
+    "serviceNumber": "SVC-123456",
+    "serviceBranch": "Royal Navy",
+    "portrait": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFAABAAAAAAAAAAAAAAAAAAAACf/EABQQAQAAAAAAAAAAAAAAAAAAAAD/xAAUAQEAAAAAAAAAAAAAAAAAAAAA/8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAwDAQACEQMRAD8AKwA//9k="
+  },
+  "vcType": "DigitalVeteranCard",
+  "credentialTtlSeconds": 2592000
+}

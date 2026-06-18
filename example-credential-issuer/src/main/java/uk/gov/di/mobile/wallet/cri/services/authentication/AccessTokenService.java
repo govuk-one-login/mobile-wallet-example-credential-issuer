@@ -21,12 +21,14 @@ import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import javax.management.InvalidAttributeValueException;
 
 import java.text.ParseException;
+import java.util.List;
 import java.util.Set;
 
 /** Service for validating and extracting data from access tokens. */
 public class AccessTokenService {
 
     public static final String CLAIM_CREDENTIAL_IDENTIFIERS = "credential_identifiers";
+    public static final String CLAIM_CREDENTIAL_CONFIGURATION_IDS = "credential_configuration_ids";
     public static final String CLAIM_C_NONCE = "c_nonce";
     private static final String CLAIM_SUBJECT = "sub";
     private static final String CLAIM_EXPIRATION_TIME = "exp";
@@ -42,6 +44,7 @@ public class AccessTokenService {
 
     private final JwksService jwksService;
     private final ConfigurationService configurationService;
+    private final Set<String> supportedCredentialConfigurationIds;
 
     /**
      * Container for access token data.
@@ -49,19 +52,29 @@ public class AccessTokenService {
      * @param walletSubjectId The subject identifier from the access token.
      * @param nonce The nonce value from the access token.
      * @param credentialIdentifier The first credential identifier from the access token.
+     * @param credentialConfigurationId The credential configuration id from the access token.
      */
     public record AccessTokenData(
-            String walletSubjectId, String nonce, String credentialIdentifier) {}
+            String walletSubjectId,
+            String nonce,
+            String credentialIdentifier,
+            String credentialConfigurationId) {}
 
     /**
      * Constructs a new AccessTokenService.
      *
      * @param jwksService Service to retrieve JWKs for signature validation.
      * @param configurationService Service providing configuration values.
+     * @param supportedCredentialConfigurationIds — the set of valid credential configuration IDs
+     *     from issuer metadata.
      */
-    public AccessTokenService(JwksService jwksService, ConfigurationService configurationService) {
+    public AccessTokenService(
+            JwksService jwksService,
+            ConfigurationService configurationService,
+            Set<String> supportedCredentialConfigurationIds) {
         this.jwksService = jwksService;
         this.configurationService = configurationService;
+        this.supportedCredentialConfigurationIds = supportedCredentialConfigurationIds;
     }
 
     /**
@@ -141,7 +154,7 @@ public class AccessTokenService {
                     Set.of(
                             CLAIM_SUBJECT,
                             CLAIM_C_NONCE,
-                            CLAIM_CREDENTIAL_IDENTIFIERS,
+                            CLAIM_CREDENTIAL_CONFIGURATION_IDS,
                             CLAIM_EXPIRATION_TIME,
                             CLAIM_JWT_ID);
             JWTClaimsSet jwtClaimsSet = accessToken.getJWTClaimsSet();
@@ -150,8 +163,26 @@ public class AccessTokenService {
 
             verifier.verify(jwtClaimsSet, null);
 
-            if (jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).isEmpty()) {
-                throw new InvalidAttributeValueException("Empty credential_identifiers claim");
+            List<String> credentialIdentifiersClaimValue =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS);
+            List<String> credentialConfigurationIdsClaimValue =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_CONFIGURATION_IDS);
+
+            if (credentialIdentifiersClaimValue != null
+                    && credentialIdentifiersClaimValue.size() != 1) {
+                throw new InvalidAttributeValueException(
+                        "Invalid value for " + CLAIM_CREDENTIAL_IDENTIFIERS);
+            }
+
+            if (credentialConfigurationIdsClaimValue.size() != 1) {
+                throw new InvalidAttributeValueException(
+                        "Invalid value for " + CLAIM_CREDENTIAL_CONFIGURATION_IDS);
+            }
+
+            if (!supportedCredentialConfigurationIds.contains(
+                    credentialConfigurationIdsClaimValue.get(0))) {
+                throw new InvalidAttributeValueException(
+                        CLAIM_CREDENTIAL_CONFIGURATION_IDS + " value not supported");
             }
 
         } catch (BadJWTException | InvalidAttributeValueException | ParseException exception) {
@@ -212,10 +243,17 @@ public class AccessTokenService {
             throws AccessTokenValidationException {
         try {
             JWTClaimsSet jwtClaimsSet = token.getJWTClaimsSet();
+            List<String> credentialIdentifiers =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_IDENTIFIERS);
+            String credentialIdentifier =
+                    credentialIdentifiers != null ? credentialIdentifiers.get(0) : null;
+            String credentialConfigurationId =
+                    jwtClaimsSet.getStringListClaim(CLAIM_CREDENTIAL_CONFIGURATION_IDS).get(0);
             return new AccessTokenData(
                     jwtClaimsSet.getSubject(),
                     jwtClaimsSet.getStringClaim(CLAIM_C_NONCE),
-                    jwtClaimsSet.getListClaim(CLAIM_CREDENTIAL_IDENTIFIERS).get(0).toString());
+                    credentialIdentifier,
+                    credentialConfigurationId);
         } catch (ParseException exception) {
             throw new AccessTokenValidationException(exception.getMessage(), exception);
         }

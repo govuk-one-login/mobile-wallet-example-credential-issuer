@@ -561,6 +561,70 @@ describe("Credential Issuer Tests", () => {
     });
   });
 
+  describe("Credential (Refresh)", () => {
+    describe("when requesting a refreshed credential using an access token without credential_identifiers", () => {
+      let credentialResponse: AxiosResponse;
+
+      beforeAll(async () => {
+        const refreshNonce = randomUUID();
+        const refreshAccessToken = await createAccessToken(
+          refreshNonce,
+          WALLET_SUBJECT_ID,
+          PRE_AUTHORIZED_CODE_PAYLOAD,
+          PRIVATE_KEY_JWK,
+          { includeCredentialIdentifiers: false },
+        );
+        const didKey = createDidKey(PUBLIC_KEY_JWK);
+        const proofJwt = await createProofJwt(
+          refreshNonce,
+          didKey,
+          PRE_AUTHORIZED_CODE_PAYLOAD,
+          PRIVATE_KEY_JWK,
+        );
+        credentialResponse = await getCredential(
+          refreshAccessToken.access_token,
+          proofJwt,
+          CREDENTIAL_ENDPOINT,
+        );
+      });
+
+      it("should return 200 status code", () => {
+        expect(credentialResponse.status).toBe(200);
+      });
+
+      it("should return valid response body", () => {
+        expect(credentialResponse.data).toHaveProperty("credentials");
+        expect(credentialResponse.data.credentials.length).toEqual(1);
+        expect(credentialResponse.data.credentials[0]).toHaveProperty(
+          "credential",
+        );
+      });
+
+      itIf("should return valid JWT credential", isJwt, async () => {
+        const didDocument: DidDocument = (await getDidDocument(CRI_URL)).data;
+        const didKey = createDidKey(PUBLIC_KEY_JWK);
+        const credential = credentialResponse.data.credentials[0].credential;
+        expect(
+          await isValidJwtCredential(
+            credential,
+            didKey,
+            didDocument.verificationMethod,
+            CRI_URL,
+          ),
+        ).toBe(true);
+      });
+
+      itIf("should return valid mdoc credential", isMdoc, async () => {
+        const credential = credentialResponse.data.credentials[0].credential;
+        const iacas: Iacas = (await getIacas(CRI_URL, IACAS_ENDPOINT)).data;
+        const rootCertificatePem = iacas.data[0].certificatePem;
+        expect(
+          await isValidMdocCredential(credential, rootCertificatePem),
+        ).toBe(true);
+      });
+    });
+  });
+
   describe("Credential (Redeeming Offer Twice)", () => {
     describe("when a credential offer twice is redeemed twice", () => {
       it("should return 401 with invalid_token error", async () => {

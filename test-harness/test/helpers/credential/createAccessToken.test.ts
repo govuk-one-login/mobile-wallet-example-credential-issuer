@@ -9,6 +9,7 @@ const preAuthorizedCodePayload = {
   clientId: "EXAMPLE_CRI",
   iss: "urn:fdc:gov:uk:example-credential-issuer",
   credential_identifiers: ["e0b02438-d006-4100-918a-b02629e1e29c"],
+  credential_configuration_ids: ["org.iso.18013.5.1.mDL"],
   exp: 1721223394,
   iat: 1721223094,
 };
@@ -56,6 +57,7 @@ describe("createAccessToken", () => {
       "iss",
       "c_nonce",
       "credential_identifiers",
+      "credential_configuration_ids",
       "exp",
       "jti",
     ];
@@ -68,6 +70,9 @@ describe("createAccessToken", () => {
     expect(accessTokenPayload.c_nonce).toEqual(c_nonce);
     expect(accessTokenPayload.credential_identifiers).toEqual(
       preAuthorizedCodePayload.credential_identifiers,
+    );
+    expect(accessTokenPayload.credential_configuration_ids).toEqual(
+      preAuthorizedCodePayload.credential_configuration_ids,
     );
     expect(accessTokenPayload.jti).toEqual(mockedJti);
     const mockedNowInSeconds = Math.floor(Date.now() / 1000);
@@ -84,5 +89,34 @@ describe("createAccessToken", () => {
     );
     expect(accessTokenHeader.typ).toEqual("at+jwt");
     expect(accessTokenHeader.alg).toEqual("ES256");
+  });
+
+  it("should not include credential_identifiers when includeCredentialIdentifiers is false", async () => {
+    const response = await createAccessToken(
+      c_nonce,
+      walletSubjectId,
+      preAuthorizedCodePayload,
+      privateKeyJwk,
+      { includeCredentialIdentifiers: false },
+    );
+
+    const accessTokenPayload = decodeJwt(response.access_token);
+    expect(accessTokenPayload).not.toHaveProperty("credential_identifiers");
+    expect(accessTokenPayload).toHaveProperty("credential_configuration_ids");
+  });
+
+  it("should include credential_identifiers when includeCredentialIdentifiers is explicitly true", async () => {
+    const response = await createAccessToken(
+      c_nonce,
+      walletSubjectId,
+      preAuthorizedCodePayload,
+      privateKeyJwk,
+      { includeCredentialIdentifiers: true },
+    );
+
+    const accessTokenPayload = decodeJwt(response.access_token);
+    expect(accessTokenPayload.credential_identifiers).toEqual(
+      preAuthorizedCodePayload.credential_identifiers,
+    );
   });
 });

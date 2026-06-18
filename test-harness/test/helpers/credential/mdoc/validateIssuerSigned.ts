@@ -8,10 +8,13 @@ import { MDLValidationError } from "./MDLValidationError";
 export function validateIssuerSignedSchema(issuerSigned: IssuerSigned): void {
   const ajv = getAjvInstance();
 
-  const validator = ajv
-    .addSchema(isoNamespaceSchema, "isoNamespace")
-    .addSchema(domesticNamespaceSchema, "domesticNamespace")
-    .compile(issuerSignedSchema);
+  if (!ajv.getSchema("isoNamespace")) {
+    ajv.addSchema(isoNamespaceSchema, "isoNamespace");
+  }
+  if (!ajv.getSchema("domesticNamespace")) {
+    ajv.addSchema(domesticNamespaceSchema, "domesticNamespace");
+  }
+  const validator = ajv.compile(issuerSignedSchema);
 
   if (!validator(issuerSigned)) {
     const errors =

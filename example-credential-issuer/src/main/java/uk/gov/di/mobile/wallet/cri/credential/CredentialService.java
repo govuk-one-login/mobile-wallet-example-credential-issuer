@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.Resources;
 import com.nimbusds.jwt.SignedJWT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,8 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DataStoreException;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.ObjectStoreException;
 import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Optional;
@@ -69,25 +73,39 @@ public class CredentialService {
                         "Access token c_nonce claim does not match Proof JWT nonce claim");
             }
 
-            String credentialOfferId = accessTokenData.credentialIdentifier();
-            CachedCredentialOffer credentialOffer = dataStore.getCredentialOffer(credentialOfferId);
-            if (!isValidCredentialOffer(credentialOffer, credentialOfferId)) {
-                throw new CredentialOfferException("Credential offer validation failed");
+            String credentialIdentifier = accessTokenData.credentialIdentifier();
+            boolean isRefreshCredential = credentialIdentifier == null;
+
+            DocumentStoreRecord document;
+            String walletSubjectId = accessTokenData.walletSubjectId();
+
+            if (isRefreshCredential) {
+                String credentialConfigurationId = accessTokenData.credentialConfigurationId();
+                document = loadRefreshCredential(credentialConfigurationId);
+                credentialIdentifier = UUID.randomUUID().toString();
+            } else {
+                CachedCredentialOffer credentialOffer =
+                        dataStore.getCredentialOffer(credentialIdentifier);
+                if (!isValidCredentialOffer(credentialOffer, credentialIdentifier)) {
+                    throw new CredentialOfferException("Credential offer validation failed");
+                }
+
+                if (!credentialOffer
+                        .getWalletSubjectId()
+                        .equals(accessTokenData.walletSubjectId())) {
+                    throw new AccessTokenValidationException(
+                            "Access token sub claim does not match cached walletSubjectId");
+                }
+
+                String itemId = credentialOffer.getItemId();
+                document = documentStoreClient.getDocument(itemId);
+
+                // Delete credential offer after redeeming it to prevent replay
+                dataStore.deleteCredentialOffer(credentialIdentifier);
             }
 
-            if (!credentialOffer.getWalletSubjectId().equals(accessTokenData.walletSubjectId())) {
-                throw new AccessTokenValidationException(
-                        "Access token sub claim does not match cached walletSubjectId");
-            }
-
-            String itemId = credentialOffer.getItemId();
-            DocumentStoreRecord document = documentStoreClient.getDocument(itemId);
             String notificationId = UUID.randomUUID().toString();
             String vcType = document.getVcType();
-
-            // Delete credential offer after redeeming it to prevent replay
-            dataStore.deleteCredentialOffer(credentialOfferId);
-
             CredentialType credentialType = CredentialType.fromType(vcType);
             long expiry = credentialExpiryCalculator.calculateExpiry(document);
 
@@ -103,9 +121,9 @@ public class CredentialService {
 
             StoredCredential storedCredential =
                     StoredCredential.builder()
-                            .credentialIdentifier(credentialOffer.getCredentialIdentifier())
+                            .credentialIdentifier(credentialIdentifier)
                             .notificationId(notificationId)
-                            .walletSubjectId(credentialOffer.getWalletSubjectId())
+                            .walletSubjectId(walletSubjectId)
                             .timeToLive(expiry)
                             .statusList(statusListInformation)
                             .documentId(document.getDocumentId())
@@ -120,10 +138,23 @@ public class CredentialService {
                 | ObjectStoreException
                 | CertificateException
                 | DocumentStoreException
-                | StatusListClientException exception) {
+                | StatusListClientException
+                | IllegalArgumentException
+                | IOException exception) {
             throw new CredentialServiceException(
                     "Failed to issue credential due to an internal error", exception);
         }
+    }
+
+    private DocumentStoreRecord loadRefreshCredential(String credentialConfigurationId)
+            throws IOException {
+        String json =
+                Resources.toString(
+                        Resources.getResource(
+                                "refresh_credentials/" + credentialConfigurationId + ".json"),
+                        StandardCharsets.UTF_8);
+        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", "RFH" + UUID.randomUUID());
+        return new ObjectMapper().readValue(json, DocumentStoreRecord.class);
     }
 
     private boolean isValidCredentialOffer(

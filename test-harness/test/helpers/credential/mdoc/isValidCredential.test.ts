@@ -271,6 +271,7 @@ describe("isValidCredential", () => {
       ];
 
       const mockAjv = {
+        getSchema: jest.fn().mockReturnValue(undefined),
         addSchema: jest.fn().mockReturnThis(),
         compile: jest.fn().mockReturnValue(mockValidator),
       };
@@ -304,6 +305,7 @@ describe("isValidCredential", () => {
       ];
 
       const mockAjv = {
+        getSchema: jest.fn().mockReturnValue(undefined),
         addSchema: jest.fn().mockReturnThis(),
         compile: jest.fn().mockReturnValue(mockValidator),
       };
@@ -337,6 +339,7 @@ describe("isValidCredential", () => {
       ];
 
       const mockAjv = {
+        getSchema: jest.fn().mockReturnValue(undefined),
         addSchema: jest.fn().mockReturnThis(),
         compile: jest.fn().mockReturnValue(mockValidator),
       };
@@ -363,6 +366,7 @@ describe("isValidCredential", () => {
       mockValidator.errors = undefined;
 
       const mockAjv = {
+        getSchema: jest.fn().mockReturnValue(undefined),
         addSchema: jest.fn().mockReturnThis(),
         compile: jest.fn().mockReturnValue(mockValidator),
       };
@@ -845,6 +849,7 @@ h6XK6xERRLkY5jjINTt8TkU=
         ];
 
         const mockAjv = {
+          getSchema: jest.fn().mockReturnValue(undefined),
           addSchema: jest.fn().mockReturnThis(),
           compile: jest.fn().mockReturnValue(mockValidator),
         };
@@ -881,6 +886,7 @@ h6XK6xERRLkY5jjINTt8TkU=
         ];
 
         const mockAjv = {
+          getSchema: jest.fn().mockReturnValue(undefined),
           addSchema: jest.fn().mockReturnThis(),
           compile: jest.fn().mockReturnValue(mockValidator),
         };
@@ -917,6 +923,7 @@ h6XK6xERRLkY5jjINTt8TkU=
         ];
 
         const mockAjv = {
+          getSchema: jest.fn().mockReturnValue(undefined),
           addSchema: jest.fn().mockReturnThis(),
           compile: jest.fn().mockReturnValue(mockValidator),
         };
@@ -946,6 +953,7 @@ h6XK6xERRLkY5jjINTt8TkU=
         mockValidator.errors = undefined;
 
         const mockAjv = {
+          getSchema: jest.fn().mockReturnValue(undefined),
           addSchema: jest.fn().mockReturnThis(),
           compile: jest.fn().mockReturnValue(mockValidator),
         };
