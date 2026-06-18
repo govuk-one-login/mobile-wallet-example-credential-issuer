@@ -421,8 +421,6 @@ Resources:
               Value: !Sub
                 - "https://${CredentialIssuerUrl}"
                 - CredentialIssuerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, CredentialIssuerUrl]
-            - Name: STS_SIGNING_KEY_ID
-              Value: !Ref StsStubSigningKey
             - Name: SELF
               Value: !If
                 - StackNameIsWalletDocBuilderFE
@@ -559,40 +557,6 @@ Resources:
         - !Ref AWS::NoValue
 
   # KMS
-  StsStubSigningKey:
-    Type: AWS::KMS::Key
-    Properties:
-      Description: ECC asymmetric key for signing tokens
-      Enabled: true
-      EnableKeyRotation: false
-      KeyPolicy:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:root'
-            Action:
-              - "kms:*"
-            Resource:
-              - "*"
-          - Effect: Allow
-            Principal:
-              AWS: !GetAtt WalletFEECSTaskRole.Arn
-            Action:
-              - 'kms:Sign'
-              - 'kms:GetPublicKey'
-            Resource:
-              - "*"
-      KeySpec: ECC_NIST_P256
-      KeyUsage: SIGN_VERIFY
-      MultiRegion: false
-
-  StsStubSigningKeyAlias:
-    Type: AWS::KMS::Alias
-    Properties:
-      AliasName: !Sub "alias/sts-stub-signing-key-${AWS::StackName}"
-      TargetKeyId: !Ref StsStubSigningKey
-
   ClientSigningKey:
     Type: AWS::KMS::Key
     Condition: IsNotIntegration
