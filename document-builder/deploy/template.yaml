@@ -421,8 +421,8 @@ Resources:
               Value: !Sub
                 - "https://${CredentialIssuerUrl}"
                 - CredentialIssuerUrl: !FindInMap [EnvironmentVariables, !Ref Environment, CredentialIssuerUrl]
-            - Name: STS_SIGNING_KEY_ID
-              Value: !Ref StsStubSigningKey
+            - Name: MOCK_PROOF_SIGNING_KEY_ID
+              Value: !Ref MockProofSigningKey
             - Name: SELF
               Value: !If
                 - StackNameIsWalletDocBuilderFE
@@ -559,10 +559,10 @@ Resources:
         - !Ref AWS::NoValue
 
   # KMS
-  StsStubSigningKey:
+  MockProofSigningKey:
     Type: AWS::KMS::Key
     Properties:
-      Description: ECC asymmetric key for signing tokens
+      Description: ECC asymmetric key for signing mock proof tokens
       Enabled: true
       EnableKeyRotation: false
       KeyPolicy:
@@ -587,11 +587,11 @@ Resources:
       KeyUsage: SIGN_VERIFY
       MultiRegion: false
 
-  StsStubSigningKeyAlias:
+  MockProofSigningKeyAlias:
     Type: AWS::KMS::Alias
     Properties:
-      AliasName: !Sub "alias/sts-stub-signing-key-${AWS::StackName}"
-      TargetKeyId: !Ref StsStubSigningKey
+      AliasName: !Sub "alias/mock-proof-signing-key-${AWS::StackName}"
+      TargetKeyId: !Ref MockProofSigningKey
 
   ClientSigningKey:
     Type: AWS::KMS::Key
