@@ -38,7 +38,8 @@ describe("validateCredentialTypePath", () => {
     expect(res.render).toHaveBeenCalledWith("500.njk");
     expect(nextFunction).not.toHaveBeenCalled();
     expect(loggerErrorSpy).toHaveBeenCalledWith(
-      "Invalid credential type path parameter provided: NotAValidPath",
+      { credentialType: "NotAValidPath" },
+      "Invalid credential type path parameter provided",
     );
   });
 });

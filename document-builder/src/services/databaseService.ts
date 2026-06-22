@@ -42,7 +42,7 @@ export async function getDocument(
 
   const item = response.Item;
   if (!item) {
-    logger.error(`Item with ID ${itemId} not found`);
+    logger.error({ itemId }, "Item not found");
     return undefined;
   }
   return item as TableItem;
