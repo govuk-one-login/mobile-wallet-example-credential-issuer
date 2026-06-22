@@ -56,6 +56,10 @@ public class ConfigurationService extends Configuration {
         return getEnvOrDefault("LOCALSTACK_ENDPOINT", "http://localhost:4560");
     }
 
+    public String getKmsEndpoint() {
+        return getEnvOrDefault("KMS_ENDPOINT", "http://localhost:4559");
+    }
+
     /**
      * Gets the DynamoDB table name for credential offer caching.
      *

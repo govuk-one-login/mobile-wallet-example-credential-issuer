@@ -80,6 +80,17 @@ class ConfigurationServiceTest {
     }
 
     @Test
+    void Should_ReturnKmsEndpointDefaultValue_When_EnvVarNotSet() {
+        assertEquals("http://localhost:4559", configurationService.getKmsEndpoint());
+    }
+
+    @Test
+    void Should_ReturnKmsEndpointEnvVarValue() {
+        environmentVariables.set("KMS_ENDPOINT", "http://local-kms:8080");
+        assertEquals("http://local-kms:8080", configurationService.getKmsEndpoint());
+    }
+
+    @Test
     void Should_ReturnCredentialOfferCacheTableNameDefaultValue_When_EnvVarNotSet() {
         assertEquals(
                 "credential_offer_cache", configurationService.getCredentialOfferCacheTableName());

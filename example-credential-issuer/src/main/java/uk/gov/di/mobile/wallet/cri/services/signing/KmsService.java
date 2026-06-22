@@ -50,7 +50,7 @@ public class KmsService implements KeyProvider {
 
     private static KmsClient getLocalClient(ConfigurationService configurationService) {
         return KmsClient.builder()
-                .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
+                .endpointOverride(URI.create(configurationService.getKmsEndpoint()))
                 .credentialsProvider(DefaultCredentialsProvider.builder().build())
                 .region(Region.of(configurationService.getAwsRegion()))
                 .build();

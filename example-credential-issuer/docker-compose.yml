@@ -1,13 +1,25 @@
 services:
   localstack:
     container_name: localstack_credentialIssuer
-    image: localstack/localstack:4.14.0@sha256:3ebc37595918b8accb852f8048fef2aff047d465167edd655528065b07bc364a
+    image: floci/floci:latest-compat
     ports:
       - "4560:4566"
     environment:
-      - SERVICES=dynamodb,kms,s3
+      - SERVICES=dynamodb,s3
       - AWS_ACCESS_KEY_ID=na
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
       - ./localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
+
+  kms:
+    container_name: local_kms_credentialIssuer
+    image: nsmithuk/local-kms
+    ports:
+      - "4559:8080"
+    environment:
+      - KMS_ACCOUNT_ID=000000000000
+      - KMS_REGION=eu-west-2
+      - KMS_SEED_PATH=/init/seed.yaml
+    volumes:
+      - ./localstack/seed.yaml:/init/seed.yaml
