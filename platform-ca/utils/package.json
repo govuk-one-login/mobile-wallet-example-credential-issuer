@@ -12,8 +12,8 @@
   },
   "description": "",
   "dependencies": {
-    "@peculiar/asn1-schema": "^2.7.0",
-    "@peculiar/asn1-x509": "^2.7.0",
+    "@peculiar/asn1-schema": "^2.8.0",
+    "@peculiar/asn1-x509": "^2.8.0",
     "commander": "^15.0.0",
     "esbuild": "^0.28.1",
     "tsx": "^4.22.4",
@@ -26,12 +26,12 @@
     "@eslint/js": "^10.0.1",
     "globals": "^17.6.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.9.2",
-    "eslint": "10.4.1",
+    "@types/node": "^25.9.3",
+    "eslint": "10.5.0",
     "eslint-config-prettier": "10.1.8",
     "jest": "30.4.2",
     "jest-junit": "^17.0.0",
-    "prettier": "^3.8.3",
+    "prettier": "^3.8.4",
     "ts-jest": "29.4.11"
   },
   "type": "module"
