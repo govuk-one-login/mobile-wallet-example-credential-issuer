@@ -10,7 +10,7 @@ export function requiresAppSelected(
 ): void {
   const selectedApp = req.cookies["app"];
 
-  logger.info(`selectedApp: ${selectedApp}`);
+  logger.info({ selectedApp }, "App selection checked");
 
   if (selectedApp === undefined) {
     res.redirect(getSelfUrl() + ROUTES.SELECT_APP);

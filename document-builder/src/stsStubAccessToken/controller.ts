@@ -24,7 +24,7 @@ export async function stsStubAccessTokenController(
     const preAuthorizedCodeErrors = Object.entries(PREAUTHORIZED_CODE_ERRORS);
     for (const [key, value] of preAuthorizedCodeErrors) {
       if (preAuthorizedCode === key) {
-        logger.error(`Error pre-authorized code: ${preAuthorizedCode}`);
+        logger.error({ preAuthorizedCode }, "Error pre-authorized code");
         res.status(value.statusCode).json(value.message);
         return;
       }
@@ -38,7 +38,7 @@ export async function stsStubAccessTokenController(
       return;
     }
 
-    logger.info(`Valid pre-authorized code received: ${preAuthorizedCode}`);
+    logger.info({ preAuthorizedCode }, "Valid pre-authorized code received");
 
     const accessToken = await createAccessToken(
       getHardcodedWalletSubjectId(),

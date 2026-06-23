@@ -10,7 +10,7 @@ export async function getPhotoFromS3(
   const photo = await getPhoto(fileName, bucketName);
 
   if (!photo) {
-    logger.error(`Photo for document with ID ${itemId} not found`);
+    logger.error({ itemId }, "Photo for document not found");
     return null;
   }
 

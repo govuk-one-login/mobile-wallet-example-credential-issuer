@@ -15,7 +15,7 @@ export async function documentController(
     const tableItem = await getDocument(tableName, itemId);
 
     if (!tableItem) {
-      logger.error(`Document with ID ${itemId} not found`);
+      logger.error({ itemId }, "Document not found");
       res.status(404).send();
       return;
     }

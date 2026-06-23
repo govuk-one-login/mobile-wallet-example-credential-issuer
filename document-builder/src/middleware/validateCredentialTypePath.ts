@@ -10,7 +10,8 @@ export function validateCredentialTypePath(
   const { credentialType } = req.params;
   if (!isValidCredentialType(credentialType)) {
     logger.error(
-      `Invalid credential type path parameter provided: ${credentialType}`,
+      { credentialType },
+      "Invalid credential type path parameter provided",
     );
     return res.render("500.njk");
   }

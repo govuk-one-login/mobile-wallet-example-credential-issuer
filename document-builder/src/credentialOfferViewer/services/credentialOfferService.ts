@@ -20,7 +20,7 @@ export async function getCredentialOfferUrl(
     },
   });
 
-  logger.info(`Fetched credential offer for item with ID ${itemId}`);
+  logger.info({ itemId }, "Fetched credential offer");
 
   return response.data;
 }

@@ -34,7 +34,7 @@ export function requiresAuth(
 
   const isAuthenticated = req.cookies["id_token"];
 
-  logger.info(`isAuthenticated: ${isAuthenticated}`);
+  logger.info({ isAuthenticated: isAuthenticated !== undefined }, "Auth check");
 
   if (isAuthenticated === undefined) {
     redirectToLogIn(req, res);
