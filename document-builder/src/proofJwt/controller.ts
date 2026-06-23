@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { getProofJwt } from "./proofJwt";
-import { getStsSigningKeyId } from "../config/appConfig";
+import { getMockProofSigningKeyId } from "../config/appConfig";
 
 export async function proofJwtController(
   req: Request,
@@ -12,7 +12,7 @@ export async function proofJwtController(
     const proofJwt = await getProofJwt(
       nonce as string,
       audience as string,
-      getStsSigningKeyId(), // use the existing mock STS signing key to avoid creating a new KMS key
+      getMockProofSigningKeyId(),
     );
 
     res.status(200).json({ proofJwt });

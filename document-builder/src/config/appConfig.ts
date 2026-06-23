@@ -35,8 +35,8 @@ export function getAwsRegion(): string {
   return process.env.AWS_REGION || "eu-west-2";
 }
 
-export function getStsSigningKeyId(): string {
-  return getEnvVarValue("STS_SIGNING_KEY_ID");
+export function getMockProofSigningKeyId(): string {
+  return getEnvVarValue("MOCK_PROOF_SIGNING_KEY_ID");
 }
 
 export function getSelfUrl(): string {

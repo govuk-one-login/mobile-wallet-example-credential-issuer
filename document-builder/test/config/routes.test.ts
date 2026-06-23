@@ -34,8 +34,6 @@ describe("routes", () => {
       expect(ROUTES.REFRESH_NO_UPDATE).toBe(
         "/refresh/:credentialType/no-update",
       );
-      expect(ROUTES.WELL_KNOWN_JWKS).toBe("/.well-known/jwks.json");
-      expect(ROUTES.TOKEN).toBe("/token");
       expect(ROUTES.LOGOUT).toBe("/logout");
       expect(ROUTES.RETURN_FROM_AUTH).toBe("/return-from-auth");
       expect(ROUTES.VIEW_CREDENTIAL).toBe("/view-credential");
@@ -73,8 +71,6 @@ describe("routes", () => {
         ROUTES.PROOF_JWT,
         ROUTES.REFRESH,
         ROUTES.REFRESH_NO_UPDATE,
-        ROUTES.WELL_KNOWN_JWKS,
-        ROUTES.TOKEN,
         ROUTES.LOGOUT,
         ROUTES.RETURN_FROM_AUTH,
         ROUTES.VIEW_CREDENTIAL,

@@ -10,7 +10,7 @@ describe("controller.ts", () => {
 
   it("should return 200 and proof JWT when request is successful", async () => {
     jest
-      .spyOn(appConfig, "getStsSigningKeyId")
+      .spyOn(appConfig, "getMockProofSigningKeyId")
       .mockReturnValue("mock_signing_key_id");
     const mockSignedJwt = "signed jwt token";
     jest.spyOn(proofJwt, "getProofJwt").mockResolvedValue(mockSignedJwt);
@@ -31,7 +31,7 @@ describe("controller.ts", () => {
 
   it("should return 500 and server_error when signing fails", async () => {
     jest
-      .spyOn(appConfig, "getStsSigningKeyId")
+      .spyOn(appConfig, "getMockProofSigningKeyId")
       .mockReturnValue("mock_signing_key_id");
     jest
       .spyOn(proofJwt, "getProofJwt")

@@ -4,7 +4,6 @@ import {
   getOneLoginAuthServerUrl,
   getSelfUrl,
 } from "../../config/appConfig";
-import { GrantType } from "../../stsStubAccessToken/token/validateTokenRequest";
 
 /**
  * Exchanges pre-authorized code for access token
@@ -17,7 +16,7 @@ export async function getAccessToken(
   const response = await axios.post(
     `${getOneLoginAuthServerUrl()}/token`,
     {
-      grant_type: GrantType.PREAUTHORIZED_CODE,
+      grant_type: "urn:ietf:params:oauth:grant-type:pre-authorized_code",
       "pre-authorized_code": preAuthorizedCode,
     },
     {

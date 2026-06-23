@@ -23,7 +23,7 @@ aws --endpoint-url=http://localhost:4566 kms create-key \
 
 aws --endpoint-url=http://localhost:4566 kms create-alias \
     --region eu-west-2 \
-    --alias-name alias/localStsSigningKeyAlias \
+    --alias-name alias/localMockProofSigningKeyAlias \
     --target-key-id 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
 
 aws --endpoint-url=http://localhost:4566 kms create-key \
