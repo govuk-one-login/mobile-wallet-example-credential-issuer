@@ -48,12 +48,12 @@ public class ConfigurationService extends Configuration {
     }
 
     /**
-     * Gets the LocalStack endpoint URL for local development.
+     * Gets the Local AWS endpoint URL for local development.
      *
-     * @return The LocalStack endpoint URL
+     * @return The Local AWS endpoint URL
      */
-    public String getLocalstackEndpoint() {
-        return getEnvOrDefault("LOCALSTACK_ENDPOINT", "http://localhost:4560");
+    public String getLocalAwsEndpoint() {
+        return getEnvOrDefault("LOCAL_AWS_ENDPOINT", "http://localhost:4560");
     }
 
     public String getKmsEndpoint() {

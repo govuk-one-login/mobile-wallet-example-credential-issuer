@@ -1,6 +1,6 @@
 services:
-  localstack:
-    container_name: localstack
+  floci:
+    container_name: floci
     image: floci/floci:latest-compat
     ports:
       - "4566:4566"
@@ -10,7 +10,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
-      - ../localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
+      - ../localAws/provision.sh:/etc/localAws/init/ready.d/provision.sh
 
   kms:
     container_name: local-kms
@@ -20,7 +20,7 @@ services:
       - KMS_REGION=eu-west-2
       - KMS_SEED_PATH=/init/seed.yaml
     volumes:
-      - ../localstack/seed.yaml:/init/seed.yaml
+      - ../localAws/seed.yaml:/init/seed.yaml
 
   imposter:
     container_name: imposter-mock
@@ -41,7 +41,7 @@ services:
       - AWS_REGION=eu-west-2
       - CREDENTIAL_STORE_URL=http://imposter-mock:8080
       - ENVIRONMENT=ci
-      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - LOCAL_AWS_ENDPOINT=http://floci:4566
       - KMS_ENDPOINT=http://local-kms:8080
       - ONE_LOGIN_AUTH_SERVER_URL=http://test-harness:3001
       - SELF_URL=http://example-cri:8080
@@ -49,7 +49,7 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - localstack
+      - floci
       - kms
       - imposter
 

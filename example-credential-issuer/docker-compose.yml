@@ -1,7 +1,7 @@
 services:
-  localstack:
-    container_name: localstack_credentialIssuer
-    image: floci/floci:latest-compat
+  floci:
+    container_name: floci_credentialIssuer
+    image: floci/floci:1.5.27-compat
     ports:
       - "4560:4566"
     environment:
@@ -10,7 +10,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
-      - ./localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
+      - ./localAws/provision.sh:/etc/floci/init/ready.d/provision.sh
 
   kms:
     container_name: local_kms_credentialIssuer
@@ -22,4 +22,4 @@ services:
       - KMS_REGION=eu-west-2
       - KMS_SEED_PATH=/init/seed.yaml
     volumes:
-      - ./localstack/seed.yaml:/init/seed.yaml
+      - ./localAws/seed.yaml:/init/seed.yaml
