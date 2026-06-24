@@ -1,5 +1,5 @@
 import {
-  getLocalStackAwsConfig,
+  getLocalAwsConfig,
   getDatabaseConfig,
   getKmsConfig,
   getS3Config,
@@ -7,7 +7,7 @@ import {
 
 describe("aws.ts", () => {
   it("should return the LocalStack AWS configuration", () => {
-    expect(getLocalStackAwsConfig("http://localhost:test")).toStrictEqual({
+    expect(getLocalAwsConfig("http://localhost:test")).toStrictEqual({
       credentials: {
         accessKeyId: "accessKeyId",
         secretAccessKey: "secretAccessKey",
