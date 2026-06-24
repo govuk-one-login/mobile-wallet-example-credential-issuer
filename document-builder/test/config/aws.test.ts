@@ -37,12 +37,7 @@ describe("aws.ts", () => {
   it("should return the KMS configuration for the 'local' environment", () => {
     process.env.ENVIRONMENT = "local";
     expect(getKmsConfig()).toStrictEqual({
-      credentials: {
-        accessKeyId: "accessKeyId",
-        secretAccessKey: "secretAccessKey",
-      },
-      endpoint: "http://localhost:4561",
-      region: "eu-west-2",
+      endpoint: "http://localhost:4564",
     });
   });
 

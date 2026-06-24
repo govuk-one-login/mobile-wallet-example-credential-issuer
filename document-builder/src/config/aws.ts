@@ -35,7 +35,9 @@ export function getDatabaseConfig(): DynamoDBClientConfig {
 export function getKmsConfig(): KMSClientConfig {
   if (getEnvironment() === ENVIRONMENTS.LOCAL) {
     logger.info("Running KMS locally");
-    return getLocalAwsConfig(LOCAL_KMS_ENDPOINT);
+    return {
+      endpoint: LOCAL_KMS_ENDPOINT,
+    };
   }
 
   return {
