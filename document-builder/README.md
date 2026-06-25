@@ -51,7 +51,7 @@ Create a local environment file:
 cp .env.example .env
 ```
 
-Start local AWS emulators (DynamoDB, S3, KMS) on port `4561`:
+Start local AWS emulators (DynamoDB, S3) on port `4561` and `4564` (KMS) :
 
 ```bash
 npm run localAws:up

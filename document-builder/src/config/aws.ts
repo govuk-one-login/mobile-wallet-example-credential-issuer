@@ -8,7 +8,7 @@ import { logger } from "../middleware/logger";
 
 const LOCAL_AWS_ENDPOINT = "http://localhost:4561";
 const LOCAL_KMS_ENDPOINT = "http://localhost:4564";
-const LOCAL_AWS_S3_ENDPOINT = "http://s3.localhost.localstack.cloud:4561";
+const LOCAL_AWS_S3_ENDPOINT = "http://s3.localhost.localstack.cloud:4561"; // NOSONAR this is a local url used for testing
 
 export function getLocalAwsConfig(endpoint: string): LocalAwsConfig {
   return {
