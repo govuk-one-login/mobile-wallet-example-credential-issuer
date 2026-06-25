@@ -10,7 +10,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
-      - ../localAws/provision.sh:/etc/localAws/init/ready.d/provision.sh
+      - ../localAws/provision.sh:/etc/floci/init/ready.d/provision.sh
 
   kms:
     container_name: local-kms
