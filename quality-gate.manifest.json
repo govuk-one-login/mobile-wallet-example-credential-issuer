@@ -141,7 +141,7 @@
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/sonarqube.yml",
+            "file": ".github/workflows/test-harness-sonarqube.yml",
             "path": "$.jobs.run-code-quality-and-security-analysis"
           }
         },
@@ -156,7 +156,7 @@
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
-            "file": ".github/workflows/sonarqube.yml",
+            "file": ".github/workflows/test-harness-sonarqube.yml",
             "path": "$.jobs.run-code-quality-and-security-analysis"
           }
         }
