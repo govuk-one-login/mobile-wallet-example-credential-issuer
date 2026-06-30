@@ -1,8 +1,9 @@
 {
-  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.11.0/schemas/schema.json",
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.13.0/schemas/schema.json",
   "services": [
     {
-      "serviceTag": "document-signing-certificate-issuer",
+      "product": "Mobile Wallet Example Credential Issuer",
+      "component": "document-signing-certificate-issuer",
       "promotionType": "securePipelines",
       "checks": [
         {
@@ -62,7 +63,8 @@
       ]
     },
     {
-      "serviceTag": "mobile-wallet-document-builder",
+      "product": "Mobile Wallet Example Credential Issuer",
+      "component": "mobile-wallet-document-builder",
       "promotionType": "securePipelines",
       "checks": [
         {
@@ -100,7 +102,8 @@
       ]
     },
     {
-      "serviceTag": "test-harness",
+      "product": "Mobile Wallet Example Credential Issuer",
+      "component": "test-harness",
       "promotionType": "securePipelines",
       "checks": [
         {
@@ -163,7 +166,8 @@
       ]
     },
     {
-      "serviceTag": "example-credential-issuer",
+      "product": "Mobile Wallet Example Credential Issuer",
+      "component": "example-credential-issuer",
       "promotionType": "securePipelines",
       "checks": [
         {
