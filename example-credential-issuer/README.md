@@ -49,7 +49,7 @@ This service is built with Java using Gradle, containerised with Docker, and dep
 
 * Java 17
 * Gradle 8.8
-* [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run LocalStack locally and to build the app image
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run local AWS emulators and to build the app image
 * [Pre-commit](https://pre-commit.com/)
 
 ## Local Setup
@@ -66,10 +66,10 @@ By default, this also calls `clean`, `spotlessApply` and `test`.
 
 ### Run
 
-Start LocalStack to emulate AWS services (DynamoDB and KMS) locally on port `4560`.
+Start local AWS emulators to emulate AWS services (DynamoDB and KMS) locally on port `4560`.
 
 ```
-./gradlew localstackUp
+./gradlew localAwsUp
 ```
 
 Running locally also requires a mock of STS and status list for end-to-end journey functionality.

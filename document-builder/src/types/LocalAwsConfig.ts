@@ -1,4 +1,4 @@
-export interface LocalStackAwsConfig {
+export interface LocalAwsConfig {
   endpoint: string;
   credentials: Credentials;
   region: string;

@@ -40,14 +40,14 @@ class KmsServiceTest {
     void Should_GetClientForLocalEnvironment() {
         ConfigurationService config = mock(ConfigurationService.class);
         when(config.getEnvironment()).thenReturn("local");
-        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4560");
+        when(config.getKmsEndpoint()).thenReturn("http://localhost:4559");
         when(config.getAwsRegion()).thenReturn("eu-west-2");
 
         KmsClient client = KmsService.getClient(config);
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getKmsEndpoint();
         verify(config, times(1)).getAwsRegion();
     }
 
@@ -55,14 +55,14 @@ class KmsServiceTest {
     void Should_GetClientForCiEnvironment() {
         ConfigurationService config = mock(ConfigurationService.class);
         when(config.getEnvironment()).thenReturn("ci");
-        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4560");
+        when(config.getKmsEndpoint()).thenReturn("http://localhost:4559");
         when(config.getAwsRegion()).thenReturn("eu-west-2");
 
         KmsClient client = KmsService.getClient(config);
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getKmsEndpoint();
         verify(config, times(1)).getAwsRegion();
     }
 
@@ -76,7 +76,7 @@ class KmsServiceTest {
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, never()).getLocalstackEndpoint();
+        verify(config, never()).getKmsEndpoint();
         verify(config, times(1)).getAwsRegion();
     }
 

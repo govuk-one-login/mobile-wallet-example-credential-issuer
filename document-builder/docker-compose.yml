@@ -1,7 +1,7 @@
 services:
-  localstack:
-    container_name: localstack_documentBuilder
-    image: localstack/localstack:4.14.0@sha256:3ebc37595918b8accb852f8048fef2aff047d465167edd655528065b07bc364a
+  floci:
+    container_name: floci_documentBuilder
+    image: floci/floci:1.5.27-compat
     ports:
       - "4561:4566"
     environment:
@@ -10,4 +10,16 @@ services:
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
-      - ./localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
+      - ./localAws/provision.sh:/etc/floci/init/ready.d/provision.sh
+
+  kms:
+    container_name: local_kms_documentBuilder
+    image: nsmithuk/local-kms
+    ports:
+      - "4564:8080"
+    environment:
+      - KMS_ACCOUNT_ID=000000000000
+      - KMS_REGION=eu-west-2
+      - KMS_SEED_PATH=/init/seed.yaml
+    volumes:
+      - ./localAws/seed.yaml:/init/seed.yaml

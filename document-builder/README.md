@@ -9,7 +9,7 @@ This service is built with TypeScript and Node.js/Express, using Nunjucks for se
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/en) — we recommend managing versions with [nvm](https://github.com/nvm-sh/nvm)
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run LocalStack locally and to build the app image
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) — required to run local AWS locally and to build the app image
 
 ## Set up locally
 
@@ -51,10 +51,10 @@ Create a local environment file:
 cp .env.example .env
 ```
 
-Start LocalStack to emulate AWS services (DynamoDB, S3, KMS) on port `4561`:
+Start local AWS emulators (DynamoDB, S3) on port `4561` and `4564` (KMS) :
 
 ```bash
-npm run localstack:up
+npm run localAws:up
 ```
 
 Running locally also requires the example credential issuer and STS mock for end-to-end journey functionality.

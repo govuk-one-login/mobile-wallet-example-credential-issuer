@@ -1,16 +1,27 @@
 services:
-  localstack:
-    container_name: localstack
-    image: localstack/localstack:4.14.0@sha256:3ebc37595918b8accb852f8048fef2aff047d465167edd655528065b07bc364a # Cannot be updated past 4.14.0 due to LocalStack's move to a paid-only license.
+  floci:
+    container_name: floci
+    image: floci/floci:latest-compat
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=dynamodb,kms,s3
+      - SERVICES=dynamodb,s3
       - AWS_ACCESS_KEY_ID=na
       - AWS_SECRET_ACCESS_KEY=na
       - AWS_DEFAULT_REGION=eu-west-2
     volumes:
-      - ../localstack/provision.sh:/etc/localstack/init/ready.d/provision.sh
+      - ../localAws/provision.sh:/etc/floci/init/ready.d/provision.sh
+
+  kms:
+    container_name: local-kms
+    image: nsmithuk/local-kms
+    environment:
+      - KMS_ACCOUNT_ID=000000000000
+      - KMS_REGION=eu-west-2
+      - KMS_SEED_PATH=/init/seed.yaml
+    volumes:
+      - ../localAws/seed.yaml:/init/seed.yaml
+
   imposter:
     container_name: imposter-mock
     image: outofcoffee/imposter
@@ -30,14 +41,16 @@ services:
       - AWS_REGION=eu-west-2
       - CREDENTIAL_STORE_URL=http://imposter-mock:8080
       - ENVIRONMENT=ci
-      - LOCALSTACK_ENDPOINT=http://localstack:4566
+      - LOCAL_AWS_ENDPOINT=http://floci:4566
+      - KMS_ENDPOINT=http://local-kms:8080
       - ONE_LOGIN_AUTH_SERVER_URL=http://test-harness:3001
       - SELF_URL=http://example-cri:8080
       - STATUS_LIST_URL=http://imposter-mock:8080
     ports:
       - "8080:8080"
     depends_on:
-      - localstack
+      - floci
+      - kms
       - imposter
 
 networks:
