@@ -1,0 +1,75 @@
+name: Document Builder - Deploy to Dev
+
+on:
+  workflow_dispatch:
+    inputs:
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          # Check out the repository at the specific branch, tag, or commit
+          ref: ${{ inputs.gitRef }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ secrets.TGW_DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # pin@v1
+
+      - name: Set GIT_REF_SHA
+        # Set GIT_REF_SHA to the checked-out commit SHA
+        run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
+
+      - name: Build, tag and push image to ECR
+        working-directory: ./document-builder
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.TGW_DEV_DOC_BUILDER_ECR_REPOSITORY_NAME}}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
+        with:
+          version: 1.131.0
+          use-installer: true
+
+      - name: Deploy SAM app
+        working-directory: ./document-builder/deploy
+        env:
+          ARTIFACT_BUCKET_NAME: ${{ secrets.TGW_DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.TGW_DEV_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
+        run: |
+          echo "Running `SAM validate` and `SAM build`"
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate
+          sam build
+          mv .aws-sam/build/template.yaml cf-template.yaml
+          echo "Replacing `CONTAINER-IMAGE-PLACEHOLDER` with new ECR image"
+          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
+          echo "Compressing SAM template"
+          zip template.zip cf-template.yaml
+          echo "Uploading the built SAM application artifacts to the deployment pipeline S3 bucket"
+          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$IMAGE_TAG"
