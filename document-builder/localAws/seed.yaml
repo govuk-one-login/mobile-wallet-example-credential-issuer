@@ -1,0 +1,16 @@
+Keys:
+  Asymmetric:
+    Ecc:
+      - Metadata:
+          KeyId: 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
+          KeyUsage: SIGN_VERIFY
+          Description: Mock Proof Key
+
+      - Metadata:
+          KeyId: 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
+          KeyUsage: SIGN_VERIFY
+          Description: Client Signing Key
+
+Aliases:
+  - AliasName: alias/localSigningKeyAlias
+    TargetKeyId: 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
