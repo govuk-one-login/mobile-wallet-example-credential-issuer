@@ -1,9 +1,13 @@
 name: TGW Document Builder - Deploy to Dev
 
 on:
-  push:
-    branches:
-      - DCMAW-21357-redo-again
+  workflow_dispatch:
+    inputs:
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
 
 jobs:
   deploy:
