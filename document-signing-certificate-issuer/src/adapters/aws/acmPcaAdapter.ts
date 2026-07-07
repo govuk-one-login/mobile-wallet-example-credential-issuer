@@ -81,8 +81,7 @@ export async function retrieveIssuedCertificate(
 
   while (getCertificateCommandOutput === undefined) {
     getCertificateCommandOutput = (await Promise.race([getCertificate(), timeoutPromise])) as
-      | GetCertificateCommandOutput
-      | undefined;
+      GetCertificateCommandOutput | undefined;
   }
 
   if (!getCertificateCommandOutput.Certificate) {
