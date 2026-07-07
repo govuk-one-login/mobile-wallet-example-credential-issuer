@@ -1,0 +1,6 @@
+name: TGW Document Builder - Deploy to Dev
+
+on:
+  push:
+    branches:
+      - DCMAW-21357-redo-again
