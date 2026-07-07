@@ -8,6 +8,19 @@ on:
         required: true
         type: string
         default: main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+    paths:
+      - document-builder/**
+      - .github/workflows/tgw-doc-builder-dev-deploy.yml
+
+permissions:
+  id-token: write
+  contents: read
 
 jobs:
   deploy:
