@@ -30,7 +30,7 @@ Parameters:
     Default: 8000
 
 Conditions:
-  StackNameIsWalletDocBuilderFE: !Equals [!Ref "AWS::StackName", wallet-doc-builder]
+  StackNameIsWalletDocBuilderFE: !Equals [!Ref "AWS::StackName", tg-doc-builder-spoke]
 
   IsStagingOrInt: !Or
     - !Equals [!Ref Environment, staging]
@@ -50,7 +50,7 @@ Mappings:
   EnvironmentVariables:
     dev:
       CredentialIssuerUrl: "example-credential-issuer.wallet-onboarding.dev.account.gov.uk"
-      SelfUrl: "stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
+      SelfUrl: "tg-doc-builder-stub-credential-issuer.wallet-onboarding.dev.account.gov.uk"
       DocumentBuilderImageRepository: arn:aws:ecr:eu-west-2:219494607463:repository/doc-builder-image-repo-containerrepository-lc2jfleeqwvq
       OidcIssuerEndpoint: "https://auth-stub.mobile.dev.account.gov.uk"
       WalletApps: "govuk-build,wallet-test-dev,wallet-test-build"
