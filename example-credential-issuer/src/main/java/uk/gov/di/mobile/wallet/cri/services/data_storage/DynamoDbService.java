@@ -54,7 +54,7 @@ public class DynamoDbService implements DataStore {
 
     private static DynamoDbClient getLocalClient(ConfigurationService configurationService) {
         return DynamoDbClient.builder()
-                .endpointOverride(URI.create(configurationService.getLocalstackEndpoint()))
+                .endpointOverride(URI.create(configurationService.getLocalAwsEndpoint()))
                 .httpClient(UrlConnectionHttpClient.create())
                 .region(Region.of(configurationService.getAwsRegion()))
                 .build();

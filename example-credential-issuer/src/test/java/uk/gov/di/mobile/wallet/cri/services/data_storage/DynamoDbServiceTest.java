@@ -261,14 +261,14 @@ class DynamoDbServiceTest {
     void Should_GetClientForLocalEnvironment() {
         ConfigurationService config = mock(ConfigurationService.class);
         when(config.getEnvironment()).thenReturn("local");
-        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4566");
+        when(config.getLocalAwsEndpoint()).thenReturn("http://localhost:4566");
         when(config.getAwsRegion()).thenReturn("eu-west-2");
 
         DynamoDbEnhancedClient client = DynamoDbService.getClient(config);
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getLocalAwsEndpoint();
         verify(config, times(1)).getAwsRegion();
     }
 
@@ -276,14 +276,14 @@ class DynamoDbServiceTest {
     void Should_GetClientForCiEnvironment() {
         ConfigurationService config = mock(ConfigurationService.class);
         when(config.getEnvironment()).thenReturn("ci");
-        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4566");
+        when(config.getLocalAwsEndpoint()).thenReturn("http://localhost:4566");
         when(config.getAwsRegion()).thenReturn("eu-west-2");
 
         DynamoDbEnhancedClient client = DynamoDbService.getClient(config);
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getLocalAwsEndpoint();
         verify(config, times(1)).getAwsRegion();
     }
 
@@ -297,7 +297,7 @@ class DynamoDbServiceTest {
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, never()).getLocalstackEndpoint();
+        verify(config, never()).getLocalAwsEndpoint();
         verify(config, times(1)).getAwsRegion();
     }
 }

@@ -41,14 +41,14 @@ class S3ServiceTest {
     void Should_GetClientForLocalEnvironment() {
         ConfigurationService config = mock(ConfigurationService.class);
         when(config.getEnvironment()).thenReturn("local");
-        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4566");
+        when(config.getLocalAwsEndpoint()).thenReturn("http://localhost:4566");
         when(config.getAwsRegion()).thenReturn("eu-west-2");
 
         S3Client client = S3Service.getClient(config);
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getLocalAwsEndpoint();
         verify(config, times(1)).getAwsRegion();
         assertEquals(Region.of("eu-west-2"), client.serviceClientConfiguration().region());
         assertEquals(
@@ -60,14 +60,14 @@ class S3ServiceTest {
     void Should_GetClientForCiEnvironment() {
         ConfigurationService config = mock(ConfigurationService.class);
         when(config.getEnvironment()).thenReturn("ci");
-        when(config.getLocalstackEndpoint()).thenReturn("http://localhost:4566");
+        when(config.getLocalAwsEndpoint()).thenReturn("http://localhost:4566");
         when(config.getAwsRegion()).thenReturn("eu-west-2");
 
         S3Client client = S3Service.getClient(config);
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, times(1)).getLocalstackEndpoint();
+        verify(config, times(1)).getLocalAwsEndpoint();
         verify(config, times(1)).getAwsRegion();
         assertEquals(Region.of("eu-west-2"), client.serviceClientConfiguration().region());
         assertEquals(
@@ -85,7 +85,7 @@ class S3ServiceTest {
 
         assertNotNull(client);
         verify(config, times(1)).getEnvironment();
-        verify(config, never()).getLocalstackEndpoint();
+        verify(config, never()).getLocalAwsEndpoint();
         verify(config, times(1)).getAwsRegion();
         assertEquals(Region.of("eu-west-2"), client.serviceClientConfiguration().region());
     }

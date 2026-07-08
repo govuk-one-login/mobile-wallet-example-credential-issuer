@@ -1,0 +1,28 @@
+Keys:
+  Asymmetric:
+    Ecc:
+      - Metadata:
+          KeyId: ff275b92-0def-4dfc-b0f6-87c96b26c6c7
+          KeyUsage: SIGN_VERIFY
+          Description: JWT and VCDM credential signing key
+        PrivateKeyPem: |
+          -----BEGIN EC PRIVATE KEY-----
+          MHcCAQEEIKu3aFRyEyDl3EG1W/RCqL0Q2UKHdJGS9Gn/gSQlZb5aoAoGCCqGSM49
+          AwEHoUQDQgAE91exsSsm7CkxteHVBA/aESrcW9FOu9R0/JZr7/3yRnaoZX4grtDu
+          73px4uP6BZG0RPRfWb/m0mao0gbtVNpTkQ==
+          -----END EC PRIVATE KEY-----
+
+      - Metadata:
+          KeyId: 1291b7bc-3d2c-47f0-a52a-cb6cb0fba6b4
+          KeyUsage: SIGN_VERIFY
+          Description: mDoc document signing key
+        PrivateKeyPem: |
+          -----BEGIN EC PRIVATE KEY-----
+          MHcCAQEEIKexbdPE2TDYzOuasfwN4QWNqHF1wNsV30ERMPPaRYnWoAoGCCqGSM49
+          AwEHoUQDQgAE+NKi4QpYV/avqTFFoldRIYEZaRgKF/qv+xJsek63Eh2cKn922zlJ
+          Hj2KglzSlLm439BfFYGDYVet6W7pkvIYfg==
+          -----END EC PRIVATE KEY-----
+
+Aliases:
+  - AliasName: alias/localSigningKeyAlias
+    TargetKeyId: ff275b92-0def-4dfc-b0f6-87c96b26c6c7
