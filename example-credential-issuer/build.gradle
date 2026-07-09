@@ -128,15 +128,15 @@ tasks.withType(Test).configureEach {
 }
 
 
-tasks.register("localstackUp", Exec) {
+tasks.register("localAwsUp", Exec) {
 	group = "docker"
-	description = "Starts the LocalStack container to emulate AWS services"
+	description = "Starts the Local AWS containers to emulate AWS services"
 	commandLine "sh", "-c", "docker compose -f docker-compose.yml up --build -d --wait"
 }
 
-tasks.register("localstackDown", Exec) {
+tasks.register("localAwsDown", Exec) {
 	group = "docker"
-	description = "Stops and removes LocalStack container"
+	description = "Stops and removes Local AWS container"
 	commandLine "sh", "-c", "docker compose -f docker-compose.yml down"
 }
 

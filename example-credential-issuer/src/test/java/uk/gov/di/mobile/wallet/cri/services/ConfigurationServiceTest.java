@@ -69,14 +69,25 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ReturnLocalStackEndpointDefaultValue_When_EnvVarNotSet() {
-        assertEquals("http://localhost:4560", configurationService.getLocalstackEndpoint());
+    void Should_ReturnLocalAwsEndpointDefaultValue_When_EnvVarNotSet() {
+        assertEquals("http://localhost:4560", configurationService.getLocalAwsEndpoint());
     }
 
     @Test
-    void Should_ReturnLocalStackEndpointEnvVarValue() {
-        environmentVariables.set("LOCALSTACK_ENDPOINT", "http://localhost:test");
-        assertEquals("http://localhost:test", configurationService.getLocalstackEndpoint());
+    void Should_ReturnLocalAwsEndpointEnvVarValue() {
+        environmentVariables.set("LOCAL_AWS_ENDPOINT", "http://localhost:test");
+        assertEquals("http://localhost:test", configurationService.getLocalAwsEndpoint());
+    }
+
+    @Test
+    void Should_ReturnKmsEndpointDefaultValue_When_EnvVarNotSet() {
+        assertEquals("http://localhost:4559", configurationService.getKmsEndpoint());
+    }
+
+    @Test
+    void Should_ReturnKmsEndpointEnvVarValue() {
+        environmentVariables.set("KMS_ENDPOINT", "http://local-kms:8080");
+        assertEquals("http://local-kms:8080", configurationService.getKmsEndpoint());
     }
 
     @Test
