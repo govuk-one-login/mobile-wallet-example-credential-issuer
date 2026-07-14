@@ -8,5 +8,5 @@ export function errorHandler(
   next: NextFunction,
 ): void {
   logger.error(err.message);
-  res.status(500).send("500.njk");
+  res.status(500).render("500.njk");
 }
