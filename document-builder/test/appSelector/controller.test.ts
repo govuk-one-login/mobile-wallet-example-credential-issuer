@@ -53,9 +53,9 @@ describe("appSelectorGetController", () => {
 
   it("should render select-app form with 'test-app-1' and 'test-app-3' options when walletApps=['test-app-1','test-app-3']", () => {
     const req = getMockReq();
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    appSelectorGetController(config)(req, res);
+    appSelectorGetController(config)(req, res, next);
 
     expect(mockBuildTemplateInputForApps).toHaveBeenCalledWith(
       ["test-app-1", "test-app-3"],
@@ -77,9 +77,9 @@ describe("appSelectorPostController", () => {
 
   it("should re-render select-app form with a validation error when no app is selected", () => {
     const req = getMockReq();
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    appSelectorPostController(config)(req, res);
+    appSelectorPostController(config)(req, res, next);
 
     expect(mockBuildTemplateInputForApps).toHaveBeenCalledWith(
       ["test-app-1", "test-app-3"],
@@ -112,9 +112,9 @@ describe("appSelectorPostController", () => {
         app: "not-a-valid-app-option",
       },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    appSelectorPostController(config)(req, res);
+    appSelectorPostController(config)(req, res, next);
 
     expect(mockBuildTemplateInputForApps).toHaveBeenCalledWith(
       ["test-app-1", "test-app-3"],
@@ -148,9 +148,9 @@ describe("appSelectorPostController", () => {
         app: "test-app-1",
       },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    appSelectorPostController(config)(req, res);
+    appSelectorPostController(config)(req, res, next);
 
     expect(res.cookie).toHaveBeenCalledWith("app", "test-app-1", {
       httpOnly: true,
@@ -165,9 +165,9 @@ describe("appSelectorPostController", () => {
         credentialType: "SocialSecurityCredential",
       },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    appSelectorPostController(config)(req, res);
+    appSelectorPostController(config)(req, res, next);
 
     expect(res.redirect).toHaveBeenCalledWith(
       "/select-document?credentialType=SocialSecurityCredential",
@@ -180,9 +180,9 @@ describe("appSelectorPostController", () => {
         app: "test-app-1",
       },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    appSelectorPostController(config)(req, res);
+    appSelectorPostController(config)(req, res, next);
 
     expect(res.redirect).toHaveBeenCalledWith("/select-document");
   });
