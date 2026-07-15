@@ -26,7 +26,7 @@ describe("logoutGetController", () => {
         app: "govuk-staging",
       },
     });
-    const { res } = getMockRes({
+    const { res, next } = getMockRes({
       cookies: {
         id_token: "id_token",
         access_token: "access_token",
@@ -35,7 +35,7 @@ describe("logoutGetController", () => {
       },
     });
 
-    logoutGetController(config)(req, res);
+    logoutGetController(config)(req, res, next);
 
     expect(res.redirect).toHaveBeenCalled();
     expect(req.oidc.endSessionUrl).toHaveBeenCalled();
