@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { JWTPayload } from "jose";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { replaceMapsWithObjects } from "../utils/replaceMapsWithObjects";
@@ -49,6 +49,7 @@ async function getProofData(
 export async function credentialViewerController(
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> {
   try {
     // 1. Parse credential offer
@@ -99,7 +100,8 @@ export async function credentialViewerController(
       x5chainHex: credentialData.x5chainHex,
     });
   } catch (error) {
-    logger.error(error, "An error happened.");
-    res.render("500.njk");
+    next(
+      new Error("An error happened.", { cause: error }),
+    );
   }
 }
