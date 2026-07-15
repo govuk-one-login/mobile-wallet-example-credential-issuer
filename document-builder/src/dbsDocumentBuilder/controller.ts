@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { randomUUID } from "node:crypto";
 import { saveDocument } from "../services/databaseService";
 import { CredentialType } from "../types/CredentialType";
-import { logger } from "../middleware/logger";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import {
   getDocumentsTableName,
@@ -26,7 +25,7 @@ export interface DbsDocumentBuilderControllerConfig {
 export function dbsDocumentBuilderGetController({
   environment = getEnvironment(),
 }: DbsDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const showThrowError = environment !== ENVIRONMENTS.STAGE;
       res.render("dbs-document-details-form.njk", {
@@ -35,8 +34,11 @@ export function dbsDocumentBuilderGetController({
         showThrowError,
       });
     } catch (error) {
-      logger.error(error, "An error happened rendering DBS document page");
-      res.render("500.njk");
+      next(
+        new Error("An error happened rendering DBS document page", {
+          cause: error,
+        }),
+      );
     }
   };
 }
@@ -44,6 +46,7 @@ export function dbsDocumentBuilderGetController({
 export async function dbsDocumentBuilderPostController(
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> {
   try {
     const body: DbsRequestBody = req.body;
@@ -67,8 +70,11 @@ export async function dbsDocumentBuilderPostController(
     });
     res.redirect(redirectUrl);
   } catch (error) {
-    logger.error(error, "An error happened processing DBS document request");
-    res.render("500.njk");
+    next(
+      new Error("An error happened processing DBS document request", {
+        cause: error,
+      }),
+    );
   }
 }
 
