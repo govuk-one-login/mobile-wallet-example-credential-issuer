@@ -51,30 +51,34 @@ describe("controller.ts", () => {
   });
 
   describe("get", () => {
-    it("should render the error page when an error occurs", async () => {
+    it("should call next with an error when an error occurs", async () => {
       saveDocument.mockRejectedValueOnce(new Error("SOME_DATABASE_ERROR"));
       const req = getMockReq();
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await dvsDrivingLicenceBuilderGetController(req, res);
+      await dvsDrivingLicenceBuilderGetController(req, res, next);
 
-      expect(res.render).toHaveBeenCalledWith("500.njk");
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "An error happened processing the DVS Driving Licence document request",
+        }),
+      );
     });
 
     it("should call getPhoto with the correct filename", async () => {
       const req = getMockReq();
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await dvsDrivingLicenceBuilderGetController(req, res);
+      await dvsDrivingLicenceBuilderGetController(req, res, next);
 
       expect(mockGetPhoto).toHaveBeenCalledWith("dvs.jpeg");
     });
 
     it("should call uploadPhoto with the correct arguments", async () => {
       const req = getMockReq();
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await dvsDrivingLicenceBuilderGetController(req, res);
+      await dvsDrivingLicenceBuilderGetController(req, res, next);
 
       expect(uploadPhoto).toHaveBeenCalledWith(
         photoBuffer,
@@ -86,9 +90,9 @@ describe("controller.ts", () => {
 
     it("should call buildDefaultDrivingLicenceData with the correct S3 URI", async () => {
       const req = getMockReq();
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await dvsDrivingLicenceBuilderGetController(req, res);
+      await dvsDrivingLicenceBuilderGetController(req, res, next);
 
       expect(mockBuildDefaultDrivingLicenceData).toHaveBeenCalledWith(
         "s3://testBucket/2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -97,9 +101,9 @@ describe("controller.ts", () => {
 
     it("should call saveDocument with the correct arguments", async () => {
       const req = getMockReq();
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await dvsDrivingLicenceBuilderGetController(req, res);
+      await dvsDrivingLicenceBuilderGetController(req, res, next);
 
       expect(saveDocument).toHaveBeenCalledWith("testTable", {
         documentId: "TEST1769688000000",
@@ -118,9 +122,9 @@ describe("controller.ts", () => {
 
     it("should redirect to the credential offer page with the correct query params", async () => {
       const req = getMockReq();
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await dvsDrivingLicenceBuilderGetController(req, res);
+      await dvsDrivingLicenceBuilderGetController(req, res, next);
 
       expect(res.redirect).toHaveBeenCalledWith(
         "/dvs/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=org.iso.18013.5.1.mDL",
