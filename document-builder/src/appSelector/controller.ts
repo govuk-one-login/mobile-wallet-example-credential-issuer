@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
-import { logger } from "../middleware/logger";
+import { NextFunction, Request, Response } from "express";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
 import { getWalletApps, COOKIE_TTL_IN_MILLISECONDS } from "../config/appConfig";
@@ -22,7 +21,7 @@ export function appSelectorGetController({
   walletAppsConfig = config,
   walletApps = getWalletApps(),
 }: AppSelectorConfig = {}): ExpressRouteFunction {
-  return function (req: Request, res: Response): void {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const credentialType = req.query["credentialType"];
 
@@ -32,8 +31,11 @@ export function appSelectorGetController({
         credentialType,
       });
     } catch (error) {
-      logger.error(error, "An error happened rendering app selection page");
-      res.render("500.njk");
+      next(
+        new Error("An error happened rendering app selection page", {
+          cause: error,
+        }),
+      );
     }
   };
 }
@@ -43,7 +45,7 @@ export function appSelectorPostController({
   walletApps = getWalletApps(),
   cookieExpiry = COOKIE_TTL_IN_MILLISECONDS,
 }: AppSelectorConfig = {}): ExpressRouteFunction {
-  return function (req: Request, res: Response): void {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const { app } = req.body;
       const credentialType = req.body["credentialType"];
@@ -75,8 +77,9 @@ export function appSelectorPostController({
 
       res.redirect(redirectUrl);
     } catch (error) {
-      logger.error(error, "An error happened selecting app");
-      res.render("500.njk");
+      next(
+        new Error("An error happened selecting app", { cause: error }),
+      );
     }
   };
 }
