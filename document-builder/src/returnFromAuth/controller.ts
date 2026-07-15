@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
-import { logger } from "../middleware/logger";
+import { NextFunction, Request, Response } from "express";
 import { CallbackParamsType, TokenSet, UserinfoResponse } from "openid-client";
 import { buildClientAssertion } from "./clientAssertion/buildClientAssertion";
 import {
@@ -21,19 +20,16 @@ import { Jwt } from "../types/Jwt";
 export async function returnFromAuthGetController(
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> {
   try {
     const callbackParams: CallbackParamsType = req.oidc.callbackParams(req);
     if (callbackParams?.error) {
-      logger.error(
-        {
-          error: callbackParams.error,
-          error_description: callbackParams.error_description,
-        },
-        "OAuth authorization failed",
+      return next(
+        new Error(
+          `OAuth authorization failed: ${callbackParams.error} - ${callbackParams.error_description}`,
+        ),
       );
-      res.render("500.njk");
-      return;
     }
 
     // Build JWT assertion for client authentication
@@ -72,11 +68,8 @@ export async function returnFromAuthGetController(
     const redirectUri = req.cookies.current_url || "/select-app";
     res.redirect(redirectUri);
   } catch (error) {
-    const message =
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      typeof error === "string" ? error : ((error as any)?.message ?? "");
-    logger.error(`OAuth callback failed: ${message}`);
-    res.render("500.njk");
-    return;
+    next(
+      new Error("OAuth callback failed", { cause: error }),
+    );
   }
 }
