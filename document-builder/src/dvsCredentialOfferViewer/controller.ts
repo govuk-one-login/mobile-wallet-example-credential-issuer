@@ -1,6 +1,5 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import QRCode from "qrcode";
-import { logger } from "../middleware/logger";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import {
   getEnvironment,
@@ -33,7 +32,7 @@ export function dvsCredentialOfferViewerController({
   walletApps = getWalletApps(),
   environment = getEnvironment(),
 }: CredentialOfferViewerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const errorScenario = "";
       const itemId = req.params.itemId as string;
@@ -72,11 +71,12 @@ export function dvsCredentialOfferViewerController({
         environment,
       });
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened processing credential offer request",
+      next(
+        new Error(
+          "An error happened processing credential offer request",
+          { cause: error },
+        ),
       );
-      return res.render("500.njk");
     }
   };
 }
