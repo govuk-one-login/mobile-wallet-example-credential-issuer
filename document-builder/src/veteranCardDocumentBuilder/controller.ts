@@ -1,7 +1,6 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { saveDocument } from "../services/databaseService";
 import { CredentialType } from "../types/CredentialType";
-import { logger } from "../middleware/logger";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import {
   getDocumentsTableName,
@@ -35,7 +34,7 @@ export interface VeteranCardDocumentBuilderControllerConfig {
 export function veteranCardDocumentBuilderGetController({
   environment = getEnvironment(),
 }: VeteranCardDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       res.render("veteran-card-document-details-form.njk", {
         authenticated: isAuthenticated(req),
@@ -43,11 +42,11 @@ export function veteranCardDocumentBuilderGetController({
         showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened rendering Veteran Card document page",
+      next(
+        new Error("An error happened rendering Veteran Card document page", {
+          cause: error,
+        }),
       );
-      res.render("500.njk");
     }
   };
 }
@@ -55,7 +54,7 @@ export function veteranCardDocumentBuilderGetController({
 export function veteranCardDocumentBuilderPostController({
   environment = getEnvironment(),
 }: VeteranCardDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const body: VeteranCardRequestBody = req.body;
 
@@ -107,11 +106,12 @@ export function veteranCardDocumentBuilderPostController({
       });
       res.redirect(redirectUrl);
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened processing Veteran Card document request",
+      next(
+        new Error(
+          "An error happened processing Veteran Card document request",
+          { cause: error },
+        ),
       );
-      res.render("500.njk");
     }
   };
 }
