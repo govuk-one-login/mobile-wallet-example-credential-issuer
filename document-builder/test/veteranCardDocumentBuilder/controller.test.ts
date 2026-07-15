@@ -45,9 +45,9 @@ describe("controller.ts", () => {
   describe("get", () => {
     it("should render the form for inputting the Veteran Card document details", async () => {
       const req = getMockReq({ cookies: {} });
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await veteranCardDocumentBuilderGetController(config)(req, res);
+      await veteranCardDocumentBuilderGetController(config)(req, res, next);
       expect(res.render).toHaveBeenCalledWith(
         "veteran-card-document-details-form.njk",
         {
@@ -65,11 +65,12 @@ describe("controller.ts", () => {
       "should set showThrowError correctly when environment is %s",
       async (environment, expectedShowThrowError) => {
         const req = getMockReq({ cookies: {} });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
         await veteranCardDocumentBuilderGetController({ environment })(
           req,
           res,
+          next,
         );
 
         expect(res.render).toHaveBeenCalledWith(
@@ -121,9 +122,9 @@ describe("controller.ts", () => {
           errors: validationErrors,
         });
         const req = getMockReq({ body: requestBody });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith(
           "veteran-card-document-details-form.njk",
@@ -140,16 +141,20 @@ describe("controller.ts", () => {
     });
 
     describe("given an error happens trying to process the request", () => {
-      it("should render the error page", async () => {
+      it("should call next with an error", async () => {
         saveDocument.mockRejectedValueOnce(new Error("SOME_DATABASE_ERROR"));
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
-        expect(res.render).toHaveBeenCalledWith("500.njk");
+        expect(next).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: "An error happened processing Veteran Card document request",
+          }),
+        );
       });
     });
 
@@ -167,11 +172,11 @@ describe("controller.ts", () => {
               ...{ portrait: fileName },
             },
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
           mockGetPhoto.mockReturnValue({ photoBuffer, mimeType });
 
-          await veteranCardDocumentBuilderPostController(config)(req, res);
+          await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
           expect(mockGetPhoto).toHaveBeenCalledWith(fileName);
           expect(uploadPhoto).toHaveBeenCalledWith(
@@ -199,9 +204,9 @@ describe("controller.ts", () => {
             "credentialExpiry-year": "2026",
           },
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
         expect(mockCalculateTtlSeconds).toHaveBeenCalledWith(
           "02",
@@ -220,9 +225,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith("testTable", {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -254,9 +259,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await veteranCardDocumentBuilderPostController(config)(req, res);
+          await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard",
@@ -269,9 +274,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await veteranCardDocumentBuilderPostController(config)(req, res);
+          await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard",
@@ -286,8 +291,8 @@ describe("controller.ts", () => {
             const req = getMockReq({
               body: { ...requestBody, ...{ throwError: selectedError } },
             });
-            const { res } = getMockRes();
-            await veteranCardDocumentBuilderPostController(config)(req, res);
+            const { res, next } = getMockRes();
+            await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
             expect(res.redirect).toHaveBeenCalledWith(
               `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard&error=${selectedError}`,
@@ -306,9 +311,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: { ...requestBody, expectedUpdateDays: "5" },
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
@@ -334,9 +339,9 @@ describe("controller.ts", () => {
             expectedUpdateDays: "10",
           },
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
@@ -351,9 +356,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: { ...requestBody, expectedUpdateDays: "" },
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
@@ -367,9 +372,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await veteranCardDocumentBuilderPostController(config)(req, res);
+        await veteranCardDocumentBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
