@@ -49,9 +49,9 @@ describe("controller.ts", () => {
   describe("get", () => {
     it("should render the form for inputting the simple document details", async () => {
       const req = getMockReq({ cookies: { id_token: "id_token" } });
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await simpleDocumentBuilderGetController(config)(req, res);
+      await simpleDocumentBuilderGetController(config)(req, res, next);
 
       expect(res.render).toHaveBeenCalledWith(
         "simple-document-details-form.njk",
@@ -103,9 +103,9 @@ describe("controller.ts", () => {
       "should set showThrowError to %s when environment is %s",
       async (expectedValue, environment) => {
         const req = getMockReq({ cookies: {} });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await simpleDocumentBuilderGetController({ environment })(req, res);
+        await simpleDocumentBuilderGetController({ environment })(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith(
           "simple-document-details-form.njk",
@@ -151,17 +151,21 @@ describe("controller.ts", () => {
       },
     );
 
-    it("should render the 500 error page if an error is thrown", async () => {
+    it("should call next with an error if an error is thrown", async () => {
       const req = getMockReq({ cookies: { id_token: "id_token" } });
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
       (res.render as jest.Mock).mockImplementationOnce(() => {
         throw new Error("Rendering error");
       });
 
-      await simpleDocumentBuilderGetController(config)(req, res);
+      await simpleDocumentBuilderGetController(config)(req, res, next);
 
-      expect(res.render).toHaveBeenCalledWith("500.njk");
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "An error happened rendering the Simple Document page",
+        }),
+      );
     });
   });
 
@@ -191,9 +195,9 @@ describe("controller.ts", () => {
           body: requestBody,
           cookies: { id_token: "id_token" },
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await simpleDocumentBuilderPostController(config)(req, res);
+        await simpleDocumentBuilderPostController(config)(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith(
           "simple-document-details-form.njk",
@@ -242,16 +246,20 @@ describe("controller.ts", () => {
     });
 
     describe("given an error happens trying to process the request", () => {
-      it("should render the error page", async () => {
+      it("should call next with an error", async () => {
         saveDocument.mockRejectedValueOnce(new Error("SOME_DATABASE_ERROR"));
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await simpleDocumentBuilderPostController(config)(req, res);
+        await simpleDocumentBuilderPostController(config)(req, res, next);
 
-        expect(res.render).toHaveBeenCalledWith("500.njk");
+        expect(next).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: "An error happened processing the Simple Document request",
+          }),
+        );
       });
     });
 
@@ -269,11 +277,11 @@ describe("controller.ts", () => {
               ...{ portrait: fileName },
             },
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
           mockGetPhoto.mockReturnValue({ photoBuffer, mimeType });
 
-          await simpleDocumentBuilderPostController(config)(req, res);
+          await simpleDocumentBuilderPostController(config)(req, res, next);
 
           expect(mockGetPhoto).toHaveBeenCalledWith(fileName);
           expect(uploadPhoto).toHaveBeenCalledWith(
@@ -291,9 +299,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await simpleDocumentBuilderPostController(config)(req, res);
+        await simpleDocumentBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith("testTable", {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -325,9 +333,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await simpleDocumentBuilderPostController(config)(req, res);
+          await simpleDocumentBuilderPostController(config)(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
@@ -340,9 +348,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await simpleDocumentBuilderPostController(config)(req, res);
+          await simpleDocumentBuilderPostController(config)(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
@@ -357,8 +365,8 @@ describe("controller.ts", () => {
             const req = getMockReq({
               body: { ...requestBody, ...{ throwError: selectedError } },
             });
-            const { res } = getMockRes();
-            await simpleDocumentBuilderPostController(config)(req, res);
+            const { res, next } = getMockRes();
+            await simpleDocumentBuilderPostController(config)(req, res, next);
 
             expect(res.redirect).toHaveBeenCalledWith(
               `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1&error=${selectedError}`,
