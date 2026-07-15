@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { formatDate, getDefaultDates } from "../utils/date";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { ERROR_CHOICES } from "../utils/errorChoices";
-import { logger } from "../middleware/logger";
 import { randomUUID } from "node:crypto";
 import {
   getDocumentsTableName,
@@ -43,7 +42,7 @@ export interface SimpleDocumentBuilderControllerConfig {
 export function simpleDocumentBuilderGetController({
   environment = getEnvironment(),
 }: SimpleDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
       res.render("simple-document-details-form.njk", {
@@ -56,11 +55,11 @@ export function simpleDocumentBuilderGetController({
         showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened rendering the Simple Document page",
+      next(
+        new Error("An error happened rendering the Simple Document page", {
+          cause: error,
+        }),
       );
-      res.render("500.njk");
     }
   };
 }
@@ -68,7 +67,7 @@ export function simpleDocumentBuilderGetController({
 export function simpleDocumentBuilderPostController({
   environment = getEnvironment(),
 }: SimpleDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const body: SimpleDocumentRequestBody = req.body;
 
@@ -112,11 +111,12 @@ export function simpleDocumentBuilderPostController({
       });
       res.redirect(redirectUrl);
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened processing the Simple Document request",
+      next(
+        new Error(
+          "An error happened processing the Simple Document request",
+          { cause: error },
+        ),
       );
-      res.render("500.njk");
     }
   };
 }
