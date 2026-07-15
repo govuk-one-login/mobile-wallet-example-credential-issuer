@@ -100,8 +100,6 @@ export async function credentialViewerController(
       x5chainHex: credentialData.x5chainHex,
     });
   } catch (error) {
-    next(
-      new Error("An error happened.", { cause: error }),
-    );
+    next(new Error("An error happened.", { cause: error }));
   }
 }

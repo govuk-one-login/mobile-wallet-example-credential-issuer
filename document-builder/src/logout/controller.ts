@@ -34,9 +34,7 @@ export function logoutGetController({
         }),
       );
     } catch (error) {
-      next(
-        new Error("An error happened trying to logout", { cause: error }),
-      );
+      next(new Error("An error happened trying to logout", { cause: error }));
     }
   };
 }

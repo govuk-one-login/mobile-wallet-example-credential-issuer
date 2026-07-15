@@ -77,9 +77,7 @@ export function appSelectorPostController({
 
       res.redirect(redirectUrl);
     } catch (error) {
-      next(
-        new Error("An error happened selecting app", { cause: error }),
-      );
+      next(new Error("An error happened selecting app", { cause: error }));
     }
   };
 }

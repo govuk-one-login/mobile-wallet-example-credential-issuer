@@ -60,7 +60,8 @@ describe("controller.ts", () => {
 
       expect(next).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: "An error happened processing the DVS Driving Licence document request",
+          message:
+            "An error happened processing the DVS Driving Licence document request",
         }),
       );
     });

@@ -57,10 +57,9 @@ export function drivingLicenceBuilderGetController({
       });
     } catch (error) {
       next(
-        new Error(
-          "An error happened rendering Driving Licence document page",
-          { cause: error },
-        ),
+        new Error("An error happened rendering Driving Licence document page", {
+          cause: error,
+        }),
       );
     }
   };
@@ -69,7 +68,11 @@ export function drivingLicenceBuilderGetController({
 export function drivingLicenceBuilderPostController({
   environment = getEnvironment(),
 }: DrivingLicenceBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const body: DrivingLicenceRequestBody = req.body;
 

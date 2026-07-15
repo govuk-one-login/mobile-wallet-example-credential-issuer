@@ -42,7 +42,11 @@ export interface SimpleDocumentBuilderControllerConfig {
 export function simpleDocumentBuilderGetController({
   environment = getEnvironment(),
 }: SimpleDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
       res.render("simple-document-details-form.njk", {
@@ -67,7 +71,11 @@ export function simpleDocumentBuilderGetController({
 export function simpleDocumentBuilderPostController({
   environment = getEnvironment(),
 }: SimpleDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const body: SimpleDocumentRequestBody = req.body;
 
@@ -112,10 +120,9 @@ export function simpleDocumentBuilderPostController({
       res.redirect(redirectUrl);
     } catch (error) {
       next(
-        new Error(
-          "An error happened processing the Simple Document request",
-          { cause: error },
-        ),
+        new Error("An error happened processing the Simple Document request", {
+          cause: error,
+        }),
       );
     }
   };

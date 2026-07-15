@@ -34,7 +34,11 @@ export interface VeteranCardDocumentBuilderControllerConfig {
 export function veteranCardDocumentBuilderGetController({
   environment = getEnvironment(),
 }: VeteranCardDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       res.render("veteran-card-document-details-form.njk", {
         authenticated: isAuthenticated(req),
@@ -54,7 +58,11 @@ export function veteranCardDocumentBuilderGetController({
 export function veteranCardDocumentBuilderPostController({
   environment = getEnvironment(),
 }: VeteranCardDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const body: VeteranCardRequestBody = req.body;
 

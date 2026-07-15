@@ -105,7 +105,11 @@ describe("controller.ts", () => {
         const req = getMockReq({ cookies: {} });
         const { res, next } = getMockRes();
 
-        await simpleDocumentBuilderGetController({ environment })(req, res, next);
+        await simpleDocumentBuilderGetController({ environment })(
+          req,
+          res,
+          next,
+        );
 
         expect(res.render).toHaveBeenCalledWith(
           "simple-document-details-form.njk",

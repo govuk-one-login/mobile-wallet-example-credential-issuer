@@ -25,7 +25,11 @@ export interface NinoDocumentBuilderControllerConfig {
 export function ninoDocumentBuilderGetController({
   environment = getEnvironment(),
 }: NinoDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const showThrowError = environment !== ENVIRONMENTS.STAGE;
       res.render("nino-document-details-form.njk", {

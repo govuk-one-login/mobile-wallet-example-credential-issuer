@@ -152,7 +152,8 @@ describe("controller.ts", () => {
 
         expect(next).toHaveBeenCalledWith(
           expect.objectContaining({
-            message: "An error happened processing Veteran Card document request",
+            message:
+              "An error happened processing Veteran Card document request",
           }),
         );
       });
@@ -176,7 +177,11 @@ describe("controller.ts", () => {
 
           mockGetPhoto.mockReturnValue({ photoBuffer, mimeType });
 
-          await veteranCardDocumentBuilderPostController(config)(req, res, next);
+          await veteranCardDocumentBuilderPostController(config)(
+            req,
+            res,
+            next,
+          );
 
           expect(mockGetPhoto).toHaveBeenCalledWith(fileName);
           expect(uploadPhoto).toHaveBeenCalledWith(
@@ -261,7 +266,11 @@ describe("controller.ts", () => {
           });
           const { res, next } = getMockRes();
 
-          await veteranCardDocumentBuilderPostController(config)(req, res, next);
+          await veteranCardDocumentBuilderPostController(config)(
+            req,
+            res,
+            next,
+          );
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard",
@@ -276,7 +285,11 @@ describe("controller.ts", () => {
           });
           const { res, next } = getMockRes();
 
-          await veteranCardDocumentBuilderPostController(config)(req, res, next);
+          await veteranCardDocumentBuilderPostController(config)(
+            req,
+            res,
+            next,
+          );
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard",
@@ -292,7 +305,11 @@ describe("controller.ts", () => {
               body: { ...requestBody, ...{ throwError: selectedError } },
             });
             const { res, next } = getMockRes();
-            await veteranCardDocumentBuilderPostController(config)(req, res, next);
+            await veteranCardDocumentBuilderPostController(config)(
+              req,
+              res,
+              next,
+            );
 
             expect(res.redirect).toHaveBeenCalledWith(
               `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=DigitalVeteranCard&error=${selectedError}`,

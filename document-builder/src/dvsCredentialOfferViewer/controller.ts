@@ -32,7 +32,11 @@ export function dvsCredentialOfferViewerController({
   walletApps = getWalletApps(),
   environment = getEnvironment(),
 }: CredentialOfferViewerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const errorScenario = "";
       const itemId = req.params.itemId as string;
@@ -72,10 +76,9 @@ export function dvsCredentialOfferViewerController({
       });
     } catch (error) {
       next(
-        new Error(
-          "An error happened processing credential offer request",
-          { cause: error },
-        ),
+        new Error("An error happened processing credential offer request", {
+          cause: error,
+        }),
       );
     }
   };

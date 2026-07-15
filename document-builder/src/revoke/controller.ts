@@ -19,7 +19,11 @@ export function revokeGetController(): ExpressRouteFunction {
 export function revokePostController({
   criUrl = getCriEndpoint(),
 }: RevokeConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response, next: NextFunction): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const documentId = req.body["documentId"];
       if (!validateDocumentId(documentId)) {
@@ -64,10 +68,9 @@ export function revokePostController({
       });
     } catch (error) {
       next(
-        new Error(
-          "An error happened trying to revoke the credential(s)",
-          { cause: error },
-        ),
+        new Error("An error happened trying to revoke the credential(s)", {
+          cause: error,
+        }),
       );
     }
   };

@@ -80,7 +80,11 @@ describe("controller.ts", () => {
         const req = getMockReq({ cookies: { id_token: "id_token" } });
         const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderGetController({ environment })(req, res, next);
+        await drivingLicenceBuilderGetController({ environment })(
+          req,
+          res,
+          next,
+        );
 
         expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
           authenticated: true,
@@ -183,7 +187,8 @@ describe("controller.ts", () => {
 
         expect(next).toHaveBeenCalledWith(
           expect.objectContaining({
-            message: "An error happened processing Driving Licence document request",
+            message:
+              "An error happened processing Driving Licence document request",
           }),
         );
       });

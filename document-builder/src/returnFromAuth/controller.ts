@@ -68,8 +68,6 @@ export async function returnFromAuthGetController(
     const redirectUri = req.cookies.current_url || "/select-app";
     res.redirect(redirectUri);
   } catch (error) {
-    next(
-      new Error("OAuth callback failed", { cause: error }),
-    );
+    next(new Error("OAuth callback failed", { cause: error }));
   }
 }
