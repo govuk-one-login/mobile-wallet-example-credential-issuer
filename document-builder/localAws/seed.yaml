@@ -5,12 +5,13 @@ Keys:
           KeyId: 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
           KeyUsage: SIGN_VERIFY
           Description: Mock Proof Key
-
-      - Metadata:
-          KeyId: 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
-          KeyUsage: SIGN_VERIFY
-          Description: Client Signing Key
+        PrivateKeyPem: |
+          -----BEGIN EC PRIVATE KEY-----
+          MHcCAQEEIOdCU66XEd/gMqYppuS+Cx7S/jUGf+XZFEcyrFM0AS2toAoGCCqGSM49
+          AwEHoUQDQgAE8kpWJU0b1is/XOGcUCVlINMWReyKIAyvdwafVunNClYjhiS23dnP
+          P5Vgv1AuY18sfIOzK5WjNgetpmcbdzi0MQ==
+          -----END EC PRIVATE KEY-----
 
 Aliases:
-  - AliasName: alias/localSigningKeyAlias
+  - AliasName: alias/localMockProofSigningKeyAlias
     TargetKeyId: 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
