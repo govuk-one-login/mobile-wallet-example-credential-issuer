@@ -16,6 +16,26 @@ describe("logoutGetController", () => {
 
   const config = { selfUrl: "http://test-stub.com" };
 
+  it("should call next with an error when an exception is thrown", () => {
+    const req = getMockReq({
+      cookies: {
+        get id_token(): string {
+          throw new Error("unexpected error");
+        },
+      },
+      oidc: { endSessionUrl: jest.fn() },
+    });
+    const { res, next } = getMockRes();
+
+    logoutGetController(config)(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened trying to logout",
+      }),
+    );
+  });
+
   it("should redirect user to One Login to log out", () => {
     const req = getMockReq({
       oidc: { endSessionUrl: jest.fn() },

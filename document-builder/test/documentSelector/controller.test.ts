@@ -22,6 +22,25 @@ const config = {
 };
 
 describe("documentSelectorGetController", () => {
+  it("should call next with an error when an exception is thrown", () => {
+    const req = getMockReq({
+      query: {
+        get credentialType(): string {
+          throw new Error("unexpected error");
+        },
+      },
+    });
+    const { res, next } = getMockRes();
+
+    documentSelectorGetController(config)(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened rendering document selection page",
+      }),
+    );
+  });
+
   it.each([
     ["/build-test-document-1", "TestCredential1"],
     ["/build-test-document-2", "TestCredential2"],
@@ -94,6 +113,25 @@ describe("documentSelectorGetController", () => {
 });
 
 describe("documentSelectorPostController", () => {
+  it("should call next with an error when an exception is thrown", () => {
+    const req = getMockReq({
+      body: {
+        get document(): string {
+          throw new Error("unexpected error");
+        },
+      },
+    });
+    const { res, next } = getMockRes();
+
+    documentSelectorPostController(config)(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened processing request to select document",
+      }),
+    );
+  });
+
   it.each([
     ["/build-test-document-1", "TestCredential1"],
     ["/build-test-document-2", "TestCredential2"],

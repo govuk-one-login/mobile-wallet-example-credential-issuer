@@ -51,6 +51,22 @@ describe("appSelectorGetController", () => {
     mockBuildTemplateInputForApps.mockReturnValue(mockApps);
   });
 
+  it("should call next with an error when an exception is thrown", () => {
+    mockBuildTemplateInputForApps.mockImplementationOnce(() => {
+      throw new Error("unexpected error");
+    });
+    const req = getMockReq();
+    const { res, next } = getMockRes();
+
+    appSelectorGetController(config)(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened rendering app selection page",
+      }),
+    );
+  });
+
   it("should render select-app form with 'test-app-1' and 'test-app-3' options when walletApps=['test-app-1','test-app-3']", () => {
     const req = getMockReq();
     const { res, next } = getMockRes();
@@ -73,6 +89,22 @@ describe("appSelectorPostController", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockBuildTemplateInputForApps.mockReturnValue(mockApps);
+  });
+
+  it("should call next with an error when an exception is thrown", () => {
+    mockBuildTemplateInputForApps.mockImplementationOnce(() => {
+      throw new Error("unexpected error");
+    });
+    const req = getMockReq();
+    const { res, next } = getMockRes();
+
+    appSelectorPostController(config)(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened selecting app",
+      }),
+    );
   });
 
   it("should re-render select-app form with a validation error when no app is selected", () => {

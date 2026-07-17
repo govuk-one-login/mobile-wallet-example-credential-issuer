@@ -43,6 +43,25 @@ describe("controller.ts", () => {
   });
 
   describe("get", () => {
+    it("should call next with an error when an exception is thrown", async () => {
+      const req = getMockReq({
+        cookies: {
+          get id_token(): string {
+            throw new Error("unexpected error");
+          },
+        },
+      });
+      const { res, next } = getMockRes();
+
+      await veteranCardDocumentBuilderGetController(config)(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "An error happened rendering Veteran Card document page",
+        }),
+      );
+    });
+
     it("should render the form for inputting the Veteran Card document details", async () => {
       const req = getMockReq({ cookies: {} });
       const { res, next } = getMockRes();
