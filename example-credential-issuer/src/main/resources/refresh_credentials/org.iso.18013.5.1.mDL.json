@@ -11,7 +11,7 @@
     "birth_place": "Birth City",
     "issue_date": "01-01-2024",
     "expiry_date": "01-01-2034",
-    "issuing_authority": "GDS",
+    "issuing_authority": "DVLA",
     "issuing_country": "GB",
     "document_number": "{{UNIQUE_DOCUMENT_NUMBER}}",
     "resident_address": ["Flat test, Building X, Street test"],
@@ -24,7 +24,7 @@
         "expiry_date": "01-01-2034"
       }
     ],
-    "un_distinguishing_sign": "GBR"
+    "un_distinguishing_sign": "UK"
   },
   "vcType": "org.iso.18013.5.1.mDL",
   "credentialTtlSeconds": 2592000
