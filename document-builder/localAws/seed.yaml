@@ -1,6 +1,6 @@
 # This file seeds a local-kms Docker container for local development only.
 # The private key below is a non-production mock key used exclusively for local KMS simulation.
-# It is not used in any real environment and poses no security risk. NOSONAR
+# It is not used in any real environment and poses no security risk.
 Keys:
   Asymmetric:
     Ecc:
@@ -8,12 +8,12 @@ Keys:
           KeyId: 2ced22e2-c15b-4e02-aa5f-7a10a2eaccc7
           KeyUsage: SIGN_VERIFY
           Description: Mock Proof Key
-        PrivateKeyPem: |
+        PrivateKeyPem: | # NOSONAR
           -----BEGIN EC PRIVATE KEY-----
           MHcCAQEEIOdCU66XEd/gMqYppuS+Cx7S/jUGf+XZFEcyrFM0AS2toAoGCCqGSM49
           AwEHoUQDQgAE8kpWJU0b1is/XOGcUCVlINMWReyKIAyvdwafVunNClYjhiS23dnP
           P5Vgv1AuY18sfIOzK5WjNgetpmcbdzi0MQ==
-          -----END EC PRIVATE KEY-----
+          -----END EC PRIVATE KEY----- 
 
 Aliases:
   - AliasName: alias/localMockProofSigningKeyAlias
