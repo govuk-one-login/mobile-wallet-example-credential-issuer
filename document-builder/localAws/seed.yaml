@@ -1,3 +1,6 @@
+# This file seeds a local-kms Docker container for local development only.
+# The private key below is a non-production mock key used exclusively for local KMS simulation.
+# It is not used in any real environment and poses no security risk. NOSONAR
 Keys:
   Asymmetric:
     Ecc:
