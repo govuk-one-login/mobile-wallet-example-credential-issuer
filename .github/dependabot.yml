@@ -65,6 +65,9 @@ updates:
       prefix: chore
     open-pull-requests-limit: 5
     versioning-strategy: increase
+    ignore:
+      - dependency-name: "typescript"
+        update-types: [ "version-update:semver-major" ]
     groups:
       npm-updates:
         patterns:
@@ -86,6 +89,8 @@ updates:
       - dependency-name: "jose"
         update-types: [ "version-update:semver-major" ]
       - dependency-name: "openid-client"
+        update-types: [ "version-update:semver-major" ]
+      - dependency-name: "typescript"
         update-types: [ "version-update:semver-major" ]
     commit-message:
       prefix: chore
@@ -154,6 +159,8 @@ updates:
       - dependencies
     ignore:
       - dependency-name: "jose"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
     commit-message:
       prefix: chore
