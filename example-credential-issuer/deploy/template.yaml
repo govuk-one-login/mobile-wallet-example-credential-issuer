@@ -829,7 +829,7 @@ Resources:
       Dimensions:  
         - Name: CanaryName  
           Value: example_cri_heartbeat  
-      Period: 10800  # 3 hours in seconds, as the canary runs every 3 hours
+      Period: 60  # 1 minute in seconds
       EvaluationPeriods: 1  
       Statistic: Maximum  
       ComparisonOperator: GreaterThanOrEqualToThreshold  
