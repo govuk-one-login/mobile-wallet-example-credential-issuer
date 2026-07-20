@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.JwksService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
@@ -24,6 +23,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,7 +37,7 @@ class JwksResourceTest {
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(jwksService);
+        reset(jwksService);
     }
 
     @Test
@@ -48,7 +48,7 @@ class JwksResourceTest {
 
         final Response response = resource.target("/.well-known/jwks.json").request().get();
 
-        verify(jwksService, Mockito.times(1)).generateJwks();
+        verify(jwksService, times(1)).generateJwks();
         assertThat(response.getStatus(), is(500));
         reset(jwksService);
     }
@@ -64,7 +64,7 @@ class JwksResourceTest {
 
         final Response response = resource.target("/.well-known/jwks.json").request().get();
 
-        verify(jwksService, Mockito.times(1)).generateJwks();
+        verify(jwksService, times(1)).generateJwks();
         assertThat(response.getStatus(), is(200));
         assertThat(response.readEntity(String.class), is(expectedJWKSet.toString()));
     }
