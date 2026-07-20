@@ -60,8 +60,6 @@
     "@types/node": "^26.1.1",
     "@types/nunjucks": "^3.2.6",
     "@types/qrcode": "^1.5.6",
-    "@typescript-eslint/eslint-plugin": "^8.63.0",
-    "@typescript-eslint/parser": "^8.63.0",
     "aws-sdk-client-mock": "^4.1.0",
     "aws-sdk-client-mock-jest": "^4.1.0",
     "dotenv": "^17.4.2",
