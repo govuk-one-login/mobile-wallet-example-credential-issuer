@@ -782,6 +782,7 @@ Resources:
         - Name: CanaryName  
           Value: document_builder_heartbeat  
       Period: 60  # 1 minute in seconds
+      EvaluationPeriods: 1  
       Statistic: Maximum  
       ComparisonOperator: GreaterThanOrEqualToThreshold  
       Threshold: 1.0  
