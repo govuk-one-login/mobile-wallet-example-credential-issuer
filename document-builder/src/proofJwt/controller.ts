@@ -19,6 +19,10 @@ export async function proofJwtController(
     res.status(200).json({ proofJwt });
     return;
   } catch (error) {
-    next(new Error("An error happened processing proof JWT request", { cause: error }));
+    next(
+      new Error("An error happened processing proof JWT request", {
+        cause: error,
+      }),
+    );
   }
 }
