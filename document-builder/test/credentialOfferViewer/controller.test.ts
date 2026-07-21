@@ -3,7 +3,7 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { credentialOfferViewerController } from "../../src/credentialOfferViewer/controller";
 import { getCredentialOfferUrl } from "../../src/credentialOfferViewer/services/credentialOfferService";
 import { customiseCredentialOfferUrl } from "../../src/credentialOfferViewer/helpers/customCredentialOfferUrl";
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 
 jest.mock("../../src/credentialOfferViewer/services/credentialOfferService");
 jest.mock("../../src/credentialOfferViewer/helpers/customCredentialOfferUrl");
@@ -26,6 +26,7 @@ const config = {
 describe("credentialOfferViewerController", () => {
   let req: Request;
   let res: Response;
+  let next: NextFunction;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,7 +36,9 @@ describe("credentialOfferViewerController", () => {
       cookies: { app: "test-app-1", wallet_subject_id: wallletSubjectId },
       query: { type: "BasicCheckCredential", error: "" },
     });
-    res = getMockRes().res;
+    const mockRes = getMockRes();
+    res = mockRes.res;
+    next = mockRes.next;
 
     (QRCode.toDataURL as jest.Mock).mockResolvedValue("mocked-qrcode");
     (getCredentialOfferUrl as jest.Mock).mockResolvedValue("mocked-offer-url");
@@ -45,7 +48,7 @@ describe("credentialOfferViewerController", () => {
   });
 
   it("should render the credential offer page", async () => {
-    await credentialOfferViewerController(config)(req, res);
+    await credentialOfferViewerController(config)(req, res, next);
 
     expect(getCredentialOfferUrl).toHaveBeenCalledWith(
       wallletSubjectId,
@@ -68,11 +71,15 @@ describe("credentialOfferViewerController", () => {
     });
   });
 
-  it("should render error page when an exception is thrown", async () => {
+  it("should call next with an error when an exception is thrown", async () => {
     (getCredentialOfferUrl as jest.Mock).mockRejectedValueOnce(
       new Error("Network error"),
     );
-    await credentialOfferViewerController(config)(req, res);
-    expect(res.render).toHaveBeenCalledWith("500.njk");
+    await credentialOfferViewerController(config)(req, res, next);
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened processing credential offer request",
+      }),
+    );
   });
 });

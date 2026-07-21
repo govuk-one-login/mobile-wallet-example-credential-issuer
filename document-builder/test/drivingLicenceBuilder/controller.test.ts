@@ -49,9 +49,9 @@ describe("controller.ts", () => {
   describe("get", () => {
     it("should render the form for inputting the driving licence details", async () => {
       const req = getMockReq({ cookies: { id_token: "id_token" } });
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await drivingLicenceBuilderGetController(config)(req, res);
+      await drivingLicenceBuilderGetController(config)(req, res, next);
 
       expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
         authenticated: true,
@@ -78,9 +78,13 @@ describe("controller.ts", () => {
       "should set showThrowError correctly when environment is %s",
       async (environment, expectedShowThrowError) => {
         const req = getMockReq({ cookies: { id_token: "id_token" } });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderGetController({ environment })(req, res);
+        await drivingLicenceBuilderGetController({ environment })(
+          req,
+          res,
+          next,
+        );
 
         expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
           authenticated: true,
@@ -101,17 +105,21 @@ describe("controller.ts", () => {
       },
     );
 
-    it("should render the 500 error page if an error is thrown", async () => {
+    it("should call next with an error if an error is thrown", async () => {
       const req = getMockReq({ cookies: { id_token: "id_token" } });
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
       (res.render as jest.Mock).mockImplementationOnce(() => {
         throw new Error("Rendering error");
       });
 
-      await drivingLicenceBuilderGetController(config)(req, res);
+      await drivingLicenceBuilderGetController(config)(req, res, next);
 
-      expect(res.render).toHaveBeenCalledWith("500.njk");
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "An error happened rendering Driving Licence document page",
+        }),
+      );
     });
   });
 
@@ -141,9 +149,9 @@ describe("controller.ts", () => {
           body: requestBody,
           cookies: { id_token: "id_token" },
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderPostController(config)(req, res);
+        await drivingLicenceBuilderPostController(config)(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith("driving-licence-form.njk", {
           errors: validationErrors,
@@ -168,16 +176,21 @@ describe("controller.ts", () => {
     });
 
     describe("given an error happens trying to process the request", () => {
-      it("should render the error page", async () => {
+      it("should call next with an error", async () => {
         saveDocument.mockRejectedValueOnce(new Error("SOME_DATABASE_ERROR"));
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderPostController(config)(req, res);
+        await drivingLicenceBuilderPostController(config)(req, res, next);
 
-        expect(res.render).toHaveBeenCalledWith("500.njk");
+        expect(next).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message:
+              "An error happened processing Driving Licence document request",
+          }),
+        );
       });
     });
 
@@ -195,11 +208,11 @@ describe("controller.ts", () => {
               ...{ portrait: fileName },
             },
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
           mockGetPhoto.mockReturnValue({ photoBuffer, mimeType });
 
-          await drivingLicenceBuilderPostController(config)(req, res);
+          await drivingLicenceBuilderPostController(config)(req, res, next);
 
           expect(mockGetPhoto).toHaveBeenCalledWith(fileName);
           expect(uploadPhoto).toHaveBeenCalledWith(
@@ -226,9 +239,9 @@ describe("controller.ts", () => {
             "credentialExpiry-year": "2026",
           }),
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderPostController(config)(req, res);
+        await drivingLicenceBuilderPostController(config)(req, res, next);
 
         expect(mockCalculateTtlSeconds).toHaveBeenCalledWith(
           "02",
@@ -250,9 +263,9 @@ describe("controller.ts", () => {
               provisionalVehicleCategoryCode: "",
             }),
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await drivingLicenceBuilderPostController(config)(req, res);
+          await drivingLicenceBuilderPostController(config)(req, res, next);
 
           expect(saveDocument).toHaveBeenCalledWith("testTable", {
             itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -302,9 +315,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await drivingLicenceBuilderPostController(config)(req, res);
+          await drivingLicenceBuilderPostController(config)(req, res, next);
 
           expect(saveDocument).toHaveBeenCalledWith("testTable", {
             itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -364,9 +377,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await drivingLicenceBuilderPostController(config)(req, res);
+          await drivingLicenceBuilderPostController(config)(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=org.iso.18013.5.1.mDL",
@@ -379,9 +392,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await drivingLicenceBuilderPostController(config)(req, res);
+          await drivingLicenceBuilderPostController(config)(req, res, next);
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=org.iso.18013.5.1.mDL",
           );
@@ -395,9 +408,9 @@ describe("controller.ts", () => {
             const req = getMockReq({
               body: { ...requestBody, ...{ throwError: selectedError } },
             });
-            const { res } = getMockRes();
+            const { res, next } = getMockRes();
 
-            await drivingLicenceBuilderPostController(config)(req, res);
+            await drivingLicenceBuilderPostController(config)(req, res, next);
 
             expect(res.redirect).toHaveBeenCalledWith(
               `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=org.iso.18013.5.1.mDL&error=${selectedError}`,
@@ -416,9 +429,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "5" }),
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderPostController(config)(req, res);
+        await drivingLicenceBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
@@ -443,9 +456,9 @@ describe("controller.ts", () => {
             expectedUpdateDays: "10",
           }),
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderPostController(config)(req, res);
+        await drivingLicenceBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
@@ -460,9 +473,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: buildDrivingLicenceRequestBody({ expectedUpdateDays: "" }),
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderPostController(config)(req, res);
+        await drivingLicenceBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",
@@ -476,9 +489,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await drivingLicenceBuilderPostController(config)(req, res);
+        await drivingLicenceBuilderPostController(config)(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith(
           "testTable",

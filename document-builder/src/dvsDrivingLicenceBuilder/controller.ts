@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { randomUUID } from "node:crypto";
 import {
   getDocumentsTableName,
@@ -12,7 +12,6 @@ import { saveDocument } from "../services/databaseService";
 import { getTimeToLiveEpoch } from "../utils/getTimeToLiveEpoch";
 import { getViewCredentialOfferRedirectUrl } from "../utils/getViewCredentialOfferRedirectUrl";
 import { CredentialType } from "../types/CredentialType";
-import { logger } from "../middleware/logger";
 
 const DOCUMENT_PHOTO_FILENAME = "dvs.jpeg";
 const CREDENTIAL_TYPE = CredentialType.MobileDrivingLicence;
@@ -21,6 +20,7 @@ const CREDENTIAL_TTL_SECONDS = 172800; // 48 hours
 export async function dvsDrivingLicenceBuilderGetController(
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> {
   try {
     const itemId = randomUUID();
@@ -49,10 +49,11 @@ export async function dvsDrivingLicenceBuilderGetController(
     });
     res.redirect(redirectUrl);
   } catch (error) {
-    logger.error(
-      error,
-      "An error happened processing the DVS Driving Licence document request",
+    next(
+      new Error(
+        "An error happened processing the DVS Driving Licence document request",
+        { cause: error },
+      ),
     );
-    res.render("500.njk");
   }
 }

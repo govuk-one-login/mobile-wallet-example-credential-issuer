@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import {
   getDocumentsTableName,
   getEnvironment,
@@ -7,7 +7,6 @@ import {
 } from "../config/appConfig";
 import { CredentialType } from "../types/CredentialType";
 import { isAuthenticated } from "../utils/isAuthenticated";
-import { logger } from "../middleware/logger";
 import { randomUUID } from "node:crypto";
 import { saveDocument } from "../services/databaseService";
 import { getDefaultDates, formatDate } from "../utils/date";
@@ -41,7 +40,11 @@ export interface DrivingLicenceBuilderControllerConfig {
 export function drivingLicenceBuilderGetController({
   environment = getEnvironment(),
 }: DrivingLicenceBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
       res.render("driving-licence-form.njk", {
@@ -53,11 +56,11 @@ export function drivingLicenceBuilderGetController({
         showThrowError: environment !== ENVIRONMENTS.STAGE,
       });
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened rendering Driving Licence document page",
+      next(
+        new Error("An error happened rendering Driving Licence document page", {
+          cause: error,
+        }),
       );
-      res.render("500.njk");
     }
   };
 }
@@ -65,7 +68,11 @@ export function drivingLicenceBuilderGetController({
 export function drivingLicenceBuilderPostController({
   environment = getEnvironment(),
 }: DrivingLicenceBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const body: DrivingLicenceRequestBody = req.body;
 
@@ -121,11 +128,12 @@ export function drivingLicenceBuilderPostController({
       });
       res.redirect(redirectUrl);
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened processing Driving Licence document request",
+      next(
+        new Error(
+          "An error happened processing Driving Licence document request",
+          { cause: error },
+        ),
       );
-      res.render("500.njk");
     }
   };
 }
