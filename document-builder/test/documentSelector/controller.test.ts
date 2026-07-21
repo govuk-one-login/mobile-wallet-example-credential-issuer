@@ -22,6 +22,25 @@ const config = {
 };
 
 describe("documentSelectorGetController", () => {
+  it("should call next with an error when an exception is thrown", () => {
+    const req = getMockReq({
+      query: {
+        get credentialType(): string {
+          throw new Error("unexpected error");
+        },
+      },
+    });
+    const { res, next } = getMockRes();
+
+    documentSelectorGetController(config)(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened rendering document selection page",
+      }),
+    );
+  });
+
   it.each([
     ["/build-test-document-1", "TestCredential1"],
     ["/build-test-document-2", "TestCredential2"],
@@ -30,9 +49,9 @@ describe("documentSelectorGetController", () => {
     "redirects to %s when credentialType=%s",
     (expectedRoute, credentialType) => {
       const req = getMockReq({ query: { credentialType } });
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      documentSelectorGetController(config)(req, res);
+      documentSelectorGetController(config)(req, res, next);
 
       expect(res.redirect).toHaveBeenCalledWith(expectedRoute);
     },
@@ -40,9 +59,9 @@ describe("documentSelectorGetController", () => {
 
   it("should render select-document form when there is no credentialType query param", () => {
     const req = getMockReq({ query: {} });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    documentSelectorGetController(config)(req, res);
+    documentSelectorGetController(config)(req, res, next);
 
     expect(res.render).toHaveBeenCalledWith("select-document-form.njk", {
       authenticated: false,
@@ -68,9 +87,9 @@ describe("documentSelectorGetController", () => {
     const req = getMockReq({
       query: { credentialType: "InvalidCredentialType" },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    documentSelectorGetController(config)(req, res);
+    documentSelectorGetController(config)(req, res, next);
 
     expect(res.render).toHaveBeenCalledWith("select-document-form.njk", {
       authenticated: false,
@@ -94,6 +113,25 @@ describe("documentSelectorGetController", () => {
 });
 
 describe("documentSelectorPostController", () => {
+  it("should call next with an error when an exception is thrown", () => {
+    const req = getMockReq({
+      body: {
+        get document(): string {
+          throw new Error("unexpected error");
+        },
+      },
+    });
+    const { res, next } = getMockRes();
+
+    documentSelectorPostController(config)(req, res, next);
+
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened processing request to select document",
+      }),
+    );
+  });
+
   it.each([
     ["/build-test-document-1", "TestCredential1"],
     ["/build-test-document-2", "TestCredential2"],
@@ -104,9 +142,9 @@ describe("documentSelectorPostController", () => {
         document: selection,
       },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    documentSelectorPostController(config)(req, res);
+    documentSelectorPostController(config)(req, res, next);
 
     expect(res.redirect).toHaveBeenCalledWith(expectedRoute);
   });
@@ -117,9 +155,9 @@ describe("documentSelectorPostController", () => {
         document: "InvalidCredentialType",
       },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    documentSelectorPostController(config)(req, res);
+    documentSelectorPostController(config)(req, res, next);
 
     expect(res.render).toHaveBeenCalledWith("select-document-form.njk", {
       errors: {
@@ -156,9 +194,9 @@ describe("documentSelectorPostController", () => {
 
   it("should re-render select-document form with a validation error when no document selected", () => {
     const req = getMockReq({ body: {} });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
-    documentSelectorPostController(config)(req, res);
+    documentSelectorPostController(config)(req, res, next);
 
     expect(res.render).toHaveBeenCalledWith("select-document-form.njk", {
       errors: {

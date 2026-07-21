@@ -12,7 +12,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 
@@ -30,6 +29,7 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +54,7 @@ class DidDocumentResourceTest {
 
     @BeforeEach
     void setUp() {
-        Mockito.reset(didDocumentService);
+        reset(didDocumentService);
     }
 
     @Test
@@ -68,7 +68,7 @@ class DidDocumentResourceTest {
 
         final Response response = resource.target("/.well-known/did.json").request().get();
 
-        verify(didDocumentService, Mockito.times(1)).generateDidDocument();
+        verify(didDocumentService, times(1)).generateDidDocument();
         assertThat(response.getStatus(), is(500));
         reset(didDocumentService);
     }
@@ -86,7 +86,7 @@ class DidDocumentResourceTest {
 
         final Response response = resource.target("/.well-known/did.json").request().get();
 
-        verify(didDocumentService, Mockito.times(1)).generateDidDocument();
+        verify(didDocumentService, times(1)).generateDidDocument();
         assertThat(response.getStatus(), is(200));
         assertThat(
                 response.readEntity(String.class),

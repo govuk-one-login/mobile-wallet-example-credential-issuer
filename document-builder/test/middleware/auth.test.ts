@@ -41,7 +41,7 @@ describe("auth.ts", () => {
     expect(mockRes.render).not.toHaveBeenCalled();
   });
 
-  it("should handle errors during OIDC client creation and render 500 error page", async () => {
+  it("should call next with error when OIDC client creation fails", async () => {
     const mockConfiguration = {
       clientId: "mock-client-id",
       discoveryEndpoint:
@@ -56,10 +56,11 @@ describe("auth.ts", () => {
 
     expect(mockGetOIDCClient).toHaveBeenCalledWith(mockConfiguration);
     expect(mockReq.oidc).toBeUndefined();
-    expect(mockNext).not.toHaveBeenCalled();
-    expect(mockRes.render).toHaveBeenCalledWith("500.njk", {
-      errorMessage:
-        "Failed to connect to authentication provider. Please try again later.",
-    });
+    expect(mockNext).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "Error building OIDC Client",
+      }),
+    );
+    expect(mockRes.render).not.toHaveBeenCalled();
   });
 });

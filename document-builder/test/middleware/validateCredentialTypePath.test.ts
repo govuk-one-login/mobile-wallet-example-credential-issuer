@@ -26,7 +26,7 @@ describe("validateCredentialTypePath", () => {
     expect(loggerErrorSpy).not.toHaveBeenCalled();
   });
 
-  it("should render error page when path is invalid", () => {
+  it("should call next with error when path is invalid", () => {
     const req = getMockReq({
       params: { credentialType: "NotAValidPath" },
     });
@@ -35,8 +35,9 @@ describe("validateCredentialTypePath", () => {
 
     validateCredentialTypePath(req, res, nextFunction);
 
-    expect(res.render).toHaveBeenCalledWith("500.njk");
-    expect(nextFunction).not.toHaveBeenCalled();
+    expect(nextFunction).toHaveBeenCalledWith(
+      new Error("Invalid credential type path parameter provided"),
+    );
     expect(loggerErrorSpy).toHaveBeenCalledWith(
       { credentialType: "NotAValidPath" },
       "Invalid credential type path parameter provided",

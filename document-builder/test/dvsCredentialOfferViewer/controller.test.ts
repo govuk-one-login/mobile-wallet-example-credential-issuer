@@ -3,7 +3,7 @@ import { getMockReq, getMockRes } from "@jest-mock/express";
 import { dvsCredentialOfferViewerController } from "../../src/dvsCredentialOfferViewer/controller";
 import { getCredentialOfferUrl } from "../../src/credentialOfferViewer/services/credentialOfferService";
 import { customiseCredentialOfferUrl } from "../../src/credentialOfferViewer/helpers/customCredentialOfferUrl";
-import type { Request, Response } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { ENVIRONMENTS } from "../../src/config/environments";
 import { WalletAppsConfig } from "../../src/config/walletAppsConfig";
 import { getHardcodedWalletSubjectId } from "../../src/config/appConfig";
@@ -34,6 +34,7 @@ const mockCustomisedUrl = "customised-url";
 describe("dvsCredentialOfferViewerController", () => {
   let req: Request;
   let res: Response;
+  let next: NextFunction;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -41,7 +42,9 @@ describe("dvsCredentialOfferViewerController", () => {
     req = getMockReq({
       params: { itemId: mockItemId },
     });
-    res = getMockRes().res;
+    const mockRes = getMockRes();
+    res = mockRes.res;
+    next = mockRes.next;
 
     (QRCode.toDataURL as jest.Mock).mockResolvedValue(mockQrCode);
     (getCredentialOfferUrl as jest.Mock).mockResolvedValue(mockOfferUrl);
@@ -51,7 +54,7 @@ describe("dvsCredentialOfferViewerController", () => {
   });
 
   it("should render the credential offer page with wallet-test-build for non-prod environments", async () => {
-    await dvsCredentialOfferViewerController(config)(req, res);
+    await dvsCredentialOfferViewerController(config)(req, res, next);
 
     expect(getCredentialOfferUrl).toHaveBeenCalledWith(
       getHardcodedWalletSubjectId(),
@@ -76,7 +79,7 @@ describe("dvsCredentialOfferViewerController", () => {
 
   it("should render the credential offer page with wallet-test-verifier-integration for prod environments", async () => {
     const prodConfig = { ...config, environment: ENVIRONMENTS.INT };
-    await dvsCredentialOfferViewerController(prodConfig)(req, res);
+    await dvsCredentialOfferViewerController(prodConfig)(req, res, next);
 
     expect(getCredentialOfferUrl).toHaveBeenCalledWith(
       getHardcodedWalletSubjectId(),
@@ -101,7 +104,7 @@ describe("dvsCredentialOfferViewerController", () => {
 
   it("should redirect to / for unknown environments", async () => {
     const prodConfig = { ...config, environment: "PRODUCTION" };
-    await dvsCredentialOfferViewerController(prodConfig)(req, res);
+    await dvsCredentialOfferViewerController(prodConfig)(req, res, next);
 
     expect(getCredentialOfferUrl).not.toHaveBeenCalled();
     expect(customiseCredentialOfferUrl).not.toHaveBeenCalled();
@@ -110,11 +113,15 @@ describe("dvsCredentialOfferViewerController", () => {
     expect(res.redirect).toHaveBeenCalledWith("/start");
   });
 
-  it("should render error page when an exception is thrown", async () => {
+  it("should call next with an error when an exception is thrown", async () => {
     (getCredentialOfferUrl as jest.Mock).mockRejectedValueOnce(
       new Error("Network error"),
     );
-    await dvsCredentialOfferViewerController(config)(req, res);
-    expect(res.render).toHaveBeenCalledWith("500.njk");
+    await dvsCredentialOfferViewerController(config)(req, res, next);
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened processing credential offer request",
+      }),
+    );
   });
 });

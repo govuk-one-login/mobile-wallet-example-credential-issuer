@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.proof.ProofJwtValidationException;
 import uk.gov.di.mobile.wallet.cri.services.authentication.AccessTokenValidationException;
@@ -25,6 +24,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,7 +53,7 @@ class CredentialResourceTest {
         requestBody =
                 OBJECT_MAPPER.readTree(
                         "{\"proof\":{\"proof_type\":\"jwt\", \"jwt\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c\"}}");
-        Mockito.reset(MOCK_CREDENTIAL_SERVICE);
+        reset(MOCK_CREDENTIAL_SERVICE);
     }
 
     @ParameterizedTest
@@ -78,7 +78,7 @@ class CredentialResourceTest {
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(arg, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(0)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
         assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_proof\"}"));
@@ -96,7 +96,7 @@ class CredentialResourceTest {
                         .request()
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(0)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(401));
         assertThat(response.getHeaderString("WWW-Authenticate"), is("Bearer"));
     }
@@ -114,7 +114,7 @@ class CredentialResourceTest {
                         .header("Authorization", "NotBearer " + ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(0)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(0)).getCredential(any(), any());
         assertThat(response.getStatus(), is(401));
         assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(
@@ -138,7 +138,7 @@ class CredentialResourceTest {
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(1)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(401));
         assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(
@@ -163,7 +163,7 @@ class CredentialResourceTest {
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(1)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(401));
         assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(
@@ -188,7 +188,7 @@ class CredentialResourceTest {
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(1)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
         assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_proof\"}"));
@@ -212,7 +212,7 @@ class CredentialResourceTest {
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(1)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(400));
         assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         assertThat(response.readEntity(String.class), is("{\"error\":\"invalid_nonce\"}"));
@@ -236,7 +236,7 @@ class CredentialResourceTest {
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(1)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(500));
         reset(MOCK_CREDENTIAL_SERVICE);
     }
@@ -260,7 +260,7 @@ class CredentialResourceTest {
                         .header("Authorization", BEARER_ACCESS_TOKEN)
                         .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
 
-        verify(MOCK_CREDENTIAL_SERVICE, Mockito.times(1)).getCredential(any(), any());
+        verify(MOCK_CREDENTIAL_SERVICE, times(1)).getCredential(any(), any());
         assertThat(response.getStatus(), is(200));
         assertThat(response.getHeaderString("Cache-Control"), is("no-store"));
         CredentialResponse credentialResponse = response.readEntity(CredentialResponse.class);

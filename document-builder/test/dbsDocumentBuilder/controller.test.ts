@@ -26,11 +26,30 @@ describe("controller.ts", () => {
   });
 
   describe("get", () => {
+    it("should call next with an error when an exception is thrown", async () => {
+      const req = getMockReq({
+        cookies: {
+          get id_token(): string {
+            throw new Error("unexpected error");
+          },
+        },
+      });
+      const { res, next } = getMockRes();
+
+      await dbsDocumentBuilderGetController(config)(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "An error happened rendering DBS document page",
+        }),
+      );
+    });
+
     it("should render the form for inputting DBS document details", async () => {
       const req = getMockReq({ cookies: { id_token: "id_token" } });
-      const { res } = getMockRes();
+      const { res, next } = getMockRes();
 
-      await dbsDocumentBuilderGetController(config)(req, res);
+      await dbsDocumentBuilderGetController(config)(req, res, next);
 
       expect(res.render).toHaveBeenCalledWith("dbs-document-details-form.njk", {
         authenticated: true,
@@ -46,9 +65,9 @@ describe("controller.ts", () => {
       "should set showThrowError correctly when environment is %s",
       async (environment, expectedShowThrowError) => {
         const req = getMockReq({ cookies: {} });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await dbsDocumentBuilderGetController({ environment })(req, res);
+        await dbsDocumentBuilderGetController({ environment })(req, res, next);
 
         expect(res.render).toHaveBeenCalledWith(
           "dbs-document-details-form.njk",
@@ -90,16 +109,20 @@ describe("controller.ts", () => {
     const saveDocument = databaseService.saveDocument as jest.Mock;
 
     describe("given an error happens trying to process the request", () => {
-      it("should render the error page", async () => {
+      it("should call next with an error", async () => {
         saveDocument.mockRejectedValueOnce(new Error("SOME_DATABASE_ERROR"));
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await dbsDocumentBuilderPostController(req, res);
+        await dbsDocumentBuilderPostController(req, res, next);
 
-        expect(res.render).toHaveBeenCalledWith("500.njk");
+        expect(next).toHaveBeenCalledWith(
+          expect.objectContaining({
+            message: "An error happened processing DBS document request",
+          }),
+        );
       });
     });
 
@@ -108,9 +131,9 @@ describe("controller.ts", () => {
         const req = getMockReq({
           body: requestBody,
         });
-        const { res } = getMockRes();
+        const { res, next } = getMockRes();
 
-        await dbsDocumentBuilderPostController(req, res);
+        await dbsDocumentBuilderPostController(req, res, next);
 
         expect(saveDocument).toHaveBeenCalledWith("testTable", {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
@@ -153,9 +176,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await dbsDocumentBuilderPostController(req, res);
+          await dbsDocumentBuilderPostController(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=BasicDisclosureCredential",
@@ -168,9 +191,9 @@ describe("controller.ts", () => {
           const req = getMockReq({
             body: requestBody,
           });
-          const { res } = getMockRes();
+          const { res, next } = getMockRes();
 
-          await dbsDocumentBuilderPostController(req, res);
+          await dbsDocumentBuilderPostController(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
             "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=BasicDisclosureCredential",
@@ -185,9 +208,9 @@ describe("controller.ts", () => {
             const req = getMockReq({
               body: { ...requestBody, ...{ throwError: selectedError } },
             });
-            const { res } = getMockRes();
+            const { res, next } = getMockRes();
 
-            await dbsDocumentBuilderPostController(req, res);
+            await dbsDocumentBuilderPostController(req, res, next);
 
             expect(res.redirect).toHaveBeenCalledWith(
               `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=BasicDisclosureCredential&error=${selectedError}`,
