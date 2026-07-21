@@ -7,6 +7,6 @@ export function errorHandler(
   res: Response,
   _next: NextFunction,
 ): void {
-  logger.error(err.message);
+  logger.error({ err }, err.message);
   res.status(500).render("500.njk");
 }

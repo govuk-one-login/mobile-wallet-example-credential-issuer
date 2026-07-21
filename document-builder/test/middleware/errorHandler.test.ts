@@ -11,9 +11,10 @@ describe("errorHandler", () => {
     const req = getMockReq();
     const { res, next } = getMockRes();
 
-    errorHandler(new Error("Something went wrong."), req, res, next);
+    const error = new Error("Something went wrong.");
+    errorHandler(error, req, res, next);
 
-    expect(logger.error).toHaveBeenCalledWith("Something went wrong.");
+    expect(logger.error).toHaveBeenCalledWith({ err: error }, "Something went wrong.");
   });
 
   it("should render the 500 page with status 500", () => {
