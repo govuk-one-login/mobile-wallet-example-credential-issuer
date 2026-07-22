@@ -4,7 +4,7 @@ import { CredentialType } from "../types/CredentialType";
 
 export function validateCredentialTypePath(
   req: Request,
-  res: Response,
+  _res: Response,
   next: NextFunction,
 ): void {
   const { credentialType } = req.params;
@@ -13,7 +13,7 @@ export function validateCredentialTypePath(
       { credentialType },
       "Invalid credential type path parameter provided",
     );
-    return res.render("500.njk");
+    return next(new Error("Invalid credential type path parameter provided"));
   }
   next();
 }

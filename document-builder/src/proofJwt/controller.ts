@@ -1,10 +1,11 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { getProofJwt } from "./proofJwt";
 import { getMockProofSigningKeyId } from "../config/appConfig";
 
 export async function proofJwtController(
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> {
   try {
     const { nonce, audience } = req.query;
@@ -18,8 +19,10 @@ export async function proofJwtController(
     res.status(200).json({ proofJwt });
     return;
   } catch (error) {
-    console.log(`An error happened: ${JSON.stringify(error)}`);
-    res.status(500).json({ error: "server_error" });
-    return;
+    next(
+      new Error("An error happened processing proof JWT request", {
+        cause: error,
+      }),
+    );
   }
 }

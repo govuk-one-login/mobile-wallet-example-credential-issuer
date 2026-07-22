@@ -30,6 +30,7 @@ import { dvsCredentialOfferViewerRouter } from "./dvsCredentialOfferViewer/route
 import { startRouter } from "./start/router";
 import { pageNotFound } from "./middleware/pageNotFound";
 import { healthcheckRouter } from "./healthcheck/router";
+import { errorHandler } from "./middleware/errorHandler";
 
 const APP_VIEWS = [
   path.resolve("dist/appSelector/views"),
@@ -109,6 +110,7 @@ export async function createApp(): Promise<express.Application> {
   app.use(veteranCardDocumentBuilderRouter);
 
   app.use(pageNotFound);
+  app.use(errorHandler);
 
   return app;
 }

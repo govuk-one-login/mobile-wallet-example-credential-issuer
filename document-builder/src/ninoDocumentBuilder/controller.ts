@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { randomUUID } from "node:crypto";
 import { saveDocument } from "../services/databaseService";
 import { CredentialType } from "../types/CredentialType";
-import { logger } from "../middleware/logger";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import {
   getDocumentsTableName,
@@ -26,7 +25,11 @@ export interface NinoDocumentBuilderControllerConfig {
 export function ninoDocumentBuilderGetController({
   environment = getEnvironment(),
 }: NinoDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const showThrowError = environment !== ENVIRONMENTS.STAGE;
       res.render("nino-document-details-form.njk", {
@@ -35,8 +38,11 @@ export function ninoDocumentBuilderGetController({
         showThrowError,
       });
     } catch (error) {
-      logger.error(error, "An error happened rendering NINO document page");
-      res.render("500.njk");
+      next(
+        new Error("An error happened rendering NINO document page", {
+          cause: error,
+        }),
+      );
     }
   };
 }
@@ -44,6 +50,7 @@ export function ninoDocumentBuilderGetController({
 export async function ninoDocumentBuilderPostController(
   req: Request,
   res: Response,
+  next: NextFunction,
 ): Promise<void> {
   try {
     const body: NinoRequestBody = req.body;
@@ -66,8 +73,11 @@ export async function ninoDocumentBuilderPostController(
     });
     res.redirect(redirectUrl);
   } catch (error) {
-    logger.error(error, "An error happened processing NINO document request");
-    res.render("500.njk");
+    next(
+      new Error("An error happened processing NINO document request", {
+        cause: error,
+      }),
+    );
   }
 }
 

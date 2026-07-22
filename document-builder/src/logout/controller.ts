@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
-import { logger } from "../middleware/logger";
+import { NextFunction, Request, Response } from "express";
 import { getSelfUrl } from "../config/appConfig";
 import { deleteCookies } from "./utils/deleteCookies";
 import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
@@ -20,7 +19,7 @@ export interface LogoutConfig {
 export function logoutGetController({
   selfUrl = getSelfUrl(),
 }: LogoutConfig = {}): ExpressRouteFunction {
-  return function (req: Request, res: Response): void {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const idToken = req.cookies.id_token;
       const state = req.cookies.state;
@@ -35,8 +34,7 @@ export function logoutGetController({
         }),
       );
     } catch (error) {
-      logger.error(error, "An error happened trying to logout");
-      res.render("500.njk");
+      next(new Error("An error happened trying to logout", { cause: error }));
     }
   };
 }

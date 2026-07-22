@@ -30,7 +30,7 @@ describe("controller.ts", () => {
       userinfo: jest.fn().mockImplementation(() => userinfo),
     },
   });
-  const { res } = getMockRes();
+  const { res, next } = getMockRes();
 
   it("should render the VCDM credential page", async () => {
     const accessToken = VCDM_TEST_DATA.accessToken;
@@ -55,7 +55,7 @@ describe("controller.ts", () => {
     } as AxiosResponse;
     mockedAxios.post.mockResolvedValueOnce(mockCredentialResponse);
 
-    await credentialViewerController(req, res);
+    await credentialViewerController(req, res, next);
 
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       1,
@@ -149,7 +149,7 @@ describe("controller.ts", () => {
     } as AxiosResponse;
     mockedAxios.post.mockResolvedValueOnce(mockCredentialResponse);
 
-    await credentialViewerController(req, res);
+    await credentialViewerController(req, res, next);
 
     expect(mockedAxios.post).toHaveBeenNthCalledWith(
       1,
@@ -283,11 +283,15 @@ describe("controller.ts", () => {
     expect(viewData.x5chainHex.length).toBeGreaterThan(0);
   });
 
-  it("should render an error page when an error happens", async () => {
+  it("should call next with an error when an error happens", async () => {
     mockedAxios.post.mockRejectedValueOnce("SOME_ERROR");
 
-    await credentialViewerController(req, res);
+    await credentialViewerController(req, res, next);
 
-    expect(res.render).toHaveBeenCalledWith("500.njk");
+    expect(next).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "An error happened.",
+      }),
+    );
   });
 });

@@ -1,8 +1,7 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import QRCode from "qrcode";
 import { getCredentialOfferUrl } from "./services/credentialOfferService";
 import { customiseCredentialOfferUrl } from "./helpers/customCredentialOfferUrl";
-import { logger } from "../middleware/logger";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { getEnvironment, getWalletApps } from "../config/appConfig";
 import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
@@ -22,7 +21,11 @@ export function credentialOfferViewerController({
   walletApps = getWalletApps(),
   environment = getEnvironment(),
 }: CredentialOfferViewerConfig = {}): ExpressRouteFunction {
-  return async function (req: Request, res: Response): Promise<void> {
+  return async function (
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
     try {
       const itemId = req.params.itemId as string;
       const selectedApp = req.cookies.app;
@@ -53,11 +56,11 @@ export function credentialOfferViewerController({
         environment,
       });
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened processing credential offer request",
+      next(
+        new Error("An error happened processing credential offer request", {
+          cause: error,
+        }),
       );
-      return res.render("500.njk");
     }
   };
 }

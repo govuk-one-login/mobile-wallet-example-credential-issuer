@@ -24,10 +24,10 @@ describe("revoke", () => {
 
   describe("revokeGetController", () => {
     const req = getMockReq();
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
     it("should render the revoke form", () => {
-      revokeGetController()(req, res);
+      revokeGetController()(req, res, next);
 
       expect(res.render).toHaveBeenCalledWith("revoke-form.njk");
     });
@@ -43,7 +43,7 @@ describe("revoke", () => {
         documentId: DOCUMENT_ID,
       },
     });
-    const { res } = getMockRes();
+    const { res, next } = getMockRes();
 
     it.each([
       "shrt", // 4 characters but the minimum is 5
@@ -59,7 +59,7 @@ describe("revoke", () => {
           },
         });
 
-        await revokePostController(config)(req, res);
+        await revokePostController(config)(req, res, next);
 
         expect(revoke).not.toHaveBeenCalled();
         expect(res.render).toHaveBeenCalledWith("revoke-form.njk", {
@@ -83,16 +83,20 @@ describe("revoke", () => {
     it("should render 500 error page if an unexpected error occurs", async () => {
       (revoke as jest.Mock).mockRejectedValue(new Error("Unexpected error"));
 
-      await revokePostController(config)(req, res);
+      await revokePostController(config)(req, res, next);
 
-      expect(res.render).toHaveBeenCalledWith("500.njk");
+      expect(next).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "An error happened trying to revoke the credential(s)",
+        }),
+      );
     });
 
     it("should render success message when CRI returns 202 (revocation succeeded)", async () => {
       const mockResult = 202;
       (revoke as jest.Mock).mockResolvedValue(mockResult);
 
-      await revokePostController(config)(req, res);
+      await revokePostController(config)(req, res, next);
 
       expect(revoke).toHaveBeenCalledWith(CRI_URL, DOCUMENT_ID);
       expect(res.render).toHaveBeenCalledWith("revoke-form.njk", {
@@ -105,7 +109,7 @@ describe("revoke", () => {
       const mockResult = 404;
       (revoke as jest.Mock).mockResolvedValue(mockResult);
 
-      await revokePostController(config)(req, res);
+      await revokePostController(config)(req, res, next);
 
       expect(res.render).toHaveBeenCalledWith("revoke-form.njk", {
         documentId: DOCUMENT_ID,
@@ -128,7 +132,7 @@ describe("revoke", () => {
       const mockResult = 500;
       (revoke as jest.Mock).mockResolvedValue(mockResult);
 
-      await revokePostController(config)(req, res);
+      await revokePostController(config)(req, res, next);
 
       expect(revoke).toHaveBeenCalledWith(CRI_URL, DOCUMENT_ID);
       expect(res.render).toHaveBeenCalledWith("revoke-form.njk", {

@@ -1,5 +1,4 @@
-import { Request, Response } from "express";
-import { logger } from "../middleware/logger";
+import { NextFunction, Request, Response } from "express";
 import { isAuthenticated } from "../utils/isAuthenticated";
 import { buildTemplateInputForDocuments } from "./utils/buildTemplateInputForDocuments";
 import {
@@ -18,7 +17,7 @@ export interface DocumentSelectorConfig {
 export function documentSelectorGetController({
   documentsConfig = config,
 }: DocumentSelectorConfig = {}): ExpressRouteFunction {
-  return function (req: Request, res: Response): void {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const credentialType = req.query["credentialType"] as string;
       const { route } = documentsConfig[credentialType] ?? {};
@@ -31,11 +30,11 @@ export function documentSelectorGetController({
         authenticated: isAuthenticated(req),
       });
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened rendering document selection page",
+      next(
+        new Error("An error happened rendering document selection page", {
+          cause: error,
+        }),
       );
-      return res.render("500.njk");
     }
   };
 }
@@ -43,7 +42,7 @@ export function documentSelectorGetController({
 export function documentSelectorPostController({
   documentsConfig = config,
 }: DocumentSelectorConfig = {}): ExpressRouteFunction {
-  return function (req: Request, res: Response): void {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const { document } = req.body;
       if (!document || !documentsConfig[document]) {
@@ -64,11 +63,11 @@ export function documentSelectorPostController({
       const { route } = documentsConfig[document];
       return res.redirect(route);
     } catch (error) {
-      logger.error(
-        error,
-        "An error happened processing request to select document",
+      next(
+        new Error("An error happened processing request to select document", {
+          cause: error,
+        }),
       );
-      return res.render("500.njk");
     }
   };
 }
