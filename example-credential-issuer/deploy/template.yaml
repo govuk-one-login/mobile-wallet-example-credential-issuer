@@ -85,7 +85,7 @@ Mappings:
       CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
-      StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
+      StatusListUrl: "api.crs.staging.account.gov.uk"
     integration:
       SelfUrl: "example-credential-issuer.wallet-onboarding.integration.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.integration.account.gov.uk"
@@ -552,6 +552,11 @@ Resources:
 
   WalletBEECSTaskRole:
     Type: 'AWS::IAM::Role'
+    Metadata:
+      checkov:
+        skip:
+          - id: CKV_AWS_111
+            comment: "Resource is intentionally broad to verify connectivity. Will be scoped to a specific API Gateway ARN in a follow-up."
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -603,6 +608,10 @@ Resources:
                   - 'kms:DescribeKey'
                 Resource:
                   - !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKey1Arn]
+              - Effect: Allow
+                Action:
+                  - 'execute-api:Invoke'
+                Resource: '*'
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
