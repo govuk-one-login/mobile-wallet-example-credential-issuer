@@ -6,11 +6,14 @@ import com.google.common.io.Resources;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
+import uk.gov.di.mobile.wallet.cri.credential.SigV4RequestFilter;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListRequestTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
@@ -171,9 +174,21 @@ public class ServicesFactory {
 
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);
+
+        boolean sigV4Enabled = "staging".equals(configurationService.getEnvironment());
+        Client statusListHttpClient =
+                new JerseyClientBuilder(environment)
+                        .using(configurationService.getHttpClient())
+                        .build("status-list-client");
+        statusListHttpClient.register(
+                new SigV4RequestFilter(
+                        AwsV4HttpSigner.create(),
+                        DefaultCredentialsProvider.builder().build(),
+                        sigV4Enabled));
+
         StatusListClient statusListClient =
                 new StatusListClient(
-                        configurationService, httpClient, statusListRequestTokenBuilder);
+                        configurationService, statusListHttpClient, statusListRequestTokenBuilder);
 
         CredentialService credentialService =
                 new CredentialService(
