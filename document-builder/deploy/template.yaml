@@ -781,12 +781,12 @@ Resources:
       Dimensions:  
         - Name: CanaryName  
           Value: document_builder_heartbeat  
-      Period: 10800  # 3 hours in seconds, as the canary runs every 3 hours
+      Period: 60  # 1 minute in seconds
       EvaluationPeriods: 1  
       Statistic: Maximum  
       ComparisonOperator: GreaterThanOrEqualToThreshold  
       Threshold: 1.0  
-      TreatMissingData: notBreaching  
+      TreatMissingData: ignore 
       ActionsEnabled: true
       AlarmActions:
         - !ImportValue alarm-sns-topic-warning
