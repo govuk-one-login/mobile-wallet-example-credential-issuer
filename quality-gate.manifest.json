@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.14.0/schemas/schema.json",
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.15.0/schemas/schema.json",
   "services": [
     {
       "product": "Mobile Wallet Example Credential Issuer",
@@ -7,58 +7,86 @@
       "promotionType": "securePipelines",
       "automated": [
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
             "path": "$.jobs.check-conventional-commits"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting",
-            "unit test coverage",
-            "unit",
-            "code quality",
-            "secret scanning",
-            "vulnerability detection"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
             "path": "$.jobs.run-code-analysis"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            },
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "unit"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "secret scanning"
+            },
+            {
+              "name": "vulnerability detection"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "unit test coverage",
-            "unit",
-            "code quality",
-            "code style and linting",
-            "secret scanning",
-            "vulnerability detection"
-          ],
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
             "path": "$.jobs.run-code-analysis"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "unit"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "code style and linting"
+            },
+            {
+              "name": "secret scanning"
+            },
+            {
+              "name": "vulnerability detection"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
             "path": "$.jobs.deploy"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         }
       ]
     },
@@ -68,36 +96,60 @@
       "promotionType": "securePipelines",
       "automated": [
         {
-          "checkTypes": [
-            "unit",
-            "code style and linting",
-            "unit",
-            "unit test coverage",
-            "code quality",
-            "vulnerability detection",
-            "secret scanning"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/document-builder-pull-request-checks.yml",
             "path": "$.jobs.ci"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit"
+            },
+            {
+              "name": "code style and linting"
+            },
+            {
+              "name": "unit"
+            },
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "vulnerability detection"
+            },
+            {
+              "name": "secret scanning"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting",
-            "unit test coverage",
-            "code quality",
-            "vulnerability detection",
-            "secret scanning"
-          ],
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/document-builder-push-to-main.yml",
             "path": "$.jobs.upload-s3-artifact-to-build"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            },
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "vulnerability detection"
+            },
+            {
+              "name": "secret scanning"
+            }
+          ]
         }
       ]
     },
@@ -107,61 +159,95 @@
       "promotionType": "securePipelines",
       "automated": [
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/test-harness-pull-request-checks.yml",
             "path": "$.jobs.check-conventional-commits"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting",
-            "unit",
-            "unit test coverage",
-            "code quality",
-            "vulnerability detection",
-            "secret scanning"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/test-harness-pull-request-checks.yml",
             "path": "$.jobs.build-lint-and-test"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            },
+            {
+              "name": "unit"
+            },
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "vulnerability detection"
+            },
+            {
+              "name": "secret scanning"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "unit",
-            "unit test coverage",
-            "code quality",
-            "vulnerability detection",
-            "secret scanning"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/test-harness-sonarqube.yml",
             "path": "$.jobs.run-code-quality-and-security-analysis"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit"
+            },
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "vulnerability detection"
+            },
+            {
+              "name": "secret scanning"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "unit",
-            "unit test coverage",
-            "code quality",
-            "vulnerability detection",
-            "secret scanning"
-          ],
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/test-harness-sonarqube.yml",
             "path": "$.jobs.run-code-quality-and-security-analysis"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit"
+            },
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "vulnerability detection"
+            },
+            {
+              "name": "secret scanning"
+            }
+          ]
         }
       ]
     },
@@ -171,78 +257,106 @@
       "promotionType": "securePipelines",
       "automated": [
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
             "path": "$.jobs.check-conventional-commits"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "unit test coverage",
-            "unit",
-            "code quality",
-            "secret scanning",
-            "vulnerability detection"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
             "path": "$.jobs.run-code-analysis"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "unit"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "secret scanning"
+            },
+            {
+              "name": "vulnerability detection"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "integration"
-          ],
           "phase": "pre-merge",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
             "path": "$.jobs.run-wallet-integration-tests"
-          }
+          },
+          "checks": [
+            {
+              "name": "integration"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "unit test coverage",
-            "unit",
-            "code quality",
-            "secret scanning",
-            "vulnerability detection"
-          ],
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
             "path": "$.jobs.run-code-analysis"
-          }
+          },
+          "checks": [
+            {
+              "name": "unit test coverage"
+            },
+            {
+              "name": "unit"
+            },
+            {
+              "name": "code quality"
+            },
+            {
+              "name": "secret scanning"
+            },
+            {
+              "name": "vulnerability detection"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "integration"
-          ],
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
             "path": "$.jobs.run-wallet-integration-tests"
-          }
+          },
+          "checks": [
+            {
+              "name": "integration"
+            }
+          ]
         },
         {
-          "checkTypes": [
-            "code style and linting"
-          ],
           "phase": "pre-upload",
           "provider": "GitHub",
           "config": {
             "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
             "path": "$.jobs.deploy"
-          }
+          },
+          "checks": [
+            {
+              "name": "code style and linting"
+            }
+          ]
         }
       ]
     }
