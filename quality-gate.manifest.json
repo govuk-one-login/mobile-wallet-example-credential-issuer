@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.16.0/schemas/schema.json",
+  "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.17.0/schemas/schema.json",
   "services": [
     {
       "product": "Mobile Wallet Example Credential Issuer",
@@ -9,23 +9,17 @@
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
-            "path": "$.jobs.check-conventional-commits"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+          "path": "$.jobs.check-conventional-commits"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
-            "path": "$.jobs.run-code-analysis"
-          },
           "checks": [
             {
               "name": "code style and linting"
@@ -45,15 +39,13 @@
             {
               "name": "vulnerability detection"
             }
-          ]
+          ],
+          "file": ".github/workflows/document-signing-certificate-issuer-pull-request-checks.yml",
+          "path": "$.jobs.run-code-analysis"
         },
         {
           "phase": "pre-upload",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
-            "path": "$.jobs.run-code-analysis"
-          },
           "checks": [
             {
               "name": "unit test coverage"
@@ -73,20 +65,20 @@
             {
               "name": "vulnerability detection"
             }
-          ]
+          ],
+          "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
+          "path": "$.jobs.run-code-analysis"
         },
         {
           "phase": "pre-upload",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
-            "path": "$.jobs.deploy"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/document-signing-certificate-issuer-push-to-main.yml",
+          "path": "$.jobs.deploy"
         }
       ]
     },
@@ -98,10 +90,6 @@
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/document-builder-pull-request-checks.yml",
-            "path": "$.jobs.ci"
-          },
           "checks": [
             {
               "name": "unit"
@@ -124,15 +112,13 @@
             {
               "name": "secret scanning"
             }
-          ]
+          ],
+          "file": ".github/workflows/document-builder-pull-request-checks.yml",
+          "path": "$.jobs.ci"
         },
         {
           "phase": "pre-upload",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/document-builder-push-to-main.yml",
-            "path": "$.jobs.upload-s3-artifact-to-build"
-          },
           "checks": [
             {
               "name": "code style and linting"
@@ -149,7 +135,9 @@
             {
               "name": "secret scanning"
             }
-          ]
+          ],
+          "file": ".github/workflows/document-builder-push-to-main.yml",
+          "path": "$.jobs.upload-s3-artifact-to-build"
         }
       ]
     },
@@ -161,23 +149,17 @@
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/test-harness-pull-request-checks.yml",
-            "path": "$.jobs.check-conventional-commits"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/test-harness-pull-request-checks.yml",
+          "path": "$.jobs.check-conventional-commits"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/test-harness-pull-request-checks.yml",
-            "path": "$.jobs.build-lint-and-test"
-          },
           "checks": [
             {
               "name": "code style and linting"
@@ -197,15 +179,13 @@
             {
               "name": "secret scanning"
             }
-          ]
+          ],
+          "file": ".github/workflows/test-harness-pull-request-checks.yml",
+          "path": "$.jobs.build-lint-and-test"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/test-harness-sonarqube.yml",
-            "path": "$.jobs.run-code-quality-and-security-analysis"
-          },
           "checks": [
             {
               "name": "unit"
@@ -222,15 +202,13 @@
             {
               "name": "secret scanning"
             }
-          ]
+          ],
+          "file": ".github/workflows/test-harness-sonarqube.yml",
+          "path": "$.jobs.run-code-quality-and-security-analysis"
         },
         {
           "phase": "pre-upload",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/test-harness-sonarqube.yml",
-            "path": "$.jobs.run-code-quality-and-security-analysis"
-          },
           "checks": [
             {
               "name": "unit"
@@ -247,7 +225,9 @@
             {
               "name": "secret scanning"
             }
-          ]
+          ],
+          "file": ".github/workflows/test-harness-sonarqube.yml",
+          "path": "$.jobs.run-code-quality-and-security-analysis"
         }
       ]
     },
@@ -259,23 +239,17 @@
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
-            "path": "$.jobs.check-conventional-commits"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
+          "path": "$.jobs.check-conventional-commits"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
-            "path": "$.jobs.run-code-analysis"
-          },
           "checks": [
             {
               "name": "unit test coverage"
@@ -292,28 +266,24 @@
             {
               "name": "vulnerability detection"
             }
-          ]
+          ],
+          "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
+          "path": "$.jobs.run-code-analysis"
         },
         {
           "phase": "pre-merge",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
-            "path": "$.jobs.run-wallet-integration-tests"
-          },
           "checks": [
             {
               "name": "integration"
             }
-          ]
+          ],
+          "file": ".github/workflows/example-credential-issuer-pull-request-checks.yml",
+          "path": "$.jobs.run-wallet-integration-tests"
         },
         {
           "phase": "pre-upload",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
-            "path": "$.jobs.run-code-analysis"
-          },
           "checks": [
             {
               "name": "unit test coverage"
@@ -330,33 +300,31 @@
             {
               "name": "vulnerability detection"
             }
-          ]
+          ],
+          "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
+          "path": "$.jobs.run-code-analysis"
         },
         {
           "phase": "pre-upload",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
-            "path": "$.jobs.run-wallet-integration-tests"
-          },
           "checks": [
             {
               "name": "integration"
             }
-          ]
+          ],
+          "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
+          "path": "$.jobs.run-wallet-integration-tests"
         },
         {
           "phase": "pre-upload",
           "provider": "GitHub",
-          "config": {
-            "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
-            "path": "$.jobs.deploy"
-          },
           "checks": [
             {
               "name": "code style and linting"
             }
-          ]
+          ],
+          "file": ".github/workflows/example-credential-issuer-push-to-main.yml",
+          "path": "$.jobs.deploy"
         }
       ]
     }
