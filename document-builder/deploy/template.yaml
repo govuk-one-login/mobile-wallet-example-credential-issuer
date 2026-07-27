@@ -775,16 +775,16 @@ Resources:
     Type: AWS::CloudWatch::Alarm  
     Properties:
       AlarmName: !Sub "${AWS::StackName}-DocBuilderHeartbeatAlarm"
-      AlarmDescription: "DocBuilder-Heartbeat Synthetic-Canary Alarm: Failed  GreaterThanOrEqualToThreshold 1"
-      MetricName: Failed  
+      AlarmDescription: "DocBuilder-Heartbeat Synthetic-Canary Alarm: 2xx LessThanThreshold 1"
+      MetricName: 2xx  
       Namespace: CloudWatchSynthetics  
       Dimensions:  
         - Name: CanaryName  
           Value: document_builder_heartbeat  
       Period: 60  # 1 minute in seconds
       EvaluationPeriods: 1  
-      Statistic: Maximum  
-      ComparisonOperator: GreaterThanOrEqualToThreshold  
+      Statistic: Sum  
+      ComparisonOperator: LessThanThreshold  
       Threshold: 1.0  
       TreatMissingData: ignore 
       ActionsEnabled: true
