@@ -8,5 +8,10 @@ COPY build.gradle settings.gradle gradlew gradlew.bat config.yml ./
 COPY gradle/ gradle/
 RUN ./gradlew
 
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot \
+    && chown -R nonroot:nonroot /app
+USER nonroot
+
 EXPOSE 8080
 CMD ./gradlew run
