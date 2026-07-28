@@ -48,8 +48,8 @@ import uk.gov.di.mobile.wallet.cri.services.data_storage.DynamoDbService;
 import uk.gov.di.mobile.wallet.cri.services.object_storage.S3Service;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -214,11 +214,9 @@ public class ServicesFactory {
 
     private static Set<String> loadSupportedCredentialConfigurationIds() {
         try {
-            File file =
-                    new File(
-                            Resources.getResource("credential_configurations_supported.json")
-                                    .getPath());
-            Map<String, Object> map = new ObjectMapper().readValue(file, new TypeReference<>() {});
+            URL resource = Resources.getResource("credential_configurations_supported.json");
+            Map<String, Object> map =
+                    new ObjectMapper().readValue(resource.openStream(), new TypeReference<>() {});
             return map.keySet();
         } catch (IOException e) {
             throw new IllegalStateException(
