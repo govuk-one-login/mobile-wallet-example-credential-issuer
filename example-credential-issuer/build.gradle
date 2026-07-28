@@ -65,10 +65,22 @@ jar {
 				"Implementation-Version": project.version
 				)
 	}
+}
+
+tasks.register("fatJar", Jar) {
+	archiveClassifier = "all"
+	manifest {
+		attributes(
+				"Main-Class": "uk.gov.di.mobile.wallet.cri.ExampleCriApp",
+				"Implementation-Title": project.name,
+				"Implementation-Version": project.version
+				)
+	}
 
 	from {
 		configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
 	}
+	with jar
 
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
