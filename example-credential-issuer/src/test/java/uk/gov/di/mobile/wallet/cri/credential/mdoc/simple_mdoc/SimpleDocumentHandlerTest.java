@@ -1,9 +1,9 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc.simple_mdoc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreRecord;
@@ -38,18 +38,13 @@ class SimpleDocumentHandlerTest {
     @Mock private ECPublicKey ecPublicKey;
     @Mock private ProofJwtService.ProofJwtData mockProofData;
     @Mock private SimpleDocument mockSimpleDocument;
-    private SimpleMdocHandler handler;
+    @InjectMocks private SimpleMdocHandler handler;
 
     private static final StatusListClient.StatusListInformation STATUS_LIST_INFORMATION =
             new StatusListClient.StatusListInformation(
                     0, "https://test-status-list.gov.uk/t/3B0F3BD087A7");
     private static final String EXPECTED_CREDENTIAL = "signed-mdoc-credential-string";
     private static final long CREDENTIAL_TTL_SECONDS = 43200L;
-
-    @BeforeEach
-    void setUp() {
-        handler = new SimpleMdocHandler(mdocBuilder);
-    }
 
     @Test
     void Should_ReturnSimpleDocument()
