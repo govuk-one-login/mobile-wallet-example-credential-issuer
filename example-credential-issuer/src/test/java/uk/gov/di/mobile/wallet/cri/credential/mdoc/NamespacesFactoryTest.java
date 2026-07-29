@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.constants.NamespaceTypes;
@@ -37,12 +37,7 @@ class NamespacesFactoryTest {
 
     @Mock private IssuerSignedItemFactory mockIssuerSignedItemFactory;
 
-    private NamespacesFactory namespacesFactory;
-
-    @BeforeEach
-    void setUp() {
-        namespacesFactory = new NamespacesFactory(mockIssuerSignedItemFactory);
-    }
+    @InjectMocks private NamespacesFactory namespacesFactory;
 
     /**
      * Test that the NamespacesFactory creates both ISO and UK nameSpaces, and that the correct
