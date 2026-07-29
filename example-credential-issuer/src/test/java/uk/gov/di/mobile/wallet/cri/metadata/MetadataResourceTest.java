@@ -32,7 +32,10 @@ class MetadataResourceTest {
     private static final String CREDENTIAL_STORE_URL = "https://credential-store.test.gov.uk";
 
     @Mock private ConfigurationService configurationService;
-    @Mock(answer = RETURNS_SELF) private MetadataBuilder metadataBuilder;
+
+    @Mock(answer = RETURNS_SELF)
+    private MetadataBuilder metadataBuilder;
+
     @Mock private Metadata metadata;
 
     @InjectMocks private MetadataResource metadataResource;

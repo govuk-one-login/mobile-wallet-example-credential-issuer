@@ -44,7 +44,6 @@ class StatusListClientTest {
     private static final int INDEX = 5;
     private static final String STATUS_LIST_URI = "https://status-list.test.com/t/12345";
 
-
     @Nested
     class GetIndexTests {
 
