@@ -27,7 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -39,8 +39,8 @@ class AccessTokenServiceTest {
 
     private AccessTokenService accessTokenService;
     private ECDSASigner ecSigner;
-    private final ConfigurationService configurationService = mock(ConfigurationService.class);
-    private final JwksService jwksService = mock(JwksService.class);
+    @Mock private ConfigurationService configurationService;
+    @Mock private JwksService jwksService;
 
     @Mock private Logger mockLogger;
 
@@ -63,8 +63,12 @@ class AccessTokenServiceTest {
                         return mockLogger;
                     }
                 };
-        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
-        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
+        lenient()
+                .when(configurationService.getSelfUrl())
+                .thenReturn(URI.create("https://issuer-url.gov.uk"));
+        lenient()
+                .when(configurationService.getOneLoginAuthServerUrl())
+                .thenReturn("https://auth-url.gov.uk");
     }
 
     @Test
