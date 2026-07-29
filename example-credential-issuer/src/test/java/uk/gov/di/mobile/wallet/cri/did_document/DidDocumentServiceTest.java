@@ -81,8 +81,7 @@ class DidDocumentServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(
-            strings = {"Key is Inactive", "Key is not Enabled", "Key is due for deletion"})
+    @ValueSource(strings = {"Key is Inactive", "Key is not Enabled", "Key is due for deletion"})
     @DisplayName("Should Throw Key Not Active Exception if")
     void should_ThrowKeyNotActiveException(String scenario) {
         when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
