@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { AlgorithmProvider, AsnEcSignatureFormatter, Name, Pkcs10CertificateRequest } from '@peculiar/x509';
 import { CertificationRequest, CertificationRequestInfo } from '@peculiar/asn1-csr';
 import { AsnConvert } from '@peculiar/asn1-schema';
