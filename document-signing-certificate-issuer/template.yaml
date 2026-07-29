@@ -217,6 +217,7 @@ Resources:
       BuildProperties:
         Minify: true
         Target: es2020
+        MainFields: module,main
         EntryPoints:
           - src/issueDocumentSigningCertificate.ts
 
