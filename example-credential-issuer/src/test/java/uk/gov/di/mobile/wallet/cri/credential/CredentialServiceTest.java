@@ -5,8 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import testUtils.MockAccessTokenBuilder;
@@ -38,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -46,8 +49,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CredentialServiceTest {
-
-    private CredentialService credentialService;
 
     @Mock private CredentialHandlerFactory mockCredentialHandlerFactory;
     @Mock private CredentialExpiryCalculator mockExpiryCalculator;
@@ -58,6 +59,8 @@ class CredentialServiceTest {
     @Mock private ProofJwtService mockProofJwtService;
     @Mock private DocumentStoreClient mockDocumentStoreClient;
     @Mock private StatusListClient mockStatusListClient;
+
+    @Spy @InjectMocks private CredentialService credentialService;
 
     private CachedCredentialOffer mockCachedCredentialOffer;
     private SignedJWT mockProofJwt;
@@ -92,20 +95,7 @@ class CredentialServiceTest {
         when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
                 .thenReturn(getMockAccessTokenData());
 
-        credentialService =
-                new CredentialService(
-                        mockDynamoDbService,
-                        mockAccessTokenService,
-                        mockProofJwtService,
-                        mockDocumentStoreClient,
-                        mockCredentialHandlerFactory,
-                        mockExpiryCalculator,
-                        mockStatusListClient) {
-                    @Override
-                    protected Logger getLogger() {
-                        return mockLogger;
-                    }
-                };
+        lenient().doReturn(mockLogger).when(credentialService).getLogger();
     }
 
     @Test
