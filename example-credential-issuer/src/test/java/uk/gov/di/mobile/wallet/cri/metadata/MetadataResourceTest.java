@@ -7,6 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
@@ -17,8 +19,8 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.mockito.Mockito.RETURNS_SELF;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Answers.RETURNS_SELF;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,22 +31,21 @@ class MetadataResourceTest {
     private static final String AUTH_SERVER_URL = "https://authorization-server.test.gov.uk";
     private static final String CREDENTIAL_STORE_URL = "https://credential-store.test.gov.uk";
 
-    private final ConfigurationService configurationService = mock(ConfigurationService.class);
-    private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
-    private final Metadata metadata = mock(Metadata.class);
+    @Mock private ConfigurationService configurationService;
+    @Mock(answer = RETURNS_SELF) private MetadataBuilder metadataBuilder;
+    @Mock private Metadata metadata;
 
-    private MetadataResource metadataResource;
+    @InjectMocks private MetadataResource metadataResource;
 
     @BeforeEach
     void setUp() {
-        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
-        when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
-        when(configurationService.getEnvironment()).thenReturn("test");
-        when(configurationService.getCredentialStoreUrl())
+        lenient().when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        lenient().when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
+        lenient().when(configurationService.getEnvironment()).thenReturn("test");
+        lenient()
+                .when(configurationService.getCredentialStoreUrl())
                 .thenReturn(URI.create(CREDENTIAL_STORE_URL));
-        when(metadataBuilder.build()).thenReturn(metadata);
-
-        metadataResource = new MetadataResource(configurationService, metadataBuilder);
+        lenient().when(metadataBuilder.build()).thenReturn(metadata);
     }
 
     @Test
