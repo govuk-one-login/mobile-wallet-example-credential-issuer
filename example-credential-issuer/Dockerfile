@@ -8,7 +8,7 @@ COPY build.gradle settings.gradle gradlew gradlew.bat config.yml ./
 COPY gradle/ gradle/
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:17-jre-alpine@sha256:02320dd4ce20e243dfb915c686089cf9315c763084fafbb12d5c9993aee18b57
 
 RUN apk update && apk upgrade
 
