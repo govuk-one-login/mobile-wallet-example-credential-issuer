@@ -6,6 +6,8 @@ import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -78,37 +80,11 @@ class DidDocumentServiceTest {
         assertEquals(mockJwk.getAlgorithm().toString(), jwk.getAlg());
     }
 
-    @Test
-    @DisplayName("Should Throw Key Not Active Exception if Key is Inactive")
-    void should_ThrowException_If_Key_Is_Inactive() {
-        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
-        when(configurationService.getSelfUrl())
-                .thenReturn(URI.create("https://test-example-credential-issuer.gov.uk"));
-
-        KeyNotActiveException exception =
-                assertThrows(
-                        KeyNotActiveException.class,
-                        () -> didDocumentService.generateDidDocument());
-        assertThat(exception.getMessage(), containsString("Public key is not active"));
-    }
-
-    @Test
-    @DisplayName("Should Throw Key Not Active Exception if Key is not Enabled")
-    void should_ThrowException_If_Key_Is_Not_Enabled() {
-        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
-        when(configurationService.getSelfUrl())
-                .thenReturn(URI.create("https://test-example-credential-issuer.gov.uk"));
-
-        KeyNotActiveException exception =
-                assertThrows(
-                        KeyNotActiveException.class,
-                        () -> didDocumentService.generateDidDocument());
-        assertThat(exception.getMessage(), containsString("Public key is not active"));
-    }
-
-    @Test
-    @DisplayName("Should Throw Key Not Active Exception if Key is due for deletion")
-    void should_ThrowException_If_Key_Is_Due_For_Deletion() {
+    @ParameterizedTest
+    @ValueSource(
+            strings = {"Key is Inactive", "Key is not Enabled", "Key is due for deletion"})
+    @DisplayName("Should Throw Key Not Active Exception if")
+    void should_ThrowKeyNotActiveException(String scenario) {
         when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
         when(configurationService.getSelfUrl())
                 .thenReturn(URI.create("https://test-example-credential-issuer.gov.uk"));
