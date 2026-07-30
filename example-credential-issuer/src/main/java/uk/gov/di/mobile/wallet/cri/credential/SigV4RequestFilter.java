@@ -4,6 +4,7 @@ import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.http.ContentStreamProvider;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.http.auth.aws.signer.AwsV4FamilyHttpSigner;
@@ -12,7 +13,9 @@ import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
 import software.amazon.awssdk.identity.spi.AwsCredentialsIdentity;
 import software.amazon.awssdk.identity.spi.IdentityProvider;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +24,8 @@ import java.util.Map;
  * requests. Used to authenticate requests to API Gateway endpoints that require IAM authorization.
  *
  * <p>When enabled, this filter intercepts outgoing requests and adds the {@code Authorization},
- * {@code X-Amz-Date}, and {@code X-Amz-Security-Token} headers using AWS SigV4 signing..
+ * {@code X-Amz-Date}, {@code X-Amz-Security-Token}, and {@code x-amz-content-sha256} headers using
+ * AWS SigV4 signing.
  */
 public class SigV4RequestFilter implements ClientRequestFilter {
 
@@ -67,18 +71,22 @@ public class SigV4RequestFilter implements ClientRequestFilter {
 
             SdkHttpRequest sdkRequest = requestBuilder.build();
 
+            byte[] payload = getPayloadBytes(requestContext);
+            ContentStreamProvider contentStreamProvider = () -> new ByteArrayInputStream(payload);
+
             SignedRequest signedRequest =
                     signer.sign(
                             r ->
                                     r.identity(credentials)
                                             .request(sdkRequest)
+                                            .payload(contentStreamProvider)
                                             .putProperty(
                                                     AwsV4FamilyHttpSigner.SERVICE_SIGNING_NAME,
                                                     SERVICE_NAME)
-                                            .putProperty(AwsV4HttpSigner.REGION_NAME, REGION)
                                             .putProperty(
                                                     AwsV4FamilyHttpSigner.PAYLOAD_SIGNING_ENABLED,
-                                                    false));
+                                                    true)
+                                            .putProperty(AwsV4HttpSigner.REGION_NAME, REGION));
 
             SdkHttpRequest signedHttpRequest = signedRequest.request();
             copySigningHeaders(signedHttpRequest, requestContext);
@@ -88,6 +96,14 @@ public class SigV4RequestFilter implements ClientRequestFilter {
         } catch (Exception exception) {
             throw new IOException("Failed to sign request with SigV4", exception);
         }
+    }
+
+    private byte[] getPayloadBytes(ClientRequestContext requestContext) {
+        Object entity = requestContext.getEntity();
+        if (entity == null) {
+            return new byte[0];
+        }
+        return entity.toString().getBytes(StandardCharsets.UTF_8);
     }
 
     private void copySigningHeaders(
