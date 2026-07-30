@@ -75,7 +75,10 @@ public class SigV4RequestFilter implements ClientRequestFilter {
                                             .putProperty(
                                                     AwsV4FamilyHttpSigner.SERVICE_SIGNING_NAME,
                                                     SERVICE_NAME)
-                                            .putProperty(AwsV4HttpSigner.REGION_NAME, REGION));
+                                            .putProperty(AwsV4HttpSigner.REGION_NAME, REGION)
+                                            .putProperty(
+                                                    AwsV4FamilyHttpSigner.PAYLOAD_SIGNING_ENABLED,
+                                                    false));
 
             SdkHttpRequest signedHttpRequest = signedRequest.request();
             copySigningHeaders(signedHttpRequest, requestContext);
@@ -92,13 +95,13 @@ public class SigV4RequestFilter implements ClientRequestFilter {
         copyHeader(signedRequest, requestContext, "Authorization");
         copyHeader(signedRequest, requestContext, "X-Amz-Date");
         copyHeader(signedRequest, requestContext, "X-Amz-Security-Token");
+        copyHeader(signedRequest, requestContext, "x-amz-content-sha256");
     }
 
     private void copyHeader(
             SdkHttpRequest signedRequest, ClientRequestContext requestContext, String headerName) {
-        List<String> values = signedRequest.headers().get(headerName);
-        if (values != null && !values.isEmpty()) {
-            requestContext.getHeaders().putSingle(headerName, values.get(0));
-        }
+        signedRequest
+                .firstMatchingHeader(headerName)
+                .ifPresent(value -> requestContext.getHeaders().putSingle(headerName, value));
     }
 }
