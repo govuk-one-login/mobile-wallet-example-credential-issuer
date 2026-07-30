@@ -129,6 +129,17 @@ Resources:
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
+          - Effect: Deny
+            Principal:
+              AWS: "*"
+            Action: "*"
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref RootCAAuditReportBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+
 
   CRLBucket:
     Type: AWS::S3::Bucket
