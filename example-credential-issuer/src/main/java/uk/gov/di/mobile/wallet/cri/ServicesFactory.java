@@ -175,7 +175,9 @@ public class ServicesFactory {
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);
 
-        boolean sigV4Enabled = "staging".equals(configurationService.getEnvironment());
+        boolean sigV4Enabled =
+                "staging".equals(configurationService.getEnvironment())
+                        || "dev".equals(configurationService.getEnvironment());
         Client statusListHttpClient =
                 new JerseyClientBuilder(environment)
                         .using(configurationService.getHttpClient())
