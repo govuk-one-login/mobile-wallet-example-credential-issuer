@@ -21,7 +21,7 @@ import java.util.Map;
  * requests. Used to authenticate requests to API Gateway endpoints that require IAM authorization.
  *
  * <p>When enabled, this filter intercepts outgoing requests and adds the {@code Authorization},
- * {@code X-Amz-Date}, and {@code X-Amz-Security-Token} headers using AWS SigV4 signing.
+ * {@code X-Amz-Date}, and {@code X-Amz-Security-Token} headers using AWS SigV4 signing..
  */
 public class SigV4RequestFilter implements ClientRequestFilter {
 
