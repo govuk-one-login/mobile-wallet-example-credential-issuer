@@ -2,6 +2,8 @@ package uk.gov.di.mobile.wallet.cri.credential;
 
 import jakarta.ws.rs.client.ClientRequestContext;
 import jakarta.ws.rs.client.ClientRequestFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.http.SdkHttpMethod;
 import software.amazon.awssdk.http.SdkHttpRequest;
 import software.amazon.awssdk.http.auth.aws.signer.AwsV4FamilyHttpSigner;
@@ -23,6 +25,7 @@ import java.util.Map;
  */
 public class SigV4RequestFilter implements ClientRequestFilter {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SigV4RequestFilter.class);
     private static final String SERVICE_NAME = "execute-api";
     private static final String REGION = "eu-west-2";
 
@@ -42,8 +45,11 @@ public class SigV4RequestFilter implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         if (!enabled) {
+            LOGGER.info("SigV4RequestFilter: disabled, skipping signing");
             return;
         }
+
+        LOGGER.info("SigV4RequestFilter: signing request to {}", requestContext.getUri());
 
         try {
             AwsCredentialsIdentity credentials = credentialsProvider.resolveIdentity().get();

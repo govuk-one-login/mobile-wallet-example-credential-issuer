@@ -21,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -86,6 +85,7 @@ class StatusListClientTest {
             when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
             when(requestBuilder.post(any())).thenReturn(response);
             when(response.getStatus()).thenReturn(500);
+            when(response.readEntity(String.class)).thenReturn("error response body");
 
             StatusListClientException exception =
                     assertThrows(
@@ -94,7 +94,6 @@ class StatusListClientTest {
             assertEquals(
                     "Request to get credential index failed with status code 500",
                     exception.getMessage());
-            verify(response, never()).readEntity((Class<Object>) any());
         }
 
         @Test
@@ -152,6 +151,7 @@ class StatusListClientTest {
             when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
             when(requestBuilder.post(any())).thenReturn(response);
             when(response.getStatus()).thenReturn(500);
+            when(response.readEntity(String.class)).thenReturn("error response body");
 
             StatusListClientException exception =
                     assertThrows(
@@ -160,7 +160,6 @@ class StatusListClientTest {
             assertEquals(
                     "Request to revoke credential failed with status code 500",
                     exception.getMessage());
-            verify(response, never()).readEntity((Class<Object>) any());
         }
 
         @Test
