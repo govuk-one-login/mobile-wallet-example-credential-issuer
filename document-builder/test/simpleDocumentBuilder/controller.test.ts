@@ -311,7 +311,7 @@ describe("controller.ts", () => {
           itemId: "2e0fac05-4b38-480f-9cbd-b046eabe1e46",
           documentId: "FLN550000",
           vcType:
-            "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
+            "uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1",
           timeToLive: 1748736000,
           credentialTtlSeconds: 43200,
           expectedUpdateSeconds: null,
@@ -342,7 +342,7 @@ describe("controller.ts", () => {
           await simpleDocumentBuilderPostController(config)(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
-            "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
+            "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1",
           );
         });
       });
@@ -357,7 +357,7 @@ describe("controller.ts", () => {
           await simpleDocumentBuilderPostController(config)(req, res, next);
 
           expect(res.redirect).toHaveBeenCalledWith(
-            "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1",
+            "/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1",
           );
         });
       });
@@ -373,7 +373,7 @@ describe("controller.ts", () => {
             await simpleDocumentBuilderPostController(config)(req, res, next);
 
             expect(res.redirect).toHaveBeenCalledWith(
-              `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.mobile.example-credential-issuer.simplemdoc.1&error=${selectedError}`,
+              `/view-credential-offer/2e0fac05-4b38-480f-9cbd-b046eabe1e46?type=uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1&error=${selectedError}`,
             );
           },
         );
