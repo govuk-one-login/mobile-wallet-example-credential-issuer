@@ -94,7 +94,7 @@ Globals:
         - EnvironmentVariables
         - !Ref Environment
         - LambdaLogLevel
-    Runtime: nodejs20.x
+    Runtime: nodejs22.x
     Architectures:
       - arm64
     PermissionsBoundary: !If
@@ -217,6 +217,7 @@ Resources:
       BuildProperties:
         Minify: true
         Target: es2020
+        MainFields: module,main
         EntryPoints:
           - src/issueDocumentSigningCertificate.ts
 
