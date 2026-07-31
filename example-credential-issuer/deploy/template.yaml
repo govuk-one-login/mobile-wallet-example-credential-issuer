@@ -301,6 +301,8 @@ Resources:
       Name: !Sub wallet-stub-Back-${Environment}-${AWS::StackName}
       Description: !Sub "Wallet Stub Backend API. ${AWS::StackName}"
       ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins: []
 
   WalletBEApiGwHttpEndpointIntegration:
     Type: 'AWS::ApiGatewayV2::Integration'
