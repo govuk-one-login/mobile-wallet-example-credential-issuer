@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -94,8 +94,6 @@ class CredentialServiceTest {
         mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
                 .thenReturn(getMockAccessTokenData());
-
-        lenient().doReturn(mockLogger).when(credentialService).getLogger();
     }
 
     @Test
@@ -131,6 +129,7 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialOfferValidationException_When_CredentialOfferNotFound()
             throws DataStoreException {
+        doReturn(mockLogger).when(credentialService).getLogger();
         when(mockDynamoDbService.getCredentialOffer(CREDENTIAL_IDENTIFIER)).thenReturn(null);
 
         CredentialOfferException exception =
@@ -145,6 +144,7 @@ class CredentialServiceTest {
     @Test
     void Should_ThrowCredentialOfferException_When_CredentialOfferIsExpired()
             throws DataStoreException {
+        doReturn(mockLogger).when(credentialService).getLogger();
         mockCachedCredentialOffer =
                 getMockCredentialOfferCacheItem(
                         WALLET_SUBJECT_ID, Instant.parse("2020-01-01T00:00:00Z"));

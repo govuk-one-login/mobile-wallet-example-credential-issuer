@@ -9,7 +9,6 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -34,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,11 +45,6 @@ class JwksServiceTest {
     private static final String TEST_KEY_ID =
             "d7cb2ed24d8f70433e293ebc270bf1de77fcfab02a7f631da396b70e9b3aa8d7";
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
-
-    @BeforeEach
-    void setUp() {
-        lenient().when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key");
-    }
 
     @Test
     void should_ReturnMatchingJwk_WhenKeyIdExists() throws KeySourceException, ParseException {
@@ -126,6 +119,7 @@ class JwksServiceTest {
                     NoSuchAlgorithmException,
                     PEMException,
                     KeyNotActiveException {
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key");
         ECKey mockJwk = getMockJwk();
         when(kmsService.isKeyActive(any(String.class))).thenReturn(true);
         when(kmsService.getPublicKey(any(String.class))).thenReturn(mockJwk);
