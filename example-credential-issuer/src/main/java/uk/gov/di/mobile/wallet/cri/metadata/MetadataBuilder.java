@@ -4,8 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.Resources;
 
-import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -76,12 +76,10 @@ public class MetadataBuilder {
             throw new IllegalArgumentException("fileName must not be null");
         }
 
-        File credentialConfigurationsSupportedFilePath =
-                new File(Resources.getResource(fileName).getPath());
+        URL resource = Resources.getResource(fileName);
         ObjectMapper mapper = new ObjectMapper();
         this.credentialConfigurationsSupported =
-                mapper.readValue(
-                        credentialConfigurationsSupportedFilePath, new TypeReference<>() {});
+                mapper.readValue(resource.openStream(), new TypeReference<>() {});
 
         for (Map.Entry<String, Object> entry : credentialConfigurationsSupported.entrySet()) {
             String credentialName = entry.getKey();
