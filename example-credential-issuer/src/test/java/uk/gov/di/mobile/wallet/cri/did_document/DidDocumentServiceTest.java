@@ -3,15 +3,14 @@ package uk.gov.di.mobile.wallet.cri.did_document;
 import com.nimbusds.jose.jwk.Curve;
 import com.nimbusds.jose.jwk.ECKey;
 import org.bouncycastle.openssl.PEMException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
-import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
-import software.amazon.awssdk.services.kms.model.KeyMetadata;
-import software.amazon.awssdk.services.kms.model.NotFoundException;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
@@ -22,7 +21,6 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
-import java.time.Instant;
 import java.util.List;
 
 import static com.nimbusds.jose.JWSAlgorithm.ES256;
@@ -31,17 +29,14 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith({MockitoExtension.class})
 class DidDocumentServiceTest {
 
-    private DidDocumentService didDocumentService;
-    private final KmsService kmsService = mock(KmsService.class);
-    private final ConfigurationService configurationService = mock(ConfigurationService.class);
-    private static final String TEST_ARN =
-            "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+    @InjectMocks private DidDocumentService didDocumentService;
+    @Mock private KmsService kmsService;
+    @Mock private ConfigurationService configurationService;
     private static final String TEST_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
     private static final String TEST_CONTROLLER = "did:web:test-example-credential-issuer.gov.uk";
@@ -51,23 +46,16 @@ class DidDocumentServiceTest {
     private static final String TEST_DID_TYPE = "JsonWebKey2020";
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
 
-    @BeforeEach
-    void setUp() {
-        didDocumentService = new DidDocumentService(configurationService, kmsService);
-        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
-        when(configurationService.getSelfUrl())
-                .thenReturn(URI.create("https://test-example-credential-issuer.gov.uk"));
-    }
-
     @Test
     void shouldReturnDidDocument()
             throws PEMException,
                     NoSuchAlgorithmException,
                     InvalidAlgorithmParameterException,
                     KeyNotActiveException {
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
+        when(configurationService.getSelfUrl())
+                .thenReturn(URI.create("https://test-example-credential-issuer.gov.uk"));
         ECKey mockJwk = getMockJwk();
-        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(getMockDescribeKeyResponse(TEST_ARN, true, null));
         when(kmsService.isKeyActive(any(String.class))).thenReturn(true);
         when(kmsService.getPublicKey(any(String.class))).thenReturn(mockJwk);
 
@@ -92,57 +80,19 @@ class DidDocumentServiceTest {
         assertEquals(mockJwk.getAlgorithm().toString(), jwk.getAlg());
     }
 
-    @Test
-    @DisplayName("Should Throw Key Not Active Exception if Key is Inactive")
-    void should_ThrowException_If_Key_Is_Inactive() {
-        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenThrow(NotFoundException.class);
+    @ParameterizedTest
+    @ValueSource(strings = {"Key is Inactive", "Key is not Enabled", "Key is due for deletion"})
+    @DisplayName("Should Throw Key Not Active Exception if")
+    void should_ThrowKeyNotActiveException(String scenario) {
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key-alias");
+        when(configurationService.getSelfUrl())
+                .thenReturn(URI.create("https://test-example-credential-issuer.gov.uk"));
 
         KeyNotActiveException exception =
                 assertThrows(
                         KeyNotActiveException.class,
                         () -> didDocumentService.generateDidDocument());
         assertThat(exception.getMessage(), containsString("Public key is not active"));
-    }
-
-    @Test
-    @DisplayName("Should Throw Key Not Active Exception if Key is not Enabled")
-    void should_ThrowException_If_Key_Is_Not_Enabled() {
-        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(getMockDescribeKeyResponse(TEST_ARN, false, null));
-
-        KeyNotActiveException exception =
-                assertThrows(
-                        KeyNotActiveException.class,
-                        () -> didDocumentService.generateDidDocument());
-        assertThat(exception.getMessage(), containsString("Public key is not active"));
-    }
-
-    @Test
-    @DisplayName("Should Throw Key Not Active Exception if Key is due for deletion")
-    void should_ThrowException_If_Key_Is_Due_For_Deletion() {
-        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(
-                        getMockDescribeKeyResponse(
-                                TEST_ARN, true, Instant.parse("2090-01-01T00:00:00Z")));
-
-        KeyNotActiveException exception =
-                assertThrows(
-                        KeyNotActiveException.class,
-                        () -> didDocumentService.generateDidDocument());
-        assertThat(exception.getMessage(), containsString("Public key is not active"));
-    }
-
-    public static DescribeKeyResponse getMockDescribeKeyResponse(
-            String keyId, boolean enabled, Instant deletionDate) {
-        return DescribeKeyResponse.builder()
-                .keyMetadata(
-                        KeyMetadata.builder()
-                                .keyId(keyId)
-                                .enabled(enabled)
-                                .deletionDate(deletionDate)
-                                .build())
-                .build();
     }
 
     private ECKey getMockJwk() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {
