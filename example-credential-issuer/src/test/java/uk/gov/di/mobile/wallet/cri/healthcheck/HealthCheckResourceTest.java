@@ -6,10 +6,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -24,17 +24,12 @@ import static org.mockito.Mockito.when;
 class HealthCheckResourceTest {
     @Mock private Environment environment;
     @Mock private HealthCheckRegistry healthCheckRegistry;
-    private HealthCheckResource resource;
-
-    @BeforeEach
-    void setup() {
-        when(environment.healthChecks()).thenReturn(healthCheckRegistry);
-        resource = new HealthCheckResource(environment);
-    }
+    @InjectMocks private HealthCheckResource resource;
 
     @Test
     @DisplayName("Should be Healthy Response when Service is healthy")
     void should_Be_HealthyResponse_When_Service_Is_Healthy() throws JsonProcessingException {
+        when(environment.healthChecks()).thenReturn(healthCheckRegistry);
         SortedMap<String, HealthCheck.Result> map = new TreeMap<>();
         map.put("ping", HealthCheck.Result.healthy());
         map.put("deadlocks", HealthCheck.Result.healthy());

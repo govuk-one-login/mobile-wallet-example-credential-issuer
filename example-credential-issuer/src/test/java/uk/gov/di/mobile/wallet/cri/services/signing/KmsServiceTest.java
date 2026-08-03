@@ -6,6 +6,7 @@ import com.nimbusds.jose.jwk.KeyType;
 import org.bouncycastle.openssl.PEMException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.SdkBytes;
 import software.amazon.awssdk.services.kms.KmsClient;
@@ -28,7 +29,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class KmsServiceTest {
 
-    private final KmsService kmsService = mock(KmsService.class);
+    @Mock private KmsService kmsService;
     private static final String TEST_KEY_ID = "1234abcd-12ab-34cd-56ef-1234567890ab";
     private static final String HASHED_TEST_KEY_ID =
             "0ee49f6f7aa27ef1924a735ed9542a85d8be3fb916632adbae584a1c24de91f2";
@@ -94,8 +95,6 @@ class KmsServiceTest {
     void should_Return_PublicKey_As_Jwk() throws PEMException, NoSuchAlgorithmException {
         String mockPublicKey =
                 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEZS4QGXEhtywj9ivxlgx1dIJkFS7l2TInfT9r3Onmpvq64gfgiSQcFQ6eBIJDb9udSzWgi9+Z4Ls+wRkRqzghgQ==";
-        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(getMockDescribeKeyResponse(TEST_KEY_ID, true, null));
         when(kmsService.getKmsPublicKey(TEST_KEY_ALIAS))
                 .thenReturn(getMockPublicKeyResponse(TEST_ARN, mockPublicKey));
 

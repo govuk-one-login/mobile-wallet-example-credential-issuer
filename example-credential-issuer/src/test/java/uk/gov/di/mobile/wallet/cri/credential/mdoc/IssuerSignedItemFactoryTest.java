@@ -1,9 +1,9 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
 import org.apache.hc.client5.http.utils.Hex;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -18,12 +18,7 @@ import static org.mockito.Mockito.when;
 class IssuerSignedItemFactoryTest {
 
     @Mock private DigestIDGenerator mockDigestIDGenerator;
-    private IssuerSignedItemFactory issuerSignedItemFactory;
-
-    @BeforeEach
-    void setUp() {
-        issuerSignedItemFactory = new IssuerSignedItemFactory(mockDigestIDGenerator);
-    }
+    @InjectMocks private IssuerSignedItemFactory issuerSignedItemFactory;
 
     @Test
     void Should_CreateItemWithProvidedElementIdentifierAndValue() {

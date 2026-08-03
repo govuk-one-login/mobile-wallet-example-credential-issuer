@@ -1,12 +1,13 @@
 package uk.gov.di.mobile.wallet.cri.metadata;
 
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
@@ -17,8 +18,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.mockito.Mockito.RETURNS_SELF;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Answers.RETURNS_SELF;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -29,14 +29,17 @@ class MetadataResourceTest {
     private static final String AUTH_SERVER_URL = "https://authorization-server.test.gov.uk";
     private static final String CREDENTIAL_STORE_URL = "https://credential-store.test.gov.uk";
 
-    private final ConfigurationService configurationService = mock(ConfigurationService.class);
-    private final MetadataBuilder metadataBuilder = mock(MetadataBuilder.class, RETURNS_SELF);
-    private final Metadata metadata = mock(Metadata.class);
+    @Mock private ConfigurationService configurationService;
 
-    private MetadataResource metadataResource;
+    @Mock(answer = RETURNS_SELF)
+    private MetadataBuilder metadataBuilder;
 
-    @BeforeEach
-    void setUp() {
+    @Mock private Metadata metadata;
+
+    @InjectMocks private MetadataResource metadataResource;
+
+    @Test
+    void Should_Return200AndMetadata() {
         when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
         when(configurationService.getEnvironment()).thenReturn("test");
@@ -44,11 +47,6 @@ class MetadataResourceTest {
                 .thenReturn(URI.create(CREDENTIAL_STORE_URL));
         when(metadataBuilder.build()).thenReturn(metadata);
 
-        metadataResource = new MetadataResource(configurationService, metadataBuilder);
-    }
-
-    @Test
-    void Should_Return200AndMetadata() {
         final Response response = metadataResource.getMetadata();
 
         assertEquals(200, response.getStatus());
@@ -68,6 +66,13 @@ class MetadataResourceTest {
 
     @Test
     void Should_CallAllBuilderMethods() throws IOException {
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
+        when(configurationService.getEnvironment()).thenReturn("test");
+        when(configurationService.getCredentialStoreUrl())
+                .thenReturn(URI.create(CREDENTIAL_STORE_URL));
+        when(metadataBuilder.build()).thenReturn(metadata);
+
         metadataResource.getMetadata();
 
         verify(metadataBuilder).setCredentialIssuer(SELF_URL);
@@ -94,6 +99,11 @@ class MetadataResourceTest {
 
     @Test
     void Should_Return500_When_MetadataBuilderThrowsIllegalArgumentException() {
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
+        when(configurationService.getEnvironment()).thenReturn("test");
+        when(configurationService.getCredentialStoreUrl())
+                .thenReturn(URI.create(CREDENTIAL_STORE_URL));
         when(metadataBuilder.build())
                 .thenThrow(new IllegalArgumentException("Invalid configuration"));
 
@@ -104,6 +114,11 @@ class MetadataResourceTest {
 
     @Test
     void Should_Return500_When_MetadataBuilderThrowsRuntimeException() {
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        when(configurationService.getSelfUrl()).thenReturn(URI.create(SELF_URL));
+        when(configurationService.getEnvironment()).thenReturn("test");
+        when(configurationService.getCredentialStoreUrl())
+                .thenReturn(URI.create(CREDENTIAL_STORE_URL));
         when(metadataBuilder.build()).thenThrow(new RuntimeException("Unexpected error"));
 
         final Response response = metadataResource.getMetadata();
@@ -115,6 +130,10 @@ class MetadataResourceTest {
     @MethodSource("iacasEndpointScenarios")
     void Should_UseCorrectIacasEndpoint(
             String environment, String selfUrl, String expectedIacasEndpoint, String testName) {
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn(AUTH_SERVER_URL);
+        when(configurationService.getCredentialStoreUrl())
+                .thenReturn(URI.create(CREDENTIAL_STORE_URL));
+        when(metadataBuilder.build()).thenReturn(metadata);
         when(configurationService.getEnvironment()).thenReturn(environment);
         when(configurationService.getSelfUrl()).thenReturn(URI.create(selfUrl));
 
