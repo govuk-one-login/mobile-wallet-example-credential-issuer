@@ -488,6 +488,11 @@ Resources:
           PortMappings:
             - ContainerPort: !Ref ContainerPort
               Protocol: tcp
+          ReadonlyRootFilesystem: true
+          MountPoints:
+            - ContainerPath: /tmp
+              SourceVolume: tmp-volume
+              ReadOnly: false
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -501,6 +506,8 @@ Resources:
       RequiresCompatibilities:
         - FARGATE
       TaskRoleArn: !GetAtt WalletBEECSTaskRole.Arn
+      Volumes:
+        - Name: tmp-volume
       Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-WalletTaskDefinition"
