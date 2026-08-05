@@ -130,8 +130,7 @@ Resources:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
           - Effect: Deny
-            Principal:
-              AWS: "*"
+            Principal: "*"
             Action: "*"
             Resource: !Sub
               - arn:aws:s3:::${bucketName}/*
@@ -197,8 +196,7 @@ Resources:
               StringEquals:
                 AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CRLDistribution}
           - Effect: Deny
-            Principal:
-              AWS: "*"
+            Principal: "*"
             Action: "*"
             Resource: !Sub
               - arn:aws:s3:::${bucketName}/*

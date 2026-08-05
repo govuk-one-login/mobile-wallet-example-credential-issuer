@@ -283,8 +283,7 @@ Resources:
             Action: 's3:GetObject'
             Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
           - Effect: Deny
-            Principal:
-              AWS: '*'
+            Principal: '*'
             Action: '*'
             Resource: !Sub
               - arn:aws:s3:::${bucketName}/*
