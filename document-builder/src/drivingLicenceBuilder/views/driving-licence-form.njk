@@ -443,7 +443,7 @@
         {% endcall %}
         {{ govukButton({"text": "Continue", "type": "Submit", "preventDoubleClick": true}) }}
     </form>
-    <script>
+    <script nonce="{{ cspNonce }}">
       const MAX_ENTRIES = 60;
 
       const defaultIssueDateValues = {

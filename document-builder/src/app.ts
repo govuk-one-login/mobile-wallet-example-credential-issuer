@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import express from "express";
 import helmet from "helmet";
 import { appSelectorRouter } from "./appSelector/router";
@@ -58,13 +59,24 @@ const APP_VIEWS = [
 export async function createApp(): Promise<express.Application> {
   const app: express.Application = express();
 
+  app.use((_req, res, next) => {
+    res.locals.cspNonce = crypto.randomBytes(16).toString("base64");
+    next();
+  });
+
   app.use(
     helmet({
       contentSecurityPolicy: {
         directives: {
           defaultSrc: ["'self'"],
-          scriptSrc: ["'self'", "'unsafe-inline'"],
-          styleSrc: ["'self'", "'unsafe-inline'"],
+          scriptSrc: [
+            "'self'",
+            (_req, res) => `'nonce-${(res as express.Response).locals.cspNonce}'`,
+          ],
+          styleSrc: [
+            "'self'",
+            (_req, res) => `'nonce-${(res as express.Response).locals.cspNonce}'`,
+          ],
           imgSrc: ["'self'", "data:"],
           fontSrc: ["'self'"],
           connectSrc: ["'self'"],

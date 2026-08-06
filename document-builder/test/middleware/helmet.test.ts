@@ -24,14 +24,17 @@ describe("Helmet security headers", () => {
     expect(response.headers["content-security-policy"]).toContain(
       "default-src 'self'",
     );
-    expect(response.headers["content-security-policy"]).toContain(
-      "script-src 'self' 'unsafe-inline'",
+    expect(response.headers["content-security-policy"]).toMatch(
+      /script-src 'self' 'nonce-[A-Za-z0-9+/=]+'/,
     );
-    expect(response.headers["content-security-policy"]).toContain(
-      "style-src 'self' 'unsafe-inline'",
+    expect(response.headers["content-security-policy"]).toMatch(
+      /style-src 'self' 'nonce-[A-Za-z0-9+/=]+'/,
     );
     expect(response.headers["content-security-policy"]).toContain(
       "img-src 'self' data:",
+    );
+    expect(response.headers["content-security-policy"]).not.toContain(
+      "unsafe-inline",
     );
   });
 
