@@ -1,6 +1,4 @@
-import crypto from "node:crypto";
 import express from "express";
-import helmet from "helmet";
 import { appSelectorRouter } from "./appSelector/router";
 import { dbsDocumentBuilderRouter } from "./dbsDocumentBuilder/router";
 import { credentialOfferViewerRouter } from "./credentialOfferViewer/router";
@@ -34,6 +32,10 @@ import { pageNotFound } from "./middleware/pageNotFound";
 import { healthcheckRouter } from "./healthcheck/router";
 import { robotsTxtRouter } from "./robotsTxt/router";
 import { errorHandler } from "./middleware/errorHandler";
+import {
+  generateCspNonce,
+  contentSecurityPolicy,
+} from "./middleware/cspNonce";
 
 const APP_VIEWS = [
   path.resolve("dist/appSelector/views"),
@@ -59,31 +61,8 @@ const APP_VIEWS = [
 export async function createApp(): Promise<express.Application> {
   const app: express.Application = express();
 
-  app.use((_req, res, next) => {
-    res.locals.cspNonce = crypto.randomBytes(16).toString("base64");
-    next();
-  });
-
-  app.use(
-    helmet({
-      contentSecurityPolicy: {
-        directives: {
-          defaultSrc: ["'self'"],
-          scriptSrc: [
-            "'self'",
-            (_req, res) => `'nonce-${(res as express.Response).locals.cspNonce}'`,
-          ],
-          styleSrc: [
-            "'self'",
-            (_req, res) => `'nonce-${(res as express.Response).locals.cspNonce}'`,
-          ],
-          imgSrc: ["'self'", "data:"],
-          fontSrc: ["'self'"],
-          connectSrc: ["'self'"],
-        },
-      },
-    }),
-  );
+  app.use(generateCspNonce);
+  app.use(contentSecurityPolicy);
 
   app.use(cookieParser());
   app.use(express.urlencoded({ extended: true, limit: "16kb" }));
