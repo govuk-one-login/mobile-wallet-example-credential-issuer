@@ -1,4 +1,5 @@
 import express from "express";
+import helmet from "helmet";
 import { appSelectorRouter } from "./appSelector/router";
 import { dbsDocumentBuilderRouter } from "./dbsDocumentBuilder/router";
 import { credentialOfferViewerRouter } from "./credentialOfferViewer/router";
@@ -57,8 +58,23 @@ const APP_VIEWS = [
 export async function createApp(): Promise<express.Application> {
   const app: express.Application = express();
 
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", "data:"],
+          fontSrc: ["'self'"],
+          connectSrc: ["'self'"],
+        },
+      },
+    }),
+  );
+
   app.use(cookieParser());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
   app.set(
     "view engine",
