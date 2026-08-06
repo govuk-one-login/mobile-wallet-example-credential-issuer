@@ -723,8 +723,7 @@ Resources:
         Statement:
           - Sid: AllowSSLRequestsOnly
             Effect: Deny
-            Principal:
-              AWS: "*"
+            Principal: "*"
             Action: "*"
             Resource: !Sub
               - "arn:aws:s3:::${bucketName}/*"
