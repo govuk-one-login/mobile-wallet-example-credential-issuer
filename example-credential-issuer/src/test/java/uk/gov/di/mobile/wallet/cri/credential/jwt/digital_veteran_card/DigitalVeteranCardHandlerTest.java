@@ -1,9 +1,9 @@
 package uk.gov.di.mobile.wallet.cri.credential.jwt.digital_veteran_card;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,18 +37,13 @@ class DigitalVeteranCardHandlerTest {
     @Mock private ProofJwtService.ProofJwtData mockProofData;
     @Mock private VeteranCardDocument mockVeteranCardDocument;
     @Mock private VeteranCardCredentialSubject mockCredentialSubject;
-    private DigitalVeteranCardHandler handler;
+    @InjectMocks private DigitalVeteranCardHandler handler;
 
     private static final String EXPECTED_CREDENTIAL = "signed-jwt-credential-string";
     private static final String DID_KEY = "did:key:test123";
     private static final long TTL_SECONDS = 1440L;
     private static final Optional<StatusListClient.StatusListInformation> STATUS_LIST_INFORMATION =
             Optional.empty();
-
-    @BeforeEach
-    void setUp() {
-        handler = new DigitalVeteranCardHandler(mockCredentialBuilder);
-    }
 
     @Test
     void Should_ReturnDigitalVeteranCard() throws SigningException {

@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -24,7 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class DocumentStoreClientTest {
 
-    private DocumentStoreClient documentStoreClient;
+    @InjectMocks private DocumentStoreClient documentStoreClient;
 
     @Mock private Client mockHttpClient;
     @Mock private WebTarget mockWebTarget;
@@ -41,7 +42,6 @@ class DocumentStoreClientTest {
     @BeforeEach
     void setUp() throws URISyntaxException {
         documentBuilderUrl = new URI("https://test-example-cri.com");
-        documentStoreClient = new DocumentStoreClient(mockConfigurationService, mockHttpClient);
     }
 
     @Test

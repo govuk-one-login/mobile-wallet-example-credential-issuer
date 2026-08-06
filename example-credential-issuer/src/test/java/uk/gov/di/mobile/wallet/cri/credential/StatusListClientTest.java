@@ -6,10 +6,10 @@ import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
@@ -36,18 +36,13 @@ class StatusListClientTest {
     @Mock private Invocation.Builder requestBuilder;
     @Mock private Response response;
 
-    private StatusListClient statusListClient;
+    @InjectMocks private StatusListClient statusListClient;
 
     private static final URI BASE_URL = URI.create("https://status-list.test.com");
     private static final String MOCK_TOKEN = "mock-token";
     private static final long CREDENTIAL_EXPIRY = 1234567890L;
     private static final int INDEX = 5;
     private static final String STATUS_LIST_URI = "https://status-list.test.com/t/12345";
-
-    @BeforeEach
-    void setUp() {
-        statusListClient = new StatusListClient(configurationService, httpClient, tokenBuilder);
-    }
 
     @Nested
     class GetIndexTests {

@@ -1,8 +1,8 @@
 package uk.gov.di.mobile.wallet.cri.credential.mdoc;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
@@ -48,14 +48,7 @@ class MobileSecurityObjectFactoryTest {
     @Mock private COSEKeyFactory coseKeyFactory;
     @Mock private ECPublicKey publicKey;
 
-    private MobileSecurityObjectFactory factory;
-
-    @BeforeEach
-    void setUp() {
-        factory =
-                new MobileSecurityObjectFactory(
-                        valueDigestsFactory, validityInfoFactory, coseKeyFactory);
-    }
+    @InjectMocks private MobileSecurityObjectFactory factory;
 
     @Test
     void Should_ConstructMobileSecurityObject_With_ExpectedFields() throws MdocException {

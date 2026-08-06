@@ -9,16 +9,12 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.bouncycastle.openssl.PEMException;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import software.amazon.awssdk.services.kms.model.DescribeKeyRequest;
-import software.amazon.awssdk.services.kms.model.DescribeKeyResponse;
-import software.amazon.awssdk.services.kms.model.KeyMetadata;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyNotActiveException;
 import uk.gov.di.mobile.wallet.cri.services.signing.KeyProvider;
-import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyPair;
@@ -26,7 +22,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.ECPublicKey;
 import java.text.ParseException;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 
@@ -38,26 +33,18 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class JwksServiceTest {
 
     private JwksService jwksService;
-    private final JWKSource<SecurityContext> jwkSource = mock(JWKSource.class);
-    private final KeyProvider kmsService = mock(KmsService.class);
-    private final ConfigurationService configurationService = mock(ConfigurationService.class);
-    private static final String TEST_ARN =
-            "arn:aws:kms:eu-west-2:00000000000:key/1234abcd-12ab-34cd-56ef-1234567890ab";
+    @Mock private JWKSource<SecurityContext> jwkSource;
+    @Mock private KeyProvider kmsService;
+    @Mock private ConfigurationService configurationService;
     private static final String TEST_KEY_ID =
             "d7cb2ed24d8f70433e293ebc270bf1de77fcfab02a7f631da396b70e9b3aa8d7";
     private static final String TEST_PUBLIC_KEY_TYPE = "EC";
-
-    @BeforeEach
-    void setUp() {
-        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key");
-    }
 
     @Test
     void should_ReturnMatchingJwk_WhenKeyIdExists() throws KeySourceException, ParseException {
@@ -132,27 +119,14 @@ class JwksServiceTest {
                     NoSuchAlgorithmException,
                     PEMException,
                     KeyNotActiveException {
+        when(configurationService.getSigningKeyAlias()).thenReturn("test-signing-key");
         ECKey mockJwk = getMockJwk();
-        when(kmsService.describeKey(any(DescribeKeyRequest.class)))
-                .thenReturn(getMockDescribeKeyResponse(TEST_ARN, true, null));
         when(kmsService.isKeyActive(any(String.class))).thenReturn(true);
         when(kmsService.getPublicKey(any(String.class))).thenReturn(mockJwk);
 
         JWKSet result = new JwksService(configurationService, kmsService).generateJwks();
         JWK key = result.getKeyByKeyId(TEST_KEY_ID);
         assertEquals(mockJwk.toString(), key.toJSONString());
-    }
-
-    public static DescribeKeyResponse getMockDescribeKeyResponse(
-            String keyId, boolean enabled, Instant deletionDate) {
-        return DescribeKeyResponse.builder()
-                .keyMetadata(
-                        KeyMetadata.builder()
-                                .keyId(keyId)
-                                .enabled(enabled)
-                                .deletionDate(deletionDate)
-                                .build())
-                .build();
     }
 
     private ECKey getMockJwk() throws InvalidAlgorithmParameterException, NoSuchAlgorithmException {

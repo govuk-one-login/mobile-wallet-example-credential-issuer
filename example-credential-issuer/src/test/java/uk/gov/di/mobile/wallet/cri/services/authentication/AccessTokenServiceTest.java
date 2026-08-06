@@ -27,7 +27,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -39,8 +38,8 @@ class AccessTokenServiceTest {
 
     private AccessTokenService accessTokenService;
     private ECDSASigner ecSigner;
-    private final ConfigurationService configurationService = mock(ConfigurationService.class);
-    private final JwksService jwksService = mock(JwksService.class);
+    @Mock private ConfigurationService configurationService;
+    @Mock private JwksService jwksService;
 
     @Mock private Logger mockLogger;
 
@@ -63,8 +62,6 @@ class AccessTokenServiceTest {
                         return mockLogger;
                     }
                 };
-        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
-        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
     }
 
     @Test
@@ -120,6 +117,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_RequiredClaimsAreMissing() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         SignedJWT mockAccessToken =
                 new SignedJWT(
                         new JWSHeader.Builder(JWSAlgorithm.ES256)
@@ -139,6 +138,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_TokenIsExpired() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
                         .withExpirationTime(Instant.parse("2026-05-07T10:00:00Z"))
@@ -153,6 +154,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_CredentialIdentifiersClaimIsEmpty() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
                         .withClaim("credential_identifiers", List.of())
@@ -167,6 +170,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_CredentialIdentifiersHasMultipleItems() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
                         .withClaim("credential_identifiers", List.of("id1", "id2"))
@@ -181,6 +186,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdsIsEmpty() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
                         .withClaim("credential_configuration_ids", List.of())
@@ -196,6 +203,8 @@ class AccessTokenServiceTest {
     @Test
     void
             Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdsHasMultipleItems() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
                         .withClaim(
@@ -212,6 +221,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_CredentialConfigurationIdNotInSupported() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         SignedJWT mockAccessToken =
                 new MockAccessTokenBuilder("ES256")
                         .withClaim(
@@ -228,6 +239,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_AudClaimDoesNotMatchConfig() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         MockAccessTokenBuilder builder = new MockAccessTokenBuilder("ES256");
         SignedJWT mockAccessToken = builder.withAudience("invalid-audience").build();
 
@@ -240,6 +253,8 @@ class AccessTokenServiceTest {
 
     @Test
     void Should_ThrowAccessTokenValidationException_When_IssClaimDoesNotMatchConfig() {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         MockAccessTokenBuilder builder = new MockAccessTokenBuilder("ES256");
         SignedJWT mockAccessToken = builder.withIssuer("invalid-issuer").build();
 
@@ -253,6 +268,8 @@ class AccessTokenServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_JwkHasWrongType()
             throws JOSEException, ParseException {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         when(configurationService.getEnvironment()).thenReturn("test");
         JWK publicKey =
                 JWK.parse(
@@ -271,6 +288,8 @@ class AccessTokenServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_SignatureVerificationFails()
             throws JOSEException, ParseException {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         when(configurationService.getEnvironment()).thenReturn("test");
         JWK publicKey =
                 JWK.parse(
@@ -289,6 +308,8 @@ class AccessTokenServiceTest {
     @Test
     void Should_ThrowAccessTokenValidationException_When_JwksServiceThrowsKeySourceException()
             throws JOSEException {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         when(configurationService.getEnvironment()).thenReturn("test");
         SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class)))
@@ -304,6 +325,8 @@ class AccessTokenServiceTest {
     @Test
     void Should_ReturnTokenData_When_JwtVerificationSucceeds_For_FreshIssuance()
             throws JOSEException, ParseException, AccessTokenValidationException {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         when(configurationService.getEnvironment()).thenReturn("test");
         JWK publicKey = getEcKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
@@ -331,6 +354,8 @@ class AccessTokenServiceTest {
     @Test
     void Should_ReturnTokenData_When_JwtVerificationSucceeds_For_Refresh()
             throws JOSEException, ParseException, AccessTokenValidationException {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         when(configurationService.getEnvironment()).thenReturn("test");
         JWK publicKey = getEcKey().toPublicJWK();
         when(jwksService.retrieveJwkFromURLWithKeyId(any(String.class))).thenReturn(publicKey);
@@ -354,6 +379,8 @@ class AccessTokenServiceTest {
     @ValueSource(strings = {"local", "dev", "build", "integration"})
     void Should_SkipSignatureVerification_When_EnvironmentSkipsVerification(String environment)
             throws JOSEException, AccessTokenValidationException {
+        when(configurationService.getSelfUrl()).thenReturn(URI.create("https://issuer-url.gov.uk"));
+        when(configurationService.getOneLoginAuthServerUrl()).thenReturn("https://auth-url.gov.uk");
         when(configurationService.getEnvironment()).thenReturn(environment);
         SignedJWT mockAccessToken = spy(new MockAccessTokenBuilder("ES256").build());
         mockAccessToken.sign(ecSigner);
