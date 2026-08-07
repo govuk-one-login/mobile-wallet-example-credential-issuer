@@ -103,6 +103,11 @@ public class NotificationResource {
             throw new InvalidNotificationRequestException(
                     "Invalid event_description: must contain only ASCII characters");
         }
+        if (requestBody.getEventDescription() != null
+                && requestBody.getEventDescription().length() > 1000) {
+            throw new InvalidNotificationRequestException(
+                    "Invalid event_description: must not exceed 1000 characters");
+        }
         return requestBody;
     }
 }

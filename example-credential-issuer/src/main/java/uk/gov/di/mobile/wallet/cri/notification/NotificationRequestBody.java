@@ -2,6 +2,7 @@ package uk.gov.di.mobile.wallet.cri.notification;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Size;
 import lombok.Getter;
 
 @Getter
@@ -14,6 +15,7 @@ public class NotificationRequestBody {
     private EventType event;
 
     @JsonProperty("event_description")
+    @Size(max = 1000)
     private String eventDescription;
 
     @JsonCreator

@@ -203,6 +203,60 @@ class NotificationResourceTest {
     }
 
     @Test
+    void Should_Return400_When_RequestContainsUnknownFields() {
+        final Response response =
+                resource.target("/notification")
+                        .request()
+                        .header("Authorization", "Bearer " + mockAccessToken.serialize())
+                        .post(
+                                Entity.entity(
+                                        "{\"notification_id\":\"77368ca6-877b-4208-a397-99f1df890400\",\"event\":\"credential_accepted\",\"unknown_field\":\"value\"}",
+                                        MediaType.APPLICATION_JSON));
+
+        assertThat(response.getStatus(), is(400));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"invalid_notification_request\"}"));
+    }
+
+    @Test
+    void Should_Return400_When_EventDescriptionExceedsMaxLength() {
+        String oversizedDescription = "a".repeat(1001);
+        String requestBody =
+                "{\"notification_id\":\"77368ca6-877b-4208-a397-99f1df890400\",\"event\":\"credential_accepted\",\"event_description\":\""
+                        + oversizedDescription
+                        + "\"}";
+
+        final Response response =
+                resource.target("/notification")
+                        .request()
+                        .header("Authorization", "Bearer " + mockAccessToken.serialize())
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        assertThat(response.getStatus(), is(400));
+        assertThat(
+                response.readEntity(String.class),
+                is("{\"error\":\"invalid_notification_request\"}"));
+    }
+
+    @Test
+    void Should_Return204_When_EventDescriptionIsExactlyMaxLength() {
+        String maxDescription = "a".repeat(1000);
+        String requestBody =
+                "{\"notification_id\":\"77368ca6-877b-4208-a397-99f1df890400\",\"event\":\"credential_accepted\",\"event_description\":\""
+                        + maxDescription
+                        + "\"}";
+
+        final Response response =
+                resource.target("/notification")
+                        .request()
+                        .header("Authorization", "Bearer " + mockAccessToken.serialize())
+                        .post(Entity.entity(requestBody, MediaType.APPLICATION_JSON));
+
+        assertThat(response.getStatus(), is(204));
+    }
+
+    @Test
     void Should_Return204_When_RequestIsValid() {
         final Response response =
                 resource.target("/notification")

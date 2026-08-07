@@ -1,4 +1,10 @@
 server:
+  applicationConnectors:
+    - type: http
+      port: 8080
+      # Explicit size limits (Dropwizard/Jetty defaults made visible for auditability)
+      maxRequestHeaderSize: 8KiB
+      inputBufferSize: 8KiB
   requestLog:
     appenders:
       - type: console

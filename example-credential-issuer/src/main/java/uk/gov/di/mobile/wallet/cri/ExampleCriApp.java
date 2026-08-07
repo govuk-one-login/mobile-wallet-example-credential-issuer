@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
@@ -40,6 +41,9 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 new SubstitutingSourceProvider(
                         bootstrap.getConfigurationSourceProvider(),
                         new EnvironmentVariableSubstitutor(false)));
+        bootstrap
+                .getObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     }
 
     /**
