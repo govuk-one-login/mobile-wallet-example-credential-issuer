@@ -49,7 +49,7 @@ class AccessTokenServiceTest {
                     "BasicDisclosureCredential",
                     "DigitalVeteranCard",
                     "org.iso.18013.5.1.mDL",
-                    "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1");
+                    "uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1");
 
     @BeforeEach
     void setup() throws ParseException, JOSEException {

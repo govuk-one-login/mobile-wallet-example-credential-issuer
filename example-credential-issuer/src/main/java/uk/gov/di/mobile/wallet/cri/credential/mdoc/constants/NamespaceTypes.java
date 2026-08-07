@@ -9,7 +9,7 @@ public final class NamespaceTypes {
 
     /** Simple mDoc namespace */
     public static final String SIMPLE_MDOC =
-            "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1";
+            "uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1";
 
     private NamespaceTypes() {}
 }

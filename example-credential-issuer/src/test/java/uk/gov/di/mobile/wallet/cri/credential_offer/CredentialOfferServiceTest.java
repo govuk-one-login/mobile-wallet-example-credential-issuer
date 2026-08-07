@@ -48,7 +48,7 @@ class CredentialOfferServiceTest {
     private static final String CREDENTIAL_TYPE_DBS = "BasicDisclosureCredential";
     private static final String CREDENTIAL_TYPE_VC = "DigitalVeteranCard";
     private static final String CREDENTIAL_TYPE_SIMPLE_MDOC =
-            "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1";
+            "uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1";
     private static final String PRE_AUTH_GRANT_TYPE =
             "urn:ietf:params:oauth:grant-type:pre-authorized_code";
     private static final String PRE_AUTH_CODE_PARAM = "pre-authorized_code";
