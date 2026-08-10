@@ -129,6 +129,16 @@ Resources:
             Condition:
               StringEquals:
                 aws:SourceAccount: !Ref AWS::AccountId
+          - Effect: Deny
+            Principal: "*"
+            Action: "*"
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref RootCAAuditReportBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
+
 
   CRLBucket:
     Type: AWS::S3::Bucket
@@ -185,6 +195,15 @@ Resources:
             Condition:
               StringEquals:
                 AWS:SourceArn: !Sub arn:aws:cloudfront::${AWS::AccountId}:distribution/${CRLDistribution}
+          - Effect: Deny
+            Principal: "*"
+            Action: "*"
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref CRLBucket
+            Condition:
+              Bool:
+                "aws:SecureTransport": false
 
   CRLOriginAccessControl:
     Type: AWS::CloudFront::OriginAccessControl

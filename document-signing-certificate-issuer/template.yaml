@@ -282,6 +282,15 @@ Resources:
                 - arn:aws:iam::804878519326:role/wallet-cred-issuer-WalletBEECSTaskRole-HvjrqZ6Gz3YJ # role deployed in staging
             Action: 's3:GetObject'
             Resource: !Sub '${DocSigningCertificateBucket.Arn}/*'
+          - Effect: Deny
+            Principal: '*'
+            Action: '*'
+            Resource: !Sub
+              - arn:aws:s3:::${bucketName}/*
+              - bucketName: !Ref DocSigningCertificateBucket
+            Condition:
+              Bool:
+                'aws:SecureTransport': false
 
   DocumentSigningKey1:
     Type: AWS::KMS::Key
