@@ -153,6 +153,7 @@ Resources:
       Timeout: 15
       MemorySize: 512
       ReservedConcurrentExecutions: 1
+      Tracing: Active
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
