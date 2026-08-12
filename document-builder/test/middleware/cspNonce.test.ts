@@ -65,12 +65,6 @@ describe("getFormActionSources", () => {
   });
 
   it("should only include 'self' when no endpoint is provided", () => {
-    const sources = getFormActionSources();
-
-    expect(sources).toEqual(["'self'"]);
-  });
-
-  it("should only include 'self' when undefined is provided", () => {
     const sources = getFormActionSources(undefined);
 
     expect(sources).toEqual(["'self'"]);

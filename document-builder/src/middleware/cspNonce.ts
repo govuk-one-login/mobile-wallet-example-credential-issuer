@@ -12,7 +12,9 @@ export function generateCspNonce(
   next();
 }
 
-export function getFormActionSources(oidcEndpoint?: string): string[] {
+export function getFormActionSources(
+  oidcEndpoint: string | undefined,
+): string[] {
   const formActionSources: string[] = ["'self'"];
   if (oidcEndpoint) {
     try {
@@ -28,7 +30,7 @@ export function getFormActionSources(oidcEndpoint?: string): string[] {
   return formActionSources;
 }
 
-export function buildContentSecurityPolicy(oidcEndpoint?: string) {
+export function buildContentSecurityPolicy(oidcEndpoint: string | undefined) {
   return helmet({
     contentSecurityPolicy: {
       directives: {
