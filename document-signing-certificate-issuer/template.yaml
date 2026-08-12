@@ -168,8 +168,6 @@ Resources:
           DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
           DOC_SIGNING_KEY_COUNTRY_NAME:
             !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
@@ -196,6 +194,16 @@ Resources:
                 Fn::Sub:
                   - '{{resolve:ssm:${ParameterName}}}'
                   - ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+        - Statement:
+            - Sid: AWSXRayDaemonWriteAccess
+              Effect: Allow
+              Action:
+                - xray:PutTraceSegments
+                - xray:PutTelemetryRecords
+                - xray:GetSamplingRules
+                - xray:GetSamplingTargets
+                - xray:GetSamplingStatisticSummaries
+              Resource: '*'
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
