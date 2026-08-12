@@ -32,6 +32,10 @@ import { pageNotFound } from "./middleware/pageNotFound";
 import { healthcheckRouter } from "./healthcheck/router";
 import { robotsTxtRouter } from "./robotsTxt/router";
 import { errorHandler } from "./middleware/errorHandler";
+import {
+  generateCspNonce,
+  contentSecurityPolicy,
+} from "./middleware/cspNonce";
 
 const APP_VIEWS = [
   path.resolve("dist/appSelector/views"),
@@ -57,8 +61,11 @@ const APP_VIEWS = [
 export async function createApp(): Promise<express.Application> {
   const app: express.Application = express();
 
+  app.use(generateCspNonce);
+  app.use(contentSecurityPolicy);
+
   app.use(cookieParser());
-  app.use(express.urlencoded({ extended: true }));
+  app.use(express.urlencoded({ extended: true, limit: "16kb" }));
 
   app.set(
     "view engine",
