@@ -168,6 +168,8 @@ Resources:
           DOC_SIGNING_KEY_COMMON_NAME: !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCommonName]
           DOC_SIGNING_KEY_COUNTRY_NAME:
             !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKeyCountryName]
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess
       Policies:
         - SSMParameterWithSlashPrefixReadPolicy:
             ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
