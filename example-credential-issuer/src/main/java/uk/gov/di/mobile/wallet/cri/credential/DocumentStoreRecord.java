@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
@@ -10,7 +9,6 @@ import java.util.Map;
 import java.util.Optional;
 
 @Getter
-@JsonIgnoreProperties(ignoreUnknown = true)
 public class DocumentStoreRecord {
     @JsonProperty("itemId")
     private String itemId;
