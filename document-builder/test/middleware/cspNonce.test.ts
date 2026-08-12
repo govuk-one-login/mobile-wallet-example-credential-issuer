@@ -1,6 +1,9 @@
 import { getMockReq, getMockRes } from "@jest-mock/express";
 import type { NextFunction } from "express";
-import { generateCspNonce } from "../../src/middleware/cspNonce";
+import {
+  generateCspNonce,
+  getFormActionSources,
+} from "../../src/middleware/cspNonce";
 
 describe("generateCspNonce", () => {
   it("should set res.locals.cspNonce to a base64 string", () => {
@@ -49,5 +52,44 @@ describe("generateCspNonce", () => {
     generateCspNonce(req, res, next);
 
     expect(next).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getFormActionSources", () => {
+  it("should include OIDC origin when a valid endpoint is provided", () => {
+    const sources = getFormActionSources(
+      "https://oidc.staging.account.gov.uk/.well-known/openid-configuration",
+    );
+
+    expect(sources).toEqual(["'self'", "https://oidc.staging.account.gov.uk"]);
+  });
+
+  it("should only include 'self' when no endpoint is provided", () => {
+    const sources = getFormActionSources();
+
+    expect(sources).toEqual(["'self'"]);
+  });
+
+  it("should only include 'self' when undefined is provided", () => {
+    const sources = getFormActionSources(undefined);
+
+    expect(sources).toEqual(["'self'"]);
+  });
+
+  it("should only include 'self' when endpoint is not a valid URL", () => {
+    const sources = getFormActionSources("not-a-url");
+
+    expect(sources).toEqual(["'self'"]);
+  });
+
+  it("should extract only the origin from the endpoint URL", () => {
+    const sources = getFormActionSources(
+      "https://auth-stub.mobile.dev.account.gov.uk/some/path?query=1",
+    );
+
+    expect(sources).toEqual([
+      "'self'",
+      "https://auth-stub.mobile.dev.account.gov.uk",
+    ]);
   });
 });

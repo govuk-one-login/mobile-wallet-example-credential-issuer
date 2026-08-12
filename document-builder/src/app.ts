@@ -11,6 +11,7 @@ import { loggerMiddleware } from "./middleware/logger";
 import { getOIDCConfig } from "./config/oidc";
 import { auth } from "./middleware/auth";
 import { isAuthDisabled } from "./config/environments";
+import { getOIDCDiscoveryEndpoint } from "./config/appConfig";
 import cookieParser from "cookie-parser";
 import { returnFromAuthRouter } from "./returnFromAuth/router";
 import { logoutRouter } from "./logout/router";
@@ -34,7 +35,7 @@ import { robotsTxtRouter } from "./robotsTxt/router";
 import { errorHandler } from "./middleware/errorHandler";
 import {
   generateCspNonce,
-  contentSecurityPolicy,
+  buildContentSecurityPolicy,
 } from "./middleware/cspNonce";
 
 const APP_VIEWS = [
@@ -62,7 +63,7 @@ export async function createApp(): Promise<express.Application> {
   const app: express.Application = express();
 
   app.use(generateCspNonce);
-  app.use(contentSecurityPolicy);
+  app.use(buildContentSecurityPolicy(getOIDCDiscoveryEndpoint()));
 
   app.use(cookieParser());
   app.use(express.urlencoded({ extended: true, limit: "16kb" }));
