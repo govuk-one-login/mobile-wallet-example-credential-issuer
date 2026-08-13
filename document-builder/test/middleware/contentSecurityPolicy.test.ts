@@ -3,7 +3,7 @@ import type { NextFunction } from "express";
 import {
   generateCspNonce,
   getFormActionSources,
-} from "../../src/middleware/cspNonce";
+} from "../../src/middleware/contentSecurityPolicy";
 
 describe("generateCspNonce", () => {
   it("should set res.locals.cspNonce to a base64 string", () => {

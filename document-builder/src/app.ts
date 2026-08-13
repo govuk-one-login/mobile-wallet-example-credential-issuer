@@ -36,7 +36,7 @@ import { errorHandler } from "./middleware/errorHandler";
 import {
   generateCspNonce,
   buildContentSecurityPolicy,
-} from "./middleware/cspNonce";
+} from "./middleware/contentSecurityPolicy";
 
 const APP_VIEWS = [
   path.resolve("dist/appSelector/views"),
