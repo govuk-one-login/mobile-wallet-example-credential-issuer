@@ -38,8 +38,7 @@ export async function documentController(
       typedData.portrait = photoBase64;
     }
 
-    const { timeToLive, ...responsePayload } = tableItem;
-    res.status(200).json(responsePayload);
+    res.status(200).json(tableItem);
 
     return;
   } catch (error) {
