@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri.notification;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.crypto.ECDSASigner;
 import com.nimbusds.jwt.SignedJWT;
@@ -35,9 +37,11 @@ import static testUtils.EcKeyHelper.getEcKey;
 class NotificationResourceTest {
 
     private final NotificationService notificationService = mock(NotificationService.class);
+    private static final ObjectMapper OBJECT_MAPPER =
+            new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     private final ResourceExtension resource =
             ResourceExtension.builder()
-                    .addResource(new NotificationResource(notificationService))
+                    .addResource(new NotificationResource(notificationService, OBJECT_MAPPER))
                     .build();
     private SignedJWT mockAccessToken = new MockAccessTokenBuilder("ES256").build();
 

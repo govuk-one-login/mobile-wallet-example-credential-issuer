@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.notification;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -26,11 +25,16 @@ import java.util.UUID;
 @Path("/notification")
 public class NotificationResource {
 
+    private static final int MAX_EVENT_DESCRIPTION_LENGTH = 1000;
+
     private final NotificationService notificationService;
+    private final ObjectMapper objectMapper;
     private static final Logger LOGGER = LoggerFactory.getLogger(NotificationResource.class);
 
-    public NotificationResource(NotificationService notificationService) {
+    public NotificationResource(
+            NotificationService notificationService, ObjectMapper objectMapper) {
         this.notificationService = notificationService;
+        this.objectMapper = objectMapper;
     }
 
     @POST
@@ -77,12 +81,9 @@ public class NotificationResource {
 
     private NotificationRequestBody parseRequestBody(String payload)
             throws InvalidNotificationIdException, InvalidNotificationRequestException {
-        ObjectMapper mapper =
-                new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
         NotificationRequestBody requestBody;
         try {
-            requestBody = mapper.readValue(payload, NotificationRequestBody.class);
+            requestBody = objectMapper.readValue(payload, NotificationRequestBody.class);
         } catch (JsonProcessingException exception) {
             throw new InvalidNotificationRequestException(
                     "Failed to parse request body", exception);
@@ -98,15 +99,15 @@ public class NotificationResource {
         if (requestBody.getEvent() == null) {
             throw new InvalidNotificationRequestException("Missing property event");
         }
-        if (requestBody.getEventDescription() != null
-                && !requestBody.getEventDescription().matches("\\A\\p{ASCII}*\\z")) {
-            throw new InvalidNotificationRequestException(
-                    "Invalid event_description: must contain only ASCII characters");
-        }
-        if (requestBody.getEventDescription() != null
-                && requestBody.getEventDescription().length() > 1000) {
-            throw new InvalidNotificationRequestException(
-                    "Invalid event_description: must not exceed 1000 characters");
+        if (requestBody.getEventDescription() != null) {
+            if (requestBody.getEventDescription().length() > MAX_EVENT_DESCRIPTION_LENGTH) {
+                throw new InvalidNotificationRequestException(
+                        "Invalid event_description: must not exceed 1000 characters");
+            }
+            if (!requestBody.getEventDescription().matches("\\A\\p{ASCII}*\\z")) {
+                throw new InvalidNotificationRequestException(
+                        "Invalid event_description: must contain only ASCII characters");
+            }
         }
         return requestBody;
     }
