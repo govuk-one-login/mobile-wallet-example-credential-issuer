@@ -153,6 +153,7 @@ Resources:
       Timeout: 15
       MemorySize: 512
       ReservedConcurrentExecutions: 1
+      Tracing: Active
       Environment:
         Variables:
           POWERTOOLS_SERVICE_NAME: issueDocSigningCertificateFunction
@@ -193,6 +194,16 @@ Resources:
                 Fn::Sub:
                   - '{{resolve:ssm:${ParameterName}}}'
                   - ParameterName: !FindInMap [EnvironmentVariables, !Ref Environment, PlatformCaArnParameter]
+        - Statement:
+            - Sid: AWSXRayDaemonWriteAccess
+              Effect: Allow
+              Action:
+                - xray:PutTraceSegments
+                - xray:PutTelemetryRecords
+                - xray:GetSamplingRules
+                - xray:GetSamplingTargets
+                - xray:GetSamplingStatisticSummaries
+              Resource: '*'
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
