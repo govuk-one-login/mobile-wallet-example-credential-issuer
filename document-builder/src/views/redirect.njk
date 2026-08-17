@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Redirecting</title>
+  </head>
+  <body>
+    <noscript>
+      <p><a href="{{ redirectUrl }}">Click here to continue</a></p>
+    </noscript>
+    <script nonce="{{ cspNonce }}">
+      window.location.href = "{{ redirectUrl }}";
+    </script>
+  </body>
+</html>
