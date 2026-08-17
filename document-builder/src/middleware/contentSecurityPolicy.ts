@@ -1,7 +1,6 @@
 import crypto from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
 import helmet from "helmet";
-import { logger } from "./logger";
 
 export function generateCspNonce(
   _req: Request,
@@ -12,25 +11,11 @@ export function generateCspNonce(
   next();
 }
 
-export function getFormActionSources(
-  oidcEndpoint: string | undefined,
-): string[] {
-  const formActionSources: string[] = ["'self'"];
-  if (oidcEndpoint) {
-    try {
-      const url = new URL(oidcEndpoint);
-      formActionSources.push(url.origin);
-    } catch (error) {
-      logger.warn(
-        { oidcEndpoint, error },
-        "OIDC endpoint is not a valid URL, form-action CSP will only allow 'self'",
-      );
-    }
-  }
-  return formActionSources;
+export function getFormActionSources(): string[] {
+  return ["'self'"];
 }
 
-export function buildContentSecurityPolicy(oidcEndpoint: string | undefined) {
+export function buildContentSecurityPolicy() {
   return helmet({
     contentSecurityPolicy: {
       directives: {
@@ -46,7 +31,7 @@ export function buildContentSecurityPolicy(oidcEndpoint: string | undefined) {
         imgSrc: ["'self'", "data:"],
         fontSrc: ["'self'"],
         connectSrc: ["'self'"],
-        formAction: getFormActionSources(oidcEndpoint),
+        formAction: getFormActionSources(),
       },
     },
   });
