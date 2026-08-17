@@ -257,8 +257,8 @@ Resources:
       DefaultRouteSettings:
         DataTraceEnabled: false
         DetailedMetricsEnabled: true
-        ThrottlingBurstLimit: 400
-        ThrottlingRateLimit: 1200
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 10
       AccessLogSettings:
         DestinationArn: !GetAtt WalletFEAPIGWAccessLogsGroup.Arn
         Format: >-
