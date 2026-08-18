@@ -111,11 +111,13 @@ Resources:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
       GroupDescription: >-
-        Wallet Stub Front ECS Security Group permitting outbound to anywhere.
+        Wallet Stub Front ECS Security Group permitting outbound to https.
       SecurityGroupEgress:
         - CidrIp: 0.0.0.0/0
-          Description: Allow all outbound traffic by default
-          IpProtocol: '-1'
+          Description: Allow HTTPS outbound only
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
       VpcId:
         Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
