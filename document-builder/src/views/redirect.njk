@@ -8,7 +8,7 @@
       <p><a href="{{ redirectUrl }}">Click here to continue</a></p>
     </noscript>
     <script nonce="{{ cspNonce }}">
-      window.location.href = "{{ redirectUrl }}";
+      window.location.href = "{{ redirectUrl | safe }}";
     </script>
   </body>
 </html>
