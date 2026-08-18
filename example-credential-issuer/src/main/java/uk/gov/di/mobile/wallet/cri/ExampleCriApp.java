@@ -1,5 +1,7 @@
 package uk.gov.di.mobile.wallet.cri;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.core.Application;
@@ -40,6 +42,9 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 new SubstitutingSourceProvider(
                         bootstrap.getConfigurationSourceProvider(),
                         new EnvironmentVariableSubstitutor(false)));
+        bootstrap
+                .getObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     }
 
     /**
@@ -53,6 +58,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
             throws NoSuchAlgorithmException {
 
         Services services = ServicesFactory.create(configurationService, environment);
+        ObjectMapper objectMapper = environment.getObjectMapper();
 
         environment.healthChecks().register("ping", new Ping());
         environment.jersey().register(new HealthCheckResource(environment));
@@ -67,10 +73,15 @@ public class ExampleCriApp extends Application<ConfigurationService> {
                 .jersey()
                 .register(
                         new MetadataResource(configurationService, services.getMetadataBuilder()));
-        environment.jersey().register(new CredentialResource(services.getCredentialService()));
+        environment
+                .jersey()
+                .register(new CredentialResource(services.getCredentialService(), objectMapper));
         environment.jersey().register(new DidDocumentResource(services.getDidDocumentService()));
         environment.jersey().register(new JwksResource(services.getJwksService()));
-        environment.jersey().register(new NotificationResource(services.getNotificationService()));
+        environment
+                .jersey()
+                .register(
+                        new NotificationResource(services.getNotificationService(), objectMapper));
         environment.jersey().register(new IacasResource(services.getIacasService()));
         environment.jersey().register(new RevokeResource(services.getRevokeService()));
         environment.jersey().register(new LogoResource());

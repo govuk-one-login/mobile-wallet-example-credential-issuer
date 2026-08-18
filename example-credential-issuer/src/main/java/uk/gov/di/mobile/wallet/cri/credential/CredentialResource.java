@@ -1,7 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nimbusds.jwt.SignedJWT;
 import com.nimbusds.oauth2.sdk.ParseException;
@@ -31,10 +30,12 @@ import java.util.Objects;
 public class CredentialResource {
 
     private final CredentialService credentialService;
+    private final ObjectMapper objectMapper;
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialResource.class);
 
-    public CredentialResource(CredentialService credentialService) {
+    public CredentialResource(CredentialService credentialService, ObjectMapper objectMapper) {
         this.credentialService = credentialService;
+        this.objectMapper = objectMapper;
     }
 
     @POST
@@ -82,13 +83,9 @@ public class CredentialResource {
     }
 
     private SignedJWT parseRequestBody(String payload) throws ProofJwtValidationException {
-        ObjectMapper mapper =
-                new ObjectMapper()
-                        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
-
         RequestBody requestBody;
         try {
-            requestBody = mapper.readValue(payload, RequestBody.class);
+            requestBody = objectMapper.readValue(payload, RequestBody.class);
         } catch (JsonProcessingException exception) {
             throw new ProofJwtValidationException(
                     "Failed to parse request body as Proof: ", exception);
