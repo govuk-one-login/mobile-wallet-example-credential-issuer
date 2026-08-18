@@ -38,11 +38,14 @@ describe("Helmet security headers", () => {
     );
   });
 
-  it("should include OIDC provider origin in form-action directive", async () => {
+  it("should restrict form-action to self only", async () => {
     const response = await request(app).get("/healthcheck");
 
     expect(response.headers["content-security-policy"]).toContain(
-      "form-action 'self' https://oidc.test.account.gov.uk",
+      "form-action 'self'",
+    );
+    expect(response.headers["content-security-policy"]).not.toContain(
+      "https://oidc.test.account.gov.uk",
     );
   });
 
