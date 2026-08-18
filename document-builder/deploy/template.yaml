@@ -76,10 +76,6 @@ Mappings:
       OidcIssuerEndpoint: "" # Not required as the DVS flow doesn't require authentication
       WalletApps: "wallet-test-verifier-integration"
       OneLoginAuthServerUrl: "" # Not required as functionality to issue credential without the wallet isn't available in integration
-  ElasticLoadBalancerAccountIds:
-    eu-west-2:
-      AccountId: 652711504416
-
 Resources:
   # SECURITY GROUPS
   WalletFELoadBalancerSG:
@@ -157,54 +153,6 @@ Resources:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Front-ECS
       RetentionInDays: 14
 
-  WalletFEAccessLogsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub wallet-stub-front-${AWS::StackName}-${Environment}-access-logs
-      VersioningConfiguration:
-        Status: "Enabled"
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
-        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
-        TargetObjectKeyFormat:
-          PartitionedPrefix:
-            PartitionDateSource: EventTime
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-
-  WalletFEAccessLogsBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref WalletFEAccessLogsBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub
-                - "arn:aws:iam::${ElbAccountId}:root"
-                - ElbAccountId: !FindInMap [ElasticLoadBalancerAccountIds, !Ref 'AWS::Region', AccountId]
-            Action:
-              - s3:PutObject
-            Resource:
-              - !Sub arn:aws:s3:::${WalletFEAccessLogsBucket}/wallet-stub-front-${Environment}/AWSLogs/${AWS::AccountId}/*
-          - Effect: Deny
-            Sid: AllowSSLRequestsOnly
-            Principal: "*"
-            Action: s3:*
-            Resource:
-              - !Sub arn:aws:s3:::${WalletFEAccessLogsBucket}/wallet-stub-front-${Environment}/AWSLogs/${AWS::AccountId}/*
-            Condition:
-              Bool:
-                aws:SecureTransport": false
-
   # LOAD BALANCER
   WalletFELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
@@ -223,7 +171,7 @@ Resources:
         - Key: access_logs.s3.enabled
           Value: true
         - Key: access_logs.s3.bucket
-          Value: !Ref WalletFEAccessLogsBucket
+          Value: !Sub di-lb-access-logs-${AWS::AccountId}-${AWS::Region}
         - Key: access_logs.s3.prefix
           Value: !Sub wallet-stub-front-${Environment}
         - Key: idle_timeout.timeout_seconds
@@ -703,7 +651,7 @@ Resources:
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !Sub di-s3-access-logs-${AWS::AccountId}-${AWS::Region}
         TargetObjectKeyFormat:
           PartitionedPrefix:
             PartitionDateSource: EventTime

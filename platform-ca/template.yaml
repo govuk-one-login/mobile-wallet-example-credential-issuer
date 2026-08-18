@@ -93,7 +93,7 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !Sub di-s3-access-logs-${AWS::AccountId}-${AWS::Region}
         LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
         TargetObjectKeyFormat:
           PartitionedPrefix:
@@ -156,7 +156,7 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !Sub di-s3-access-logs-${AWS::AccountId}-${AWS::Region}
         LogFilePrefix: !Sub ${AWS::StackName}-crl/
         TargetObjectKeyFormat:
           PartitionedPrefix:

@@ -96,10 +96,6 @@ Mappings:
       DocumentSigningKey1Arn: "arn:aws:kms:eu-west-2:228170791542:key/112cc5ff-e83c-4985-8e52-6ae39433210a"
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:228170791542:certificate-authority/a25b18b1-2a1f-4ff0-91c0-cd65a49c948e
       StatusListUrl: "status-list-mock.wallet-onboarding.integration.account.gov.uk"
-  ElasticLoadBalancerAccountIds:
-    eu-west-2:
-      AccountId: 652711504416
-
 Resources:
   # SECURITY GROUPS
   WalletBELoadBalancerSG:
@@ -186,54 +182,6 @@ Resources:
   #      FilterPattern: ""
   #      LogGroupName: !Ref WalletBEECSAccessLogsGroup
 
-  WalletBEAccessLogsBucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub wallet-stub-back-${AWS::StackName}-${Environment}-access-logs
-      VersioningConfiguration:
-        Status: "Enabled"
-      LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
-        LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
-        TargetObjectKeyFormat:
-          PartitionedPrefix:
-            PartitionDateSource: EventTime
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-
-  WalletBEAccessLogsBucketPolicy:
-    Type: AWS::S3::BucketPolicy
-    Properties:
-      Bucket: !Ref WalletBEAccessLogsBucket
-      PolicyDocument:
-        Version: "2012-10-17"
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub
-                - "arn:aws:iam::${ElbAccountId}:root"
-                - ElbAccountId: !FindInMap [ElasticLoadBalancerAccountIds, !Ref 'AWS::Region', AccountId]
-            Action:
-              - s3:PutObject
-            Resource:
-              - !Sub arn:aws:s3:::${WalletBEAccessLogsBucket}/wallet-stub-back-${Environment}/AWSLogs/${AWS::AccountId}/*
-          - Effect: Deny
-            Principal: "*"
-            Action: "*"
-            Resource: !Sub
-              - arn:aws:s3:::${bucketName}/*
-              - bucketName: !Ref WalletBEAccessLogsBucket
-            Condition:
-              Bool:
-                "aws:SecureTransport": false
-
   # LOAD BALANCER
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
@@ -252,7 +200,7 @@ Resources:
         - Key: access_logs.s3.enabled
           Value: true
         - Key: access_logs.s3.bucket
-          Value: !Ref WalletBEAccessLogsBucket
+          Value: !Sub di-lb-access-logs-${AWS::AccountId}-${AWS::Region}
         - Key: access_logs.s3.prefix
           Value: !Sub wallet-stub-back-${Environment}
         - Key: idle_timeout.timeout_seconds
