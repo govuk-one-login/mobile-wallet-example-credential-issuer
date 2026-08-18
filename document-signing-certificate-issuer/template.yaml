@@ -271,7 +271,7 @@ Resources:
               NoncurrentDays: 14
             Status: Enabled
       LoggingConfiguration:
-        DestinationBucketName: !ImportValue s3-access-logs-bucket-S3AccessLogsBucketName
+        DestinationBucketName: !Sub di-s3-access-logs-${AWS::AccountId}-${AWS::Region}
         LogFilePrefix: !Sub ${AWS::StackName}-audit-report/
         TargetObjectKeyFormat:
           PartitionedPrefix:
