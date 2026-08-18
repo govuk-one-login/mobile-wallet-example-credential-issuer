@@ -268,7 +268,7 @@ Resources:
             - EnvironmentVariables
             - !Ref Environment
             - CloudFrontCertArn
-          MinimumProtocolVersion: TLSv1.2_2018
+          MinimumProtocolVersion: TLSv1.3_2025
           SslSupportMethod: sni-only
 
   RootCACertificate:
