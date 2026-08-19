@@ -561,7 +561,7 @@ Resources:
       checkov:
         skip:
           - id: CKV_AWS_111
-            comment: "Resource is intentionally broad to verify connectivity. Will be scoped to a specific API Gateway ARN in a follow-up."
+            comment: "Resource wildcard is temporary for testing. Will be scoped to status list domain ARN."
     Properties:
       AssumeRolePolicyDocument:
         Statement:
