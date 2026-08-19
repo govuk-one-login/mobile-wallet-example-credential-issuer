@@ -18,12 +18,7 @@ public class SecurityHeadersFilter implements ContainerResponseFilter {
         responseContext
                 .getHeaders()
                 .putSingle("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
-        responseContext.getHeaders().putSingle("X-Frame-Options", "deny");
         responseContext.getHeaders().putSingle("X-Content-Type-Options", "nosniff");
-        responseContext
-                .getHeaders()
-                .putSingle("Content-Security-Policy", "default-src 'self'; frame-ancestors 'none'");
-        responseContext.getHeaders().putSingle("X-Permitted-Cross-Domain-Policies", "none");
         responseContext.getHeaders().putSingle("Referrer-Policy", "no-referrer");
     }
 }

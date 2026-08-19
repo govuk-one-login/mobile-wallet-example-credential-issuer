@@ -40,33 +40,10 @@ class SecurityHeadersFilterTest {
     }
 
     @Test
-    void shouldAddXFrameOptionsHeader() {
-        filter.filter(requestContext, responseContext);
-
-        assertThat(headers.getFirst("X-Frame-Options"), is("deny"));
-    }
-
-    @Test
     void shouldAddXContentTypeOptionsHeader() {
         filter.filter(requestContext, responseContext);
 
         assertThat(headers.getFirst("X-Content-Type-Options"), is("nosniff"));
-    }
-
-    @Test
-    void shouldAddContentSecurityPolicyHeader() {
-        filter.filter(requestContext, responseContext);
-
-        assertThat(
-                headers.getFirst("Content-Security-Policy"),
-                is("default-src 'self'; frame-ancestors 'none'"));
-    }
-
-    @Test
-    void shouldAddXPermittedCrossDomainPoliciesHeader() {
-        filter.filter(requestContext, responseContext);
-
-        assertThat(headers.getFirst("X-Permitted-Cross-Domain-Policies"), is("none"));
     }
 
     @Test
