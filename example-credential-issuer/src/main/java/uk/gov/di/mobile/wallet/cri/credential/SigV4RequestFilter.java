@@ -115,7 +115,7 @@ public class SigV4RequestFilter implements ClientRequestFilter {
         copyHeader(signedRequest, requestContext, "Authorization");
         copyHeader(signedRequest, requestContext, "X-Amz-Date");
         copyHeader(signedRequest, requestContext, "X-Amz-Security-Token");
-        copyHeader(signedRequest, requestContext, "x-amz-content-sha256");
+        copyHeader(signedRequest, requestContext, "X-Amz-Content-Sha256");
     }
 
     private void copyHeader(
