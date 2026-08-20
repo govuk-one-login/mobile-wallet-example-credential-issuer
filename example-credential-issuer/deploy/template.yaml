@@ -513,11 +513,6 @@ Resources:
 
   WalletBEECSTaskRole:
     Type: 'AWS::IAM::Role'
-    Metadata:
-      checkov:
-        skip:
-          - id: CKV_AWS_111
-            comment: "Resource wildcard is temporary for testing. Will be scoped to status list domain ARN."
     Properties:
       AssumeRolePolicyDocument:
         Statement:
@@ -572,7 +567,7 @@ Resources:
               - Effect: Allow
                 Action:
                   - 'execute-api:Invoke'
-                Resource: '*'
+                Resource: 'arn:aws:execute-api:*:*:*'
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
