@@ -4,11 +4,15 @@ import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
 import java.net.URI;
 
 public class StatusListClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatusListClient.class);
 
     public record StatusListInformation(Integer idx, String uri) {}
 
@@ -35,13 +39,23 @@ public class StatusListClient {
             String token = tokenBuilder.buildIssueToken(credentialExpiry);
             String url = buildUrl(ISSUE_ENDPOINT);
 
+            LOGGER.info(
+                    "StatusListClient: POST {} with credentialExpiry={}", url, credentialExpiry);
+
             Response response =
                     httpClient
                             .target(url)
                             .request(MediaType.APPLICATION_JSON)
                             .post(Entity.entity(token, "application/jwt"));
 
+            LOGGER.info("StatusListClient: response status={}", response.getStatus());
+
             if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                String responseBody = response.readEntity(String.class);
+                LOGGER.error(
+                        "StatusListClient: request to get credential index failed. Status={}, Body={}",
+                        response.getStatus(),
+                        responseBody);
                 throw new StatusListClientException(
                         String.format(
                                 "Request to get credential index failed with status code %s",
@@ -51,6 +65,7 @@ public class StatusListClient {
         } catch (StatusListClientException exception) {
             throw exception;
         } catch (Exception exception) {
+            LOGGER.error("StatusListClient: unexpected error getting credential index", exception);
             throw new StatusListClientException("Failed to get credential index", exception);
         }
     }
@@ -60,13 +75,22 @@ public class StatusListClient {
             String token = tokenBuilder.buildRevokeToken(index, uri);
             String url = buildUrl(REVOKE_ENDPOINT);
 
+            LOGGER.info("StatusListClient: POST {} for index={}, uri={}", url, index, uri);
+
             Response response =
                     httpClient
                             .target(url)
                             .request(MediaType.APPLICATION_JSON)
                             .post(Entity.entity(token, "application/jwt"));
 
+            LOGGER.info("StatusListClient: response status={}", response.getStatus());
+
             if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+                String responseBody = response.readEntity(String.class);
+                LOGGER.error(
+                        "StatusListClient: request to revoke credential failed. Status={}, Body={}",
+                        response.getStatus(),
+                        responseBody);
                 throw new StatusListClientException(
                         String.format(
                                 "Request to revoke credential failed with status code %s",
@@ -76,6 +100,7 @@ public class StatusListClient {
         } catch (StatusListClientException exception) {
             throw exception;
         } catch (Exception exception) {
+            LOGGER.error("StatusListClient: unexpected error revoking credential", exception);
             throw new StatusListClientException("Failed to revoke credential", exception);
         }
     }

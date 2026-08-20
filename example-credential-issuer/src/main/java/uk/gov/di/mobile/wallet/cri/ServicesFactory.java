@@ -6,11 +6,16 @@ import com.google.common.io.Resources;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.core.setup.Environment;
 import jakarta.ws.rs.client.Client;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
 import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageReport;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialHandlerFactory;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialService;
 import uk.gov.di.mobile.wallet.cri.credential.CredentialType;
 import uk.gov.di.mobile.wallet.cri.credential.DocumentStoreClient;
+import uk.gov.di.mobile.wallet.cri.credential.SigV4RequestFilter;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListClient;
 import uk.gov.di.mobile.wallet.cri.credential.StatusListRequestTokenBuilder;
 import uk.gov.di.mobile.wallet.cri.credential.jwt.CredentialBuilder;
@@ -62,6 +67,8 @@ import java.util.Set;
  */
 @ExcludeFromGeneratedCoverageReport
 public class ServicesFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServicesFactory.class);
 
     private ServicesFactory() {
         // Should never be instantiated
@@ -171,9 +178,27 @@ public class ServicesFactory {
 
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);
+
+        boolean sigV4Enabled = configurationService.isSigV4Enabled();
+        LOGGER.info(
+                "ServicesFactory: ENVIRONMENT={}, sigV4Enabled={}, statusListClientId={}",
+                configurationService.getEnvironment(),
+                sigV4Enabled,
+                configurationService.getStatusListClientId());
+        Client statusListHttpClient =
+                new JerseyClientBuilder(environment)
+                        .using(configurationService.getHttpClient())
+                        .build("status-list-client");
+        statusListHttpClient.register(
+                new SigV4RequestFilter(
+                        AwsV4HttpSigner.create(),
+                        DefaultCredentialsProvider.builder().build(),
+                        sigV4Enabled,
+                        configurationService.getAwsRegion()));
+
         StatusListClient statusListClient =
                 new StatusListClient(
-                        configurationService, httpClient, statusListRequestTokenBuilder);
+                        configurationService, statusListHttpClient, statusListRequestTokenBuilder);
 
         CredentialService credentialService =
                 new CredentialService(
