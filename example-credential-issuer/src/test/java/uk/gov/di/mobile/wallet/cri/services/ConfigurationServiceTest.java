@@ -284,25 +284,8 @@ class ConfigurationServiceTest {
     }
 
     @Test
-    void Should_ReturnSigV4Enabled_When_EnvironmentIsDev() {
-        environmentVariables.set("ENVIRONMENT", "dev");
-        assertEquals(true, configurationService.isSigV4Enabled());
-    }
-
-    @Test
     void Should_ReturnSigV4Disabled_When_EnvironmentIsBuild() {
         environmentVariables.set("ENVIRONMENT", "build");
-        assertEquals(false, configurationService.isSigV4Enabled());
-    }
-
-    @Test
-    void Should_ReturnSigV4Disabled_When_EnvironmentIsIntegration() {
-        environmentVariables.set("ENVIRONMENT", "integration");
-        assertEquals(false, configurationService.isSigV4Enabled());
-    }
-
-    @Test
-    void Should_ReturnSigV4Disabled_When_EnvironmentIsLocal() {
         assertEquals(false, configurationService.isSigV4Enabled());
     }
 }

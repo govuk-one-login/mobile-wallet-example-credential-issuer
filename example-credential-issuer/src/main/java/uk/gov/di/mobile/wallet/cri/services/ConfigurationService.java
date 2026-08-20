@@ -227,12 +227,6 @@ public class ConfigurationService extends Configuration {
     // ===========================================
     // STATUS LIST
     // ===========================================
-    /**
-     * Determines whether SigV4 request signing is enabled for the status list API. SigV4 signing is
-     * required in environments where the status list API is fronted by API Gateway with IAM auth.
-     *
-     * @return true if SigV4 signing should be applied to status list requests
-     */
     public boolean isSigV4Enabled() {
         return Set.of("staging", "dev").contains(getEnvironment());
     }
