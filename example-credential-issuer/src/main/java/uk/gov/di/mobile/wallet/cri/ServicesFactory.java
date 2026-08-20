@@ -193,7 +193,8 @@ public class ServicesFactory {
                 new SigV4RequestFilter(
                         AwsV4HttpSigner.create(),
                         DefaultCredentialsProvider.builder().build(),
-                        sigV4Enabled));
+                        sigV4Enabled,
+                        configurationService.getAwsRegion()));
 
         StatusListClient statusListClient =
                 new StatusListClient(

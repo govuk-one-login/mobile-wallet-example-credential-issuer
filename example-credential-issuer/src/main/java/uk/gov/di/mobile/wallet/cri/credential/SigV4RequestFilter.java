@@ -31,19 +31,21 @@ public class SigV4RequestFilter implements ClientRequestFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SigV4RequestFilter.class);
     private static final String SERVICE_NAME = "execute-api";
-    private static final String REGION = "eu-west-2";
 
     private final AwsV4HttpSigner signer;
     private final IdentityProvider<AwsCredentialsIdentity> credentialsProvider;
     private final boolean enabled;
+    private final String region;
 
     public SigV4RequestFilter(
             AwsV4HttpSigner signer,
             IdentityProvider<AwsCredentialsIdentity> credentialsProvider,
-            boolean enabled) {
+            boolean enabled,
+            String region) {
         this.signer = signer;
         this.credentialsProvider = credentialsProvider;
         this.enabled = enabled;
+        this.region = region;
     }
 
     @Override
@@ -86,7 +88,7 @@ public class SigV4RequestFilter implements ClientRequestFilter {
                                             .putProperty(
                                                     AwsV4FamilyHttpSigner.PAYLOAD_SIGNING_ENABLED,
                                                     true)
-                                            .putProperty(AwsV4HttpSigner.REGION_NAME, REGION));
+                                            .putProperty(AwsV4HttpSigner.REGION_NAME, region));
 
             SdkHttpRequest signedHttpRequest = signedRequest.request();
             copySigningHeaders(signedHttpRequest, requestContext);
@@ -103,6 +105,8 @@ public class SigV4RequestFilter implements ClientRequestFilter {
         if (entity == null) {
             return new byte[0];
         }
+        // Entity is always a String (JWT) as this filter is only registered on the status list
+        // client
         return entity.toString().getBytes(StandardCharsets.UTF_8);
     }
 

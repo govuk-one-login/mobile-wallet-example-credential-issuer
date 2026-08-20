@@ -47,7 +47,7 @@ class SigV4RequestFilterTest {
         @Test
         void shouldNotSignRequest() {
             SigV4RequestFilter filter =
-                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, false);
+                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, false, "eu-west-2");
 
             assertDoesNotThrow(() -> filter.filter(mockRequestContext));
 
@@ -64,7 +64,7 @@ class SigV4RequestFilterTest {
         @SuppressWarnings("unchecked")
         void shouldAddSigningHeadersToRequest() throws IOException {
             SigV4RequestFilter filter =
-                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, true);
+                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, true, "eu-west-2");
 
             doReturn(CompletableFuture.completedFuture(mockCredentials))
                     .when(mockCredentialsProvider)
@@ -102,7 +102,7 @@ class SigV4RequestFilterTest {
         @Test
         void shouldThrowIOExceptionWhenCredentialResolutionFails() {
             SigV4RequestFilter filter =
-                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, true);
+                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, true, "eu-west-2");
 
             doReturn(
                             CompletableFuture.failedFuture(
@@ -121,7 +121,7 @@ class SigV4RequestFilterTest {
         @SuppressWarnings("unchecked")
         void shouldThrowIOExceptionWhenSigningFails() {
             SigV4RequestFilter filter =
-                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, true);
+                    new SigV4RequestFilter(mockSigner, mockCredentialsProvider, true, "eu-west-2");
 
             doReturn(CompletableFuture.completedFuture(mockCredentials))
                     .when(mockCredentialsProvider)
