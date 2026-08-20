@@ -46,6 +46,8 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
+  IsStaging: !Equals [!Ref Environment, staging]
+
   IsIntegration: !Equals [!Ref Environment, integration]
 
   UsePermissionsBoundary:
@@ -559,10 +561,13 @@ Resources:
                   - 'kms:DescribeKey'
                 Resource:
                   - !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKey1Arn]
-              - Effect: Allow
-                Action:
-                  - 'execute-api:Invoke'
-                Resource: 'arn:aws:execute-api:*:*:*'
+              - !If
+                - IsStaging
+                - Effect: Allow
+                  Action:
+                    - 'execute-api:Invoke'
+                  Resource: 'arn:aws:execute-api:*:*:*'
+                - !Ref AWS::NoValue
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary
