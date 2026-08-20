@@ -126,7 +126,7 @@
                                 <div id="{{ type }}DrivingPrivilege"></div>
                                 <button id="add-{{ type }}-button"
                                         class="govuk-button govuk-button--secondary"
-                                        onclick="addDrivingPrivileges('{{ type }}') "
+                                        data-driving-privilege-type="{{ type }}"
                             type="button">Add</button>
                 {% endcall %}
             {% endmacro %}
@@ -443,7 +443,7 @@
         {% endcall %}
         {{ govukButton({"text": "Continue", "type": "Submit", "preventDoubleClick": true}) }}
     </form>
-    <script>
+    <script nonce="{{ cspNonce }}">
       const MAX_ENTRIES = 60;
 
       const defaultIssueDateValues = {
@@ -597,7 +597,7 @@
                       </div>
                   </fieldset>
               </div>
-              <button class="govuk-button govuk-button--secondary" onclick="deleteDrivingPrivileges(this.parentNode, '${type}')" type="button">Delete</button>
+              <button class="govuk-button govuk-button--secondary delete-privilege-button" data-driving-privilege-type="${type}" type="button">Delete</button>
           `;
 
           container.appendChild(entry);
@@ -623,6 +623,24 @@
           updateAddButtonState('full');
           updateAddButtonState('provisional');
       }
+
+      // Bind Add buttons via data attributes (skip any delete buttons that share the attribute)
+      document.querySelectorAll('[data-driving-privilege-type]').forEach(function(button) {
+          if (button.classList.contains('delete-privilege-button')) return;
+          button.addEventListener('click', function() {
+              addDrivingPrivileges(this.getAttribute('data-driving-privilege-type'));
+          });
+      });
+
+      // Bind Delete buttons via event delegation (they are dynamically created)
+      document.addEventListener('click', function(event) {
+          // Walk up from the clicked element to find the nearest Delete button
+          const button = event.target.closest('.delete-privilege-button');
+          if (button) {
+              const type = button.getAttribute('data-driving-privilege-type');
+              deleteDrivingPrivileges(button.parentNode, type);
+          }
+      });
 
       initialiseDrivingPrivileges();
     </script>

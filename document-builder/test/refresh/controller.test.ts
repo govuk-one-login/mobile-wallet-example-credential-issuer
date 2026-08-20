@@ -36,7 +36,7 @@ describe("refreshPostController", () => {
     );
   });
 
-  it("should redirect to /select-app with credentialType when refreshCredential=true", () => {
+  it("should render redirect.njk with /select-app URL when refreshCredential=true", () => {
     const req = getMockReq({
       params: { credentialType: "SocialSecurityCredential" },
       body: { refreshCredential: "true" },
@@ -45,9 +45,10 @@ describe("refreshPostController", () => {
 
     refreshPostController(req, res);
 
-    expect(res.redirect).toHaveBeenCalledWith(
-      "/select-app?credentialType=SocialSecurityCredential",
-    );
+    expect(res.render).toHaveBeenCalledWith("redirect.njk", {
+      redirectUrl: "/select-app?credentialType=SocialSecurityCredential",
+    });
+    expect(res.redirect).not.toHaveBeenCalled();
   });
 
   it("should re-render refresh form with validation error when refreshCredential is missing", () => {

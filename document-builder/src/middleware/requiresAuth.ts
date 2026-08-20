@@ -75,5 +75,10 @@ export function getAuthorizationUrl(req: Request, res: Response) {
 
 function redirectToLogIn(req: Request, res: Response): void {
   const authorizationUrl = getAuthorizationUrl(req, res);
+
+  if (req.method === "POST") {
+    return res.render("redirect.njk", { redirectUrl: authorizationUrl });
+  }
+
   return res.redirect(authorizationUrl);
 }

@@ -77,9 +77,10 @@ describe("requiresAuth", () => {
       delete process.env.ENVIRONMENT;
     });
 
-    it("should redirect to authorisation URL and set cookies when user is not authenticated", () => {
+    it("should redirect to authorisation URL via 302 when unauthenticated GET request", () => {
       const authorizationUrl = "https://auth.test/authorize";
       const req = getMockReq({
+        method: "GET",
         url: "/test-protected",
         cookies: {
           app: "govuk-staging",
@@ -102,6 +103,63 @@ describe("requiresAuth", () => {
 
       expect(req.oidc.authorizationUrl).toHaveBeenCalledTimes(1);
       expect(res.redirect).toHaveBeenCalledWith(authorizationUrl);
+      expect(res.render).not.toHaveBeenCalled();
+      expect(res.cookie).toHaveBeenCalledWith(
+        "nonce",
+        expect.any(String),
+        expect.objectContaining({
+          httpOnly: true,
+          maxAge: COOKIE_TTL_IN_MILLISECONDS,
+        }),
+      );
+      expect(res.cookie).toHaveBeenCalledWith(
+        "state",
+        expect.any(String),
+        expect.objectContaining({
+          httpOnly: true,
+          maxAge: COOKIE_TTL_IN_MILLISECONDS,
+        }),
+      );
+      expect(res.cookie).toHaveBeenCalledWith(
+        "current_url",
+        "/test-protected",
+        expect.objectContaining({
+          httpOnly: true,
+          maxAge: COOKIE_TTL_IN_MILLISECONDS,
+        }),
+      );
+      expect(nextFunction).not.toHaveBeenCalled();
+    });
+
+    it("should render redirect.njk with authorization URL when unauthenticated POST request", () => {
+      const authorizationUrl = "https://auth.test/authorize";
+      const req = getMockReq({
+        method: "POST",
+        url: "/test-protected",
+        cookies: {
+          app: "govuk-staging",
+          // missing id_token => not authenticated
+        },
+        oidc: {
+          authorizationUrl: jest.fn().mockReturnValue(authorizationUrl),
+          metadata: {
+            scopes: "openid",
+            redirect_uris: ["http://localhost/callback"],
+            client_id: "test-client",
+          },
+        },
+        /* eslint-disable  @typescript-eslint/no-explicit-any */
+      }) as any;
+      const { res } = getMockRes();
+      const nextFunction: NextFunction = jest.fn();
+
+      requiresAuth(req, res, nextFunction);
+
+      expect(req.oidc.authorizationUrl).toHaveBeenCalledTimes(1);
+      expect(res.render).toHaveBeenCalledWith("redirect.njk", {
+        redirectUrl: authorizationUrl,
+      });
+      expect(res.redirect).not.toHaveBeenCalled();
       expect(res.cookie).toHaveBeenCalledWith(
         "nonce",
         expect.any(String),

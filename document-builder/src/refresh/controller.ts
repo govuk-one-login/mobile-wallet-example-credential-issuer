@@ -15,7 +15,9 @@ export function refreshPostController(req: Request, res: Response): void {
   const { credentialType } = req.params;
 
   if (refreshCredential === "true") {
-    return res.redirect(`/select-app?credentialType=${credentialType}`);
+    return res.render("redirect.njk", {
+      redirectUrl: `/select-app?credentialType=${credentialType}`,
+    });
   }
 
   if (refreshCredential === "false") {

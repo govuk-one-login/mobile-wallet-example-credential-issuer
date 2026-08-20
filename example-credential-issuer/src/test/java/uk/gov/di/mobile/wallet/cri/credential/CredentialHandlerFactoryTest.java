@@ -98,7 +98,7 @@ class CredentialHandlerFactoryTest {
 
     @Test
     void Should_CreateSimpleMdocHandler() {
-        String vcType = "uk.gov.account.mobile.example-credential-issuer.simplemdoc.1";
+        String vcType = "uk.gov.account.wallet-onboarding.example-credential-issuer.simplemdoc.1";
 
         CredentialHandler handler = factory.createHandler(vcType);
 
