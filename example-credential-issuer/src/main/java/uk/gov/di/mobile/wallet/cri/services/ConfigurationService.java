@@ -5,7 +5,6 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.Configuration;
 
 import java.net.URI;
-import java.util.Set;
 
 /**
  * Configuration service for managing application settings. Provides environment variable-based
@@ -228,7 +227,7 @@ public class ConfigurationService extends Configuration {
     // STATUS LIST
     // ===========================================
     public boolean isSigV4Enabled() {
-        return Set.of("staging", "dev").contains(getEnvironment());
+        return "staging".equals(getEnvironment());
     }
 
     /**
