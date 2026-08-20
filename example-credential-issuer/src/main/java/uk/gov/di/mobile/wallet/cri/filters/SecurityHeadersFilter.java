@@ -7,8 +7,8 @@ import jakarta.ws.rs.container.ContainerResponseFilter;
 /**
  * A Jersey filter that adds HTTP security headers to all responses.
  *
- * <p>These headers protect against client-side attacks such as clickjacking, MIME-type sniffing,
- * and cross-site scripting.
+ * <p>These headers enforce HTTPS connections, prevent MIME-type sniffing, and restrict referrer
+ * information leakage.
  */
 public class SecurityHeadersFilter implements ContainerResponseFilter {
 
