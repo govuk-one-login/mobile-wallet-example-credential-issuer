@@ -179,9 +179,7 @@ public class ServicesFactory {
         StatusListRequestTokenBuilder statusListRequestTokenBuilder =
                 new StatusListRequestTokenBuilder(configurationService, kmsService);
 
-        boolean sigV4Enabled =
-                "staging".equals(configurationService.getEnvironment())
-                        || "dev".equals(configurationService.getEnvironment());
+        boolean sigV4Enabled = configurationService.isSigV4Enabled();
         LOGGER.info(
                 "ServicesFactory: ENVIRONMENT={}, sigV4Enabled={}, statusListClientId={}",
                 configurationService.getEnvironment(),

@@ -5,6 +5,7 @@ import io.dropwizard.client.JerseyClientConfiguration;
 import io.dropwizard.core.Configuration;
 
 import java.net.URI;
+import java.util.Set;
 
 /**
  * Configuration service for managing application settings. Provides environment variable-based
@@ -226,6 +227,16 @@ public class ConfigurationService extends Configuration {
     // ===========================================
     // STATUS LIST
     // ===========================================
+    /**
+     * Determines whether SigV4 request signing is enabled for the status list API. SigV4 signing is
+     * required in environments where the status list API is fronted by API Gateway with IAM auth.
+     *
+     * @return true if SigV4 signing should be applied to status list requests
+     */
+    public boolean isSigV4Enabled() {
+        return Set.of("staging", "dev").contains(getEnvironment());
+    }
+
     /**
      * Gets this CRI's status list client ID.
      *
