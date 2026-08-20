@@ -15,7 +15,11 @@ export async function buildClientAssertion(
   signingKeyId: string,
   kmsService = new KmsService(signingKeyId),
 ): Promise<Jwt> {
-  const header = { alg: TOKEN_SIGNING_ALGORITHM, typ: TOKEN_JWT_TYPE };
+  const header = {
+    alg: TOKEN_SIGNING_ALGORITHM,
+    typ: TOKEN_JWT_TYPE,
+    kid: signingKeyId,
+  };
 
   const timeNow = Date.now();
   const payload = {
