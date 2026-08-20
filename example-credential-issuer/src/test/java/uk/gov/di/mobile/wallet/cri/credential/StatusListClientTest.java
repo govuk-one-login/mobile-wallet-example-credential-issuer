@@ -80,7 +80,6 @@ class StatusListClientTest {
             when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
             when(requestBuilder.post(any())).thenReturn(response);
             when(response.getStatus()).thenReturn(500);
-            when(response.readEntity(String.class)).thenReturn("error response body");
 
             StatusListClientException exception =
                     assertThrows(
@@ -146,7 +145,6 @@ class StatusListClientTest {
             when(webTarget.request(MediaType.APPLICATION_JSON)).thenReturn(requestBuilder);
             when(requestBuilder.post(any())).thenReturn(response);
             when(response.getStatus()).thenReturn(500);
-            when(response.readEntity(String.class)).thenReturn("error response body");
 
             StatusListClientException exception =
                     assertThrows(
