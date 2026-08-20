@@ -10,7 +10,7 @@ import { ninoDocumentBuilderRouter } from "./ninoDocumentBuilder/router";
 import { loggerMiddleware } from "./middleware/logger";
 import { getOIDCConfig } from "./config/oidc";
 import { auth } from "./middleware/auth";
-import { isAuthDisabled } from "./config/environments";
+import { isAuthDisabled, isIntegration } from "./config/environments";
 import cookieParser from "cookie-parser";
 import { returnFromAuthRouter } from "./returnFromAuth/router";
 import { logoutRouter } from "./logout/router";
@@ -36,6 +36,8 @@ import {
   generateCspNonce,
   buildContentSecurityPolicy,
 } from "./middleware/contentSecurityPolicy";
+import { createJwksRouter } from "./jwks/router";
+import { getClientSigningKeyId } from "./config/appConfig";
 
 const APP_VIEWS = [
   path.resolve("dist/appSelector/views"),
@@ -91,6 +93,11 @@ export async function createApp(): Promise<express.Application> {
 
   app.use(robotsTxtRouter);
   app.use(healthcheckRouter);
+
+  if (!isIntegration()) {
+    app.use(createJwksRouter(getClientSigningKeyId()));
+  }
+
   app.use(documentRouter);
   app.use(loggedOutRouter);
   app.use(proofJwtRouter);
