@@ -519,7 +519,7 @@ Resources:
               Service: ecs-tasks.amazonaws.com
         Version: 2012-10-17
       Policies:
-        - PolicyName: AccessDynamoDb
+        - PolicyName: TaskPermissions
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
