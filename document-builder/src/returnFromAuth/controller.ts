@@ -39,20 +39,8 @@ export async function returnFromAuthGetController(
       getClientSigningKeyId(),
     );
 
-    // TEMPORARY: Remove after verifying kid in dev
-    try {
-      const [headerB64] = clientAssertion.split(".");
-      req.log.info(
-        {
-          clientAssertionHeader: JSON.parse(
-            Buffer.from(headerB64, "base64url").toString(),
-          ),
-        },
-        "Client assertion JWT header",
-      );
-    } catch {
-      // Ignore decode failures in test/stub environments
-    }
+    // TEMPORARY: Remove after verifying JWT in dev
+    console.log("Client assertion JWT:", clientAssertion);
 
     // Exchange the access code in the url parameters for an access token
     const tokenSet: TokenSet = await req.oidc.callback(
