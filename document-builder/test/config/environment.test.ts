@@ -6,7 +6,6 @@ import {
   gdsRoutesEnvs,
   AUTH_DISABLED_ENVS,
   isAuthDisabled,
-  isIntegration,
 } from "../../src/config/environments";
 
 describe("environments", () => {
@@ -107,29 +106,6 @@ describe("environments", () => {
     it("should have no repeated values in gdsRoutesEnvs", () => {
       const uniqueEnvs = new Set(gdsRoutesEnvs);
       expect(gdsRoutesEnvs.length).toBe(uniqueEnvs.size);
-    });
-  });
-
-  describe("isIntegration", () => {
-    const originalEnv = process.env.ENVIRONMENT;
-
-    afterEach(() => {
-      process.env.ENVIRONMENT = originalEnv;
-    });
-
-    it("should return true for integration", () => {
-      process.env.ENVIRONMENT = ENVIRONMENTS.INT;
-      expect(isIntegration()).toBe(true);
-    });
-
-    it.each([
-      ENVIRONMENTS.LOCAL,
-      ENVIRONMENTS.DEV,
-      ENVIRONMENTS.BUILD,
-      ENVIRONMENTS.STAGE,
-    ])("should return false for %s", (testEnvName) => {
-      process.env.ENVIRONMENT = testEnvName;
-      expect(isIntegration()).toBe(false);
     });
   });
 });

@@ -26,7 +26,3 @@ export const AUTH_DISABLED_ENVS = [ENVIRONMENTS.LOCAL, ENVIRONMENTS.INT];
 export function isAuthDisabled(): boolean {
   return AUTH_DISABLED_ENVS.includes(process.env.ENVIRONMENT ?? "");
 }
-
-export function isIntegration(): boolean {
-  return process.env.ENVIRONMENT === ENVIRONMENTS.INT;
-}

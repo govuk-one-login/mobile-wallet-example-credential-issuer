@@ -10,7 +10,7 @@ import { ninoDocumentBuilderRouter } from "./ninoDocumentBuilder/router";
 import { loggerMiddleware } from "./middleware/logger";
 import { getOIDCConfig } from "./config/oidc";
 import { auth } from "./middleware/auth";
-import { isAuthDisabled, isIntegration } from "./config/environments";
+import { isAuthDisabled } from "./config/environments";
 import cookieParser from "cookie-parser";
 import { returnFromAuthRouter } from "./returnFromAuth/router";
 import { logoutRouter } from "./logout/router";
@@ -93,7 +93,7 @@ export async function createApp(): Promise<express.Application> {
   app.use(robotsTxtRouter);
   app.use(healthcheckRouter);
 
-  if (!isIntegration()) {
+  if (!isAuthDisabled()) {
     app.use(jwksRouter);
   }
 
