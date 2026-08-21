@@ -22,7 +22,9 @@ describe("buildJwks", () => {
     expect(key.use).toBe("sig");
     expect(key.kid).toBe(mockKeyId);
     expect(key.e).toBe("AQAB");
-    expect(key.n).toBeDefined();
+    expect(key.n).toBe(
+      "rfFYx70x2REo13FfqFdqISe6cjz6morHuzyDLKawLDeHTwOy62BP4aZykWR04CKXD6EjB_P67UrfieeqzobNfrVnLP6WD7qkzc0K9Y8qjG_iHKoR7FqL1C_5Yt46RoAy3kOqC3YllicqsWOPqEWcw-gxwwkZ9q50mxSMyf-KimINA_f7mvGmxyzyVmxfzwtdKgbKPknm2VJZivGlCB__DUEF-Gzz5Axuo_NOrwddig0oQSn0Pzy3RfQ6ZBWdsiUBW3dTYy96018xe0uw8kR8m-zFwXkfFp9_MMc99bOpCfL_2UVU9135HvfojRSbIYL_s20aCHfc5o04pw9oY2-WDw",
+    );
   });
 
   it("should propagate errors from KMS", async () => {
