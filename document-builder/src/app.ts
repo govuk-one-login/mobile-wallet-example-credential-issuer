@@ -36,8 +36,7 @@ import {
   generateCspNonce,
   buildContentSecurityPolicy,
 } from "./middleware/contentSecurityPolicy";
-import { createJwksRouter } from "./jwks/router";
-import { getClientSigningKeyId } from "./config/appConfig";
+import { jwksRouter } from "./jwks/router";
 
 const APP_VIEWS = [
   path.resolve("dist/appSelector/views"),
@@ -95,7 +94,7 @@ export async function createApp(): Promise<express.Application> {
   app.use(healthcheckRouter);
 
   if (!isIntegration()) {
-    app.use(createJwksRouter(getClientSigningKeyId()));
+    app.use(jwksRouter);
   }
 
   app.use(documentRouter);

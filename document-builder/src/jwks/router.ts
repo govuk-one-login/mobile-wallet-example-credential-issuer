@@ -1,13 +1,8 @@
 import express from "express";
-import { KmsService } from "../services/kmsService";
-import { createJwksController } from "./controller";
+import { jwksGetController } from "./controller";
 
-export function createJwksRouter(keyId: string): express.Router {
-  const router = express.Router();
-  const kmsService = new KmsService(keyId);
-  const controller = createJwksController(keyId, kmsService);
+const router = express.Router();
 
-  router.get("/.well-known/jwks.json", controller);
+router.get("/.well-known/jwks.json", jwksGetController);
 
-  return router;
-}
+export { router as jwksRouter };
