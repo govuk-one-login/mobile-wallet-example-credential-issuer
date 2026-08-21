@@ -2,15 +2,15 @@ import { KmsService } from "../services/kmsService";
 import { createJwkFromRawPublicKey } from "../utils/keyUtils";
 
 export interface Jwks {
-  keys: JwksKey[];
+  keys: RsaJwksKey[];
 }
 
-export interface JwksKey {
-  kty: string;
-  use: string;
+export interface RsaJwksKey {
+  kty: "RSA";
+  use: "sig";
   kid: string;
-  e?: string;
-  n?: string;
+  e: string;
+  n: string;
 }
 
 export async function buildJwks(
@@ -21,14 +21,18 @@ export async function buildJwks(
   const rawPublicKey = Buffer.from(publicKeyBase64, "base64");
   const jwk = createJwkFromRawPublicKey(rawPublicKey);
 
+  if (jwk.kty !== "RSA" || !jwk.n || !jwk.e) {
+    throw new Error(`Expected RSA public key but got kty: ${jwk.kty}`);
+  }
+
   return {
     keys: [
       {
-        kty: jwk.kty!,
+        kty: "RSA",
         use: "sig",
         kid: keyId,
-        e: jwk.e as string,
-        n: jwk.n as string,
+        e: jwk.e,
+        n: jwk.n,
       },
     ],
   };

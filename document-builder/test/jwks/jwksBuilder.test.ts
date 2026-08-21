@@ -34,4 +34,17 @@ describe("buildJwks", () => {
       "KMS unavailable",
     );
   });
+
+  it("should throw if the key is not RSA", async () => {
+    const ecPublicKeyBase64 =
+      "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAECO6A8rvNKD/sVNQwswdrIwR5ThN0gEc1rHtRzs5BXVvQ21bG1y7/b97RcxzbcQH+P2ti2DhwGiM/HwN5Agtg/Q==";
+
+    const mockKmsService = {
+      getPublicKey: jest.fn().mockResolvedValue(ecPublicKeyBase64),
+    } as unknown as KmsService;
+
+    await expect(buildJwks(mockKeyId, mockKmsService)).rejects.toThrow(
+      "Expected RSA public key but got kty: EC",
+    );
+  });
 });
