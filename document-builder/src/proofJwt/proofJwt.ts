@@ -123,8 +123,3 @@ function compressEcPoint(x: Uint8Array, y: Uint8Array) {
   compressedKey.set(x, 1);
   return compressedKey;
 }
-
-export {
-  createJwkFromRawPublicKey,
-  uint8ArrayToBase64,
-} from "../utils/keyUtils";
