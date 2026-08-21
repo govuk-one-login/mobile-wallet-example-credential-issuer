@@ -8,7 +8,7 @@ import {
 } from "@aws-sdk/client-kms";
 import { getKmsConfig } from "../config/aws";
 import format from "ecdsa-sig-formatter";
-import { createPublicKey } from "node:crypto";
+import { createJwkFromRawPublicKey } from "../utils/keyUtils";
 
 import bs58 from "bs58";
 
@@ -123,22 +123,3 @@ function compressEcPoint(x: Uint8Array, y: Uint8Array) {
   compressedKey.set(x, 1);
   return compressedKey;
 }
-
-export const createJwkFromRawPublicKey = (
-  rawPublicKey: Uint8Array,
-): JsonWebKey => {
-  const stringPublicKey = uint8ArrayToBase64(rawPublicKey);
-
-  const formattedPublicKey =
-    "-----BEGIN PUBLIC KEY-----\n" +
-    stringPublicKey +
-    "\n-----END PUBLIC KEY-----";
-
-  return createPublicKey(formattedPublicKey).export({
-    format: "jwk",
-  });
-};
-
-export const uint8ArrayToBase64 = (uint8Array: Uint8Array) => {
-  return Buffer.from(uint8Array).toString("base64");
-};

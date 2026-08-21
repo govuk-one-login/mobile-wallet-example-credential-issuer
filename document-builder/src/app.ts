@@ -36,6 +36,7 @@ import {
   generateCspNonce,
   buildContentSecurityPolicy,
 } from "./middleware/contentSecurityPolicy";
+import { jwksRouter } from "./jwks/router";
 
 const APP_VIEWS = [
   path.resolve("dist/appSelector/views"),
@@ -91,6 +92,11 @@ export async function createApp(): Promise<express.Application> {
 
   app.use(robotsTxtRouter);
   app.use(healthcheckRouter);
+
+  if (!isAuthDisabled()) {
+    app.use(jwksRouter);
+  }
+
   app.use(documentRouter);
   app.use(loggedOutRouter);
   app.use(proofJwtRouter);

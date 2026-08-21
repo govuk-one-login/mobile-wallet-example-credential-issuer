@@ -5,6 +5,7 @@ process.env.OIDC_ISSUER_DISCOVERY_ENDPOINT = "https://oidc.test.account.gov.uk";
 process.env.SELF = "http://localhost:3000";
 process.env.CREDENTIAL_ISSUER_URL = "https://test-cri.example.com";
 process.env.WALLET_APPS = "test-app-1,test-app-2";
+process.env.CLIENT_SIGNING_KEY_ID = "test-signing-key-id";
 
 import request from "supertest";
 import { createApp } from "../../src/app";
