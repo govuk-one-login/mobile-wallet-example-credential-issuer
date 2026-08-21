@@ -38,6 +38,22 @@ export async function returnFromAuthGetController(
       req.oidc.issuer.metadata.token_endpoint!,
       getClientSigningKeyId(),
     );
+
+    // TEMPORARY: Remove after verifying kid in dev
+    try {
+      const [headerB64] = clientAssertion.split(".");
+      req.log.info(
+        {
+          clientAssertionHeader: JSON.parse(
+            Buffer.from(headerB64, "base64url").toString(),
+          ),
+        },
+        "Client assertion JWT header",
+      );
+    } catch {
+      // Ignore decode failures in test/stub environments
+    }
+
     // Exchange the access code in the url parameters for an access token
     const tokenSet: TokenSet = await req.oidc.callback(
       req.oidc.metadata.redirect_uris![0],
