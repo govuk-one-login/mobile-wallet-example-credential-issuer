@@ -38,6 +38,10 @@ describe("jwksGetController", () => {
         ]),
       }),
     );
+    expect(res.set).toHaveBeenCalledWith(
+      "Cache-Control",
+      "public, max-age=86400",
+    );
   });
 
   it("should call next with error when KMS fails", async () => {

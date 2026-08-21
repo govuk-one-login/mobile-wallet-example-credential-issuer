@@ -12,6 +12,7 @@ export async function jwksGetController(
     const keyId = getClientSigningKeyId();
     const kmsService = new KmsService(keyId);
     const jwks = await buildJwks(keyId, kmsService);
+    res.set("Cache-Control", "public, max-age=86400");
     res.json(jwks);
   } catch (error) {
     next(error);
