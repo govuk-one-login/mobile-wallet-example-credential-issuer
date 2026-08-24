@@ -12,8 +12,8 @@
   },
   "description": "",
   "dependencies": {
-    "@peculiar/asn1-schema": "^2.8.0",
-    "@peculiar/asn1-x509": "^2.8.0",
+    "@peculiar/asn1-schema": "^2.9.0",
+    "@peculiar/asn1-x509": "^2.9.0",
     "commander": "^15.0.0",
     "esbuild": "^0.28.2",
     "tsx": "^4.23.12",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "globals": "^17.9.0",
+    "globals": "^17.11.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.2.0",
     "eslint": "10.8.1",
