@@ -41,12 +41,12 @@ describe('acmPcaAdapter', () => {
             KeyUsage: {
               DigitalSignature: true,
             },
-            ExtendedKeyUsage: [
-              {
-                ExtendedKeyUsageObjectIdentifier: '1.0.18013.5.1.2', // identifier for ISO mDL
-              },
-            ],
             CustomExtensions: [
+              {
+                ObjectIdentifier: '2.5.29.37',
+                Value: 'MAkGByiBjF0FAQI=',
+                Critical: true,
+              },
               {
                 ObjectIdentifier: '2.5.29.18',
                 Value: 'ISSUER_ALT_NAME',
