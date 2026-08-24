@@ -55,8 +55,8 @@ Mappings:
       CloudwatchLogRetentionDays: 3
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: DEBUG
-      CertificateValidityPeriodInDays: 458 # 366 (1 year) + 92 (3 months), worse case
-      CertificateRetentionPeriodInDays: 488 # validity period + 30 days
+      CertificateValidityPeriodInDays: 457 # 365 (1 year) + 92 (3 months) - max allowed leaf certificate validity period
+      CertificateRetentionPeriodInDays: 487 # validity period + 30 days
     build:
       DocumentSigningKeyParameterPrefix: '/iaca/'
       DocumentSigningKeyCommonName: 'Example Issuer DSC (BUILD)'
@@ -67,8 +67,8 @@ Mappings:
       CloudwatchLogRetentionDays: 3653 # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
-      CertificateValidityPeriodInDays: 458 # 366 (1 year) + 92 (3 months), worse case
-      CertificateRetentionPeriodInDays: 488 # validity period + 30 days
+      CertificateValidityPeriodInDays: 457 # 365 (1 year) + 92 (3 months) - max allowed leaf certificate validity period
+      CertificateRetentionPeriodInDays: 487 # validity period + 30 days
     integration:
       DocumentSigningKeyParameterPrefix: '/iaca/'
       DocumentSigningKeyCommonName: 'Example Issuer DSC (INTEGRATION)'
@@ -79,8 +79,8 @@ Mappings:
       CloudwatchLogRetentionDays: 3653 # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
-      CertificateValidityPeriodInDays: 458 # 366 (1 year) + 92 (3 months), worse case
-      CertificateRetentionPeriodInDays: 488 # validity period + 30 days
+      CertificateValidityPeriodInDays: 457 # 365 (1 year) + 92 (3 months) - max allowed leaf certificate validity period
+      CertificateRetentionPeriodInDays: 487 # validity period + 30 days
 
 Globals:
   Function:
