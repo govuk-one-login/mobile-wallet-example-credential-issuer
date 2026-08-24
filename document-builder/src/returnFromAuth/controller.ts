@@ -39,9 +39,6 @@ export async function returnFromAuthGetController(
       getClientSigningKeyId(),
     );
 
-    // TEMPORARY: Remove after verifying JWT in dev
-    console.log("Client assertion JWT:", clientAssertion);
-
     // Exchange the access code in the url parameters for an access token
     const tokenSet: TokenSet = await req.oidc.callback(
       req.oidc.metadata.redirect_uris![0],
