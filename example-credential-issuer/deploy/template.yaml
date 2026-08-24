@@ -46,6 +46,8 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
+  IsStaging: !Equals [!Ref Environment, staging]
+
   IsIntegration: !Equals [!Ref Environment, integration]
 
   UsePermissionsBoundary:
@@ -85,7 +87,7 @@ Mappings:
       CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
-      StatusListUrl: "4bebqm94bg.execute-api.eu-west-2.amazonaws.com/staging"
+      StatusListUrl: "api.crs.staging.account.gov.uk"
     integration:
       SelfUrl: "example-credential-issuer.wallet-onboarding.integration.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.integration.account.gov.uk"
@@ -286,8 +288,8 @@ Resources:
       DefaultRouteSettings:
         DataTraceEnabled: false
         DetailedMetricsEnabled: true
-        ThrottlingBurstLimit: 400
-        ThrottlingRateLimit: 1200
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 20
       AccessLogSettings:
         DestinationArn: !GetAtt WalletBEAPIGWAccessLogsGroup.Arn
         Format: >-
@@ -517,7 +519,7 @@ Resources:
               Service: ecs-tasks.amazonaws.com
         Version: 2012-10-17
       Policies:
-        - PolicyName: AccessDynamoDb
+        - PolicyName: TaskPermissions
           PolicyDocument:
             Version: "2012-10-17"
             Statement:
@@ -559,6 +561,13 @@ Resources:
                   - 'kms:DescribeKey'
                 Resource:
                   - !FindInMap [EnvironmentVariables, !Ref Environment, DocumentSigningKey1Arn]
+              - !If
+                - IsStaging
+                - Effect: Allow
+                  Action:
+                    - 'execute-api:Invoke'
+                  Resource: 'arn:aws:execute-api:*:*:*'
+                - !Ref AWS::NoValue
       PermissionsBoundary: !If
         - UsePermissionsBoundary
         - !Ref PermissionsBoundary

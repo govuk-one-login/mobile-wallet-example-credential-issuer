@@ -11,6 +11,7 @@ import uk.gov.di.mobile.wallet.cri.annotations.ExcludeFromGeneratedCoverageRepor
 import uk.gov.di.mobile.wallet.cri.credential.CredentialResource;
 import uk.gov.di.mobile.wallet.cri.credential_offer.CredentialOfferResource;
 import uk.gov.di.mobile.wallet.cri.did_document.DidDocumentResource;
+import uk.gov.di.mobile.wallet.cri.filters.SecurityHeadersFilter;
 import uk.gov.di.mobile.wallet.cri.healthcheck.HealthCheckResource;
 import uk.gov.di.mobile.wallet.cri.healthcheck.Ping;
 import uk.gov.di.mobile.wallet.cri.iacas.IacasResource;
@@ -61,6 +62,7 @@ public class ExampleCriApp extends Application<ConfigurationService> {
         ObjectMapper objectMapper = environment.getObjectMapper();
 
         environment.healthChecks().register("ping", new Ping());
+        environment.jersey().register(new SecurityHeadersFilter());
         environment.jersey().register(new HealthCheckResource(environment));
         environment
                 .jersey()

@@ -226,6 +226,10 @@ public class ConfigurationService extends Configuration {
     // ===========================================
     // STATUS LIST
     // ===========================================
+    public boolean isSigV4Enabled() {
+        return "staging".equals(getEnvironment());
+    }
+
     /**
      * Gets this CRI's status list client ID.
      *

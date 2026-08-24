@@ -276,4 +276,16 @@ class ConfigurationServiceTest {
                 "Invalid URI for CREDENTIAL_STORE_URL: invalid://uri with spaces",
                 exception.getMessage());
     }
+
+    @Test
+    void Should_ReturnSigV4Enabled_When_EnvironmentIsStaging() {
+        environmentVariables.set("ENVIRONMENT", "staging");
+        assertEquals(true, configurationService.isSigV4Enabled());
+    }
+
+    @Test
+    void Should_ReturnSigV4Disabled_When_EnvironmentIsBuild() {
+        environmentVariables.set("ENVIRONMENT", "build");
+        assertEquals(false, configurationService.isSigV4Enabled());
+    }
 }
