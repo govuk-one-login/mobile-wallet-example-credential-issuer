@@ -20,14 +20,15 @@ export async function issueMdlDocSigningCertificateUsingSha256WithEcdsa(
         KeyUsage: {
           DigitalSignature: true,
         },
-        ExtendedKeyUsage: [
-          {
-            ExtendedKeyUsageObjectIdentifier: '1.0.18013.5.1.2', // identifier for ISO mDL
-          },
-        ],
         CustomExtensions: [
           {
-            ObjectIdentifier: '2.5.29.18',
+            ObjectIdentifier: '2.5.29.37', // ExtendedKeyUsage
+            // OID 1.0.18013.5.1.2 (mDL Document Signing), DER-encoded and base64-encoded
+            Value: 'MAkGByiBjF0FAQI=',
+            Critical: true,
+          },
+          {
+            ObjectIdentifier: '2.5.29.18', // IssuerAlternativeName
             Value: issuerAlternativeName,
           },
         ],
