@@ -20,7 +20,7 @@ describe("buildClientAssertion.ts", () => {
     const claims = jose.decodeJwt(response);
 
     expect(response).toBeDefined();
-    expect(header).toEqual({ alg: "RS512", typ: "JWT" });
+    expect(header).toEqual({ alg: "RS512", typ: "JWT", kid: "mock_key_id" });
     expect(claims).toHaveProperty("sub", "test_client_id");
     expect(claims).toHaveProperty("iss", "test_client_id");
     expect(claims).toHaveProperty("aud", "http://localost:8000/token");

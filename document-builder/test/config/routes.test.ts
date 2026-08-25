@@ -75,6 +75,7 @@ describe("routes", () => {
         ROUTES.RETURN_FROM_AUTH,
         ROUTES.VIEW_CREDENTIAL,
         ROUTES.CREDENTIAL_OFFER_VIEWER,
+        ROUTES.JWKS,
       ]);
     });
   });

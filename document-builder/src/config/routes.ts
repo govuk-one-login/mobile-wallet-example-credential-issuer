@@ -21,6 +21,7 @@ export const ROUTES = {
   RETURN_FROM_AUTH: "/return-from-auth",
   VIEW_CREDENTIAL: "/view-credential",
   CREDENTIAL_OFFER_VIEWER: "/view-credential-offer/:itemId",
+  JWKS: "/.well-known/jwks.json",
   // Common Routes
   DOCUMENT: "/document/:itemId",
   REVOKE: "/revoke",
@@ -49,5 +50,6 @@ export const gdsRoutes = [
   ROUTES.RETURN_FROM_AUTH,
   ROUTES.VIEW_CREDENTIAL,
   ROUTES.CREDENTIAL_OFFER_VIEWER,
+  ROUTES.JWKS,
 ];
 export const commonRoutes = [ROUTES.REVOKE, ROUTES.DOCUMENT];
