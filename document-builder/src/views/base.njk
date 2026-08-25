@@ -5,10 +5,12 @@
 {% block pageTitle %}{{ pageTitle + " - " if pageTitle }}{{ serviceName }}{% endblock %}
 {% block head %}<link href="/public/stylesheets/application.css" rel="stylesheet">{% endblock %}
 {% block header %}
+    {{ govukHeader({
+        "homepageUrl": "/select-app"
+    }) }}
     {% if authenticated %}
-        {{ govukHeader({
-            "homepageUrl": "/select-app",
-            "classes": "govuk-header--with-sign-out-link",
+        {{ govukServiceNavigation({
+            "serviceName": serviceName,
             "navigation": [
                 {
                     "href": "/logout",
@@ -17,11 +19,8 @@
             ]
         }) }}
     {% else %}
-        {{ govukHeader ({
-        homepageUrl: "/select-app"
-        }) }}
+        {{ govukServiceNavigation({"serviceName": serviceName}) }}
     {% endif %}
-    {{ govukServiceNavigation({"serviceName": serviceName}) }}
 {% endblock %}
 {% block main %}
     <div class="govuk-width-container {{ containerClasses }}">
