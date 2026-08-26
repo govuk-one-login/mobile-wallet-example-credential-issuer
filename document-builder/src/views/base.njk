@@ -5,7 +5,7 @@
 {% block pageTitle %}{{ pageTitle + " - " if pageTitle }}{{ serviceName }}{% endblock %}
 {% block head %}<link href="/public/stylesheets/application.css" rel="stylesheet">{% endblock %}
 {% block header %}
-    {{ govukHeader({}) }}
+    {{ govukHeader({"homepageUrl": "/start"}) }}
     {% if authenticated %}
         {{ govukServiceNavigation({
             "serviceName": serviceName,
