@@ -19,9 +19,6 @@ export function requiresAuth(
       httpOnly: true,
       maxAge: COOKIE_TTL_IN_MILLISECONDS,
     };
-    if (!req.cookies["id_token"]) {
-      res.cookie("id_token", "stub-id-token", cookieOptions);
-    }
     if (!req.cookies["wallet_subject_id"]) {
       res.cookie(
         "wallet_subject_id",

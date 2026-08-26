@@ -30,10 +30,10 @@ describe("requiresAuth", () => {
 
       expect(next).toHaveBeenCalledTimes(1);
       expect(res.redirect).not.toHaveBeenCalled();
-      expect(res.cookie).toHaveBeenCalledWith(
+      expect(res.cookie).not.toHaveBeenCalledWith(
         "id_token",
-        "stub-id-token",
-        COOKIE_OPTIONS,
+        expect.anything(),
+        expect.anything(),
       );
       expect(res.cookie).toHaveBeenCalledWith(
         "wallet_subject_id",
@@ -45,7 +45,6 @@ describe("requiresAuth", () => {
     it("should not overwrite cookies that are already present", () => {
       const req = getMockReq({
         cookies: {
-          id_token: "existing-token",
           wallet_subject_id: "existing-subject",
         },
       }) as any;
@@ -55,11 +54,6 @@ describe("requiresAuth", () => {
       requiresAuth(req, res, next);
 
       expect(next).toHaveBeenCalledTimes(1);
-      expect(res.cookie).not.toHaveBeenCalledWith(
-        "id_token",
-        expect.anything(),
-        expect.anything(),
-      );
       expect(res.cookie).not.toHaveBeenCalledWith(
         "wallet_subject_id",
         expect.anything(),
