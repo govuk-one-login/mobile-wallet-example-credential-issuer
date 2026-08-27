@@ -1,24 +1,19 @@
 {% extends "govuk/template.njk" %}
 {% from "govuk/components/header/macro.njk" import govukHeader %}
 {% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+{% from "service-header/service-header.njk" import govukOneLoginServiceHeader %}
 {% set serviceName = "Example GOV.UK Wallet Document Builder" %}
 {% block pageTitle %}{{ pageTitle + " - " if pageTitle }}{{ serviceName }}{% endblock %}
-{% block head %}<link href="/public/stylesheets/application.css" rel="stylesheet">{% endblock %}
+{% block head %}<link href="/public/stylesheets/application.css" rel="stylesheet"><link href="/public/stylesheets/service-header.css" rel="stylesheet">{% endblock %}
 {% block header %}
-    {{ govukHeader({"homepageUrl": "/start"}) }}
     {% if authenticated %}
-        {{ govukServiceNavigation({
-            "serviceName": serviceName,
-            "navigation": [
-                {
-                    "href": "/logout",
-                    "text": "Sign out"
-                }
-            ]
+        {{ govukOneLoginServiceHeader({
+            "signOutLink": "/logout"
         }) }}
     {% else %}
-        {{ govukServiceNavigation({"serviceName": serviceName}) }}
+        {{ govukHeader({"homepageUrl": "/start"}) }}
     {% endif %}
+    {{ govukServiceNavigation({"serviceName": serviceName}) }}
 {% endblock %}
 {% block main %}
     <div class="govuk-width-container {{ containerClasses }}">
@@ -40,4 +35,5 @@
       import { initAll } from '/public/scripts/govuk-frontend.min.js'
       initAll()
     </script>
+    <script src="/public/scripts/init-service-header.js" nonce="{{ cspNonce }}"></script>
 {% endblock %}
