@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { getSelfUrl } from "../config/appConfig";
 import { deleteCookies } from "./utils/deleteCookies";
 import { ExpressRouteFunction } from "../types/ExpressRouteFunction";
+import { isAuthDisabled } from "../config/environments";
 
 const COOKIES_TO_DELETE = [
   "id_token",
@@ -21,6 +22,10 @@ export function logoutGetController({
 }: LogoutConfig = {}): ExpressRouteFunction {
   return function (req: Request, res: Response, next: NextFunction): void {
     try {
+      if (isAuthDisabled()) {
+        return res.redirect(selfUrl + "/start");
+      }
+
       const idToken = req.cookies.id_token;
       const state = req.cookies.state;
       deleteCookies(req, res, COOKIES_TO_DELETE);

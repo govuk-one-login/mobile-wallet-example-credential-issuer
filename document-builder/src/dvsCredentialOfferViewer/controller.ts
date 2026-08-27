@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import QRCode from "qrcode";
-import { isAuthenticated } from "../utils/isAuthenticated";
 import {
   getEnvironment,
   getHardcodedWalletSubjectId,
@@ -69,7 +68,6 @@ export function dvsCredentialOfferViewerController({
       const qrCode = await QRCode.toDataURL(customisedCredentialOfferUrl);
 
       return res.render("dvs-credential-offer.njk", {
-        authenticated: isAuthenticated(req),
         universalLink: customisedCredentialOfferUrl,
         qrCode,
         environment,

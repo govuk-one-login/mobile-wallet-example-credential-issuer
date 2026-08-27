@@ -70,7 +70,6 @@ describe("dvsCredentialOfferViewerController", () => {
     );
     expect(QRCode.toDataURL).toHaveBeenCalledWith(mockCustomisedUrl);
     expect(res.render).toHaveBeenCalledWith("dvs-credential-offer.njk", {
-      authenticated: expect.anything(),
       universalLink: "customised-url",
       qrCode: "mocked-qrcode",
       environment: "dev",
@@ -95,7 +94,6 @@ describe("dvsCredentialOfferViewerController", () => {
     );
     expect(QRCode.toDataURL).toHaveBeenCalledWith(mockCustomisedUrl);
     expect(res.render).toHaveBeenCalledWith("dvs-credential-offer.njk", {
-      authenticated: expect.anything(),
       universalLink: "customised-url",
       qrCode: "mocked-qrcode",
       environment: ENVIRONMENTS.INT,

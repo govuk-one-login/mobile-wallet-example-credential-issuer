@@ -57,6 +57,7 @@ const APP_VIEWS = [
   path.resolve("dist/start/views"),
   path.resolve("dist/views"),
   path.resolve("node_modules/govuk-frontend/dist"),
+  path.resolve("node_modules/@govuk-one-login/service-header/dist/nunjucks"),
 ];
 
 export async function createApp(): Promise<express.Application> {

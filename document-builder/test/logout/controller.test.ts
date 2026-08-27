@@ -12,9 +12,21 @@ const deleteCookies = utils.deleteCookies as jest.Mock;
 describe("logoutGetController", () => {
   afterEach(() => {
     jest.clearAllMocks();
+    delete process.env.ENVIRONMENT;
   });
 
   const config = { selfUrl: "http://test-stub.com" };
+
+  it("should redirect to /start when auth is disabled", () => {
+    process.env.ENVIRONMENT = "local";
+    const req = getMockReq({ cookies: {} });
+    const { res, next } = getMockRes();
+
+    logoutGetController(config)(req, res, next);
+
+    expect(res.redirect).toHaveBeenCalledWith("http://test-stub.com/start");
+    expect(deleteCookies).not.toHaveBeenCalled();
+  });
 
   it("should call next with an error when an exception is thrown", () => {
     const req = getMockReq({
