@@ -343,13 +343,11 @@ async function getTestJwt(audience, issuer, clientId, kid, exp = "30 minutes") {
   })
     .setProtectedHeader({ alg: "ES256", typ: "JWT", kid: kid })
     .setIssuedAt()
-    .setExpirationTime(exp);
+    .setExpirationTime(exp)
+    .setAudience(audience);
 
   if (issuer !== undefined) {
     jwt.setIssuer(issuer);
-  }
-  if (audience !== undefined) {
-    jwt.setAudience(audience);
   }
 
   return await jwt.sign(signingKeyAsKeyLike);
