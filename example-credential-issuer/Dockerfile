@@ -1,4 +1,4 @@
-FROM gradle:9.7.0-jdk17-alpine@sha256:d537e24fca45130a3d10f4cbe91018cfd6bca92b7fade34ed57f807afedaeb9a AS build
+FROM gradle:9.7.1-jdk17-alpine@sha256:e91f2fa163b87c6ae76bf31dd9d4cf74111ea9d51d4a79d1607be2c535c52094 AS build
 
 RUN apk update && apk upgrade busybox
 
@@ -8,7 +8,7 @@ COPY build.gradle settings.gradle gradlew gradlew.bat config.yml ./
 COPY gradle/ gradle/
 RUN ./gradlew installDist
 
-FROM eclipse-temurin:25-jre-alpine@sha256:28db6fdf60e38945e43d840c0333aeaec66c15943070104f7586fd3c9d1665b0
+FROM eclipse-temurin:25-jre-alpine@sha256:3137541deb3cac6626b5d9a4a2187bc0d6a34312f858bd2c67dd01e732e6b682
 
 RUN apk update && apk upgrade
 
