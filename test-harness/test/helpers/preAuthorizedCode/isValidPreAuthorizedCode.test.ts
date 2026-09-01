@@ -336,15 +336,21 @@ async function getTestJwt(audience, issuer, clientId, kid, exp = "30 minutes") {
 
   const signingKeyAsKeyLike = await importJWK(privateKey, "ES256");
 
-  return await new SignJWT({
+  const jwt = new SignJWT({
     clientId: clientId,
     credential_configuration_ids: [credentialConfigurationId],
     credential_identifiers: ["727da4d1-0636-4951-81eb-801c1cf90dd3"],
   })
     .setProtectedHeader({ alg: "ES256", typ: "JWT", kid: kid })
     .setIssuedAt()
-    .setExpirationTime(exp)
-    .setIssuer(issuer)
-    .setAudience(audience)
-    .sign(signingKeyAsKeyLike);
+    .setExpirationTime(exp);
+
+  if (issuer !== undefined) {
+    jwt.setIssuer(issuer);
+  }
+  if (audience !== undefined) {
+    jwt.setAudience(audience);
+  }
+
+  return await jwt.sign(signingKeyAsKeyLike);
 }
