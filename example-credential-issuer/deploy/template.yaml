@@ -87,7 +87,7 @@ Mappings:
       CertificatesBucketName: "wallet-doc-sign-cert-899032468188-certificates"
       DocumentSigningKey1Arn: arn:aws:kms:eu-west-2:899032468188:key/f74c0aae-5c7a-42e2-a6c1-287aa60e5878
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:899032468188:certificate-authority/f513efea-9757-4d08-9dfb-733b86f1933e
-      StatusListUrl: "api.crs.staging.account.gov.uk"
+      StatusListUrl: "status-list-mock.wallet-onboarding.staging.account.gov.uk"
     integration:
       SelfUrl: "example-credential-issuer.wallet-onboarding.integration.account.gov.uk"
       CredentialStoreUrl: "stub-credential-issuer.wallet-onboarding.integration.account.gov.uk"
