@@ -23,6 +23,7 @@ import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.MOBILE_DRIVING_LICENCE;
 import static uk.gov.di.mobile.wallet.cri.credential.CredentialType.SIMPLE_MDOC;
@@ -153,7 +154,9 @@ public class CredentialService {
                         Resources.getResource(
                                 "refresh_credentials/" + credentialConfigurationId + ".json"),
                         StandardCharsets.UTF_8);
-        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", "RFH" + UUID.randomUUID());
+
+        String uniqueDocumentNumber = "RFH" + ThreadLocalRandom.current().nextInt(100000, 1000000);
+        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", uniqueDocumentNumber);
         return new ObjectMapper().readValue(json, DocumentStoreRecord.class);
     }
 
