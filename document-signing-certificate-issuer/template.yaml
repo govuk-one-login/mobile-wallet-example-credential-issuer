@@ -24,11 +24,17 @@ Parameters:
     Type: String
     Default: none
 
-  VpcStackName:
+  LegacyVpcStackName:
     Description: |
-      The stack name of the VPC where Issue Document Signing Certificate Lambda will be deployed
+      The stack name of the Legacy VPC where Issue Document Signing Certificate Lambda will be deployed
     Type: String
     Default: vpc
+
+  SpokeVpcStackName:
+    Description: |
+      The stack name of the Spoke VPC where Issue Document Signing Certificate Lambda will be deployed
+    Type: String
+    Default: spoke-vpc
 
 Conditions:
   UsePermissionsBoundary: !Not
