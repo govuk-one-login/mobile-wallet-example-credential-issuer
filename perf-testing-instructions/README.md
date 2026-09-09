@@ -28,6 +28,8 @@ All journeys target the `verifier-integration` environment. This environment is 
 Products code. When this document refers to integration it is referring to the Onboarding Products `integration` environment. 
 Other teams may call their `verifier-integration` other names.
 
+AWS Account Name: `di-mobile-wallet-onboarding-products-integration`
+
 Resolved hostnames:
 
 | Service | Host |
