@@ -26,7 +26,7 @@ Parameters:
 
   LegacyVpcStackName:
     Description: |
-      The stack name of the Legacy VPC where Issue Document Signing Certificate Lambda will be deployed
+      The stack name of the Legacy git commit -m VPC where Issue Document Signing Certificate Lambda will be deployed
     Type: String
     Default: vpc
 
@@ -213,14 +213,14 @@ Resources:
       VpcConfig:
         SecurityGroupIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
+            Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
           - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
     Metadata:
       checkov:
         skip:
