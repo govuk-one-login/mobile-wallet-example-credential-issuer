@@ -2,7 +2,7 @@
   "$schema": "https://raw.githubusercontent.com/govuk-one-login/quality-gates/refs/tags/v0.19.0/schemas/schema.json",
   "services": [
     {
-      "product": "document-signing-certificate-issuer",
+      "product": "Mobile Wallet Document Signing Certificate Issuer",
       "component": "document-signing-certificate-issuer",
       "promotionType": "securePipelines",
       "automated": [
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "product": "mobile-wallet-document-builder",
+      "product": "Mobile Wallet Document Builder",
       "component": "mobile-wallet-document-builder",
       "promotionType": "securePipelines",
       "automated": [
@@ -142,7 +142,7 @@
       ]
     },
     {
-      "product": "test-harness",
+      "product": "Mobile Wallet Test Harness",
       "component": "test-harness",
       "promotionType": "securePipelines",
       "automated": [
@@ -232,7 +232,7 @@
       ]
     },
     {
-      "product": "example-credential-issuer",
+      "product": "Mobile Wallet Example Credential Issuer",
       "component": "example-credential-issuer",
       "promotionType": "securePipelines",
       "automated": [
