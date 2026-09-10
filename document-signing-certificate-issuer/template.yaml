@@ -234,7 +234,6 @@ Resources:
               Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdB
             - !ImportValue
               Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdC
-
     Metadata:
       checkov:
         skip:
