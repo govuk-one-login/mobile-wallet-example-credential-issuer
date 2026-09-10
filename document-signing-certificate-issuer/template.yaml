@@ -24,17 +24,17 @@ Parameters:
     Type: String
     Default: none
 
-  # LegacyVpcStackName:
-  #   Description: |
-  #     The stack name of the Legacy git commit -m VPC where Issue Document Signing Certificate Lambda will be deployed
-  #   Type: String
-  #   Default: vpc
-
-  SpokeVpcStackName:
+  LegacyVpcStackName:
     Description: |
-      The stack name of the Spoke VPC where Issue Document Signing Certificate Lambda will be deployed
+      The stack name of the Legacy git commit -m VPC where Issue Document Signing Certificate Lambda will be deployed
     Type: String
-    Default: spoke-vpc
+    Default: vpc
+
+  # SpokeVpcStackName:
+  #   Description: |
+  #     The stack name of the Spoke VPC where Issue Document Signing Certificate Lambda will be deployed
+  #   Type: String
+  #   Default: spoke-vpc
 
 Conditions:
   UsePermissionsBoundary: !Not
@@ -214,11 +214,11 @@ Resources:
               Resource: '*'
       VpcConfig:
         SecurityGroupIds:
-          - !ImportValue spoke-vpc-AWSServicesEndpointSecurityGroupId
+          - !ImportValue Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
-          - !ImportValue spoke-vpc-PrivateSubnetIdA
-          - !ImportValue spoke-vpc-PrivateSubnetIdB
-          - !ImportValue spoke-vpc-PrivateSubnetIdC
+          - !ImportValue Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
+          - !ImportValue Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
+          - !ImportValue Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
     Metadata:
       checkov:
         skip:
