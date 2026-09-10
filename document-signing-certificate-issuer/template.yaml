@@ -214,15 +214,25 @@ Resources:
               Resource: '*'
       VpcConfig:
         SecurityGroupIds:
+          - !If MigrateToSpokeVpc
           - !ImportValue
             Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
+          - !ImportValue
+            Fn::Sub: ${SpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
         SubnetIds:
-          - !ImportValue
-            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
-          - !ImportValue
-            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
-          - !ImportValue
-            Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
+          - !If
+            - MigrateToSpokeVpc
+            - !ImportValue Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
+            - !ImportValue Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdA
+          - !If
+            - MigrateToSpokeVpc
+            - !ImportValue Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
+            - !ImportValue Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdB
+          - !If
+            - MigrateToSpokeVpc
+            - !ImportValue Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
+            - !ImportValue Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdC
+
     Metadata:
       checkov:
         skip:
