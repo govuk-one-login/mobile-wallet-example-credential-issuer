@@ -49,7 +49,7 @@ Conditions:
 
   IsBuild: !Equals [!Ref Environment, build]
 
-  # MigrateToSpokeVpc: !Equals [!Ref Environment, dev]
+  MigrateToSpokeVpc: !Equals [!Ref Environment, dev]
 
 Mappings:
   EnvironmentVariables:
@@ -213,26 +213,16 @@ Resources:
                 - xray:GetSamplingStatisticSummaries
               Resource: '*'
       VpcConfig:
-        - SecurityGroupIds:
-            - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
-          SubnetIds:
-            - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdA
-            - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdB
-            - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdC
-        # - SecurityGroupIds:
-        #     - !ImportValue
-        #       Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
-        #   SubnetIds:
-        #     - !ImportValue
-        #       Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
-        #     - !ImportValue
-        #       Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
-        #     - !ImportValue
-        #       Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
+        SecurityGroupIds:
+          - !ImportValue
+            Fn::Sub: ${SpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
+        SubnetIds:
+          - !ImportValue
+            Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdA
+          - !ImportValue
+            Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdB
+          - !ImportValue
+            Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdC
     Metadata:
       checkov:
         skip:
