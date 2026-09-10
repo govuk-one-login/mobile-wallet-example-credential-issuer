@@ -30,7 +30,7 @@ Parameters:
     Type: String
     Default: vpc
 
-  SpokeVpcStackName:
+  MigrationSpokeVpcStackName:
     Description: |
       The stack name of the Spoke VPC where Issue Document Signing Certificate Lambda will be deployed
     Type: String
@@ -216,14 +216,14 @@ Resources:
         - MigrateToSpokeVpc
         - SecurityGroupIds:
             - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
+              Fn::Sub: ${MigrationSpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
           SubnetIds:
             - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdA
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdA
             - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdB
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdB
             - !ImportValue
-              Fn::Sub: ${SpokeVpcStackName}-PrivateSubnetIdC
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdC
         - SecurityGroupIds:
             - !ImportValue
               Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
