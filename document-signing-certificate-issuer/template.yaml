@@ -24,11 +24,17 @@ Parameters:
     Type: String
     Default: none
 
-  VpcStackName:
+  LegacyVpcStackName:
     Description: |
-      The stack name of the VPC where Issue Document Signing Certificate Lambda will be deployed
+      The stack name of the Legacy git commit -m VPC where Issue Document Signing Certificate Lambda will be deployed
     Type: String
     Default: vpc
+
+  MigrationSpokeVpcStackName:
+    Description: |
+      The stack name of the Spoke VPC where Issue Document Signing Certificate Lambda will be deployed
+    Type: String
+    Default: spoke-vpc
 
 Conditions:
   UsePermissionsBoundary: !Not
@@ -42,6 +48,8 @@ Conditions:
       - none
 
   IsBuild: !Equals [!Ref Environment, build]
+
+  MigrateToSpokeVpc: !Equals [!Ref Environment, dev]
 
 Mappings:
   EnvironmentVariables:
@@ -204,17 +212,28 @@ Resources:
                 - xray:GetSamplingTargets
                 - xray:GetSamplingStatisticSummaries
               Resource: '*'
-      VpcConfig:
-        SecurityGroupIds:
-          - !ImportValue
-            Fn::Sub: ${VpcStackName}-AWSServicesEndpointSecurityGroupId
-        SubnetIds:
-          - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdA
-          - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdB
-          - !ImportValue
-            Fn::Sub: ${VpcStackName}-PrivateSubnetIdC
+      VpcConfig: !If
+        - MigrateToSpokeVpc
+        - SecurityGroupIds:
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
+          SubnetIds:
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${MigrationSpokeVpcStackName}-PrivateSubnetIdC
+        - SecurityGroupIds:
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-AWSServicesEndpointSecurityGroupId
+          SubnetIds:
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdA
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdB
+            - !ImportValue
+              Fn::Sub: ${LegacyVpcStackName}-PrivateSubnetIdC
     Metadata:
       checkov:
         skip:
