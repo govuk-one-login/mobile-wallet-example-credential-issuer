@@ -19,6 +19,7 @@ import uk.gov.di.mobile.wallet.cri.services.signing.SigningException;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
 import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.util.Optional;
@@ -38,6 +39,7 @@ public class CredentialService {
     private final StatusListClient statusListClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     public CredentialService(
             DataStore dataStore,
@@ -153,7 +155,9 @@ public class CredentialService {
                         Resources.getResource(
                                 "refresh_credentials/" + credentialConfigurationId + ".json"),
                         StandardCharsets.UTF_8);
-        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", "RFH" + UUID.randomUUID());
+
+        String uniqueDocumentNumber = "RFH" + SECURE_RANDOM.nextInt(100000, 1000000);
+        json = json.replace("{{UNIQUE_DOCUMENT_NUMBER}}", uniqueDocumentNumber);
         return new ObjectMapper().readValue(json, DocumentStoreRecord.class);
     }
 
