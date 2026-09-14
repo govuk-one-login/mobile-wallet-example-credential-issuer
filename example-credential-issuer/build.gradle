@@ -1,8 +1,8 @@
 plugins {
 	id "application"
 	id "java"
-	id "com.diffplug.spotless" version "8.10.1"
-	id "org.sonarqube" version "7.4.0.8496"
+	id "com.diffplug.spotless" version "8.10.2"
+	id "org.sonarqube" version "7.5.0.8588"
 	id "jacoco"
 }
 
@@ -13,10 +13,10 @@ repositories {
 }
 
 ext {
-	awsSdkVersion = "2.54.7"
+	awsSdkVersion = "2.54.13"
 	dropwizardVersion = "5.0.2"
 	jacksonVersion = "2.22.2"
-	lombokVersion = "1.18.46"
+	lombokVersion = "1.18.48"
 }
 
 dependencies {
