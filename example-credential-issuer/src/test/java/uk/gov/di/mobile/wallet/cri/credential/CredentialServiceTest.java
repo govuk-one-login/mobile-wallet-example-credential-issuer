@@ -34,6 +34,7 @@ import java.util.UUID;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -438,6 +439,36 @@ class CredentialServiceTest {
         verify(mockDynamoDbService, never()).getCredentialOffer(any());
         verify(mockDocumentStoreClient, never()).getDocument(any());
         verify(mockDynamoDbService).saveStoredCredential(any());
+    }
+
+    @Test
+    void Should_AssignDocumentIdValidForRevokeEndpoint_When_RefreshingCredential()
+            throws Exception {
+        when(mockAccessTokenService.verifyAccessToken(mockAccessToken))
+                .thenReturn(
+                        new AccessTokenService.AccessTokenData(
+                                WALLET_SUBJECT_ID, NONCE, null, MDL_VC_TYPE));
+        when(mockStatusListClient.getIndex(anyLong())).thenReturn(STATUS_LIST_INFORMATION);
+        when(mockExpiryCalculator.calculateExpiry(any())).thenReturn(EXPIRY_TIME);
+
+        CredentialHandler mockHandler = mock(CredentialHandler.class);
+        when(mockCredentialHandlerFactory.createHandler(MDL_VC_TYPE)).thenReturn(mockHandler);
+        when(mockHandler.buildCredential(any(), eq(mockProofJwtData), any()))
+                .thenReturn(CREDENTIAL);
+
+        try (MockedStatic<UUID> mockedUUID = mockStatic(UUID.class)) {
+            mockedUUID.when(UUID::randomUUID).thenReturn(NOTIFICATION_ID);
+
+            credentialService.getCredential(mockAccessToken, mockProofJwt);
+        }
+
+        ArgumentCaptor<StoredCredential> storedCredentialCaptor =
+                ArgumentCaptor.forClass(StoredCredential.class);
+        verify(mockDynamoDbService).saveStoredCredential(storedCredentialCaptor.capture());
+
+        // Must satisfy the /revoke/{documentId} validation pattern in RevokeResource
+        String documentId = storedCredentialCaptor.getValue().getDocumentId();
+        assertThat(documentId, matchesPattern("^[a-zA-Z0-9]{5,25}$"));
     }
 
     @Test
