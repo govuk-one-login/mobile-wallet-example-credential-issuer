@@ -516,44 +516,44 @@ Resources:
         - Key: Environment
           Value: !Sub "${Environment}"
 
-# SPOKE ECS
-WalletFEECSServiceSpoke:
-    DependsOn:
-      - WalletFELoadBalancerListenerSpoke
-    Type: 'AWS::ECS::Service'
-    Condition: DeploySpokeVpcResources
-    Properties:
-      Cluster: !Ref WalletFECluster
-      DeploymentConfiguration:
-        DeploymentCircuitBreaker:
-          Enable: TRUE
-          Rollback: TRUE
-      EnableECSManagedTags: false
-      HealthCheckGracePeriodSeconds: 60
-      LaunchType: FARGATE
-      LoadBalancers:
-        - ContainerName: app
-          ContainerPort: !Ref ContainerPort
-          TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECSSpoke
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
-          SecurityGroups:
-            - !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
-          Subnets:
-            - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdC"
-      TaskDefinition: !Ref WalletFEECSServiceTaskDefinition
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-WalletECS-spoke"
-        - Key: Product
-          Value: "GOV.UK sign in"
-        - Key: System
-          Value: "Wallet FE Stub"
-        - Key: Environment
-          Value: !Sub "${Environment}"
+  # SPOKE ECS
+  WalletFEECSServiceSpoke:
+      DependsOn:
+        - WalletFELoadBalancerListenerSpoke
+      Type: 'AWS::ECS::Service'
+      Condition: DeploySpokeVpcResources
+      Properties:
+        Cluster: !Ref WalletFECluster
+        DeploymentConfiguration:
+          DeploymentCircuitBreaker:
+            Enable: TRUE
+            Rollback: TRUE
+        EnableECSManagedTags: false
+        HealthCheckGracePeriodSeconds: 60
+        LaunchType: FARGATE
+        LoadBalancers:
+          - ContainerName: app
+            ContainerPort: !Ref ContainerPort
+            TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECSSpoke
+        NetworkConfiguration:
+          AwsvpcConfiguration:
+            AssignPublicIp: DISABLED
+            SecurityGroups:
+              - !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
+            Subnets:
+              - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdA"
+              - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdB"
+              - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdC"
+        TaskDefinition: !Ref WalletFEECSServiceTaskDefinition
+        Tags:
+          - Key: Name
+            Value: !Sub "${AWS::StackName}-WalletECS-spoke"
+          - Key: Product
+            Value: "GOV.UK sign in"
+          - Key: System
+            Value: "Wallet FE Stub"
+          - Key: Environment
+            Value: !Sub "${Environment}"
 
   WalletFEECSServiceTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
