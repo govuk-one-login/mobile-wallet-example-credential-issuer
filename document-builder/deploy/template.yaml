@@ -90,7 +90,7 @@ Mappings:
       WalletApps: "wallet-test-verifier-integration"
       OneLoginAuthServerUrl: "" # Not required as functionality to issue credential without the wallet isn't available in integration
 Resources:
-  # LEGACY SECURITY GROUPS
+  # LEGACY SECURITY GROUPS and resources - to be depracated
   WalletFELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -217,7 +217,7 @@ Resources:
       LogGroupName: !Sub /aws/ecs/${AWS::StackName}-Wallet-Stub-Front-ECS
       RetentionInDays: 14
 
-  # LEGACY LOAD BALANCER
+  # LEGACY LOAD BALANCER and resources - to be depracated
   WalletFELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
     Properties:
@@ -349,6 +349,7 @@ Resources:
       Description: !Sub "Wallet Stub Frontend API. ${AWS::StackName}"
       ProtocolType: HTTP
 
+  # LEGACY INTEGRATION - to be depracated
   WalletFEApiGwHttpEndpointIntegration:
     Type: 'AWS::ApiGatewayV2::Integration'
     Properties:
@@ -359,6 +360,23 @@ Resources:
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletFELoadBalancerListener
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletFEFrontCustomDomain
+
+  # SPOKE INTEGRATION
+    WalletFEApiGwHttpEndpointIntegrationSpoke:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Properties:
+      ApiId: !Ref WalletFEApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref WalletFELoadBalancerListenerSpoke
       PayloadFormatVersion: '1.0'
       RequestParameters:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
@@ -440,6 +458,7 @@ Resources:
         - Key: Environment
           Value: !Sub "${Environment}"
 
+ # LEGACY ECESSERVICE - to be depracated
   WalletFEECSService:
     DependsOn:
       - WalletFELoadBalancerListener
@@ -470,6 +489,44 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub "${AWS::StackName}-WalletECS"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet FE Stub"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+
+# SPOKE ECS
+WalletFEECSServiceSpoke:
+    DependsOn:
+      - WalletFELoadBalancerListener
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref WalletFECluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECS
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
+          Subnets:
+            - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdC"
+      TaskDefinition: !Ref WalletFEECSServiceTaskDefinition
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletECS-spoke"
         - Key: Product
           Value: "GOV.UK sign in"
         - Key: System
