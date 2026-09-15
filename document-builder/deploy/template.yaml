@@ -16,9 +16,14 @@ Parameters:
       - "integration"
   LegacyVpcStackName:
     Description: >
-      The name of the stack that defines the VPC in which this container will run.
+      The name of the stack that defines the legacy vpc which will son be depracated.
     Type: String
     Default: vpc
+  MigrationSpokeVpcStackName:
+    Description: >
+      The name of the stack that defines the spoke-VPC which we are migrating our services to.
+    Type: String
+    Default: spoke-vpc
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
     Type: String
