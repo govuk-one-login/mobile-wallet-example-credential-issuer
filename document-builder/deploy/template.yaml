@@ -541,9 +541,9 @@ Resources:
             SecurityGroups:
               - !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
             Subnets:
-              - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdA"
-              - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdB"
-              - Fn::ImportValue: !Sub "${MigrateSpokeVpcStackName}-ProtectedSubnetIdC"
+              - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdA"
+              - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdB"
+              - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdC"
         TaskDefinition: !Ref WalletFEECSServiceTaskDefinition
         Tags:
           - Key: Name
