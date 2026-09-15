@@ -93,6 +93,7 @@ Resources:
   # LEGACY SECURITY GROUPS and resources - to be depracated
   WalletFELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub Front LoadBalancer Security Group
@@ -107,6 +108,7 @@ Resources:
 
   WalletFELoadBalancerSGEgressToECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroupEgress'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupId: !GetAtt WalletFELoadBalancerSG.GroupId
       IpProtocol: tcp
@@ -118,6 +120,7 @@ Resources:
 
   WalletFEECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub Front ECS Security Group permitting outbound to https.
@@ -132,6 +135,7 @@ Resources:
 
   WalletFEECSSecurityGroupIngressFromLoadBalancer:
     Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: DeployLegacyVpcResources
     Properties:
       IpProtocol: tcp
       Description: >-
@@ -144,6 +148,7 @@ Resources:
   # SPOKE SECURITY GROUPS
   WalletFELoadBalancerSGSpoke:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeploySpokeVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub Front LoadBalancer Security Group (spoke vpc)
@@ -158,6 +163,7 @@ Resources:
 
   WalletFELoadBalancerSGEgressToECSSecurityGroupSpoke:
     Type: 'AWS::EC2::SecurityGroupEgress'
+    Condition: DeploySpokeVpcResources
     Properties:
       GroupId: !GetAtt WalletFELoadBalancerSGSpoke.GroupId
       IpProtocol: tcp
@@ -169,6 +175,7 @@ Resources:
 
   WalletFEECSSecurityGroupSpoke:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeploySpokeVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub Front ECS Security Group permitting outbound to https (spoke vpc)
@@ -183,6 +190,7 @@ Resources:
 
   WalletFEECSSecurityGroupIngressFromLoadBalancerSpoke:
     Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: DeploySpokeVpcResources
     Properties:
       IpProtocol: tcp
       Description: >-
@@ -220,6 +228,7 @@ Resources:
   # LEGACY LOAD BALANCER and resources - to be depracated
   WalletFELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Condition: DeployLegacyVpcResources
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -248,6 +257,7 @@ Resources:
 
   WalletFELoadBalancerListenerTargetGroupECS:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
@@ -268,6 +278,7 @@ Resources:
 
   WalletFELoadBalancerListener:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Condition: DeployLegacyVpcResources
     Properties:
       DefaultActions:
         - TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECS
@@ -282,6 +293,7 @@ Resources:
   # SPOKE LOAD BALANCER
   WalletFELoadBalancerSpoke:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Condition: DeploySpokeVpcResources
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -310,6 +322,7 @@ Resources:
 
   WalletFELoadBalancerListenerTargetGroupECSSpoke:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Condition: DeploySpokeVpcResources
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
@@ -330,6 +343,7 @@ Resources:
 
   WalletFELoadBalancerListenerSpoke:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Condition: DeploySpokeVpcResources
     Properties:
       DefaultActions:
         - TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECSSpoke
@@ -352,6 +366,7 @@ Resources:
   # LEGACY INTEGRATION - to be depracated
   WalletFEApiGwHttpEndpointIntegration:
     Type: 'AWS::ApiGatewayV2::Integration'
+    Condition: DeployLegacyVpcResources
     Properties:
       ApiId: !Ref WalletFEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
@@ -369,6 +384,7 @@ Resources:
   # SPOKE INTEGRATION
     WalletFEApiGwHttpEndpointIntegrationSpoke:
     Type: 'AWS::ApiGatewayV2::Integration'
+    Condition: DeploySpokeVpcResources
     Properties:
       ApiId: !Ref WalletFEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
@@ -463,6 +479,7 @@ Resources:
     DependsOn:
       - WalletFELoadBalancerListener
     Type: 'AWS::ECS::Service'
+    Condition: DeployLegacyVpcResources
     Properties:
       Cluster: !Ref WalletFECluster
       DeploymentConfiguration:
@@ -499,8 +516,9 @@ Resources:
 # SPOKE ECS
 WalletFEECSServiceSpoke:
     DependsOn:
-      - WalletFELoadBalancerListener
+      - WalletFELoadBalancerListenerSpoke
     Type: 'AWS::ECS::Service'
+    Condition: DeploySpokeVpcResources
     Properties:
       Cluster: !Ref WalletFECluster
       DeploymentConfiguration:
