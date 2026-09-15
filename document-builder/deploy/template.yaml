@@ -51,6 +51,14 @@ Conditions:
           - !Ref PermissionsBoundary
           - "none"
 
+  DeployLegacyVpcResources: !Or
+    - !Equals [!Ref Environment, dev]
+    - !Equals [!Ref Environment, build]
+    - !Equals [!Ref Environment, staging]
+    - !Equals [!Ref Environment, integration]
+
+  DeploySpokeVpcResources: !Equals [!Ref Environment, dev]
+
 Mappings:
   EnvironmentVariables:
     dev:
