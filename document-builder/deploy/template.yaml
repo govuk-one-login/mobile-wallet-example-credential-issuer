@@ -90,7 +90,7 @@ Mappings:
       WalletApps: "wallet-test-verifier-integration"
       OneLoginAuthServerUrl: "" # Not required as functionality to issue credential without the wallet isn't available in integration
 Resources:
-  # SECURITY GROUPS
+  # LEGACY SECURITY GROUPS
   WalletFELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -139,6 +139,57 @@ Resources:
       FromPort: !Ref ContainerPort
       ToPort: !Ref ContainerPort
       GroupId: !GetAtt WalletFEECSSecurityGroup.GroupId
+      SourceSecurityGroupId: !GetAtt WalletFELoadBalancerSG.GroupId
+  
+  # SPOKE SECURITY GROUPS
+  WalletFELoadBalancerSGSpoke:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub Front LoadBalancer Security Group (spoke vpc)
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+
+  WalletFELoadBalancerSGEgressToECSSecurityGroupSpoke:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !GetAtt WalletFELoadBalancerSGSpoke.GroupId
+      IpProtocol: tcp
+      Description: >-
+        Egress between the Wallet Stub FE Front load balancer and the Wallet Stub FE Front ECS security group (spoke vpc)
+      DestinationSecurityGroupId: !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+
+  WalletFEECSSecurityGroupSpoke:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub Front ECS Security Group permitting outbound to https (spoke vpc)
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow HTTPS outbound only
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+
+  WalletFEECSSecurityGroupIngressFromLoadBalancerSpoke:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      IpProtocol: tcp
+      Description: >-
+        Wallet Stub FE ECS permits inbound from the Wallet Stub Front load balancer (spoke vpc)
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
       SourceSecurityGroupId: !GetAtt WalletFELoadBalancerSG.GroupId
 
   # ACCESS LOGS
