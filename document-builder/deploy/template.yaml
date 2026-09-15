@@ -201,7 +201,7 @@ Resources:
       FromPort: !Ref ContainerPort
       ToPort: !Ref ContainerPort
       GroupId: !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
-      SourceSecurityGroupId: !GetAtt WalletFELoadBalancerSG.GroupId
+      SourceSecurityGroupId: !GetAtt WalletFELoadBalancerSGSpoke.GroupId
 
   # ACCESS LOGS
   WalletFEAPIGWAccessLogsGroup:
