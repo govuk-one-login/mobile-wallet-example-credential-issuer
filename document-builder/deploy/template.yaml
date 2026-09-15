@@ -534,7 +534,7 @@ WalletFEECSServiceSpoke:
       LoadBalancers:
         - ContainerName: app
           ContainerPort: !Ref ContainerPort
-          TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECS
+          TargetGroupArn: !Ref WalletFELoadBalancerListenerTargetGroupECSSpoke
       NetworkConfiguration:
         AwsvpcConfiguration:
           AssignPublicIp: DISABLED
