@@ -14,7 +14,7 @@ Parameters:
       - "build"
       - "staging"
       - "integration"
-  VpcStackName:
+  LegacyVpcStackName:
     Description: >
       The name of the stack that defines the VPC in which this container will run.
     Type: String
@@ -90,7 +90,7 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
 
   WalletFELoadBalancerSGEgressToECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroupEgress'
@@ -115,7 +115,7 @@ Resources:
           FromPort: 443
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
 
   WalletFEECSSecurityGroupIngressFromLoadBalancer:
     Type: 'AWS::EC2::SecurityGroupIngress'
@@ -163,9 +163,9 @@ Resources:
       SecurityGroups:
         - !GetAtt WalletFELoadBalancerSG.GroupId
       Subnets:
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdC"
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -201,7 +201,7 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
@@ -233,7 +233,7 @@ Resources:
       ApiId: !Ref WalletFEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcLinkId"
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletFELoadBalancerListener
@@ -341,9 +341,9 @@ Resources:
           SecurityGroups:
             - !GetAtt WalletFEECSSecurityGroup.GroupId
           Subnets:
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdC"
       TaskDefinition: !Ref WalletFEECSServiceTaskDefinition
       Tags:
         - Key: Name
