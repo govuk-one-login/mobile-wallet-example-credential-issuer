@@ -422,6 +422,7 @@ Resources:
   # LEGACY API INTEGRATION - soon to be depracated
   WalletBEApiGwHttpEndpointIntegration:
     Type: 'AWS::ApiGatewayV2::Integration'
+    Condition: DeployLegacyVpcResources
     Properties:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
@@ -439,6 +440,7 @@ Resources:
   # SPOKE API INTEGRATION
   WalletBEApiGwHttpEndpointIntegrationSpoke:
     Type: 'AWS::ApiGatewayV2::Integration'
+    Condition: DeploySpokeVpcResources
     Properties:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
