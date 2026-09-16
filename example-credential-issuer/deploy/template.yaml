@@ -73,6 +73,8 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
+  MigrateTrafficToSpokeVpc: !Equals [!Ref Environment, dev] 
+
 Mappings:
   EnvironmentVariables:
     dev:
@@ -400,6 +402,7 @@ Resources:
       Description: !Sub "Wallet Stub Backend API. ${AWS::StackName}"
       ProtocolType: HTTP
 
+  # LEGACY API INTEGRATION - soon to be depracated
   WalletBEApiGwHttpEndpointIntegration:
     Type: 'AWS::ApiGatewayV2::Integration'
     Properties:
@@ -410,6 +413,40 @@ Resources:
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletBELoadBalancerListener
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletBECustomDomain
+    
+  # LEGACY API INTEGRATION - soon to be depracated
+  WalletBEApiGwHttpEndpointIntegration:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref WalletBELoadBalancerListener
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletBECustomDomain
+
+  # SPOKE API INTEGRATION
+  WalletBEApiGwHttpEndpointIntegrationSpoke:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref WalletBELoadBalancerListenerSpoke
       PayloadFormatVersion: '1.0'
       RequestParameters:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
