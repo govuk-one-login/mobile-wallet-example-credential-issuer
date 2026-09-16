@@ -14,9 +14,14 @@ Parameters:
       - "build"
       - "staging"
       - "integration"
-  VpcStackName:
+  LegacyVpcStackName:
     Description: >
-      The name of the stack that defines the VPC in which this container will run.
+      The name of the legacy vpc in which this container will be deployed - soon to be depractated.
+    Type: String
+    Default: vpc
+  MigrationSpokeVpcStackName:
+    Description: >
+      The name of the spoke vpc in which this container will be deployed, after migration.
     Type: String
     Default: vpc
   PermissionsBoundary:
@@ -99,7 +104,7 @@ Mappings:
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:228170791542:certificate-authority/a25b18b1-2a1f-4ff0-91c0-cd65a49c948e
       StatusListUrl: "status-list-mock.wallet-onboarding.integration.account.gov.uk"
 Resources:
-  # SECURITY GROUPS
+  # LEGACY SECURITY GROUPS - soon to be depracated
   WalletBELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
     Properties:
@@ -112,7 +117,7 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
 
   WalletBELoadBalancerSGEgressToECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroupEgress'
@@ -137,7 +142,7 @@ Resources:
           FromPort: 443
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
 
   WalletBEECSSecurityGroupIngressFromLoadBalancer:
     Type: 'AWS::EC2::SecurityGroupIngress'
@@ -150,6 +155,58 @@ Resources:
       GroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
       SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSG.GroupId
 
+  # SPOKE SECURITY GROUPS - soon to be depracated
+  WalletBELoadBalancerSGSpoke:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub BE LoadBalancer Security Group - spoke-vpc
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+
+  WalletBELoadBalancerSGEgressToECSSecurityGroupSpoke:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Properties:
+      GroupId: !GetAtt WalletBELoadBalancerSGSpoke.GroupId
+      IpProtocol: tcp
+      Description: >-
+        Egress between the Wallet Stub BE load balancer and the Wallet Stub BE ECS security group - spoke-vpc
+      DestinationSecurityGroupId: !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+
+  WalletBEECSSecurityGroupSpoke:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: >-
+        Wallet Stub BE ECS Security Group permitting outbound to HTTPs - spoke-vpc
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow HTTPS outbound only
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+
+  WalletBEECSSecurityGroupIngressFromLoadBalancerSpoke:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      IpProtocol: tcp
+      Description: >-
+        Wallet Stub BE ECS permits inbound from the Wallet Stub BE load balancer - spoke-vpc
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
+      SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSGSpoke.GroupId
+      
+  # **************************************
   # ACCESS LOGS
   WalletBEAPIGWAccessLogsGroup:
     Type: AWS::Logs::LogGroup
@@ -187,16 +244,14 @@ Resources:
   # LOAD BALANCER
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
     Properties:
       Scheme: internal
       SecurityGroups:
         - !GetAtt WalletBELoadBalancerSG.GroupId
       Subnets:
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdC"
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -207,8 +262,6 @@ Resources:
           Value: !Sub wallet-stub-back-${Environment}
         - Key: idle_timeout.timeout_seconds
           Value: 60
-        - Key: deletion_protection.enabled
-          Value: true
         - Key: routing.http.drop_invalid_header_fields.enabled
           Value: true
       Tags:
@@ -232,7 +285,7 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
@@ -264,7 +317,7 @@ Resources:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcLinkId"
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletBELoadBalancerListener
@@ -372,9 +425,9 @@ Resources:
           SecurityGroups:
             - !GetAtt WalletBEECSSecurityGroup.GroupId
           Subnets:
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdC"
       TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
       Tags:
         - Key: Name
