@@ -173,6 +173,7 @@ Resources:
   # SPOKE SECURITY GROUPS - soon to be depracated
   WalletBELoadBalancerSGSpoke:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeploySpokeVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub BE LoadBalancer Security Group - spoke-vpc
@@ -187,6 +188,7 @@ Resources:
 
   WalletBELoadBalancerSGEgressToECSSecurityGroupSpoke:
     Type: 'AWS::EC2::SecurityGroupEgress'
+    Condition: DeploySpokeVpcResources
     Properties:
       GroupId: !GetAtt WalletBELoadBalancerSGSpoke.GroupId
       IpProtocol: tcp
@@ -198,6 +200,7 @@ Resources:
 
   WalletBEECSSecurityGroupSpoke:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeploySpokeVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub BE ECS Security Group permitting outbound to HTTPs - spoke-vpc
@@ -212,6 +215,7 @@ Resources:
 
   WalletBEECSSecurityGroupIngressFromLoadBalancerSpoke:
     Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: DeploySpokeVpcResources
     Properties:
       IpProtocol: tcp
       Description: >-
@@ -324,6 +328,7 @@ Resources:
   # SPOKE LOAD BALANCER - soon to be depracated
   WalletBELoadBalancerSpoke:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Condition: DeploySpokeVpcResources
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -352,6 +357,7 @@ Resources:
 
   WalletBELoadBalancerListenerTargetGroupECSSpoke:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Condition: DeploySpokeVpcResources
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
@@ -372,6 +378,7 @@ Resources:
 
   WalletBELoadBalancerListenerSpoke:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Condition: DeploySpokeVpcResources
     Properties:
       DefaultActions:
         - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECSSpoke
@@ -527,6 +534,7 @@ Resources:
     DependsOn:
       - WalletBELoadBalancerListenerSpoke
     Type: 'AWS::ECS::Service'
+    Condition: DeploySpokeVpcResources
     Properties:
       Cluster: !Ref WalletBECluster
       DeploymentConfiguration:
