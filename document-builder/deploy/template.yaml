@@ -416,7 +416,10 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !Ref WalletFEApiGwHttpEndpointIntegration
+          - !If
+            - MigrateTrafficToSpokeVpc
+            - !Ref WalletFEApiGwHttpEndpointIntegrationSpoke
+            - !Ref WalletFEApiGwHttpEndpointIntegration
 
   WalletFEAPIStageDefault:
     Type: 'AWS::ApiGatewayV2::Stage'
