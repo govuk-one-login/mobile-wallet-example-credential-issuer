@@ -373,7 +373,6 @@ Resources:
       ProtocolType: HTTP
 
   # LEGACY INTEGRATION - to be depracated
-  
   WalletFEApiGwHttpEndpointIntegration:
     Type: 'AWS::ApiGatewayV2::Integration'
     Condition: DeployLegacyVpcResources
@@ -385,6 +384,24 @@ Resources:
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletFELoadBalancerListener
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletFEFrontCustomDomain
+
+    # SPOKE INTEGRATION
+  WalletFEApiGwHttpEndpointIntegrationSpoke:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      ApiId: !Ref WalletFEApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref WalletFELoadBalancerListenerSpoke
       PayloadFormatVersion: '1.0'
       RequestParameters:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
