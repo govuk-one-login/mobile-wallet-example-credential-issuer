@@ -63,10 +63,8 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
-  MigrateTrafficToSpokeVpc: !Or
-    - !Equals [!Ref Environment, dev]
-    - !Equals [!Ref Environment, build]
-    - !Equals [!Ref Environment, integration]
+  MigrateTrafficToSpokeVpc: !Equals [!Ref Environment, dev]
+
 
 Mappings:
   EnvironmentVariables:
