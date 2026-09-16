@@ -465,6 +465,7 @@ Resources:
         - Key: Environment
           Value: !Sub "${Environment}"
 
+  # LEGACY ESC SERVICE - soon to be depracated
   WalletBEECSService:
     DependsOn:
       - WalletBELoadBalancerListener
@@ -501,6 +502,45 @@ Resources:
           Value: "Wallet BE Stub"
         - Key: Environment
           Value: !Sub "${Environment}"
+
+  # SPOKE ESC SERVICE
+  WalletBEECSServiceSpoke:
+    DependsOn:
+      - WalletBELoadBalancerListenerSpoke
+    Type: 'AWS::ECS::Service'
+    Properties:
+      Cluster: !Ref WalletBECluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECSSpoke
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
+          Subnets:
+            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdC"
+      TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletECS-spoke"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet BE Stub"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+  # ************************************** 
 
   WalletBEECSServiceTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
