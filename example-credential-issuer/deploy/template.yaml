@@ -61,6 +61,17 @@ Conditions:
           - !Ref PermissionsBoundary
           - "none"
 
+  DeployLegacyVpcResources: !Or
+    - !Equals [!Ref Environment, dev]
+    - !Equals [!Ref Environment, build]
+    - !Equals [!Ref Environment, staging]
+    - !Equals [!Ref Environment, integration]
+
+  DeploySpokeVpcResources: !Or
+    - !Equals [!Ref Environment, dev]
+    - !Equals [!Ref Environment, build]
+    - !Equals [!Ref Environment, integration]
+
 Mappings:
   EnvironmentVariables:
     dev:
@@ -107,6 +118,7 @@ Resources:
   # LEGACY SECURITY GROUPS - soon to be depracated
   WalletBELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub BE LoadBalancer Security Group
@@ -121,6 +133,7 @@ Resources:
 
   WalletBELoadBalancerSGEgressToECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroupEgress'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupId: !GetAtt WalletBELoadBalancerSG.GroupId
       IpProtocol: tcp
@@ -132,6 +145,7 @@ Resources:
 
   WalletBEECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub BE ECS Security Group permitting outbound to HTTPs.
@@ -146,6 +160,7 @@ Resources:
 
   WalletBEECSSecurityGroupIngressFromLoadBalancer:
     Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: DeployLegacyVpcResources
     Properties:
       IpProtocol: tcp
       Description: >-
@@ -244,6 +259,7 @@ Resources:
   # LEGACY LOAD BALANCER - soon to be depracated
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Condition: DeployLegacyVpcResources
     Properties:
       Scheme: internal
       SecurityGroups:
@@ -272,6 +288,7 @@ Resources:
 
   WalletBELoadBalancerListenerTargetGroupECS:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
@@ -292,6 +309,7 @@ Resources:
 
   WalletBELoadBalancerListener:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Condition: DeployLegacyVpcResources
     Properties:
       DefaultActions:
         - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
@@ -470,6 +488,7 @@ Resources:
     DependsOn:
       - WalletBELoadBalancerListener
     Type: 'AWS::ECS::Service'
+    Condition: DeployLegacyVpcResources
     Properties:
       Cluster: !Ref WalletBECluster
       DeploymentConfiguration:
