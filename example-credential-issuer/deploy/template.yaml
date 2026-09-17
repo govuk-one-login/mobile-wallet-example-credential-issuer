@@ -14,9 +14,14 @@ Parameters:
       - "build"
       - "staging"
       - "integration"
-  VpcStackName:
+  LegacyVpcStackName:
     Description: >
-      The name of the stack that defines the VPC in which this container will run.
+      The name of the legacy vpc in which this container will be deployed - soon to be depractated.
+    Type: String
+    Default: vpc
+  MigrationSpokeVpcStackName:
+    Description: >
+      The name of the spoke vpc in which this container will be deployed, after migration.
     Type: String
     Default: vpc
   PermissionsBoundary:
@@ -55,6 +60,22 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
+
+  DeployLegacyVpcResources: !Or
+    - !Equals [!Ref Environment, dev]
+    - !Equals [!Ref Environment, build]
+    - !Equals [!Ref Environment, staging]
+    - !Equals [!Ref Environment, integration]
+
+  DeploySpokeVpcResources: !Or
+    - !Equals [!Ref Environment, dev]
+    - !Equals [!Ref Environment, build]
+    - !Equals [!Ref Environment, staging]
+    - !Equals [!Ref Environment, integration]
+
+  MigrateTrafficToSpokeVpc: !Or 
+    - !Equals [!Ref Environment, dev]
+    - !Equals [!Ref Environment, integration]
 
 Mappings:
   EnvironmentVariables:
@@ -99,9 +120,10 @@ Mappings:
       CertificateAuthorityArn: arn:aws:acm-pca:eu-west-2:228170791542:certificate-authority/a25b18b1-2a1f-4ff0-91c0-cd65a49c948e
       StatusListUrl: "status-list-mock.wallet-onboarding.integration.account.gov.uk"
 Resources:
-  # SECURITY GROUPS
+  # LEGACY SECURITY GROUPS - soon to be depracated
   WalletBELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub BE LoadBalancer Security Group
@@ -112,10 +134,11 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
 
   WalletBELoadBalancerSGEgressToECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroupEgress'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupId: !GetAtt WalletBELoadBalancerSG.GroupId
       IpProtocol: tcp
@@ -127,6 +150,7 @@ Resources:
 
   WalletBEECSSecurityGroup:
     Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       GroupDescription: >-
         Wallet Stub BE ECS Security Group permitting outbound to HTTPs.
@@ -137,10 +161,11 @@ Resources:
           FromPort: 443
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
 
   WalletBEECSSecurityGroupIngressFromLoadBalancer:
     Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: DeployLegacyVpcResources
     Properties:
       IpProtocol: tcp
       Description: >-
@@ -150,6 +175,62 @@ Resources:
       GroupId: !GetAtt WalletBEECSSecurityGroup.GroupId
       SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSG.GroupId
 
+  # SPOKE SECURITY GROUPS - soon to be depracated
+  WalletBELoadBalancerSGSpoke:
+    Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      GroupDescription: >-
+        Wallet Stub BE LoadBalancer Security Group - spoke-vpc
+      SecurityGroupIngress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow from anyone on port 443
+          FromPort: 443
+          IpProtocol: tcp
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+
+  WalletBELoadBalancerSGEgressToECSSecurityGroupSpoke:
+    Type: 'AWS::EC2::SecurityGroupEgress'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      GroupId: !GetAtt WalletBELoadBalancerSGSpoke.GroupId
+      IpProtocol: tcp
+      Description: >-
+        Egress between the Wallet Stub BE load balancer and the Wallet Stub BE ECS security group - spoke-vpc
+      DestinationSecurityGroupId: !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+
+  WalletBEECSSecurityGroupSpoke:
+    Type: 'AWS::EC2::SecurityGroup'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      GroupDescription: >-
+        Wallet Stub BE ECS Security Group permitting outbound to HTTPs - spoke-vpc
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          Description: Allow HTTPS outbound only
+          IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+      VpcId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+
+  WalletBEECSSecurityGroupIngressFromLoadBalancerSpoke:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      IpProtocol: tcp
+      Description: >-
+        Wallet Stub BE ECS permits inbound from the Wallet Stub BE load balancer - spoke-vpc
+      FromPort: !Ref ContainerPort
+      ToPort: !Ref ContainerPort
+      GroupId: !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
+      SourceSecurityGroupId: !GetAtt WalletBELoadBalancerSGSpoke.GroupId
+
+  # **************************************
   # ACCESS LOGS
   WalletBEAPIGWAccessLogsGroup:
     Type: AWS::Logs::LogGroup
@@ -184,19 +265,18 @@ Resources:
   #      FilterPattern: ""
   #      LogGroupName: !Ref WalletBEECSAccessLogsGroup
 
-  # LOAD BALANCER
+  # LEGACY LOAD BALANCER - soon to be depracated
   WalletBELoadBalancer:
     Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
-    DeletionPolicy: Retain
-    UpdateReplacePolicy: Retain
+    Condition: DeployLegacyVpcResources
     Properties:
       Scheme: internal
       SecurityGroups:
         - !GetAtt WalletBELoadBalancerSG.GroupId
       Subnets:
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
-        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${LegacyVpcStackName}-PrivateSubnetIdC"
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -207,8 +287,6 @@ Resources:
           Value: !Sub wallet-stub-back-${Environment}
         - Key: idle_timeout.timeout_seconds
           Value: 60
-        - Key: deletion_protection.enabled
-          Value: true
         - Key: routing.http.drop_invalid_header_fields.enabled
           Value: true
       Tags:
@@ -219,6 +297,7 @@ Resources:
 
   WalletBELoadBalancerListenerTargetGroupECS:
     Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Condition: DeployLegacyVpcResources
     Properties:
       HealthCheckEnabled: TRUE
       HealthCheckProtocol: HTTP
@@ -232,13 +311,14 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcId"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
 
   WalletBELoadBalancerListener:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Condition: DeployLegacyVpcResources
     Properties:
       DefaultActions:
         - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
@@ -250,6 +330,72 @@ Resources:
         - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
       SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
 
+  # SPOKE LOAD BALANCER - soon to be depracated
+  WalletBELoadBalancerSpoke:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      Scheme: internal
+      SecurityGroups:
+        - !GetAtt WalletBELoadBalancerSGSpoke.GroupId
+      Subnets:
+        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdC"
+      Type: application
+      LoadBalancerAttributes:
+        - Key: access_logs.s3.enabled
+          Value: true
+        - Key: access_logs.s3.bucket
+          Value: !Sub di-lb-access-logs-${AWS::AccountId}-${AWS::Region}
+        - Key: access_logs.s3.prefix
+          Value: !Sub wallet-stub-back-spoke-${Environment}
+        - Key: idle_timeout.timeout_seconds
+          Value: 60
+        - Key: routing.http.drop_invalid_header_fields.enabled
+          Value: true
+      Tags:
+        - Key: FMSRegionalPolicy
+          Value: false
+        - Key: CustomPolicy
+          Value: true
+
+  WalletBELoadBalancerListenerTargetGroupECSSpoke:
+    Type: 'AWS::ElasticLoadBalancingV2::TargetGroup'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      HealthCheckEnabled: TRUE
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: "/healthcheck"
+      HealthCheckTimeoutSeconds: 2
+      HealthCheckIntervalSeconds: 60
+      HealthyThresholdCount: 2
+      Matcher:
+        HttpCode: 200-499
+      Port: 80
+      Protocol: HTTP
+      TargetType: ip
+      VpcId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+      TargetGroupAttributes:
+        - Key: deregistration_delay.timeout_seconds
+          Value: 60
+
+  WalletBELoadBalancerListenerSpoke:
+    Type: 'AWS::ElasticLoadBalancingV2::Listener'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      DefaultActions:
+        - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECSSpoke
+          Type: forward
+      LoadBalancerArn: !Ref WalletBELoadBalancerSpoke
+      Port: 443
+      Protocol: HTTPS
+      Certificates:
+        - CertificateArn: !Sub "{{resolve:ssm:/${Environment}/Platform/ACM/PrimaryZoneWildcardCertificateARN}}"
+      SslPolicy: ELBSecurityPolicy-TLS13-1-2-2021-06
+  # **************************************    
+
   # API GATEWAY
   WalletBEApiGwHttpEndpoint:
     Type: 'AWS::ApiGatewayV2::Api'
@@ -258,16 +404,53 @@ Resources:
       Description: !Sub "Wallet Stub Backend API. ${AWS::StackName}"
       ProtocolType: HTTP
 
+  # LEGACY API INTEGRATION - soon to be depracated
   WalletBEApiGwHttpEndpointIntegration:
     Type: 'AWS::ApiGatewayV2::Integration'
     Properties:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId:
-        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcLinkId"
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletBELoadBalancerListener
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletBECustomDomain
+    
+  # LEGACY API INTEGRATION - soon to be depracated
+  WalletBEApiGwHttpEndpointIntegration:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Condition: DeployLegacyVpcResources
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref WalletBELoadBalancerListener
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
+      TlsConfig:
+        ServerNameToVerify: !Ref WalletBECustomDomain
+
+  # SPOKE API INTEGRATION
+  WalletBEApiGwHttpEndpointIntegrationSpoke:
+    Type: 'AWS::ApiGatewayV2::Integration'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      ApiId: !Ref WalletBEApiGwHttpEndpoint
+      IntegrationType: HTTP_PROXY
+      ConnectionId:
+        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcLinkId"
+      ConnectionType: VPC_LINK
+      IntegrationMethod: ANY
+      IntegrationUri: !Ref WalletBELoadBalancerListenerSpoke
       PayloadFormatVersion: '1.0'
       RequestParameters:
         overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
@@ -282,7 +465,10 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !Ref WalletBEApiGwHttpEndpointIntegration
+          - !If
+            - MigrateTrafficToSpokeVpc
+            - !Ref WalletBEApiGwHttpEndpointIntegrationSpoke
+            - !Ref WalletBEApiGwHttpEndpointIntegration
 
   WalletBEAPIStageDefault:
     Type: 'AWS::ApiGatewayV2::Stage'
@@ -349,10 +535,12 @@ Resources:
         - Key: Environment
           Value: !Sub "${Environment}"
 
+  # LEGACY ESC SERVICE - soon to be depracated
   WalletBEECSService:
     DependsOn:
       - WalletBELoadBalancerListener
     Type: 'AWS::ECS::Service'
+    Condition: DeployLegacyVpcResources
     Properties:
       Cluster: !Ref WalletBECluster
       DeploymentConfiguration:
@@ -372,9 +560,9 @@ Resources:
           SecurityGroups:
             - !GetAtt WalletBEECSSecurityGroup.GroupId
           Subnets:
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdC"
       TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
       Tags:
         - Key: Name
@@ -385,6 +573,46 @@ Resources:
           Value: "Wallet BE Stub"
         - Key: Environment
           Value: !Sub "${Environment}"
+
+  # SPOKE ESC SERVICE
+  WalletBEECSServiceSpoke:
+    DependsOn:
+      - WalletBELoadBalancerListenerSpoke
+    Type: 'AWS::ECS::Service'
+    Condition: DeploySpokeVpcResources
+    Properties:
+      Cluster: !Ref WalletBECluster
+      DeploymentConfiguration:
+        DeploymentCircuitBreaker:
+          Enable: TRUE
+          Rollback: TRUE
+      EnableECSManagedTags: false
+      HealthCheckGracePeriodSeconds: 60
+      LaunchType: FARGATE
+      LoadBalancers:
+        - ContainerName: app
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECSSpoke
+      NetworkConfiguration:
+        AwsvpcConfiguration:
+          AssignPublicIp: DISABLED
+          SecurityGroups:
+            - !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
+          Subnets:
+            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdC"
+      TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
+      Tags:
+        - Key: Name
+          Value: !Sub "${AWS::StackName}-WalletECS-spoke"
+        - Key: Product
+          Value: "GOV.UK sign in"
+        - Key: System
+          Value: "Wallet BE Stub"
+        - Key: Environment
+          Value: !Sub "${Environment}"
+  # ************************************** 
 
   WalletBEECSServiceTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
