@@ -8,6 +8,8 @@ import {
 import { ValidationResult } from "../../types/ValidationResult";
 import { CUSTOM_CREDENTIAL_TTL } from "../../config/credentialTtl";
 
+export const ALLOWED_ISSUING_AUTHORITIES = ["DVLA", "GDS"] as const;
+
 export function validateDrivingLicenceForm(
   body: DrivingLicenceRequestBody,
 ): ValidationResult {
@@ -45,6 +47,14 @@ export function validateDrivingLicenceForm(
     Number.isNaN(Number(body.expectedUpdateDays))
   ) {
     errors.expected_update = "Enter a number";
+  }
+
+  if (
+    !ALLOWED_ISSUING_AUTHORITIES.includes(
+      body.issuing_authority as (typeof ALLOWED_ISSUING_AUTHORITIES)[number],
+    )
+  ) {
+    errors.issuing_authority = `Issuing authority must be one of: ${ALLOWED_ISSUING_AUTHORITIES.join(", ")}`;
   }
 
   return {
