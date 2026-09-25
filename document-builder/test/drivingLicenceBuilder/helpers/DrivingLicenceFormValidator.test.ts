@@ -161,4 +161,32 @@ describe("validateDrivingLicenceForm", () => {
     expect(result.isValid).toBe(true);
     expect(result.errors).toEqual({});
   });
+
+  it.each(["DVLA", "GDS"])(
+    "should return valid when issuing_authority is '%s'",
+    (issuingAuthority) => {
+      const result = validateDrivingLicenceForm({
+        ...validBody,
+        issuing_authority: issuingAuthority,
+      });
+
+      expect(result.isValid).toBe(true);
+      expect(result.errors).toEqual({});
+    },
+  );
+
+  it.each(["", "dvla", "gds", "OTHER", "MOD"])(
+    "should return an error when issuing_authority is '%s'",
+    (issuingAuthority) => {
+      const result = validateDrivingLicenceForm({
+        ...validBody,
+        issuing_authority: issuingAuthority,
+      });
+
+      expect(result.isValid).toBe(false);
+      expect(result.errors).toEqual({
+        issuing_authority: "Issuing authority must be one of: DVLA, GDS",
+      });
+    },
+  );
 });
