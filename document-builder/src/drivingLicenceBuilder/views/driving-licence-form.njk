@@ -187,17 +187,6 @@
                         }) }}
             {{ govukInput({
                 "label": {
-                    "text": "Issuing authority",
-                    "classes": "govuk-label--s"
-                },
-                "id": "issuing_authority",
-                "name": "issuing_authority",
-                "classes": "govuk-!-width-one-third",
-                "spellcheck": false,
-                "value": "DVLA"
-            }) }}
-            {{ govukInput({
-                "label": {
                     "text": "Issuing country",
                     "classes": "govuk-label--s"
                 },
@@ -440,6 +429,32 @@
                         "items": errorChoices
                         }) }}
         {% endif %}
+            <hr class="govuk-section-break govuk-section-break--m govuk-section-break--visible">
+            {{ govukRadios({
+                classes: "govuk-radios--inline",
+                idPrefix: "issuing_authority",
+                name: "issuing_authority",
+                value: "DVLA",
+                fieldset: {
+                    legend: {
+                        text: "Issuing authority",
+                        classes: "govuk-fieldset__legend--s"
+                    }
+                },
+                hint: {
+                    text: "Temporary toggle. Defaults to the current issuing authority (DVLA); switch to GDS if required."
+                },
+                items: [
+                    {
+                        value: "DVLA",
+                        text: "DVLA"
+                    },
+                    {
+                        value: "GDS",
+                        text: "GDS"
+                    }
+                ]
+            }) }}
         {% endcall %}
         {{ govukButton({"text": "Continue", "type": "Submit", "preventDoubleClick": true}) }}
     </form>
