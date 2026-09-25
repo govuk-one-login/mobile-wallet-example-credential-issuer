@@ -371,6 +371,40 @@ describe("controller.ts", () => {
       });
     });
 
+    describe("issuing_authority toggle", () => {
+      it("should store 'DVLA' by default (current value)", async () => {
+        const req = getMockReq({
+          body: buildDrivingLicenceRequestBody({ issuing_authority: "DVLA" }),
+        });
+        const { res, next } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res, next);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            data: expect.objectContaining({ issuing_authority: "DVLA" }),
+          }),
+        );
+      });
+
+      it("should store 'GDS' when the toggle is set to GDS", async () => {
+        const req = getMockReq({
+          body: buildDrivingLicenceRequestBody({ issuing_authority: "GDS" }),
+        });
+        const { res, next } = getMockRes();
+
+        await drivingLicenceBuilderPostController(config)(req, res, next);
+
+        expect(saveDocument).toHaveBeenCalledWith(
+          "testTable",
+          expect.objectContaining({
+            data: expect.objectContaining({ issuing_authority: "GDS" }),
+          }),
+        );
+      });
+    });
+
     describe("given the document and photo have been stored successfully", () => {
       describe("when an unknown error code has been received in the request body", () => {
         it("should redirect to the credential offer page with only 'org.iso.18013.5.1.mDL' in the query params", async () => {
