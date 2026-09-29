@@ -40,7 +40,7 @@ jobs:
         run: npm run test:cov
 
       - name: Perform static analysis
-        uses: sonarsource/sonarqube-scan-action@22918119ff8e1ca75a623e15c8296b6ea4fbe28f # v8.2.1
+        uses: sonarsource/sonarqube-scan-action@ba9859eae8dd6bd29e412f25ddbbef3d032000f4 # v8.2.2
         with:
           projectBaseDir: ./document-signing-certificate-issuer
         env:
@@ -56,7 +56,7 @@ jobs:
           scanMetadataReportFile: document-signing-certificate-issuer/.scannerwork/report-task.txt
 
       - name: Run Checkov
-        uses: bridgecrewio/checkov-action@a8664e3a0549367977f0cda990a34311835c87c0 # v12.3123.0
+        uses: bridgecrewio/checkov-action@444c9db6fa75e2d9c19ebf1fde7322089be9009e # v12.3125.0
         with:
           file: "document-signing-certificate-issuer/template.yaml"
           quiet: true
@@ -86,7 +86,7 @@ jobs:
           node-version-file: document-signing-certificate-issuer/.nvmrc
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@cbe3b392738ccf3f987d68400dafcf4b0624a56c # v6.2.4
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           role-to-assume: ${{ secrets.BUILD_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
           aws-region: eu-west-2
