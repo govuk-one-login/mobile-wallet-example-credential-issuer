@@ -49,11 +49,6 @@ Conditions:
 
   IsBuild: !Equals [!Ref Environment, build]
 
-  MigrateToSpokeVpc: !Or
-    - !Equals [!Ref Environment, dev]
-    - !Equals [!Ref Environment, build]
-    - !Equals [!Ref Environment, integration]
-
 Mappings:
   EnvironmentVariables:
     dev:
