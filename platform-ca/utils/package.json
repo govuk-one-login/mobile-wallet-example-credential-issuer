@@ -36,7 +36,7 @@
   },
   "overrides": {
     "brace-expansion": "5.0.9",
-    "js-yaml": "5.2.2"
+    "js-yaml": "5.4.1"
   },
   "type": "module"
 }
