@@ -210,8 +210,7 @@ Resources:
                 - xray:GetSamplingTargets
                 - xray:GetSamplingStatisticSummaries
               Resource: '*'
-      VpcConfig: !If
-        - MigrateToSpokeVpc
+      VpcConfig:
         - SecurityGroupIds:
             - !ImportValue
               Fn::Sub: ${MigrationSpokeVpcStackName}-AWSServicesEndpointSecurityGroupId
