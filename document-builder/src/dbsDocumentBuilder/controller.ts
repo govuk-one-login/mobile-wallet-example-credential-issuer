@@ -25,11 +25,7 @@ export interface DbsDocumentBuilderControllerConfig {
 export function dbsDocumentBuilderGetController({
   environment = getEnvironment(),
 }: DbsDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const showThrowError = environment !== ENVIRONMENTS.STAGE;
       res.render("dbs-document-details-form.njk", {

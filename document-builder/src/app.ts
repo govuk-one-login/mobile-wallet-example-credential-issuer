@@ -60,7 +60,7 @@ const APP_VIEWS = [
   path.resolve("node_modules/@govuk-one-login/service-header/dist/nunjucks"),
 ];
 
-export async function createApp(): Promise<express.Application> {
+export function createApp(): express.Application {
   const app: express.Application = express();
 
   app.use(generateCspNonce);

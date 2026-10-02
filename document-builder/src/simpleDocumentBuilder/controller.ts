@@ -42,11 +42,7 @@ export interface SimpleDocumentBuilderControllerConfig {
 export function simpleDocumentBuilderGetController({
   environment = getEnvironment(),
 }: SimpleDocumentBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
       res.render("simple-document-details-form.njk", {

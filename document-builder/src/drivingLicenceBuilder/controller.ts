@@ -40,11 +40,7 @@ export interface DrivingLicenceBuilderControllerConfig {
 export function drivingLicenceBuilderGetController({
   environment = getEnvironment(),
 }: DrivingLicenceBuilderControllerConfig = {}): ExpressRouteFunction {
-  return async function (
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
+  return function (req: Request, res: Response, next: NextFunction): void {
     try {
       const { defaultIssueDate, defaultExpiryDate } = getDefaultDates();
       res.render("driving-licence-form.njk", {
