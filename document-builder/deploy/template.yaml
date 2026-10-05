@@ -900,9 +900,6 @@ Resources:
   # ALARMS
   DocBuilderLowContainerTaskCountAlarm:
     Condition: IsStagingOrInt
-    DependsOn:
-      - WalletFECluster
-      - WalletFEECSService
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub "${AWS::StackName}-DocBuilderLowContainerTaskCountAlarm"
@@ -913,7 +910,6 @@ Resources:
       OKActions:
         - !ImportValue alarm-sns-topic-warning
       InsufficientDataActions: []
-      Dimensions: []
       EvaluationPeriods: 1
       DatapointsToAlarm: 1
       Threshold: 1
@@ -930,7 +926,7 @@ Resources:
                 - Name: ClusterName
                   Value: !Ref WalletFECluster
                 - Name: ServiceName
-                  Value: !GetAtt WalletFEECSService.Name
+                  Value: !GetAtt WalletFEECSServiceSpoke.Name
             Period: 60
             Stat: Minimum
 
