@@ -54,7 +54,6 @@ Conditions:
   DeployLegacyVpcResources: !Or
     - !Equals [!Ref Environment, build]
     - !Equals [!Ref Environment, staging]
-    - !Equals [!Ref Environment, integration]
 
   DeploySpokeVpcResources: !Or
     - !Equals [!Ref Environment, dev]
