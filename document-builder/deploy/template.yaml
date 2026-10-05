@@ -100,7 +100,6 @@ Mappings:
       OneLoginAuthServerUrl: "" # Not required as functionality to issue credential without the wallet isn't available in integration
 Resources:
   # LEGACY SECURITY GROUPS and resources - to be depracated
-
   WalletFELoadBalancerSG:
     Type: 'AWS::EC2::SecurityGroup'
     Condition: DeployLegacyVpcResources
