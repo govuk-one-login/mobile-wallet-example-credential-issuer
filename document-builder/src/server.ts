@@ -4,7 +4,7 @@ import { getPortNumber } from "./config/appConfig";
 import { logger } from "./middleware/logger";
 
 const port = getPortNumber();
-const server = await createApp();
+const server = createApp();
 
 server
   .listen(port, () => {
