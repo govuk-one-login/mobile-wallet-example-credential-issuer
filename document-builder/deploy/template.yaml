@@ -51,9 +51,7 @@ Conditions:
           - !Ref PermissionsBoundary
           - "none"
 
-  DeployLegacyVpcResources: !Or
-    - !Equals [!Ref Environment, build]
-    - !Equals [!Ref Environment, staging]
+  DeployLegacyVpcResources: !Equals [!Ref Environment, mock] # condition can't be empty
 
   DeploySpokeVpcResources: !Or
     - !Equals [!Ref Environment, dev]
