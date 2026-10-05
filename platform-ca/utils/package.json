@@ -12,8 +12,8 @@
   },
   "description": "",
   "dependencies": {
-    "@peculiar/asn1-schema": "^2.9.5",
-    "@peculiar/asn1-x509": "^2.9.5",
+    "@peculiar/asn1-schema": "^2.10.0",
+    "@peculiar/asn1-x509": "^2.10.0",
     "commander": "^15.0.0",
     "esbuild": "^0.28.2",
     "tsx": "^4.23.15",
@@ -26,13 +26,13 @@
     "@eslint/js": "^10.0.1",
     "globals": "^17.12.0",
     "@types/jest": "^30.0.0",
-    "@types/node": "^26.6.2",
+    "@types/node": "^26.6.3",
     "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
     "jest": "30.5.2",
     "jest-junit": "^17.0.0",
-    "prettier": "^3.9.8",
-    "ts-jest": "29.4.12"
+    "prettier": "^3.9.9",
+    "ts-jest": "29.4.14"
   },
   "overrides": {
     "brace-expansion": "5.0.9",
