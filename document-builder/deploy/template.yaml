@@ -14,12 +14,7 @@ Parameters:
       - "build"
       - "staging"
       - "integration"
-  LegacyVpcStackName:
-    Description: >
-      The name of the stack that defines the legacy vpc which will son be depracated.
-    Type: String
-    Default: vpc
-  MigrationSpokeVpcStackName:
+  VpcStackName:
     Description: >
       The name of the stack that defines the spoke-VPC which we are migrating our services to.
     Type: String
@@ -50,13 +45,6 @@ Conditions:
       - Fn::Equals:
           - !Ref PermissionsBoundary
           - "none"
-
-  MigrateTrafficToSpokeVpc: !Or
-    - !Equals [!Ref Environment, dev]
-    - !Equals [!Ref Environment, build]
-    - !Equals [!Ref Environment, staging]
-    - !Equals [!Ref Environment, integration]
-
 
 Mappings:
   EnvironmentVariables:
@@ -103,7 +91,7 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletFELoadBalancerSGEgressToECSSecurityGroupSpoke:
     Type: 'AWS::EC2::SecurityGroupEgress'
@@ -128,7 +116,7 @@ Resources:
           FromPort: 443
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletFEECSSecurityGroupIngressFromLoadBalancerSpoke:
     Type: 'AWS::EC2::SecurityGroupIngress'
@@ -174,9 +162,9 @@ Resources:
       SecurityGroups:
         - !GetAtt WalletFELoadBalancerSGSpoke.GroupId
       Subnets:
-        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdA"
-        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdB"
-        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdC"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -210,7 +198,7 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
@@ -243,7 +231,7 @@ Resources:
       ApiId: !Ref WalletFEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcLinkId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletFELoadBalancerListenerSpoke
@@ -261,10 +249,7 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !If
-            - MigrateTrafficToSpokeVpc
             - !Ref WalletFEApiGwHttpEndpointIntegrationSpoke
-            - !Ref WalletFEApiGwHttpEndpointIntegration
 
   WalletFEAPIStageDefault:
     Type: 'AWS::ApiGatewayV2::Stage'
@@ -355,9 +340,9 @@ Resources:
             SecurityGroups:
               - !GetAtt WalletFEECSSecurityGroupSpoke.GroupId
             Subnets:
-              - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdA"
-              - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdB"
-              - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdC"
+              - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
+              - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
+              - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
         TaskDefinition: !Ref WalletFEECSServiceTaskDefinition
         Tags:
           - Key: Name
