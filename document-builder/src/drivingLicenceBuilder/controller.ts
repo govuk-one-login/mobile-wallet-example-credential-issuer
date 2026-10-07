@@ -25,7 +25,7 @@ import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { validateDrivingLicenceForm } from "./helpers/DrivingLicenceFormValidator";
-import { ISSUING_AUTHORITY } from "./config/issuingAuthority";
+import { ISSUING_AUTHORITY } from "../config/issuingAuthority";
 import {
   CUSTOM_CREDENTIAL_TTL,
   SECONDS_IN_A_DAY,

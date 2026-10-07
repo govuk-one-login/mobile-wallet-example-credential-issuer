@@ -7,7 +7,7 @@ import {
 } from "../../utils/date";
 import { ValidationResult } from "../../types/ValidationResult";
 import { CUSTOM_CREDENTIAL_TTL } from "../../config/credentialTtl";
-import { ISSUING_AUTHORITY } from "../config/issuingAuthority";
+import { ISSUING_AUTHORITY } from "../../config/issuingAuthority";
 
 export function validateDrivingLicenceForm(
   body: DrivingLicenceRequestBody,
