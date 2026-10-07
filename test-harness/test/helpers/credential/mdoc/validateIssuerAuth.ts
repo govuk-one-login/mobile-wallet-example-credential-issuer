@@ -82,10 +82,10 @@ function validateProtectedHeader(protectedHeader: Uint8Array): void {
   }
 }
 
-async function validateUnprotectedHeader(
+function validateUnprotectedHeader(
   unprotectedHeader: Map<number, Uint8Array>,
   rootCertificatePem: string,
-): Promise<X509Certificate> {
+): X509Certificate {
   if (unprotectedHeader.size !== 1) {
     throw new MDLValidationError(
       "Unprotected header contains unexpected extra parameters - must contain only one",
