@@ -25,6 +25,7 @@ import { uploadPhoto } from "../services/s3Service";
 import { getPhoto } from "../utils/photoUtils";
 import { calculateCredentialTtlSeconds } from "../utils/calculateCredentialTtlSeconds";
 import { validateDrivingLicenceForm } from "./helpers/DrivingLicenceFormValidator";
+import { ISSUING_AUTHORITY } from "../config/issuingAuthority";
 import {
   CUSTOM_CREDENTIAL_TTL,
   SECONDS_IN_A_DAY,
@@ -71,6 +72,7 @@ export function drivingLicenceBuilderPostController({
   ): Promise<void> {
     try {
       const body: DrivingLicenceRequestBody = req.body;
+      body.issuing_authority = ISSUING_AUTHORITY;
 
       const result = validateDrivingLicenceForm(body);
       if (!result.isValid) {

@@ -3,6 +3,7 @@ import { DrivingLicenceData } from "../../types/DrivingLicenceData";
 import { DrivingPrivilege } from "../../types/DrivingPrivilege";
 import drivingPrivilegesData from "./drivingPrivileges.json";
 import { RawDrivingPrivilege } from "../types/RawDrivingPrivilege";
+import { ISSUING_AUTHORITY } from "../../config/issuingAuthority";
 
 /**
  * Builds the default data for the driving licence document for the DVS journey.
@@ -37,7 +38,7 @@ export function buildDefaultDrivingLicenceData(
     birth_place: "Birth city",
     issue_date: dateToday,
     expiry_date: dateIn30Days,
-    issuing_authority: "GDS",
+    issuing_authority: ISSUING_AUTHORITY,
     issuing_country: "GB",
     document_number: "TST" + Date.now(),
     resident_address: ["Flat test, Building X, Street test"],

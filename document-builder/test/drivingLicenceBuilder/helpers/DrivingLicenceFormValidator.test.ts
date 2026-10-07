@@ -17,7 +17,7 @@ const validBody: DrivingLicenceRequestBody = {
   "expiry-day": "01",
   "expiry-month": "01",
   "expiry-year": "2030",
-  issuing_authority: "DVLA",
+  issuing_authority: "GDS",
   issuing_country: "GB",
   document_number: "SMITH123456",
   resident_address: ["1 Test Street"],
@@ -162,20 +162,17 @@ describe("validateDrivingLicenceForm", () => {
     expect(result.errors).toEqual({});
   });
 
-  it.each(["DVLA", "GDS"])(
-    "should return valid when issuing_authority is '%s'",
-    (issuingAuthority) => {
-      const result = validateDrivingLicenceForm({
-        ...validBody,
-        issuing_authority: issuingAuthority,
-      });
+  it("should return valid when issuing_authority is 'GDS'", () => {
+    const result = validateDrivingLicenceForm({
+      ...validBody,
+      issuing_authority: "GDS",
+    });
 
-      expect(result.isValid).toBe(true);
-      expect(result.errors).toEqual({});
-    },
-  );
+    expect(result.isValid).toBe(true);
+    expect(result.errors).toEqual({});
+  });
 
-  it.each(["", "dvla", "gds", "OTHER", "MOD"])(
+  it.each(["", "DVLA", "dvla", "gds", "OTHER", "MOD"])(
     "should return an error when issuing_authority is '%s'",
     (issuingAuthority) => {
       const result = validateDrivingLicenceForm({
@@ -185,7 +182,7 @@ describe("validateDrivingLicenceForm", () => {
 
       expect(result.isValid).toBe(false);
       expect(result.errors).toEqual({
-        issuing_authority: "Issuing authority must be one of: DVLA, GDS",
+        issuing_authority: "Issuing authority must be GDS",
       });
     },
   );
