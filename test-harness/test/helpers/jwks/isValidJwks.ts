@@ -6,7 +6,7 @@ export interface JWKS {
   keys: JWK[];
 }
 
-export async function isValidJwks(jwks: JWKS) {
+export function isValidJwks(jwks: JWKS) {
   const ajv = getAjvInstance();
   const rulesValidator = ajv.compile(jwksSchema);
   if (!rulesValidator(jwks)) {
