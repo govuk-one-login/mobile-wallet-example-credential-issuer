@@ -38,7 +38,7 @@ export async function validateIssuerAuth(
   validateProtectedHeader(protectedHeader);
 
   const unprotectedHeader = issuerAuth[1];
-  const certificate = await validateUnprotectedHeader(
+  const certificate = validateUnprotectedHeader(
     unprotectedHeader,
     rootCertificatePem,
   );
