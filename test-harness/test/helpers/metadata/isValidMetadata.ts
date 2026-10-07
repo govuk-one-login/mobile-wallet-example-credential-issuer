@@ -41,14 +41,14 @@ export interface IsValidMetadata {
   hasNotificationEndpoint: boolean;
 }
 
-export async function isValidMetadata({
+export function isValidMetadata({
   metadata,
   criUrl,
   authServerUrl,
   credentialFormat,
   credentialConfigurationId,
   hasNotificationEndpoint,
-}: IsValidMetadata): Promise<true> {
+}: IsValidMetadata): true {
   const ajv = getAjvInstance();
 
   const validator = ajv

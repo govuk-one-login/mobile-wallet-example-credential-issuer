@@ -9,7 +9,7 @@ describe("isValidJwks", () => {
   it("should throw 'INVALID_JWKS' error when JWKS does not contain any keys", async () => {
     const jwks = jwksBuilder().withOverrides({ keys: [] });
 
-    await expect(isValidJwks(jwks)).rejects.toThrow(
+    expect(() => isValidJwks(jwks)).toThrow(
       'INVALID_JWKS: JWKS does not comply with the schema. [{"instancePath":"/keys","schemaPath":"#/properties/keys/minItems","keyword":"minItems","params":{"limit":1},"message":"must NOT have fewer than 1 items"}]',
     );
   });
@@ -28,7 +28,7 @@ describe("isValidJwks", () => {
       ],
     });
 
-    await expect(isValidJwks(jwks)).rejects.toThrow(
+    expect(() => isValidJwks(jwks)).toThrow(
       'INVALID_JWKS: JWKS does not comply with the schema. [{"instancePath":"/keys/0","schemaPath":"#/properties/keys/items/required","keyword":"required","params":{"missingProperty":"kid"},"message":"must have required property \'kid\'"}]',
     );
   });
@@ -48,7 +48,7 @@ describe("isValidJwks", () => {
       ],
     });
 
-    await expect(isValidJwks(jwks)).rejects.toThrow(
+    expect(() => isValidJwks(jwks)).toThrow(
       'INVALID_JWKS: JWKS does not comply with the schema. [{"instancePath":"/keys/0/alg","schemaPath":"#/properties/keys/items/properties/alg/const","keyword":"const","params":{"allowedValue":"ES256"},"message":"must be equal to constant"}]',
     );
   });

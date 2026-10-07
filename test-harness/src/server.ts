@@ -5,7 +5,7 @@ const port = getPortNumber();
 const app = await createApp();
 
 export const server = app
-  .listen(port, async () => {
+  .listen(port, () => {
     console.log(`Server is running on port ${port}`);
   })
   .on("error", (error: Error) => {

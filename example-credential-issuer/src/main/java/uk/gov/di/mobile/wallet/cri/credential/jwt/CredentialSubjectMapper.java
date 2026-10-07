@@ -17,6 +17,7 @@ import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.Soc
 import uk.gov.di.mobile.wallet.cri.credential.jwt.social_security_credential.SocialSecurityRecord;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class CredentialSubjectMapper {
@@ -164,15 +165,11 @@ public class CredentialSubjectMapper {
             nameParts.add(setNamePart(title, "Title"));
         }
 
-        String[] givenNames = givenName.split(" ");
-        for (String name : givenNames) {
-            nameParts.add(setNamePart(name, "GivenName"));
-        }
+        Arrays.stream(givenName.split(" "))
+                .forEach(name -> nameParts.add(setNamePart(name, "GivenName")));
 
-        String[] familyNames = familyName.split(" ");
-        for (String name : familyNames) {
-            nameParts.add(setNamePart(name, "FamilyName"));
-        }
+        Arrays.stream(familyName.split(" "))
+                .forEach(name -> nameParts.add(setNamePart(name, "FamilyName")));
 
         Name name = new Name();
         name.setNameParts(nameParts);
@@ -193,7 +190,7 @@ public class CredentialSubjectMapper {
     }
 
     private static @NotNull String getFormattedDate(String year, String month, String day) {
-        return String.format("%s-%s-%s", year, month, day);
+        return year + "-" + month + "-" + day;
     }
 
     private static @NotNull List<BirthDate> buildBirthDate(String year, String month, String day) {

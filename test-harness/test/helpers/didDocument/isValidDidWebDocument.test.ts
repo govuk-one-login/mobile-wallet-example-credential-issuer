@@ -5,18 +5,14 @@ const criDomain = "example-cri.test.gov.uk";
 describe("isValidDidWebDocument", () => {
   it("should return 'true' when DID document is valid", async () => {
     const didWebDocument = didWebDocumentBuilder().withDefaults();
-    expect(await isValidDidWebDocument(didWebDocument, criDomain)).toEqual(
-      true,
-    );
+    expect(isValidDidWebDocument(didWebDocument, criDomain)).toEqual(true);
   });
 
   it("should throw 'INVALID_DID_DOCUMENT' error when 'verificationMethod' missing from DID document", async () => {
     const didWebDocument = didWebDocumentBuilder().withOverrides({
       verificationMethod: undefined,
     });
-    await expect(
-      isValidDidWebDocument(didWebDocument, criDomain),
-    ).rejects.toThrow(
+    expect(() => isValidDidWebDocument(didWebDocument, criDomain)).toThrow(
       'INVALID_DID_DOCUMENT: DID document does not comply with the schema. [{"instancePath":"","schemaPath":"#/required","keyword":"required","params":{"missingProperty":"verificationMethod"},"message":"must have required property \'verificationMethod\'"}]',
     );
   });
@@ -25,9 +21,7 @@ describe("isValidDidWebDocument", () => {
     const didWebDocument = didWebDocumentBuilder().withOverrides({
       id: "did:web:SOMETHING-ELSE.test.gov.uk",
     });
-    await expect(
-      isValidDidWebDocument(didWebDocument, criDomain),
-    ).rejects.toThrow(
+    expect(() => isValidDidWebDocument(didWebDocument, criDomain)).toThrow(
       'INVALID_DID_DOCUMENT: Invalid "id" value in DID document. Should be did:web:example-cri.test.gov.uk but found did:web:SOMETHING-ELSE.test.gov.uk',
     );
   });
@@ -50,9 +44,7 @@ describe("isValidDidWebDocument", () => {
         },
       ],
     });
-    await expect(
-      isValidDidWebDocument(didWebDocument, criDomain),
-    ).rejects.toThrow(
+    expect(() => isValidDidWebDocument(didWebDocument, criDomain)).toThrow(
       'INVALID_DID_DOCUMENT: Invalid "controller" value in "verificationMethod". Should be did:web:example-cri.test.gov.uk but found did:web:SOMETHING-ELSE.test.gov.uk',
     );
   });
@@ -63,9 +55,7 @@ describe("isValidDidWebDocument", () => {
         "did:web:example-cri.test.gov.uk#5dcbee863b5d7cc30c9ba1f7393dacc6c16610782e4b6a191f94a7e8b1e1510f",
       ],
     });
-    await expect(
-      isValidDidWebDocument(didWebDocument, criDomain),
-    ).rejects.toThrow(
+    expect(() => isValidDidWebDocument(didWebDocument, criDomain)).toThrow(
       'INVALID_DID_DOCUMENT: "id" did:web:example-cri.test.gov.uk#6dcbee863b5d7cc30c9ba1f7393dacc6c16610782e4b6a191f94a7e8b1e1510a is missing in "assertionMethod" did:web:example-cri.test.gov.uk#5dcbee863b5d7cc30c9ba1f7393dacc6c16610782e4b6a191f94a7e8b1e1510f',
     );
   });
@@ -88,9 +78,7 @@ describe("isValidDidWebDocument", () => {
         },
       ],
     });
-    await expect(
-      isValidDidWebDocument(didWebDocument, criDomain),
-    ).rejects.toThrow(
+    expect(() => isValidDidWebDocument(didWebDocument, criDomain)).toThrow(
       'INVALID_DID_DOCUMENT: Invalid "id" value in "verificationMethod". Should be did:web:example-cri.test.gov.uk#SOMETHING-ELSE but found did:web:example-cri.test.gov.uk#5dcbee863b5d7cc30c9ba1f7393dacc6c16610782e4b6a191f94a7e8b1e1510f',
     );
   });
