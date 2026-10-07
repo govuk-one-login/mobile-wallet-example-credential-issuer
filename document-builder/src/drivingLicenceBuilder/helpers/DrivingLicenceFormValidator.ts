@@ -8,7 +8,7 @@ import {
 import { ValidationResult } from "../../types/ValidationResult";
 import { CUSTOM_CREDENTIAL_TTL } from "../../config/credentialTtl";
 
-export const ALLOWED_ISSUING_AUTHORITIES = ["DVLA", "GDS"] as const;
+export const ALLOWED_ISSUING_AUTHORITY = "GDS" as const;
 
 export function validateDrivingLicenceForm(
   body: DrivingLicenceRequestBody,
@@ -49,12 +49,8 @@ export function validateDrivingLicenceForm(
     errors.expected_update = "Enter a number";
   }
 
-  if (
-    !ALLOWED_ISSUING_AUTHORITIES.includes(
-      body.issuing_authority as (typeof ALLOWED_ISSUING_AUTHORITIES)[number],
-    )
-  ) {
-    errors.issuing_authority = `Issuing authority must be one of: ${ALLOWED_ISSUING_AUTHORITIES.join(", ")}`;
+  if (body.issuing_authority !== ALLOWED_ISSUING_AUTHORITY) {
+    errors.issuing_authority = `Issuing authority must be ${ALLOWED_ISSUING_AUTHORITY}`;
   }
 
   return {
