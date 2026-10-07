@@ -38,7 +38,7 @@ describe("isValidMetadata", () => {
       credential_configurations_supported: false,
     });
 
-    await expect(
+    expect(() =>
       isValidMetadata({
         metadata,
         criUrl,
@@ -47,7 +47,7 @@ describe("isValidMetadata", () => {
         credentialConfigurationId,
         hasNotificationEndpoint,
       }),
-    ).rejects.toThrow(
+    ).toThrow(
       'INVALID_METADATA: Metadata does not comply with the schema. [{"message":"mock AJV error"}]',
     );
   });
@@ -57,7 +57,7 @@ describe("isValidMetadata", () => {
       credential_issuer: "https://something-else.com/",
     });
 
-    await expect(
+    expect(() =>
       isValidMetadata({
         metadata,
         criUrl,
@@ -66,7 +66,7 @@ describe("isValidMetadata", () => {
         credentialConfigurationId,
         hasNotificationEndpoint,
       }),
-    ).rejects.toThrow(
+    ).toThrow(
       'INVALID_METADATA: Invalid "credential_issuer" value. Should be https://cri.example.com but found https://something-else.com/',
     );
   });
@@ -76,7 +76,7 @@ describe("isValidMetadata", () => {
       authorization_servers: ["https://something-else.com/"],
     });
 
-    await expect(
+    expect(() =>
       isValidMetadata({
         metadata,
         criUrl,
@@ -85,7 +85,7 @@ describe("isValidMetadata", () => {
         credentialConfigurationId,
         hasNotificationEndpoint,
       }),
-    ).rejects.toThrow(
+    ).toThrow(
       'INVALID_METADATA: Invalid "authorization_servers" value. Should contain https://auth.example.com but only contains https://something-else.com/',
     );
   });
@@ -95,7 +95,7 @@ describe("isValidMetadata", () => {
       credential_endpoint: "https://something-else.com/something",
     });
 
-    await expect(
+    expect(() =>
       isValidMetadata({
         metadata,
         criUrl,
@@ -104,7 +104,7 @@ describe("isValidMetadata", () => {
         credentialConfigurationId,
         hasNotificationEndpoint,
       }),
-    ).rejects.toThrow(
+    ).toThrow(
       'INVALID_METADATA: Invalid "credential_endpoint" value. Should be https://cri.example.com/credential but found https://something-else.com/something',
     );
   });
@@ -116,7 +116,7 @@ describe("isValidMetadata", () => {
       },
     });
 
-    await expect(
+    expect(() =>
       isValidMetadata({
         metadata,
         criUrl,
@@ -125,7 +125,7 @@ describe("isValidMetadata", () => {
         credentialConfigurationId,
         hasNotificationEndpoint,
       }),
-    ).rejects.toThrow(
+    ).toThrow(
       'INVALID_METADATA: Invalid "credential_configurations_supported" value. Missing credential TestCredential',
     );
   });
@@ -136,7 +136,7 @@ describe("isValidMetadata", () => {
         notification_endpoint: undefined,
       });
 
-      await expect(
+      expect(() =>
         isValidMetadata({
           metadata,
           criUrl,
@@ -145,7 +145,7 @@ describe("isValidMetadata", () => {
           credentialConfigurationId,
           hasNotificationEndpoint: true,
         }),
-      ).rejects.toThrow(
+      ).toThrow(
         "INVALID_METADATA: Invalid metadata. Missing notification_endpoint",
       );
     });
@@ -155,7 +155,7 @@ describe("isValidMetadata", () => {
         notification_endpoint: "https://something-else.com/something",
       });
 
-      await expect(
+      expect(() =>
         isValidMetadata({
           metadata,
           criUrl,
@@ -164,7 +164,7 @@ describe("isValidMetadata", () => {
           credentialConfigurationId,
           hasNotificationEndpoint: true,
         }),
-      ).rejects.toThrow(
+      ).toThrow(
         'INVALID_METADATA: Invalid "notification_endpoint" value. Should be https://cri.example.com/notification but found https://something-else.com/something',
       );
     });
@@ -191,7 +191,7 @@ describe("isValidMetadata", () => {
     it("should throw 'INVALID_METADATA' error when 'mdoc_iacas_uri' is missing", async () => {
       const metadata = metadataBuilder().withDefaults();
 
-      await expect(
+      expect(() =>
         isValidMetadata({
           metadata,
           criUrl,
@@ -200,9 +200,7 @@ describe("isValidMetadata", () => {
           credentialConfigurationId,
           hasNotificationEndpoint,
         }),
-      ).rejects.toThrow(
-        "INVALID_METADATA: Invalid metadata. Missing mdoc_iacas_uri",
-      );
+      ).toThrow("INVALID_METADATA: Invalid metadata. Missing mdoc_iacas_uri");
     });
 
     it("should throw 'INVALID_METADATA' error when 'mdoc_iacas_uri' is invalid", async () => {
@@ -210,7 +208,7 @@ describe("isValidMetadata", () => {
         mdoc_iacas_uri: "https://something-else.com/something",
       });
 
-      await expect(
+      expect(() =>
         isValidMetadata({
           metadata,
           criUrl,
@@ -219,7 +217,7 @@ describe("isValidMetadata", () => {
           credentialConfigurationId,
           hasNotificationEndpoint,
         }),
-      ).rejects.toThrow(
+      ).toThrow(
         'INVALID_METADATA: Invalid "mdoc_iacas_uri" value. Should be https://cri.example.com/iacas but found https://something-else.com/something',
       );
     });
