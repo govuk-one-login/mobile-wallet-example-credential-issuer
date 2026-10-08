@@ -67,17 +67,10 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
-  DeploySpokeVpcResources: !Or
-    - !Equals [!Ref Environment, dev]
-    - !Equals [!Ref Environment, build]
-    - !Equals [!Ref Environment, staging]
-    - !Equals [!Ref Environment, integration]
+  DeploySpokeVpcResources: !Equals [!Ref Environment, mock] # cannot be empty, using mock value temporarily
 
-  MigrateTrafficToSpokeVpc: !Or 
-    - !Equals [!Ref Environment, dev]
-    - !Equals [!Ref Environment, build]
-    - !Equals [!Ref Environment, staging]
-    - !Equals [!Ref Environment, integration]
+  MigrateTrafficToSpokeVpc: !Equals [!Ref Environment, mock] # cannot be empty, using mock value temporarily
+
 
 Mappings:
   EnvironmentVariables:
