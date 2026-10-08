@@ -23,7 +23,7 @@ Parameters:
     Description: >
       The name of the spoke vpc in which this container will be deployed, after migration.
     Type: String
-    Default: vpc
+    Default: spoke-vpc
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
     Type: String
@@ -67,10 +67,17 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
-  DeploySpokeVpcResources: !Equals [!Ref Environment, mock] # cannot be empty, using mock value temporarily
+  DeploySpokeVpcResources: !Or
+    - !Equals [ !Ref Environment, dev ]
+    - !Equals [ !Ref Environment, build ]
+    - !Equals [ !Ref Environment, staging ]
+    - !Equals [ !Ref Environment, integration ]
 
-  MigrateTrafficToSpokeVpc: !Equals [!Ref Environment, mock] # cannot be empty, using mock value temporarily
-
+  MigrateTrafficToSpokeVpc: !Or
+    - !Equals [ !Ref Environment, dev ]
+    - !Equals [ !Ref Environment, build ]
+    - !Equals [ !Ref Environment, staging ]
+    - !Equals [ !Ref Environment, integration ]
 
 Mappings:
   EnvironmentVariables:
