@@ -16,7 +16,7 @@ export interface VerificationMethod {
   publicKeyJwk: JWK;
 }
 
-export async function isValidDidWebDocument(
+export function isValidDidWebDocument(
   didWebDocument: DidDocument,
   criDomain: string,
 ) {

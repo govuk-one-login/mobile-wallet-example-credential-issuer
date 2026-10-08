@@ -284,7 +284,7 @@ describe("controller.ts", () => {
               birth_place: "London",
               issue_date: "08-04-2019",
               expiry_date: "08-04-2029",
-              issuing_authority: "DVLA",
+              issuing_authority: "GDS",
               issuing_country: "GB",
               document_number: "EDWAR550000SE5RO",
               driving_privileges: [
@@ -336,7 +336,7 @@ describe("controller.ts", () => {
               birth_place: "London",
               issue_date: "08-04-2019",
               expiry_date: "08-04-2029",
-              issuing_authority: "DVLA",
+              issuing_authority: "GDS",
               issuing_country: "GB",
               document_number: "EDWAR550000SE5RO",
               driving_privileges: [
