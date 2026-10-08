@@ -1,5 +1,6 @@
 {% extends "govuk/template.njk" %}
 {% from "govuk/components/header/macro.njk" import govukHeader %}
+{% from "govuk/components/footer/macro.njk" import govukFooter %}
 {% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
 {% from "service-header/service-header.njk" import govukOneLoginServiceHeader %}
 {% set serviceName = "Example GOV.UK Wallet Document Builder" %}
@@ -14,6 +15,18 @@
         {{ govukHeader({"homepageUrl": "/select-app"}) }}
     {% endif %}
     {{ govukServiceNavigation({"serviceName": serviceName}) }}
+{% endblock %}
+{% block govukFooter %}
+    {{ govukFooter({
+        "meta": {
+            "items": [
+                {
+                    "href": "https://www.gov.uk/guidance/accessibility-statement-for-the-govuk-wallet-sandbox",
+                    "text": "Accessibility statement"
+                }
+            ]
+        }
+    }) }}
 {% endblock %}
 {% block main %}
     <div class="govuk-width-container {{ containerClasses }}">
