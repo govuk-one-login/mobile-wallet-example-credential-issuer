@@ -237,7 +237,6 @@ Resources:
 
   WalletBELoadBalancerListenerSpoke:
     Type: 'AWS::ElasticLoadBalancingV2::Listener'
-    Condition: DeploySpokeVpcResources
     Properties:
       DefaultActions:
         - TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECSSpoke
@@ -258,45 +257,9 @@ Resources:
       Description: !Sub "Wallet Stub Backend API. ${AWS::StackName}"
       ProtocolType: HTTP
 
-  # LEGACY API INTEGRATION - soon to be depracated
-  WalletBEApiGwHttpEndpointIntegration:
-    Type: 'AWS::ApiGatewayV2::Integration'
-    Properties:
-      ApiId: !Ref WalletBEApiGwHttpEndpoint
-      IntegrationType: HTTP_PROXY
-      ConnectionId:
-        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcLinkId"
-      ConnectionType: VPC_LINK
-      IntegrationMethod: ANY
-      IntegrationUri: !Ref WalletBELoadBalancerListener
-      PayloadFormatVersion: '1.0'
-      RequestParameters:
-        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
-      TlsConfig:
-        ServerNameToVerify: !Ref WalletBECustomDomain
-    
-  # LEGACY API INTEGRATION - soon to be depracated
-  WalletBEApiGwHttpEndpointIntegration:
-    Type: 'AWS::ApiGatewayV2::Integration'
-    Condition: DeployLegacyVpcResources
-    Properties:
-      ApiId: !Ref WalletBEApiGwHttpEndpoint
-      IntegrationType: HTTP_PROXY
-      ConnectionId:
-        Fn::ImportValue: !Sub "${LegacyVpcStackName}-VpcLinkId"
-      ConnectionType: VPC_LINK
-      IntegrationMethod: ANY
-      IntegrationUri: !Ref WalletBELoadBalancerListener
-      PayloadFormatVersion: '1.0'
-      RequestParameters:
-        overwrite:header.x-govuk-signin-source-ip: $context.identity.sourceIp
-      TlsConfig:
-        ServerNameToVerify: !Ref WalletBECustomDomain
-
   # SPOKE API INTEGRATION
   WalletBEApiGwHttpEndpointIntegrationSpoke:
     Type: 'AWS::ApiGatewayV2::Integration'
-    Condition: DeploySpokeVpcResources
     Properties:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
@@ -319,10 +282,7 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !If
-            - MigrateTrafficToSpokeVpc
-            - !Ref WalletBEApiGwHttpEndpointIntegrationSpoke
-            - !Ref WalletBEApiGwHttpEndpointIntegration
+          - !Ref WalletBEApiGwHttpEndpointIntegrationSpoke
 
   WalletBEAPIStageDefault:
     Type: 'AWS::ApiGatewayV2::Stage'
@@ -389,51 +349,11 @@ Resources:
         - Key: Environment
           Value: !Sub "${Environment}"
 
-  # LEGACY ESC SERVICE - soon to be depracated
-  WalletBEECSService:
-    DependsOn:
-      - WalletBELoadBalancerListener
-    Type: 'AWS::ECS::Service'
-    Condition: DeployLegacyVpcResources
-    Properties:
-      Cluster: !Ref WalletBECluster
-      DeploymentConfiguration:
-        DeploymentCircuitBreaker:
-          Enable: TRUE
-          Rollback: TRUE
-      EnableECSManagedTags: false
-      HealthCheckGracePeriodSeconds: 60
-      LaunchType: FARGATE
-      LoadBalancers:
-        - ContainerName: app
-          ContainerPort: !Ref ContainerPort
-          TargetGroupArn: !Ref WalletBELoadBalancerListenerTargetGroupECS
-      NetworkConfiguration:
-        AwsvpcConfiguration:
-          AssignPublicIp: DISABLED
-          SecurityGroups:
-            - !GetAtt WalletBEECSSecurityGroup.GroupId
-          Subnets:
-            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${LegacyVpcStackName}-ProtectedSubnetIdC"
-      TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
-      Tags:
-        - Key: Name
-          Value: !Sub "${AWS::StackName}-WalletECS"
-        - Key: Product
-          Value: "GOV.UK sign in"
-        - Key: System
-          Value: "Wallet BE Stub"
-        - Key: Environment
-          Value: !Sub "${Environment}"
-
   # SPOKE ESC SERVICE
   WalletBEECSServiceSpoke:
     DependsOn:
       - WalletBELoadBalancerListenerSpoke
     Type: 'AWS::ECS::Service'
-    Condition: DeploySpokeVpcResources
     Properties:
       Cluster: !Ref WalletBECluster
       DeploymentConfiguration:
@@ -820,7 +740,7 @@ Resources:
                 - Name: ClusterName
                   Value: !Ref WalletBECluster
                 - Name: ServiceName
-                  Value: !GetAtt WalletBEECSService.Name
+                  Value: !GetAtt WalletBEECSServiceSpoke.Name
             Period: 60
             Stat: Minimum
 
