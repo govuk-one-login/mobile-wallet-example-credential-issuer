@@ -16,12 +16,12 @@ Parameters:
       - "integration"
   LegacyVpcStackName:
     Description: >
-      The name of the legacy vpc in which this container will be deployed - soon to be depractated.
+      The name of the legacy vpc in which this container will be deployed - soon to be deprecated.
     Type: String
     Default: vpc
-  NewMigrationSpokeVpcStackName:
+  VpcStackName:
     Description: >
-      The name of the spoke vpc in which this container will be deployed, after migration.
+      The name of the spoke vpc in which this container will be deployed, delegated by the secure pipeline.
     Type: String
     Default: spoke-vpc
   PermissionsBoundary:
@@ -191,7 +191,7 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletBELoadBalancerSGEgressToECSSecurityGroupSpoke:
     Type: 'AWS::EC2::SecurityGroupEgress'
@@ -218,7 +218,7 @@ Resources:
           FromPort: 443
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletBEECSSecurityGroupIngressFromLoadBalancerSpoke:
     Type: 'AWS::EC2::SecurityGroupIngress'
@@ -341,9 +341,9 @@ Resources:
       SecurityGroups:
         - !GetAtt WalletBELoadBalancerSGSpoke.GroupId
       Subnets:
-        - Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-PrivateSubnetIdA"
-        - Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-PrivateSubnetIdB"
-        - Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-PrivateSubnetIdC"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -378,7 +378,7 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId:
-        Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
@@ -449,7 +449,7 @@ Resources:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId:
-        Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-VpcLinkId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletBELoadBalancerListenerSpoke
@@ -601,9 +601,9 @@ Resources:
           SecurityGroups:
             - !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
           Subnets:
-            - Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${NewMigrationSpokeVpcStackName}-ProtectedSubnetIdC"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
       TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
       Tags:
         - Key: Name
