@@ -16,14 +16,14 @@ Parameters:
       - "integration"
   LegacyVpcStackName:
     Description: >
-      The name of the legacy vpc in which this container will be deployed - soon to be depractated.
+      The name of the legacy vpc in which this container will be deployed - soon to be deprecated.
     Type: String
     Default: vpc
-  MigrationSpokeVpcStackName:
+  VpcStackName:
     Description: >
-      The name of the spoke vpc in which this container will be deployed, after migration.
+      The name of the spoke vpc in which this container will be deployed, delegated by the secure pipeline.
     Type: String
-    Default: vpc
+    Default: spoke-vpc
   PermissionsBoundary:
     Description: "The ARN of the permissions boundary to apply when creating IAM roles"
     Type: String
@@ -67,10 +67,17 @@ Conditions:
     - !Equals [!Ref Environment, staging]
     - !Equals [!Ref Environment, integration]
 
-  DeploySpokeVpcResources: !Equals [!Ref Environment, mock] # cannot be empty, using mock value temporarily
+  DeploySpokeVpcResources: !Or
+    - !Equals [!Ref Environment, dev]
+    - !Equals [!Ref Environment, build]
+    - !Equals [!Ref Environment, staging]
+    - !Equals [!Ref Environment, integration]
 
-  MigrateTrafficToSpokeVpc: !Equals [!Ref Environment, mock] # cannot be empty, using mock value temporarily
-
+  MigrateTrafficToSpokeVpc: !Or
+    - !Equals [ !Ref Environment, dev ]
+    - !Equals [ !Ref Environment, build ]
+    - !Equals [ !Ref Environment, staging ]
+    - !Equals [ !Ref Environment, integration ]
 
 Mappings:
   EnvironmentVariables:
@@ -184,7 +191,7 @@ Resources:
           IpProtocol: tcp
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletBELoadBalancerSGEgressToECSSecurityGroupSpoke:
     Type: 'AWS::EC2::SecurityGroupEgress'
@@ -211,7 +218,7 @@ Resources:
           FromPort: 443
           ToPort: 443
       VpcId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
 
   WalletBEECSSecurityGroupIngressFromLoadBalancerSpoke:
     Type: 'AWS::EC2::SecurityGroupIngress'
@@ -334,9 +341,9 @@ Resources:
       SecurityGroups:
         - !GetAtt WalletBELoadBalancerSGSpoke.GroupId
       Subnets:
-        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdA"
-        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdB"
-        - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-PrivateSubnetIdC"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdA"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdB"
+        - Fn::ImportValue: !Sub "${VpcStackName}-PrivateSubnetIdC"
       Type: application
       LoadBalancerAttributes:
         - Key: access_logs.s3.enabled
@@ -371,7 +378,7 @@ Resources:
       Protocol: HTTP
       TargetType: ip
       VpcId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcId"
       TargetGroupAttributes:
         - Key: deregistration_delay.timeout_seconds
           Value: 60
@@ -442,7 +449,7 @@ Resources:
       ApiId: !Ref WalletBEApiGwHttpEndpoint
       IntegrationType: HTTP_PROXY
       ConnectionId:
-        Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-VpcLinkId"
+        Fn::ImportValue: !Sub "${VpcStackName}-VpcLinkId"
       ConnectionType: VPC_LINK
       IntegrationMethod: ANY
       IntegrationUri: !Ref WalletBELoadBalancerListenerSpoke
@@ -594,9 +601,9 @@ Resources:
           SecurityGroups:
             - !GetAtt WalletBEECSSecurityGroupSpoke.GroupId
           Subnets:
-            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdA"
-            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdB"
-            - Fn::ImportValue: !Sub "${MigrationSpokeVpcStackName}-ProtectedSubnetIdC"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdA"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdB"
+            - Fn::ImportValue: !Sub "${VpcStackName}-ProtectedSubnetIdC"
       TaskDefinition: !Ref WalletBEECSServiceTaskDefinition
       Tags:
         - Key: Name
