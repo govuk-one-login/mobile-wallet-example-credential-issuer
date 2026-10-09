@@ -716,7 +716,7 @@ Resources:
     Condition: IsBuildOrStagingOrInt
     DependsOn:
       - WalletBECluster
-      - WalletBEECSService
+      - WalletBEECSServiceSpoke
     Type: AWS::CloudWatch::Alarm
     Properties:
       AlarmName: !Sub "${AWS::StackName}-EgCredIssuerLowContainerTaskCountAlarm"
