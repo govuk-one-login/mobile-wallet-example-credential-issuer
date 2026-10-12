@@ -611,7 +611,7 @@ Resources:
         - Key: Product
           Value: "GOV.UK sign in"
         - Key: System
-          Value: "Wallet BE Stub"
+          Value: "Wallet BE Stub Spoke"
         - Key: Environment
           Value: !Sub "${Environment}"
   # ************************************** 
