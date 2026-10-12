@@ -4,7 +4,7 @@
 
 This example credential issuer demonstrates how to implement the OID4VCI pre-authorized code flow to issue verifiable credentials to GOV.UK Wallet. Our development team uses this example credential issuer to test GOV.UK Wallet.
 
-This code is for government departments and service teams who want to issue credentials to GOV.UK Wallet. It is a reference implementation that can help you integrate with GOV.UK Wallet, and should not be used in production.
+This code is for government departments and service teams who want to issue credentials to GOV.UK Wallet. It is a reference implementation that can help you integrate with GOV.UK Wallet and should not be used in production.
 
 This implementation follows the pre-authorized code flow as specified in the [GOV.UK Wallet technical documentation](https://docs.wallet.service.gov.uk/).
 
