@@ -18,6 +18,9 @@ logging:
 httpClient:
   timeout: 5000ms
   connectionTimeout: 5000ms
+  connectionRequestTimeout: 5000ms
+  keepAlive: 0ms
+  validateAfterInactivityPeriod: 2000ms   # validate pooled connections after 2s idle
   # GZIP compression is disabled by default to ensure compatibility with local
   # development environments that do not support it. Additionally, CRI request
   # payloads are small, so GZIP compression is unnecessary.
