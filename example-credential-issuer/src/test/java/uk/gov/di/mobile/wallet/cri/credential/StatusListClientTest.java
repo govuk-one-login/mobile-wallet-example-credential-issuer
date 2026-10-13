@@ -70,6 +70,7 @@ class StatusListClientTest {
             verify(httpClient).target(expectedUrl);
             verify(webTarget).request(MediaType.APPLICATION_JSON);
             verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, "application/jwt"));
+            verify(response).close();
         }
 
         @Test
@@ -88,6 +89,7 @@ class StatusListClientTest {
             assertEquals(
                     "Request to get credential index failed with status code 500",
                     exception.getMessage());
+            verify(response).close();
         }
 
         @Test
@@ -135,6 +137,7 @@ class StatusListClientTest {
             verify(httpClient).target(expectedUrl);
             verify(webTarget).request(MediaType.APPLICATION_JSON);
             verify(requestBuilder).post(Entity.entity(MOCK_TOKEN, "application/jwt"));
+            verify(response).close();
         }
 
         @Test
@@ -153,6 +156,7 @@ class StatusListClientTest {
             assertEquals(
                     "Request to revoke credential failed with status code 500",
                     exception.getMessage());
+            verify(response).close();
         }
 
         @Test
