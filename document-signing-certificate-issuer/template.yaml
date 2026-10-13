@@ -55,7 +55,7 @@ Mappings:
       CloudwatchLogRetentionDays: 3
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: DEBUG
-      CertificateValidityPeriodInDays: 457 # 365 (1 year) + 92 (3 months) - max allowed leaf certificate validity period
+      CertificateValidityPeriodInDays: 456 # max allowed validity is 457 days. AWS sets not-before to issuance time -1h so validity is max days - 1
       CertificateRetentionPeriodInDays: 487 # validity period + 30 days
     build:
       DocumentSigningKeyParameterPrefix: '/iaca/'
@@ -67,7 +67,7 @@ Mappings:
       CloudwatchLogRetentionDays: 3653 # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
-      CertificateValidityPeriodInDays: 457 # 365 (1 year) + 92 (3 months) - max allowed leaf certificate validity period
+      CertificateValidityPeriodInDays: 456 # max allowed validity is 457 days. AWS sets not-before to issuance time -1h so validity is max days - 1
       CertificateRetentionPeriodInDays: 487 # validity period + 30 days
     integration:
       DocumentSigningKeyParameterPrefix: '/iaca/'
@@ -79,7 +79,7 @@ Mappings:
       CloudwatchLogRetentionDays: 3653 # 10 years, since the underlying CA root will likely have a 9 year lifecycle
       DynatraceSecretArn: arn:aws:secretsmanager:eu-west-2:216552277552:secret:DynatraceNonProductionVariables
       LambdaLogLevel: INFO
-      CertificateValidityPeriodInDays: 457 # 365 (1 year) + 92 (3 months) - max allowed leaf certificate validity period
+      CertificateValidityPeriodInDays: 456 # max allowed validity is 457 days. AWS sets not-before to issuance time -1h so validity is max days - 1
       CertificateRetentionPeriodInDays: 487 # validity period + 30 days
 
 Globals:
