@@ -11,9 +11,8 @@
     "execute": "node ./dist/src/server.js",
     "lint": "eslint . ",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --ignore-path .gitignore --write \"*/**/*.{ts,json}\"",
-    "format:check": "node_modules/.bin/prettier --check .",
-    "format:fix": "prettier --ignore-path .gitignore --write \"*/**/*.{ts,json}\"",
+    "format": "prettier --ignore-path .gitignore --write .",
+    "format:check": "node_modules/.bin/prettier --ignore-path .gitignore --check .",
     "test": "node_modules/.bin/jest --testPathPatterns=test/credential-issuer-tests.test.ts --coverage=false",
     "test:unit": "TZ=UTC jest --testPathPatterns='test/helpers|src' --silent"
   },
