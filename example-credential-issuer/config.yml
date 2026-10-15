@@ -18,6 +18,18 @@ logging:
 httpClient:
   timeout: 5000ms
   connectionTimeout: 5000ms
+  # Max time to wait leasing a connection from the pool. The Dropwizard default
+  # is 500ms, which surfaced as ConnectionRequestTimeoutException once the pool
+  # was exhausted by leaked connections.
+  connectionRequestTimeout: 2000ms
+  # Make pool sizing explicit rather than relying on the 1024 default.
+  maxConnections: 128
+  maxConnectionsPerRoute: 128
+  # Cap connection lifetime and revalidate idle connections so a stale/stuck
+  # pool can self-heal without a process restart.
+  timeToLive: 1h
+  validateAfterInactivityPeriod: 5s
+  keepAlive: 0ms
   # GZIP compression is disabled by default to ensure compatibility with local
   # development environments that do not support it. Additionally, CRI request
   # payloads are small, so GZIP compression is unnecessary.

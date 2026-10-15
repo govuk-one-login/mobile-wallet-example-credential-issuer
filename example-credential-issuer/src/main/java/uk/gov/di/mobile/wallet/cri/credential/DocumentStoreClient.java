@@ -21,16 +21,23 @@ public class DocumentStoreClient {
     public DocumentStoreRecord getDocument(String itemId) throws DocumentStoreException {
         try {
             URI uri = buildDocumentUri(itemId);
-            Response response = httpClient.target(uri).request(MediaType.APPLICATION_JSON).get();
-            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-                throw new DocumentStoreException(
-                        String.format(
-                                "Request to fetch document %s failed with status code %s",
-                                itemId, response.getStatus()));
+            try (Response response =
+                    httpClient.target(uri).request(MediaType.APPLICATION_JSON).get()) {
+                if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                    throw new DocumentStoreException(
+                            String.format(
+                                    "Request to fetch document %s failed with status code %s",
+                                    itemId, response.getStatus()));
+                }
+                return response.readEntity(DocumentStoreRecord.class);
             }
-            return response.readEntity(DocumentStoreRecord.class);
         } catch (URISyntaxException exception) {
             String errorMessage = String.format("Invalid URI constructed for document: %s", itemId);
+            throw new DocumentStoreException(errorMessage, exception);
+        } catch (DocumentStoreException exception) {
+            throw exception;
+        } catch (Exception exception) {
+            String errorMessage = String.format("Failed to fetch document: %s", itemId);
             throw new DocumentStoreException(errorMessage, exception);
         }
     }

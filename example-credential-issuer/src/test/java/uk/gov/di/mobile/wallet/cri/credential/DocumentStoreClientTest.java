@@ -1,5 +1,6 @@
 package uk.gov.di.mobile.wallet.cri.credential;
 
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -60,6 +61,7 @@ class DocumentStoreClientTest {
 
         assertEquals(mockDocument, document);
         verify(mockHttpClient).target(expectedUri);
+        verify(mockResponse).close();
     }
 
     @Test
@@ -72,6 +74,24 @@ class DocumentStoreClientTest {
         when(mockResponse.getStatus()).thenReturn(500);
 
         assertThrows(DocumentStoreException.class, () -> documentStoreClient.getDocument(ITEM_ID));
+        verify(mockResponse).close();
+    }
+
+    @Test
+    void Should_ThrowDocumentStoreException_When_TransportFails() {
+        when(mockConfigurationService.getCredentialStoreUrl()).thenReturn(documentBuilderUrl);
+        when(mockConfigurationService.getDocumentEndpoint()).thenReturn(DOCUMENT_PATH);
+        when(mockHttpClient.target(any(URI.class))).thenReturn(mockWebTarget);
+        when(mockWebTarget.request(MediaType.APPLICATION_JSON)).thenReturn(mockInvocationBuilder);
+        when(mockInvocationBuilder.get()).thenThrow(new ProcessingException("connection reset"));
+
+        DocumentStoreException exception =
+                assertThrows(
+                        DocumentStoreException.class,
+                        () -> documentStoreClient.getDocument(ITEM_ID));
+        assertEquals(
+                String.format("Failed to fetch document: %s", ITEM_ID), exception.getMessage());
+        assertEquals(ProcessingException.class, exception.getCause().getClass());
     }
 
     @Test

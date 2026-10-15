@@ -83,7 +83,34 @@ npm run lint:fix
 npm run format
 ```
 
-### Run
+### Run the test harness against a deployed Example Credential Issuer
+
+Before running the test harness against the env you must comment out the negative tests `Credential (Invalid Requests)`
+in test-harness/test/credential-issuer-tests.test.ts. This because signature verification is disabled in dev and integration
+and the negative tests assume signature verification is enabled so the request is rejected early; with it disabled the
+request proceeds and consumes the offer. Since the check is disabled the credential offer is redeemed and
+the happy path tests do not work.
+
+A future improvement can be to pass a flag eg `signature-verification-disabled=true` which will skip the negative tests.
+
+Use the following commands to run the tests against an Example Credential Issuer that is deployed in the Wallet Onboarding
+Products environment.
+
+```bash
+# assume the correct AWS role
+
+CLIENT_ID=$(aws ssm get-parameter \
+  --name "/wallet-doc-builder/Config/OIDC/Client/Id" \
+  --query 'Parameter.Value' --output text --region eu-west-2)
+
+./run-test-harness.sh mdoc "<CREDENTIAL_OFFER_DEEP_LINK>" \
+  --cri-url "<CRI_URL>" \
+  --test-harness-url "<AUTHORISATION_SERVER_URL>" \
+  --client-id "$CLIENT_ID" \
+  --wallet-subject-id "urn:fdc:wallet.account.gov.uk:2024:DtPT8x-dp_73tnlY3KNTiCitziN9GEherD16bqxNt9i"
+```
+
+### Run the test harness locally
 
 Before running the test harness, you must set up your credential issuer so that it
 uses the test harness domain to fetch the public signing key that validates the
