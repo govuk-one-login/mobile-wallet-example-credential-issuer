@@ -69,6 +69,11 @@ jar {
 
 run {
 	args = ["server", "config.yml"]
+
+	// Dummy AWS credentials for local/CI runs.
+	environment "AWS_ACCESS_KEY_ID", "test"
+	environment "AWS_SECRET_ACCESS_KEY", "test"
+	environment "AWS_REGION", "eu-west-2"
 }
 
 java {
