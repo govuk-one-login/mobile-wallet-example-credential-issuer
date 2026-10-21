@@ -35,19 +35,20 @@ public class StatusListClient {
             String token = tokenBuilder.buildIssueToken(credentialExpiry);
             String url = buildUrl(ISSUE_ENDPOINT);
 
-            Response response =
+            try (Response response =
                     httpClient
                             .target(url)
                             .request(MediaType.APPLICATION_JSON)
-                            .post(Entity.entity(token, "application/jwt"));
+                            .post(Entity.entity(token, "application/jwt"))) {
 
-            if (response.getStatus() != Response.Status.OK.getStatusCode()) {
-                throw new StatusListClientException(
-                        String.format(
-                                "Request to get credential index failed with status code %s",
-                                response.getStatus()));
+                if (response.getStatus() != Response.Status.OK.getStatusCode()) {
+                    throw new StatusListClientException(
+                            String.format(
+                                    "Request to get credential index failed with status code %s",
+                                    response.getStatus()));
+                }
+                return response.readEntity(StatusListInformation.class);
             }
-            return response.readEntity(StatusListInformation.class);
         } catch (StatusListClientException exception) {
             throw exception;
         } catch (Exception exception) {
@@ -60,19 +61,20 @@ public class StatusListClient {
             String token = tokenBuilder.buildRevokeToken(index, uri);
             String url = buildUrl(REVOKE_ENDPOINT);
 
-            Response response =
+            try (Response response =
                     httpClient
                             .target(url)
                             .request(MediaType.APPLICATION_JSON)
-                            .post(Entity.entity(token, "application/jwt"));
+                            .post(Entity.entity(token, "application/jwt"))) {
 
-            if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
-                throw new StatusListClientException(
-                        String.format(
-                                "Request to revoke credential failed with status code %s",
-                                response.getStatus()));
+                if (response.getStatus() != Response.Status.ACCEPTED.getStatusCode()) {
+                    throw new StatusListClientException(
+                            String.format(
+                                    "Request to revoke credential failed with status code %s",
+                                    response.getStatus()));
+                }
+                return response.readEntity(RevokeResponse.class);
             }
-            return response.readEntity(RevokeResponse.class);
         } catch (StatusListClientException exception) {
             throw exception;
         } catch (Exception exception) {

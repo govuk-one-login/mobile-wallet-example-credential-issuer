@@ -28,7 +28,7 @@ jobs:
           ref: ${{ inputs.gitRef }}
 
       - name: Set up Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: document-signing-certificate-issuer/.nvmrc
 
@@ -54,7 +54,7 @@ jobs:
 
       - name: Deploy SAM app
         # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
-        uses: govuk-one-login/devplatform-upload-action@9320b8e71484f79c1b48139a86d214473d0f2709 # v4.3.0
+        uses: govuk-one-login/devplatform-upload-action@7076683de6e38a0ecdfbcd273b510a47c7b9489c # v4.4.0
         with:
           artifact-bucket-name: ${{ secrets.DEV_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
           signing-profile-name: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}

@@ -47,6 +47,25 @@ class ConfigurationServiceTest {
     }
 
     @Test
+    void Should_RetainConnectionResilienceSettings_On_HttpClient() {
+        ConfigurationService config = new ConfigurationService();
+        JerseyClientConfiguration customClient = new JerseyClientConfiguration();
+        customClient.setConnectionRequestTimeout(Duration.milliseconds(2000));
+        customClient.setMaxConnections(128);
+        customClient.setMaxConnectionsPerRoute(128);
+        customClient.setTimeToLive(Duration.hours(1));
+        customClient.setValidateAfterInactivityPeriod(Duration.seconds(5));
+        config.setHttpClient(customClient);
+
+        JerseyClientConfiguration result = config.getHttpClient();
+        assertEquals(Duration.milliseconds(2000), result.getConnectionRequestTimeout());
+        assertEquals(128, result.getMaxConnections());
+        assertEquals(128, result.getMaxConnectionsPerRoute());
+        assertEquals(Duration.hours(1), result.getTimeToLive());
+        assertEquals(Duration.seconds(5), result.getValidateAfterInactivityPeriod());
+    }
+
+    @Test
     void Should_ReturnEnvironmentDefaultValue_When_EnvVarNotSet() {
         assertEquals("local", configurationService.getEnvironment());
     }
