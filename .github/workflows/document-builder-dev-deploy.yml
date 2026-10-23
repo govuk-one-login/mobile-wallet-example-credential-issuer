@@ -9,67 +9,38 @@ on:
         type: string
         default: main
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    permissions:
-      id-token: write
-      contents: read
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          # Check out the repository at the specific branch, tag, or commit
-          ref: ${{ inputs.gitRef }}
+  docker:
+    name: Build, tag and push image
+    uses: ./.github/workflows/_module-docker-build-push.yml
+    with:
+      working-directory: ./document-builder
+      image-tag-mode: git-ref-sha
+      registry-mode: ecr-login-output
+      sign: false
+      fetch-depth: 1
+      checkout-ref: ${{ inputs.gitRef }}
+      role-arn-secret-name: DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN
+      ecr-repo-secret-name: DEV_DOC_BUILDER_ECR_REPOSITORY_NAME
+    secrets: inherit
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          role-to-assume: ${{ secrets.DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN }}
-          aws-region: eu-west-2
-
-      - name: Login to Amazon ECR
-        id: login-ecr
-        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # pin@v1
-
-      - name: Set GIT_REF_SHA
-        # Set GIT_REF_SHA to the checked-out commit SHA
-        run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
-
-      - name: Build, tag and push image to ECR
-        working-directory: ./document-builder
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME}}
-          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Set up SAM CLI
-        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # v3
-        with:
-          version: 1.131.0
-          use-installer: true
-
-      - name: Deploy SAM app
-        working-directory: ./document-builder/deploy
-        env:
-          ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME }}
-          IMAGE_TAG: ${{ env.GIT_REF_SHA }}
-        run: |
-          echo "Running `SAM validate` and `SAM build`"
-          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          sam validate
-          sam build
-          mv .aws-sam/build/template.yaml cf-template.yaml
-          echo "Replacing `CONTAINER-IMAGE-PLACEHOLDER` with new ECR image"
-          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
-          echo "Compressing SAM template"
-          zip template.zip cf-template.yaml
-          echo "Uploading the built SAM application artifacts to the deployment pipeline S3 bucket"
-          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$IMAGE_TAG"
+  sam-deploy:
+    name: Build and deploy SAM app
+    needs: docker
+    uses: ./.github/workflows/_module-sam-deploy.yml
+    with:
+      working-directory: ./document-builder/deploy
+      sam-version: 1.131.0
+      deploy-mode: s3-cp
+      uses-container-image: false
+      checkout-ref: ${{ inputs.gitRef }}
+      registry: ${{ needs.docker.outputs.registry }}
+      image-tag: ${{ needs.docker.outputs.image-tag }}
+      role-arn-secret-name: DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN
+      ecr-repo-secret-name: DEV_DOC_BUILDER_ECR_REPOSITORY_NAME
+      bucket-name-secret-name: DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME
+    secrets: inherit
