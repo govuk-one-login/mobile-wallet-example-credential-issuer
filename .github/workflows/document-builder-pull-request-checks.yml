@@ -18,64 +18,28 @@ permissions:
 jobs:
   ci:
     name: Run tests, lint and validate
-    runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    defaults:
-      run:
-        working-directory: ./document-builder
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
+    uses: ./.github/workflows/_module-node-ci.yml
+    with:
+      working-directory: ./document-builder
+      node-version-file: document-builder/.nvmrc
+      install-command: npm ci --ignore-scripts
+      run-build: true
+      lint-command: npm run lint
+      run-sam-validate: true
+      sam-validate-working-directory: deploy
+      sam-validate-args: --region eu-west-2
 
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: document-builder/.nvmrc
+  sonarqube:
+    name: SonarQube analysis
+    uses: ./.github/workflows/_module-sonarqube.yml
+    with:
+      project-base-dir: ./document-builder
+      scan-metadata-report-file: document-builder/.scannerwork/report-task.txt
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Install dependencies
-        run: npm ci --ignore-scripts
-
-      - name: Build source code
-        run: npm run build
-
-      - name: Run the linter
-        run: npm run lint
-
-      - name: Generate coverage report
-        run: npm run test:cov
-
-      - name: Setup SAM CLI
-        uses: aws-actions/setup-sam@89ddb14d60e682855e3fea4be85b3c56485de310 # pin@v3
-        with:
-          version: 1.90.0
-          use-installer: true
-
-      - name: SAM Validate
-        run: |
-          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
-          cd deploy && sam validate --region eu-west-2
-
-      - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
-        with:
-          projectBaseDir: ./document-builder
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: SonarQube Quality Gate check
-        uses: SonarSource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1
-        timeout-minutes: 5
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        with:
-          scanMetadataReportFile: document-builder/.scannerwork/report-task.txt
-
-      - name: Run Checkov
-        uses: bridgecrewio/checkov-action@29be5868bfa968f099ae80169f61f42887494b8f # v12.3133.0
-        with:
-          file: "document-builder/deploy/template.yaml"
-          quiet: true
-          soft_fail: false
+  checkov:
+    name: Run Checkov
+    uses: ./.github/workflows/_module-checkov.yml
+    with:
+      template-file: "document-builder/deploy/template.yaml"

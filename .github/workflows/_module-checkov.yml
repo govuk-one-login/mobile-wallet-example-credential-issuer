@@ -1,0 +1,36 @@
+name: _module-checkov
+
+on:
+  workflow_call:
+    inputs:
+      template-file:
+        description: Path to the template file to scan (repo-root relative).
+        required: true
+        type: string
+      quiet:
+        description: Only display failed checks.
+        required: false
+        type: boolean
+        default: true
+      soft-fail:
+        description: Do not fail the workflow on findings.
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  checkov:
+    name: Run Checkov
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Run Checkov
+        uses: bridgecrewio/checkov-action@29be5868bfa968f099ae80169f61f42887494b8f # v12.3133.0
+        with:
+          file: ${{ inputs.template-file }}
+          quiet: ${{ inputs.quiet }}
+          soft_fail: ${{ inputs.soft-fail }}

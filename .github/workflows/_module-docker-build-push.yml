@@ -1,0 +1,136 @@
+name: _module-docker-build-push
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Docker build context directory.
+        required: true
+        type: string
+      image-tag-mode:
+        description: "'github-sha' | 'git-ref-sha'"
+        required: false
+        type: string
+        default: github-sha
+      registry-mode:
+        description: "'build-account-id' | 'ecr-login-output'"
+        required: false
+        type: string
+        default: build-account-id
+      sign:
+        description: Cosign-sign the pushed image.
+        required: false
+        type: boolean
+        default: false
+      aws-region:
+        description: AWS region.
+        required: false
+        type: string
+        default: eu-west-2
+      checkout-ref:
+        description: Git ref to check out (empty = default).
+        required: false
+        type: string
+        default: ""
+      fetch-depth:
+        description: Checkout fetch depth (0 = full history; 1 = shallow).
+        required: false
+        type: number
+        default: 0
+      role-arn-secret-name:
+        description: Name of the secret holding the AWS role ARN.
+        required: true
+        type: string
+      ecr-repo-secret-name:
+        description: Name of the secret holding the ECR repository name.
+        required: true
+        type: string
+      kms-key-secret-name:
+        description: Name of the secret holding the Cosign KMS key ARN (when sign=true).
+        required: false
+        type: string
+        default: ""
+      build-account-id-secret-name:
+        description: Name of the secret holding the build account id (registry-mode=build-account-id).
+        required: false
+        type: string
+        default: BUILD_ACCOUNT_ID
+    outputs:
+      image-tag:
+        description: The resolved image tag.
+        value: ${{ jobs.docker.outputs.image-tag }}
+      registry:
+        description: The resolved ECR registry.
+        value: ${{ jobs.docker.outputs.registry }}
+
+jobs:
+  docker:
+    name: Build, tag and push image
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: read
+    outputs:
+      image-tag: ${{ steps.resolve.outputs.image-tag }}
+      registry: ${{ steps.resolve.outputs.registry }}
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+          ref: ${{ inputs.checkout-ref }}
+
+      - name: Set up AWS creds
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # pin@v4
+        with:
+          role-to-assume: ${{ secrets[inputs.role-arn-secret-name] }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # pin@v1
+
+      - name: Install Cosign
+        if: ${{ inputs.sign }}
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: 'v2.5.2'
+
+      - name: Resolve registry and tag
+        id: resolve
+        env:
+          REGISTRY_MODE: ${{ inputs.registry-mode }}
+          TAG_MODE: ${{ inputs.image-tag-mode }}
+          BUILD_ACCOUNT_ID: ${{ secrets[inputs.build-account-id-secret-name] }}
+          ECR_LOGIN_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          AWS_REGION: ${{ inputs.aws-region }}
+        run: |
+          if [ "$REGISTRY_MODE" = "build-account-id" ]; then
+            registry="${BUILD_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          else
+            registry="${ECR_LOGIN_REGISTRY}"
+          fi
+          if [ "$TAG_MODE" = "git-ref-sha" ]; then
+            tag="$(git rev-parse HEAD)"
+          else
+            tag="$GITHUB_SHA"
+          fi
+          echo "registry=$registry" >> "$GITHUB_OUTPUT"
+          echo "image-tag=$tag" >> "$GITHUB_OUTPUT"
+
+      - name: Build, tag, and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.resolve.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets[inputs.ecr-repo-secret-name] }}
+          IMAGE_TAG: ${{ steps.resolve.outputs.image-tag }}
+          CONTAINER_SIGN_KMS_KEY: ${{ secrets[inputs.kms-key-secret-name] }}
+          SIGN: ${{ inputs.sign }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          if [ "$SIGN" = "true" ]; then
+            cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          fi
