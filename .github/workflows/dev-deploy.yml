@@ -1,0 +1,66 @@
+name: Deploy to Dev
+
+# Generic manual deploy-to-dev workflow for the whole repository.
+#
+# The operator picks which service to deploy via the `service` choice input and
+# the ref to deploy via `gitRef`. Each service's deploy jobs are gated on the
+# selected service, so exactly one service is deployed per run and that
+# service's own dev secrets are used.
+#
+# Only Document Builder is wired today. Other services keep their own
+# per-service workflows and are migrated into this file in follow-up tickets by
+# adding their value to the `service` choice and their gated jobs below.
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to deploy to dev
+        required: true
+        type: choice
+        options:
+          - document-builder
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  # --- Document Builder ---
+  document-builder-docker:
+    name: Document Builder / Build, tag and push image
+    if: ${{ inputs.service == 'document-builder' }}
+    uses: ./.github/workflows/_module-docker-build-push.yml
+    with:
+      working-directory: ./document-builder
+      image-tag-mode: git-ref-sha
+      registry-mode: ecr-login-output
+      sign: false
+      fetch-depth: 1
+      checkout-ref: ${{ inputs.gitRef }}
+      role-arn-secret-name: DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN
+      ecr-repo-secret-name: DEV_DOC_BUILDER_ECR_REPOSITORY_NAME
+    secrets: inherit
+
+  document-builder-sam-deploy:
+    name: Document Builder / Build and deploy SAM app
+    needs: document-builder-docker
+    if: ${{ inputs.service == 'document-builder' }}
+    uses: ./.github/workflows/_module-sam-deploy.yml
+    with:
+      working-directory: ./document-builder/deploy
+      sam-version: 1.131.0
+      deploy-mode: s3-cp
+      uses-container-image: false
+      checkout-ref: ${{ inputs.gitRef }}
+      registry: ${{ needs.document-builder-docker.outputs.registry }}
+      image-tag: ${{ needs.document-builder-docker.outputs.image-tag }}
+      role-arn-secret-name: DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN
+      ecr-repo-secret-name: DEV_DOC_BUILDER_ECR_REPOSITORY_NAME
+      bucket-name-secret-name: DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME
+    secrets: inherit

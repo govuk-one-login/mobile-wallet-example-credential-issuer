@@ -1,0 +1,143 @@
+name: Push to Main
+
+# Generic post-merge workflow for the whole repository.
+#
+# A single `detect-changes` job decides which services were touched by the push
+# to main. Each service's build / push / deploy jobs are gated on its change
+# flag, so only changed services are built and deployed. The final
+# `all-checks-passed` job is the single status check: it passes when every
+# triggered job succeeded or was skipped, and fails if any triggered job failed
+# or was cancelled.
+#
+# Only Document Builder is wired today. Other services keep their own
+# per-service workflows and are migrated into this file in follow-up tickets by
+# adding a filter + their gated jobs to the gate's `needs` list.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect changed services
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      # A manual run (workflow_dispatch) forces every service to build/deploy,
+      # matching the original per-service workflows' manual-dispatch behaviour.
+      document-builder: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.document-builder == 'true' }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Filter changed paths
+        id: filter
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          # On push, compare against the previous commit on the branch.
+          base: ${{ github.event.before }}
+          filters: |
+            document-builder:
+              - 'document-builder/**'
+              - '.github/workflows/push-to-main.yml'
+              - '.github/workflows/_module-node-ci.yml'
+              - '.github/workflows/_module-sonarqube.yml'
+              - '.github/workflows/_module-checkov.yml'
+              - '.github/workflows/_module-docker-build-push.yml'
+              - '.github/workflows/_module-sam-deploy.yml'
+
+  # --- Document Builder ---
+  document-builder-code-analysis:
+    name: Document Builder / Validate & test
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    uses: ./.github/workflows/_module-node-ci.yml
+    with:
+      working-directory: ./document-builder
+      node-version-file: document-builder/.nvmrc
+      install-command: npm ci --ignore-scripts
+
+  document-builder-checkov:
+    name: Document Builder / Run Checkov
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    uses: ./.github/workflows/_module-checkov.yml
+    with:
+      template-file: "document-builder/deploy/template.yaml"
+
+  document-builder-sonarqube:
+    name: Document Builder / SonarQube analysis
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    uses: ./.github/workflows/_module-sonarqube.yml
+    with:
+      project-base-dir: ./document-builder
+      scan-metadata-report-file: document-builder/.scannerwork/report-task.txt
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  document-builder-docker:
+    name: Document Builder / Build, tag and push image
+    needs:
+      - detect-changes
+      - document-builder-code-analysis
+      - document-builder-checkov
+      - document-builder-sonarqube
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    uses: ./.github/workflows/_module-docker-build-push.yml
+    with:
+      working-directory: ./document-builder
+      sign: true
+      role-arn-secret-name: BUILD_DOC_BUILDER_GH_ACTIONS_ROLE_ARN
+      ecr-repo-secret-name: BUILD_DOC_BUILDER_ECR_REPOSITORY_NAME
+      kms-key-secret-name: BUILD_DOC_BUILDER_CONTAINER_SIGNER_KMS_KEY_ARN
+    secrets: inherit
+
+  document-builder-sam-deploy:
+    name: Document Builder / Validate, build and deploy SAM app
+    needs:
+      - detect-changes
+      - document-builder-docker
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    uses: ./.github/workflows/_module-sam-deploy.yml
+    with:
+      working-directory: ./document-builder/deploy
+      sam-version: 1.90.0
+      deploy-mode: upload-action
+      uses-container-image: true
+      sam-build-args: --cached
+      upload-working-directory: ./document-builder/deploy/.aws-sam/build
+      registry: ${{ needs.document-builder-docker.outputs.registry }}
+      image-tag: ${{ needs.document-builder-docker.outputs.image-tag }}
+      role-arn-secret-name: BUILD_DOC_BUILDER_GH_ACTIONS_ROLE_ARN
+      ecr-repo-secret-name: BUILD_DOC_BUILDER_ECR_REPOSITORY_NAME
+      bucket-name-secret-name: BUILD_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME
+    secrets: inherit
+
+  # --- Final gate ---
+  all-checks-passed:
+    name: All checks passed
+    if: always()
+    needs:
+      - detect-changes
+      - document-builder-code-analysis
+      - document-builder-checkov
+      - document-builder-sonarqube
+      - document-builder-docker
+      - document-builder-sam-deploy
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Verify all preceding jobs succeeded
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1

@@ -1,18 +1,22 @@
 # GitHub Actions Workflow Consolidation
 
 Agreed approach for consolidating the repository's GitHub Actions workflows into
-reusable "module" workflows, and the plan for applying it per service.
+reusable "module" workflows pulled into **three generic top-level workflows**
+(PR checks, push-to-main, dev-deploy), and the plan for applying it per service.
 
 This ticket **applies the approach to the Document Builder service only**. Other
 services (Example CRI, DSC Issuer, Platform CA, Test Harness) are left untouched
-and migrated in follow-up tickets. The modules are nonetheless **designed to
-accommodate every service's divergence**, so follow-ups need no module rewrites.
+and migrated in follow-up tickets. The modules and the generic workflows are
+nonetheless **designed to accommodate every service's divergence**, so follow-ups
+need no module rewrites — a follow-up only adds a path filter and the service's
+gated jobs to the generic workflows.
 
 ## 1. Approach
 
 ### Status (this ticket)
 
-All seven modules are **built**. Document Builder's three callers are **wired**:
+All seven modules are **built**. The three generic workflows are **wired for
+Document Builder**:
 
 | Module | Built | Wired by Document Builder |
 |---|---|---|
@@ -25,13 +29,26 @@ All seven modules are **built**. Document Builder's three callers are **wired**:
 | `_module-create-release.yml` | yes (stub) | no (follow-up services) |
 
 
-### Pattern: reusable workflows (`workflow_call`)
+### Pattern: generic workflows calling reusable modules (`workflow_call`)
 
 Each reusable job is extracted into its own callable workflow file (a "module").
-Thin per-service **caller** workflows invoke the modules via `uses:` and `with:`,
-forwarding secrets per the hybrid model below. This is the pattern most aligned
-with the ticket requirement: "jobs are written in separate files, and then are
-pulled into the main workflow when it is run."
+**Three generic workflows** — one per trigger type — invoke the modules via
+`uses:` and `with:`, forwarding secrets per the hybrid model below. This is the
+pattern most aligned with the ticket requirement: "jobs are written in separate
+files, and then are pulled into the main workflow when it is run."
+
+Instead of one set of caller files **per service**, there is now **one caller
+workflow per trigger** that holds every service's jobs:
+
+- **`pull-request-checks.yml`** and **`push-to-main.yml`** begin with a
+  `detect-changes` job that computes a per-service "changed" flag. Each service's
+  jobs are gated on its flag (`if: needs.detect-changes.outputs.<service> == 'true'`),
+  so **only changed services are built/deployed**. Both workflows end with a
+  single `all-checks-passed` gate job (see §1a).
+- **`dev-deploy.yml`** is a manual (`workflow_dispatch`) workflow with a
+  `service` **choice** input (document-builder, and future services) plus a
+  `gitRef`. Each service's deploy jobs are gated on the selected `service`, so
+  exactly one service deploys per run using its own dev secrets.
 
 ```text
 .github/workflows/
@@ -43,15 +60,71 @@ pulled into the main workflow when it is run."
   _module-conventional-commits.yml  # reusable (stub, not yet wired)
   _module-create-release.yml        # reusable (stub, not yet wired)
 
-  document-builder-pull-request-checks.yml   # caller
-  document-builder-push-to-main.yml          # caller
-  document-builder-dev-deploy.yml            # caller
+  pull-request-checks.yml   # generic caller: detect-changes + gated jobs + gate
+  push-to-main.yml          # generic caller: detect-changes + gated jobs + gate
+  dev-deploy.yml            # generic caller: service choice input + gated jobs
 ```
 
 - Modules **must** live directly under `.github/workflows/`. GitHub does not
   support reusable workflows nested in subdirectories.
 - The `_module-` prefix marks files that are only ever called by another
   workflow (they declare `on: workflow_call` and are never triggered directly).
+
+## 1a. Change detection and the `all-checks-passed` gate
+
+### Change detection
+
+`detect-changes` runs [`dorny/paths-filter`](https://github.com/dorny/paths-filter)
+(SHA-pinned to v4.0.3) and exposes a boolean-string output per service. A
+service's filter matches on its own directory **and** on the workflow/module
+files that affect it, so a change to a shared module re-runs the services that
+use it. Example:
+
+```yaml
+document-builder:
+  - 'document-builder/**'
+  - '.github/workflows/pull-request-checks.yml'
+  - '.github/workflows/_module-node-ci.yml'
+  - '.github/workflows/_module-sonarqube.yml'
+  - '.github/workflows/_module-checkov.yml'
+```
+
+- On **pull_request**, the filter compares against the PR base automatically.
+- On **push** to main, the filter compares against `github.event.before`.
+- On **workflow_dispatch** of `push-to-main.yml`, the filter step is skipped and
+  every service's flag is forced `true`, preserving the original per-service
+  workflows' "manual run = full build/deploy" behaviour.
+
+### The gate
+
+Both `pull-request-checks.yml` and `push-to-main.yml` end with:
+
+```yaml
+all-checks-passed:
+  name: All checks passed
+  if: always()
+  needs:
+    - detect-changes
+    - document-builder-ci
+    - document-builder-sonarqube
+    - document-builder-checkov
+  runs-on: ubuntu-24.04
+  permissions:
+    contents: read
+  steps:
+    - name: Verify all preceding jobs succeeded
+      if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+      run: exit 1
+```
+
+- `if: always()` makes the gate run even when an upstream job failed or was
+  skipped.
+- A **skipped** job (an unchanged service) reports `result: skipped`, which does
+  **not** trip the gate — so a PR touching only one service still passes.
+- The gate **fails** only on `failure` or `cancelled` among its `needs`.
+- This gives branch protection **one** stable required status check
+  (`All checks passed`) regardless of which services a change touches, rather
+  than requiring a different per-service check for every possible change set.
 
 ### Secrets: hybrid model (least-privilege where practical)
 
@@ -295,18 +368,29 @@ Builder (**DB**) is the only service wired this ticket.
 
 ## 4. Document Builder wiring (this ticket)
 
-The three DB callers wire exactly DB's current jobs — no conventional-commits,
-no create-release, no integration-tests:
+Document Builder's jobs live inside the three **generic** workflows, gated by
+change detection (PR checks, push-to-main) or the `service` choice (dev-deploy).
+They wire exactly DB's current jobs — no conventional-commits, no create-release,
+no integration-tests:
 
-- **PR checks** → `_module-node-ci` (build+lint+test+`sam validate`) →
-  `_module-sonarqube` → `_module-checkov`.
-- **Push to main** → `_module-node-ci` (test only) + `_module-checkov` +
-  `_module-sonarqube` → `_module-docker-build-push` (sign, `github-sha`,
-  `build-account-id`) → `_module-sam-deploy` (`upload-action`, SAM 1.90.0,
-  `--cached`, container image).
-- **Deploy to dev** → `_module-docker-build-push` (`git-ref-sha`,
-  `ecr-login-output`, no sign) → `_module-sam-deploy` (`s3-cp`, SAM 1.131.0,
-  container image).
+- **`pull-request-checks.yml`** → `detect-changes` →
+  `document-builder-ci` (`_module-node-ci`: build+lint+test+`sam validate`),
+  `document-builder-sonarqube` (`_module-sonarqube`),
+  `document-builder-checkov` (`_module-checkov`) →
+  `all-checks-passed` gate. Each DB job is gated on
+  `needs.detect-changes.outputs.document-builder == 'true'`.
+- **`push-to-main.yml`** → `detect-changes` →
+  `document-builder-code-analysis` (`_module-node-ci`, test only),
+  `document-builder-checkov`, `document-builder-sonarqube` →
+  `document-builder-docker` (`_module-docker-build-push`: sign, `github-sha`,
+  `build-account-id`) → `document-builder-sam-deploy` (`_module-sam-deploy`:
+  `upload-action`, SAM 1.90.0, `--cached`, container image) →
+  `all-checks-passed` gate. Gated on the DB change flag (forced `true` on manual
+  `workflow_dispatch`).
+- **`dev-deploy.yml`** → `document-builder-docker` (`_module-docker-build-push`:
+  `git-ref-sha`, `ecr-login-output`, no sign) → `document-builder-sam-deploy`
+  (`_module-sam-deploy`: `s3-cp`, SAM 1.131.0, container image). Gated on
+  `inputs.service == 'document-builder'`.
 
 ## 5. Verification
 
@@ -314,27 +398,34 @@ no create-release, no integration-tests:
   diffs against git history. **The agent does not trigger live runs.**
 - Live/functional testing (PR checks, push-to-main, dev deploy via
   `workflow_dispatch`) is performed by the maintainers — see the migration
-  checklist below.
-- `actionlint` baseline note: the pre-existing workflows already emit
-  informational `shellcheck` quoting notes (SC2086/SC2006) and `inputs.gitRef`
-  expression warnings on push-to-main files. These are pre-existing and are
+  checklist below. Maintainers should set **`All checks passed`** as the single
+  required status check for `pull-request-checks.yml` in branch protection.
+- `actionlint` baseline note: the reusable modules already emit informational
+  `shellcheck` quoting notes (SC2086/SC2006). These are pre-existing and are
   preserved for behaviour parity; the refactor introduces **no new error-level
   findings**.
 
 ## 6. Migration checklist (follow-up services)
 
-For each of Example CRI, DSC Issuer, Platform CA, Test Harness:
+For each of Example CRI, DSC Issuer, Platform CA, Test Harness, extend the three
+**generic** workflows (do not re-introduce per-service caller files):
 
-1. Create thin caller workflows preserving the existing `name`, `on`
-   triggers/`paths`, `permissions`, and `concurrency` blocks.
-2. Map the service's concrete secret names to the module secret-name inputs.
-   Apply the hybrid secrets model: forward `SONAR_TOKEN` **explicitly** on the
-   sonarqube caller job; use `secrets: inherit` only on the `docker` /
-   `sam-deploy` caller jobs (which resolve secrets dynamically); pass no
-   `secrets:` block on node-ci / checkov jobs.
-3. Wire the jobs the service has today (add the conventional-commits /
+1. **Change detection:** add a `<service>` filter to the `detect-changes` job in
+   `pull-request-checks.yml` and `push-to-main.yml` (its own `**` path plus the
+   module files it uses), and add a matching `<service>` output.
+2. **Jobs:** add the service's gated jobs (`if: needs.detect-changes.outputs.<service> == 'true'`),
+   wiring the jobs the service has today (add the conventional-commits /
    create-release / integration-tests / Sonar-split jobs where present).
-4. Set divergent inputs: SAM version, deploy mode, build/validate args,
+3. **Gate:** add every new job to the `all-checks-passed` gate's `needs` list.
+4. **Secrets:** map the service's concrete secret names to the module
+   secret-name inputs. Apply the hybrid secrets model: forward `SONAR_TOKEN`
+   **explicitly** on the sonarqube caller job; use `secrets: inherit` only on the
+   `docker` / `sam-deploy` caller jobs (which resolve secrets dynamically); pass
+   no `secrets:` block on node-ci / checkov jobs.
+5. **Divergent inputs:** set SAM version, deploy mode, build/validate args,
    `signing-profile-secret-name`, toolchain (`mode: gradle` for Example CRI).
-5. Run `actionlint` and diff behaviour against the pre-migration file.
-6. Maintainer runs the live checks (PR, push-to-main, dev deploy).
+6. **Dev deploy:** add the service to the `service` choice `options` in
+   `dev-deploy.yml` and add its gated deploy jobs
+   (`if: inputs.service == '<service>'`).
+7. Run `actionlint` and diff behaviour against the pre-migration file.
+8. Maintainer runs the live checks (PR, push-to-main, dev deploy).
