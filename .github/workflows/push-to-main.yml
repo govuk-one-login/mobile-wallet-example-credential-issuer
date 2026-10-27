@@ -1,18 +1,5 @@
 name: Push to Main
 
-# Generic post-merge workflow for the whole repository.
-#
-# A single `detect-changes` job decides which services were touched by the push
-# to main. Each service's build / push / deploy jobs are gated on its change
-# flag, so only changed services are built and deployed. The final
-# `all-checks-passed` job is the single status check: it passes when every
-# triggered job succeeded or was skipped, and fails if any triggered job failed
-# or was cancelled.
-#
-# Only Document Builder is wired today. Other services keep their own
-# per-service workflows and are migrated into this file in follow-up tickets by
-# adding a filter + their gated jobs to the gate's `needs` list.
-
 on:
   workflow_dispatch:
   push:

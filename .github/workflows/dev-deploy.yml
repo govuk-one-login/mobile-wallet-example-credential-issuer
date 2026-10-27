@@ -1,16 +1,5 @@
 name: Deploy to Dev
 
-# Generic manual deploy-to-dev workflow for the whole repository.
-#
-# The operator picks which service to deploy via the `service` choice input and
-# the ref to deploy via `gitRef`. Each service's deploy jobs are gated on the
-# selected service, so exactly one service is deployed per run and that
-# service's own dev secrets are used.
-#
-# Only Document Builder is wired today. Other services keep their own
-# per-service workflows and are migrated into this file in follow-up tickets by
-# adding their value to the `service` choice and their gated jobs below.
-
 on:
   workflow_dispatch:
     inputs:

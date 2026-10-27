@@ -1,18 +1,5 @@
 name: Pull Request Checks
 
-# Generic PR-checks workflow for the whole repository.
-#
-# A single `detect-changes` job decides which services were touched by the PR.
-# Each service's check jobs are gated on its change flag, so a PR that only
-# touches one service only builds that service. The final `all-checks-passed`
-# job is the single status check to make required in branch protection: it
-# passes when every triggered job succeeded or was skipped, and fails if any
-# triggered job failed or was cancelled.
-#
-# Only Document Builder is wired today. Other services keep their own
-# per-service workflows and are migrated into this file in follow-up tickets by
-# adding a filter + their gated jobs to the gate's `needs` list.
-
 on:
   pull_request:
     types:
