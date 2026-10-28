@@ -16,8 +16,6 @@ jobs:
     permissions:
       contents: read
     outputs:
-      # A manual run (workflow_dispatch) forces every service to build/deploy,
-      # matching the original per-service workflows' manual-dispatch behaviour.
       document-builder: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.document-builder == 'true' }}
     steps:
       - name: Check out repository code
@@ -30,14 +28,12 @@ jobs:
         if: ${{ github.event_name != 'workflow_dispatch' }}
         uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         with:
-          # On push, compare against the previous commit on the branch.
           base: ${{ github.event.before }}
           filters: |
             document-builder:
               - 'document-builder/**'
               - '.github/workflows/push-to-main.yml'
               - '.github/workflows/_module-node-ci.yml'
-              - '.github/workflows/_module-sonarqube.yml'
               - '.github/workflows/_module-checkov.yml'
               - '.github/workflows/_module-docker-build-push.yml'
               - '.github/workflows/_module-sam-deploy.yml'
@@ -52,6 +48,11 @@ jobs:
       working-directory: ./document-builder
       node-version-file: document-builder/.nvmrc
       install-command: npm ci --ignore-scripts
+      run-sonar: true
+      sonar-project-base-dir: ./document-builder
+      sonar-scan-metadata-report-file: document-builder/.scannerwork/report-task.txt
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   document-builder-checkov:
     name: Document Builder / Run Checkov
@@ -61,24 +62,12 @@ jobs:
     with:
       template-file: "document-builder/deploy/template.yaml"
 
-  document-builder-sonarqube:
-    name: Document Builder / SonarQube analysis
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
-    uses: ./.github/workflows/_module-sonarqube.yml
-    with:
-      project-base-dir: ./document-builder
-      scan-metadata-report-file: document-builder/.scannerwork/report-task.txt
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   document-builder-docker:
     name: Document Builder / Build, tag and push image
     needs:
       - detect-changes
       - document-builder-code-analysis
       - document-builder-checkov
-      - document-builder-sonarqube
     if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
     uses: ./.github/workflows/_module-docker-build-push.yml
     with:
@@ -118,7 +107,6 @@ jobs:
       - detect-changes
       - document-builder-code-analysis
       - document-builder-checkov
-      - document-builder-sonarqube
       - document-builder-docker
       - document-builder-sam-deploy
     runs-on: ubuntu-24.04

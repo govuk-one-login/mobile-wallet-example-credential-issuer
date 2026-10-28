@@ -34,7 +34,6 @@ jobs:
               - 'document-builder/**'
               - '.github/workflows/pull-request-checks.yml'
               - '.github/workflows/_module-node-ci.yml'
-              - '.github/workflows/_module-sonarqube.yml'
               - '.github/workflows/_module-checkov.yml'
 
   # --- Document Builder ---
@@ -52,15 +51,9 @@ jobs:
       run-sam-validate: true
       sam-validate-working-directory: deploy
       sam-validate-args: --region eu-west-2
-
-  document-builder-sonarqube:
-    name: Document Builder / SonarQube analysis
-    needs: detect-changes
-    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
-    uses: ./.github/workflows/_module-sonarqube.yml
-    with:
-      project-base-dir: ./document-builder
-      scan-metadata-report-file: document-builder/.scannerwork/report-task.txt
+      run-sonar: true
+      sonar-project-base-dir: ./document-builder
+      sonar-scan-metadata-report-file: document-builder/.scannerwork/report-task.txt
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -79,7 +72,6 @@ jobs:
     needs:
       - detect-changes
       - document-builder-ci
-      - document-builder-sonarqube
       - document-builder-checkov
     runs-on: ubuntu-24.04
     permissions:

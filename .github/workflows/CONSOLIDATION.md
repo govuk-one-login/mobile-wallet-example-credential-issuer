@@ -20,13 +20,23 @@ Document Builder**:
 
 | Module | Built | Wired by Document Builder |
 |---|---|---|
-| `_module-node-ci.yml` | yes | PR checks, push-to-main |
-| `_module-sonarqube.yml` | yes | PR checks, push-to-main |
+| `_module-node-ci.yml` | yes | PR checks, push-to-main (incl. Node Sonar scan + gate) |
+| `_module-sonarqube.yml` | yes | not wired by Document Builder; retained for the Gradle/Java path |
 | `_module-checkov.yml` | yes | PR checks, push-to-main |
 | `_module-docker-build-push.yml` | yes | push-to-main, dev-deploy |
 | `_module-sam-deploy.yml` | yes | push-to-main, dev-deploy |
 | `_module-conventional-commits.yml` | yes (stub) | no (follow-up services) |
 | `_module-create-release.yml` | yes (stub) | no (follow-up services) |
+
+> **Node coverage + Sonar must share a job.** The Sonar scan needs the Jest
+> coverage report (`document-builder/coverage/lcov.info`, per
+> `sonar.javascript.lcov.reportPaths`) on disk. Reusable workflows run as
+> separate jobs on separate runners, so a standalone Sonar job cannot see the
+> coverage produced by the Node CI job. For Node services the scan + quality
+> gate therefore run **inside** `_module-node-ci.yml` (gated by `run-sonar`),
+> immediately after coverage generation — matching the original per-service
+> workflows. `_module-sonarqube.yml` stays for the Gradle/Java path, where
+> `./gradlew sonar` generates and uploads coverage in the same step.
 
 
 ### Pattern: generic workflows calling reusable modules (`workflow_call`)
@@ -85,7 +95,6 @@ document-builder:
   - 'document-builder/**'
   - '.github/workflows/pull-request-checks.yml'
   - '.github/workflows/_module-node-ci.yml'
-  - '.github/workflows/_module-sonarqube.yml'
   - '.github/workflows/_module-checkov.yml'
 ```
 
@@ -106,7 +115,6 @@ all-checks-passed:
   needs:
     - detect-changes
     - document-builder-ci
-    - document-builder-sonarqube
     - document-builder-checkov
   runs-on: ubuntu-24.04
   permissions:
@@ -216,11 +224,27 @@ Builder runs `sam validate` inside its PR-checks job today).
 | `sam-version` | O | `1.90.0` | SAM CLI version when validating |
 | `sam-validate-working-directory` | O | `""` | dir to `cd` into before validate |
 | `sam-validate-args` | O | `--region eu-west-2` | args for `sam validate` |
+| `run-sonar` | O | `false` | Run Sonar scan + gate in this job, after coverage |
+| `sonar-project-base-dir` | O | `""` | e.g. `./document-builder` (required when `run-sonar`) |
+| `sonar-scan-metadata-report-file` | O | `""` | report-task.txt path (required when `run-sonar`) |
+| `sonar-quality-gate-timeout-minutes` | O | `5` | gate step timeout |
+
+Secrets:
+
+| Secret | Req | Purpose |
+|---|---|---|
+| `SONAR_TOKEN` | O | used by the Sonar scan + gate when `run-sonar` is true |
+
+The scan runs immediately after the coverage step so the lcov report is on disk
+in the same workspace, reproducing the original single-job behaviour.
 
 ### `_module-sonarqube.yml`
 
-SonarQube scan + quality-gate check. Supports the Node scan-action path now and
-a Gradle (`./gradlew sonar`) path gated by input for later Java use.
+SonarQube scan + quality-gate check. **Node services do not use this module** —
+their scan runs inside `_module-node-ci.yml` (see `run-sonar`) so it shares a
+workspace with the Jest coverage report. This module is retained for the Gradle
+(`./gradlew sonar`) path for later Java use, where coverage is produced within
+the same step as the scan.
 
 | Input | Req | Default | Purpose |
 |---|---|---|---|

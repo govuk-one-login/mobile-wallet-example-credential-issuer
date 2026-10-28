@@ -32,7 +32,9 @@ on:
         type: string
         default: "17"
       fetch-depth:
-        description: Checkout fetch depth (gradle mode).
+        description: >-
+          Checkout fetch depth for all modes. Defaults to 0 (full history),
+          which Sonar's new-code / SCM analysis needs.
         required: false
         type: number
         default: 0
@@ -51,10 +53,7 @@ jobs:
       - name: Check out repository code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # node scan-action path keeps the original shallow checkout (depth 1);
-          # gradle path honours the configurable depth (default 0 = full history).
-          # Note: avoid `&& inputs.fetch-depth` because 0 is falsy in GH expressions.
-          fetch-depth: ${{ inputs.mode == 'gradle' && format('{0}', inputs.fetch-depth) || '1' }}
+          fetch-depth: ${{ format('{0}', inputs.fetch-depth) }}
 
       # --- Node scan-action path ---
       - name: SonarQube Scan
