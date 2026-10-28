@@ -1,0 +1,131 @@
+name: Reusable - Container Deploy (Push to Main)
+
+# Reusable push-to-main deploy for container services: build + push a Docker
+# image to ECR (tagged with the commit SHA), cosign-sign it with a KMS key,
+# inject the image into the SAM template, build, and upload the artifact to the
+# dev-platform S3 bucket via devplatform-upload-action.
+
+on:
+  workflow_call:
+    inputs:
+      docker-context-directory:
+        description: Directory containing the Dockerfile / build context.
+        required: true
+        type: string
+      template-directory:
+        description: Directory containing the SAM template.yaml.
+        required: true
+        type: string
+      template-file:
+        description: SAM template filename within template-directory.
+        required: false
+        default: 'template.yaml'
+        type: string
+      sam-version:
+        description: SAM CLI version to install.
+        required: false
+        default: '1.160.0'
+        type: string
+      sam-build-args:
+        description: Extra args for `sam build` (e.g. --cached).
+        required: false
+        default: ''
+        type: string
+      upload-working-directory:
+        description: working-directory passed to devplatform-upload-action.
+        required: true
+        type: string
+      upload-template-file:
+        description: template-file passed to devplatform-upload-action (empty uses the action default).
+        required: false
+        default: ''
+        type: string
+      cosign-release:
+        description: Cosign version to install.
+        required: false
+        default: 'v2.5.2'
+        type: string
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      AWS_ACCOUNT_ID:
+        required: true
+      ECR_REPOSITORY:
+        required: true
+      CONTAINER_SIGN_KMS_KEY:
+        required: true
+      ARTIFACT_BUCKET_NAME:
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Compose ECR registry
+        env:
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+        run: echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.eu-west-2.amazonaws.com" >> "$GITHUB_ENV"
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+        with:
+          cosign-release: ${{ inputs.cosign-release }}
+
+      - name: Build, tag and push image to ECR
+        working-directory: ${{ inputs.docker-context-directory }}
+        env:
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+          CONTAINER_SIGN_KMS_KEY: ${{ secrets.CONTAINER_SIGN_KMS_KEY }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA
+
+      - name: Set up SAM CLI
+        uses: aws-actions/setup-sam@341eee193f458fa5aae5d52c94b0c5cf3a1c5a52 # v3
+        with:
+          version: ${{ inputs.sam-version }}
+          use-installer: true
+
+      - name: Update SAM template
+        working-directory: ${{ inputs.template-directory }}
+        env:
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
+        run: |
+          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_SHA|" ${{ inputs.template-file }}
+
+      - name: Validate SAM template
+        working-directory: ${{ inputs.template-directory }}
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate
+
+      - name: Build SAM template
+        working-directory: ${{ inputs.template-directory }}
+        run: sam build ${{ inputs.sam-build-args }}
+
+      - name: Deploy SAM app
+        # Upload the built SAM application artifacts to the deployment pipeline S3 bucket
+        uses: govuk-one-login/devplatform-upload-action@6677f824e2e0899e207870cfc8224858d1dd6fac # v4.4.1
+        with:
+          artifact-bucket-name: ${{ secrets.ARTIFACT_BUCKET_NAME }}
+          working-directory: ${{ inputs.upload-working-directory }}
+          template-file: ${{ inputs.upload-template-file }}

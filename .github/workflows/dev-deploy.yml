@@ -1,0 +1,99 @@
+name: Deploy to Dev
+
+# Single manual entry workflow to deploy one service to the dev environment.
+# Pick a service from the preset list; the matching gated job routes to that
+# service's archetype reusable with its DEV_* secrets. test-harness is not
+# listed because it has no deployment.
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: Service to deploy to dev
+        required: true
+        type: choice
+        options:
+          - example-credential-issuer
+          - document-builder
+          - document-signing-certificate-issuer
+          - platform-ca
+      gitRef:
+        description: Input branch name or commit SHA
+        required: true
+        type: string
+        default: main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ inputs.service }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ----------------------------- example-credential-issuer (java-container)
+  example-cri-deploy:
+    name: Example CRI - Deploy to dev
+    if: ${{ inputs.service == 'example-credential-issuer' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-container-dev-deploy.yml
+    with:
+      docker-context-directory: ./example-credential-issuer
+      template-directory: ./example-credential-issuer/deploy
+      gitRef: ${{ inputs.gitRef }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.DEV_EXAMPLE_CRI_GH_ACTIONS_ROLE_ARN }}
+      ECR_REPOSITORY: ${{ secrets.DEV_EXAMPLE_CRI_ECR_REPOSITORY_NAME }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_EXAMPLE_CRI_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+
+  # ----------------------------- document-builder (node-container)
+  document-builder-deploy:
+    name: Document Builder - Deploy to dev
+    if: ${{ inputs.service == 'document-builder' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-container-dev-deploy.yml
+    with:
+      docker-context-directory: ./document-builder
+      template-directory: ./document-builder/deploy
+      gitRef: ${{ inputs.gitRef }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN }}
+      ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+
+  # ----------------------------- document-signing-certificate-issuer (node-sam)
+  dsc-issuer-deploy:
+    name: DSC Issuer - Deploy to dev
+    if: ${{ inputs.service == 'document-signing-certificate-issuer' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      working-directory: ./document-signing-certificate-issuer
+      gitRef: ${{ inputs.gitRef }}
+      setup-node: true
+      node-version-file: document-signing-certificate-issuer/.nvmrc
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.DEV_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
+      SIGNING_PROFILE_NAME: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}
+
+  # ----------------------------- platform-ca (sam-only)
+  platform-ca-deploy:
+    name: Platform CA - Deploy to dev
+    if: ${{ inputs.service == 'platform-ca' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      working-directory: ./platform-ca
+      gitRef: ${{ inputs.gitRef }}
+      sam-validate-args: --lint
+      sam-build-args: --parallel
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.DEV_PLATFORM_CA_GH_ACTIONS_ROLE_ARN }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_PLATFORM_CA_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+      SIGNING_PROFILE_NAME: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}

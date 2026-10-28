@@ -1,0 +1,216 @@
+name: Push to Main
+
+# Single entry workflow for all main-branch CI + deploy across every service.
+# `detect-changes` decides which service directories changed; each service block
+# is gated on its own flag. Deploy jobs use `if: always() && <ci>.result ==
+# 'success' && <svc flag>` so a deploy blocks on its OWN CI failure but is not
+# blocked by skipped sibling services. A change to any shared reusable workflow
+# (or this file) flags ALL services. There is no semantic-release / version bump.
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  detect-changes:
+    name: Detect changed services
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    outputs:
+      example-cri: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.example-cri == 'true' || steps.filter.outputs.shared == 'true' }}
+      document-builder: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.document-builder == 'true' || steps.filter.outputs.shared == 'true' }}
+      dsc-issuer: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.dsc-issuer == 'true' || steps.filter.outputs.shared == 'true' }}
+      platform-ca: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.platform-ca == 'true' || steps.filter.outputs.shared == 'true' }}
+      test-harness: ${{ github.event_name == 'workflow_dispatch' || steps.filter.outputs.test-harness == 'true' || steps.filter.outputs.shared == 'true' }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Filter changed paths
+        id: filter
+        if: ${{ github.event_name != 'workflow_dispatch' }}
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          # On a push to main, base = the branch name makes paths-filter diff
+          # against the most recent commit before the push.
+          base: ${{ github.ref_name }}
+          filters: |
+            shared:
+              - '.github/workflows/_reusable-*.yml'
+              - '.github/workflows/push-to-main.yml'
+              - '.github/workflows/example-credential-issuer-integration-tests.yml'
+            example-cri:
+              - 'example-credential-issuer/**'
+            document-builder:
+              - 'document-builder/**'
+            dsc-issuer:
+              - 'document-signing-certificate-issuer/**'
+            platform-ca:
+              - 'platform-ca/**'
+            test-harness:
+              - 'test-harness/**'
+
+  # ----------------------------- example-credential-issuer (java-container)
+  example-cri-integration-tests:
+    name: Example CRI - Integration tests
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.example-cri == 'true' }}
+    uses: ./.github/workflows/example-credential-issuer-integration-tests.yml
+
+  example-cri-code-analysis:
+    name: Example CRI - Code analysis
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.example-cri == 'true' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-java-ci.yml
+    with:
+      working-directory: ./example-credential-issuer
+      java-version: '17'
+      java-distribution: corretto
+      run-sonar: true
+      sonar-report-path: example-credential-issuer/build/sonar/report-task.txt
+      run-checkov: true
+      checkov-file: example-credential-issuer/deploy/template.yaml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  example-cri-deploy:
+    name: Example CRI - Deploy
+    needs: [detect-changes, example-cri-code-analysis, example-cri-integration-tests]
+    if: ${{ always() && needs.detect-changes.outputs.example-cri == 'true' && needs.example-cri-code-analysis.result == 'success' && needs.example-cri-integration-tests.result == 'success' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-container-deploy.yml
+    with:
+      docker-context-directory: ./example-credential-issuer
+      template-directory: ./example-credential-issuer/deploy
+      upload-working-directory: ./example-credential-issuer/deploy
+      upload-template-file: .aws-sam/build/template.yaml
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.BUILD_EXAMPLE_CRI_GH_ACTIONS_ROLE_ARN }}
+      AWS_ACCOUNT_ID: ${{ secrets.BUILD_ACCOUNT_ID }}
+      ECR_REPOSITORY: ${{ secrets.BUILD_EXAMPLE_CRI_ECR_REPOSITORY_NAME }}
+      CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_EXAMPLE_CRI_CONTAINER_SIGNER_KMS_KEY_ARN }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.BUILD_EXAMPLE_CRI_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+
+  # ----------------------------- document-builder (node-container)
+  document-builder-code-analysis:
+    name: Document Builder - Code analysis
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: ./document-builder
+      node-version-file: document-builder/.nvmrc
+      npm-ci-args: --ignore-scripts
+      coverage-script: test:cov
+      run-sonar: true
+      sonar-report-path: document-builder/.scannerwork/report-task.txt
+      run-checkov: true
+      checkov-file: document-builder/deploy/template.yaml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  document-builder-deploy:
+    name: Document Builder - Deploy
+    needs: [detect-changes, document-builder-code-analysis]
+    if: ${{ always() && needs.detect-changes.outputs.document-builder == 'true' && needs.document-builder-code-analysis.result == 'success' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-container-deploy.yml
+    with:
+      docker-context-directory: ./document-builder
+      template-directory: ./document-builder/deploy
+      sam-build-args: --cached
+      upload-working-directory: ./document-builder/deploy/.aws-sam/build
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.BUILD_DOC_BUILDER_GH_ACTIONS_ROLE_ARN }}
+      AWS_ACCOUNT_ID: ${{ secrets.BUILD_ACCOUNT_ID }}
+      ECR_REPOSITORY: ${{ secrets.BUILD_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+      CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_DOC_BUILDER_CONTAINER_SIGNER_KMS_KEY_ARN }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.BUILD_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+
+  # ----------------------------- document-signing-certificate-issuer (node-sam)
+  dsc-issuer-code-analysis:
+    name: DSC Issuer - Code analysis
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.dsc-issuer == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: ./document-signing-certificate-issuer
+      node-version-file: document-signing-certificate-issuer/.nvmrc
+      format-check-script: format:check
+      coverage-script: test:cov
+      run-sonar: true
+      sonar-report-path: document-signing-certificate-issuer/.scannerwork/report-task.txt
+      run-checkov: true
+      checkov-file: document-signing-certificate-issuer/template.yaml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  dsc-issuer-deploy:
+    name: DSC Issuer - Deploy
+    needs: [detect-changes, dsc-issuer-code-analysis]
+    if: ${{ always() && needs.detect-changes.outputs.dsc-issuer == 'true' && needs.dsc-issuer-code-analysis.result == 'success' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      working-directory: ./document-signing-certificate-issuer
+      setup-node: true
+      node-version-file: document-signing-certificate-issuer/.nvmrc
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.BUILD_DSC_ISS_GH_ACTIONS_ROLE_ARN }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.BUILD_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
+      SIGNING_PROFILE_NAME: ${{ secrets.BUILD_SIGNING_PROFILE_NAME }}
+
+  # ----------------------------- platform-ca (sam-only)
+  platform-ca-deploy:
+    name: Platform CA - Deploy
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.platform-ca == 'true' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-deploy.yml
+    with:
+      working-directory: ./platform-ca
+      sam-validate-args: --lint
+      sam-build-args: --parallel
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.BUILD_PLATFORM_CA_GH_ACTIONS_ROLE_ARN }}
+      ARTIFACT_BUCKET_NAME: ${{ secrets.BUILD_PLATFORM_CA_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+      SIGNING_PROFILE_NAME: ${{ secrets.BUILD_SIGNING_PROFILE_NAME }}
+
+  # ----------------------------- test-harness (node CI only, no deploy)
+  test-harness-sonar:
+    name: Test Harness - SonarQube
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.test-harness == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-node-sonar.yml
+    with:
+      working-directory: ./test-harness
+      node-version-file: test-harness/.nvmrc
+      coverage-script: test:unit
+      sonar-report-path: test-harness/.scannerwork/report-task.txt
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

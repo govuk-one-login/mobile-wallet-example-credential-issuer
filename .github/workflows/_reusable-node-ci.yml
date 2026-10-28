@@ -1,0 +1,140 @@
+name: Reusable - Node CI
+
+# Reusable CI for Node/TypeScript services: install, optional lint/format/build,
+# coverage, optional Checkov, and optional SonarQube scan + quality gate.
+# Every enabled script runs in a single job so coverage (LCOV) exists before the
+# Sonar scan. Steps are opt-in via inputs so each service maps only what it has.
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Service directory containing package.json.
+        required: true
+        type: string
+      node-version-file:
+        description: Path (relative to repo root) to the service .nvmrc file.
+        required: true
+        type: string
+      npm-ci-args:
+        description: Extra args passed to npm ci (e.g. --ignore-scripts).
+        required: false
+        default: ''
+        type: string
+      gitRef:
+        description: Branch name or commit SHA to check out (empty uses the default ref).
+        required: false
+        default: ''
+        type: string
+      lint-script:
+        description: npm script for linting (empty to skip).
+        required: false
+        default: ''
+        type: string
+      format-check-script:
+        description: npm script for format checking (empty to skip).
+        required: false
+        default: ''
+        type: string
+      build-script:
+        description: npm script for building source (empty to skip).
+        required: false
+        default: ''
+        type: string
+      coverage-script:
+        description: npm script that runs tests + produces coverage (empty to skip).
+        required: false
+        default: ''
+        type: string
+      run-checkov:
+        description: Whether to run Checkov against a CloudFormation/SAM template.
+        required: false
+        default: false
+        type: boolean
+      checkov-file:
+        description: Path (relative to repo root) to the template Checkov should scan.
+        required: false
+        default: ''
+        type: string
+      run-sonar:
+        description: Whether to run the SonarQube scan + quality gate.
+        required: false
+        default: false
+        type: boolean
+      sonar-report-path:
+        description: Path (relative to repo root) to the Sonar report-task.txt.
+        required: false
+        default: ''
+        type: string
+    secrets:
+      SONAR_TOKEN:
+        required: false
+
+jobs:
+  ci:
+    name: Run tests, lint and validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.gitRef }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: ${{ inputs.node-version-file }}
+          cache: npm
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci ${{ inputs.npm-ci-args }}
+
+      - name: Run the linter
+        if: ${{ inputs.lint-script != '' }}
+        run: npm run ${{ inputs.lint-script }}
+
+      - name: Check code formatting
+        if: ${{ inputs.format-check-script != '' }}
+        run: npm run ${{ inputs.format-check-script }}
+
+      - name: Build source code
+        if: ${{ inputs.build-script != '' }}
+        run: npm run ${{ inputs.build-script }}
+
+      - name: Generate coverage report
+        if: ${{ inputs.coverage-script != '' }}
+        run: npm run ${{ inputs.coverage-script }}
+
+      - name: Perform static analysis
+        if: ${{ inputs.run-sonar }}
+        uses: sonarsource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        with:
+          projectBaseDir: ${{ inputs.working-directory }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check SonarQube Quality Gate status
+        if: ${{ inputs.run-sonar }}
+        uses: sonarsource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: ${{ inputs.sonar-report-path != '' && inputs.sonar-report-path || format('{0}/.scannerwork/report-task.txt', inputs.working-directory) }}
+
+      - name: Run Checkov
+        if: ${{ inputs.run-checkov }}
+        uses: bridgecrewio/checkov-action@6f26dc90000b74feb589a906cdfae540f5119895 # v12.3134.0
+        with:
+          file: ${{ inputs.checkov-file }}
+          quiet: true
+          soft_fail: false

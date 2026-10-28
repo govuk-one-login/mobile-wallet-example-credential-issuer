@@ -1,13 +1,37 @@
-name: Document Builder - Deploy to Dev
+name: Reusable - Container Deploy to Dev
+
+# Reusable dev deploy for container services: build + push a Docker image to ECR
+# (tagged with the checked-out commit SHA), then build the SAM template, inject
+# the image, zip it and copy it straight to the dev artifact S3 bucket with
+# `aws s3 cp` (no cosign signing on the dev path).
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
-      gitRef:
-        description: Input branch name or commit SHA
+      docker-context-directory:
+        description: Directory containing the Dockerfile / build context.
         required: true
         type: string
-        default: main
+      template-directory:
+        description: Directory containing the SAM template.yaml.
+        required: true
+        type: string
+      gitRef:
+        description: Branch name or commit SHA to check out.
+        required: true
+        type: string
+      sam-version:
+        description: SAM CLI version to install.
+        required: false
+        default: '1.160.0'
+        type: string
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      ECR_REPOSITORY:
+        required: true
+      ARTIFACT_BUCKET_NAME:
+        required: true
 
 jobs:
   deploy:
@@ -27,22 +51,22 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
-          role-to-assume: ${{ secrets.DEV_DOC_BUILDER_GH_ACTIONS_ROLE_ARN }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: eu-west-2
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # pin@v1
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
 
       - name: Set GIT_REF_SHA
         # Set GIT_REF_SHA to the checked-out commit SHA
         run: echo "GIT_REF_SHA=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Build, tag and push image to ECR
-        working-directory: ./document-builder
+        working-directory: ${{ inputs.docker-context-directory }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME}}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
@@ -51,23 +75,23 @@ jobs:
       - name: Set up SAM CLI
         uses: aws-actions/setup-sam@341eee193f458fa5aae5d52c94b0c5cf3a1c5a52 # v3
         with:
-          version: 1.131.0
+          version: ${{ inputs.sam-version }}
           use-installer: true
 
       - name: Deploy SAM app
-        working-directory: ./document-builder/deploy
+        working-directory: ${{ inputs.template-directory }}
         env:
-          ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_DOC_BUILDER_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
+          ARTIFACT_BUCKET_NAME: ${{ secrets.ARTIFACT_BUCKET_NAME }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ secrets.DEV_DOC_BUILDER_ECR_REPOSITORY_NAME }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ env.GIT_REF_SHA }}
         run: |
-          echo "Running `SAM validate` and `SAM build`"
+          echo "Running SAM validate and SAM build"
           echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
           sam validate
           sam build
           mv .aws-sam/build/template.yaml cf-template.yaml
-          echo "Replacing `CONTAINER-IMAGE-PLACEHOLDER` with new ECR image"
+          echo "Replacing CONTAINER-IMAGE-PLACEHOLDER with new ECR image"
           sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
           echo "Compressing SAM template"
           zip template.zip cf-template.yaml
