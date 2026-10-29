@@ -1,0 +1,164 @@
+name: _module-node-ci
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Service directory, e.g. ./document-builder
+        required: true
+        type: string
+      node-version-file:
+        description: Path to the .nvmrc file (repo-root relative).
+        required: true
+        type: string
+      install-command:
+        description: Dependency install command.
+        required: false
+        type: string
+        default: npm ci
+      run-build:
+        description: Run `npm run build`.
+        required: false
+        type: boolean
+        default: false
+      lint-command:
+        description: Lint command (skipped when empty).
+        required: false
+        type: string
+        default: ""
+      format-check-command:
+        description: Format-check command (skipped when empty).
+        required: false
+        type: string
+        default: ""
+      test-command:
+        description: Test / coverage command.
+        required: false
+        type: string
+        default: npm run test:cov
+      fetch-depth:
+        description: Checkout fetch depth.
+        required: false
+        type: number
+        default: 0
+      run-sam-validate:
+        description: Run SAM validate after tests.
+        required: false
+        type: boolean
+        default: false
+      sam-version:
+        description: SAM CLI version (when validating).
+        required: false
+        type: string
+        default: 1.90.0
+      sam-validate-working-directory:
+        description: Directory to cd into before `sam validate` (relative to working-directory; empty = none).
+        required: false
+        type: string
+        default: ""
+      sam-validate-args:
+        description: Arguments for `sam validate`.
+        required: false
+        type: string
+        default: --region eu-west-2
+      run-sonar:
+        description: >-
+          Run the SonarQube scan + quality gate in this job, immediately after
+          the coverage report is generated (so the lcov report is on disk).
+        required: false
+        type: boolean
+        default: false
+      sonar-project-base-dir:
+        description: Sonar project base dir, e.g. ./document-builder (required when run-sonar=true).
+        required: false
+        type: string
+        default: ""
+      sonar-scan-metadata-report-file:
+        description: Path to report-task.txt used by the quality gate (required when run-sonar=true).
+        required: false
+        type: string
+        default: ""
+      sonar-quality-gate-timeout-minutes:
+        description: Timeout for the quality-gate step.
+        required: false
+        type: number
+        default: 5
+    secrets:
+      SONAR_TOKEN:
+        description: SonarQube token used by the scan and quality-gate steps (required when run-sonar=true).
+        required: false
+
+jobs:
+  node-ci:
+    name: Run tests, lint and validate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: ${{ inputs.node-version-file }}
+
+      - name: Install dependencies
+        run: ${{ inputs.install-command }}
+
+      - name: Build source code
+        if: ${{ inputs.run-build }}
+        run: npm run build
+
+      - name: Run the linter
+        if: ${{ inputs.lint-command != '' }}
+        run: ${{ inputs.lint-command }}
+
+      - name: Check code formatting
+        if: ${{ inputs.format-check-command != '' }}
+        run: ${{ inputs.format-check-command }}
+
+      - name: Generate coverage report
+        run: ${{ inputs.test-command }}
+
+      - name: SonarQube Scan
+        if: ${{ inputs.run-sonar }}
+        uses: sonarsource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        with:
+          projectBaseDir: ${{ inputs.sonar-project-base-dir }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: SonarQube Quality Gate check
+        if: ${{ inputs.run-sonar }}
+        uses: sonarsource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1
+        timeout-minutes: ${{ inputs.sonar-quality-gate-timeout-minutes }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: ${{ inputs.sonar-scan-metadata-report-file }}
+
+      - name: Setup SAM CLI
+        if: ${{ inputs.run-sam-validate }}
+        uses: aws-actions/setup-sam@341eee193f458fa5aae5d52c94b0c5cf3a1c5a52 # pin@v3
+        with:
+          version: ${{ inputs.sam-version }}
+          use-installer: true
+
+      - name: SAM Validate
+        if: ${{ inputs.run-sam-validate }}
+        env:
+          SAM_VALIDATE_DIR: ${{ inputs.sam-validate-working-directory }}
+          SAM_VALIDATE_ARGS: ${{ inputs.sam-validate-args }}
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          if [ -n "$SAM_VALIDATE_DIR" ]; then cd "$SAM_VALIDATE_DIR"; fi
+          sam validate $SAM_VALIDATE_ARGS

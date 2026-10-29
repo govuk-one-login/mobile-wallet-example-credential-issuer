@@ -1,0 +1,171 @@
+name: _module-sam-deploy
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: SAM project directory.
+        required: true
+        type: string
+      sam-version:
+        description: SAM CLI version.
+        required: false
+        type: string
+        default: 1.131.0
+      deploy-mode:
+        description: "'upload-action' | 's3-cp'"
+        required: false
+        type: string
+        default: upload-action
+      uses-container-image:
+        description: Perform the CONTAINER-IMAGE-PLACEHOLDER sed substitution.
+        required: false
+        type: boolean
+        default: false
+      sam-build-args:
+        description: Extra args for `sam build` (e.g. --cached).
+        required: false
+        type: string
+        default: ""
+      sam-validate-args:
+        description: Extra args for `sam validate` (e.g. --lint).
+        required: false
+        type: string
+        default: ""
+      upload-working-directory:
+        description: working-directory passed to the upload-action (empty = inputs.working-directory).
+        required: false
+        type: string
+        default: ""
+      template-file:
+        description: template-file passed to the upload-action (empty = not passed).
+        required: false
+        type: string
+        default: ""
+      aws-region:
+        description: AWS region.
+        required: false
+        type: string
+        default: eu-west-2
+      checkout-ref:
+        description: Git ref to check out (empty = default).
+        required: false
+        type: string
+        default: ""
+      registry:
+        description: ECR registry for the sed substitution (container image).
+        required: false
+        type: string
+        default: ""
+      image-tag:
+        description: Image tag for the sed substitution (container image).
+        required: false
+        type: string
+        default: ""
+      bucket-name-secret-name:
+        description: Name of the secret holding the artifact bucket name.
+        required: true
+        type: string
+      role-arn-secret-name:
+        description: Name of the secret holding the AWS role ARN (s3-cp mode).
+        required: false
+        type: string
+        default: ""
+      ecr-repo-secret-name:
+        description: Name of the secret holding the ECR repo name (sed substitution).
+        required: false
+        type: string
+        default: ""
+      signing-profile-secret-name:
+        description: Name of the secret holding the signing profile name (upload-action).
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  sam-deploy:
+    name: Validate, build and deploy SAM app
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.checkout-ref }}
+
+      - name: Set up AWS creds
+        if: ${{ inputs.role-arn-secret-name != '' }}
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # pin@v4
+        with:
+          role-to-assume: ${{ secrets[inputs.role-arn-secret-name] }}
+          aws-region: ${{ inputs.aws-region }}
+
+      - name: Setup SAM CLI
+        uses: aws-actions/setup-sam@341eee193f458fa5aae5d52c94b0c5cf3a1c5a52 # pin@v3
+        with:
+          version: ${{ inputs.sam-version }}
+          use-installer: true
+
+      - name: Update SAM template (container image)
+        if: ${{ inputs.uses-container-image }}
+        env:
+          ECR_REGISTRY: ${{ inputs.registry }}
+          ECR_REPOSITORY: ${{ secrets[inputs.ecr-repo-secret-name] }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+        run: |
+          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" template.yaml
+
+      - name: SAM validate and build
+        env:
+          SAM_VALIDATE_ARGS: ${{ inputs.sam-validate-args }}
+          SAM_BUILD_ARGS: ${{ inputs.sam-build-args }}
+        run: |
+          echo "SAM_CLI_TELEMETRY=0" >> $GITHUB_ENV
+          sam validate $SAM_VALIDATE_ARGS
+          sam build $SAM_BUILD_ARGS
+
+      # --- upload-action deploy (variants gated to preserve exact per-service inputs) ---
+      - name: Deploy SAM app (upload-action, no template-file, no signing)
+        if: ${{ inputs.deploy-mode == 'upload-action' && inputs.template-file == '' && inputs.signing-profile-secret-name == '' }}
+        uses: govuk-one-login/devplatform-upload-action@6677f824e2e0899e207870cfc8224858d1dd6fac # pin@v3.9.3
+        with:
+          artifact-bucket-name: ${{ secrets[inputs.bucket-name-secret-name] }}
+          working-directory: ${{ inputs.upload-working-directory != '' && inputs.upload-working-directory || inputs.working-directory }}
+
+      - name: Deploy SAM app (upload-action, template-file, no signing)
+        if: ${{ inputs.deploy-mode == 'upload-action' && inputs.template-file != '' && inputs.signing-profile-secret-name == '' }}
+        uses: govuk-one-login/devplatform-upload-action@6677f824e2e0899e207870cfc8224858d1dd6fac # pin@v3.9.3
+        with:
+          artifact-bucket-name: ${{ secrets[inputs.bucket-name-secret-name] }}
+          working-directory: ${{ inputs.upload-working-directory != '' && inputs.upload-working-directory || inputs.working-directory }}
+          template-file: ${{ inputs.template-file }}
+
+      - name: Deploy SAM app (upload-action, template-file + signing)
+        if: ${{ inputs.deploy-mode == 'upload-action' && inputs.template-file != '' && inputs.signing-profile-secret-name != '' }}
+        uses: govuk-one-login/devplatform-upload-action@6677f824e2e0899e207870cfc8224858d1dd6fac # pin@v3.9.3
+        with:
+          artifact-bucket-name: ${{ secrets[inputs.bucket-name-secret-name] }}
+          signing-profile-name: ${{ secrets[inputs.signing-profile-secret-name] }}
+          working-directory: ${{ inputs.upload-working-directory != '' && inputs.upload-working-directory || inputs.working-directory }}
+          template-file: ${{ inputs.template-file }}
+
+      # --- s3-cp deploy ---
+      - name: Deploy SAM app (s3-cp)
+        if: ${{ inputs.deploy-mode == 's3-cp' }}
+        env:
+          ARTIFACT_BUCKET_NAME: ${{ secrets[inputs.bucket-name-secret-name] }}
+          ECR_REGISTRY: ${{ inputs.registry }}
+          ECR_REPOSITORY: ${{ secrets[inputs.ecr-repo-secret-name] }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+        run: |
+          mv .aws-sam/build/template.yaml cf-template.yaml
+          sed -i "s|CONTAINER-IMAGE-PLACEHOLDER|$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG|" cf-template.yaml
+          zip template.zip cf-template.yaml
+          aws s3 cp template.zip "s3://$ARTIFACT_BUCKET_NAME/template.zip" --metadata "repository=$GITHUB_REPOSITORY,commitsha=$IMAGE_TAG"

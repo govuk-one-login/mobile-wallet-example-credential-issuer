@@ -1,0 +1,42 @@
+name: _module-conventional-commits
+
+on:
+  workflow_call:
+    inputs:
+      fetch-depth:
+        description: Checkout fetch depth.
+        required: false
+        type: number
+        default: 0
+      checkout-ref:
+        description: Git ref to check out (e.g. PR head sha). Empty = default.
+        required: false
+        type: string
+        default: ""
+      cog-command:
+        description: cocogitto command.
+        required: false
+        type: string
+        default: check
+      cog-args:
+        description: cocogitto args.
+        required: false
+        type: string
+        default: --from-latest-tag
+
+jobs:
+  conventional-commits:
+    name: Check conventional commits
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: ${{ inputs.fetch-depth }}
+          ref: ${{ inputs.checkout-ref }}
+
+      - name: Verify conventional commit standards
+        uses: cocogitto/cocogitto-action@52d0023b4396897f1815648e553db2ab8d782f3a # v4.2.0
+        with:
+          command: ${{ inputs.cog-command }}
+          args: ${{ inputs.cog-args }}

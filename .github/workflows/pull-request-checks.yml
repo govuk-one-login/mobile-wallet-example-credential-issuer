@@ -1,0 +1,82 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  detect-changes:
+    name: Detect changed services
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      document-builder: ${{ steps.filter.outputs.document-builder }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            document-builder:
+              - 'document-builder/**'
+              - '.github/workflows/pull-request-checks.yml'
+              - '.github/workflows/_module-node-ci.yml'
+              - '.github/workflows/_module-checkov.yml'
+
+  # --- Document Builder ---
+  document-builder-ci:
+    name: Document Builder / Run tests, lint and validate
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    uses: ./.github/workflows/_module-node-ci.yml
+    with:
+      working-directory: ./document-builder
+      node-version-file: document-builder/.nvmrc
+      install-command: npm ci --ignore-scripts
+      run-build: true
+      lint-command: npm run lint
+      run-sam-validate: true
+      sam-validate-working-directory: deploy
+      sam-validate-args: --region eu-west-2
+      run-sonar: true
+      sonar-project-base-dir: ./document-builder
+      sonar-scan-metadata-report-file: document-builder/.scannerwork/report-task.txt
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  document-builder-checkov:
+    name: Document Builder / Run Checkov
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    uses: ./.github/workflows/_module-checkov.yml
+    with:
+      template-file: "document-builder/deploy/template.yaml"
+
+  # --- Final gate ---
+  all-checks-passed:
+    name: All checks passed
+    if: always()
+    needs:
+      - detect-changes
+      - document-builder-ci
+      - document-builder-checkov
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Verify all preceding jobs succeeded
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
