@@ -1,35 +1,25 @@
-name: Test Harness - Push to Main
+name: Reusable - Create Release
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - test-harness/**
-      - .github/workflows/test-harness-push-to-main.yml
-  workflow_dispatch:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  workflow_call:
+    inputs:
+      git-user:
+        description: Git user name used for the release commit/tag.
+        required: false
+        default: 'github-actions[bot]'
+        type: string
+      git-user-email:
+        description: Git user email used for the release commit/tag.
+        required: false
+        default: 'github-actions[bot]@users.noreply.github.com'
+        type: string
 
 jobs:
-  run-sonarqube-scan:
-    name: Run SonarQube Scan
-    uses: ./.github/workflows/test-harness-sonarqube.yml
-    permissions:
-      contents: read
-    secrets:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
   create-release:
     name: Create release
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
     permissions:
       contents: write
-    defaults:
-      run:
-        working-directory: ./test-harness
     steps:
       - name: Check out repository code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -46,8 +36,8 @@ jobs:
         with:
           command: bump
           args: --auto
-          git-user: "github-actions[bot]"
-          git-user-email: "github-actions[bot]@users.noreply.github.com"
+          git-user: ${{ inputs.git-user }}
+          git-user-email: ${{ inputs.git-user-email }}
 
       - name: Check if version was bumped
         id: created

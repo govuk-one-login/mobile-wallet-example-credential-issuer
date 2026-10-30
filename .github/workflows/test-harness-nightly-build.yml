@@ -1,4 +1,4 @@
-name: Test Harness - Nightly Quality Analysis & Docker Image Vulnerability Scan
+name: Test Harness - Nightly Quality Analysis
 
 on:
   schedule:
@@ -14,6 +14,11 @@ jobs:
     name: Run SonarQube Scan
     permissions:
       contents: read
-    uses: ./.github/workflows/test-harness-sonarqube.yml
+    uses: ./.github/workflows/_reusable-node-sonar.yml
+    with:
+      working-directory: ./test-harness
+      node-version-file: test-harness/.nvmrc
+      coverage-script: test:unit
+      sonar-report-path: test-harness/.scannerwork/report-task.txt
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

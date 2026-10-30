@@ -1,0 +1,109 @@
+name: Reusable - Java CI
+
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Service directory containing the Gradle build.
+        required: true
+        type: string
+      java-version:
+        description: JDK version.
+        required: false
+        default: '17'
+        type: string
+      java-distribution:
+        description: JDK distribution.
+        required: false
+        default: 'corretto'
+        type: string
+      run-sonar:
+        description: Whether to run `gradlew sonar` + quality gate.
+        required: false
+        default: true
+        type: boolean
+      sonar-report-path:
+        description: Path (relative to repo root) to the Sonar report-task.txt.
+        required: false
+        default: ''
+        type: string
+      run-checkov:
+        description: Whether to run Checkov against a CloudFormation/SAM template.
+        required: false
+        default: true
+        type: boolean
+      checkov-file:
+        description: Path (relative to repo root) to the template Checkov should scan.
+        required: false
+        default: ''
+        type: string
+    secrets:
+      SONAR_TOKEN:
+        required: false
+
+jobs:
+  run-code-analysis:
+    name: Run code analysis
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      id-token: write
+      contents: read
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Check out the repository with full Git history
+          fetch-depth: 0
+
+      - name: Set up JDK ${{ inputs.java-version }}
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: ${{ inputs.java-version }}
+          distribution: ${{ inputs.java-distribution }}
+          cache: gradle
+
+      - name: Cache SonarCloud packages
+        if: ${{ inputs.run-sonar }}
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Gradle packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle
+
+      - name: Build and unit test
+        run: ./gradlew clean build
+
+      - name: Perform static analysis
+        if: ${{ inputs.run-sonar && github.actor != 'dependabot[bot]' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: ./gradlew sonar
+
+      - name: Check SonarQube Quality Gate status
+        if: ${{ inputs.run-sonar && github.actor != 'dependabot[bot]' }}
+        uses: sonarsource/sonarqube-quality-gate-action@7a5fffe8e523c40e0c740b6bc2712ab503e52efa # v1.2.1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          scanMetadataReportFile: ${{ inputs.sonar-report-path != '' && inputs.sonar-report-path || format('{0}/build/sonar/report-task.txt', inputs.working-directory) }}
+
+      - name: Run Checkov
+        if: ${{ inputs.run-checkov }}
+        uses: bridgecrewio/checkov-action@6f26dc90000b74feb589a906cdfae540f5119895 # v12.3134.0
+        with:
+          file: ${{ inputs.checkov-file }}
+          quiet: true
+          soft_fail: false
