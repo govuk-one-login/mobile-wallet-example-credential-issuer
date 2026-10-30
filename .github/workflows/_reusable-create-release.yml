@@ -1,0 +1,76 @@
+name: Reusable - Create Release
+
+# Reusable semantic-release step shared by services that cut a GitHub release on
+# push to main. Mirrors the original per-service `create-release` jobs: it bumps
+# the version with cocogitto (--auto), and, only when the tag actually changed,
+# pushes the tag and creates a GitHub release with generated notes.
+
+on:
+  workflow_call:
+    inputs:
+      git-user:
+        description: Git user name used for the release commit/tag.
+        required: false
+        default: 'github-actions[bot]'
+        type: string
+      git-user-email:
+        description: Git user email used for the release commit/tag.
+        required: false
+        default: 'github-actions[bot]@users.noreply.github.com'
+        type: string
+
+jobs:
+  create-release:
+    name: Create release
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Get latest tag
+        id: get_tag
+        run: echo "version=$(git describe --tags --abbrev=0)" >> "$GITHUB_OUTPUT"
+
+      - name: Create semantic release
+        uses: cocogitto/cocogitto-action@52d0023b4396897f1815648e553db2ab8d782f3a # v4.2.0
+        id: release
+        with:
+          command: bump
+          args: --auto
+          git-user: ${{ inputs.git-user }}
+          git-user-email: ${{ inputs.git-user-email }}
+
+      - name: Check if version was bumped
+        id: created
+        run: |
+          prev=${{ steps.get_tag.outputs.version }}
+          new=${{ steps.release.outputs.version }}
+
+          if [ "$prev" = "$new" ]; then
+            echo "bump=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "bump=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Push semantic version tag
+        if: steps.created.outputs.bump == 'true'
+        run: git push --follow-tags && git push --tags
+        shell: bash
+
+      - name: Create GitHub release
+        if: steps.created.outputs.bump == 'true'
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
+        with:
+          tag_name: ${{ steps.release.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+
+      - name: Log release info
+        if: steps.created.outputs.bump == 'true'
+        run: |
+          echo "New release created: ${{ steps.release.outputs.version }}"

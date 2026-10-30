@@ -1,0 +1,36 @@
+name: Reusable - Conventional Commits Check
+
+# Reusable Conventional Commits check shared by every service's PR workflow.
+# Verifies commit messages on the PR branch conform to the Conventional Commits
+# standard (cocogitto `check --from-latest-tag`). The check is repository-wide,
+# not service-specific, so every service calls this same module.
+
+on:
+  workflow_call:
+    inputs:
+      gitRef:
+        description: Ref to check out (defaults to the PR head SHA).
+        required: false
+        default: ''
+        type: string
+
+jobs:
+  check-conventional-commits:
+    name: Check conventional commits
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Check out the repository with full Git history
+          fetch-depth: 0
+          # Pick the PR HEAD instead of the merge commit
+          ref: ${{ inputs.gitRef != '' && inputs.gitRef || github.event.pull_request.head.sha }}
+
+      - name: Verify conventional commit standards
+        uses: cocogitto/cocogitto-action@52d0023b4396897f1815648e553db2ab8d782f3a # v4.2.0
+        with:
+          command: check
+          args: --from-latest-tag

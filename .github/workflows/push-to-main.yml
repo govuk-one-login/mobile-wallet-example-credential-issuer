@@ -5,7 +5,9 @@ name: Push to Main
 # is gated on its own flag. Deploy jobs use `if: always() && <ci>.result ==
 # 'success' && <svc flag>` so a deploy blocks on its OWN CI failure but is not
 # blocked by skipped sibling services. A change to any shared reusable workflow
-# (or this file) flags ALL services. There is no semantic-release / version bump.
+# (or this file) flags ALL services. Services that cut a release (example-cri,
+# dsc-issuer, test-harness) run a gated `create-release` via the shared
+# _reusable-create-release.yml module.
 
 on:
   push:
@@ -104,6 +106,14 @@ jobs:
       CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_EXAMPLE_CRI_CONTAINER_SIGNER_KMS_KEY_ARN }}
       ARTIFACT_BUCKET_NAME: ${{ secrets.BUILD_EXAMPLE_CRI_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
 
+  example-cri-create-release:
+    name: Example CRI - Create release
+    needs: [detect-changes, example-cri-deploy]
+    if: ${{ always() && needs.detect-changes.outputs.example-cri == 'true' && needs.example-cri-deploy.result == 'success' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_reusable-create-release.yml
+
   # ----------------------------- document-builder (node-container)
   document-builder-code-analysis:
     name: Document Builder - Code analysis
@@ -181,6 +191,14 @@ jobs:
       ARTIFACT_BUCKET_NAME: ${{ secrets.BUILD_DSC_ISS_ARTIFACT_SOURCE_BUCKET_NAME }}
       SIGNING_PROFILE_NAME: ${{ secrets.BUILD_SIGNING_PROFILE_NAME }}
 
+  dsc-issuer-create-release:
+    name: DSC Issuer - Create release
+    needs: [detect-changes, dsc-issuer-deploy]
+    if: ${{ always() && needs.detect-changes.outputs.dsc-issuer == 'true' && needs.dsc-issuer-deploy.result == 'success' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_reusable-create-release.yml
+
   # ----------------------------- platform-ca (sam-only)
   platform-ca-deploy:
     name: Platform CA - Deploy
@@ -214,3 +232,11 @@ jobs:
       sonar-report-path: test-harness/.scannerwork/report-task.txt
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  test-harness-create-release:
+    name: Test Harness - Create release
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.test-harness == 'true' }}
+    permissions:
+      contents: write
+    uses: ./.github/workflows/_reusable-create-release.yml

@@ -1,4 +1,4 @@
-name: Test Harness - Nightly Quality Analysis & Docker Image Vulnerability Scan
+name: Test Harness - Nightly Quality Analysis
 
 on:
   schedule:
