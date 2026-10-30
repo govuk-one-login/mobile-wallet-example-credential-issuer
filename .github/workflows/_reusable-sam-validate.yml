@@ -1,9 +1,5 @@
 name: Reusable - SAM Validate
 
-# Reusable PR-time validation for SAM-only / infrastructure services.
-# Optionally lints a Node utils package, then validates (and optionally builds)
-# the SAM template and runs Checkov. No deployment, no Sonar.
-
 on:
   workflow_call:
     inputs:

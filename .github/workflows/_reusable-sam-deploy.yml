@@ -1,10 +1,5 @@
 name: Reusable - SAM Deploy
 
-# Reusable deploy for SAM-only / Lambda services (no container image).
-# Validates and builds the SAM template, then uploads the built artifact to the
-# dev-platform S3 bucket via devplatform-upload-action (which triggers the
-# downstream CodePipeline deployment).
-
 on:
   workflow_call:
     inputs:

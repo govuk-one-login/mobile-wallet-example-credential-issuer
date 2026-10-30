@@ -1,10 +1,5 @@
 name: Reusable - Node CI
 
-# Reusable CI for Node/TypeScript services: install, optional lint/format/build,
-# coverage, optional Checkov, and optional SonarQube scan + quality gate.
-# Every enabled script runs in a single job so coverage (LCOV) exists before the
-# Sonar scan. Steps are opt-in via inputs so each service maps only what it has.
-
 on:
   workflow_call:
     inputs:

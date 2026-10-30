@@ -1,10 +1,5 @@
 name: Reusable - Container Deploy to Dev
 
-# Reusable dev deploy for container services: build + push a Docker image to ECR
-# (tagged with the checked-out commit SHA), then build the SAM template, inject
-# the image, zip it and copy it straight to the dev artifact S3 bucket with
-# `aws s3 cp` (no cosign signing on the dev path).
-
 on:
   workflow_call:
     inputs:

@@ -1,10 +1,5 @@
 name: Reusable - Java CI
 
-# Reusable CI for Java/Gradle services: build + unit test (JaCoCo coverage),
-# optional SonarQube analysis (Gradle plugin) + quality gate, and optional Checkov.
-# Coverage is produced by `gradlew clean build` (test tasks finalizedBy
-# jacocoTestReport) in the same job before `gradlew sonar`.
-
 on:
   workflow_call:
     inputs:

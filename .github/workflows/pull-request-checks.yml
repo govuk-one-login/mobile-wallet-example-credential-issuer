@@ -1,10 +1,5 @@
 name: Pull Request Checks
 
-# Single entry workflow for all PR checks across every service.
-# `detect-changes` decides which service directories changed; each service block
-# is gated on its own flag. A change to any shared reusable workflow (or this
-# file) flags ALL services so shared changes are validated against every consumer.
-
 on:
   pull_request:
     types:

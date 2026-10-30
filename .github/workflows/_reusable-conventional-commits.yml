@@ -1,10 +1,5 @@
 name: Reusable - Conventional Commits Check
 
-# Reusable Conventional Commits check shared by every service's PR workflow.
-# Verifies commit messages on the PR branch conform to the Conventional Commits
-# standard (cocogitto `check --from-latest-tag`). The check is repository-wide,
-# not service-specific, so every service calls this same module.
-
 on:
   workflow_call:
     inputs:

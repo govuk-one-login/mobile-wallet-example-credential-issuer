@@ -1,9 +1,5 @@
 name: Reusable - Node SonarQube Analysis
 
-# Reusable SonarQube scan + quality gate for Node/TypeScript services.
-# Coverage (LCOV) is always produced in this job immediately before the scan,
-# so SonarCloud receives real coverage data (never 0%).
-
 on:
   workflow_call:
     inputs:

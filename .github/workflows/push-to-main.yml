@@ -1,14 +1,5 @@
 name: Push to Main
 
-# Single entry workflow for all main-branch CI + deploy across every service.
-# `detect-changes` decides which service directories changed; each service block
-# is gated on its own flag. Deploy jobs use `if: always() && <ci>.result ==
-# 'success' && <svc flag>` so a deploy blocks on its OWN CI failure but is not
-# blocked by skipped sibling services. A change to any shared reusable workflow
-# (or this file) flags ALL services. Services that cut a release (example-cri,
-# dsc-issuer, test-harness) run a gated `create-release` via the shared
-# _reusable-create-release.yml module.
-
 on:
   push:
     branches: [ main ]

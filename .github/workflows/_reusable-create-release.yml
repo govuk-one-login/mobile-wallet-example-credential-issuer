@@ -1,10 +1,5 @@
 name: Reusable - Create Release
 
-# Reusable semantic-release step shared by services that cut a GitHub release on
-# push to main. Mirrors the original per-service `create-release` jobs: it bumps
-# the version with cocogitto (--auto), and, only when the tag actually changed,
-# pushes the tag and creates a GitHub release with generated notes.
-
 on:
   workflow_call:
     inputs:

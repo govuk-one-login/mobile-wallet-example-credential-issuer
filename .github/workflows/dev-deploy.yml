@@ -1,10 +1,5 @@
 name: Deploy to Dev
 
-# Single manual entry workflow to deploy one service to the dev environment.
-# Pick a service from the preset list; the matching gated job routes to that
-# service's archetype reusable with its DEV_* secrets. test-harness is not
-# listed because it has no deployment.
-
 on:
   workflow_dispatch:
     inputs:

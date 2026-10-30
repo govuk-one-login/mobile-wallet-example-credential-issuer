@@ -1,10 +1,5 @@
 name: Reusable - Container Deploy (Push to Main)
 
-# Reusable push-to-main deploy for container services: build + push a Docker
-# image to ECR (tagged with the commit SHA), cosign-sign it with a KMS key,
-# inject the image into the SAM template, build, and upload the artifact to the
-# dev-platform S3 bucket via devplatform-upload-action.
-
 on:
   workflow_call:
     inputs:
