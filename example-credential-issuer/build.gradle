@@ -13,7 +13,7 @@ repositories {
 }
 
 ext {
-	awsSdkVersion = "2.56.0"
+	awsSdkVersion = "2.57.3"
 	dropwizardVersion = "5.0.2"
 	jacksonVersion = "2.22.4"
 	lombokVersion = "1.18.48"
