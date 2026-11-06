@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public class ValueDigestsFactory {
     private final CBOREncoder cborEncoder;
-    private final MessageDigest messageDigest;
+    private final MessageDigest messageDigest; // NOSONAR
 
     /**
      * Constructs a new instance using the given {@link CBORMapper} for serialization and {@link
