@@ -1,0 +1,273 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - ready_for_review
+      - synchronize
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  detect-changes:
+    name: Detect changed services
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      example-cri: ${{ steps.filter.outputs.example-cri == 'true' || steps.filter.outputs.shared == 'true' }}
+      document-builder: ${{ steps.filter.outputs.document-builder == 'true' || steps.filter.outputs.shared == 'true' }}
+      dsc-issuer: ${{ steps.filter.outputs.dsc-issuer == 'true' || steps.filter.outputs.shared == 'true' }}
+      platform-ca: ${{ steps.filter.outputs.platform-ca == 'true' || steps.filter.outputs.shared == 'true' }}
+      test-harness: ${{ steps.filter.outputs.test-harness == 'true' || steps.filter.outputs.shared == 'true' }}
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Filter changed paths
+        id: filter
+        uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        with:
+          filters: |
+            shared:
+              - '.github/workflows/_reusable-*.yml'
+              - '.github/workflows/pull-request-checks.yml'
+              - '.github/workflows/example-credential-issuer-integration-tests.yml'
+            example-cri:
+              - 'example-credential-issuer/**'
+            document-builder:
+              - 'document-builder/**'
+            dsc-issuer:
+              - 'document-signing-certificate-issuer/**'
+            platform-ca:
+              - 'platform-ca/**'
+            test-harness:
+              - 'test-harness/**'
+
+  # ----------------------------- example-credential-issuer (java-container)
+  example-cri-conventional-commits:
+    name: Example CRI - Check conventional commits
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.example-cri == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-conventional-commits.yml
+
+  example-cri-integration-tests:
+    name: Example CRI - Integration tests
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.example-cri == 'true' }}
+    uses: ./.github/workflows/example-credential-issuer-integration-tests.yml
+
+  example-cri-code-analysis:
+    name: Example CRI - Code analysis
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.example-cri == 'true' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-java-ci.yml
+    with:
+      working-directory: ./example-credential-issuer
+      java-version: '17'
+      java-distribution: corretto
+      run-sonar: true
+      sonar-report-path: example-credential-issuer/build/sonar/report-task.txt
+      run-checkov: true
+      checkov-file: example-credential-issuer/deploy/template.yaml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ----------------------------- document-builder (node-container)
+  document-builder-conventional-commits:
+    name: Document Builder - Check conventional commits
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-conventional-commits.yml
+
+  document-builder-ci:
+    name: Document Builder - CI
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: ./document-builder
+      node-version-file: document-builder/.nvmrc
+      npm-ci-args: --ignore-scripts
+      lint-script: lint
+      build-script: build
+      coverage-script: test:cov
+      run-sonar: true
+      sonar-report-path: document-builder/.scannerwork/report-task.txt
+      run-checkov: true
+      checkov-file: document-builder/deploy/template.yaml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  document-builder-validate-infra:
+    name: Document Builder - Validate infrastructure
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.document-builder == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-validate.yml
+    with:
+      working-directory: ./document-builder/deploy
+      sam-validate-args: --region eu-west-2
+      run-sam-build: false
+      run-checkov: false
+
+  # ----------------------------- document-signing-certificate-issuer (node-sam)
+  dsc-issuer-conventional-commits:
+    name: DSC Issuer - Check conventional commits
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.dsc-issuer == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-conventional-commits.yml
+
+  dsc-issuer-code-analysis:
+    name: DSC Issuer - Code analysis
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.dsc-issuer == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: ./document-signing-certificate-issuer
+      node-version-file: document-signing-certificate-issuer/.nvmrc
+      format-check-script: format:check
+      coverage-script: test:cov
+      run-sonar: true
+      sonar-report-path: document-signing-certificate-issuer/.scannerwork/report-task.txt
+      run-checkov: true
+      checkov-file: document-signing-certificate-issuer/template.yaml
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  # ----------------------------- platform-ca (sam-only)
+  platform-ca-conventional-commits:
+    name: Platform CA - Check conventional commits
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.platform-ca == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-conventional-commits.yml
+
+  platform-ca-code-analysis:
+    name: Platform CA - Code analysis
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.platform-ca == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-sam-validate.yml
+    with:
+      working-directory: ./platform-ca
+      sam-validate-args: --lint
+      run-sam-build: true
+      sam-build-args: --parallel
+      node-utils-directory: ./platform-ca/utils
+      node-version-file: platform-ca/utils/.nvmrc
+      lint-script: lint
+      format-check-script: format:check
+      run-checkov: true
+      checkov-file: platform-ca/template.yaml
+
+  # ----------------------------- test-harness (node CI only)
+  test-harness-conventional-commits:
+    name: Test Harness - Check conventional commits
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.test-harness == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-conventional-commits.yml
+
+  test-harness-sonar:
+    name: Test Harness - SonarQube
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.test-harness == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-node-sonar.yml
+    with:
+      working-directory: ./test-harness
+      node-version-file: test-harness/.nvmrc
+      coverage-script: test:unit
+      sonar-report-path: test-harness/.scannerwork/report-task.txt
+      gitRef: ${{ github.event.pull_request.head.sha }}
+    secrets:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  test-harness-ci:
+    name: Test Harness - Build, lint and test
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.test-harness == 'true' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/_reusable-node-ci.yml
+    with:
+      working-directory: ./test-harness
+      node-version-file: test-harness/.nvmrc
+      npm-ci-args: --ignore-scripts
+      gitRef: ${{ github.sha }}
+      lint-script: lint
+      build-script: build
+      coverage-script: test:unit
+
+  # ----------------------------- aggregate gate
+  pr-checks-complete:
+    name: PR checks complete
+    # Runs regardless of upstream outcomes so it can inspect their results.
+    # This is the single stable job to mark as a required status check in
+    # branch protection: it passes when every PR job succeeded or was skipped
+    # (an unchanged service is skipped by design) and fails if any job failed
+    # or was cancelled.
+    if: ${{ always() }}
+    needs:
+      - detect-changes
+      - example-cri-conventional-commits
+      - example-cri-integration-tests
+      - example-cri-code-analysis
+      - document-builder-conventional-commits
+      - document-builder-ci
+      - document-builder-validate-infra
+      - dsc-issuer-conventional-commits
+      - dsc-issuer-code-analysis
+      - platform-ca-conventional-commits
+      - platform-ca-code-analysis
+      - test-harness-conventional-commits
+      - test-harness-sonar
+      - test-harness-ci
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Verify no PR check failed or was cancelled
+        env:
+          RESULTS: ${{ join(needs.*.result, ',') }}
+        run: |
+          echo "Upstream job results: $RESULTS"
+          IFS=',' read -ra OUTCOMES <<< "$RESULTS"
+          failed=0
+          for outcome in "${OUTCOMES[@]}"; do
+            case "$outcome" in
+              success|skipped) ;;
+              *) echo "::error::A PR check ended with result '$outcome'"; failed=1 ;;
+            esac
+          done
+          if [ "$failed" -ne 0 ]; then
+            echo "One or more PR checks failed or were cancelled."
+            exit 1
+          fi
+          echo "All PR checks passed (or were skipped for unchanged services)."
