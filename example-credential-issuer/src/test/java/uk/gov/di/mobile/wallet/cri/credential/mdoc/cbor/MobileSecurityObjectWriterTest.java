@@ -59,8 +59,8 @@ class MobileSecurityObjectWriterTest {
     }
 
     private static @NotNull MobileSecurityObject getTestMobileSecurityObject() {
-        byte[] x = new byte[] {0x01, 0x02, 0x03};
-        byte[] y = new byte[] {0x04, 0x05, 0x06};
+        byte[] x = {0x01, 0x02, 0x03};
+        byte[] y = {0x04, 0x05, 0x06};
         COSEKey coseKey = new COSEKey(COSEKeyTypes.EC2, COSEEllipticCurves.P256, x, y);
         KeyAuthorizations keyAuthorizations =
                 new KeyAuthorizations(Set.of("testNamespace1", "testNamespace2"));

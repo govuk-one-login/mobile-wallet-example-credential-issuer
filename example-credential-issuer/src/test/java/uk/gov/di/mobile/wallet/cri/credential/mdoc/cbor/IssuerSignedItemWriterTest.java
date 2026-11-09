@@ -21,7 +21,7 @@ class IssuerSignedItemWriterTest {
     @Test
     void Should_WriteIssuerSignedItem() throws IOException {
         int digestId = 7;
-        byte[] random = new byte[] {0x01, 0x02};
+        byte[] random = {0x01, 0x02};
         String elementIdentifier = "test_element_identifier";
         Object elementValue = "Test Element Value";
 
