@@ -7,13 +7,11 @@ import com.fasterxml.jackson.dataformat.cbor.CBORGenerator;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.DeviceKeyInfo;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * CBOR serializer for {@link DeviceKeyInfo}.
  *
- * <p>Serializes a {@link DeviceKeyInfo} object as a definite-length CBOR map with two entries:
+ * <p>Serializes a {@link DeviceKeyInfo} object as a definite-length CBOR map with a single entry:
  *
  * <ul>
  *   <li>{@code "deviceKey"}: definite-length CBOR map with four entries:
@@ -23,8 +21,6 @@ import java.util.List;
  *         <li>{@code -2}: byte string, x-coordinate (x)
  *         <li>{@code -3}: byte string, y-coordinate (y)
  *       </ul>
- *   <li>{@code "keyAuthorizations"}: map with a single field {@code "nameSpaces"} containing a
- *       definite-length array of strings
  * </ul>
  *
  * <p>The integer labels in the {@code "deviceKey"} map are defined by RFC 8152 §13.1.
@@ -54,7 +50,7 @@ public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
             throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
-        cborGenerator.writeStartObject(2);
+        cborGenerator.writeStartObject(1);
         cborGenerator.writeFieldName("deviceKey");
         cborGenerator.writeStartObject(4);
         cborGenerator.writeFieldId(1);
@@ -65,16 +61,6 @@ public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
         cborGenerator.writeBinary(value.deviceKey().x());
         cborGenerator.writeFieldId(-3);
         cborGenerator.writeBinary(value.deviceKey().y());
-        cborGenerator.writeEndObject();
-        cborGenerator.writeFieldName("keyAuthorizations");
-        cborGenerator.writeStartObject(1);
-        cborGenerator.writeFieldName("nameSpaces");
-        List<String> namespaces = new ArrayList<>(value.keyAuthorizations().nameSpaces());
-        cborGenerator.writeStartArray(namespaces, namespaces.size());
-        for (String namespace : namespaces) {
-            cborGenerator.writeString(namespace);
-        }
-        cborGenerator.writeEndArray();
         cborGenerator.writeEndObject();
         cborGenerator.writeEndObject();
     }
