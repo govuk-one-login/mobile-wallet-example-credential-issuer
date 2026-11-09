@@ -29,23 +29,6 @@ export const mobileSecurityObjectSchema = {
           type: "object",
           instanceofMap: true,
         },
-        keyAuthorizations: {
-          type: "object",
-          required: ["nameSpaces"],
-          additionalProperties: false,
-          properties: {
-            nameSpaces: {
-              type: "array",
-              minItems: 2,
-              maxItems: 2,
-              uniqueItems: true,
-              items: {
-                type: "string",
-                enum: ["org.iso.18013.5.1.GB", "org.iso.18013.5.1"],
-              },
-            },
-          },
-        },
       },
     },
     valueDigests: {
