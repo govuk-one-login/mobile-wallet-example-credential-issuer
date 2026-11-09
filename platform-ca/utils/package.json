@@ -12,7 +12,7 @@
   },
   "description": "",
   "dependencies": {
-    "@peculiar/asn1-schema": "^2.11.1",
+    "@peculiar/asn1-schema": "^3.0.0",
     "@peculiar/asn1-x509": "^2.11.1",
     "commander": "^15.0.0",
     "esbuild": "^0.28.2",

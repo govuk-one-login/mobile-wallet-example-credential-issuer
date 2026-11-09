@@ -2,9 +2,6 @@ import { Tag } from "cbor2";
 
 export interface DeviceKeyInfo {
   deviceKey: Map<unknown, unknown>;
-  keyAuthorizations: {
-    nameSpaces: ("org.iso.18013.5.1.GB" | "org.iso.18013.5.1")[];
-  };
 }
 
 export interface ValueDigests {

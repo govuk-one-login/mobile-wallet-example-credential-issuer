@@ -8,7 +8,6 @@ import org.mockito.InOrder;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.DeviceKeyInfo;
-import uk.gov.di.mobile.wallet.cri.credential.mdoc.KeyAuthorizations;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.MobileSecurityObject;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.Status;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.StatusList;
@@ -23,7 +22,6 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -62,9 +60,7 @@ class MobileSecurityObjectWriterTest {
         byte[] x = new byte[] {0x01, 0x02, 0x03};
         byte[] y = new byte[] {0x04, 0x05, 0x06};
         COSEKey coseKey = new COSEKey(COSEKeyTypes.EC2, COSEEllipticCurves.P256, x, y);
-        KeyAuthorizations keyAuthorizations =
-                new KeyAuthorizations(Set.of("testNamespace1", "testNamespace2"));
-        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
+        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey);
 
         Map<Integer, byte[]> digestMap = new HashMap<>();
         digestMap.put(1, new byte[] {0x01, 0x02, 0x03});
