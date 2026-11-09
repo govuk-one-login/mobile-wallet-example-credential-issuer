@@ -53,7 +53,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
@@ -114,8 +113,7 @@ public class ServicesFactory {
                 new CBOREncoder(JacksonCBOREncoderProvider.configuredCBORMapper());
         IssuerSignedItemFactory issuerSignedItemFactory =
                 new IssuerSignedItemFactory(new DigestIDGenerator());
-        ValueDigestsFactory valueDigestsFactory =
-                new ValueDigestsFactory(cborEncoder, MessageDigest.getInstance("SHA-256"));
+        ValueDigestsFactory valueDigestsFactory = new ValueDigestsFactory(cborEncoder, "SHA-256");
         ValidityInfoFactory validityInfoFactory = new ValidityInfoFactory();
         COSEKeyFactory coseKeyFactory = new COSEKeyFactory();
         MobileSecurityObjectFactory mobileSecurityObjectFactory =

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.dataformat.cbor.databind.CBORMapper;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,23 +12,24 @@ import java.util.stream.Collectors;
 /**
  * Factory class responsible for generating message digests for {@link IssuerSignedItem} instances.
  *
- * <p>Uses a provided {@link CBORMapper} to serialize items and a {@link MessageDigest} to compute
- * digests.
+ * <p>Uses a provided {@link CBORMapper} to serialize items and a {@link MessageDigest}, created
+ * locally per computation, to compute digests.
  */
 public class ValueDigestsFactory {
     private final CBOREncoder cborEncoder;
-    private final MessageDigest messageDigest;
+    private final String digestAlgorithm;
 
     /**
-     * Constructs a new instance using the given {@link CBORMapper} for serialization and {@link
-     * MessageDigest} for digest calculation.
+     * Constructs a new instance using the given {@link CBORMapper} for serialization and the given
+     * digest algorithm name for digest calculation.
      *
      * @param cborEncoder Used to serialize {@link IssuerSignedItem} instances.
-     * @param messageDigest Used to calculate the digest.
+     * @param digestAlgorithm The name of the digest algorithm used to calculate digests (e.g.
+     *     "SHA-256").
      */
-    public ValueDigestsFactory(CBOREncoder cborEncoder, MessageDigest messageDigest) {
+    public ValueDigestsFactory(CBOREncoder cborEncoder, String digestAlgorithm) {
         this.cborEncoder = cborEncoder;
-        this.messageDigest = messageDigest;
+        this.digestAlgorithm = digestAlgorithm;
     }
 
     /**
@@ -36,7 +38,7 @@ public class ValueDigestsFactory {
      * @return The digest algorithm used for this instance's generation of message digests.
      */
     public String getDigestAlgorithm() {
-        return messageDigest.getAlgorithm();
+        return digestAlgorithm;
     }
 
     /**
@@ -80,6 +82,15 @@ public class ValueDigestsFactory {
             final IssuerSignedItem issuerSignedItem) throws MdocException {
         // Serialize the IssuerSignedItem to a CBOR byte array
         byte[] serializedIssuerSignedItem = cborEncoder.encode(issuerSignedItem);
+
+        // Create a fresh MessageDigest instance for this computation to avoid shared mutable state
+        final MessageDigest messageDigest;
+        try {
+            messageDigest = MessageDigest.getInstance(digestAlgorithm);
+        } catch (NoSuchAlgorithmException exception) {
+            throw new MdocException(
+                    "Failed to create MessageDigest for algorithm: " + digestAlgorithm, exception);
+        }
 
         // Compute the digest over the serialized bytes
         byte[] digest = messageDigest.digest(serializedIssuerSignedItem);
