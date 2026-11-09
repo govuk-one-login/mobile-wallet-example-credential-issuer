@@ -22,7 +22,7 @@ export const mobileSecurityObjectSchema = {
     },
     deviceKeyInfo: {
       type: "object",
-      required: ["deviceKey", "keyAuthorizations"],
+      required: ["deviceKey"],
       additionalProperties: false,
       properties: {
         deviceKey: {
