@@ -67,8 +67,7 @@ public class MobileSecurityObjectFactory {
             throws MdocException {
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
         Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
-        KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
-        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
+        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey);
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         ValidityInfo validityInfo =
                 validityInfoFactory.build(credentialTtlSeconds, expectedUpdateSeconds);
