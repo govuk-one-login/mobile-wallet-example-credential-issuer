@@ -115,9 +115,6 @@ export class TestMDLBuilder {
       valueDigests,
       deviceKeyInfo: {
         deviceKey: this.deviceKey,
-        keyAuthorizations: {
-          nameSpaces: Array.from(this.namespaces.keys()),
-        },
       },
       docType: "org.iso.18013.5.1.mDL",
       status: {
