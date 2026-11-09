@@ -13,6 +13,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +36,27 @@ class ValueDigestsFactoryTest {
                 new ValueDigestsFactory(cborEncoder, DIGEST_ALGORITHM).getDigestAlgorithm();
 
         assertEquals(DIGEST_ALGORITHM, algorithm);
+    }
+
+    /**
+     * Verifies that an {@link MdocException} (wrapping {@link NoSuchAlgorithmException}) is thrown
+     * when the configured digest algorithm is not supported by the JVM.
+     */
+    @Test
+    void Should_ThrowMdocException_When_DigestAlgorithmIsInvalid() {
+        IssuerSignedItem issuerSignedItem =
+                new IssuerSignedItem(1, new byte[] {1, 2, 3}, "elementIdentifier", "elementValue");
+        when(cborEncoder.encode(issuerSignedItem)).thenReturn("testCbor".getBytes());
+        Namespaces namespaces = new Namespaces(Map.of("namespace", List.of(issuerSignedItem)));
+        ValueDigestsFactory factory = new ValueDigestsFactory(cborEncoder, "INVALID-ALGORITHM");
+
+        MdocException exception =
+                assertThrows(MdocException.class, () -> factory.createFromNamespaces(namespaces));
+
+        assertEquals(
+                "Failed to create MessageDigest for algorithm: INVALID-ALGORITHM",
+                exception.getMessage());
+        assertInstanceOf(NoSuchAlgorithmException.class, exception.getCause());
     }
 
     /** Verifies correct digest generation for a single namespace with a single item. */
