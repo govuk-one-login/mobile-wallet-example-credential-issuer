@@ -22,6 +22,8 @@ export default {
   Some modern packages (cbor2, @cto.af/wtf8, jose v6) ship only ESM syntax, which Jest can't execute.
   The line below instructs Jest to transform these specific modules to CommonJS so ts-jest can process them.
   */
-  transformIgnorePatterns: ["/node_modules/(?!cbor2|@cto.af/wtf8|jose)"],
+  transformIgnorePatterns: [
+    "/node_modules/(?!cbor2|@cto.af/wtf8|jose|@peculiar/x509)",
+  ],
   preset: "ts-jest",
 };
