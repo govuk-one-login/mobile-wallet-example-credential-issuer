@@ -83,19 +83,14 @@ public class ValueDigestsFactory {
         // Serialize the IssuerSignedItem to a CBOR byte array
         byte[] serializedIssuerSignedItem = cborEncoder.encode(issuerSignedItem);
 
-        // Create a fresh MessageDigest instance for this computation to avoid shared mutable state
-        final MessageDigest messageDigest;
         try {
-            messageDigest = MessageDigest.getInstance(digestAlgorithm);
+            MessageDigest messageDigest = MessageDigest.getInstance(digestAlgorithm);
+            byte[] digest = messageDigest.digest(serializedIssuerSignedItem);
+
+            return Map.entry(issuerSignedItem.digestId(), digest);
         } catch (NoSuchAlgorithmException exception) {
             throw new MdocException(
                     "Failed to create MessageDigest for algorithm: " + digestAlgorithm, exception);
         }
-
-        // Compute the digest over the serialized bytes
-        byte[] digest = messageDigest.digest(serializedIssuerSignedItem);
-
-        // Return a map entry pairing the digest ID with the computed digest bytes
-        return Map.entry(issuerSignedItem.digestId(), digest);
     }
 }
