@@ -11,7 +11,7 @@ import java.io.IOException;
 /**
  * CBOR serializer for {@link DeviceKeyInfo}.
  *
- * <p>Serializes a {@link DeviceKeyInfo} object as a definite-length CBOR map with two entries:
+ * <p>Serializes a {@link DeviceKeyInfo} object as a definite-length CBOR map with a single entry:
  *
  * <ul>
  *   <li>{@code "deviceKey"}: definite-length CBOR map with four entries:
@@ -50,7 +50,7 @@ public class DeviceKeyInfoSerializer extends StdSerializer<DeviceKeyInfo> {
             throw new IllegalArgumentException("Requires CBORGenerator");
         }
 
-        cborGenerator.writeStartObject(2);
+        cborGenerator.writeStartObject(1);
         cborGenerator.writeFieldName("deviceKey");
         cborGenerator.writeStartObject(4);
         cborGenerator.writeFieldId(1);

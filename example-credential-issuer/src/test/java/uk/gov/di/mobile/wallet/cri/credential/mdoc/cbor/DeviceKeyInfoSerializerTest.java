@@ -12,13 +12,12 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.DeviceKeyInfo;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKey;
 
 import java.io.IOException;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class DeviceKeyInfoSerializerTest {
@@ -30,15 +29,12 @@ class DeviceKeyInfoSerializerTest {
     @Test
     void Should_SerializeDeviceKeyInfo() throws IOException {
         COSEKey coseKey = new COSEKey(2, 1, new byte[] {0x01}, new byte[] {0x02});
-        Set<String> namespaces = new LinkedHashSet<>();
-        namespaces.add("org.iso.18013.5.1");
-        namespaces.add("org.iso.18013.5.1.GB");
         DeviceKeyInfo valueToSerialize = new DeviceKeyInfo(coseKey);
 
         serializer.serialize(valueToSerialize, cborGenerator, serializerProvider);
 
         InOrder inOrder = inOrder(cborGenerator);
-        inOrder.verify(cborGenerator).writeStartObject(2);
+        inOrder.verify(cborGenerator).writeStartObject(1);
         inOrder.verify(cborGenerator).writeFieldName("deviceKey");
         inOrder.verify(cborGenerator).writeStartObject(4);
         inOrder.verify(cborGenerator).writeFieldId(1);
@@ -49,7 +45,7 @@ class DeviceKeyInfoSerializerTest {
         inOrder.verify(cborGenerator).writeBinary(new byte[] {0x01});
         inOrder.verify(cborGenerator).writeFieldId(-3);
         inOrder.verify(cborGenerator).writeBinary(new byte[] {0x02});
-        inOrder.verify(cborGenerator).writeEndObject();
+        inOrder.verify(cborGenerator, times(2)).writeEndObject();
     }
 
     @Test
