@@ -53,7 +53,6 @@ import uk.gov.di.mobile.wallet.cri.services.signing.KmsService;
 
 import java.io.IOException;
 import java.net.URL;
-import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
 
@@ -77,8 +76,7 @@ public class ServicesFactory {
      * @return A {@link Services} instance containing all initialized services.
      */
     public static Services create(
-            ConfigurationService configurationService, Environment environment)
-            throws NoSuchAlgorithmException {
+            ConfigurationService configurationService, Environment environment) {
 
         KmsService kmsService = new KmsService(KmsService.getClient(configurationService));
         PreAuthorizedCodeBuilder preAuthorizedCodeBuilder =
