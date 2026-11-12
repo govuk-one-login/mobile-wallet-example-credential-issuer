@@ -6,6 +6,7 @@ import uk.gov.di.mobile.wallet.cri.credential.mdoc.cose.COSEKeyFactory;
 
 import java.security.interfaces.ECPublicKey;
 import java.util.Optional;
+import java.util.Set;
 
 /** Creates {@link MobileSecurityObject} instances. */
 public class MobileSecurityObjectFactory {
@@ -65,7 +66,9 @@ public class MobileSecurityObjectFactory {
             String docType)
             throws MdocException {
         COSEKey coseKey = coseKeyFactory.fromECPublicKey(publicKey);
-        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey);
+        Set<String> authorizedNameSpaces = nameSpaces.namespaces().keySet();
+        KeyAuthorizations keyAuthorizations = new KeyAuthorizations(authorizedNameSpaces);
+        DeviceKeyInfo deviceKeyInfo = new DeviceKeyInfo(coseKey, keyAuthorizations);
         ValueDigests valueDigests = valueDigestsFactory.createFromNamespaces(nameSpaces);
         ValidityInfo validityInfo =
                 validityInfoFactory.build(credentialTtlSeconds, expectedUpdateSeconds);

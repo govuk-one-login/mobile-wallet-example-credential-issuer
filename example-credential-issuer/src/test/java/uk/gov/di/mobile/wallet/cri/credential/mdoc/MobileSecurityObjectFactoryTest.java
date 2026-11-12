@@ -82,6 +82,7 @@ class MobileSecurityObjectFactoryTest {
                 () -> {
                     DeviceKeyInfo deviceKeyInfo = mso.deviceKeyInfo();
                     assertEquals(coseKey, deviceKeyInfo.deviceKey());
+                    assertEquals(NAMESPACE_NAMES, deviceKeyInfo.keyAuthorizations().nameSpaces());
                 });
 
         verify(valueDigestsFactory).getDigestAlgorithm();
