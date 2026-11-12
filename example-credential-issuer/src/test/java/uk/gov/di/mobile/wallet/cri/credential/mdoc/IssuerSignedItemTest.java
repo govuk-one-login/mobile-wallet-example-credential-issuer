@@ -12,7 +12,7 @@ class IssuerSignedItemTest {
     @Test
     void Should_CreateRecordWithAllFields() {
         int digestId = 1;
-        byte[] random = new byte[] {1, 2};
+        byte[] random = {1, 2};
         String elementIdentifier = "test_element_identifier";
         Object elementValue = "Test Element Value";
 

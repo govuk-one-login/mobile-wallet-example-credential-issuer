@@ -7,54 +7,78 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.di.mobile.wallet.cri.credential.mdoc.cbor.CBOREncoder;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ValueDigestsFactoryTest {
 
-    @Mock private MessageDigest mockMessageDigest;
+    private static final String DIGEST_ALGORITHM = "SHA-256";
 
     @Mock private CBOREncoder cborEncoder;
+
+    private static byte[] sha256(byte[] input) throws NoSuchAlgorithmException {
+        return MessageDigest.getInstance(DIGEST_ALGORITHM).digest(input);
+    }
 
     /** Verifies that the digest algorithm is returned as expected. */
     @Test
     void Should_ReturnDigestAlgorithm() {
-        when(mockMessageDigest.getAlgorithm()).thenReturn("SHA-256-TEST");
+        String algorithm =
+                new ValueDigestsFactory(cborEncoder, DIGEST_ALGORITHM).getDigestAlgorithm();
 
-        String algorithm = mockMessageDigest.getAlgorithm();
+        assertEquals(DIGEST_ALGORITHM, algorithm);
+    }
 
-        assertEquals("SHA-256-TEST", algorithm);
+    /**
+     * Verifies that an {@link MdocException} (wrapping {@link NoSuchAlgorithmException}) is thrown
+     * when the configured digest algorithm is not supported by the JVM.
+     */
+    @Test
+    void Should_ThrowMdocException_When_DigestAlgorithmIsInvalid() {
+        IssuerSignedItem issuerSignedItem =
+                new IssuerSignedItem(1, new byte[] {1, 2, 3}, "elementIdentifier", "elementValue");
+        when(cborEncoder.encode(issuerSignedItem)).thenReturn("testCbor".getBytes());
+        Namespaces namespaces = new Namespaces(Map.of("namespace", List.of(issuerSignedItem)));
+        ValueDigestsFactory factory = new ValueDigestsFactory(cborEncoder, "INVALID-ALGORITHM");
+
+        MdocException exception =
+                assertThrows(MdocException.class, () -> factory.createFromNamespaces(namespaces));
+
+        assertEquals(
+                "Failed to create MessageDigest for algorithm: INVALID-ALGORITHM",
+                exception.getMessage());
+        assertInstanceOf(NoSuchAlgorithmException.class, exception.getCause());
     }
 
     /** Verifies correct digest generation for a single namespace with a single item. */
     @Test
-    void Should_AddSingleNameSpaceWithSingleDigest() {
+    void Should_AddSingleNameSpaceWithSingleDigest() throws NoSuchAlgorithmException {
         IssuerSignedItem issuerSignedItem =
                 new IssuerSignedItem(1, new byte[] {1, 2, 3}, "elementIdentifier", "elementValue");
         byte[] expectedCbor = "testCbor1".getBytes();
         when(cborEncoder.encode(issuerSignedItem)).thenReturn(expectedCbor);
-        byte[] expectedDigest = "testDigest1".getBytes();
-        when(mockMessageDigest.digest(expectedCbor)).thenReturn(expectedDigest);
+        byte[] expectedDigest = sha256(expectedCbor);
         Namespaces namespaces = new Namespaces(Map.of("namespace", List.of(issuerSignedItem)));
         ValueDigests result =
-                new ValueDigestsFactory(cborEncoder, mockMessageDigest)
+                new ValueDigestsFactory(cborEncoder, DIGEST_ALGORITHM)
                         .createFromNamespaces(namespaces);
 
-        Map<String, Map<Integer, byte[]>> expectedDigests =
-                Map.of("namespace", Map.of(1, expectedDigest));
-        assertEquals(expectedDigests, result.valueDigests());
+        assertArrayEquals(expectedDigest, result.valueDigests().get("namespace").get(1));
         verify(cborEncoder).encode(issuerSignedItem);
-        verify(mockMessageDigest).digest(expectedCbor);
     }
 
     /** Verifies correct digest generation for multiple nameSpaces, each with a single item. */
     @Test
-    void Should_AddMultipleNameSpacesWithSingleDigest() {
+    void Should_AddMultipleNameSpacesWithSingleDigest() throws NoSuchAlgorithmException {
         IssuerSignedItem issuerSignedItem1 =
                 new IssuerSignedItem(
                         1, new byte[] {1, 2, 3}, "elementIdentifier1", "elementValue1");
@@ -65,10 +89,8 @@ class ValueDigestsFactoryTest {
                         2, new byte[] {1, 2, 3, 4}, "elementIdentifier2", "elementValue2");
         byte[] expectedCbor2 = "testCbor2".getBytes();
         when(cborEncoder.encode(issuerSignedItem2)).thenReturn(expectedCbor2);
-        byte[] expectedDigest1 = "testDigest1".getBytes();
-        when(mockMessageDigest.digest(expectedCbor1)).thenReturn(expectedDigest1);
-        byte[] expectedDigest2 = "testDigest2".getBytes();
-        when(mockMessageDigest.digest(expectedCbor2)).thenReturn(expectedDigest2);
+        byte[] expectedDigest1 = sha256(expectedCbor1);
+        byte[] expectedDigest2 = sha256(expectedCbor2);
 
         Namespaces namespaces =
                 new Namespaces(
@@ -78,23 +100,22 @@ class ValueDigestsFactoryTest {
                                 "namespace2",
                                 List.of(issuerSignedItem2)));
         ValueDigests result =
-                new ValueDigestsFactory(cborEncoder, mockMessageDigest)
+                new ValueDigestsFactory(cborEncoder, DIGEST_ALGORITHM)
                         .createFromNamespaces(namespaces);
 
-        Map<String, Map<Integer, byte[]>> expectedDigests =
-                Map.of(
-                        "namespace1", Map.of(issuerSignedItem1.digestId(), expectedDigest1),
-                        "namespace2", Map.of(issuerSignedItem2.digestId(), expectedDigest2));
-        assertEquals(expectedDigests, result.valueDigests());
+        assertArrayEquals(
+                expectedDigest1,
+                result.valueDigests().get("namespace1").get(issuerSignedItem1.digestId()));
+        assertArrayEquals(
+                expectedDigest2,
+                result.valueDigests().get("namespace2").get(issuerSignedItem2.digestId()));
         verify(cborEncoder).encode(issuerSignedItem1);
         verify(cborEncoder).encode(issuerSignedItem2);
-        verify(mockMessageDigest).digest(expectedCbor1);
-        verify(mockMessageDigest).digest(expectedCbor2);
     }
 
     /** Verifies correct digest generation for multiple nameSpaces with multiple items. */
     @Test
-    void Should_AddMultipleNameSpacesWithMultipleDigests() {
+    void Should_AddMultipleNameSpacesWithMultipleDigests() throws NoSuchAlgorithmException {
         IssuerSignedItem issuerSignedItem1 =
                 new IssuerSignedItem(
                         1, new byte[] {1, 2, 3}, "elementIdentifier1", "elementValue1");
@@ -110,12 +131,9 @@ class ValueDigestsFactoryTest {
                         3, new byte[] {1, 2, 3, 4, 5}, "elementIdentifier3", "elementValue3");
         byte[] expectedCbor3 = "testCbor3".getBytes();
         when(cborEncoder.encode(issuerSignedItem3)).thenReturn(expectedCbor3);
-        byte[] expectedDigest1 = "testDigest1".getBytes();
-        when(mockMessageDigest.digest(expectedCbor1)).thenReturn(expectedDigest1);
-        byte[] expectedDigest2 = "testDigest2".getBytes();
-        when(mockMessageDigest.digest(expectedCbor2)).thenReturn(expectedDigest2);
-        byte[] expectedDigest3 = "testDigest3".getBytes();
-        when(mockMessageDigest.digest(expectedCbor3)).thenReturn(expectedDigest3);
+        byte[] expectedDigest1 = sha256(expectedCbor1);
+        byte[] expectedDigest2 = sha256(expectedCbor2);
+        byte[] expectedDigest3 = sha256(expectedCbor3);
 
         Namespaces namespaces =
                 new Namespaces(
@@ -125,25 +143,20 @@ class ValueDigestsFactoryTest {
                                 "namespace2",
                                 List.of(issuerSignedItem2, issuerSignedItem3)));
         ValueDigests result =
-                new ValueDigestsFactory(cborEncoder, mockMessageDigest)
+                new ValueDigestsFactory(cborEncoder, DIGEST_ALGORITHM)
                         .createFromNamespaces(namespaces);
 
-        Map<String, Map<Integer, byte[]>> expectedDigests =
-                Map.of(
-                        "namespace1",
-                        Map.of(issuerSignedItem1.digestId(), expectedDigest1),
-                        "namespace2",
-                        Map.of(
-                                issuerSignedItem2.digestId(),
-                                expectedDigest2,
-                                issuerSignedItem3.digestId(),
-                                expectedDigest3));
-        assertEquals(expectedDigests, result.valueDigests());
+        assertArrayEquals(
+                expectedDigest1,
+                result.valueDigests().get("namespace1").get(issuerSignedItem1.digestId()));
+        assertArrayEquals(
+                expectedDigest2,
+                result.valueDigests().get("namespace2").get(issuerSignedItem2.digestId()));
+        assertArrayEquals(
+                expectedDigest3,
+                result.valueDigests().get("namespace2").get(issuerSignedItem3.digestId()));
         verify(cborEncoder).encode(issuerSignedItem1);
         verify(cborEncoder).encode(issuerSignedItem2);
         verify(cborEncoder).encode(issuerSignedItem3);
-        verify(mockMessageDigest).digest(expectedCbor1);
-        verify(mockMessageDigest).digest(expectedCbor2);
-        verify(mockMessageDigest).digest(expectedCbor3);
     }
 }
