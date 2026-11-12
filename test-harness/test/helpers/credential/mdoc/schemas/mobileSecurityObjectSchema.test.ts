@@ -11,6 +11,9 @@ describe("mobileSecurityObjectSchema", () => {
     digestAlgorithm: "SHA-256",
     deviceKeyInfo: {
       deviceKey: new Map(),
+      keyAuthorizations: {
+        nameSpaces: ["org.iso.18013.5.1", "org.iso.18013.5.1.GB"],
+      },
     },
     valueDigests: {
       "org.iso.18013.5.1": new Map(),
@@ -125,7 +128,9 @@ describe("mobileSecurityObjectSchema", () => {
     it("should return false when deviceKey is missing", () => {
       const data = {
         ...validData,
-        deviceKeyInfo: {},
+        deviceKeyInfo: {
+          keyAuthorizations: validData.deviceKeyInfo.keyAuthorizations,
+        },
       };
 
       const isValid = validate(data);
@@ -135,6 +140,25 @@ describe("mobileSecurityObjectSchema", () => {
         expect.objectContaining({
           instancePath: "/deviceKeyInfo",
           message: "must have required property 'deviceKey'",
+        }),
+      );
+    });
+
+    it("should return false when keyAuthorizations is missing", () => {
+      const data = {
+        ...validData,
+        deviceKeyInfo: {
+          deviceKey: new Map(),
+        },
+      };
+
+      const isValid = validate(data);
+
+      expect(isValid).toBe(false);
+      expect(validate.errors).toContainEqual(
+        expect.objectContaining({
+          instancePath: "/deviceKeyInfo",
+          message: "must have required property 'keyAuthorizations'",
         }),
       );
     });
@@ -165,12 +189,129 @@ describe("mobileSecurityObjectSchema", () => {
           ...validData,
           deviceKeyInfo: {
             deviceKey: {},
+            keyAuthorizations: validData.deviceKeyInfo.keyAuthorizations,
           },
         };
 
         const isValid = validate(data);
 
         expect(isValid).toBe(false);
+      });
+    });
+
+    describe("keyAuthorizations", () => {
+      it("should return false when nameSpaces is missing", () => {
+        const data = {
+          ...validData,
+          deviceKeyInfo: {
+            deviceKey: new Map(),
+            keyAuthorizations: {},
+          },
+        };
+
+        const isValid = validate(data);
+
+        expect(isValid).toBe(false);
+        expect(validate.errors).toContainEqual(
+          expect.objectContaining({
+            instancePath: "/deviceKeyInfo/keyAuthorizations",
+            message: "must have required property 'nameSpaces'",
+          }),
+        );
+      });
+
+      describe("nameSpaces", () => {
+        it("should return false when it contains an invalid namespace", () => {
+          const data = {
+            ...validData,
+            deviceKeyInfo: {
+              deviceKey: new Map(),
+              keyAuthorizations: {
+                nameSpaces: ["org.iso.18013.5.1", "invalid.namespace"],
+              },
+            },
+          };
+
+          const isValid = validate(data);
+
+          expect(isValid).toBe(false);
+          expect(validate.errors).toContainEqual(
+            expect.objectContaining({
+              instancePath: "/deviceKeyInfo/keyAuthorizations/nameSpaces/1",
+              message: "must be equal to one of the allowed values",
+            }),
+          );
+        });
+
+        it("should return false when it has fewer than 2 items", () => {
+          const data = {
+            ...validData,
+            deviceKeyInfo: {
+              deviceKey: new Map(),
+              keyAuthorizations: {
+                nameSpaces: ["org.iso.18013.5.1"],
+              },
+            },
+          };
+
+          const isValid = validate(data);
+
+          expect(isValid).toBe(false);
+          expect(validate.errors).toContainEqual(
+            expect.objectContaining({
+              instancePath: "/deviceKeyInfo/keyAuthorizations/nameSpaces",
+              message: "must NOT have fewer than 2 items",
+            }),
+          );
+        });
+
+        it("should return false when it has more than 2 items", () => {
+          const data = {
+            ...validData,
+            deviceKeyInfo: {
+              deviceKey: new Map(),
+              keyAuthorizations: {
+                nameSpaces: [
+                  "org.iso.18013.5.1",
+                  "org.iso.18013.5.1.GB",
+                  "org.iso.18013.5.1",
+                ],
+              },
+            },
+          };
+
+          const isValid = validate(data);
+
+          expect(isValid).toBe(false);
+          expect(validate.errors).toContainEqual(
+            expect.objectContaining({
+              instancePath: "/deviceKeyInfo/keyAuthorizations/nameSpaces",
+              message: "must NOT have more than 2 items",
+            }),
+          );
+        });
+
+        it("should return false when items are not unique", () => {
+          const data = {
+            ...validData,
+            deviceKeyInfo: {
+              deviceKey: new Map(),
+              keyAuthorizations: {
+                nameSpaces: ["org.iso.18013.5.1", "org.iso.18013.5.1"],
+              },
+            },
+          };
+
+          const isValid = validate(data);
+
+          expect(isValid).toBe(false);
+          expect(validate.errors).toContainEqual(
+            expect.objectContaining({
+              instancePath: "/deviceKeyInfo/keyAuthorizations/nameSpaces",
+              keyword: "uniqueItems",
+            }),
+          );
+        });
       });
     });
   });
