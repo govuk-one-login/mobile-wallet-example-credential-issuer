@@ -14,7 +14,7 @@
   "dependencies": {
     "@peculiar/asn1-schema": "^3.0.0",
     "@peculiar/asn1-x509": "^3.0.0",
-    "commander": "^15.0.0",
+    "commander": "^15.1.0",
     "esbuild": "^0.28.2",
     "tsx": "^4.23.15",
     "typescript": "^6.0.3"
