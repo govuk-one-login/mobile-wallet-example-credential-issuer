@@ -6,8 +6,10 @@
 export default {
   setupFiles: ['reflect-metadata'],
   transform: {
-    '^.+\\.ts?$': 'ts-jest',
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: { allowJs: true, module: 'commonjs', esModuleInterop: true } }],
   },
+  // @peculiar packages (and asn1js) are ESM-only, so they must be transformed to CommonJS for Jest
+  transformIgnorePatterns: ['/node_modules/(?!(@peculiar|asn1js)/)'],
   clearMocks: true,
   collectCoverage: true,
   coverageDirectory: 'coverage',
