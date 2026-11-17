@@ -51,11 +51,10 @@ class MdocCredentialBuilderTest {
 
     @Test
     void Should_ReturnBase64UrlEncodedIssuerSigned() throws Exception {
-        byte[] mockCborData =
-                new byte[] {
-                    0x00, 0x01, 0x02, 0x03, 0x04,
-                    0x05, 0x06, 0x07, 0x08, 0x09
-                }; // 10 bytes length, will yield padding if encoded with standard Base64
+        byte[] mockCborData = {
+            0x00, 0x01, 0x02, 0x03, 0x04,
+            0x05, 0x06, 0x07, 0x08, 0x09
+        }; // 10 bytes length, will yield padding if encoded with standard Base64
         String expectedBase64 = "AAECAwQFBgcICQ";
         when(namespacesFactory.build(mockDrivingLicenceDocument)).thenReturn(namespaces);
         when(issuerSignedFactory.build(

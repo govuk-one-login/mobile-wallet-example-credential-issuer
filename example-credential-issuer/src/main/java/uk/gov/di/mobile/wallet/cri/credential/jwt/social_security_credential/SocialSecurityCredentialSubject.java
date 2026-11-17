@@ -11,9 +11,9 @@ import java.util.List;
 @Getter
 public class SocialSecurityCredentialSubject implements CredentialSubject {
 
-    private String id;
-    private List<Name> name;
-    private List<SocialSecurityRecord> socialSecurityRecord;
+    private final String id;
+    private final List<Name> name;
+    private final List<SocialSecurityRecord> socialSecurityRecord;
 
     @JsonCreator
     public SocialSecurityCredentialSubject(

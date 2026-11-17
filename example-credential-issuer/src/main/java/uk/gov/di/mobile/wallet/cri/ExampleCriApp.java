@@ -22,8 +22,6 @@ import uk.gov.di.mobile.wallet.cri.notification.NotificationResource;
 import uk.gov.di.mobile.wallet.cri.revoke.RevokeResource;
 import uk.gov.di.mobile.wallet.cri.services.ConfigurationService;
 
-import java.security.NoSuchAlgorithmException;
-
 /**
  * Main application class for the Example CRI.
  *
@@ -55,8 +53,8 @@ public class ExampleCriApp extends Application<ConfigurationService> {
      * @param environment The Dropwizard environment.
      */
     @Override
-    public void run(final ConfigurationService configurationService, final Environment environment)
-            throws NoSuchAlgorithmException {
+    public void run(
+            final ConfigurationService configurationService, final Environment environment) {
 
         Services services = ServicesFactory.create(configurationService, environment);
         ObjectMapper objectMapper = environment.getObjectMapper();
