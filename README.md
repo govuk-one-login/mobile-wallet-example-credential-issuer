@@ -46,5 +46,3 @@ Individual project READMEs have specific commands to run checkov analysis.
 ## Getting Started
 
 See the README file in each module directory for further information on each service.
-
-TEST
