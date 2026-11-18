@@ -22,4 +22,6 @@ RUN chown -R nonroot:nonroot /app
 USER nonroot
 
 EXPOSE 8080
-CMD ["java", "-cp", "lib/*", "uk.gov.di.mobile.wallet.cri.ExampleCriApp", "server", "config.yml"]
+# -XX:-UseBASE64Intrinsics: mitigation for CVE-2026-114938 (Java4Shell); disables the vulnerable AVX-512 Base64 intrinsic.
+# Remove once the base image ships a fixed JDK.
+CMD ["java", "-XX:-UseBASE64Intrinsics", "-cp", "lib/*", "uk.gov.di.mobile.wallet.cri.ExampleCriApp", "server", "config.yml"]
