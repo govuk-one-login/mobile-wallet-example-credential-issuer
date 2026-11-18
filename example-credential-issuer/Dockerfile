@@ -1,6 +1,5 @@
-FROM gradle:9.8.2-jdk17-alpine@sha256:4e5d9557fa2277b84ab0bd03449d4101144ffc693c85973c17d86aa53642be36 AS build
-
-RUN apk update && apk upgrade busybox
+# Multi-arch (amd64 + arm64) Gradle image; the alpine variant has no arm64 build.
+FROM gradle:9.8.2-jdk17-noble@sha256:bbe3195a4217ea126ce343ca7283c46d12e74361a3788823c3de507a56e63382 AS build
 
 WORKDIR /app
 COPY src/ src/

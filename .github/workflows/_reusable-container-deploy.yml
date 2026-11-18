@@ -3,6 +3,11 @@ name: Reusable - Container Deploy (Push to Main)
 on:
   workflow_call:
     inputs:
+      runner:
+        description: GitHub runner label. Must match the CPU architecture of the image being built (e.g. ubuntu-24.04-arm for arm64).
+        required: false
+        default: 'ubuntu-24.04'
+        type: string
       docker-context-directory:
         description: Directory containing the Dockerfile / build context.
         required: true
@@ -55,7 +60,7 @@ on:
 jobs:
   deploy:
     name: Deploy
-    runs-on: ubuntu-24.04
+    runs-on: ${{ inputs.runner }}
     timeout-minutes: 60
     permissions:
       id-token: write

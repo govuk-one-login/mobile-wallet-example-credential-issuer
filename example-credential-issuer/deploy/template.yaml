@@ -465,6 +465,9 @@ Resources:
       NetworkMode: awsvpc
       RequiresCompatibilities:
         - FARGATE
+      RuntimePlatform:
+        CpuArchitecture: ARM64 # CVE-2026-114938 (Java4Shell) only affects x86-64 CPUs with AVX-512 VBMI
+        OperatingSystemFamily: LINUX
       TaskRoleArn: !GetAtt WalletBEECSTaskRole.Arn
       Volumes:
         - Name: tmp-volume

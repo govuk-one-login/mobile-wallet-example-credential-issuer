@@ -32,6 +32,7 @@ jobs:
       contents: read
     uses: ./.github/workflows/_reusable-container-dev-deploy.yml
     with:
+      runner: ubuntu-24.04-arm
       docker-context-directory: ./example-credential-issuer
       template-directory: ./example-credential-issuer/deploy
       gitRef: ${{ inputs.gitRef }}

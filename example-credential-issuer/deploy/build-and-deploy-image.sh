@@ -8,7 +8,7 @@ then
     AWS_PROFILE="$2"
     echo "Attempting to build docker image for the Example CRI with tag: \"$1\""
     DOCKER_IMAGE_PATH="219494607463.dkr.ecr.eu-west-2.amazonaws.com/cred-issuer-image-repo-containerrepository-7qtvqf9sk6lf:$TAG"
-    docker build -t "$DOCKER_IMAGE_PATH" --platform Linux/X86_64 ..
+    docker build -t "$DOCKER_IMAGE_PATH" --platform linux/arm64 ..
 
     echo "Attempting to log into ECR in the dev account"
     aws ecr get-login-password --region eu-west-2 --profile $AWS_PROFILE | docker login --username AWS --password-stdin 219494607463.dkr.ecr.eu-west-2.amazonaws.com
