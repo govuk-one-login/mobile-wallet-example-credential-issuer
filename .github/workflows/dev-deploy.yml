@@ -12,6 +12,7 @@ on:
           - document-builder
           - document-signing-certificate-issuer
           - platform-ca
+          - test-harness
       gitRef:
         description: Input branch name or commit SHA
         required: true
@@ -93,3 +94,42 @@ jobs:
       AWS_ROLE_ARN: ${{ secrets.DEV_PLATFORM_CA_GH_ACTIONS_ROLE_ARN }}
       ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_PLATFORM_CA_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
       SIGNING_PROFILE_NAME: ${{ secrets.DEV_SIGNING_PROFILE_NAME }}
+
+  # ----------------------------- test-harness (test image for the secure pipeline)
+  test-harness-publish-image:
+    name: Test Harness - Push test image to dev
+    if: ${{ inputs.service == 'test-harness' }}
+    runs-on: ubuntu-24.04
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.gitRef }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.DEV_TEST_HARNESS_GH_ACTIONS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          cosign-release: v2.5.2
+
+      - name: Build, tag, push and sign test image
+        working-directory: ./test-harness
+        env:
+          # Full image repository URI, e.g. <account>.dkr.ecr.eu-west-2.amazonaws.com/<repository>
+          TEST_IMAGE_REPOSITORY: ${{ secrets.DEV_TEST_HARNESS_ECR_REPOSITORY_URI }}
+          CONTAINER_SIGN_KMS_KEY: ${{ secrets.DEV_TEST_HARNESS_CONTAINER_SIGNER_KMS_KEY_ARN }}
+        run: |
+          docker build -t $TEST_IMAGE_REPOSITORY:latest .
+          docker push $TEST_IMAGE_REPOSITORY:latest
+          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $TEST_IMAGE_REPOSITORY:latest
