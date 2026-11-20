@@ -1,6 +1,7 @@
 import {
   getCredentialFormat,
   getHasNotificationEndpoint,
+  getSkipNegativeTests,
 } from "../../src/config";
 
 /**
@@ -10,6 +11,7 @@ export const isJwt = () => getCredentialFormat() === "jwt";
 export const isMdoc = () => getCredentialFormat() === "mdoc";
 export const hasNotificationEndpoint = () =>
   getHasNotificationEndpoint() === "true";
+export const runNegativeTests = () => !getSkipNegativeTests();
 
 /**
  * Version of Jest's describe() that runs based on a boolean condition.

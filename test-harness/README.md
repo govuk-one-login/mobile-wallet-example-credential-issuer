@@ -85,13 +85,14 @@ npm run format
 
 ### Run the test harness against a deployed Example Credential Issuer
 
-Before running the test harness against the env you must comment out the negative tests `Credential (Invalid Requests)`
-in test-harness/test/credential-issuer-tests.test.ts. This because signature verification is disabled in dev and integration
-and the negative tests assume signature verification is enabled so the request is rejected early; with it disabled the
-request proceeds and consumes the offer. Since the check is disabled the credential offer is redeemed and
-the happy path tests do not work.
+Before running the test harness against the env you must skip the negative tests (`Credential (Invalid Requests)`,
+the invalid notification tests and `Credential (Redeeming Offer Twice)`) by setting `SKIP_NEGATIVE_TESTS=true`.
+This is because signature verification is disabled in dev, build and integration, and the negative tests assume
+signature verification is enabled so the request is rejected early; with it disabled the request proceeds and
+consumes the offer. Since the check is disabled the credential offer is redeemed and the happy path tests do not work.
 
-A future improvement can be to pass a flag eg `signature-verification-disabled=true` which will skip the negative tests.
+`run-test-harness.sh` does not yet pass this variable to the container, so add `-e SKIP_NEGATIVE_TESTS=true` to its
+`docker run` command when running against a deployed environment where signature verification is disabled.
 
 Use the following commands to run the tests against an Example Credential Issuer that is deployed in the Wallet Onboarding
 Products environment.
