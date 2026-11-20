@@ -7,7 +7,7 @@ SERVER_PID=$!
 
 sleep 5
 
-bash run-tests.sh
+npm run test
 TEST_EXIT_CODE=$?
 
 kill $SERVER_PID
