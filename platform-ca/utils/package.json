@@ -27,11 +27,11 @@
     "globals": "^17.14.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.6.6",
-    "eslint": "10.14.0",
+    "eslint": "10.15.0",
     "eslint-config-prettier": "10.1.8",
     "jest": "30.5.2",
     "jest-junit": "^17.0.0",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "ts-jest": "29.4.15"
   },
   "overrides": {
