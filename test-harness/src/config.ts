@@ -11,6 +11,7 @@ const ENV_VARS = {
   CLIENT_ID: "CLIENT_ID",
   CREDENTIAL_FORMAT: "CREDENTIAL_FORMAT",
   HAS_NOTIFICATION_ENDPOINT: "HAS_NOTIFICATION_ENDPOINT",
+  SKIP_NEGATIVE_TESTS: "SKIP_NEGATIVE_TESTS",
 } as const;
 
 /**
@@ -57,6 +58,14 @@ export function getClientId(): string {
 
 export function getHasNotificationEndpoint(): string {
   return getEnvVarValue(ENV_VARS.HAS_NOTIFICATION_ENDPOINT);
+}
+
+/**
+ * Whether the negative tests should be skipped. Optional: unset means false.
+ * @returns true only when SKIP_NEGATIVE_TESTS is "true"
+ */
+export function getSkipNegativeTests(): boolean {
+  return process.env[ENV_VARS.SKIP_NEGATIVE_TESTS] === "true";
 }
 
 export function getCredentialFormat(): "jwt" | "mdoc" {

@@ -46,6 +46,7 @@ import {
   isJwt,
   isMdoc,
   hasNotificationEndpoint,
+  runNegativeTests,
 } from "./helpers/testConditions";
 import { isValidCredential as isValidJwtCredential } from "./helpers/credential/jwt/isValidCredential";
 import { isValidCredential as isValidMdocCredential } from "./helpers/credential/mdoc/isValidCredential";
@@ -225,7 +226,7 @@ describe("Credential Issuer Tests", () => {
     });
   });
 
-  describe("Credential (Invalid Requests)", () => {
+  describeIf("Credential (Invalid Requests)", runNegativeTests, () => {
     describe("when requesting a credential with invalid access token", () => {
       describe("when the access token and credential offer wallet subject IDs do not match", () => {
         it("should return 401 with invalid_token error", async () => {
@@ -490,7 +491,7 @@ describe("Credential Issuer Tests", () => {
         });
       });
 
-      describe("when sending invalid notifications", () => {
+      describeIf("when sending invalid notifications", runNegativeTests, () => {
         it("should return 400 for missing notification_id", async () => {
           try {
             await sendNotification(
@@ -519,45 +520,49 @@ describe("Credential Issuer Tests", () => {
         });
       });
 
-      describe("when sending notifications with invalid authentication", () => {
-        it("should return 401 for invalid access token", async () => {
-          const notification_id = credentialResponse.data.notification_id;
-          try {
-            await sendNotification(
-              "INVALID_TOKEN",
-              notification_id,
-              "credential_accepted",
-              NOTIFICATION_ENDPOINT!,
-            );
-          } catch (error) {
-            expect((error as AxiosError).response?.status).toEqual(401);
-            const header = (error as AxiosError).response?.headers[
-              "www-authenticate"
-            ];
-            expect(wwwAuthenticateHeaderContainsCorrectError(header)).toBe(
-              true,
-            );
-          }
-        });
+      describeIf(
+        "when sending notifications with invalid authentication",
+        runNegativeTests,
+        () => {
+          it("should return 401 for invalid access token", async () => {
+            const notification_id = credentialResponse.data.notification_id;
+            try {
+              await sendNotification(
+                "INVALID_TOKEN",
+                notification_id,
+                "credential_accepted",
+                NOTIFICATION_ENDPOINT!,
+              );
+            } catch (error) {
+              expect((error as AxiosError).response?.status).toEqual(401);
+              const header = (error as AxiosError).response?.headers[
+                "www-authenticate"
+              ];
+              expect(wwwAuthenticateHeaderContainsCorrectError(header)).toBe(
+                true,
+              );
+            }
+          });
 
-        it("should return 401 when no authentication is provided", async () => {
-          const notification_id = credentialResponse.data.notification_id;
-          try {
-            await sendNotification(
-              undefined,
-              notification_id,
-              "credential_accepted",
-              NOTIFICATION_ENDPOINT!,
-            );
-          } catch (error) {
-            expect((error as AxiosError).response?.status).toEqual(401);
-            const header = (error as AxiosError).response?.headers[
-              "www-authenticate"
-            ];
-            expect(wwwAuthenticateHeaderHasNoErrorParams(header)).toBe(true);
-          }
-        });
-      });
+          it("should return 401 when no authentication is provided", async () => {
+            const notification_id = credentialResponse.data.notification_id;
+            try {
+              await sendNotification(
+                undefined,
+                notification_id,
+                "credential_accepted",
+                NOTIFICATION_ENDPOINT!,
+              );
+            } catch (error) {
+              expect((error as AxiosError).response?.status).toEqual(401);
+              const header = (error as AxiosError).response?.headers[
+                "www-authenticate"
+              ];
+              expect(wwwAuthenticateHeaderHasNoErrorParams(header)).toBe(true);
+            }
+          });
+        },
+      );
     });
   });
 
@@ -625,7 +630,7 @@ describe("Credential Issuer Tests", () => {
     });
   });
 
-  describe("Credential (Redeeming Offer Twice)", () => {
+  describeIf("Credential (Redeeming Offer Twice)", runNegativeTests, () => {
     describe("when a credential offer twice is redeemed twice", () => {
       it("should return 401 with invalid_token error", async () => {
         const proofJwt = await createProofJwt(
