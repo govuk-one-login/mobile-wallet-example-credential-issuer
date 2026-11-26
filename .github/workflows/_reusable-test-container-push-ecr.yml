@@ -1,0 +1,77 @@
+thname: Reusable - Push Container Image to ECR
+
+on:
+  workflow_call:
+    inputs:
+      runner:
+        description: GitHub runner label. Must match the CPU architecture of the image being built (e.g. ubuntu-24.04-arm for arm64).
+        required: false
+        default: 'ubuntu-24.04'
+        type: string
+      docker-context-directory:
+        description: Directory containing the Dockerfile / build context.
+        required: true
+        type: string
+      image-tag:
+        description: Tag to apply to the image.
+        required: false
+        default: 'latest'
+        type: string
+      gitRef:
+        description: Branch name, tag or commit SHA to check out (empty uses the default ref for the triggering event).
+        required: false
+        default: ''
+        type: string
+      cosign-release:
+        description: Cosign version to install.
+        required: false
+        default: 'v2.5.2'
+        type: string
+    secrets:
+      AWS_ROLE_ARN:
+        required: true
+      TEST_ECR_REPOSITORY:
+        required: true
+      CONTAINER_SIGN_KMS_KEY:
+        required: true
+
+jobs:
+  push-image:
+    name: Build, tag, and push image to Amazon ECR
+    runs-on: ${{ inputs.runner }}
+    timeout-minutes: 60
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.gitRef }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@756fe2d284c7292c4e9b62c8a28f1e5629c59532 # v4.1.3
+        with:
+          cosign-release: ${{ inputs.cosign-release }}
+
+      - name: Build, tag, and push image to Amazon ECR
+        working-directory: ${{ inputs.docker-context-directory }}
+        env:
+          CONTAINER_SIGN_KMS_KEY: ${{ secrets.CONTAINER_SIGN_KMS_KEY }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.TEST_ECR_REPOSITORY }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          cosign sign --key awskms:///${CONTAINER_SIGN_KMS_KEY} $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
