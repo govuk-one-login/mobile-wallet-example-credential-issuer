@@ -49,7 +49,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/_reusable-test-container-push-ecr.yml
     with:
-      docker-context-directory: ./test-harness
+      runner: ubuntu-24.04-arm
+      docker-context-directory: ./example-credential-issuer
       gitRef: ${{ inputs.gitRef }}
     secrets:
       AWS_ROLE_ARN: ${{ secrets.DEV_EXAMPLE_CRI_GH_ACTIONS_ROLE_ARN }}
