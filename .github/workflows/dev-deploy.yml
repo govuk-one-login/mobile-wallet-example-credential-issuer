@@ -41,6 +41,21 @@ jobs:
       ECR_REPOSITORY: ${{ secrets.DEV_EXAMPLE_CRI_ECR_REPOSITORY_NAME }}
       ARTIFACT_BUCKET_NAME: ${{ secrets.DEV_EXAMPLE_CRI_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
 
+  example-cri-test-container-push:
+    name: Example CRI - Push test container to ECR
+    if: ${{ inputs.service == 'example-credential-issuer' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-test-container-push-ecr.yml
+    with:
+      docker-context-directory: ./test-harness
+      gitRef: ${{ inputs.gitRef }}
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.DEV_EXAMPLE_CRI_GH_ACTIONS_ROLE_ARN }}
+      TEST_ECR_REPOSITORY: ${{ secrets.DEV_EXAMPLE_CRI_TEST_ECR_REPOSITORY_NAME }}
+      CONTAINER_SIGN_KMS_KEY: ${{ secrets.DEV_CONTAINER_SIGNER_KMS_KEY_ARN }}
+
   # ----------------------------- document-builder (node-container)
   document-builder-deploy:
     name: Document Builder - Deploy to dev
