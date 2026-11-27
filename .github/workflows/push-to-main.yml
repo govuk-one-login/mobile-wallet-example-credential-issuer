@@ -98,6 +98,22 @@ jobs:
       CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_EXAMPLE_CRI_CONTAINER_SIGNER_KMS_KEY_ARN }}
       ARTIFACT_BUCKET_NAME: ${{ secrets.BUILD_EXAMPLE_CRI_GH_ARTIFACT_SOURCE_BUCKET_NAME }}
 
+  example-cri-test-container-push:
+    name: Example CRI - Push test container to ECR
+    needs: [detect-changes, example-cri-code-analysis, example-cri-integration-tests]
+    if: ${{ always() && needs.detect-changes.outputs.example-cri == 'true' && needs.example-cri-code-analysis.result == 'success' && needs.example-cri-integration-tests.result == 'success' }}
+    permissions:
+      id-token: write
+      contents: read
+    uses: ./.github/workflows/_reusable-test-container-push-ecr.yml
+    with:
+      runner: ubuntu-24.04-arm
+      docker-context-directory: ./example-credential-issuer
+    secrets:
+      AWS_ROLE_ARN: ${{ secrets.BUILD_EXAMPLE_CRI_GH_ACTIONS_ROLE_ARN }}
+      TEST_ECR_REPOSITORY: ${{ secrets.BUILD_EXAMPLE_CRI_TEST_ECR_REPOSITORY_NAME }}
+      CONTAINER_SIGN_KMS_KEY: ${{ secrets.BUILD_EXAMPLE_CRI_CONTAINER_SIGNER_KMS_KEY_ARN }}
+
   # ----------------------------- document-builder (node-container)
   document-builder-code-analysis:
     name: Document Builder - Code analysis
