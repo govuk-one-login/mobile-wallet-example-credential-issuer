@@ -1,0 +1,21 @@
+# Image for running the example credential issuer tests (run-tests.sh) in AWS environments.
+# Uses the same multi-arch Gradle/JDK 17 base image as the main Dockerfile.
+FROM gradle:9.8.2-jdk17-noble@sha256:bbe3195a4217ea126ce343ca7283c46d12e74361a3788823c3de507a56e63382
+
+RUN groupadd --system nonroot \
+    && useradd --system --gid nonroot --create-home nonroot
+
+WORKDIR /app
+COPY --chown=nonroot:nonroot src/ src/
+COPY --chown=nonroot:nonroot build.gradle settings.gradle gradlew gradlew.bat config.yml run-tests.sh ./
+COPY --chown=nonroot:nonroot gradle/ gradle/
+RUN chown nonroot:nonroot /app
+
+USER nonroot
+
+# Pre-fetch the Gradle distribution and dependencies and compile the tests,
+# so the container does not need to download them when it starts.
+RUN ./gradlew --no-daemon testClasses
+
+# Exit code is that of run-tests.sh: 0 when all tests pass, non-zero otherwise.
+ENTRYPOINT ["./run-tests.sh"]
